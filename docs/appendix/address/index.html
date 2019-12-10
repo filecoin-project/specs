@@ -4724,15 +4724,20 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">Int</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Int</span>
 
-<span class="c1">// Addresses for singleton system actors
+<span class="c1">// Addresses for singleton system actors.
 </span><span class="c1"></span><span class="kd">var</span> <span class="p">(</span>
-    <span class="nx">InitActorAddr</span>           <span class="p">=</span> <span class="o">&amp;</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
-</span><span class="c1"></span>    <span class="nx">CronActorAddr</span>           <span class="p">=</span> <span class="o">&amp;</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
-</span><span class="c1"></span>    <span class="nx">StoragePowerActorAddr</span>   <span class="p">=</span> <span class="o">&amp;</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
-</span><span class="c1"></span>    <span class="nx">StorageMarketActorAddr</span>  <span class="p">=</span> <span class="o">&amp;</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
-</span><span class="c1"></span>    <span class="nx">PaymentChannelActorAddr</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
-</span><span class="c1"></span>    <span class="nx">BurntFundsActorAddr</span>     <span class="p">=</span> <span class="o">&amp;</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
-</span><span class="c1"></span><span class="p">)</span>
+    <span class="c1">// Distinguished AccountActor that is the source of system implicit messages.
+</span><span class="c1"></span>    <span class="nx">SystemActorAddr</span>        <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="nx">InitActorAddr</span>          <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="nx">RewardActorAddr</span>        <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="nx">CronActorAddr</span>          <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="nx">StoragePowerActorAddr</span>  <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="nx">StorageMarketActorAddr</span> <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="c1">// Distinguished AccountActor that is the destination of all burnt funds.
+</span><span class="c1"></span>    <span class="nx">BurntFundsActorAddr</span> <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">99</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="kd">const</span> <span class="nx">FirstNonSingletonActorId</span> <span class="p">=</span> <span class="mi">100</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">VerifySyntax</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>

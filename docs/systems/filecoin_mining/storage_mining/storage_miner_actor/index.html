@@ -4720,8 +4720,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">ChallengeHasExpired</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">CanBeElected</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">ShouldChallenge</span><span class="p">(</span>
-        <span class="nx">currEpoch</span>            <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">challengeFreePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
 
@@ -4757,8 +4756,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">_canBeElected</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_challengeHasExpired</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_shouldChallenge</span><span class="p">(</span>
-        <span class="nx">currEpoch</span>            <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">challengeFreePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_verifySeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_assertSectorDidNotExist</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
@@ -4788,8 +4786,8 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">PreCommitSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">info</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorPreCommitInfo</span><span class="p">)</span>  <span class="c1">// TODO: check with Magik on sizes
 </span><span class="c1"></span>    <span class="nf">ProveCommitSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">info</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorProveCommitInfo</span><span class="p">)</span>
 
-    <span class="nf">SubmitVerifiedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span>
-    <span class="nf">SubmitVerifiedElectionPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span>
+    <span class="nf">ProcessVerifiedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
+    <span class="nf">ProcessVerifiedElectionPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 
     <span class="nf">_checkSurprisePoStSubmissionHappened</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 
@@ -4799,7 +4797,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">_isChallenged</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_isSealVerificationCorrect</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_onMissedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
-    <span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span>
+    <span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 
     <span class="nf">_slashCollateralForStorageFaults</span><span class="p">(</span>
         <span class="nx">rt</span>          <span class="nx">Runtime</span>
@@ -4909,8 +4907,8 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ChallengeStatus</span><span class="p">().</span><span class="nf">ChallengeHasExpired</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">ShouldChallenge</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">challengeFreePeriod</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ChallengeStatus</span><span class="p">().</span><span class="nf">ShouldChallenge</span><span class="p">(</span><span class="nx">currEpoch</span><span class="p">,</span> <span class="nx">challengeFreePeriod</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_shouldChallenge</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ChallengeStatus</span><span class="p">().</span><span class="nf">ShouldChallenge</span><span class="p">(</span><span class="nx">currEpoch</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_processStagedCommittedSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
@@ -5031,7 +5029,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="c1">// failSector moves Sector from Active/Committed/Recovering into Failing State
 </span><span class="c1">// and increments FaultCount if asked to do so (DeclareFaults does not increment faultCount)
-</span><span class="c1">// move Sector from Failing to Cleared State if increment results in faultCount exceeds MaxFaultCount
+</span><span class="c1">// move Sector from Failing to Cleared State if increment results in faultCount exceeds MAX_CONSECUTIVE_FAULTS
 </span><span class="c1">// update SectorTable
 </span><span class="c1">// remove from ProvingSet
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_updateFailSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">,</span> <span class="nx">increment</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
@@ -5217,7 +5215,9 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">)</span>
 
 <span class="kd">const</span> <span class="p">(</span>
-    <span class="nx">Method_StorageMinerActor_SubmitSurprisePoSt</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodPlaceholder</span> <span class="o">+</span> <span class="kc">iota</span>
+    <span class="nx">Method_StorageMinerActor_ProcessVerifiedSurprisePoSt</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodPlaceholder</span> <span class="o">+</span> <span class="kc">iota</span>
+    <span class="nx">Method_StorageMinerActor_ProcessVerifiedElectionPoSt</span>
+    <span class="nx">Method_StorageMinerActor_NotifyOfSurprisePoStChallenge</span>
 <span class="p">)</span>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
@@ -5273,6 +5273,13 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">ret</span>
 <span class="p">}</span>
 
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_shouldChallenge</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">ret</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_shouldChallenge</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">())</span>
+    <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">ret</span>
+<span class="p">}</span>
+
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1">// Surprise PoSt
 </span><span class="c1">////////////////////////////////////////////////////////////////////////////////
@@ -5281,7 +5288,8 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">NotifyOfSurprisePoStChallenge</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
     <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_isChallenged</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// check that this is a valid challenge
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">!</span><span class="nx">a</span><span class="p">.</span><span class="nf">_shouldChallenge</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SuccessReturn</span><span class="p">()</span> <span class="c1">// silent return, dont re-challenge
 </span><span class="c1"></span>    <span class="p">}</span>
 
@@ -5350,7 +5358,7 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="c1">// Note: NewDetectedFaults is now the sum of all
 </span><span class="c1"></span>    <span class="c1">// previously active, committed, and recovering sectors minus expired ones
-</span><span class="c1"></span>    <span class="c1">// and any previously Failing sectors that did not exceed MaxFaultCount
+</span><span class="c1"></span>    <span class="c1">// and any previously Failing sectors that did not exceed MAX_CONSECUTIVE_FAULTS
 </span><span class="c1"></span>    <span class="c1">// Note: previously declared faults is now treated as part of detected faults
 </span><span class="c1"></span>    <span class="nx">a</span><span class="p">.</span><span class="nf">_slashCollateralForStorageFaults</span><span class="p">(</span>
         <span class="nx">rt</span><span class="p">,</span>
@@ -5458,11 +5466,9 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">//       - Failing / Recovering / Active / Committed -&gt; Cleared
 </span><span class="c1">//     - Remove SectorNumber from Sectors, ProvingSet
 </span><span class="c1">// - Update ChallengeEndEpoch
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-    <span class="c1">// TODO add info on chain
-</span><span class="c1"></span>
     <span class="c1">// The proof is verified, process ProvingSet.SectorsOn():
 </span><span class="c1"></span>    <span class="c1">// ProvingSet.SectorsOn() contains SectorCommitted, SectorActive, SectorRecovering
 </span><span class="c1"></span>    <span class="c1">// ProvingSet itself does not store states, states are all stored in Sectors.State
@@ -5528,31 +5534,30 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SuccessReturn</span><span class="p">()</span>
-
 <span class="p">}</span>
 
 <span class="c1">// called by verifier to update miner state on successful surprise post
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">SubmitVerifiedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+</span><span class="c1">// after it has been verified in the storage_mining_subsystem
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">ProcessVerifiedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
     <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// TODO: validate caller
 </span><span class="c1"></span>
     <span class="c1">// Ensure pledge collateral satisfied
-</span><span class="c1"></span>    <span class="c1">// otherwise, abort SubmitVerifiedSurprisePoSt
+</span><span class="c1"></span>    <span class="c1">// otherwise, abort ProcessVerifiedSurprisePoSt
 </span><span class="c1"></span>    <span class="nx">a</span><span class="p">.</span><span class="nf">_ensurePledgeCollateralSatisfied</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">onChainInfo</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
 <span class="p">}</span>
 
 <span class="c1">// Called by StoragePowerConsensus subsystem after verifying the Election proof
 </span><span class="c1">// and verifying the PoSt proof in the block header.
-</span><span class="c1">// Assume ElectionPoSt has already been successfully verified when the function gets called.
+</span><span class="c1">// Assume ElectionPoSt has already been successfully verified (both proof and partial ticket
+</span><span class="c1">// value) when the function gets called.
 </span><span class="c1">// Likewise assume that the rewards have already been granted to the storage miner actor. This only handles sector management.
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">SubmitVerifiedElectionPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
-
-    <span class="c1">// TODO: validate caller
-</span><span class="c1"></span>    <span class="c1">// the caller MUST be the miner who won the block (who won the block should be callable as a a VM runtime call)
-</span><span class="c1"></span>    <span class="c1">// we also need to enforce that this call happens only once per block, OR make it not callable by special privileged messages
-</span><span class="c1"></span>    <span class="nf">TODO</span><span class="p">()</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">ProcessVerifiedElectionPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+    <span class="c1">// The receiver must be the miner who produced the block for which this message is created.
+</span><span class="c1"></span>    <span class="nf">Assert</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">ToplevelBlockWinner</span><span class="p">()</span> <span class="o">==</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrReceiver</span><span class="p">())</span>
 
     <span class="c1">// we do not need to verify post submission here, as this should have already been done
 </span><span class="c1"></span>    <span class="c1">// outside of the VM, in StoragePowerConsensus Subsystem. Doing so again would waste
@@ -5561,8 +5566,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// notneeded := a._verifyPoStSubmission(rt)
 </span><span class="c1"></span>
     <span class="c1">// the following will update last challenge response time
-</span><span class="c1"></span>    <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">onChainInfo</span><span class="p">)</span>
-
+</span><span class="c1"></span>    <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////

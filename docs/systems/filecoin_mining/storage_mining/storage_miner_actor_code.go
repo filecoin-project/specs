@@ -17,7 +17,9 @@ import (
 )
 
 const (
-	Method_StorageMinerActor_SubmitSurprisePoSt = actor.MethodPlaceholder + iota
+	Method_StorageMinerActor_ProcessVerifiedSurprisePoSt = actor.MethodPlaceholder + iota
+	Method_StorageMinerActor_ProcessVerifiedElectionPoSt
+	Method_StorageMinerActor_NotifyOfSurprisePoStChallenge
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -73,6 +75,13 @@ func (a *StorageMinerActorCode_I) _challengeHasExpired(rt Runtime) bool {
 	return ret
 }
 
+func (a *StorageMinerActorCode_I) _shouldChallenge(rt Runtime) bool {
+	h, st := a.State(rt)
+	ret := st._shouldChallenge(rt.CurrEpoch())
+	Release(rt, h, st)
+	return ret
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Surprise PoSt
 ////////////////////////////////////////////////////////////////////////////////
@@ -81,7 +90,8 @@ func (a *StorageMinerActorCode_I) _challengeHasExpired(rt Runtime) bool {
 func (a *StorageMinerActorCode_I) NotifyOfSurprisePoStChallenge(rt Runtime) InvocOutput {
 	rt.ValidateImmediateCallerIs(addr.StoragePowerActorAddr)
 
-	if a._isChallenged(rt) {
+	// check that this is a valid challenge
+	if !a._shouldChallenge(rt) {
 		return rt.SuccessReturn() // silent return, dont re-challenge
 	}
 
@@ -150,7 +160,7 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 
 	// Note: NewDetectedFaults is now the sum of all
 	// previously active, committed, and recovering sectors minus expired ones
-	// and any previously Failing sectors that did not exceed MaxFaultCount
+	// and any previously Failing sectors that did not exceed MAX_CONSECUTIVE_FAULTS
 	// Note: previously declared faults is now treated as part of detected faults
 	a._slashCollateralForStorageFaults(
 		rt,
@@ -258,10 +268,8 @@ func (a *StorageMinerActorCode_I) _claimDealPayments(rt Runtime) {
 //       - Failing / Recovering / Active / Committed -> Cleared
 //     - Remove SectorNumber from Sectors, ProvingSet
 // - Update ChallengeEndEpoch
-func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
+func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime) InvocOutput {
 	h, st := a.State(rt)
-
-	// TODO add info on chain
 
 	// The proof is verified, process ProvingSet.SectorsOn():
 	// ProvingSet.SectorsOn() contains SectorCommitted, SectorActive, SectorRecovering
@@ -328,31 +336,30 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 	UpdateRelease(rt, h, st)
 
 	return rt.SuccessReturn()
-
 }
 
 // called by verifier to update miner state on successful surprise post
-func (a *StorageMinerActorCode_I) SubmitVerifiedSurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
+// after it has been verified in the storage_mining_subsystem
+func (a *StorageMinerActorCode_I) ProcessVerifiedSurprisePoSt(rt Runtime) InvocOutput {
 	TODO() // TODO: validate caller
 
 	// Ensure pledge collateral satisfied
-	// otherwise, abort SubmitVerifiedSurprisePoSt
+	// otherwise, abort ProcessVerifiedSurprisePoSt
 	a._ensurePledgeCollateralSatisfied(rt)
 
-	return a._onSuccessfulPoSt(rt, onChainInfo)
+	return a._onSuccessfulPoSt(rt)
 
 }
 
 // Called by StoragePowerConsensus subsystem after verifying the Election proof
 // and verifying the PoSt proof in the block header.
-// Assume ElectionPoSt has already been successfully verified when the function gets called.
+// Assume ElectionPoSt has already been successfully verified (both proof and partial ticket
+// value) when the function gets called.
 // Likewise assume that the rewards have already been granted to the storage miner actor. This only handles sector management.
-func (a *StorageMinerActorCode_I) SubmitVerifiedElectionPoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
-
-	// TODO: validate caller
-	// the caller MUST be the miner who won the block (who won the block should be callable as a a VM runtime call)
-	// we also need to enforce that this call happens only once per block, OR make it not callable by special privileged messages
-	TODO()
+func (a *StorageMinerActorCode_I) ProcessVerifiedElectionPoSt(rt Runtime) InvocOutput {
+	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
+	// The receiver must be the miner who produced the block for which this message is created.
+	Assert(rt.ToplevelBlockWinner() == rt.CurrReceiver())
 
 	// we do not need to verify post submission here, as this should have already been done
 	// outside of the VM, in StoragePowerConsensus Subsystem. Doing so again would waste
@@ -361,8 +368,7 @@ func (a *StorageMinerActorCode_I) SubmitVerifiedElectionPoSt(rt Runtime, onChain
 	// notneeded := a._verifyPoStSubmission(rt)
 
 	// the following will update last challenge response time
-	return a._onSuccessfulPoSt(rt, onChainInfo)
-
+	return a._onSuccessfulPoSt(rt)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

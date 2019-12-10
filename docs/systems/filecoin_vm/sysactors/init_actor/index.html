@@ -4758,7 +4758,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
     <span class="nx">st</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">InitActorState_I</span><span class="p">{</span>
         <span class="nx">AddressMap_</span><span class="p">:</span> <span class="kd">map</span><span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">{},</span> <span class="c1">// TODO: HAMT
-</span><span class="c1"></span>        <span class="nx">NextID_</span><span class="p">:</span>     <span class="nx">addr</span><span class="p">.</span><span class="nf">ActorID</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+</span><span class="c1"></span>        <span class="nx">NextID_</span><span class="p">:</span>     <span class="nx">addr</span><span class="p">.</span><span class="nf">ActorID</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">FirstNonSingletonActorId</span><span class="p">),</span>
     <span class="p">}</span>
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
     <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReturn</span><span class="p">(</span><span class="kc">nil</span><span class="p">)</span>

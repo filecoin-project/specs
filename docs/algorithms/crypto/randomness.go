@@ -32,9 +32,9 @@ func (tag DomainSeparationTag) DeriveRandWithIndex(s Serialization, index int) R
 
 func _deriveRandInternal(tag DomainSeparationTag, s Serialization, index int) Randomness {
 	buffer := []byte{}
-	buffer = append(buffer, util.IntToBytesLittleEndian(int(tag))...)
-	buffer = append(buffer, util.IntToBytesLittleEndian(int(index))...)
-	buffer = append(buffer, Bytes(s)...)
+	buffer = append(buffer, LittleEndianBytesFromInt(int(tag))...)
+	buffer = append(buffer, LittleEndianBytesFromInt(int(index))...)
+	buffer = append(buffer, util.Bytes(s)...)
 	ret := SHA256(buffer)
 	return Randomness(ret)
 }

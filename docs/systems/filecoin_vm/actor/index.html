@@ -4656,7 +4656,6 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// This contains actor things that are _outside_ of VM exection.
 </span><span class="c1">// The VM uses this to execute actors.
 </span><span class="c1"></span>
-<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 
 <span class="c1">// TokenAmount is an amount of Filecoin tokens. This type is used within
@@ -4729,24 +4728,18 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// to Actors in the Actor Model (programming), or Objects in Object-
 </span><span class="c1">// Oriented Programming, or Ethereum Contracts in the EVM.
 </span><span class="c1">//
-</span><span class="c1">// Questions for id language:
-</span><span class="c1">// - we should not do inheritance, we should do composition.
-</span><span class="c1">//   but we should make including actor state nicer.
-</span><span class="c1">//
-</span><span class="c1">// ActorState represents the on-chain storage actors keep.
+</span><span class="c1">// ActorState represents the on-chain storage all actors keep.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ActorState</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// common fields for all actors
-</span><span class="c1"></span>
-    <span class="nx">CodeID</span>
-    <span class="c1">// use a CID here, load it in interpreter.
-</span><span class="c1"></span>    <span class="c1">// Alternative is to use ActorState here but tricky w/ the type system
-</span><span class="c1"></span>    <span class="nx">State</span>                    <span class="nx">ActorSubstateCID</span>
-
-    <span class="nx">Balance</span>                  <span class="nx">TokenAmount</span>
-    <span class="nx">CallSeqNum</span>  <span class="c1">// FKA Nonce
-</span><span class="c1"></span>
-    <span class="c1">// Note: may be nil if actor has no public key
-</span><span class="c1"></span>    <span class="nf">GetSignaturePublicKey</span><span class="p">()</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span>
+    <span class="c1">// Identifies the code this actor executes.
+</span><span class="c1"></span>    <span class="nx">CodeID</span>
+    <span class="c1">// CID of the root of optional actor-specific sub-state.
+</span><span class="c1"></span>    <span class="nx">State</span>       <span class="nx">ActorSubstateCID</span>
+    <span class="c1">// Balance of tokens held by this actor.
+</span><span class="c1"></span>    <span class="nx">Balance</span>     <span class="nx">TokenAmount</span>
+    <span class="c1">// Expected sequence number of the next message sent by this actor.
+</span><span class="c1"></span>    <span class="c1">// Initially zero, incremented when an account actor originates a top-level message.
+</span><span class="c1"></span>    <span class="c1">// Always zero for other actors.
+</span><span class="c1"></span>    <span class="nx">CallSeqNum</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ActorSystemStateCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
@@ -4799,7 +4792,6 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">actor</span>
 
-<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 <span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 
@@ -4810,18 +4802,12 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">const</span> <span class="p">(</span>
 	<span class="nx">MethodSend</span>        <span class="p">=</span> <span class="nf">MethodNum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 	<span class="nx">MethodConstructor</span> <span class="p">=</span> <span class="nf">MethodNum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-	<span class="nx">MethodCron</span>        <span class="p">=</span> <span class="nf">MethodNum</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 	<span class="c1">// TODO: remove this once canonical method numbers are finalized
 </span><span class="c1"></span>	<span class="nx">MethodPlaceholder</span> <span class="p">=</span> <span class="nf">MethodNum</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">))</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">ActorState_I</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Note: may be nil if actor has no public key
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">ActorState_I</span><span class="p">)</span> <span class="nf">GetSignaturePublicKey</span><span class="p">()</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 

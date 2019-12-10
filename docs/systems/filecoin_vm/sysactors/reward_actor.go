@@ -5,6 +5,10 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
+const (
+	Method_RewardActor_AwardBlockReward = actor.MethodPlaceholder + iota
+)
+
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
 ////////////////////////////////////////////////////////////////////////////////
@@ -70,8 +74,10 @@ func (a *RewardActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 	panic("TODO")
 }
 
-func (a *RewardActorCode_I) MintReward(rt vmr.Runtime) {
+func (a *RewardActorCode_I) AwardBlockReward(rt vmr.Runtime, miner addr.Address, penalty actor.TokenAmount) {
+	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
 	// block reward function should live here
+	// handle penalty greater than reward
 	// put Reward into RewardMap
 	panic("TODO")
 }

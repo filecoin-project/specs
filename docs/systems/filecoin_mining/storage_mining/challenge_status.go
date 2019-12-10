@@ -28,7 +28,7 @@ func (cs *ChallengeStatus_I) LastPoStResponseEpoch() block.ChainEpoch {
 }
 
 func (cs *ChallengeStatus_I) IsChallenged() bool {
-	// true if most recent challenge has gone unanswered
+	// true if most recent challenge has gone unanswered (with a PoSt or a failure)
 	return cs.LastChallengeEpoch() > cs.LastPoStResponseEpoch()
 }
 
@@ -48,6 +48,6 @@ func (cs *ChallengeStatus_I) CanBeElected(currEpoch block.ChainEpoch) bool {
 	return !cs.IsChallenged() && currEpoch < cs._lastPoStSuccessEpoch()+PROVING_PERIOD
 }
 
-func (cs *ChallengeStatus_I) ShouldChallenge(currEpoch block.ChainEpoch, challengeFreePeriod block.ChainEpoch) bool {
-	return currEpoch > (cs.LastChallengeEpoch()+challengeFreePeriod) && !cs.IsChallenged()
+func (cs *ChallengeStatus_I) ShouldChallenge(currEpoch block.ChainEpoch) bool {
+	return !cs.IsChallenged() && currEpoch > (cs._lastPoStSuccessEpoch()+SUPRISE_NO_CHALLENGE_PERIOD)
 }

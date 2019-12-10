@@ -4643,39 +4643,53 @@ producing a new state and a sequence of message receipts. The CIDs of this new s
 collection are included in blocks from the subsequent epoch, which must agree about those CIDs
 in order to form a new tipset.</p>
 
-<p>The messages from all the blocks in a tipset must be executed in order to produce a next state.
+<p>Every state change is driven by the execution of a message.
+The messages from all the blocks in a tipset must be executed in order to produce a next state.
 All messages from the first block are executed before those of second and subsequent blocks in the
 tipset. For each block, BLS-aggregated messages are executed first, then SECP signed messages.</p>
 
-<p>In addition, for each block:</p>
+<h1 id="implicit-messages">Implicit messages</h1>
+
+<p>In addition to the messages explicitly included in each block, a few state changes at each epoch
+are made by implicit messages. Implicit messages are not transmitted between nodes, but constructed
+by the interpreter at evaluation time.</p>
+
+<p>For each block in a tipset, an implicit message:</p>
 
 <ul>
-<li>the block reward is paid to the miner owner account, and</li>
-<li>the block producer&rsquo;s election PoSt is processed by an implicit invocation on the associated actor<br /></li>
+<li>invokes the block producer&rsquo;s miner actor to process the (already-validated) election PoSt submission,
+as the first message in the block;</li>
+<li>invokes the reward actor to pay the block reward to the miner&rsquo;s owner account, as the final message in the block;</li>
 </ul>
 
-<p>via implicit messages before that block&rsquo;s explicit messages are executed.</p>
-
-<p>For each tipset:</p>
+<p>For each tipset, an implicit message:</p>
 
 <ul>
-<li>the <code>CronActor</code>&rsquo;s tick method is invoked implicitly after all the blocks&rsquo; messages.</li>
+<li>invokes the cron actor to process automated checks and payments, as the final message in the tipset.</li>
 </ul>
 
-<p>These implicit messages specify a gas price of zero, but must be included in the computation.
-They must succeed (have an exit code of zero) in order for the new state to be
-computed. Receipts for them are excluded from the receipt list; only explicit messages have an
+<p>All implicit messages are constructed with a <code>From</code> address being the distinguished system account actor.
+They specify a gas price of zero, but must be included in the computation.
+They must succeed (have an exit code of zero) in order for the new state to be computed.
+Receipts for implicit messages are not included in the receipt list; only explicit messages have an
 explicit receipt.</p>
 
-<p>The gas payment for each message execution is paid to the miner owner account immediately after
+<h1 id="gas-payments">Gas payments</h1>
+
+<p>In most cases, the sender of a message pays the miner which produced the block including that message
+a gas fee for its execution.</p>
+
+<p>The gas payments for each message execution are paid to the miner owner account immediately after
 that message is executed. There are no encumbrances to either the block reward or gas fees earned:
-both may be spent immediately, including by a message in the same block in which they are earned.</p>
+both may be spent immediately.</p>
+
+<h1 id="duplicate-messages">Duplicate messages</h1>
 
 <p>Since different miners produce blocks in the same epoch, multiple blocks in a single tipset may
 include the same message (identified by the same CID).
 When this happens, the message is processed only the first time it is encountered in the tipset&rsquo;s
 canonical order. Subsequent instances of the message are ignored and do not result in any
-state mutation or produce a receipt.</p>
+state mutation, produce a receipt, or pay gas to the block producer.</p>
 
 <p>The sequence of executions for a tipset is thus summarised:</p>
 
@@ -4821,6 +4835,7 @@ it will be created as an account actor (only if the message has a MethodNum of z
 	<span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
 	<span class="nx">gascost</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost&#34;</span>
 	<span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
+	<span class="nx">sysactors</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/sysactors&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
@@ -4845,10 +4860,8 @@ it will be created as an account actor (only if the message has a MethodNum of z
 </span><span class="c1"></span>	<span class="kd">var</span> <span class="nx">receipt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span>
 
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">blk</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">msgs</span><span class="p">.</span><span class="nf">Blocks</span><span class="p">()</span> <span class="p">{</span>
-		<span class="nx">minerOwner</span> <span class="o">:=</span> <span class="nx">storage_mining</span><span class="p">.</span><span class="nf">GetMinerOwnerAddress_Assert</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
-
 		<span class="c1">// Process block miner&#39;s Election PoSt.
-</span><span class="c1"></span>		<span class="nx">epostMessage</span> <span class="o">:=</span> <span class="nf">_makeElectionPoStMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">(),</span> <span class="nx">msgs</span><span class="p">.</span><span class="nf">Epoch</span><span class="p">(),</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">PoStProof</span><span class="p">())</span>
+</span><span class="c1"></span>		<span class="nx">epostMessage</span> <span class="o">:=</span> <span class="nf">_makeElectionPoStMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
 		<span class="nx">outTree</span> <span class="p">=</span> <span class="nf">_applyMessageBuiltinAssert</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">epostMessage</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
 
 		<span class="nx">minerPenaltyTotal</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -4882,7 +4895,7 @@ it will be created as an account actor (only if the message has a MethodNum of z
 		<span class="p">}</span>
 
 		<span class="c1">// Pay block reward.
-</span><span class="c1"></span>		<span class="nx">rewardMessage</span> <span class="o">:=</span> <span class="nf">_makeBlockRewardMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">minerOwner</span><span class="p">,</span> <span class="nx">minerPenaltyTotal</span><span class="p">)</span>
+</span><span class="c1"></span>		<span class="nx">rewardMessage</span> <span class="o">:=</span> <span class="nf">_makeBlockRewardMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">(),</span> <span class="nx">minerPenaltyTotal</span><span class="p">)</span>
 		<span class="nx">outTree</span> <span class="p">=</span> <span class="nf">_applyMessageBuiltinAssert</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">rewardMessage</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
 	<span class="p">}</span>
 
@@ -5037,14 +5050,10 @@ it will be created as an account actor (only if the message has a MethodNum of z
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_applyMessageBuiltinAssert</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">topLevelBlockWinner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span> <span class="p">{</span>
-	<span class="nx">gasRemainingInit</span> <span class="o">:=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_SentinelUnlimited</span><span class="p">()</span>
-	<span class="nf">Assert</span><span class="p">(</span><span class="nx">gasRemainingInit</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">()))</span>
-
-	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// TODO: assert message.From() is ControlActor
-</span><span class="c1"></span>
+	<span class="nf">Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">().</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">))</span>
 	<span class="nx">tree</span> <span class="p">=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithIncrementedCallSeqNum_Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
 
-	<span class="nx">retReceipt</span><span class="p">,</span> <span class="nx">retTree</span> <span class="o">:=</span> <span class="nf">_applyMessageInternal</span><span class="p">(</span><span class="nx">tree</span><span class="p">,</span> <span class="nx">message</span><span class="p">,</span> <span class="nx">gasRemainingInit</span><span class="p">,</span> <span class="nx">topLevelBlockWinner</span><span class="p">)</span>
+	<span class="nx">retReceipt</span><span class="p">,</span> <span class="nx">retTree</span> <span class="o">:=</span> <span class="nf">_applyMessageInternal</span><span class="p">(</span><span class="nx">tree</span><span class="p">,</span> <span class="nx">message</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(),</span> <span class="nx">topLevelBlockWinner</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">retReceipt</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;internal message application failed&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
@@ -5096,73 +5105,59 @@ it will be created as an account actor (only if the message has a MethodNum of z
 </span><span class="c1"></span>	<span class="c1">// return actor.TokenAmount(util.UVarint(gas) * util.UVarint(price))
 </span><span class="c1"></span><span class="p">}</span>
 
-<span class="c1">// Builds a message for paying block reward from the treasury account to a miner owner.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeBlockRewardMessage</span><span class="p">(</span>
-	<span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerOwnerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">minerPenaltyTotal</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
+<span class="c1">// Builds a message for paying block reward to a miner&#39;s owner.
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeBlockRewardMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">penalty</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
+	<span class="nx">params</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+	<span class="nx">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Serialize_Address</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+	<span class="nx">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">Serialize_TokenAmount</span><span class="p">(</span><span class="nx">penalty</span><span class="p">)</span>
 
-	<span class="kd">var</span> <span class="nx">blockReward</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// TODO: finish
-</span><span class="c1"></span>
-	<span class="nx">blockReward</span> <span class="o">-=</span> <span class="nx">minerPenaltyTotal</span>
-	<span class="k">if</span> <span class="nx">blockReward</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>
-		<span class="nx">blockReward</span> <span class="p">=</span> <span class="mi">0</span>
+	<span class="nx">sysActor</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
+		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">,</span>
+		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">RewardActorAddr</span><span class="p">,</span>
+		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">sysactors</span><span class="p">.</span><span class="nx">Method_RewardActor_AwardBlockReward</span><span class="p">,</span>
+		<span class="nx">Params_</span><span class="p">:</span>     <span class="nx">params</span><span class="p">,</span>
+		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">sysActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
+		<span class="nx">Value_</span><span class="p">:</span>      <span class="mi">0</span><span class="p">,</span>
+		<span class="nx">GasPrice_</span><span class="p">:</span>   <span class="mi">0</span><span class="p">,</span>
+		<span class="nx">GasLimit_</span><span class="p">:</span>   <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_SentinelUnlimited</span><span class="p">(),</span>
 	<span class="p">}</span>
-
-	<span class="c1">// networkTreasuryActor := loadActor(NetworkTreasuryActorAddress)
-</span><span class="c1"></span>	<span class="c1">// minerActor := loadActorSubstate(minerActorAddr)
-</span><span class="c1"></span>	<span class="c1">// minerWorker := loadActor(minerActor.Info.Worker)
-</span><span class="c1"></span>	<span class="c1">//return &amp;UnsignedMessage_I{
-</span><span class="c1"></span>	<span class="c1">//	From_:       minerActor.Info.Worker,
-</span><span class="c1"></span>	<span class="c1">//	To_:         NetworkTreasuryActorAddress,
-</span><span class="c1"></span>	<span class="c1">//	Method_:     NetworkTreasury.PayBlockReward,
-</span><span class="c1"></span>	<span class="c1">//	Params_:     serialize([minerActorAddr]),
-</span><span class="c1"></span>	<span class="c1">//	CallSeqNum_: minerWorker.CallSeqNum,
-</span><span class="c1"></span>	<span class="c1">//	Value_:      0,
-</span><span class="c1"></span>	<span class="c1">//	GasPrice_:   0,
-</span><span class="c1"></span>	<span class="c1">//	GasLimit_:   payBlockRewardGasLimit,
-</span><span class="c1"></span>	<span class="c1">//}
-</span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO: implement when network treasury actor implemented&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">// Builds a message for submitting ElectionPost on behalf of a miner actor.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeElectionPoStMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">UInt64</span><span class="p">,</span> <span class="nx">postProof</span> <span class="nx">Bytes</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
-	<span class="c1">// minerActor := loadActorSubstate(minerActorAddr)
-</span><span class="c1"></span>	<span class="c1">// minerWorker := loadActor(minerActor.Info.Worker)
-</span><span class="c1"></span>	<span class="c1">//return &amp;UnsignedMessage_I{
-</span><span class="c1"></span>	<span class="c1">//	From_:       minerActor.Info.Worker,
-</span><span class="c1"></span>	<span class="c1">//	To_:         minerActorAddr,
-</span><span class="c1"></span>	<span class="c1">//	Method_:     StorageMinerActor.SubmitElectionPoSt,
-</span><span class="c1"></span>	<span class="c1">//	Params_:     serialize([PoStSubmission{postProof, epoch}]),
-</span><span class="c1"></span>	<span class="c1">//	CallSeqNum_: minerWorker.CallSeqNum,
-</span><span class="c1"></span>	<span class="c1">//	Value_:      0,
-</span><span class="c1"></span>	<span class="c1">//	GasPrice_:   0,
-</span><span class="c1"></span>	<span class="c1">//	GasLimit_:   sumbitElectionPostGasLimit,
-</span><span class="c1"></span>	<span class="c1">//}
-</span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO: implement when necessary dependencies are importable&#34;</span><span class="p">)</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeElectionPoStMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
+	<span class="c1">// TODO: determine parameters necessary for this message.
+</span><span class="c1"></span>	<span class="nx">params</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+	<span class="nx">sysActor</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
+		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">,</span>
+		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">minerActorAddr</span><span class="p">,</span>
+		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">storage_mining</span><span class="p">.</span><span class="nx">Method_StorageMinerActor_ProcessVerifiedElectionPoSt</span><span class="p">,</span>
+		<span class="nx">Params_</span><span class="p">:</span>     <span class="nx">params</span><span class="p">,</span>
+		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">sysActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
+		<span class="nx">Value_</span><span class="p">:</span>      <span class="mi">0</span><span class="p">,</span>
+		<span class="nx">GasPrice_</span><span class="p">:</span>   <span class="mi">0</span><span class="p">,</span>
+		<span class="nx">GasLimit_</span><span class="p">:</span>   <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_SentinelUnlimited</span><span class="p">(),</span>
+	<span class="p">}</span>
 <span class="p">}</span>
 
 <span class="c1">// Builds a message for invoking the cron actor tick.
 </span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeCronTickMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
-	<span class="c1">// minerActor := loadActorSubstate(minerActorAddr)
-</span><span class="c1"></span>	<span class="c1">// minerWorker := loadActor(minerActor.Info.Worker)
-</span><span class="c1"></span>	<span class="c1">//return &amp;UnsignedMessage_I{
-</span><span class="c1"></span>	<span class="c1">//	From_:       minerActor.Info.Worker,
-</span><span class="c1"></span>	<span class="c1">//	To_:         CronActorAddress,
-</span><span class="c1"></span>	<span class="c1">//	Method_:     CronActor.EpochTick,
-</span><span class="c1"></span>	<span class="c1">//	Params_:     nil,
-</span><span class="c1"></span>	<span class="c1">//	CallSeqNum_: minerWorker.CallSeqNum,
-</span><span class="c1"></span>	<span class="c1">//	Value_:      0,
-</span><span class="c1"></span>	<span class="c1">//	GasPrice_:   0,
-</span><span class="c1"></span>	<span class="c1">//	GasLimit_:   cronTickGasLimit,
-</span><span class="c1"></span>	<span class="c1">//}
-</span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO: implement when necessary dependencies are importable&#34;</span><span class="p">)</span>
+	<span class="nx">sysActor</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
+		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">,</span>
+		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">CronActorAddr</span><span class="p">,</span>
+		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">sysactors</span><span class="p">.</span><span class="nx">Method_CronActor_EpochTick</span><span class="p">,</span>
+		<span class="nx">Params_</span><span class="p">:</span>     <span class="kc">nil</span><span class="p">,</span>
+		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">sysActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
+		<span class="nx">Value_</span><span class="p">:</span>      <span class="mi">0</span><span class="p">,</span>
+		<span class="nx">GasPrice_</span><span class="p">:</span>   <span class="mi">0</span><span class="p">,</span>
+		<span class="nx">GasLimit_</span><span class="p">:</span>   <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_SentinelUnlimited</span><span class="p">(),</span>
+	<span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_msgCID</span><span class="p">(</span><span class="nx">msg</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">)</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">_encodeParams</span><span class="p">(</span><span class="nx">p</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{})</span> <span class="nx">Bytes</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -5296,6 +5291,9 @@ it will be created as an account actor (only if the message has a MethodNum of z
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
 <ul>
+<li><a href="#implicit-messages">Implicit messages</a></li>
+<li><a href="#gas-payments">Gas payments</a></li>
+<li><a href="#duplicate-messages">Duplicate messages</a></li>
 <li><a href="#message-validity-and-failure">Message validity and failure</a></li>
 <li><a href="#vm-interpreter-interface"><code>vm/interpreter</code> interface</a></li>
 <li><a href="#vm-interpreter-implementation"><code>vm/interpreter</code> implementation</a></li>

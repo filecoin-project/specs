@@ -4679,7 +4679,7 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li>7. Declared faults are penalized to a smaller degree than detected faults by <code>CronActor</code>. Miners declare failing sectors by invoking <code>StorageMinerActor.DeclareFaults</code> and X of the <code>StorageDealCollateral</code> will be slashed and power corresponding to these sectors will be tempororily lost. However, miners can only declare faults when they are not in <code>Challenged</code> status.</li>
 <li>8. Miners can then recover faults by invoking <code>StorageMinerActor.RecoverFaults</code> and have sufficient <code>StorageDealCollateral</code> in their available balances. FaultySectors are recommitted and power is only restored at the next PoSt submission. Miners will not be able to invoke <code>RecoverFaults</code> when they are in the <code>Challenged</code> status.</li>
-<li>9. Sectors that are failing for <code>storagemining.MaxFaults</code> consecutive ChainEpochs will be cleared and result in <code>StoragePowerActor.SlashPledgeCollateral</code>.
+<li>9. Sectors that are failing for <code>storagemining.MAX_CONSECUTIVE_FAULTS</code> consecutive ChainEpochs will be cleared and result in <code>StoragePowerActor.SlashPledgeCollateral</code>.
 
 <ul>
 <li>TODO: set <code>X</code> parameter</li>
@@ -4694,7 +4694,7 @@ https://github.com/alex-shpak/hugo-book
 
 <ul>
 <li>10. <code>StorageMinerActor</code> first verifies the PoSt Submission. If PoSt is done correctly, all <code>Committed</code> and <code>Recovering</code> sectors will be marked as <code>Active</code> and power is credited to these sectors. Payments will be processed for deals that are <code>Active</code> by invoking <code>StorageMarketActor.ProcessStorageDealsPayment</code>.</li>
-<li>11. For all sectors that are off from the <code>ProvingSet</code>, these sectors are failing. Increment <code>FaultCount</code> on these sectors and if any of these sectors are failing for <code>MaxFaultCount</code> consecutive <code>ChainEpoch</code>, these sectors are terminated and cleared from the network.</li>
+<li>11. For all sectors that are off from the <code>ProvingSet</code>, these sectors are failing. Increment <code>FaultCount</code> on these sectors and if any of these sectors are failing for <code>MAX_CONSECUTIVE_FAULTS</code> consecutive <code>ChainEpoch</code>, these sectors are terminated and cleared from the network.</li>
 <li>13. Process sector expiration. Sectors expire when all deals in that sector have expired. Expired sectors will be cleared and <code>StorageDealCollateral</code> for both miners and users returned depending on the state that the sectors are in.</li>
 <li>14. Submit <code>FaultReport</code> and <code>PowerReport</code> to <code>StoragePowerActor</code> for slashing and power accounting.</li>
 <li>15. Check and ensure that Pledge Collateral is statisfied. TODO: some details are missing here, also related to ProvingPeriod depending on PoSt construction.</li>
@@ -4713,7 +4713,7 @@ https://github.com/alex-shpak/hugo-book
 <li>If no PoSt is submitted by the end of the <code>ProvingPeriod</code>, <code>onMissedSurprisePoSt</code> detects the missing PoSt, and sets all sectors to <code>Failing</code>.</li>
 <li>TODO: reword in terms of a conditional in the mining cycle</li>
 <li>When there are sector faults are detected, some of <code>StorageDealCollateral</code> and <code>PledgeCollateral</code> are slashed, and power is lost.</li>
-<li>If the faults persist for <code>storagemining.MaxFaultCount</code> then sectors are removed/cleared from <code>StorageMinerActor</code>.</li>
+<li>If the faults persist for <code>storagemining.MAX_CONSECUTIVE_FAULTS</code> then sectors are removed/cleared from <code>StorageMinerActor</code>.</li>
 </ul></li>
 </ul>
 
@@ -4853,6 +4853,8 @@ https://github.com/alex-shpak/hugo-book
 </div>
 
 
+<div id="systems__filecoin_markets__deal__deal_states"></div>
+
 <h1 id="deal-states">Deal States</h1>
 
 <p>All on-chain economic activities in Filecoin start with the deal. This section aims to explain different states of a deal and their relationship with other concepts in the protocol such as Power, Payment, and Collaterals.</p>
@@ -4879,7 +4881,7 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li>The deal itself has expired. This is triggered by <code>StorageMinerActorCode._submitPowerReport</code> which is called whenever a PoSt is submitted. Power associated with the deal will be lost, collaterals returned, and all remaining storage fees unlocked (allowing miners to call <code>WithdrawBalance</code> successfully).</li>
 <li>The sector containing the deal has expired. This is triggered by <code>StorageMinerActorCode._submitPowerReport</code> which is called whenver a PoSt is submitted. Power associated with the deals in the sector will be lost, collaterals returned, and all remaining storage fees unlocked.</li>
-<li>The sector containing the active deal has been terminated. This is triggered by <code>StorageMinerActor._submitFaultReport</code> for <code>TerminatedFaults</code>. No storage deal collateral will be slashed on fault declaration or detection, only on termination. A terminated fault is triggered when a sector is in the <code>Failing</code> state for <code>MaxFaultCount</code> consecutive proving periods.</li>
+<li>The sector containing the active deal has been terminated. This is triggered by <code>StorageMinerActor._submitFaultReport</code> for <code>TerminatedFaults</code>. No storage deal collateral will be slashed on fault declaration or detection, only on termination. A terminated fault is triggered when a sector is in the <code>Failing</code> state for <code>MAX_CONSECUTIVE_FAULTS</code> consecutive proving periods.</li>
 </ul></li>
 </ul>
 
@@ -4888,7 +4890,7 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li><code>Power</code>: only payload data in an Active storage deal counts towards power.</li>
 <li><code>Deal Payment</code>: happens on <code>_onSuccessfulPoSt</code> and at deal/sector expiration through <code>_submitPowerReport</code>, paying out <code>StoragePricePerEpoch</code> for each epoch since the last PoSt.</li>
-<li><code>Deal Collateral</code>: no storage deal collateral will be slashed for <code>NewDeclaredFaults</code> and <code>NewDetectedFaults</code> but instead some pledge collateral will be slashed given these faults&rsquo; impact on consensus power. In the event of <code>NewTerminatedFaults</code>, all storage deal collateral and some pledge collateral will be slashed. Provider and client storage deal collaterals will be returned when a deal or a sector has expired. If a sector recovers from <code>Failing</code> within the <code>MaxFaultCount</code> threshold, deals in that sector are still considered active. However, miners may need to top up pledge collateral when they try to <code>RecoverFaults</code> given the earlier slashing.</li>
+<li><code>Deal Collateral</code>: no storage deal collateral will be slashed for <code>NewDeclaredFaults</code> and <code>NewDetectedFaults</code> but instead some pledge collateral will be slashed given these faults&rsquo; impact on consensus power. In the event of <code>NewTerminatedFaults</code>, all storage deal collateral and some pledge collateral will be slashed. Provider and client storage deal collaterals will be returned when a deal or a sector has expired. If a sector recovers from <code>Failing</code> within the <code>MAX_CONSECUTIVE_FAULTS</code> threshold, deals in that sector are still considered active. However, miners may need to top up pledge collateral when they try to <code>RecoverFaults</code> given the earlier slashing.</li>
 </ul>
 
 

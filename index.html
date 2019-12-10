@@ -4811,9 +4811,9 @@ https://github.com/alex-shpak/hugo-book
   <img id="spec-logo" src="./docs/filspeclogo.png" />
   <div id="spec-version">
     protocol version: <span id="protocol-version-number">v0.1.0</span><br />
-    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">aa8414c8</span>
+    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">b796e9cc</span>
     <br />
-    last published: <span id="spec-version-date">2019-12-09_22:24:25Z</span>
+    last published: <span id="spec-version-date">2019-12-10_16:14:17Z</span>
   </div>
 </div>
 
@@ -11821,7 +11821,6 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// This contains actor things that are _outside_ of VM exection.
 </span><span class="c1">// The VM uses this to execute actors.
 </span><span class="c1"></span>
-<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 
 <span class="c1">// TokenAmount is an amount of Filecoin tokens. This type is used within
@@ -11894,24 +11893,18 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 </span><span class="c1">// to Actors in the Actor Model (programming), or Objects in Object-
 </span><span class="c1">// Oriented Programming, or Ethereum Contracts in the EVM.
 </span><span class="c1">//
-</span><span class="c1">// Questions for id language:
-</span><span class="c1">// - we should not do inheritance, we should do composition.
-</span><span class="c1">//   but we should make including actor state nicer.
-</span><span class="c1">//
-</span><span class="c1">// ActorState represents the on-chain storage actors keep.
+</span><span class="c1">// ActorState represents the on-chain storage all actors keep.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ActorState</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// common fields for all actors
-</span><span class="c1"></span>
-    <span class="nx">CodeID</span>
-    <span class="c1">// use a CID here, load it in interpreter.
-</span><span class="c1"></span>    <span class="c1">// Alternative is to use ActorState here but tricky w/ the type system
-</span><span class="c1"></span>    <span class="nx">State</span>                    <span class="nx">ActorSubstateCID</span>
-
-    <span class="nx">Balance</span>                  <span class="nx">TokenAmount</span>
-    <span class="nx">CallSeqNum</span>  <span class="c1">// FKA Nonce
-</span><span class="c1"></span>
-    <span class="c1">// Note: may be nil if actor has no public key
-</span><span class="c1"></span>    <span class="nf">GetSignaturePublicKey</span><span class="p">()</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span>
+    <span class="c1">// Identifies the code this actor executes.
+</span><span class="c1"></span>    <span class="nx">CodeID</span>
+    <span class="c1">// CID of the root of optional actor-specific sub-state.
+</span><span class="c1"></span>    <span class="nx">State</span>       <span class="nx">ActorSubstateCID</span>
+    <span class="c1">// Balance of tokens held by this actor.
+</span><span class="c1"></span>    <span class="nx">Balance</span>     <span class="nx">TokenAmount</span>
+    <span class="c1">// Expected sequence number of the next message sent by this actor.
+</span><span class="c1"></span>    <span class="c1">// Initially zero, incremented when an account actor originates a top-level message.
+</span><span class="c1"></span>    <span class="c1">// Always zero for other actors.
+</span><span class="c1"></span>    <span class="nx">CallSeqNum</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ActorSystemStateCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
@@ -11964,7 +11957,6 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">actor</span>
 
-<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 <span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 
@@ -11975,18 +11967,12 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 <span class="kd">const</span> <span class="p">(</span>
 	<span class="nx">MethodSend</span>        <span class="p">=</span> <span class="nf">MethodNum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 	<span class="nx">MethodConstructor</span> <span class="p">=</span> <span class="nf">MethodNum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-	<span class="nx">MethodCron</span>        <span class="p">=</span> <span class="nf">MethodNum</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 	<span class="c1">// TODO: remove this once canonical method numbers are finalized
 </span><span class="c1"></span>	<span class="nx">MethodPlaceholder</span> <span class="p">=</span> <span class="nf">MethodNum</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">))</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">ActorState_I</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Note: may be nil if actor has no public key
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">ActorState_I</span><span class="p">)</span> <span class="nf">GetSignaturePublicKey</span><span class="p">()</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -12765,7 +12751,6 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 <span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
-<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 <span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 
@@ -12820,12 +12805,6 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 
     <span class="nf">CurrentBalance</span><span class="p">()</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="nf">ValueReceived</span><span class="p">()</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-
-    <span class="nf">VerifySignature</span><span class="p">(</span>
-        <span class="nx">signerActor</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">sig</span>          <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span>
-        <span class="nx">m</span>            <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Message</span>
-    <span class="p">)</span> <span class="kt">bool</span>
 
     <span class="c1">// Run a (pure function) computation, consuming the gas cost associated with that function.
 </span><span class="c1"></span>    <span class="c1">// This mechanism is intended to capture the notion of an ABI between the VM and native
@@ -12907,7 +12886,6 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">runtime</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-	<span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 	<span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 	<span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 	<span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
@@ -13452,19 +13430,6 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 		<span class="nx">_initValue</span><span class="p">:</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">).</span><span class="nf">State</span><span class="p">().</span><span class="nf">Ref</span><span class="p">(),</span>
 		<span class="nx">_rt</span><span class="p">:</span>        <span class="nx">rt</span><span class="p">,</span>
 	<span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">VerifySignature</span><span class="p">(</span><span class="nx">signerActor</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">sig</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span><span class="p">,</span> <span class="nx">m</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Message</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="nx">st</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">signerActor</span><span class="p">)</span>
-	<span class="k">if</span> <span class="nx">st</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;VerifySignature: signer actor not found&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
-	<span class="nx">pk</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">GetSignaturePublicKey</span><span class="p">()</span>
-	<span class="k">if</span> <span class="nx">pk</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;VerifySignature: signer actor has no public key&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
-	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">Compute</span><span class="p">(</span><span class="nx">ComputeFunctionID_VerifySignature</span><span class="p">,</span> <span class="p">[]</span><span class="nx">Any</span><span class="p">{</span><span class="nx">pk</span><span class="p">,</span> <span class="nx">sig</span><span class="p">,</span> <span class="nx">m</span><span class="p">})</span>
-	<span class="k">return</span> <span class="nx">ret</span><span class="p">.(</span><span class="kt">bool</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">Compute</span><span class="p">(</span><span class="nx">f</span> <span class="nx">ComputeFunctionID</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[]</span><span class="nx">Any</span><span class="p">)</span> <span class="nx">Any</span> <span class="p">{</span>
@@ -14257,7 +14222,7 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 	<span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
 	<span class="nx">st</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">InitActorState_I</span><span class="p">{</span>
 		<span class="nx">AddressMap_</span><span class="p">:</span> <span class="kd">map</span><span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">{},</span> <span class="c1">// TODO: HAMT
-</span><span class="c1"></span>		<span class="nx">NextID_</span><span class="p">:</span>     <span class="nx">addr</span><span class="p">.</span><span class="nf">ActorID</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+</span><span class="c1"></span>		<span class="nx">NextID_</span><span class="p">:</span>     <span class="nx">addr</span><span class="p">.</span><span class="nf">ActorID</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">FirstNonSingletonActorId</span><span class="p">),</span>
 	<span class="p">}</span>
 	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReturn</span><span class="p">(</span><span class="kc">nil</span><span class="p">)</span>
@@ -14497,9 +14462,14 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">sysactors</span>
 
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
 <span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
+
+<span class="kd">const</span> <span class="p">(</span>
+	<span class="nx">Method_CronActor_EpochTick</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodPlaceholder</span> <span class="o">+</span> <span class="kc">iota</span>
+<span class="p">)</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">CronActorCode_I</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
 	<span class="c1">// Nothing. intentionally left blank.
@@ -14507,8 +14477,8 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">CronActorCode_I</span><span class="p">)</span> <span class="nf">EpochTick</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
-	<span class="c1">// Hook period actions in here.
-</span><span class="c1"></span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+
 	<span class="c1">// a.Entries is basically a static registry for now, loaded
 </span><span class="c1"></span>	<span class="c1">// in the interpreter static registry.
 </span><span class="c1"></span>	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">entry</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">a</span><span class="p">.</span><span class="nf">Entries</span><span class="p">()</span> <span class="p">{</span>
@@ -14529,7 +14499,7 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
 		<span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-	<span class="k">case</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodCron</span><span class="p">:</span>
+	<span class="k">case</span> <span class="nx">Method_CronActor_EpochTick</span><span class="p">:</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
 		<span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">EpochTick</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
@@ -14800,8 +14770,10 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 <span class="kd">type</span> <span class="nx">RewardActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span>
 
-    <span class="c1">// put Reward in RewardMap
-</span><span class="c1"></span>    <span class="nf">MintReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span>
+    <span class="c1">// Allocates a block reward to the owner of a miner, less
+</span><span class="c1"></span>    <span class="c1">// - penalty, which is burnt
+</span><span class="c1"></span>    <span class="c1">// - any amount of pledge collateral shortfall, which is transferred to storage power actor
+</span><span class="c1"></span>    <span class="nf">AwardBlockReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">miner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">penalty</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
 
     <span class="c1">// withdraw available funds from RewardMap
 </span><span class="c1"></span>    <span class="nf">WithdrawReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span>
@@ -14838,6 +14810,10 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+
+<span class="kd">const</span> <span class="p">(</span>
+	<span class="nx">Method_RewardActor_AwardBlockReward</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodPlaceholder</span> <span class="o">+</span> <span class="kc">iota</span>
+<span class="p">)</span>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1">// Boilerplate
@@ -14904,8 +14880,10 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 </span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActorCode_I</span><span class="p">)</span> <span class="nf">MintReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActorCode_I</span><span class="p">)</span> <span class="nf">AwardBlockReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">miner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">penalty</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
 	<span class="c1">// block reward function should live here
+</span><span class="c1"></span>	<span class="c1">// handle penalty greater than reward
 </span><span class="c1"></span>	<span class="c1">// put Reward into RewardMap
 </span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
@@ -15013,39 +14991,53 @@ producing a new state and a sequence of message receipts. The CIDs of this new s
 collection are included in blocks from the subsequent epoch, which must agree about those CIDs
 in order to form a new tipset.</p>
 
-<p>The messages from all the blocks in a tipset must be executed in order to produce a next state.
+<p>Every state change is driven by the execution of a message.
+The messages from all the blocks in a tipset must be executed in order to produce a next state.
 All messages from the first block are executed before those of second and subsequent blocks in the
 tipset. For each block, BLS-aggregated messages are executed first, then SECP signed messages.</p>
 
-<p>In addition, for each block:</p>
+<h4 id="implicit-messages">Implicit messages</h4>
+
+<p>In addition to the messages explicitly included in each block, a few state changes at each epoch
+are made by implicit messages. Implicit messages are not transmitted between nodes, but constructed
+by the interpreter at evaluation time.</p>
+
+<p>For each block in a tipset, an implicit message:</p>
 
 <ul>
-<li>the block reward is paid to the miner owner account, and</li>
-<li>the block producer&rsquo;s election PoSt is processed by an implicit invocation on the associated actor<br /></li>
+<li>invokes the block producer&rsquo;s miner actor to process the (already-validated) election PoSt submission,
+as the first message in the block;</li>
+<li>invokes the reward actor to pay the block reward to the miner&rsquo;s owner account, as the final message in the block;</li>
 </ul>
 
-<p>via implicit messages before that block&rsquo;s explicit messages are executed.</p>
-
-<p>For each tipset:</p>
+<p>For each tipset, an implicit message:</p>
 
 <ul>
-<li>the <code>CronActor</code>&rsquo;s tick method is invoked implicitly after all the blocks&rsquo; messages.</li>
+<li>invokes the cron actor to process automated checks and payments, as the final message in the tipset.</li>
 </ul>
 
-<p>These implicit messages specify a gas price of zero, but must be included in the computation.
-They must succeed (have an exit code of zero) in order for the new state to be
-computed. Receipts for them are excluded from the receipt list; only explicit messages have an
+<p>All implicit messages are constructed with a <code>From</code> address being the distinguished system account actor.
+They specify a gas price of zero, but must be included in the computation.
+They must succeed (have an exit code of zero) in order for the new state to be computed.
+Receipts for implicit messages are not included in the receipt list; only explicit messages have an
 explicit receipt.</p>
 
-<p>The gas payment for each message execution is paid to the miner owner account immediately after
+<h4 id="gas-payments">Gas payments</h4>
+
+<p>In most cases, the sender of a message pays the miner which produced the block including that message
+a gas fee for its execution.</p>
+
+<p>The gas payments for each message execution are paid to the miner owner account immediately after
 that message is executed. There are no encumbrances to either the block reward or gas fees earned:
-both may be spent immediately, including by a message in the same block in which they are earned.</p>
+both may be spent immediately.</p>
+
+<h4 id="duplicate-messages">Duplicate messages</h4>
 
 <p>Since different miners produce blocks in the same epoch, multiple blocks in a single tipset may
 include the same message (identified by the same CID).
 When this happens, the message is processed only the first time it is encountered in the tipset&rsquo;s
 canonical order. Subsequent instances of the message are ignored and do not result in any
-state mutation or produce a receipt.</p>
+state mutation, produce a receipt, or pay gas to the block producer.</p>
 
 <p>The sequence of executions for a tipset is thus summarised:</p>
 
@@ -15191,6 +15183,7 @@ it will be created as an account actor (only if the message has a MethodNum of z
 	<span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
 	<span class="nx">gascost</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost&#34;</span>
 	<span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
+	<span class="nx">sysactors</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/sysactors&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
@@ -15215,10 +15208,8 @@ it will be created as an account actor (only if the message has a MethodNum of z
 </span><span class="c1"></span>	<span class="kd">var</span> <span class="nx">receipt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span>
 
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">blk</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">msgs</span><span class="p">.</span><span class="nf">Blocks</span><span class="p">()</span> <span class="p">{</span>
-		<span class="nx">minerOwner</span> <span class="o">:=</span> <span class="nx">storage_mining</span><span class="p">.</span><span class="nf">GetMinerOwnerAddress_Assert</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
-
 		<span class="c1">// Process block miner&#39;s Election PoSt.
-</span><span class="c1"></span>		<span class="nx">epostMessage</span> <span class="o">:=</span> <span class="nf">_makeElectionPoStMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">(),</span> <span class="nx">msgs</span><span class="p">.</span><span class="nf">Epoch</span><span class="p">(),</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">PoStProof</span><span class="p">())</span>
+</span><span class="c1"></span>		<span class="nx">epostMessage</span> <span class="o">:=</span> <span class="nf">_makeElectionPoStMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
 		<span class="nx">outTree</span> <span class="p">=</span> <span class="nf">_applyMessageBuiltinAssert</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">epostMessage</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
 
 		<span class="nx">minerPenaltyTotal</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -15252,7 +15243,7 @@ it will be created as an account actor (only if the message has a MethodNum of z
 		<span class="p">}</span>
 
 		<span class="c1">// Pay block reward.
-</span><span class="c1"></span>		<span class="nx">rewardMessage</span> <span class="o">:=</span> <span class="nf">_makeBlockRewardMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">minerOwner</span><span class="p">,</span> <span class="nx">minerPenaltyTotal</span><span class="p">)</span>
+</span><span class="c1"></span>		<span class="nx">rewardMessage</span> <span class="o">:=</span> <span class="nf">_makeBlockRewardMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">(),</span> <span class="nx">minerPenaltyTotal</span><span class="p">)</span>
 		<span class="nx">outTree</span> <span class="p">=</span> <span class="nf">_applyMessageBuiltinAssert</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">rewardMessage</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
 	<span class="p">}</span>
 
@@ -15407,14 +15398,10 @@ it will be created as an account actor (only if the message has a MethodNum of z
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_applyMessageBuiltinAssert</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">topLevelBlockWinner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span> <span class="p">{</span>
-	<span class="nx">gasRemainingInit</span> <span class="o">:=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_SentinelUnlimited</span><span class="p">()</span>
-	<span class="nf">Assert</span><span class="p">(</span><span class="nx">gasRemainingInit</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">()))</span>
-
-	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// TODO: assert message.From() is ControlActor
-</span><span class="c1"></span>
+	<span class="nf">Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">().</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">))</span>
 	<span class="nx">tree</span> <span class="p">=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithIncrementedCallSeqNum_Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
 
-	<span class="nx">retReceipt</span><span class="p">,</span> <span class="nx">retTree</span> <span class="o">:=</span> <span class="nf">_applyMessageInternal</span><span class="p">(</span><span class="nx">tree</span><span class="p">,</span> <span class="nx">message</span><span class="p">,</span> <span class="nx">gasRemainingInit</span><span class="p">,</span> <span class="nx">topLevelBlockWinner</span><span class="p">)</span>
+	<span class="nx">retReceipt</span><span class="p">,</span> <span class="nx">retTree</span> <span class="o">:=</span> <span class="nf">_applyMessageInternal</span><span class="p">(</span><span class="nx">tree</span><span class="p">,</span> <span class="nx">message</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(),</span> <span class="nx">topLevelBlockWinner</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">retReceipt</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;internal message application failed&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
@@ -15466,73 +15453,59 @@ it will be created as an account actor (only if the message has a MethodNum of z
 </span><span class="c1"></span>	<span class="c1">// return actor.TokenAmount(util.UVarint(gas) * util.UVarint(price))
 </span><span class="c1"></span><span class="p">}</span>
 
-<span class="c1">// Builds a message for paying block reward from the treasury account to a miner owner.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeBlockRewardMessage</span><span class="p">(</span>
-	<span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerOwnerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">minerPenaltyTotal</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
+<span class="c1">// Builds a message for paying block reward to a miner&#39;s owner.
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeBlockRewardMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">penalty</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
+	<span class="nx">params</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+	<span class="nx">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Serialize_Address</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+	<span class="nx">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">Serialize_TokenAmount</span><span class="p">(</span><span class="nx">penalty</span><span class="p">)</span>
 
-	<span class="kd">var</span> <span class="nx">blockReward</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// TODO: finish
-</span><span class="c1"></span>
-	<span class="nx">blockReward</span> <span class="o">-=</span> <span class="nx">minerPenaltyTotal</span>
-	<span class="k">if</span> <span class="nx">blockReward</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>
-		<span class="nx">blockReward</span> <span class="p">=</span> <span class="mi">0</span>
+	<span class="nx">sysActor</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
+		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">,</span>
+		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">RewardActorAddr</span><span class="p">,</span>
+		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">sysactors</span><span class="p">.</span><span class="nx">Method_RewardActor_AwardBlockReward</span><span class="p">,</span>
+		<span class="nx">Params_</span><span class="p">:</span>     <span class="nx">params</span><span class="p">,</span>
+		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">sysActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
+		<span class="nx">Value_</span><span class="p">:</span>      <span class="mi">0</span><span class="p">,</span>
+		<span class="nx">GasPrice_</span><span class="p">:</span>   <span class="mi">0</span><span class="p">,</span>
+		<span class="nx">GasLimit_</span><span class="p">:</span>   <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_SentinelUnlimited</span><span class="p">(),</span>
 	<span class="p">}</span>
-
-	<span class="c1">// networkTreasuryActor := loadActor(NetworkTreasuryActorAddress)
-</span><span class="c1"></span>	<span class="c1">// minerActor := loadActorSubstate(minerActorAddr)
-</span><span class="c1"></span>	<span class="c1">// minerWorker := loadActor(minerActor.Info.Worker)
-</span><span class="c1"></span>	<span class="c1">//return &amp;UnsignedMessage_I{
-</span><span class="c1"></span>	<span class="c1">//	From_:       minerActor.Info.Worker,
-</span><span class="c1"></span>	<span class="c1">//	To_:         NetworkTreasuryActorAddress,
-</span><span class="c1"></span>	<span class="c1">//	Method_:     NetworkTreasury.PayBlockReward,
-</span><span class="c1"></span>	<span class="c1">//	Params_:     serialize([minerActorAddr]),
-</span><span class="c1"></span>	<span class="c1">//	CallSeqNum_: minerWorker.CallSeqNum,
-</span><span class="c1"></span>	<span class="c1">//	Value_:      0,
-</span><span class="c1"></span>	<span class="c1">//	GasPrice_:   0,
-</span><span class="c1"></span>	<span class="c1">//	GasLimit_:   payBlockRewardGasLimit,
-</span><span class="c1"></span>	<span class="c1">//}
-</span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO: implement when network treasury actor implemented&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">// Builds a message for submitting ElectionPost on behalf of a miner actor.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeElectionPoStMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">UInt64</span><span class="p">,</span> <span class="nx">postProof</span> <span class="nx">Bytes</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
-	<span class="c1">// minerActor := loadActorSubstate(minerActorAddr)
-</span><span class="c1"></span>	<span class="c1">// minerWorker := loadActor(minerActor.Info.Worker)
-</span><span class="c1"></span>	<span class="c1">//return &amp;UnsignedMessage_I{
-</span><span class="c1"></span>	<span class="c1">//	From_:       minerActor.Info.Worker,
-</span><span class="c1"></span>	<span class="c1">//	To_:         minerActorAddr,
-</span><span class="c1"></span>	<span class="c1">//	Method_:     StorageMinerActor.SubmitElectionPoSt,
-</span><span class="c1"></span>	<span class="c1">//	Params_:     serialize([PoStSubmission{postProof, epoch}]),
-</span><span class="c1"></span>	<span class="c1">//	CallSeqNum_: minerWorker.CallSeqNum,
-</span><span class="c1"></span>	<span class="c1">//	Value_:      0,
-</span><span class="c1"></span>	<span class="c1">//	GasPrice_:   0,
-</span><span class="c1"></span>	<span class="c1">//	GasLimit_:   sumbitElectionPostGasLimit,
-</span><span class="c1"></span>	<span class="c1">//}
-</span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO: implement when necessary dependencies are importable&#34;</span><span class="p">)</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeElectionPoStMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
+	<span class="c1">// TODO: determine parameters necessary for this message.
+</span><span class="c1"></span>	<span class="nx">params</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+	<span class="nx">sysActor</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
+		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">,</span>
+		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">minerActorAddr</span><span class="p">,</span>
+		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">storage_mining</span><span class="p">.</span><span class="nx">Method_StorageMinerActor_ProcessVerifiedElectionPoSt</span><span class="p">,</span>
+		<span class="nx">Params_</span><span class="p">:</span>     <span class="nx">params</span><span class="p">,</span>
+		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">sysActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
+		<span class="nx">Value_</span><span class="p">:</span>      <span class="mi">0</span><span class="p">,</span>
+		<span class="nx">GasPrice_</span><span class="p">:</span>   <span class="mi">0</span><span class="p">,</span>
+		<span class="nx">GasLimit_</span><span class="p">:</span>   <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_SentinelUnlimited</span><span class="p">(),</span>
+	<span class="p">}</span>
 <span class="p">}</span>
 
 <span class="c1">// Builds a message for invoking the cron actor tick.
 </span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeCronTickMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
-	<span class="c1">// minerActor := loadActorSubstate(minerActorAddr)
-</span><span class="c1"></span>	<span class="c1">// minerWorker := loadActor(minerActor.Info.Worker)
-</span><span class="c1"></span>	<span class="c1">//return &amp;UnsignedMessage_I{
-</span><span class="c1"></span>	<span class="c1">//	From_:       minerActor.Info.Worker,
-</span><span class="c1"></span>	<span class="c1">//	To_:         CronActorAddress,
-</span><span class="c1"></span>	<span class="c1">//	Method_:     CronActor.EpochTick,
-</span><span class="c1"></span>	<span class="c1">//	Params_:     nil,
-</span><span class="c1"></span>	<span class="c1">//	CallSeqNum_: minerWorker.CallSeqNum,
-</span><span class="c1"></span>	<span class="c1">//	Value_:      0,
-</span><span class="c1"></span>	<span class="c1">//	GasPrice_:   0,
-</span><span class="c1"></span>	<span class="c1">//	GasLimit_:   cronTickGasLimit,
-</span><span class="c1"></span>	<span class="c1">//}
-</span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO: implement when necessary dependencies are importable&#34;</span><span class="p">)</span>
+	<span class="nx">sysActor</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
+		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">,</span>
+		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">CronActorAddr</span><span class="p">,</span>
+		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">sysactors</span><span class="p">.</span><span class="nx">Method_CronActor_EpochTick</span><span class="p">,</span>
+		<span class="nx">Params_</span><span class="p">:</span>     <span class="kc">nil</span><span class="p">,</span>
+		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">sysActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
+		<span class="nx">Value_</span><span class="p">:</span>      <span class="mi">0</span><span class="p">,</span>
+		<span class="nx">GasPrice_</span><span class="p">:</span>   <span class="mi">0</span><span class="p">,</span>
+		<span class="nx">GasLimit_</span><span class="p">:</span>   <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_SentinelUnlimited</span><span class="p">(),</span>
+	<span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_msgCID</span><span class="p">(</span><span class="nx">msg</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">)</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">_encodeParams</span><span class="p">(</span><span class="nx">p</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{})</span> <span class="nx">Bytes</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -19424,8 +19397,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
     <span class="nf">_lockPledgeCollateral</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
     <span class="nf">_unlockPledgeCollateral</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
     <span class="nf">_getPledgeCollateralReq</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">newPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nf">_sampleMinersToSurprise</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">challengeCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
-    <span class="nf">_shouldChallenge</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">networkPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_selectMinersToSurprise</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">challengeCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
 
     <span class="nf">_safeGetPowerEntry</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerID</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">PowerTableEntry</span>
     <span class="nf">_ensurePledgeCollateralSatisfied</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="kt">bool</span>
@@ -19475,12 +19447,6 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 
     <span class="nf">Surprise</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">ticket</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
 
-    <span class="nf">shouldChallenge</span><span class="p">(</span>
-        <span class="nx">minerAddr</span>            <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">currEpoch</span>            <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">challengeFreePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="p">)</span> <span class="kt">bool</span>
-
     <span class="nf">PowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span>
 
     <span class="c1">// this should call ReportConsensusFault, numSectors should be all sectors
@@ -19517,9 +19483,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_power_consensus</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-	<span class="s">&#34;math/big&#34;</span>
-
-	<span class="nx">filproofs</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto/filproofs&#34;</span>
+	<span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 	<span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 	<span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
@@ -19623,14 +19587,23 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 	<span class="k">return</span> <span class="nx">pcRequired</span>
 <span class="p">}</span>
 
-<span class="c1">// _sampleMinersToSurprise implements the PoSt-Surprise sampling algorithm
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_sampleMinersToSurprise</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">challengeCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">)</span> <span class="p">[]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">addrInArray</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">list</span> <span class="p">[]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">b</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">list</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="nx">b</span> <span class="o">==</span> <span class="nx">a</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="kc">true</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="kc">false</span>
+<span class="p">}</span>
+
+<span class="c1">// _selectMinersToSurprise implements the PoSt-Surprise sampling algorithm
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_selectMinersToSurprise</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">challengeCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">)</span> <span class="p">[]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
 	<span class="c1">// this wont quite work -- a.PowerTable() is a HAMT by actor address, doesn&#39;t
 </span><span class="c1"></span>	<span class="c1">// support enumerating by int index. maybe we need that as an interface too,
 </span><span class="c1"></span>	<span class="c1">// or something similar to an iterator (or iterator over the keys)
 </span><span class="c1"></span>	<span class="c1">// or even a seeded random call directly in the HAMT: myhamt.GetRandomElement(seed []byte, idx int) using the ticket as a seed
 </span><span class="c1"></span>
-	<span class="nx">ptSize</span> <span class="o">:=</span> <span class="nx">big</span><span class="p">.</span><span class="nf">NewInt</span><span class="p">(</span><span class="nb">int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">())))</span>
+	<span class="nx">ptSize</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">())</span>
 	<span class="nx">allMiners</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()))</span>
 	<span class="nx">index</span> <span class="o">:=</span> <span class="mi">0</span>
 
@@ -19639,23 +19612,19 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 		<span class="nx">index</span><span class="o">++</span>
 	<span class="p">}</span>
 
-	<span class="nx">sampledMiners</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
+	<span class="nx">selectedMiners</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 	<span class="k">for</span> <span class="nx">chall</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">chall</span> <span class="p">&lt;</span> <span class="nx">challengeCount</span><span class="p">;</span> <span class="nx">chall</span><span class="o">++</span> <span class="p">{</span>
-		<span class="nx">minerIndex</span> <span class="o">:=</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">RandomInt</span><span class="p">(</span><span class="nx">randomness</span><span class="p">,</span> <span class="nx">chall</span><span class="p">,</span> <span class="nx">ptSize</span><span class="p">)</span>
-		<span class="nb">panic</span><span class="p">(</span><span class="nx">minerIndex</span><span class="p">)</span>
-		<span class="c1">// hack to turn bigint into int
-</span><span class="c1"></span>		<span class="nx">minerIndexInt</span> <span class="o">:=</span> <span class="mi">0</span>
-		<span class="nx">potentialChallengee</span> <span class="o">:=</span> <span class="nx">allMiners</span><span class="p">[</span><span class="nx">minerIndexInt</span><span class="p">]</span>
-		<span class="c1">// call to storage miner actor:
-</span><span class="c1"></span>		<span class="c1">// if should_challenge(lookupMinerActorStateByAddr(potentialChallengee).ShouldChallenge(rt, SURPRISE_NO_CHALLENGE_PERIOD)){
-</span><span class="c1"></span>		<span class="c1">// hack below TODO fix
-</span><span class="c1"></span>		<span class="k">if</span> <span class="kc">true</span> <span class="p">{</span>
-			<span class="nx">sampledMiners</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">sampledMiners</span><span class="p">,</span> <span class="nx">potentialChallengee</span><span class="p">)</span>
+		<span class="nx">minerIndex</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">RandomInt</span><span class="p">(</span><span class="nx">randomness</span><span class="p">,</span> <span class="nx">chall</span><span class="p">,</span> <span class="nx">ptSize</span><span class="p">)</span>
+		<span class="nx">potentialChallengee</span> <span class="o">:=</span> <span class="nx">allMiners</span><span class="p">[</span><span class="nx">minerIndex</span><span class="p">]</span>
+		<span class="c1">// skip dups
+</span><span class="c1"></span>		<span class="k">for</span> <span class="nf">addrInArray</span><span class="p">(</span><span class="nx">potentialChallengee</span><span class="p">,</span> <span class="nx">selectedMiners</span><span class="p">)</span> <span class="p">{</span>
+			<span class="nx">minerIndex</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">RandomInt</span><span class="p">(</span><span class="nx">randomness</span><span class="p">,</span> <span class="nx">chall</span><span class="p">,</span> <span class="nx">ptSize</span><span class="p">)</span>
+			<span class="nx">potentialChallengee</span> <span class="p">=</span> <span class="nx">allMiners</span><span class="p">[</span><span class="nx">minerIndex</span><span class="p">]</span>
 		<span class="p">}</span>
+		<span class="nx">selectedMiners</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">selectedMiners</span><span class="p">,</span> <span class="nx">potentialChallengee</span><span class="p">)</span>
 	<span class="p">}</span>
 
-	<span class="k">return</span> <span class="nx">sampledMiners</span>
+	<span class="k">return</span> <span class="nx">selectedMiners</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_safeGetPowerEntry</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerID</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">PowerTableEntry</span> <span class="p">{</span>
@@ -19985,23 +19954,25 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">Surprise</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="nx">PROVING_PERIOD</span> <span class="o">:=</span> <span class="mi">0</span> <span class="c1">// defined in storage_mining, TODO: move constants somewhere else
-</span><span class="c1"></span>	<span class="nx">SURPRISE_CHALLENGE_FREQUENCY</span> <span class="o">:=</span> <span class="mi">0</span>
-
+</span><span class="c1"></span>
 	<span class="c1">// sample the actor addresses
 </span><span class="c1"></span>	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
 	<span class="nx">randomness</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(),</span> <span class="mi">0</span><span class="p">)</span>
-	<span class="nx">challengeCount</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Ceil</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">SURPRISE_CHALLENGE_FREQUENCY</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()))</span> <span class="o">/</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">PROVING_PERIOD</span><span class="p">))</span>
-	<span class="nx">surprisedMiners</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_sampleMinersToSurprise</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nx">challengeCount</span><span class="p">),</span> <span class="nx">randomness</span><span class="p">)</span>
+	<span class="nx">challengeCount</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Ceil</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()))</span> <span class="o">/</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">PROVING_PERIOD</span><span class="p">))</span>
+	<span class="nx">surprisedMiners</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_selectMinersToSurprise</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nx">challengeCount</span><span class="p">),</span> <span class="nx">randomness</span><span class="p">)</span>
 
 	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
 	<span class="c1">// now send the messages
 </span><span class="c1"></span>	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">addr</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">surprisedMiners</span> <span class="p">{</span>
-		<span class="c1">// For each miner here check if they should be challenged and send message
-</span><span class="c1"></span>		<span class="c1">// rt.SendMessage(addr, ...)
-</span><span class="c1"></span>		<span class="nb">panic</span><span class="p">(</span><span class="nx">addr</span><span class="p">)</span>
-	<span class="p">}</span>
+		<span class="c1">// For each miner here send message
+</span><span class="c1"></span>		<span class="nb">panic</span><span class="p">(</span><span class="nx">addr</span><span class="p">)</span> <span class="c1">// hack coz of import cycle
+</span><span class="c1"></span>		<span class="c1">// rt.SendPropagatingErrors(&amp;vmr.InvocInput_I{
+</span><span class="c1"></span>		<span class="c1">// 	To_:     addr,
+</span><span class="c1"></span>		<span class="c1">// 	Method_: sms.Method_StorageMinerActor_NotifyOfSurprisePoStChallenge,
+</span><span class="c1"></span>		<span class="c1">// })
+</span><span class="c1"></span>	<span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
@@ -22099,8 +22070,7 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 </span><span class="c1"></span>    <span class="nf">ChallengeHasExpired</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">CanBeElected</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">ShouldChallenge</span><span class="p">(</span>
-        <span class="nx">currEpoch</span>            <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">challengeFreePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
 
@@ -22136,8 +22106,7 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
     <span class="nf">_canBeElected</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_challengeHasExpired</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_shouldChallenge</span><span class="p">(</span>
-        <span class="nx">currEpoch</span>            <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">challengeFreePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_verifySeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_assertSectorDidNotExist</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
@@ -22167,8 +22136,8 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
     <span class="nf">PreCommitSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">info</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorPreCommitInfo</span><span class="p">)</span>  <span class="c1">// TODO: check with Magik on sizes
 </span><span class="c1"></span>    <span class="nf">ProveCommitSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">info</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorProveCommitInfo</span><span class="p">)</span>
 
-    <span class="nf">SubmitVerifiedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span>
-    <span class="nf">SubmitVerifiedElectionPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span>
+    <span class="nf">ProcessVerifiedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
+    <span class="nf">ProcessVerifiedElectionPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 
     <span class="nf">_checkSurprisePoStSubmissionHappened</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 
@@ -22178,7 +22147,7 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
     <span class="nf">_isChallenged</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_isSealVerificationCorrect</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_onMissedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
-    <span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span>
+    <span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 
     <span class="nf">_slashCollateralForStorageFaults</span><span class="p">(</span>
         <span class="nx">rt</span>          <span class="nx">Runtime</span>
@@ -22288,8 +22257,8 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 	<span class="k">return</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ChallengeStatus</span><span class="p">().</span><span class="nf">ChallengeHasExpired</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">ShouldChallenge</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">challengeFreePeriod</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ChallengeStatus</span><span class="p">().</span><span class="nf">ShouldChallenge</span><span class="p">(</span><span class="nx">currEpoch</span><span class="p">,</span> <span class="nx">challengeFreePeriod</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_shouldChallenge</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ChallengeStatus</span><span class="p">().</span><span class="nf">ShouldChallenge</span><span class="p">(</span><span class="nx">currEpoch</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_processStagedCommittedSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
@@ -22410,7 +22379,7 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 
 <span class="c1">// failSector moves Sector from Active/Committed/Recovering into Failing State
 </span><span class="c1">// and increments FaultCount if asked to do so (DeclareFaults does not increment faultCount)
-</span><span class="c1">// move Sector from Failing to Cleared State if increment results in faultCount exceeds MaxFaultCount
+</span><span class="c1">// move Sector from Failing to Cleared State if increment results in faultCount exceeds MAX_CONSECUTIVE_FAULTS
 </span><span class="c1">// update SectorTable
 </span><span class="c1">// remove from ProvingSet
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_updateFailSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">,</span> <span class="nx">increment</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
@@ -22596,7 +22565,9 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 <span class="p">)</span>
 
 <span class="kd">const</span> <span class="p">(</span>
-	<span class="nx">Method_StorageMinerActor_SubmitSurprisePoSt</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodPlaceholder</span> <span class="o">+</span> <span class="kc">iota</span>
+	<span class="nx">Method_StorageMinerActor_ProcessVerifiedSurprisePoSt</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodPlaceholder</span> <span class="o">+</span> <span class="kc">iota</span>
+	<span class="nx">Method_StorageMinerActor_ProcessVerifiedElectionPoSt</span>
+	<span class="nx">Method_StorageMinerActor_NotifyOfSurprisePoStChallenge</span>
 <span class="p">)</span>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
@@ -22652,6 +22623,13 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 	<span class="k">return</span> <span class="nx">ret</span>
 <span class="p">}</span>
 
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_shouldChallenge</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_shouldChallenge</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">())</span>
+	<span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">ret</span>
+<span class="p">}</span>
+
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1">// Surprise PoSt
 </span><span class="c1">////////////////////////////////////////////////////////////////////////////////
@@ -22660,7 +22638,8 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">NotifyOfSurprisePoStChallenge</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">)</span>
 
-	<span class="k">if</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_isChallenged</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span> <span class="p">{</span>
+	<span class="c1">// check that this is a valid challenge
+</span><span class="c1"></span>	<span class="k">if</span> <span class="p">!</span><span class="nx">a</span><span class="p">.</span><span class="nf">_shouldChallenge</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SuccessReturn</span><span class="p">()</span> <span class="c1">// silent return, dont re-challenge
 </span><span class="c1"></span>	<span class="p">}</span>
 
@@ -22729,7 +22708,7 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 
 	<span class="c1">// Note: NewDetectedFaults is now the sum of all
 </span><span class="c1"></span>	<span class="c1">// previously active, committed, and recovering sectors minus expired ones
-</span><span class="c1"></span>	<span class="c1">// and any previously Failing sectors that did not exceed MaxFaultCount
+</span><span class="c1"></span>	<span class="c1">// and any previously Failing sectors that did not exceed MAX_CONSECUTIVE_FAULTS
 </span><span class="c1"></span>	<span class="c1">// Note: previously declared faults is now treated as part of detected faults
 </span><span class="c1"></span>	<span class="nx">a</span><span class="p">.</span><span class="nf">_slashCollateralForStorageFaults</span><span class="p">(</span>
 		<span class="nx">rt</span><span class="p">,</span>
@@ -22837,11 +22816,9 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 </span><span class="c1">//       - Failing / Recovering / Active / Committed -&gt; Cleared
 </span><span class="c1">//     - Remove SectorNumber from Sectors, ProvingSet
 </span><span class="c1">// - Update ChallengeEndEpoch
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-	<span class="c1">// TODO add info on chain
-</span><span class="c1"></span>
 	<span class="c1">// The proof is verified, process ProvingSet.SectorsOn():
 </span><span class="c1"></span>	<span class="c1">// ProvingSet.SectorsOn() contains SectorCommitted, SectorActive, SectorRecovering
 </span><span class="c1"></span>	<span class="c1">// ProvingSet itself does not store states, states are all stored in Sectors.State
@@ -22907,31 +22884,30 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SuccessReturn</span><span class="p">()</span>
-
 <span class="p">}</span>
 
 <span class="c1">// called by verifier to update miner state on successful surprise post
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">SubmitVerifiedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+</span><span class="c1">// after it has been verified in the storage_mining_subsystem
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">ProcessVerifiedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
 	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// TODO: validate caller
 </span><span class="c1"></span>
 	<span class="c1">// Ensure pledge collateral satisfied
-</span><span class="c1"></span>	<span class="c1">// otherwise, abort SubmitVerifiedSurprisePoSt
+</span><span class="c1"></span>	<span class="c1">// otherwise, abort ProcessVerifiedSurprisePoSt
 </span><span class="c1"></span>	<span class="nx">a</span><span class="p">.</span><span class="nf">_ensurePledgeCollateralSatisfied</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-	<span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">onChainInfo</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
 <span class="p">}</span>
 
 <span class="c1">// Called by StoragePowerConsensus subsystem after verifying the Election proof
 </span><span class="c1">// and verifying the PoSt proof in the block header.
-</span><span class="c1">// Assume ElectionPoSt has already been successfully verified when the function gets called.
+</span><span class="c1">// Assume ElectionPoSt has already been successfully verified (both proof and partial ticket
+</span><span class="c1">// value) when the function gets called.
 </span><span class="c1">// Likewise assume that the rewards have already been granted to the storage miner actor. This only handles sector management.
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">SubmitVerifiedElectionPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
-
-	<span class="c1">// TODO: validate caller
-</span><span class="c1"></span>	<span class="c1">// the caller MUST be the miner who won the block (who won the block should be callable as a a VM runtime call)
-</span><span class="c1"></span>	<span class="c1">// we also need to enforce that this call happens only once per block, OR make it not callable by special privileged messages
-</span><span class="c1"></span>	<span class="nf">TODO</span><span class="p">()</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">ProcessVerifiedElectionPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="c1">// The receiver must be the miner who produced the block for which this message is created.
+</span><span class="c1"></span>	<span class="nf">Assert</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">ToplevelBlockWinner</span><span class="p">()</span> <span class="o">==</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrReceiver</span><span class="p">())</span>
 
 	<span class="c1">// we do not need to verify post submission here, as this should have already been done
 </span><span class="c1"></span>	<span class="c1">// outside of the VM, in StoragePowerConsensus Subsystem. Doing so again would waste
@@ -22940,8 +22916,7 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 </span><span class="c1"></span>	<span class="c1">// notneeded := a._verifyPoStSubmission(rt)
 </span><span class="c1"></span>
 	<span class="c1">// the following will update last challenge response time
-</span><span class="c1"></span>	<span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">onChainInfo</span><span class="p">)</span>
-
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
@@ -25696,7 +25671,7 @@ G and T will be selected using these.</p>
 <ul>
 <li>7. Declared faults are penalized to a smaller degree than detected faults by <code>CronActor</code>. Miners declare failing sectors by invoking <code>StorageMinerActor.DeclareFaults</code> and X of the <code>StorageDealCollateral</code> will be slashed and power corresponding to these sectors will be tempororily lost. However, miners can only declare faults when they are not in <code>Challenged</code> status.</li>
 <li>8. Miners can then recover faults by invoking <code>StorageMinerActor.RecoverFaults</code> and have sufficient <code>StorageDealCollateral</code> in their available balances. FaultySectors are recommitted and power is only restored at the next PoSt submission. Miners will not be able to invoke <code>RecoverFaults</code> when they are in the <code>Challenged</code> status.</li>
-<li>9. Sectors that are failing for <code>storagemining.MaxFaults</code> consecutive ChainEpochs will be cleared and result in <code>StoragePowerActor.SlashPledgeCollateral</code>.
+<li>9. Sectors that are failing for <code>storagemining.MAX_CONSECUTIVE_FAULTS</code> consecutive ChainEpochs will be cleared and result in <code>StoragePowerActor.SlashPledgeCollateral</code>.
 
 <ul>
 <li>TODO: set <code>X</code> parameter</li>
@@ -25711,7 +25686,7 @@ G and T will be selected using these.</p>
 
 <ul>
 <li>10. <code>StorageMinerActor</code> first verifies the PoSt Submission. If PoSt is done correctly, all <code>Committed</code> and <code>Recovering</code> sectors will be marked as <code>Active</code> and power is credited to these sectors. Payments will be processed for deals that are <code>Active</code> by invoking <code>StorageMarketActor.ProcessStorageDealsPayment</code>.</li>
-<li>11. For all sectors that are off from the <code>ProvingSet</code>, these sectors are failing. Increment <code>FaultCount</code> on these sectors and if any of these sectors are failing for <code>MaxFaultCount</code> consecutive <code>ChainEpoch</code>, these sectors are terminated and cleared from the network.</li>
+<li>11. For all sectors that are off from the <code>ProvingSet</code>, these sectors are failing. Increment <code>FaultCount</code> on these sectors and if any of these sectors are failing for <code>MAX_CONSECUTIVE_FAULTS</code> consecutive <code>ChainEpoch</code>, these sectors are terminated and cleared from the network.</li>
 <li>13. Process sector expiration. Sectors expire when all deals in that sector have expired. Expired sectors will be cleared and <code>StorageDealCollateral</code> for both miners and users returned depending on the state that the sectors are in.</li>
 <li>14. Submit <code>FaultReport</code> and <code>PowerReport</code> to <code>StoragePowerActor</code> for slashing and power accounting.</li>
 <li>15. Check and ensure that Pledge Collateral is statisfied. TODO: some details are missing here, also related to ProvingPeriod depending on PoSt construction.</li>
@@ -25730,7 +25705,7 @@ G and T will be selected using these.</p>
 <li>If no PoSt is submitted by the end of the <code>ProvingPeriod</code>, <code>onMissedSurprisePoSt</code> detects the missing PoSt, and sets all sectors to <code>Failing</code>.</li>
 <li>TODO: reword in terms of a conditional in the mining cycle</li>
 <li>When there are sector faults are detected, some of <code>StorageDealCollateral</code> and <code>PledgeCollateral</code> are slashed, and power is lost.</li>
-<li>If the faults persist for <code>storagemining.MaxFaultCount</code> then sectors are removed/cleared from <code>StorageMinerActor</code>.</li>
+<li>If the faults persist for <code>storagemining.MAX_CONSECUTIVE_FAULTS</code> then sectors are removed/cleared from <code>StorageMinerActor</code>.</li>
 </ul></li>
 </ul>
 
@@ -25870,6 +25845,8 @@ G and T will be selected using these.</p>
 </div>
 
 
+<div id="systems__filecoin_markets__deal__deal_states"></div>
+
 <h4 id="deal-states">Deal States</h4>
 
 <p>All on-chain economic activities in Filecoin start with the deal. This section aims to explain different states of a deal and their relationship with other concepts in the protocol such as Power, Payment, and Collaterals.</p>
@@ -25896,7 +25873,7 @@ G and T will be selected using these.</p>
 <ul>
 <li>The deal itself has expired. This is triggered by <code>StorageMinerActorCode._submitPowerReport</code> which is called whenever a PoSt is submitted. Power associated with the deal will be lost, collaterals returned, and all remaining storage fees unlocked (allowing miners to call <code>WithdrawBalance</code> successfully).</li>
 <li>The sector containing the deal has expired. This is triggered by <code>StorageMinerActorCode._submitPowerReport</code> which is called whenver a PoSt is submitted. Power associated with the deals in the sector will be lost, collaterals returned, and all remaining storage fees unlocked.</li>
-<li>The sector containing the active deal has been terminated. This is triggered by <code>StorageMinerActor._submitFaultReport</code> for <code>TerminatedFaults</code>. No storage deal collateral will be slashed on fault declaration or detection, only on termination. A terminated fault is triggered when a sector is in the <code>Failing</code> state for <code>MaxFaultCount</code> consecutive proving periods.</li>
+<li>The sector containing the active deal has been terminated. This is triggered by <code>StorageMinerActor._submitFaultReport</code> for <code>TerminatedFaults</code>. No storage deal collateral will be slashed on fault declaration or detection, only on termination. A terminated fault is triggered when a sector is in the <code>Failing</code> state for <code>MAX_CONSECUTIVE_FAULTS</code> consecutive proving periods.</li>
 </ul></li>
 </ul>
 
@@ -25905,7 +25882,7 @@ G and T will be selected using these.</p>
 <ul>
 <li><code>Power</code>: only payload data in an Active storage deal counts towards power.</li>
 <li><code>Deal Payment</code>: happens on <code>_onSuccessfulPoSt</code> and at deal/sector expiration through <code>_submitPowerReport</code>, paying out <code>StoragePricePerEpoch</code> for each epoch since the last PoSt.</li>
-<li><code>Deal Collateral</code>: no storage deal collateral will be slashed for <code>NewDeclaredFaults</code> and <code>NewDetectedFaults</code> but instead some pledge collateral will be slashed given these faults&rsquo; impact on consensus power. In the event of <code>NewTerminatedFaults</code>, all storage deal collateral and some pledge collateral will be slashed. Provider and client storage deal collaterals will be returned when a deal or a sector has expired. If a sector recovers from <code>Failing</code> within the <code>MaxFaultCount</code> threshold, deals in that sector are still considered active. However, miners may need to top up pledge collateral when they try to <code>RecoverFaults</code> given the earlier slashing.</li>
+<li><code>Deal Collateral</code>: no storage deal collateral will be slashed for <code>NewDeclaredFaults</code> and <code>NewDetectedFaults</code> but instead some pledge collateral will be slashed given these faults&rsquo; impact on consensus power. In the event of <code>NewTerminatedFaults</code>, all storage deal collateral and some pledge collateral will be slashed. Provider and client storage deal collaterals will be returned when a deal or a sector has expired. If a sector recovers from <code>Failing</code> within the <code>MAX_CONSECUTIVE_FAULTS</code> threshold, deals in that sector are still considered active. However, miners may need to top up pledge collateral when they try to <code>RecoverFaults</code> given the earlier slashing.</li>
 </ul>
 
 
@@ -32635,7 +32612,11 @@ To enable this, the prover must store <code>CommC</code> and use it to prove tha
 
 <p>This document describes Election-PoSt, the Proof-of-Spacetime used in Filecoin.</p>
 
-<h4 id="at-a-high-level">At a High Level</h4>
+<p>At a high-level it marries <code>ElectionPoSt</code> with a <code>SurprisePoSt</code> fallback:
+- By coupling leader election and PoSt, <code>ElectionPoSt</code> ensures that miners must do the work to prove their sectors at every round in order to earn block rewards.
+- Small miners may not win on a regular basis however, <code>SurprisePoSt</code> thus comes in as a lower-bound to how often miners must PoSt and helps ensure the Power Table does not grow stale for its long-tail of smaller miners.</p>
+
+<h4 id="overview">Overview</h4>
 
 <p>Election PoSt couples the PoSt process with block production, meaning that in order to produce a block, the miner must produce a valid PoSt proof (snark output). Specifically, a subset of non-faulted sectors the miner is storing (i.e. eligible sectors) allows them to attempt a leader election using a PartialTicket any of which could yield a valid ChallengeTicket for leader election. The probability of scratching a winning ChallengeTicket is dependent on sector size and total storage. Miners are rewarded in proportion to the quantity of winning ChallengeTickets they generate in a given epoch, thereby incentivizing a miner to check as much of their storage as allowed in order to express their full power in a leader election. The number of election proofs a miner can generate in a given epoch will determine the block reward it earns.</p>
 
@@ -32643,7 +32624,7 @@ To enable this, the prover must store <code>CommC</code> and use it to prove tha
 
 <p>This does mean that, in a given round, a lucky miner may succeed in generating a block by proving only a single sector, but again on expectation, a miner will have to prove their sectors at every single round in order for their full power to contribute to block generation. In the event one of the miner’s sectors cannot be proven (i.e. the miner does not have access to the nodes from that sector), no tickets will be returned. In order to prevent this, a miner can declare faults on their faulty sectors to avoid having to include them in the eligible sector set. Their power will be reduced accordingly.</p>
 
-<p>The Election-PoSt construction includes a Surprise PoSt cleanup which will automatically challenge leaders who have not been elected in some time so they can prove their storage within a given proving period. Any miner who does not prove their power either by ElectionPoSt or SurprisePoSt within a proving period will be penalized accordingly.</p>
+<p>The Election-PoSt construction includes a Surprise PoSt cleanup which will randomly challenge leaders who have not been elected in some time so they can prove their storage. Accordingly, miners will be challenged once per proving period on expectation. Any miner who fails to respond to the Challenge with a SurprisePoSt will see their power curbed across all their sectors (this is called a <code>Detected Fault</code>). If they are unable to prove their power within another two SurprisePoSts, their power will be terminated entirely.</p>
 
 <h5 id="electionpost">ElectionPoSt</h5>
 
@@ -32651,11 +32632,12 @@ To enable this, the prover must store <code>CommC</code> and use it to prove tha
 
 <h5 id="surprisepost-cleanup">SurprisePoSt Cleanup</h5>
 
-<p>The chain keeps track of the last time that a miner received and submitted a Challenge (Election or Surprise). It randomly challenges a miner to submit a surprisePoSt once per <code>ProvingPeriod</code> in the latter half of their <code>ProvingPeriod</code>. For every miner challenged, a <code>NotifyOfPoStSurpriseChallenge</code> is issued and sent as an on-chain message to surprised <code>StorageMinerActor</code>. However, if the <code>StorageMinerActor</code> is already proving a SurprisePoStChallenge (<code>IsChallenged</code> is True) or the <code>StorageMinerActor</code> has received a challenge (by Election or Surprise) within the <code>MIN_CHALLENGE_PERIOD</code> (<code>ShouldChallenge</code> is False), then the PoSt surprise notification will be ignored and return success.</p>
+<p>In the absence of a posted <code>ElectionPoSt</code>, the chain randomly challenges a miner to submit a <code>SurprisePoSt</code> once per <code>ProvingPeriod</code> on expectation to ensure their storage is still accounted for.</p>
 
-<p>For more on these components, see <a href="./#algorithms__post__election_post">Election PoSt</a>. At a high-level though both are needed for different reasons:
-- By coupling leader election and PoSt, <code>ElectionPoSt</code> ensures that miners must do the work to prove their sectors at every round in order to earn block rewards.
-- Small miners may not win on a regular basis however, <code>SurprisePoSt</code> thus comes in as a lower-bound to how often miners must PoSt and helps ensure the Power Table does not grow stale for its long-tail of smaller miners.</p>
+<p>For every miner challenged, a <code>NotifyOfPoStSurpriseChallenge</code> is issued and sent as an on-chain message to the chosen <code>StorageMinerActor</code>.</p>
+
+<p>The ensuing <code>SurprisePoSt</code> does not entitle a miner to generate a blocks and gains them no reward but allows them to maintain power in the power table.
+<code>PoStSurprise</code> will frequently be used by small miners who do not win blocks, and by miners as they are onboarding power to the network (since they will not be able to win ElectionPoSts to start).</p>
 
 <h4 id="in-detail">In Detail</h4>
 
@@ -32670,7 +32652,7 @@ To enable this, the prover must store <code>CommC</code> and use it to prove tha
 
 <p>As stated above, a miner is incentivized to repeat this process at every block time in order to check whether they were elected leaders (see &lt;<sref expected_consensus>&gt;). The rationality assumption made by ElectionPoSt is thus that storing files continuously and earning block rewards accordingly will be more profitable to miners than regenerating data at various epochs to sporadically participate in leader election.</p>
 
-<p>At every epoch, each miner will challenge a portion of sectors at random proportional to sectorsSampled, with each sector being issued K PoSt challenges (coverage may not be perfect).</p>
+<p>At every epoch, each miner will challenge a portion of sectors at random proportional to ePostSampleRate, with each sector being issued K PoSt challenges (coverage may not be perfect).</p>
 
 <p>By proving access to the challenged range of nodes (i.e. merkle tree leaf from the committed sector) in the sector, the miner can generate a set of valid ChallengeTickets in order to check them as part of leader election in EC (in order to find the winning tickets). The winning tickets will be stored on the block and used to generate a PoSt (using a SNARK). A block header will thus contain a number of “winning” PoStCandidates (each containing a partialTicket, SectorID and other elements, used to verify the leader election) and a PostProof generated from the ChallengeTickets.</p>
 
@@ -32691,10 +32673,10 @@ The miner draws a randomness ticket from the randomness chain from a given epoch
 
 <ol>
 <li><p><strong>(select eligible sectors)</strong>
-The miner calls <code>GenerateCandidates</code> from proofs with their non-faulted (declared or detected) sectors, meaning those in their <code>proving set</code> (from the <code>StorageMinerActor</code>) along with a chosen number of <code>PartialTickets</code> (<code>sectorsSampled*eligibleSectors</code>).</p>
+The miner calls <code>GenerateCandidates</code> from proofs with their non-faulted (declared or detected) sectors, meaning those in their <code>proving set</code> (from the <code>StorageMinerActor</code>) along with a chosen number of <code>PartialTickets</code> (<code>ePostSampleRate*eligibleSectors</code>).</p>
 
 <ul>
-<li>Select a subset of sectors of size <code>sectorsSampled*minerSectors</code> [details omitted]</li>
+<li>Select a subset of sectors of size <code>ePostSampleRate*minerSectors</code> [details omitted]</li>
 </ul>
 
 <p>Note also that even with <code>challengeTicketNum == numSectors</code>, this process may not sample all of a miner’s sectors in any given epoch, due to collisions in the pseudorandom sector ID selection process.</p></li>
@@ -32719,8 +32701,8 @@ Given a returned PartialTicket, miner checks it is a winning ticket. Specificall
 <li>Check that <code>ChallengeTicket &lt; Target</code>
 
 <ul>
-<li><code>Target = activePowerInSector/networkPower * 1/sectorsSampled * EC.ExpectedLeaders</code>.</li>
-<li>Put another way check <code>challengeTicket_num * networkPower * sectorsSampled_num &lt; activePowerInSector * sectorsSampled_denom * EC.ExpectedLeaders * challengeTicket_denom</code></li>
+<li><code>Target = activePowerInSector/networkPower * 1/ePostSampleRate * EC.ExpectedLeaders</code>.</li>
+<li>Put another way check <code>challengeTicket_num * networkPower * ePostSampleRate_num &lt; activePowerInSector * ePostSampleRate_denom * EC.ExpectedLeaders * challengeTicket_denom</code></li>
 </ul></li>
 <li>If yes, it is a winning ticket and can be used to submit a block</li>
 <li>In either case, try again with next sector to increase rewards</li>
@@ -32742,7 +32724,7 @@ Given a returned PartialTicket, miner checks it is a winning ticket. Specificall
 <li><code>Randomness_lookback</code> &ndash; how far back to draw randomness from the randomness ticket chain - it will be as large as allowed by PoSt security, likely 1 or 2 epochs</li>
 <li><code>K (e.g. 20-100s)</code> - number of  challenges per sector &ndash; must be large enough such that the PoSpace is secure.</li>
 <li><code>ChallengeRangeSize</code> - challenge read size (between 32B and 256KB)  &ndash; based on security analysis.</li>
-<li><code>sectorsSampled</code> - sector sampling fraction (e.g. 1, .10, .04) &ndash; 1 to start&ndash; It should be large enough to make it irrational to fully regenerate sectors. We may choose some subset if cost of verifying all is deleterious to disk</li>
+<li><code>ePostSampleRate</code> - sector sampling fraction (e.g. 1, .10, .04) &ndash; 1 to start&ndash; It should be large enough to make it irrational to fully regenerate sectors. We may choose some subset if cost of verifying all is deleterious to disk</li>
 <li><code>networkPower</code> - filecoin network’s power - read from the power table, expressed in number of bytes</li>
 </ul>
 
@@ -32791,60 +32773,68 @@ Given a returned PartialTicket, miner checks it is a winning ticket. Specificall
 
 <h5 id="surprise-post-cleanup">Surprise PoSt cleanup</h5>
 
-<p>But while this means a miner will never win blocks from faked power, they won’t be penalized either when storage is lost. How do we ensure that the Power Table is accurate? Likewise, how do we onboard new power since it will not win a block unless it has at least X TB or Y % of the network.</p>
+<p>But while this means a miner will never win blocks from unproven power, they won’t be penalized either when storage is lost. How do we ensure that the Power Table is accurate? Likewise, how do we onboard new power since it will not win a block unless it has at least X TB or Y % of the network (see <a href="./#systems__filecoin_blockchain__storage_power_consensus__min_miner_size">Minimum Miner Size</a>). Enter SurprisePoSt.</p>
 
-<p>This is why we need PoSt surprise:</p>
+<h5 id="postsurprise-challenge">PoStSurprise Challenge</h5>
 
-<p>Atop ElectionPost, a miner will be surprised with a PoSt challenge in every ProvingPeriod (~2 days). The ProvingPeriod resets whenever the miner publishes a PoSt (election or surprise).
-This SurprisePoSt will use a challenge drawn from the chain at the start of this recovery period. Its PoStProof must be a proof over the PartialTickets for all sectors a miner is storing (i.e. a miner must submit a PoStProof made up of all partialTickets for all sectors in the <code>ProvingSet</code>, not just the winning ones on sampled sectors). For this reason a miner is incentivized to declare faults in order to successfully generate this PoStProof.</p>
+<p>In the absence of an ElectionPost, a miner will be surprised with a PoSt challenge every ProvingPeriod (~2 days) on expectation. This SurprisePoSt will use a challenge drawn from the chain.</p>
 
-<p>Upon receiving a PoSt surprise challenge, a miner has a given ChallengePeriod (~2 hours) past which they, they will lose all their power and a portion of their pledge collateral if they have not submitted a PoSt on chain. This is considered a <code>DetectedFault</code> and all sectors in the <code>ProvingSet</code> will be marked as <code>Failing</code>. No deal collateral will be slashed if miners can recover within the next three proving periods. Note that the exact amount of slashed pledge collateral and pledge collateral function itself are subject to change.</p>
+<p>Specifically, miners are selected at random to be challenged at every clockTick by the storage power actor (with <code>_selectMinersToSurprise</code>), with <code>len(PowerTable)/ProvingPeriod</code> miners selected per round (for one challenge per miner per proving period on expectation).
+If the chosen <code>StorageMinerActor</code> is already challenged (<code>IsChallenged</code> is True) or they&rsquo;ve submitted a post (election or surprise) in the last <code>SURPRISE_NO_CHALLENGE_PERIOD</code> epochs, they will not be challenged again.
+That is if <code>ShouldChallenge</code> is False, then the PoSt surprise notification will be ignored and return success.</p>
 
-<p>Thereafter, the miner will have three more ProvingPeriods (specifically three challenges, so three ProvingPeriods on expectation) to recover their power by submitting a SurprisePoSt. If the miner does not do so, their sectors are permanently terminated and their storage deal collateral slashed (see the StorageMinerActor in the spec).</p>
+<p>Sampling which miners to surprise works as follows:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">// A number of challenged miners is chosen at every round
+challNumber = NumMiners / ProvingPeriod
 
-<p>Faults are largely independent from this process. The only rules are:</p>
+// Using the ticket to seed randomness, a miner is picked from the power table for each challenge
+sampledMiners = []
+while len(sampledMiners) &lt; challNumber:
+    ranHash = H(ticket, i)
+    ranIndex = HashToInt(ranHash) mod len(PowerTable)
+    chosenMiner = PowerTable[ranIndex].address
+    // a miner should only be challenged if
+    // - they have not submitted a post in SURPRISE_NO_CHALLENGE_PERIOD epochs 
+    // - they are not currently challenged 
+    // - they are not already chosen in this epoch
+    if !sampledMiners.contains(chosenMiner) &amp;&amp;chosenMiner.shouldChallenge():
+        sampledMiners.append(chosenMiner)</code></pre></div>
+<p>The surprise process described above is triggered by the cron actor in the <code>Storage Power Actor</code>. A miner should only be chosen if:</p>
+
+<ul>
+<li>they are not currently being challenged,</li>
+<li>they are not already selected for a challenge this round,</li>
+<li>their last PoSt (election or surprise) is older than <code>SURPRISE_NO_CHALLENGE_PERIOD</code> epochs.</li>
+</ul>
+
+<h5 id="postsurprise-response">PoStSurprise Response</h5>
+
+<p>Upon receiving a PoSt surprise challenge, a miner has a given <code>CHALLENGE_DURATION</code> (~2 hours) to respond.</p>
+
+<p>The miner&rsquo;s response must be a PoSt proof over the PartialTickets for a  sectors that miner is storing (i.e. unlike with ElectionPoSt a miner must submit a PoStProof made up of all <code>PartialTickets</code> for a portion of their sectors in the <code>ProvingSet</code> proportional with <code>SPoStSampleRate</code> (not just the winning ones on sampled sectors).</p>
+
+<p>If the miner responds to the challenge with a SurprisePoSt, they will keep/recover their power.</p>
+
+<h5 id="faults">Faults</h5>
+
+<h5 id="fault-detection">Fault Detection</h5>
+
+<p>Fault detection happens over the course of the life time of a sector. When the sector is unavailable for some reason, the miner must submit the known <code>faults</code> in order for that sector not to be tested before the PoSt challenge begins.
+Only faults which have been reported at challenge time, will be accounted for. If any other faults have occured the miner will likely fail to submit a valid PoSt for this proving period. Moreover:</p>
 
 <ul>
 <li>Faults cannot be declared during a ChallengePeriod</li>
 <li>Faults cannot be recovered during a ChallengePeriod</li>
 </ul>
 
-<p>Note that this PoStSurprise will frequently be used by small miners who do not win blocks, and by miners as they are onboarding power to the network, since they will not be able to win any blocks (they have no power) and hence gain power through ElectionPoSt.</p>
+<p>Accordingly, if the miner does not respond to the challenge, they will lose all their Power and a portion of their pledge collateral. This is considered a <code>DetectedFault</code> and all sectors in the <code>ProvingSet</code> will be marked as <code>Failing</code>. The miner will get challenged again in the next proving period. If the miner does not provide a valid response to <code>MAX_CONSECUTIVE_FAULTS</code> challenges in a row, their pledge collateral is slashed and their sectors are permanently terminated. Their storage deal collateral is slashed accordingly (see <a href="./#systems__filecoin_markets__deal__deal_states">Deal States</a> for more).</p>
 
-<p>Miners earn no reward from submitting PoStSurprise messages. This mechanism does forces a miner to announce their faults and clean up the Power Table accordingly.</p>
-
-<p>Surprise PoSt works as follows:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">// A number of challenged miners is chosen at every round
-challNumber = SURPRISE_CHALLENGE_FREQUENCY*NumMiners / ProvingPeriod
-
-// Using the ticket to seed randomness, a miner is picked from the power table for each challenge
-sampledMiners = []
-For i=0; i &lt; challNumber; i++:
-    ranHash = H(ticket, i)
-    ranIndex = HashToInt(ranHash) mod len(PowerTable)
-    chosenMiner = PowerTable[ranIndex].address
-    // a miner should only be challenged if they have not submitted a post in ProvingPeriod/SURPRISE_CHALLENGE_FREQUENCY epochs and are not currently challenged
-    if chosenMiner.shouldChallenge(SURPRISE_NO_CHALLENGE_PERIOD):
-        sampledMiners.append(chosenMiner)</code></pre></div>
-<p>The surprise process described above is triggered by the cron actor in the storage_power_actor (through which the power table is searched for challengeable miners). A miner should be getting randomly sampled SURPRISE_CHALLENGE_FREQUENCY times per proving period on expectation, but would only be sampled if they are past the SURPRISE_NO_CHALLENGE_PERIOD (which should be PP/SPF so they are challenged in that period) in their proving period leading to one challenge per proving period on expectation.</p>
-
-<p>This is done as follows: if there are M miners in the power table and a Proving Period of length P, SPF*M/P challenges will be issued at each epoch. Miners are sampled using a randomness ticket from the chain and will only be challenged if they have not submitted a PoSt in at least PP/SPF epochs and are not currently being challenged (this is checked using the storage_miner_actor).</p>
-
-<p>An alternative approach would be to assign a probability of being challenged to each miner which grows at every epoch to be 1 PP epochs from the last challenge (but this would require more computation since every miner would have to be checked at every epoch).</p>
-
-<h4 id="faults">Faults</h4>
-
-<h5 id="fault-detection">Fault Detection</h5>
-
-<p>Fault detection happens over the course of the life time of a sector. When the sector is unavailable for some reason, the miner must submit the known <code>faults</code> in order for that sector not to be tested before the PoSt challenge begins.
-Only faults which have been reported at challenge time, will be accounted for. If any other faults have occured the miner will likely fail to submit a valid PoSt for this proving period.</p>
-
-<p>Any faulted sectors will not count toward miner power in <a href="./#algorithms__expected_consensus___index">Expected Consensus</a>.</p>
+<p>Any faulted sectors will not count toward miner power in <a href="./#algorithms__expected_consensus___index">Expected Consensus</a>. Through these <code>Detected</code> and <code>Declared</code> faults, the power table should closely track power in the network.</p>
 
 <h5 id="fault-recovery">Fault Recovery</h5>
 
 <p>In order to recover from faults (and make the faulted sectors active once more), a miner must mark the faults as <code>recovering</code> and then submit a PoSt proving the recovering sectors.
-When such a PoSt proof is successfully submitted all faults are reset and assumed to be recovered. A miner must either resolve a failing sector and accept challenges against it in the next proof submission or fail to recover the failing sector within a proving period and the FaultCount on the sector will be incremented. Sectors that have been in the Failing state for more than <code>MaxFaultCount</code> consecutive epochs will be terminated and result in a <code>TerminatedFault</code>.</p>
+When such a PoSt proof is successfully submitted all faults are reset and assumed to be recovered. A miner must either resolve a failing sector and accept challenges against it in the next proof submission or fail to recover the failing sector within a proving period and the FaultCount on the sector will be incremented. Sectors that have been in the Failing state after <code>MAX_CONSECUTIVE_FAULTS</code> challenges will be terminated and result in a <code>TerminatedFault</code>.</p>
 
 <div class="notices note" ><strong>Note</strong>: It is important that all faults are known (i.e submitted to the chain) prior to challenge generation, because otherwise it would be possible to know the challenge set, before the actual challenge time. This would allow a miner to report only faults on challenged sectors, with a gurantee that other faulty sectors would not be detected.</div>
 
@@ -32852,11 +32842,7 @@ When such a PoSt proof is successfully submitted all faults are reset and assume
 
 <p>Each reported fault carries a penality with it.</p>
 
-<div class="notices todo" ><strong>TODO</strong>: Define the exact penality structure for this.</div>
-
-<p>Note that surprise PoSt will frequently be used by small miners who do not win blocks, and by miners as they are onboarding power to the network, since they will not be able to win any blocks (they have no power) and hence gain power through ElectionPoSt.</p>
-
-<p>While it resets a miner’s ElectionWindow, miners earn no reward from submitting SurprisePoSt messages. This mechanism does force a miner to announce their faults and clean up the Power Table accordingly.</p>
+<div class="notices todo" ><strong>TODO</strong>: Define the exact penalty structure for this.</div>
 
 <h4 id="miner-onboarding">Miner Onboarding</h4>
 
@@ -34114,9 +34100,9 @@ randomness = SHA256(buffer)</code></pre></div>
 
 <span class="kd">func</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">,</span> <span class="nx">s</span> <span class="nx">Serialization</span><span class="p">,</span> <span class="nx">index</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">Randomness</span> <span class="p">{</span>
 	<span class="nx">buffer</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">{}</span>
-	<span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">IntToBytesLittleEndian</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">tag</span><span class="p">))</span><span class="o">...</span><span class="p">)</span>
-	<span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">IntToBytesLittleEndian</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">index</span><span class="p">))</span><span class="o">...</span><span class="p">)</span>
-	<span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nf">Bytes</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span><span class="o">...</span><span class="p">)</span>
+	<span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nf">LittleEndianBytesFromInt</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">tag</span><span class="p">))</span><span class="o">...</span><span class="p">)</span>
+	<span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nf">LittleEndianBytesFromInt</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">index</span><span class="p">))</span><span class="o">...</span><span class="p">)</span>
+	<span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span><span class="o">...</span><span class="p">)</span>
 	<span class="nx">ret</span> <span class="o">:=</span> <span class="nf">SHA256</span><span class="p">(</span><span class="nx">buffer</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nf">Randomness</span><span class="p">(</span><span class="nx">ret</span><span class="p">)</span>
 <span class="p">}</span>
@@ -35417,15 +35403,20 @@ Given an array of size <code>N</code> and a fixed width of <code>W</code>.
 
 <span class="kd">type</span> <span class="nx">Int</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Int</span>
 
-<span class="c1">// Addresses for singleton system actors
+<span class="c1">// Addresses for singleton system actors.
 </span><span class="c1"></span><span class="kd">var</span> <span class="p">(</span>
-	<span class="nx">InitActorAddr</span>           <span class="p">=</span> <span class="o">&amp;</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
-</span><span class="c1"></span>	<span class="nx">CronActorAddr</span>           <span class="p">=</span> <span class="o">&amp;</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
-</span><span class="c1"></span>	<span class="nx">StoragePowerActorAddr</span>   <span class="p">=</span> <span class="o">&amp;</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
-</span><span class="c1"></span>	<span class="nx">StorageMarketActorAddr</span>  <span class="p">=</span> <span class="o">&amp;</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
-</span><span class="c1"></span>	<span class="nx">PaymentChannelActorAddr</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
-</span><span class="c1"></span>	<span class="nx">BurntFundsActorAddr</span>     <span class="p">=</span> <span class="o">&amp;</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
-</span><span class="c1"></span><span class="p">)</span>
+	<span class="c1">// Distinguished AccountActor that is the source of system implicit messages.
+</span><span class="c1"></span>	<span class="nx">SystemActorAddr</span>        <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="nx">InitActorAddr</span>          <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+	<span class="nx">RewardActorAddr</span>        <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+	<span class="nx">CronActorAddr</span>          <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+	<span class="nx">StoragePowerActorAddr</span>  <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+	<span class="nx">StorageMarketActorAddr</span> <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+	<span class="c1">// Distinguished AccountActor that is the destination of all burnt funds.
+</span><span class="c1"></span>	<span class="nx">BurntFundsActorAddr</span> <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">99</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="kd">const</span> <span class="nx">FirstNonSingletonActorId</span> <span class="p">=</span> <span class="mi">100</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">VerifySyntax</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>

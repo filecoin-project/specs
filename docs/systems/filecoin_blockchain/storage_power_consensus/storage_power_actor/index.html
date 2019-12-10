@@ -4687,8 +4687,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">_lockPledgeCollateral</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
     <span class="nf">_unlockPledgeCollateral</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
     <span class="nf">_getPledgeCollateralReq</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">newPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nf">_sampleMinersToSurprise</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">challengeCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
-    <span class="nf">_shouldChallenge</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">networkPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_selectMinersToSurprise</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">challengeCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
 
     <span class="nf">_safeGetPowerEntry</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerID</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">PowerTableEntry</span>
     <span class="nf">_ensurePledgeCollateralSatisfied</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="kt">bool</span>
@@ -4738,12 +4737,6 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nf">Surprise</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">ticket</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
 
-    <span class="nf">shouldChallenge</span><span class="p">(</span>
-        <span class="nx">minerAddr</span>            <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">currEpoch</span>            <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">challengeFreePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="p">)</span> <span class="kt">bool</span>
-
     <span class="nf">PowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span>
 
     <span class="c1">// this should call ReportConsensusFault, numSectors should be all sectors
@@ -4780,9 +4773,7 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_power_consensus</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-    <span class="s">&#34;math/big&#34;</span>
-
-    <span class="nx">filproofs</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto/filproofs&#34;</span>
+    <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
     <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
     <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
@@ -4886,14 +4877,23 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">pcRequired</span>
 <span class="p">}</span>
 
-<span class="c1">// _sampleMinersToSurprise implements the PoSt-Surprise sampling algorithm
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_sampleMinersToSurprise</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">challengeCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">)</span> <span class="p">[]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">addrInArray</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">list</span> <span class="p">[]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">b</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">list</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">b</span> <span class="o">==</span> <span class="nx">a</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">true</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="kc">false</span>
+<span class="p">}</span>
+
+<span class="c1">// _selectMinersToSurprise implements the PoSt-Surprise sampling algorithm
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_selectMinersToSurprise</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">challengeCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">)</span> <span class="p">[]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
     <span class="c1">// this wont quite work -- a.PowerTable() is a HAMT by actor address, doesn&#39;t
 </span><span class="c1"></span>    <span class="c1">// support enumerating by int index. maybe we need that as an interface too,
 </span><span class="c1"></span>    <span class="c1">// or something similar to an iterator (or iterator over the keys)
 </span><span class="c1"></span>    <span class="c1">// or even a seeded random call directly in the HAMT: myhamt.GetRandomElement(seed []byte, idx int) using the ticket as a seed
 </span><span class="c1"></span>
-    <span class="nx">ptSize</span> <span class="o">:=</span> <span class="nx">big</span><span class="p">.</span><span class="nf">NewInt</span><span class="p">(</span><span class="nb">int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">())))</span>
+    <span class="nx">ptSize</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">())</span>
     <span class="nx">allMiners</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()))</span>
     <span class="nx">index</span> <span class="o">:=</span> <span class="mi">0</span>
 
@@ -4902,23 +4902,19 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">index</span><span class="o">++</span>
     <span class="p">}</span>
 
-    <span class="nx">sampledMiners</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
+    <span class="nx">selectedMiners</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="k">for</span> <span class="nx">chall</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">chall</span> <span class="p">&lt;</span> <span class="nx">challengeCount</span><span class="p">;</span> <span class="nx">chall</span><span class="o">++</span> <span class="p">{</span>
-        <span class="nx">minerIndex</span> <span class="o">:=</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">RandomInt</span><span class="p">(</span><span class="nx">randomness</span><span class="p">,</span> <span class="nx">chall</span><span class="p">,</span> <span class="nx">ptSize</span><span class="p">)</span>
-        <span class="nb">panic</span><span class="p">(</span><span class="nx">minerIndex</span><span class="p">)</span>
-        <span class="c1">// hack to turn bigint into int
-</span><span class="c1"></span>        <span class="nx">minerIndexInt</span> <span class="o">:=</span> <span class="mi">0</span>
-        <span class="nx">potentialChallengee</span> <span class="o">:=</span> <span class="nx">allMiners</span><span class="p">[</span><span class="nx">minerIndexInt</span><span class="p">]</span>
-        <span class="c1">// call to storage miner actor:
-</span><span class="c1"></span>        <span class="c1">// if should_challenge(lookupMinerActorStateByAddr(potentialChallengee).ShouldChallenge(rt, SURPRISE_NO_CHALLENGE_PERIOD)){
-</span><span class="c1"></span>        <span class="c1">// hack below TODO fix
-</span><span class="c1"></span>        <span class="k">if</span> <span class="kc">true</span> <span class="p">{</span>
-            <span class="nx">sampledMiners</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">sampledMiners</span><span class="p">,</span> <span class="nx">potentialChallengee</span><span class="p">)</span>
+        <span class="nx">minerIndex</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">RandomInt</span><span class="p">(</span><span class="nx">randomness</span><span class="p">,</span> <span class="nx">chall</span><span class="p">,</span> <span class="nx">ptSize</span><span class="p">)</span>
+        <span class="nx">potentialChallengee</span> <span class="o">:=</span> <span class="nx">allMiners</span><span class="p">[</span><span class="nx">minerIndex</span><span class="p">]</span>
+        <span class="c1">// skip dups
+</span><span class="c1"></span>        <span class="k">for</span> <span class="nf">addrInArray</span><span class="p">(</span><span class="nx">potentialChallengee</span><span class="p">,</span> <span class="nx">selectedMiners</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">minerIndex</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">RandomInt</span><span class="p">(</span><span class="nx">randomness</span><span class="p">,</span> <span class="nx">chall</span><span class="p">,</span> <span class="nx">ptSize</span><span class="p">)</span>
+            <span class="nx">potentialChallengee</span> <span class="p">=</span> <span class="nx">allMiners</span><span class="p">[</span><span class="nx">minerIndex</span><span class="p">]</span>
         <span class="p">}</span>
+        <span class="nx">selectedMiners</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">selectedMiners</span><span class="p">,</span> <span class="nx">potentialChallengee</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="k">return</span> <span class="nx">sampledMiners</span>
+    <span class="k">return</span> <span class="nx">selectedMiners</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_safeGetPowerEntry</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerID</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">PowerTableEntry</span> <span class="p">{</span>
@@ -5248,23 +5244,25 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">Surprise</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
 
     <span class="nx">PROVING_PERIOD</span> <span class="o">:=</span> <span class="mi">0</span> <span class="c1">// defined in storage_mining, TODO: move constants somewhere else
-</span><span class="c1"></span>    <span class="nx">SURPRISE_CHALLENGE_FREQUENCY</span> <span class="o">:=</span> <span class="mi">0</span>
-
+</span><span class="c1"></span>
     <span class="c1">// sample the actor addresses
 </span><span class="c1"></span>    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
     <span class="nx">randomness</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(),</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="nx">challengeCount</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Ceil</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">SURPRISE_CHALLENGE_FREQUENCY</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()))</span> <span class="o">/</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">PROVING_PERIOD</span><span class="p">))</span>
-    <span class="nx">surprisedMiners</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_sampleMinersToSurprise</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nx">challengeCount</span><span class="p">),</span> <span class="nx">randomness</span><span class="p">)</span>
+    <span class="nx">challengeCount</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Ceil</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()))</span> <span class="o">/</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">PROVING_PERIOD</span><span class="p">))</span>
+    <span class="nx">surprisedMiners</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_selectMinersToSurprise</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nx">challengeCount</span><span class="p">),</span> <span class="nx">randomness</span><span class="p">)</span>
 
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
     <span class="c1">// now send the messages
 </span><span class="c1"></span>    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">addr</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">surprisedMiners</span> <span class="p">{</span>
-        <span class="c1">// For each miner here check if they should be challenged and send message
-</span><span class="c1"></span>        <span class="c1">// rt.SendMessage(addr, ...)
-</span><span class="c1"></span>        <span class="nb">panic</span><span class="p">(</span><span class="nx">addr</span><span class="p">)</span>
-    <span class="p">}</span>
+        <span class="c1">// For each miner here send message
+</span><span class="c1"></span>        <span class="nb">panic</span><span class="p">(</span><span class="nx">addr</span><span class="p">)</span> <span class="c1">// hack coz of import cycle
+</span><span class="c1"></span>        <span class="c1">// rt.SendPropagatingErrors(&amp;vmr.InvocInput_I{
+</span><span class="c1"></span>        <span class="c1">//     To_:     addr,
+</span><span class="c1"></span>        <span class="c1">//     Method_: sms.Method_StorageMinerActor_NotifyOfSurprisePoStChallenge,
+</span><span class="c1"></span>        <span class="c1">// })
+</span><span class="c1"></span>    <span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>

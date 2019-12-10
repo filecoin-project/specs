@@ -7,9 +7,6 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
-const POST_SECTOR_SAMPLE_RATE_NUM = 1
-const POST_SECTOR_SAMPLE_RATE_DEN = 25
-
 func (sps *StorageProvingSubsystem_I) VerifySeal(sv sector.SealVerifyInfo) StorageProvingSubsystem_VerifySeal_FunRet {
 	cfg := filproofs.SDRCfg_I{
 		SealCfg_: sv.SealCfg(),
@@ -32,9 +29,13 @@ func (sps *StorageProvingSubsystem_I) ComputeUnsealedSectorCID(sectorSize sector
 	}
 }
 
+// TODO: get from consts
+const EPOST_SAMPLE_NUM = 1
+const EPOST_SAMPLE_DENOM = 25
+
 // TODO also return error
 func (sps *StorageProvingSubsystem_I) GenerateElectionPoStCandidates(challengeSeed sector.PoStRandomness, sectorIDs []sector.SectorID) []sector.PoStCandidate {
-	numChallengeTickets := util.UInt(len(sectorIDs) * POST_SECTOR_SAMPLE_RATE_NUM / POST_SECTOR_SAMPLE_RATE_DEN)
+	numChallengeTickets := util.UInt(len(sectorIDs) * EPOST_SAMPLE_NUM / EPOST_SAMPLE_DENOM)
 
 	var poster = sps.PoStGenerator()
 
@@ -53,9 +54,13 @@ func (sps *StorageProvingSubsystem_I) CreateElectionPoStProof(challengeSeed sect
 	return poster.CreateElectionPoStProof(witness)
 }
 
+// TODO: get from consts
+const SPOST_SAMPLE_NUM = 1
+const SPOST_SAMPLE_DENOM = 50
+
 // TODO also return error
 func (sps *StorageProvingSubsystem_I) GenerateSurprisePoStCandidates(challengeSeed sector.PoStRandomness, sectorIDs []sector.SectorID) []sector.PoStCandidate {
-	numChallengeTickets := util.UInt(len(sectorIDs) * POST_SECTOR_SAMPLE_RATE_NUM / POST_SECTOR_SAMPLE_RATE_DEN)
+	numChallengeTickets := util.UInt(len(sectorIDs) * SPOST_SAMPLE_NUM / SPOST_SAMPLE_DENOM)
 
 	var poster = sps.PoStGenerator()
 

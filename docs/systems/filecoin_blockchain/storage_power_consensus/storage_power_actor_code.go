@@ -257,22 +257,24 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr a
 func (a *StoragePowerActorCode_I) Surprise(rt Runtime) {
 
 	PROVING_PERIOD := 0 // defined in storage_mining, TODO: move constants somewhere else
-	SURPRISE_CHALLENGE_FREQUENCY := 0
 
 	// sample the actor addresses
 	h, st := a.State(rt)
 
 	randomness := rt.Randomness(rt.CurrEpoch(), 0)
-	challengeCount := math.Ceil(float64(SURPRISE_CHALLENGE_FREQUENCY*len(st.PowerTable())) / float64(PROVING_PERIOD))
-	surprisedMiners := st._sampleMinersToSurprise(rt, int(challengeCount), randomness)
+	challengeCount := math.Ceil(float64(len(st.PowerTable())) / float64(PROVING_PERIOD))
+	surprisedMiners := st._selectMinersToSurprise(rt, int(challengeCount), randomness)
 
 	UpdateRelease(rt, h, st)
 
 	// now send the messages
 	for _, addr := range surprisedMiners {
-		// For each miner here check if they should be challenged and send message
-		// rt.SendMessage(addr, ...)
-		panic(addr)
+		// For each miner here send message
+		panic(addr) // hack coz of import cycle
+		// rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		// 	To_:     addr,
+		// 	Method_: sms.Method_StorageMinerActor_NotifyOfSurprisePoStChallenge,
+		// })
 	}
 }
 

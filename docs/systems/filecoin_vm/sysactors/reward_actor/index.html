@@ -4681,8 +4681,10 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">RewardActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span>
 
-    <span class="c1">// put Reward in RewardMap
-</span><span class="c1"></span>    <span class="nf">MintReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span>
+    <span class="c1">// Allocates a block reward to the owner of a miner, less
+</span><span class="c1"></span>    <span class="c1">// - penalty, which is burnt
+</span><span class="c1"></span>    <span class="c1">// - any amount of pledge collateral shortfall, which is transferred to storage power actor
+</span><span class="c1"></span>    <span class="nf">AwardBlockReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">miner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">penalty</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
 
     <span class="c1">// withdraw available funds from RewardMap
 </span><span class="c1"></span>    <span class="nf">WithdrawReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span>
@@ -4719,6 +4721,10 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+
+<span class="kd">const</span> <span class="p">(</span>
+    <span class="nx">Method_RewardActor_AwardBlockReward</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodPlaceholder</span> <span class="o">+</span> <span class="kc">iota</span>
+<span class="p">)</span>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1">// Boilerplate
@@ -4785,8 +4791,10 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActorCode_I</span><span class="p">)</span> <span class="nf">MintReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActorCode_I</span><span class="p">)</span> <span class="nf">AwardBlockReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">miner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">penalty</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
     <span class="c1">// block reward function should live here
+</span><span class="c1"></span>    <span class="c1">// handle penalty greater than reward
 </span><span class="c1"></span>    <span class="c1">// put Reward into RewardMap
 </span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>

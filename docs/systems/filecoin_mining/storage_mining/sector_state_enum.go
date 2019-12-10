@@ -11,8 +11,6 @@ package storage_mining
 
 type FaultCount uint8
 
-const MAX_CONSECUTIVE_FAULTS = FaultCount(3)
-
 const (
 	SectorClearedSN uint8 = 1 + iota
 	SectorCommittedSN
