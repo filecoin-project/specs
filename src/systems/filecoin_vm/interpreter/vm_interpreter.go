@@ -10,6 +10,7 @@ import (
 	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
+	sysactors "github.com/filecoin-project/specs/systems/filecoin_vm/sysactors"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -34,10 +35,8 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSet
 	var receipt vmr.MessageReceipt
 
 	for _, blk := range msgs.Blocks() {
-		minerOwner := storage_mining.GetMinerOwnerAddress_Assert(inTree, blk.Miner())
-
 		// Process block miner's Election PoSt.
-		epostMessage := _makeElectionPoStMessage(outTree, blk.Miner(), msgs.Epoch(), blk.PoStProof())
+		epostMessage := _makeElectionPoStMessage(outTree, blk.Miner(), msgs.Epoch())
 		outTree = _applyMessageBuiltinAssert(outTree, epostMessage, blk.Miner())
 
 		minerPenaltyTotal := actor.TokenAmount(0)
@@ -71,7 +70,7 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSet
 		}
 
 		// Pay block reward.
-		rewardMessage := _makeBlockRewardMessage(outTree, minerOwner, minerPenaltyTotal)
+		rewardMessage := _makeBlockRewardMessage(outTree, blk.Miner(), minerPenaltyTotal)
 		outTree = _applyMessageBuiltinAssert(outTree, rewardMessage, blk.Miner())
 	}
 
@@ -226,14 +225,10 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 }
 
 func _applyMessageBuiltinAssert(tree st.StateTree, message msg.UnsignedMessage, topLevelBlockWinner addr.Address) st.StateTree {
-	gasRemainingInit := msg.GasAmount_SentinelUnlimited()
-	Assert(gasRemainingInit.Equals(message.GasLimit()))
-
-	TODO() // TODO: assert message.From() is ControlActor
-
+	Assert(message.From().Equals(addr.SystemActorAddr))
 	tree = tree.Impl().WithIncrementedCallSeqNum_Assert(message.From())
 
-	retReceipt, retTree := _applyMessageInternal(tree, message, gasRemainingInit, topLevelBlockWinner)
+	retReceipt, retTree := _applyMessageInternal(tree, message, message.GasLimit(), topLevelBlockWinner)
 	if retReceipt.ExitCode() != exitcode.OK() {
 		panic("internal message application failed")
 	}
@@ -285,72 +280,58 @@ func _gasToFIL(gas msg.GasAmount, price msg.GasPrice) actor.TokenAmount {
 	// return actor.TokenAmount(util.UVarint(gas) * util.UVarint(price))
 }
 
-// Builds a message for paying block reward from the treasury account to a miner owner.
-func _makeBlockRewardMessage(
-	state st.StateTree, minerOwnerAddr addr.Address, minerPenaltyTotal actor.TokenAmount) msg.UnsignedMessage {
+// Builds a message for paying block reward to a miner's owner.
+func _makeBlockRewardMessage(state st.StateTree, minerAddr addr.Address, penalty actor.TokenAmount) msg.UnsignedMessage {
+	params := make([]util.Serialization, 2)
+	params[0] = addr.Serialize_Address(minerAddr)
+	params[1] = actor.Serialize_TokenAmount(penalty)
 
-	var blockReward actor.TokenAmount
-	TODO() // TODO: finish
-
-	blockReward -= minerPenaltyTotal
-	if blockReward < 0 {
-		blockReward = 0
+	sysActor := state.GetActorState(addr.SystemActorAddr)
+	return &msg.UnsignedMessage_I{
+		From_:       addr.SystemActorAddr,
+		To_:         addr.RewardActorAddr,
+		Method_:     sysactors.Method_RewardActor_AwardBlockReward,
+		Params_:     params,
+		CallSeqNum_: sysActor.CallSeqNum(),
+		Value_:      0,
+		GasPrice_:   0,
+		GasLimit_:   msg.GasAmount_SentinelUnlimited(),
 	}
-
-	// networkTreasuryActor := loadActor(NetworkTreasuryActorAddress)
-	// minerActor := loadActorSubstate(minerActorAddr)
-	// minerWorker := loadActor(minerActor.Info.Worker)
-	//return &UnsignedMessage_I{
-	//	From_:       minerActor.Info.Worker,
-	//	To_:         NetworkTreasuryActorAddress,
-	//	Method_:     NetworkTreasury.PayBlockReward,
-	//	Params_:     serialize([minerActorAddr]),
-	//	CallSeqNum_: minerWorker.CallSeqNum,
-	//	Value_:      0,
-	//	GasPrice_:   0,
-	//	GasLimit_:   payBlockRewardGasLimit,
-	//}
-	panic("TODO: implement when network treasury actor implemented")
 }
 
 // Builds a message for submitting ElectionPost on behalf of a miner actor.
-func _makeElectionPoStMessage(state st.StateTree, minerActorAddr addr.Address, epoch UInt64, postProof Bytes) msg.UnsignedMessage {
-	// minerActor := loadActorSubstate(minerActorAddr)
-	// minerWorker := loadActor(minerActor.Info.Worker)
-	//return &UnsignedMessage_I{
-	//	From_:       minerActor.Info.Worker,
-	//	To_:         minerActorAddr,
-	//	Method_:     StorageMinerActor.SubmitElectionPoSt,
-	//	Params_:     serialize([PoStSubmission{postProof, epoch}]),
-	//	CallSeqNum_: minerWorker.CallSeqNum,
-	//	Value_:      0,
-	//	GasPrice_:   0,
-	//	GasLimit_:   sumbitElectionPostGasLimit,
-	//}
-	panic("TODO: implement when necessary dependencies are importable")
+func _makeElectionPoStMessage(state st.StateTree, minerActorAddr addr.Address, epoch UInt64) msg.UnsignedMessage {
+	// TODO: determine parameters necessary for this message.
+	params := make([]util.Serialization, 0)
+
+	sysActor := state.GetActorState(addr.SystemActorAddr)
+	return &msg.UnsignedMessage_I{
+		From_:       addr.SystemActorAddr,
+		To_:         minerActorAddr,
+		Method_:     storage_mining.Method_StorageMinerActor_SubmitVerifiedElectionPoSt,
+		Params_:     params,
+		CallSeqNum_: sysActor.CallSeqNum(),
+		Value_:      0,
+		GasPrice_:   0,
+		GasLimit_:   msg.GasAmount_SentinelUnlimited(),
+	}
 }
 
 // Builds a message for invoking the cron actor tick.
 func _makeCronTickMessage(state st.StateTree, minerActorAddr addr.Address) msg.UnsignedMessage {
-	// minerActor := loadActorSubstate(minerActorAddr)
-	// minerWorker := loadActor(minerActor.Info.Worker)
-	//return &UnsignedMessage_I{
-	//	From_:       minerActor.Info.Worker,
-	//	To_:         CronActorAddress,
-	//	Method_:     CronActor.EpochTick,
-	//	Params_:     nil,
-	//	CallSeqNum_: minerWorker.CallSeqNum,
-	//	Value_:      0,
-	//	GasPrice_:   0,
-	//	GasLimit_:   cronTickGasLimit,
-	//}
-	panic("TODO: implement when necessary dependencies are importable")
+	sysActor := state.GetActorState(addr.SystemActorAddr)
+	return &msg.UnsignedMessage_I{
+		From_:       addr.SystemActorAddr,
+		To_:         addr.CronActorAddr,
+		Method_:     sysactors.Method_CronActor_EpochTick,
+		Params_:     nil,
+		CallSeqNum_: sysActor.CallSeqNum(),
+		Value_:      0,
+		GasPrice_:   0,
+		GasLimit_:   msg.GasAmount_SentinelUnlimited(),
+	}
 }
 
 func _msgCID(msg msg.UnsignedMessage) ipld.CID {
-	panic("TODO")
-}
-
-func _encodeParams(p []interface{}) Bytes {
 	panic("TODO")
 }

@@ -6,15 +6,20 @@ import (
 
 type Int = util.Int
 
-// Addresses for singleton system actors
+// Addresses for singleton system actors.
 var (
-	InitActorAddr           = &Address_I{} // TODO
-	CronActorAddr           = &Address_I{} // TODO
-	StoragePowerActorAddr   = &Address_I{} // TODO
-	StorageMarketActorAddr  = &Address_I{} // TODO
-	PaymentChannelActorAddr = &Address_I{} // TODO
-	BurntFundsActorAddr     = &Address_I{} // TODO
+	// Distinguished AccountActor that is the source of system implicit messages.
+	SystemActorAddr        = Address_Make_ID(Address_NetworkID_Testnet, 0)
+	InitActorAddr          = Address_Make_ID(Address_NetworkID_Testnet, 1)
+	RewardActorAddr        = Address_Make_ID(Address_NetworkID_Testnet, 2)
+	CronActorAddr          = Address_Make_ID(Address_NetworkID_Testnet, 3)
+	StoragePowerActorAddr  = Address_Make_ID(Address_NetworkID_Testnet, 4)
+	StorageMarketActorAddr = Address_Make_ID(Address_NetworkID_Testnet, 5)
+	// Distinguished AccountActor that is the destination of all burnt funds.
+	BurntFundsActorAddr = Address_Make_ID(Address_NetworkID_Testnet, 99)
 )
+
+const FirstNonSingletonActorId = 100
 
 func (a *Address_I) VerifySyntax() bool {
 	panic("TODO")

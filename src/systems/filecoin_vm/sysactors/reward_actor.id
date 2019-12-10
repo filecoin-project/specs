@@ -22,8 +22,10 @@ type RewardActorState struct {
 type RewardActorCode struct {
     Constructor(rt vmr.Runtime)
 
-    // put Reward in RewardMap
-    MintReward(rt vmr.Runtime)
+    // Allocates a block reward to the owner of a miner, less
+    // - penalty, which is burnt
+    // - any amount of pledge collateral shortfall, which is transferred to storage power actor
+    AwardBlockReward(rt vmr.Runtime, miner addr.Address, penalty actor.TokenAmount)
 
     // withdraw available funds from RewardMap
     WithdrawReward(rt vmr.Runtime)
