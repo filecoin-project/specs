@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	Method_StorageMinerActor_SubmitVerifiedSurprisePoSt = actor.MethodPlaceholder + iota
-	Method_StorageMinerActor_SubmitVerifiedElectionPoSt
+	Method_StorageMinerActor_ProcessVerifiedSurprisePoSt = actor.MethodPlaceholder + iota
+	Method_StorageMinerActor_ProcessVerifiedElectionPoSt
 	Method_StorageMinerActor_NotifyOfSurprisePoStChallenge
 )
 
@@ -336,16 +336,15 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime) InvocOutput {
 	UpdateRelease(rt, h, st)
 
 	return rt.SuccessReturn()
-
 }
 
 // called by verifier to update miner state on successful surprise post
 // after it has been verified in the storage_mining_subsystem
-func (a *StorageMinerActorCode_I) SubmitVerifiedSurprisePoSt(rt Runtime) InvocOutput {
+func (a *StorageMinerActorCode_I) ProcessVerifiedSurprisePoSt(rt Runtime) InvocOutput {
 	TODO() // TODO: validate caller
 
 	// Ensure pledge collateral satisfied
-	// otherwise, abort SubmitVerifiedSurprisePoSt
+	// otherwise, abort ProcessVerifiedSurprisePoSt
 	a._ensurePledgeCollateralSatisfied(rt)
 
 	return a._onSuccessfulPoSt(rt)
@@ -357,7 +356,7 @@ func (a *StorageMinerActorCode_I) SubmitVerifiedSurprisePoSt(rt Runtime) InvocOu
 // Assume ElectionPoSt has already been successfully verified (both proof and partial ticket
 // value) when the function gets called.
 // Likewise assume that the rewards have already been granted to the storage miner actor. This only handles sector management.
-func (a *StorageMinerActorCode_I) SubmitVerifiedElectionPoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
+func (a *StorageMinerActorCode_I) ProcessVerifiedElectionPoSt(rt Runtime) InvocOutput {
 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
 	// The receiver must be the miner who produced the block for which this message is created.
 	Assert(rt.ToplevelBlockWinner() == rt.CurrReceiver())
@@ -370,7 +369,6 @@ func (a *StorageMinerActorCode_I) SubmitVerifiedElectionPoSt(rt Runtime, onChain
 
 	// the following will update last challenge response time
 	return a._onSuccessfulPoSt(rt)
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////
