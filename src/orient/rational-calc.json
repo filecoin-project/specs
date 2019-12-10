@@ -22,7 +22,7 @@
     "column_leaf_hash_constraints": 1376,
     "column_leaf_hash_time": 2.56e-7,
     "cost_amax": 1,
-    "cost_gb_per_month": 0.005,
+    "cost_gb_per_month": 0.0004,
     "ec_e": 5,
     "epost_challenged_sectors_fraction": 0.04,
     "extra_storage_time": 0,
@@ -62,7 +62,8 @@
     "wrapper_parents": 10,
     "expander_parents": 14,
     "cache_size_mib": 1024,
-    "cost_memory_node": 0.00000000000000586,
-    "cost_ratio":0.1
+    "cost_memory_node": 0.00000000000000039,
+    "cost_encoding_node":0.00000000000000000369419,
+    "cost_ratio":0.61
   }
 ]
