@@ -16,6 +16,6 @@ IPLD graphs and client data. This diagram shows the detailed composition
 of a piece and its proving tree, including both full and bandwidth-optimized
 piece data structures.
 
-{{< diagram src="pieces.png" title="Pieces, Proving Trees, and Piece Data Structures" >}}
+{{< diagram src="diagrams/pieces.png" title="Pieces, Proving Trees, and Piece Data Structures" >}}
 
 {{< readfile file="piece.id" code="true" lang="go" >}}
