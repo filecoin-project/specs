@@ -13,174 +13,48 @@ viewof config = {
   return form
 }
 
-constants = Object.assign({}, base, constraints, filecoin, bench, rig)
-
-combos = {
-  let start = [constants]
-  let proofs = extend_query(start, [wrapperVariant, wrapper, stackedReplicas])
-  let graphs = extend_query(proofs, [stackedChungParams, stackedSDRParams])
-  let query = extend_query(graphs, [4, 64, 128, 1024, 16384, 32768].map(d => ({window_size_mib: d})))
-
-  return query
-}
-
-createJsonDownloadButton(combos)
-
-// combos = [wrapperVariant, wrapper, stackedReplicas]
-//   .map(d => [
-//     Object.assign({}, constants, d, stackedChungParams, config),
-//     Object.assign({}, constants, d, stackedSDRParams, config)
-//   ]).flat()
-
-
-solved_many_pre = (await solve_many(combos)).map(d => d[0])
-  .map(d => {
-    d.construction = `${d.graph_name}_${d.proof_name}`
-    return d
-  })
-
-solved_many = solved_many_pre
-// solved_manys = (await solve_manys(combos)).flat()
-
-createJsonDownloadButton(solved_many)
-
-md`#### Vars that matter`
-
-table_constraints(solved_many, [
-  'proof_name',
-  'graph_name',
-  'window_size_mib',
-  'decoding_time_parallel',
-  'block_size_kib',
-  'epost_time_parallel',
-], [])
-
-md`#### Other important vars`
-
-table_constraints(solved_many, [
-  'proof_name',
-  'graph_name',
-  'window_size_mib',
-  'decoding_time_parallel',
-  'porep_time_parallel',
-  'porep_proof_size_kib',
-  'block_size_kib',
-  'epost_time_parallel',
-], [])
-
-md`#### Graphs`
-table_constraints(solved_many, [
-  'proof_name',
-  'graph_name',
-  'window_size_mib',
-  'porep_lambda',
-  'porep_challenges',
-  'post_lambda',
-  'post_challenges',
-  'stacked_layers',
-  'expander_parents',
-  'drg_parents',
-  'windows',
-  'window_size_mib',
-  'sector_size_gib',
-], [])
-
-md`#### PoRep`
-table_constraints(solved_many, [
-  'proof_name',
-  'graph_name',
-  'window_size_mib',
-  'encoding_time',
-  'encoding_time_parallel',
-  'porep_commit_time',
-  'porep_commit_time_parallel',
-  'porep_snark_time',
-  'porep_snark_time_parallel',
-  'porep_proof_size',
-  'porep_snark_constraints',
-  'porep_time'
-], [])
-
-md`#### PoSt`
-table_constraints(solved_many, [
-  'proof_name',
-  'graph_name',
-  'window_size_mib',
-  'post_proof_size',
-  'post_snark_constraints',
-  'post_snark_time',
-  'post_snark_time_parallel',
-  'post_time',
-  'post_time_parallel',
-  'post_inclusions_time',
-  'post_inclusions_time_parallel',
-  'post_data_access',
-  'post_data_access_parallel'
-], [])
-
-md`#### EPoSt`
-table_constraints(solved_many, [
-  'proof_name',
-  'graph_name',
-  'window_size_mib',
-  'epost_time',
-  'epost_time_parallel',
-  'epost_inclusions_time',
-  'epost_inclusions_time_parallel',
-  'epost_data_access',
-  'epost_data_access_parallel'
-], [])
-
-
-md`---`
+md`## Filters`
+viewof window_sizes_mib_config = checkbox({
+  title: "Window Sizes",
+  options: [4, 64, 128, 1024, 16384, 32768].map(d => ({value: d, label: d})),
+  value: [4, 64, 128, 1024, 16384, 32768],
+})
 
 md`## Graphs`
 
-md`### On-chain footprint`
+md`### On-chain footprint
 
-chooser = (data, field) => {
-  const maximum = Math.log10(Math.max(...solved_many.map(d => d[field]))) 
-  const minimum = Math.log10(Math.min(...solved_many.map(d => d[field])))
-  const format = v => `${_f(Math.pow(10, v))}`
+This graph shows the average proofs per block (assuming a network size of ${filecoin.filecoin_storage_capacity_eib}EiB)
+`
 
-  return slider({
-    min: minimum,
-    max: maximum,
-    value: maximum,
-    step: 0.01,
-    format: format,
-  })
-}
+viewof proofs_per_block_kib_ruler = chooser(solved_many, 'proofs_per_block_kib', 2000)
 
-viewof block_size_kib_ruler = chooser(solved_many, 'block_size_kib')
-
-bar_chart(solved_many, 'block_size_kib', [
-  'not_proofs_per_block_kib',
+bar_chart(solved_many, 'proofs_per_block_kib', [
   'seals_size_per_block_kib',
   'posts_size_per_block_kib',
-], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < Math.pow(10, block_size_kib_ruler)})
+], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < Math.pow(10, proofs_per_block_kib_ruler)})
 
 md`### Retrieval`
 
-viewof decoding_time_parallel_ruler = chooser(solved_many, 'decoding_time_parallel')
+viewof decoding_time_parallel_ruler = chooser(solved_many, 'decoding_time_parallel', 2)
 
 bar_chart(solved_many, 'decoding_time_parallel', [
   'encoding_window_time_parallel',
   'window_read_time_parallel',
 ], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < Math.pow(10, decoding_time_parallel_ruler)})
 
-table_constraints(solved_many, [
-  'proof_name',
-  'graph_name',
-  'window_size_mib',
-  'decoding_time_parallel',
-  'encoding_window_time_parallel',
-  'window_read_time_parallel'
-], [])
+// table_constraints(solved_many, [
+//   'proof_name',
+//   'graph_name',
+//   'window_size_mib',
+//   'decoding_time_parallel',
+//   'encoding_window_time_parallel',
+//   'window_read_time_parallel'
+// ], [])
 
 md`### PoRep`
 
-viewof porep_time_parallel_ruler = chooser(solved_many, 'porep_time_parallel')
+viewof porep_time_parallel_ruler = chooser(solved_many, 'porep_time_parallel', 12 * 60 * 60)
 
 bar_chart(solved_many, 'porep_time_parallel', [
   'porep_snark_time_parallel',
@@ -188,10 +62,9 @@ bar_chart(solved_many, 'porep_time_parallel', [
   'encoding_time_parallel'
 ], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < Math.pow(10, porep_time_parallel_ruler)})
 
-
 md`### EPoSt`
 
-viewof epost_time_parallel_ruler = chooser(solved_many, 'epost_time_parallel')
+viewof epost_time_parallel_ruler = chooser(solved_many, 'epost_time_parallel', 30)
 
 bar_chart(solved_many, 'epost_time_parallel', [
   'epost_leaves_read_parallel',
@@ -218,64 +91,8 @@ table_constraints(solved_many, [
   'windows'
 ], [])
 
-bar_chart = (data, title, vars, group_by, opts) => {
-  let organized_data = data
-    .map(d => {
-      return vars.map(key => ({
-        construction: group_by.map(g => `${d[g]}`).join(', '),
-        type: key,
-        value: d[key],
-        title: d[title]
-      }))
-    })
-        .flat()
-  if (opts && opts.filter) {
-    organized_data = organized_data.filter(d => opts.filter(d['title']))
-  }
-
-  return vl({
-    "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
-    "title": "Composition of " + title,
-    "data": { values: organized_data },
-    "width": 800,
-    "mark": "bar",
-    "encoding": {
-      "x": {"aggregate": "sum", "field": "value", "type": "quantitative"},
-      "y": {"field": "construction", "type": "nominal"},
-      "color": {"field": "type", "type": "nominal"}
-    }
-  })
-}
-
 md`### Merkle tree caching`
 
-add_query = (query, ext) => {
-  return query.map(d => Object.assign({}, d, ext))
-}
-
-extend_query = (array, ...exts) => {
-  let query = array
-
-  const extend_one = (arr, ext) => arr.map(d => ext.map((_, i) => Object.assign({}, d, ext[i])))
-
-  exts.forEach(ext => {
-    query = extend_one(query, ext).flat()
-  })
-
-  return query
-}
-
-mtree_query = {
-  let query = [constants]
-  const proofs = [wrapper, wrapperVariant, stackedReplicas]
-  const post_mtree_layers_cached = [...Array(10)].map((_, i) => ({post_mtree_layers_cached: i+20}))
-
-  query = extend_query(query, proofs, post_mtree_layers_cached, [stackedChungParams])
-
-  return query
-}
-
-mtree_solved = (await solve_many(mtree_query)).map(d => d[0])
 
 graph_constraints(mtree_solved, 'post_mtree_layers_cached', 'epost_time_parallel', ['proof_name'], { height: 100, yrule: 15 })
 graph_constraints(mtree_solved, 'post_mtree_layers_cached', 'post_inclusion_time', ['proof_name'], { height: 100 })
@@ -394,7 +211,7 @@ rig = ({
   "rig_storage_min_tib": 100,
   "rig_storage_parallelization": 16,
   "rig_storage_read_mbs": 80,
-  "cost_gb_per_month": 0.005,
+  "cost_gb_per_month": 0.0025,
   "extra_storage_time": 0,
   "hash_gb_per_second": 5,
 })
@@ -425,6 +242,93 @@ constraints = ({
 
 md`---`
 
+md`#### Vars that matter`
+
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'window_size_mib',
+  'decoding_time_parallel',
+  'block_size_kib',
+  'epost_time_parallel',
+], [])
+
+md`#### Other important vars`
+
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'window_size_mib',
+  'decoding_time_parallel',
+  'porep_time_parallel',
+  'porep_proof_size_kib',
+  'block_size_kib',
+  'epost_time_parallel',
+], [])
+
+md`#### Graphs`
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'window_size_mib',
+  'porep_lambda',
+  'porep_challenges',
+  'post_lambda',
+  'post_challenges',
+  'stacked_layers',
+  'expander_parents',
+  'drg_parents',
+  'windows',
+  'window_size_mib',
+  'sector_size_gib',
+], [])
+
+md`#### PoRep`
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'window_size_mib',
+  'encoding_time',
+  'encoding_time_parallel',
+  'porep_commit_time',
+  'porep_commit_time_parallel',
+  'porep_snark_time',
+  'porep_snark_time_parallel',
+  'porep_proof_size',
+  'porep_snark_constraints',
+  'porep_time'
+], [])
+
+md`#### PoSt`
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'window_size_mib',
+  'post_proof_size',
+  'post_snark_constraints',
+  'post_snark_time',
+  'post_snark_time_parallel',
+  'post_time',
+  'post_time_parallel',
+  'post_inclusions_time',
+  'post_inclusions_time_parallel',
+  'post_data_access',
+  'post_data_access_parallel'
+], [])
+
+md`#### EPoSt`
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'window_size_mib',
+  'epost_time',
+  'epost_time_parallel',
+  'epost_inclusions_time',
+  'epost_inclusions_time_parallel',
+  'epost_data_access',
+  'epost_data_access_parallel'
+], [])
+
 md`## Debug`
 report_from_result(solved_many[0], combos[0])
 report_from_result(solved_many[1], combos[1])
@@ -435,6 +339,51 @@ report_from_result(solved_many[5], combos[5])
 
 md`---`
 md`## Dev`
+
+md`### Vars`
+constants = Object.assign({}, base, constraints, filecoin, bench, rig)
+
+combos = {
+  let start = [constants]
+  let proofs = extend_query(start, [wrapperVariant, wrapper, stackedReplicas])
+  let graphs = extend_query(proofs, [stackedChungParams, stackedSDRParams])
+  let query = extend_query(graphs, window_sizes_mibs_config.map(d => ({window_size_mib: d})))
+
+  return query
+}
+
+createJsonDownloadButton(combos)
+
+// combos = [wrapperVariant, wrapper, stackedReplicas]
+//   .map(d => [
+//     Object.assign({}, constants, d, stackedChungParams, config),
+//     Object.assign({}, constants, d, stackedSDRParams, config)
+//   ]).flat()
+
+
+solved_many_pre = (await solve_many(combos)).map(d => d[0])
+  .map(d => {
+    d.construction = `${d.graph_name}_${d.proof_name}`
+    return d
+  })
+
+solved_many = solved_many_pre
+// solved_manys = (await solve_manys(combos)).flat()
+
+createJsonDownloadButton(solved_many)
+
+mtree_query = {
+  let query = [constants]
+  const proofs = [wrapper, wrapperVariant, stackedReplicas]
+  const post_mtree_layers_cached = [...Array(10)].map((_, i) => ({post_mtree_layers_cached: i+20}))
+
+  query = extend_query(query, proofs, post_mtree_layers_cached, [stackedChungParams])
+
+  return query
+}
+
+mtree_solved = (await solve_many(mtree_query)).map(d => d[0])
+
 
 md`### Orient`
 
@@ -516,6 +465,51 @@ ${Object.keys(result).sort()
   return html
 }
 
+bar_chart = (data, title, vars, group_by, opts) => {
+  let organized_data = data
+      .map(d => {
+        return vars.map(key => ({
+          construction: group_by.map(g => `${d[g]}`).join(', '),
+          type: key,
+          value: d[key],
+          title: d[title]
+        }))
+      })
+      .flat()
+  if (opts && opts.filter) {
+    organized_data = organized_data.filter(d => opts.filter(d['title']))
+  }
+
+  return vl({
+    "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+    "title": "Composition of " + title,
+    "data": { values: organized_data },
+    "width": 800,
+    "mark": "bar",
+    "encoding": {
+      "x": {"aggregate": "sum", "field": "value", "type": "quantitative"},
+      "y": {"field": "construction", "type": "nominal"},
+      "color": {"field": "type", "type": "nominal"}
+    }
+  })
+}
+
+add_query = (query, ext) => {
+  return query.map(d => Object.assign({}, d, ext))
+}
+
+extend_query = (array, ...exts) => {
+  let query = array
+
+  const extend_one = (arr, ext) => arr.map(d => ext.map((_, i) => Object.assign({}, d, ext[i])))
+
+  exts.forEach(ext => {
+    query = extend_one(query, ext).flat()
+  })
+
+  return query
+}
+
 multiple_solutions = (solutions, group_by, filter) => {
   return solutions.map(s => {
     const solution = {}
@@ -545,6 +539,21 @@ table_constraints = (solutions, filter, group_by, sort_by) => {
   const table = [header, divider, rows.join('\n')].join('\n')
 
   return md`${table}`
+}
+
+chooser = (data, field, base) => {
+  const log_base = base ? Math.log10(base) : false
+  const maximum = Math.log10(Math.max(...solved_many.map(d => d[field]))) 
+  const minimum = Math.log10(Math.min(...solved_many.map(d => d[field])))
+  const format = v => `${_f(Math.pow(10, v))}`
+
+  return slider({
+    min: minimum,
+    max: maximum,
+    value: log_base || maximum,
+    step: 0.01,
+    format: format,
+  })
 }
 
 md`### Utils`
@@ -592,7 +601,7 @@ function flatten(items) {
 
 md`### Imports`
 
-import {slider} from "@jashkenas/inputs"
+import {slider, checkbox} from "@jashkenas/inputs"
 d3 = require('d3')
 vl = require('@observablehq/vega-lite')
 import { createJsonDownloadButton } from "@trebor/download-json"

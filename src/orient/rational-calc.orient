@@ -624,6 +624,7 @@ Filecoin:
     posts_size_per_block = posts_size_per_year / blocks_in_a_year
 
     proofs_per_block = seals_size_per_block + posts_size_per_block
+    proofs_per_block_kib = proofs_per_block / b_in_kib
     seals_size_per_block_kib = seals_size_per_block / b_in_kib
     posts_size_per_block_kib = posts_size_per_block / b_in_kib
 
