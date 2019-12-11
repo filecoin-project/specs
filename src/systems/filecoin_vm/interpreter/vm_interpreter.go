@@ -36,7 +36,7 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSet
 
 	for _, blk := range msgs.Blocks() {
 		// Process block miner's Election PoSt.
-		epostMessage := _makeElectionPoStMessage(outTree, blk.Miner(), msgs.Epoch())
+		epostMessage := _makeElectionPoStMessage(outTree, blk.Miner())
 		outTree = _applyMessageBuiltinAssert(outTree, epostMessage, blk.Miner())
 
 		minerPenaltyTotal := actor.TokenAmount(0)
@@ -300,7 +300,7 @@ func _makeBlockRewardMessage(state st.StateTree, minerAddr addr.Address, penalty
 }
 
 // Builds a message for submitting ElectionPost on behalf of a miner actor.
-func _makeElectionPoStMessage(state st.StateTree, minerActorAddr addr.Address, epoch UInt64) msg.UnsignedMessage {
+func _makeElectionPoStMessage(state st.StateTree, minerActorAddr addr.Address) msg.UnsignedMessage {
 	// TODO: determine parameters necessary for this message.
 	params := make([]util.Serialization, 0)
 
@@ -308,7 +308,7 @@ func _makeElectionPoStMessage(state st.StateTree, minerActorAddr addr.Address, e
 	return &msg.UnsignedMessage_I{
 		From_:       addr.SystemActorAddr,
 		To_:         minerActorAddr,
-		Method_:     storage_mining.Method_StorageMinerActor_SubmitVerifiedElectionPoSt,
+		Method_:     storage_mining.Method_StorageMinerActor_ProcessVerifiedElectionPoSt,
 		Params_:     params,
 		CallSeqNum_: sysActor.CallSeqNum(),
 		Value_:      0,
