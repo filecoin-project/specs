@@ -8,6 +8,12 @@
 // - Test all flags combos
 // - Review calculator again
 
+UtilityFunction:
+  x1 = decoding_time_parallel
+  x2 = proofs_per_block_kib
+  x3 = epost_time_parallel
+  utility = w1 * x1 + w2 * x2 + w3 * x3
+
 Rig:
   describe(rig_sectors_min, "Minimum sectors require to mine")
 
@@ -232,6 +238,7 @@ ProofOfSpacetime:
     // min(porep_snark_partition_time, porep_snark_time / snarrk_parallelization)
     post_snark_time_parallel = post_snark_partition_time + (post_snark_time - post_snark_partition_time) / (rig_snark_parallelization)
 
+// TODO: add proof of window possession
 ProofOfReplication:
   Security:
     describe(porep_challenges, "Number of challenges in a PoRep proof")
@@ -308,6 +315,8 @@ ProofOfReplication:
     porep_proof_size = porep_snark_size + seal_onchain_commitments_size
     porep_proof_size_kib = porep_proof_size / b_in_kib
 
+
+  // TODO: rename commR to commRLast
   Commitment:
     describe(window_comm_tree_time, "Time to generate a merkle tree of stacked windows", secs)
     describe(window_comm_leaves_time, "Time to commit columns of a window", secs)
@@ -330,7 +339,7 @@ ProofOfReplication:
 
     commit_size = cid_size
     window_comm_tree_time = merkle_tree_hash_time * (window_nodes * 2 - 1)
-    window_comm_leaves_time = column_leaf_hash_time * windows
+    window_comm_leaves_time = column_leaf_hash_time * window_nodes
     commr_size = commit_size
     commd_size = commit_size
     commrlast_size = commit_size
@@ -341,22 +350,23 @@ ProofOfReplication:
     commd_time = merkle_tree_datahash_time * (2 * nodes - 1)
 
     // TODO commr might be twice depending on CommQ
-    porep_commit_time = commr_time + commc_time
+    commq_time = commr_time
+    porep_commit_time = commr_time + commq_time + commc_time
     porep_commit_time_parallel = porep_commit_time / rig_cores 
     porep_commit_time_mins = porep_commit_time / 60
 
     CommR (Wrapping): // was VectorR
-      commr_time = merkle_tree_hash_time * nodes
+      commr_time = merkle_tree_hash_time * 2 * nodes
       commr_tree_depth = log2(nodes) 
       commr_column_size = 1
 
     CommR (WrappingVariant): // was VectorR
-      commr_time = merkle_tree_hash_time * nodes
+      commr_time = merkle_tree_hash_time * 2 * nodes
       commr_tree_depth = log2(nodes) 
       commr_column_size = 1
 
     CommR (StackedReplicas): // was ColumnR
-      commr_time = merkle_tree_hash_time * nodes
+      commr_time = merkle_tree_hash_time * 2 * nodes
       commr_tree_depth = log2(nodes) 
       commr_column_size = 1
       // commr_time = window_comm_tree_time + window_comm_leaves_time 
@@ -364,7 +374,9 @@ ProofOfReplication:
       // commr_column_size = windows
 
     CommC:
-      commc_time = (window_comm_tree_time + window_comm_leaves_time) * stacked_layers
+      commc_tree_time = window_comm_tree_time
+      commc_leaves_time = window_comm_leaves_time * stacked_layers * windows
+      commc_time = commc_tree_time + commc_leaves_time
 
   Encoding:
     describe(encoding_time, "Time to encode a sector", secs)
@@ -612,6 +624,7 @@ Filecoin:
     describe(seals_size_per_block, "Size of seal proofs per block", bytes)
     describe(posts_size_per_block, "Size of post proofs per block", bytes)
     describe(proofs_per_block, "Size of proofs per block", bytes)
+    describe(proofs_per_block_kib, "Size of proofs per block", kib)
 
     seals_per_sector_per_year = filecoin_reseals_per_year + 1
     seals_per_year = filecoin_sectors * seals_per_sector_per_year
