@@ -483,6 +483,7 @@ func (rt *VMContext) SendPropagatingErrors(input InvocInput) InvocOutput {
 }
 
 func (rt *VMContext) SendCatchingErrors(input InvocInput) (InvocOutput, exitcode.ExitCode) {
+	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
 	return rt._sendInternalOutputs(input, CatchErrors)
 }
 
