@@ -14,6 +14,145 @@ viewof config = {
   return form
 }
 
+jsonToSliders = (obj, assigned) => {
+  const inputs = Object.keys(obj).map(d => `<div><input type=range name=${d} min=${obj[d].min} max=${obj[d].max} step=${obj[d].step} value=${obj[d].value}> <i>${d}</i></div>`)
+  const form = formToObject(html`
+<form>
+  ${inputs.join('\n')}
+</form>`)
+
+  if (assigned) {
+    form.value = Object.assign({}, form.value, assigned)
+  }
+
+  return form
+}
+
+md`### Parameters`
+
+viewof base = jsonToSliders(
+  {
+    "porep_lambda": {value: 10, min: 0, max: 128, step: 1},
+    "post_mtree_layers_cached": {value: 25, min: 0, max: 40, step: 1},
+    "post_lambda": {value: 10, min: 0, max: 128, step: 1},
+    "sector_size_gib": {value: 32, min: 1, max: 1024, step: 1},
+    "window_size_mib": {value: 1024, min: 4, max: 32 * 1024, step: 1},
+    "wrapper_parents": {value: 100, min: 0, max: 1000, step: 1},
+  },
+  { "!StackedReplicaUnaligned": true}
+)
+
+base
+
+md`### Constants`
+
+md`#### Graph`
+
+viewof stackedChungParams = jsonToSliders(
+  {
+    "chung_delta": {value: 0.06, min: 0.01, max: 0.08, step: 0.01},
+    "expander_parents": {value: 16, min: 0, max: 128, step: 1}
+  },
+  {
+    "graph_name": "Chung",
+    "!StackedChungParameters": true,
+  })
+
+viewof stackedSDRParams = jsonToSliders(
+  {
+    "sdr_delta": {value: 0.01, min: 0.01, max: 0.08, step: 0.01}
+  },
+  {
+    "graph_name": "SDR",
+    "!StackedSDRParameters": true,
+    "sdr_delta": 0.01
+  })
+
+md`#### Proofs`
+
+wrapper = ({
+  "proof_name": "wrapping",
+  "!ElectionWithFallbackPoSt": true,
+  "!VectorR": true,
+  "!Wrapping": true,
+})
+
+wrapperVariant = ({
+  "proof_name": "wrappingVariant",
+  "!ElectionWithFallbackPoSt": true,
+  "!VectorR": true,
+  "!WrappingVariant": true,
+})
+
+stackedReplicas = ({
+  "proof_name": "stackedReplicas",
+  "!ElectionWithFallbackPoSt": true,
+  "!SectorEncoding": true,
+  "!VectorR": true,
+  "!StackedReplicas": true
+})
+
+md`#### Protocol`
+
+viewof filecoin = jsonToSliders({
+  "ec_e": {value: 5, min: 1, max: 20, step: 1},
+  "fallback_period_days": {value: 1, min: 1, max: 10, step: 1},
+  "fallback_ratio": {value: 0.05, min: 0.01, max: 1, step: 0.01},
+  "filecoin_reseals_per_year": {value: 1, min: 0, max: 365, step: 1},
+  "filecoin_storage_capacity_eib": {value: 1, min: 0.5, max: 20, step: 0.5},
+  "polling_time": {value: 15, min: 15, max: 60, step: 1},
+  "cost_amax": {value: 1, min: 1, max: 10, step: 1},
+  "hashing_amax": {value: 2, min: 1, max: 10, step: 1},
+  "spacegap": {value: 0.2, min: 0.01, max: 0.2, step: 0.01},
+  "proofs_block_fraction": {value: 0.3, min: 0.01, max: 1, step: 0.01},
+  "epost_challenged_sectors_fraction": {value: 0.04, min: 0.01, max: 1, step: 0.01},
+}, {
+  node_size: 32
+})
+
+md`### Miner`
+
+md`#### Hardware Config`
+
+viewof rig = jsonToSliders({
+  "rig_cores": {value: 16, min: 1, max: 512, step: 1},
+  "rig_snark_parallelization": {value: 2, min: 1, max: 64, step: 1},
+  "rig_malicious_cost_per_year": {value: 2.5, min: 0, max: 10, step: 0.1},
+  "rig_ram_gib": {value: 32, min: 1, max: 128, step: 1},
+  "rig_storage_latency": {value: 0.003, min: 0.0003, max: 0.01, step: 0.0001},
+  "rig_storage_min_tib": {value: 100, min: 0.5, max: 1024, step: 0.5},
+  "rig_storage_parallelization": {value: 2, min: 1, max: 128, step: 1},
+  "rig_storage_read_mbs": {value: 80, min: 80, max: 1000, step: 1},
+  "cost_gb_per_month": {value: 0.0025, min: 0.0001, max: 0.1, step: 0.0001},
+  "extra_storage_time": {value: 0, min: 0, max: 10, step: 1 },
+  "hash_gb_per_second": {value: 5, min: 0, max: 10000, step: 1},
+})
+
+md`#### Benchmarks`
+
+bench = ({
+  "column_leaf_hash_time": 2.56e-7,
+  "kdf_time": 1.28e-8,
+  "merkle_tree_datahash_time": 1.28e-8,
+  "merkle_tree_hash_time": 2.56e-7,
+  "snark_constraint_time": 0.000004642,
+  "ticket_hash": 2.56e-7,
+})
+
+md`### SNARKs`
+
+constraints = ({
+  "merkle_tree_hash_constraints": 1376,
+  "ticket_constraints": 1376,
+  "merkle_tree_datahash_constraints": 56000,
+  "kdf_constraints": 25000,
+  "column_leaf_hash_constraints": 1376,
+  "snark_size": 192,
+  "porep_snark_partition_constraints": 100000000,
+  "post_snark_partition_constraints": 3000000,
+})
+
+
 md`## Filters`
 
 // Window size MiB
@@ -192,117 +331,6 @@ graph_constraints(delta_solved, 'chung_delta', 'porep_time_parallel', ['proof_na
 plot3d(delta_solved, 'chung_delta', 'epost_time_parallel', 'onboard_tib_time_days')
 md`---`
 
-md`### Parameters`
-
-base = ({
-  "porep_lambda": 10,
-  "post_mtree_layers_cached": 25,
-  "post_lambda": 10,
-  "sector_size_gib": 32,
-  "window_size_mib": 1024,
-  "wrapper_parents": 100,
-  "!StackedReplicaUnaligned": true
-})
-
-md`### Constants`
-
-md`#### Graph`
-
-stackedChungParams = ({
-  "graph_name": "Chung",
-  "!StackedChungParameters": true,
-  "chung_delta": 0.01,
-  "expander_parents": 16
-})
-
-stackedSDRParams = ({
-  "graph_name": "SDR",
-  "!StackedSDRParameters": true,
-  "sdr_delta": 0.01
-})
-
-md`#### Proofs`
-
-wrapper = ({
-  "proof_name": "wrapping",
-  "!ElectionWithFallbackPoSt": true,
-  "!VectorR": true,
-  "!Wrapping": true,
-})
-
-wrapperVariant = ({
-  "proof_name": "wrappingVariant",
-  "!ElectionWithFallbackPoSt": true,
-  "!VectorR": true,
-  "!WrappingVariant": true,
-})
-
-stackedReplicas = ({
-  "proof_name": "stackedReplicas",
-  "!ElectionWithFallbackPoSt": true,
-  "!SectorEncoding": true,
-  "!VectorR": true,
-  "!StackedReplicas": true
-})
-
-md`#### Protocol`
-
-filecoin = ({
-  "ec_e": 5,
-  "fallback_period_days": 1,
-  "fallback_ratio": 0.05,
-  "filecoin_reseals_per_year": 1,
-  "filecoin_storage_capacity_eib": 1,
-  "node_size": 32,
-  "polling_time": 15,
-  "cost_amax": 1,
-  "hashing_amax": 2,
-  "spacegap": 0.2,
-  "proofs_block_fraction": 0.3,
-  "epost_challenged_sectors_fraction": 0.04,
-})
-
-md`### Miner`
-
-md`#### Hardware Config`
-
-rig = ({
-  "rig_cores": 16,
-  "rig_snark_parallelization": 2,
-  "rig_malicious_cost_per_year": 2.5,
-  "rig_ram_gib": 32,
-  "rig_storage_latency": 0.003,
-  "rig_storage_min_tib": 100,
-  "rig_storage_parallelization": 16,
-  "rig_storage_read_mbs": 80,
-  "cost_gb_per_month": 0.0025,
-  "extra_storage_time": 0,
-  "hash_gb_per_second": 5,
-})
-
-md`#### Benchmarks`
-
-bench = ({
-  "column_leaf_hash_time": 2.56e-7,
-  "kdf_time": 1.28e-8,
-  "merkle_tree_datahash_time": 1.28e-8,
-  "merkle_tree_hash_time": 2.56e-7,
-  "snark_constraint_time": 0.000004642,
-  "ticket_hash": 2.56e-7,
-})
-
-md`### SNARKs`
-
-constraints = ({
-  "merkle_tree_hash_constraints": 1376,
-  "ticket_constraints": 1376,
-  "merkle_tree_datahash_constraints": 56000,
-  "kdf_constraints": 25000,
-  "column_leaf_hash_constraints": 1376,
-  "snark_size": 192,
-  "porep_snark_partition_constraints": 100000000,
-  "post_snark_partition_constraints": 3000000,
-})
 
 md`---`
 
