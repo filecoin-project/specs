@@ -14,21 +14,38 @@ viewof config = {
 }
 
 md`## Filters`
-viewof window_sizes_mib_config = checkbox({
+
+// Window size MiB
+window_size_mib_choices = [4, 64, 128, 1024, 16384, 32768]
+viewof window_size_mib_config = checkbox({
   title: "Window Sizes",
-  options: [4, 64, 128, 1024, 16384, 32768].map(d => ({value: d, label: d})),
-  value: [4, 64, 128, 1024, 16384, 32768],
+  options: window_size_mib_choices.map(d => ({value: d, label: d})),
+  value: window_size_mib_choices,
 })
 
-md`## Graphs`
+md`#### Vars that matter`
 
+viewof decoding_time_parallel_weight = number({value: 1})
+viewof proofs_per_block_weight = number({value: 1})
+viewof epost_time_parallel_weight = number({value: 1})
+
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'window_size_mib',
+  'decoding_time_parallel',
+  'proofs_per_block_kib',
+  'epost_time_parallel',
+  'utility',
+], [], 'utility')
+
+md`## Graphs`
 md`### On-chain footprint
 
-This graph shows the average proofs per block (assuming a network size of ${filecoin.filecoin_storage_capacity_eib}EiB)
+This graphshows the average proofs per block (assuming a network size of ${filecoin.filecoin_storage_capacity_eib}EiB)
 `
 
 viewof proofs_per_block_kib_ruler = chooser(solved_many, 'proofs_per_block_kib', 2000)
-
 bar_chart(solved_many, 'proofs_per_block_kib', [
   'seals_size_per_block_kib',
   'posts_size_per_block_kib',
@@ -41,7 +58,18 @@ viewof decoding_time_parallel_ruler = chooser(solved_many, 'decoding_time_parall
 bar_chart(solved_many, 'decoding_time_parallel', [
   'encoding_window_time_parallel',
   'window_read_time_parallel',
-], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < Math.pow(10, decoding_time_parallel_ruler)})
+], ['proof_name', 'graph_name', 'window_size_mib'], {
+  filter: d => d < Math.pow(10, decoding_time_parallel_ruler),
+  yrule: Math.pow(10, decoding_time_parallel_ruler)
+})
+
+viewof decoding_time_ruler = chooser(solved_many, 'decoding_time', 16)
+
+bar_chart(solved_many, 'decoding_time', [
+  'encoding_window_time',
+  'window_read_time',
+], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < Math.pow(10, decoding_time_ruler)})
+
 
 // table_constraints(solved_many, [
 //   'proof_name',
@@ -61,6 +89,17 @@ bar_chart(solved_many, 'porep_time_parallel', [
   'porep_commit_time_parallel',
   'encoding_time_parallel'
 ], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < Math.pow(10, porep_time_parallel_ruler)})
+
+bar_chart(solved_many, 'porep_commit_time', [
+  'commr_time',
+  'commq_time',
+  'commc_time'
+], ['proof_name', 'graph_name', 'window_size_mib'])
+
+bar_chart(solved_many, 'commc_time', [
+  'commc_tree_time',
+  'commc_leaves_time',
+], ['proof_name', 'graph_name', 'window_size_mib'])
 
 md`### EPoSt`
 
@@ -242,16 +281,6 @@ constraints = ({
 
 md`---`
 
-md`#### Vars that matter`
-
-table_constraints(solved_many, [
-  'proof_name',
-  'graph_name',
-  'window_size_mib',
-  'decoding_time_parallel',
-  'block_size_kib',
-  'epost_time_parallel',
-], [])
 
 md`#### Other important vars`
 
@@ -267,75 +296,75 @@ table_constraints(solved_many, [
 ], [])
 
 md`#### Graphs`
-table_constraints(solved_many, [
-  'proof_name',
-  'graph_name',
-  'window_size_mib',
-  'porep_lambda',
-  'porep_challenges',
-  'post_lambda',
-  'post_challenges',
-  'stacked_layers',
-  'expander_parents',
-  'drg_parents',
-  'windows',
-  'window_size_mib',
-  'sector_size_gib',
-], [])
+// table_constraints(solved_many, [
+//   'proof_name',
+//   'graph_name',
+//   'window_size_mib',
+//   'porep_lambda',
+//   'porep_challenges',
+//   'post_lambda',
+//   'post_challenges',
+//   'stacked_layers',
+//   'expander_parents',
+//   'drg_parents',
+//   'windows',
+//   'window_size_mib',
+//   'sector_size_gib',
+// ], [])
 
 md`#### PoRep`
-table_constraints(solved_many, [
-  'proof_name',
-  'graph_name',
-  'window_size_mib',
-  'encoding_time',
-  'encoding_time_parallel',
-  'porep_commit_time',
-  'porep_commit_time_parallel',
-  'porep_snark_time',
-  'porep_snark_time_parallel',
-  'porep_proof_size',
-  'porep_snark_constraints',
-  'porep_time'
-], [])
+// table_constraints(solved_many, [
+//   'proof_name',
+//   'graph_name',
+//   'window_size_mib',
+//   'encoding_time',
+//   'encoding_time_parallel',
+//   'porep_commit_time',
+//   'porep_commit_time_parallel',
+//   'porep_snark_time',
+//   'porep_snark_time_parallel',
+//   'porep_proof_size',
+//   'porep_snark_constraints',
+//   'porep_time'
+// ], [])
 
 md`#### PoSt`
-table_constraints(solved_many, [
-  'proof_name',
-  'graph_name',
-  'window_size_mib',
-  'post_proof_size',
-  'post_snark_constraints',
-  'post_snark_time',
-  'post_snark_time_parallel',
-  'post_time',
-  'post_time_parallel',
-  'post_inclusions_time',
-  'post_inclusions_time_parallel',
-  'post_data_access',
-  'post_data_access_parallel'
-], [])
+// table_constraints(solved_many, [
+//   'proof_name',
+//   'graph_name',
+//   'window_size_mib',
+//   'post_proof_size',
+//   'post_snark_constraints',
+//   'post_snark_time',
+//   'post_snark_time_parallel',
+//   'post_time',
+//   'post_time_parallel',
+//   'post_inclusions_time',
+//   'post_inclusions_time_parallel',
+//   'post_data_access',
+//   'post_data_access_parallel'
+// ], [])
 
 md`#### EPoSt`
-table_constraints(solved_many, [
-  'proof_name',
-  'graph_name',
-  'window_size_mib',
-  'epost_time',
-  'epost_time_parallel',
-  'epost_inclusions_time',
-  'epost_inclusions_time_parallel',
-  'epost_data_access',
-  'epost_data_access_parallel'
-], [])
+// table_constraints(solved_many, [
+//   'proof_name',
+//   'graph_name',
+//   'window_size_mib',
+//   'epost_time',
+//   'epost_time_parallel',
+//   'epost_inclusions_time',
+//   'epost_inclusions_time_parallel',
+//   'epost_data_access',
+//   'epost_data_access_parallel'
+// ], [])
 
 md`## Debug`
-report_from_result(solved_many[0], combos[0])
-report_from_result(solved_many[1], combos[1])
-report_from_result(solved_many[2], combos[2])
-report_from_result(solved_many[3], combos[3])
-report_from_result(solved_many[4], combos[4])
-report_from_result(solved_many[5], combos[5])
+// report_from_result(solved_many[0], combos[0])
+// report_from_result(solved_many[1], combos[1])
+// report_from_result(solved_many[2], combos[2])
+// report_from_result(solved_many[3], combos[3])
+// report_from_result(solved_many[4], combos[4])
+// report_from_result(solved_many[5], combos[5])
 
 md`---`
 md`## Dev`
@@ -347,19 +376,12 @@ combos = {
   let start = [constants]
   let proofs = extend_query(start, [wrapperVariant, wrapper, stackedReplicas])
   let graphs = extend_query(proofs, [stackedChungParams, stackedSDRParams])
-  let query = extend_query(graphs, window_sizes_mibs_config.map(d => ({window_size_mib: d})))
+  let query = extend_query(graphs, window_size_mib_choices.map(d => ({window_size_mib: +d})))
 
   return query
 }
 
 createJsonDownloadButton(combos)
-
-// combos = [wrapperVariant, wrapper, stackedReplicas]
-//   .map(d => [
-//     Object.assign({}, constants, d, stackedChungParams, config),
-//     Object.assign({}, constants, d, stackedSDRParams, config)
-//   ]).flat()
-
 
 solved_many_pre = (await solve_many(combos)).map(d => d[0])
   .map(d => {
@@ -367,7 +389,22 @@ solved_many_pre = (await solve_many(combos)).map(d => d[0])
     return d
   })
 
+utility_function = (x1, x2, x3, w1, w2, w3) => w1 * x1 + w2 * x2 + w3 * x3
+
+
 solved_many = solved_many_pre
+  .filter(d => window_size_mib_config.some(c => d['window_size_mib'] === +c))
+  .map(d => {
+    const utility = utility_function(
+      d['decoding_time_parallel'],
+      d['proofs_per_block_kib'],
+      d['epost_time_parallel'],
+      decoding_time_parallel_weight,
+      proofs_per_block_weight,
+      epost_time_parallel_weight
+    )
+    return Object.assign({}, d, {utility: utility})
+  })
 // solved_manys = (await solve_manys(combos)).flat()
 
 createJsonDownloadButton(solved_many)
@@ -386,6 +423,22 @@ mtree_solved = (await solve_many(mtree_query)).map(d => d[0])
 
 
 md`### Orient`
+
+function dump_vars() {
+  return fetch(orientServer + '/dump-vars')
+    .then(response => response.json())
+    .then(json => {
+
+      const map = {}
+      json.forEach(d => {
+        map[d.name] = d
+      })
+
+      return map
+    })
+}
+
+vars = dump_vars()
 
 function solve_multiple(json) {
   return fetch(orientServer + '/solve', {
@@ -465,10 +518,10 @@ ${Object.keys(result).sort()
   return html
 }
 
-bar_chart = (data, title, vars, group_by, opts) => {
-  let organized_data = data
+bar_chart = (raw, title, variables, group_by, opts) => {
+  let data = raw
       .map(d => {
-        return vars.map(key => ({
+        return variables.map(key => ({
           construction: group_by.map(g => `${d[g]}`).join(', '),
           type: key,
           value: d[key],
@@ -476,22 +529,59 @@ bar_chart = (data, title, vars, group_by, opts) => {
         }))
       })
       .flat()
+  let discarded_data = []
+  let organized_data = []
+
   if (opts && opts.filter) {
-    organized_data = organized_data.filter(d => opts.filter(d['title']))
+    organized_data = data.filter(d => opts.filter(d['title']))
+    discarded_data = data.filter(d => !opts.filter(d['title']))
+  }
+  let graph = {
+    "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+    "title": `Composition of ${title} (${vars[title].type || ''})`,
+    vconcat: [
+      {
+        layer: [{
+          "width": 800,
+          "mark": "bar",
+          "data": { values: organized_data },
+          "encoding": {
+            "x": {"aggregate": "sum", "field": "value", "type": "quantitative"},
+            "y": {"field": "construction", "type": "nominal"},
+            "color": {"field": "type", "type": "nominal"}
+          }
+        }]
+      },
+      {
+        "mark": "bar",
+        "width": 800,
+        "title": "Data filtered out",
+        "data": { values: discarded_data },
+        "encoding": {
+          "x": {"aggregate": "sum", "field": "value", "type": "quantitative"},
+          "y": {"field": "construction", "type": "nominal"},
+          "color": {"field": "type", "type": "nominal"}
+        }
+      }
+    ]
   }
 
-  return vl({
-    "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
-    "title": "Composition of " + title,
-    "data": { values: organized_data },
-    "width": 800,
-    "mark": "bar",
-    "encoding": {
-      "x": {"aggregate": "sum", "field": "value", "type": "quantitative"},
-      "y": {"field": "construction", "type": "nominal"},
-      "color": {"field": "type", "type": "nominal"}
-    }
-  })
+  if (opts && opts.yrule) {
+    const rule = [{}]
+    rule[0][title] = opts.yrule
+    graph.vconcat[0].layer.push({
+      "data": { "values": rule },
+      "layer": [{
+        "mark": "rule",
+        "encoding": {
+          "x": {"field": title, "type": "quantitative"},
+          "color": {"value": "red"},
+          "size": {"value": 3}
+        }
+      }]
+    })
+  }
+  return vl(graph)
 }
 
 add_query = (query, ext) => {
@@ -543,11 +633,13 @@ table_constraints = (solutions, filter, group_by, sort_by) => {
 
 chooser = (data, field, base) => {
   const log_base = base ? Math.log10(base) : false
-  const maximum = Math.log10(Math.max(...solved_many.map(d => d[field]))) 
+  const maximum = Math.log10(Math.max(...solved_many.map(d => d[field])))+0.5
   const minimum = Math.log10(Math.min(...solved_many.map(d => d[field])))
-  const format = v => `${_f(Math.pow(10, v))}`
+  const format = v => `${_f(Math.pow(10, v))} ${vars[field].type || ''}`
 
   return slider({
+    title: field,
+    description: vars[field].description,
     min: minimum,
     max: maximum,
     value: log_base || maximum,
@@ -601,7 +693,7 @@ function flatten(items) {
 
 md`### Imports`
 
-import {slider, checkbox} from "@jashkenas/inputs"
+import {slider, checkbox, number} from "@jashkenas/inputs"
 d3 = require('d3')
 vl = require('@observablehq/vega-lite')
 import { createJsonDownloadButton } from "@trebor/download-json"
