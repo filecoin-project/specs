@@ -56,7 +56,7 @@ func (st *StorageMinerActorState_I) _processStagedCommittedSectors(rt Runtime) {
 
 func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime, lastPoStResponse block.ChainEpoch) []deal.DealID {
 	// TODO: verify if we should update Sector utilization for failing sectors
-	// depends on decision around collateral requirement for inactive power
+	// depends on decision around collateral requirement for the Proving Set
 	// and what happens when a failing sector expires
 
 	ret := make([]deal.DealID, 0)
