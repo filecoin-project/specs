@@ -108,7 +108,7 @@ func (st *StorageMarketActorState_I) _assertDealExpireAfterMaxProveCommitWindow(
 
 }
 
-// Call by PublishStorageDeals and GetInitialUtilization (consider remove this)
+// Call by PublishStorageDeals
 // This is the check before a StorageDeal appears onchain
 // It checks the following:
 //   - verify deal did not expire when it is signed
@@ -189,8 +189,16 @@ func (st *StorageMarketActorState_I) _lockFundsForStorageDeal(rt Runtime, deal d
 	st._lockBalance(rt, p.Provider(), p.ProviderBalanceRequirement())
 }
 
-func (st *StorageMarketActorState_I) _safeGetOnChainDeal(rt Runtime, dealID deal.DealID) deal.OnChainDeal {
+func (st *StorageMarketActorState_I) _getOnchainDeal(dealID deal.DealID) (deal deal.OnChainDeal, ok bool) {
 	deal, found := st.Deals()[dealID]
+	if !found {
+		return nil, false
+	}
+	return deal, true
+}
+
+func (st *StorageMarketActorState_I) _safeGetOnChainDeal(rt Runtime, dealID deal.DealID) deal.OnChainDeal {
+	deal, found := st._getOnchainDeal(dealID)
 	if !found {
 		rt.AbortStateMsg("sm._safeGetOnChainDeal: dealID not found in Deals.")
 	}
@@ -286,4 +294,17 @@ func (st *StorageMarketActorState_I) _terminateDeal(rt Runtime, dealID deal.Deal
 	st._unlockBalance(rt, dealP.Client(), clientCollateral+lockedFee)
 
 	return st._slashDealCollateral(rt, dealP)
+}
+
+func (st *StorageMarketActorState_I) _assertEpochEqual(rt Runtime, epoch1 block.ChainEpoch, epoch2 block.ChainEpoch) {
+	if epoch1 != epoch2 {
+		rt.AbortArgMsg("sm._assertEpochEqual: different epochs")
+	}
+}
+
+func (st *StorageMarketActorState_I) _getSectorPowerFromDeals(sectorDuration block.ChainEpoch, sectorSize block.StoragePower, dealPs []deal.StorageDealProposal) block.StoragePower {
+	TODO()
+
+	ret := block.StoragePower(0)
+	return ret
 }

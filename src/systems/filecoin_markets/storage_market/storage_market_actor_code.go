@@ -113,7 +113,7 @@ func (a *StorageMarketActorCode_I) AddBalance(rt Runtime) {
 
 func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDeals []deal.StorageDeal) []PublishStorageDealResponse {
 
-	TODO() // verify StorageMinerActor
+	TODO() // verify StorageMinerActor (note client can put the signed message onchain too)
 
 	h, st := a.State(rt)
 
@@ -173,12 +173,13 @@ func (a *StorageMarketActorCode_I) VerifyPublishedDealIDs(rt Runtime, dealIDs []
 	Release(rt, h, st)
 }
 
-func (a *StorageMarketActorCode_I) ActivateDeals(rt Runtime, dealIDs []deal.DealID) []deal.OnChainDeal {
+func (a *StorageMarketActorCode_I) ActivateDeals(rt Runtime, sectorExpiration block.ChainEpoch, sectorSize block.StoragePower, dealIDs []deal.DealID) block.StoragePower {
 
 	TODO() // verify StorageMinerActor
 
 	h, st := a.State(rt)
-	ret := make([]deal.OnChainDeal, len(dealIDs))
+	lastDealExpiration := block.ChainEpoch(0)
+	dealPs := make([]deal.StorageDealProposal, len(dealIDs))
 
 	for _, dealID := range dealIDs {
 		publishedDeal := st._safeGetOnChainDeal(rt, dealID)
@@ -187,12 +188,24 @@ func (a *StorageMarketActorCode_I) ActivateDeals(rt Runtime, dealIDs []deal.Deal
 		dealP := publishedDeal.Deal().Proposal()
 		st._assertDealNotYetExpired(rt, dealP)
 
-		onchainDeal := st._activateDeal(rt, publishedDeal)
-		ret = append(ret, onchainDeal)
+		dealEnd := dealP.EndEpoch()
+
+		if dealEnd > lastDealExpiration {
+			lastDealExpiration = dealEnd
+		}
+
+		dealPs = append(dealPs, dealP)
+		st._activateDeal(rt, publishedDeal)
 	}
+
+	st._assertEpochEqual(rt, lastDealExpiration, sectorExpiration)
+
+	sectorDuration := sectorExpiration - rt.CurrEpoch()
+	ret := st._getSectorPowerFromDeals(sectorDuration, sectorSize, dealPs)
 
 	UpdateRelease(rt, h, st)
 
+	// TODO potentially refund clients for started deals
 	return ret
 
 }
@@ -225,11 +238,15 @@ func (a *StorageMarketActorCode_I) ProcessDealSlash(rt Runtime, dealIDs []deal.D
 }
 
 func (a *StorageMarketActorCode_I) ProcessDealPayment(rt Runtime, dealIDs []deal.DealID, newPaymentEpoch block.ChainEpoch) {
+	TODO() // verify caller must be StorageMinerActor
+
 	h, st := a.State(rt)
 
 	for _, dealID := range dealIDs {
-		deal := st._safeGetOnChainDeal(rt, dealID)
-		st._assertActiveDealState(rt, dealID)
+		deal, ok := st._getOnChainDeal(dealID)
+		if !ok {
+			continue
+		}
 
 		fee := st._getStorageFeeSinceLastPayment(rt, deal, newPaymentEpoch)
 
@@ -248,6 +265,8 @@ func (a *StorageMarketActorCode_I) ProcessDealPayment(rt Runtime, dealIDs []deal
 // remove deals from ActiveDeals
 // return collaterals to both miner and client
 func (a *StorageMarketActorCode_I) ProcessDealExpiration(rt Runtime, dealIDs []deal.DealID) {
+	TODO() // verify caller must be StorageMinerActor
+
 	h, st := a.State(rt)
 
 	for _, dealID := range dealIDs {

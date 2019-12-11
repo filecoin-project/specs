@@ -62,6 +62,7 @@ type SectorProveCommitInfo struct {
     SectorNumber
     Proof             SealProof
     InteractiveEpoch  block.ChainEpoch
+    Expiration        block.ChainEpoch
 }
 
 // PersistentProofAux is meta data required to generate certain proofs
