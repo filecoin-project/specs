@@ -21,9 +21,16 @@ var SystemError = exitcode.SystemError
 var IMPL_FINISH = util.IMPL_FINISH
 var TODO = util.TODO
 
+// Name should be set per unique filecoin network
+var Name = "mainnet"
+
 func ActorSubstateCID_Equals(x, y ActorSubstateCID) bool {
 	IMPL_FINISH()
 	panic("")
+}
+
+func NetworkName() string {
+	return Name
 }
 
 // ActorCode is the interface that all actor code types should satisfy.
