@@ -57,8 +57,9 @@ func (st *InitActorState_I) CID() ipld.CID {
 func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
 	h := rt.AcquireState()
 	st := &InitActorState_I{
-		AddressMap_: map[addr.Address]addr.ActorID{}, // TODO: HAMT
-		NextID_:     addr.ActorID(addr.FirstNonSingletonActorId),
+		AddressMap_:  map[addr.Address]addr.ActorID{}, // TODO: HAMT
+		NextID_:      addr.ActorID(addr.FirstNonSingletonActorId),
+		NetworkName_: vmr.NetworkName(),
 	}
 	UpdateRelease(rt, h, st)
 	return rt.ValueReturn(nil)

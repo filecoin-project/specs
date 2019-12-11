@@ -31,13 +31,12 @@ Through most of this cycle, sectors will be part of the miner's `Proving Set`. T
 - `Active Sectors` which have successfully been proven and are used in {{<sref storage_power_consensus>}} (SPC), and
 - `Recovering Sectors` which were faulted and are poised to recover through a new PoSt.
 
-Sectors in the `Proving Set` can be faulted and marked as `Failing` by the miner itself declaring a fault (`Declared Faults`), or through automatic fault detection by the network using on-chain data (`Detected Faults`).
+Sectors in the `Proving Set` can be faulted and marked as `Failing` by the miner itself declaring a fault (`Declared Faults`), or through automatic fault detection by the network using on-chain data (`Detected Faults`). Note that storage in the `Proving Set` is used in SPC (specifically in-deal storage from the `Proving Set` counts toward {{<sref storage_power>}}). All storage is tracked by the system and affect a miner's ability to serve as a storage provider in the Filecoin Storage Market. 
+
 
 A sector that is in the `Failing` state for three consecutive `Proving Period`s will be terminated (`Terminated Faults`) meaning its data will be deemed unrecoverable by PoSt and the sector will have to be SEALed once more (as part of PoRep).
 
 Conversely `RecoverFaults()` can be called any time by the miner on a failing sector to return it to the `ProvingSet` and attempt to prove data is being stored once more. For instance an Active sector might move into the failing state during a power outage (through a declared or detected fault). At the end of the outage, the miner may call `RecoverFaults` to transition the state to `Recovering` before proving it once more and returning it to `Active`. 
-
-Through the above workflows, Filecoin (or Storage more generally) can more generally be described as being **Active** (`Active` sectors), or **Inactive** (`Committed`, `Recovering` and `Failing` sectors). Specifically, active storage is used in SPC (and in-deal active storage counts toward {{<sref storage_power>}}) whereas inactive storage is not. Both active and inactive storage is tracked by the system and affect a miner's ability to serve as a storage provider in the Filecoin Storage Market. 
 
 We illustrate these states below.
 
