@@ -6,7 +6,8 @@ title: Block Producer
 
 # Mining Blocks
 
-A miner registered with the storage power actor may begin generating and checking election tickets. 
+A miner registered with the storage power actor may begin generating and checking election tickets
+if it has proven storage meeting the minimum miner size threshold requirement. 
 
 In order to do so, the miner must be running chain validation, and be keeping track of the most recent
 blocks received. A miner's new block will be based on parents from a previous epoch.
@@ -59,9 +60,10 @@ This sequence of events applies only when the node is in the `CHAIN_FOLLOW` sync
 
 Producing a block for epoch `H` requires computing a tipset for epoch `H-1` (or possibly a prior epoch,
 if no blocks were received for that epoch). Using the state produced by this tipset, a miner can
-scratch winning ElectionPoSt ticket(s), and armed with the requisite `ElectionPoStOutput`, produce a new block.
+scratch winning ElectionPoSt ticket(s). 
+Armed with the requisite `ElectionPoStOutput`, as well as a new randomness ticket generated in this epoch, a miner can produce a new block.
 
-See {{<sref vm_interpreter>}} for details of parent tipset evaluation, and {{block}} for constraints 
+See {{<sref vm_interpreter>}} for details of parent tipset evaluation, and {{<sref block>}} for constraints 
 on valid block header values. 
 
 To create a block, the eligible miner must compute a few fields:
