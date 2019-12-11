@@ -6,27 +6,6 @@ md`# Proofs Tradeoff Report
 `
 
 md`## Sliders`
-viewof config = {
-  const form = formToObject(html`
-<form>
-  <div><input type=range name=post_lambda min=1 max=128 step=1 value=10> <i>post_lambda</i></div>
-</form>`)
-  return form
-}
-
-jsonToSliders = (obj, assigned) => {
-  const inputs = Object.keys(obj).map(d => `<div><input type=range name=${d} min=${obj[d].min} max=${obj[d].max} step=${obj[d].step} value=${obj[d].value}> <i>${d}</i></div>`)
-  const form = formToObject(html`
-<form>
-  ${inputs.join('\n')}
-</form>`)
-
-  if (assigned) {
-    form.value = Object.assign({}, form.value, assigned)
-  }
-
-  return form
-}
 
 md`### Parameters`
 
@@ -711,6 +690,20 @@ chooser = (data, field, base) => {
 md`### Utils`
 
 _f = (d) => typeof d == 'number' || !Number.isNaN(+d) ? d3.format('0.3~f')(d) : d
+
+jsonToSliders = (obj, assigned) => {
+  const inputs = Object.keys(obj).map(d => `<div><input type=range name=${d} min=${obj[d].min} max=${obj[d].max} step=${obj[d].step} value=${obj[d].value}> <i>${d}</i></div>`)
+  const form = formToObject(html`
+<form>
+  ${inputs.join('\n')}
+</form>`)
+
+  if (assigned) {
+    form.value = Object.assign({}, form.value, assigned)
+  }
+
+  return form
+}
 
 function formToObject (form) {
   // Array.from(form.children).forEach(el => {
