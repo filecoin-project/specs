@@ -4733,9 +4733,12 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// functions, and should be used for any function whose computation is expensive.
 </span><span class="c1"></span>    <span class="nf">Compute</span><span class="p">(</span><span class="nx">ComputeFunctionID</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[</span><span class="nx">Any</span><span class="p">])</span> <span class="nx">Any</span>
 
-    <span class="c1">// Send allows the current execution context to invoke methods on other actors in the system.
+    <span class="c1">// Sends a message to another actor.
+</span><span class="c1"></span>    <span class="c1">// If the invoked method does not return successfully, this caller will be aborted too.
 </span><span class="c1"></span>    <span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">InvocOutput</span>
-    <span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="p">(</span><span class="nx">output</span> <span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">exitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span>
+    <span class="c1">// Sends a message to another actor, trapping an unsuccessful execution.
+</span><span class="c1"></span>    <span class="c1">// This may only be invoked by the singleton Cron actor.
+</span><span class="c1"></span>    <span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="p">(</span><span class="nx">output</span> <span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">exitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span>
 
     <span class="c1">// Computes an address for a new actor. The returned address is intended to uniquely refer to
 </span><span class="c1"></span>    <span class="c1">// the actor even in the event of a chain re-org (whereas an ID-address might refer to a
@@ -4828,9 +4831,16 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">var</span> <span class="nx">IMPL_FINISH</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">IMPL_FINISH</span>
 <span class="kd">var</span> <span class="nx">TODO</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">TODO</span>
 
+<span class="c1">// Name should be set per unique filecoin network
+</span><span class="c1"></span><span class="kd">var</span> <span class="nx">Name</span> <span class="p">=</span> <span class="s">&#34;mainnet&#34;</span>
+
 <span class="kd">func</span> <span class="nf">ActorSubstateCID_Equals</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span> <span class="nx">ActorSubstateCID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">NetworkName</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">Name</span>
 <span class="p">}</span>
 
 <span class="c1">// ActorCode is the interface that all actor code types should satisfy.
@@ -5283,6 +5293,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="p">(</span><span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">CronActorAddr</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">_sendInternalOutputs</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">CatchErrors</span><span class="p">)</span>
 <span class="p">}</span>
 

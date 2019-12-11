@@ -4663,19 +4663,53 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<p>Filecoin nodes use the libp2p protocol for peer discovery, peer routing, and message multicast, and so on. Libp2p is a set of modular protocols common to the peer-to-peer networking stack. Nodes open connections with one another and mount different protocols or streams over the same connection. In the initial handshake, nodes exchange the protocols that each of them supports and all Filecoin related protcols will be mounted under <code>/filecoin/...</code> protocol identifiers.</p>
+<p>Filecoin nodes use the libp2p protocol for peer discovery, peer routing, and message multicast, and so on. Libp2p is a set of modular protocols common to the peer-to-peer networking stack. Nodes open connections with one another and mount different protocols or streams over the same connection. In the initial handshake, nodes exchange the protocols that each of them supports and all Filecoin related protcols will be mounted under <code>/fil/...</code> protocol identifiers.</p>
 
 <p>Here is the list of libp2p protocols used by Filecoin.</p>
 
 <ul>
-<li>Graphsync: <a href="https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md">Draft spec</a></li>
-<li>Bitswap:  TODO</li>
-<li>Gossipsub: block headers and messages are broadcasted through a Gossip PubSub protocol where nodes can subscribe to topics such as <code>NewBlock</code>, <code>BlockHeader</code>, <code>BlockMessage</code>, etc and receive messages in those topics. When receiving messages related to a topic, nodes processes the message and forwards it to its peers who also subscribed to the same topic.  Spec is <a href="https://github.com/libp2p/specs/tree/master/pubsub/gossipsub">here</a></li>
-<li>KademliaDHT: Kademlia DHT is a distributed hash table with a logarithmic bound on the maximum number of lookups for a particular node. Kad DHT is used primarily for peer routing as well as peer discovery in the Filecoin protocol.  Spec TODO <a href="https://github.com/libp2p/go-libp2p-kad-dht">reference implementation</a></li>
-<li>Bootstrap List: Bootstrap is a list of nodes that a new node attempts to connect upon joining the network. The list of bootstrap nodes and their addresses are defined by the users.</li>
-<li>Peer Exchange: spec <a href="https://github.com/libp2p/specs/issues/222">TODO</a></li>
+<li>Graphsync:
+
+<ul>
+<li>Graphsync is used to transfer blockchain and user data</li>
+<li><a href="https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md">Draft spec</a></li>
+<li>No filecoin specific modifications to the protocol id</li>
+</ul></li>
+<li>Gossipsub:
+
+<ul>
+<li>block headers and messages are broadcasted through a Gossip PubSub protocol where nodes can subscribe to topics for blockchain data and receive messages in those topics. When receiving messages related to a topic, nodes processes the message and forwards it to its peers who also subscribed to the same topic.<br /></li>
+<li>Spec is <a href="https://github.com/libp2p/specs/tree/master/pubsub/gossipsub">here</a></li>
+<li>No filecoin specific modifications to the protocol id.  However the topic identifiers MUST be of the form <code>fil/blocks/&lt;network-name&gt;</code> and <code>fil/msgs/&lt;network-name&gt;</code></li>
+</ul></li>
+<li>KademliaDHT:
+
+<ul>
+<li>Kademlia DHT is a distributed hash table with a logarithmic bound on the maximum number of lookups for a particular node. Kad DHT is used primarily for peer routing as well as peer discovery in the Filecoin protocol.</li>
+<li>Spec TODO <a href="https://github.com/libp2p/go-libp2p-kad-dht">reference implementation</a></li>
+<li>The protocol id must be of the form <code>fil/kad/&lt;network-name&gt;</code></li>
+</ul></li>
+<li>Bootstrap List:
+
+<ul>
+<li>Bootstrap is a list of nodes that a new node attempts to connect upon joining the network. The list of bootstrap nodes and their addresses are defined by the users.</li>
+</ul></li>
+<li>Peer Exchange:
+
+<ul>
+<li>Peer Exchange is a discovery protocol enabling peers to create and issue queries for desired peers against their existing peers</li>
+<li>spec <a href="https://github.com/libp2p/specs/issues/222">TODO</a></li>
+<li>No Filecoin specific modifications to the protocol id.</li>
+</ul></li>
 <li>DNSDiscovery: Design and spec needed before implementing</li>
 <li>HTTPDiscovery: Design and spec needed before implementing</li>
+<li>Hello:
+
+<ul>
+<li>Hello protocol handles new connections to filecoin nodes.  It is an important part of the discovery process for ambient protocols (like KademliaDHT)</li>
+<li>Spec TODO.</li>
+<li>No Filecoin specific modifications to the protocol id.</li>
+</ul></li>
 </ul>
 </article>
 

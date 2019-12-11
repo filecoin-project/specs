@@ -405,7 +405,7 @@ All Systems, as defined in this document, require the following:
       
       <guid>/docs/systems/filecoin_vm/sysactors/init_actor/</guid>
       <description>(You can see the old InitActor here )
-import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: addr.ActorID} NextID addr.ActorID _assignNextID() addr.ActorID } type InitActorCode struct { Constructor(r vmr.Runtime) Exec(r vmr.Runtime, code actor.CodeID, params actor.MethodParams) addr.Address GetActorIDForAddress(r vmr.Runtime, address addr.Address) addr.ActorID }  package sysactors import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; import exitcode &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&amp;#34; import util &amp;#34;github.</description>
+import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: addr.ActorID} NextID addr.ActorID NetworkName string _assignNextID() addr.ActorID } type InitActorCode struct { Constructor(r vmr.Runtime, networkName string) Exec(r vmr.Runtime, code actor.CodeID, params actor.MethodParams) addr.Address GetActorIDForAddress(r vmr.Runtime, address addr.Address) addr.ActorID }  package sysactors import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import vmr &amp;#34;github.</description>
     </item>
     
     <item>
@@ -611,8 +611,8 @@ import piece &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/p
       
       <guid>/docs/systems/filecoin_markets/retrieval_market/retrieval_protocols/</guid>
       <description>The retrieval market will initially be implemented as two libp2p services.
- Name: Query Protocol Protocol ID V0: /fil/retrieval/qry/0.0.1 Protocol ID V1: /fil/retrieval/qry/1.0.0  Request: CBOR Encoded RetrievalQuery Data Structure Response: CBOR Encoded RetrievalQueryResponse Data Structure
- Name: Retrieval Protocol Protocol ID V0: /fil/retrieval/0.0.1  V0: Request: CBOR Encoded RetrievalDealProposal Data Structure Response: CBOR Encoded RetrievalDealResponse Data Structure &amp;ndash; Following Request: CBOR Encoded RetrievalPayment Data Structure Response: CBOR Encoded RetrievalDealResponse Data Structure w/ Blocks</description>
+ Name: Query Protocol Protocol ID V0: /fil/&amp;lt;network-name&amp;gt;/retrieval/qry/0.0.1 Protocol ID V1: /fil/&amp;lt;network-name&amp;gt;/retrieval/qry/1.0.0  Request: CBOR Encoded RetrievalQuery Data Structure Response: CBOR Encoded RetrievalQueryResponse Data Structure
+ Name: Retrieval Protocol Protocol ID V0: /fil/&amp;lt;network-name&amp;gt;/retrieval/0.0.1  V0: Request: CBOR Encoded RetrievalDealProposal Data Structure Response: CBOR Encoded RetrievalDealResponse Data Structure &amp;ndash; Following Request: CBOR Encoded RetrievalPayment Data Structure Response: CBOR Encoded RetrievalDealResponse Data Structure w/ Blocks</description>
     </item>
     
     <item>

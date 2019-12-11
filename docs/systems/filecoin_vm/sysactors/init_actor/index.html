@@ -4663,12 +4663,13 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// responsible for create new actors
 </span><span class="c1"></span>    <span class="nx">AddressMap</span>       <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">}</span>
     <span class="nx">NextID</span>           <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span>
+    <span class="nx">NetworkName</span>      <span class="kt">string</span>
 
     <span class="nf">_assignNextID</span><span class="p">()</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">InitActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">Constructor</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span>
+    <span class="nf">Constructor</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">networkName</span> <span class="kt">string</span><span class="p">)</span>
     <span class="nf">Exec</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">code</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
     <span class="nf">GetActorIDForAddress</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span>
 <span class="p">}</span>
@@ -4757,8 +4758,9 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
     <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
     <span class="nx">st</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">InitActorState_I</span><span class="p">{</span>
-        <span class="nx">AddressMap_</span><span class="p">:</span> <span class="kd">map</span><span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">{},</span> <span class="c1">// TODO: HAMT
-</span><span class="c1"></span>        <span class="nx">NextID_</span><span class="p">:</span>     <span class="nx">addr</span><span class="p">.</span><span class="nf">ActorID</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">FirstNonSingletonActorId</span><span class="p">),</span>
+        <span class="nx">AddressMap_</span><span class="p">:</span>  <span class="kd">map</span><span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">{},</span> <span class="c1">// TODO: HAMT
+</span><span class="c1"></span>        <span class="nx">NextID_</span><span class="p">:</span>      <span class="nx">addr</span><span class="p">.</span><span class="nf">ActorID</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">FirstNonSingletonActorId</span><span class="p">),</span>
+        <span class="nx">NetworkName_</span><span class="p">:</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">NetworkName</span><span class="p">(),</span>
     <span class="p">}</span>
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
     <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReturn</span><span class="p">(</span><span class="kc">nil</span><span class="p">)</span>

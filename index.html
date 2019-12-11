@@ -4811,9 +4811,9 @@ https://github.com/alex-shpak/hugo-book
   <img id="spec-logo" src="./docs/filspeclogo.png" />
   <div id="spec-version">
     protocol version: <span id="protocol-version-number">v0.1.0</span><br />
-    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">b796e9cc</span>
+    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">c4382cec</span>
     <br />
-    last published: <span id="spec-version-date">2019-12-10_16:14:17Z</span>
+    last published: <span id="spec-version-date">2019-12-11_10:48:33Z</span>
   </div>
 </div>
 
@@ -9402,19 +9402,53 @@ settings, using all kinds of protocols (eg Bluetooth, LANs, etc).</li>
 
 
 
-<p>Filecoin nodes use the libp2p protocol for peer discovery, peer routing, and message multicast, and so on. Libp2p is a set of modular protocols common to the peer-to-peer networking stack. Nodes open connections with one another and mount different protocols or streams over the same connection. In the initial handshake, nodes exchange the protocols that each of them supports and all Filecoin related protcols will be mounted under <code>/filecoin/...</code> protocol identifiers.</p>
+<p>Filecoin nodes use the libp2p protocol for peer discovery, peer routing, and message multicast, and so on. Libp2p is a set of modular protocols common to the peer-to-peer networking stack. Nodes open connections with one another and mount different protocols or streams over the same connection. In the initial handshake, nodes exchange the protocols that each of them supports and all Filecoin related protcols will be mounted under <code>/fil/...</code> protocol identifiers.</p>
 
 <p>Here is the list of libp2p protocols used by Filecoin.</p>
 
 <ul>
-<li>Graphsync: <a href="https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md">Draft spec</a></li>
-<li>Bitswap:  TODO</li>
-<li>Gossipsub: block headers and messages are broadcasted through a Gossip PubSub protocol where nodes can subscribe to topics such as <code>NewBlock</code>, <code>BlockHeader</code>, <code>BlockMessage</code>, etc and receive messages in those topics. When receiving messages related to a topic, nodes processes the message and forwards it to its peers who also subscribed to the same topic.  Spec is <a href="https://github.com/libp2p/specs/tree/master/pubsub/gossipsub">here</a></li>
-<li>KademliaDHT: Kademlia DHT is a distributed hash table with a logarithmic bound on the maximum number of lookups for a particular node. Kad DHT is used primarily for peer routing as well as peer discovery in the Filecoin protocol.  Spec TODO <a href="https://github.com/libp2p/go-libp2p-kad-dht">reference implementation</a></li>
-<li>Bootstrap List: Bootstrap is a list of nodes that a new node attempts to connect upon joining the network. The list of bootstrap nodes and their addresses are defined by the users.</li>
-<li>Peer Exchange: spec <a href="https://github.com/libp2p/specs/issues/222">TODO</a></li>
+<li>Graphsync:
+
+<ul>
+<li>Graphsync is used to transfer blockchain and user data</li>
+<li><a href="https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md">Draft spec</a></li>
+<li>No filecoin specific modifications to the protocol id</li>
+</ul></li>
+<li>Gossipsub:
+
+<ul>
+<li>block headers and messages are broadcasted through a Gossip PubSub protocol where nodes can subscribe to topics for blockchain data and receive messages in those topics. When receiving messages related to a topic, nodes processes the message and forwards it to its peers who also subscribed to the same topic.<br /></li>
+<li>Spec is <a href="https://github.com/libp2p/specs/tree/master/pubsub/gossipsub">here</a></li>
+<li>No filecoin specific modifications to the protocol id.  However the topic identifiers MUST be of the form <code>fil/blocks/&lt;network-name&gt;</code> and <code>fil/msgs/&lt;network-name&gt;</code></li>
+</ul></li>
+<li>KademliaDHT:
+
+<ul>
+<li>Kademlia DHT is a distributed hash table with a logarithmic bound on the maximum number of lookups for a particular node. Kad DHT is used primarily for peer routing as well as peer discovery in the Filecoin protocol.</li>
+<li>Spec TODO <a href="https://github.com/libp2p/go-libp2p-kad-dht">reference implementation</a></li>
+<li>The protocol id must be of the form <code>fil/kad/&lt;network-name&gt;</code></li>
+</ul></li>
+<li>Bootstrap List:
+
+<ul>
+<li>Bootstrap is a list of nodes that a new node attempts to connect upon joining the network. The list of bootstrap nodes and their addresses are defined by the users.</li>
+</ul></li>
+<li>Peer Exchange:
+
+<ul>
+<li>Peer Exchange is a discovery protocol enabling peers to create and issue queries for desired peers against their existing peers</li>
+<li>spec <a href="https://github.com/libp2p/specs/issues/222">TODO</a></li>
+<li>No Filecoin specific modifications to the protocol id.</li>
+</ul></li>
 <li>DNSDiscovery: Design and spec needed before implementing</li>
 <li>HTTPDiscovery: Design and spec needed before implementing</li>
+<li>Hello:
+
+<ul>
+<li>Hello protocol handles new connections to filecoin nodes.  It is an important part of the discovery process for ambient protocols (like KademliaDHT)</li>
+<li>Spec TODO.</li>
+<li>No Filecoin specific modifications to the protocol id.</li>
+</ul></li>
 </ul>
 
 
@@ -12811,9 +12845,12 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 </span><span class="c1"></span>    <span class="c1">// functions, and should be used for any function whose computation is expensive.
 </span><span class="c1"></span>    <span class="nf">Compute</span><span class="p">(</span><span class="nx">ComputeFunctionID</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[</span><span class="nx">Any</span><span class="p">])</span> <span class="nx">Any</span>
 
-    <span class="c1">// Send allows the current execution context to invoke methods on other actors in the system.
+    <span class="c1">// Sends a message to another actor.
+</span><span class="c1"></span>    <span class="c1">// If the invoked method does not return successfully, this caller will be aborted too.
 </span><span class="c1"></span>    <span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">InvocOutput</span>
-    <span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="p">(</span><span class="nx">output</span> <span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">exitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span>
+    <span class="c1">// Sends a message to another actor, trapping an unsuccessful execution.
+</span><span class="c1"></span>    <span class="c1">// This may only be invoked by the singleton Cron actor.
+</span><span class="c1"></span>    <span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="p">(</span><span class="nx">output</span> <span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">exitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span>
 
     <span class="c1">// Computes an address for a new actor. The returned address is intended to uniquely refer to
 </span><span class="c1"></span>    <span class="c1">// the actor even in the event of a chain re-org (whereas an ID-address might refer to a
@@ -12906,9 +12943,16 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 <span class="kd">var</span> <span class="nx">IMPL_FINISH</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">IMPL_FINISH</span>
 <span class="kd">var</span> <span class="nx">TODO</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">TODO</span>
 
+<span class="c1">// Name should be set per unique filecoin network
+</span><span class="c1"></span><span class="kd">var</span> <span class="nx">Name</span> <span class="p">=</span> <span class="s">&#34;mainnet&#34;</span>
+
 <span class="kd">func</span> <span class="nf">ActorSubstateCID_Equals</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span> <span class="nx">ActorSubstateCID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">NetworkName</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">Name</span>
 <span class="p">}</span>
 
 <span class="c1">// ActorCode is the interface that all actor code types should satisfy.
@@ -13361,6 +13405,7 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="p">(</span><span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">CronActorAddr</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">_sendInternalOutputs</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">CatchErrors</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -14031,7 +14076,7 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 
 <ul>
 <li><a href="#CronActor">CronActor</a> - runs critical functions at every epoch</li>
-<li><a href="#InitActor">InitActor</a> - initializes new actors</li>
+<li><a href="#InitActor">InitActor</a> - initializes new actors, records the network name</li>
 </ul></li>
 <li>There are two more VM level actors:
 
@@ -14127,12 +14172,13 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
     <span class="c1">// responsible for create new actors
 </span><span class="c1"></span>    <span class="nx">AddressMap</span>       <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">}</span>
     <span class="nx">NextID</span>           <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span>
+    <span class="nx">NetworkName</span>      <span class="kt">string</span>
 
     <span class="nf">_assignNextID</span><span class="p">()</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">InitActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">Constructor</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span>
+    <span class="nf">Constructor</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">networkName</span> <span class="kt">string</span><span class="p">)</span>
     <span class="nf">Exec</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">code</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
     <span class="nf">GetActorIDForAddress</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span>
 <span class="p">}</span>
@@ -14221,8 +14267,9 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
 	<span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
 	<span class="nx">st</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">InitActorState_I</span><span class="p">{</span>
-		<span class="nx">AddressMap_</span><span class="p">:</span> <span class="kd">map</span><span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">{},</span> <span class="c1">// TODO: HAMT
-</span><span class="c1"></span>		<span class="nx">NextID_</span><span class="p">:</span>     <span class="nx">addr</span><span class="p">.</span><span class="nf">ActorID</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">FirstNonSingletonActorId</span><span class="p">),</span>
+		<span class="nx">AddressMap_</span><span class="p">:</span>  <span class="kd">map</span><span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">{},</span> <span class="c1">// TODO: HAMT
+</span><span class="c1"></span>		<span class="nx">NextID_</span><span class="p">:</span>      <span class="nx">addr</span><span class="p">.</span><span class="nf">ActorID</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">FirstNonSingletonActorId</span><span class="p">),</span>
+		<span class="nx">NetworkName_</span><span class="p">:</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">NetworkName</span><span class="p">(),</span>
 	<span class="p">}</span>
 	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReturn</span><span class="p">(</span><span class="kc">nil</span><span class="p">)</span>
@@ -17047,7 +17094,11 @@ A Chain is a sequence of tipsets, linked together. It is a single history of exe
 
 <h5 id="mining-blocks">Mining Blocks</h5>
 
-<p>Having registered as a miner, it&rsquo;s time to start making and checking tickets. At this point, the miner should already be running chain validation, which includes keeping track of the latest tipsets seen on the network.</p>
+<p>A miner registered with the storage power actor may begin generating and checking election tickets
+if it has proven storage meeting the minimum miner size threshold requirement.</p>
+
+<p>In order to do so, the miner must be running chain validation, and be keeping track of the most recent
+blocks received. A miner&rsquo;s new block will be based on parents from a previous epoch.</p>
 
 <p>For additional details around how consensus works in Filecoin, see <a href="./#algorithms__expected_consensus___index">Expected Consensus</a>. For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner is eligible to mine a block itself, and other rules pertaining to the production of some artifacts required of valid blocks (e.g. Tickets, ElectionPoSt).</p>
 
@@ -17124,7 +17175,7 @@ Heaviest tipset at H-1 is {B0}</p>
 
 <p>The mining cycle relies on receiving and producing blocks concurrently.  The sequence of these events in time is given by the timing diagram above.  The upper row represents the conceptual consumption channel consisting of successive receiving periods <code>Rx</code> during which nodes validate and select blocks as chain heads.  The lower row is the conceptual production channel made up of a period of mining <code>M</code> followed by a period of transmission <code>Tx</code>.  The lengths of the periods are not to scale.</p>
 
-<p>Blocks are received and validated during <code>Rx</code> up to the end of the epoch.  The heaviest tipset at the beginning of the next epoch is then used as the next head to mine against during <code>M</code>.  If mining is successful a block is transmitted during <code>Tx</code>.  The epoch boundaries are as shown.</p>
+<p>Blocks are received and validated during <code>Rx</code> up to the end of the epoch.  At the beginning of the next epoch, the heaviest tipset is computed from the blocks received during <code>Rx</code>, used as the head to build on during <code>M</code>.  If mining is successful a block is transmitted during <code>Tx</code>.  The epoch boundaries are as shown.</p>
 
 <p>In a fully synchronized network most of period <code>Rx</code> does not see any network traffic, only the period lined up with <code>Tx</code>.  In practice we expect blocks from previous epochs to propagate during the remainder of <code>Rx</code>.  We also expect differences in operator mining time to cause additional variance.</p>
 
@@ -17132,28 +17183,25 @@ Heaviest tipset at H-1 is {B0}</p>
 
 <h6 id="block-creation">Block Creation</h6>
 
-<p>Scratching (a) winning ElectionPoSt ticket(s), and armed with the requisite <code>ElectionPoStOutput</code>, a miner can now publish a new block!</p>
+<p>Producing a block for epoch <code>H</code> requires computing a tipset for epoch <code>H-1</code> (or possibly a prior epoch,
+if no blocks were received for that epoch). Using the state produced by this tipset, a miner can
+scratch winning ElectionPoSt ticket(s).
+Armed with the requisite <code>ElectionPoStOutput</code>, as well as a new randomness ticket generated in this epoch, a miner can produce a new block.</p>
+
+<p>See <a href="./#systems__filecoin_vm__interpreter">VM Interpreter - Message Invocation (Outside VM)</a> for details of parent tipset evaluation, and <a href="./#systems__filecoin_blockchain__struct__block___index">Block</a> for constraints
+on valid block header values.</p>
 
 <p>To create a block, the eligible miner must compute a few fields:</p>
 
 <ul>
-<li><code>Parents</code> - the CIDs of the parent blocks.</li>
-<li><code>ParentWeight</code> - The parent chain&rsquo;s weight (see <a href="./#algorithms__expected_consensus__chain_selection">Chain Selection</a>).</li>
-<li><code>ParentState</code> - This is the state of the chain after all of the message from each of the <code>Parents</code> have been applied to their own <code>ParentState</code>. For more info on how to compute this, see the <a href="./#systems__filecoin_vm__interpreter">VM Interpreter - Message Invocation (Outside VM)</a>.</li>
-<li><code>ParentMessageReceipts</code> - To compute this:
-
-<ul>
-<li>Apply the set of messages from <code>Parents</code> to the <code>ParentState</code> as described above, collecting invocation receipts as this happens.</li>
-<li>Insert them into a sharray and take its root.</li>
-</ul></li>
-<li><code>Epoch</code> - The block&rsquo;s epoch, derived from the <code>Parents</code> epoch and the number of epochs it took to generate this block.</li>
-<li><code>Timestamp</code> - A Unix Timestamp generated at block creation. We use an unsigned integer to represent a UTC timestamp (in seconds). The Timestamp in the newly created block must satisfy the following conditions:
-
-<ul>
-<li>the timestamp on the block corresponds to the current epoch (it is neither in the past nor in the future) as defined by the clock subsystem.</li>
-</ul></li>
-<li><code>Ticket</code> - new ticket generated from that in the prior epoch (see <a href="./#systems__filecoin_blockchain__storage_power_consensus__ticket_generation">Ticket Generation</a>).</li>
-<li><code>Miner</code> - The block producer&rsquo;s miner actor address.</li>
+<li><code>Parents</code> - the CIDs of the parent tipset&rsquo;s blocks.</li>
+<li><code>ParentWeight</code> - the parent chain&rsquo;s weight (see <a href="./#algorithms__expected_consensus__chain_selection">Chain Selection</a>).</li>
+<li><code>ParentState</code> - the CID of the state root from the parent tipset state evaluation (see the <a href="./#systems__filecoin_vm__interpreter">VM Interpreter - Message Invocation (Outside VM)</a>).</li>
+<li><code>ParentMessageReceipts</code> - the CID of the root of an AMT containing receipts produced while computing <code>ParentState</code>.</li>
+<li><code>Epoch</code> - the block&rsquo;s epoch, derived from the <code>Parents</code> epoch and the number of epochs it took to generate this block.</li>
+<li><code>Timestamp</code> - a Unix timestamp, in seconds, generated at block creation.</li>
+<li><code>Ticket</code> - a new ticket generated from that in the prior epoch (see <a href="./#systems__filecoin_blockchain__storage_power_consensus__ticket_generation">Ticket Generation</a>).</li>
+<li><code>Miner</code> - the block producer&rsquo;s miner actor address.</li>
 <li><code>ElectionPoStVerifyInfo</code> - The byproduct of running an ElectionPoSt yielding requisite on-chain information (see <a href="./#algorithms__post__election_post">Election PoSt</a>), namely:
 
 <ul>
@@ -17161,42 +17209,31 @@ Heaviest tipset at H-1 is {B0}</p>
 <li><code>PoStRandomness</code> used to challenge the miner&rsquo;s sectors and generate the partial tickets.</li>
 <li>A <code>PoStProof</code> snark output to prove that the partial tickets were correctly generated.</li>
 </ul></li>
-<li><code>Messages</code> - To compute this:
+<li><code>Messages</code> - The CID of a <code>TxMeta</code> object containing message proposed for inclusion in the new block:
 
 <ul>
-<li>Select a set of messages from the mempool to include in the block.</li>
+<li>Select a set of messages from the mempool to include in the block, satisfying block size and gas limits</li>
 <li>Separate the messages into BLS signed messages and secpk signed messages</li>
-<li>For the BLS messages:</li>
-<li>Strip the signatures off of the messages, and insert all the bare <code>Message</code>s for them into a sharray.</li>
-<li>Aggregate all of the bls signatures into a single signature and use this to fill out the <code>BLSAggregate</code> field</li>
-<li>For the secpk messages:</li>
-<li>Insert each of the secpk <code>SignedMessage</code>s into a sharray</li>
-<li>Create a <code>TxMeta</code> object and fill each of its fields as follows:</li>
-<li><code>BLSMessages</code>: the root cid of the bls messages sharray</li>
-<li><code>SECPMessages</code>: the root cid of the secp messages sharray</li>
-<li>The cid of this <code>TxMeta</code> object should be used to fill the <code>Messages</code> field of the block header.</li>
+<li><code>TxMeta.BLSMessages</code>: The CID of the root of an AMT comprising the bare <code>UnsignedMessage</code>s</li>
+<li><code>TxMeta.SECPMessages</code>: the CID of the root of an AMT comprising the <code>SignedMessage</code>s</li>
 </ul></li>
-<li><code>BLSAggregate</code> - The aggregated signatures of all messages in the block that used BLS signing.</li>
-<li><code>Signature</code> - A signature with the miner&rsquo;s worker account private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after it propagates to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.</li>
+<li><code>BLSAggregate</code> - The aggregated signature of all messages in the block that used BLS signing.</li>
+<li><code>Signature</code> - A signature with the miner&rsquo;s worker account private key (must also match the ticket signature) over the the block header&rsquo;s serialized representation (with empty signature).</li>
 </ul>
 
-<p>An eligible miner can start by filling out <code>Parents</code>, <code>Tickets</code> and <code>ElectionPoStVerifyInfo</code>.</p>
+<p>Note that the messages to be included in a block need not be evaluated in order to produce a valid block.
+A miner may wish to speculatively evaluate the messages anyway in order to optimize for including
+messages which will succeed in execution and pay the most gas.</p>
 
-<p>Next, they compute the aggregate state of their selected parent blocks, the <code>ParentState</code>. This is done by taking the aggregate parent state of the blocks&rsquo; parent Tipset, sorting the parent blocks by their tickets, and applying each message in each block to that state. Any message whose nonce is already used (duplicate message) in an earlier block should be skipped (application of this message should fail anyway). Note that re-applied messages may result in different receipts than they produced in their original blocks, an open question is how to represent the receipt trie of this tipset&rsquo;s messages (one can think of a tipset as a &lsquo;virtual block&rsquo; of sorts).</p>
+<p>The block reward is not evaluated when producing a block. It is paid when the block is included in a tipset in the following epoch.</p>
 
-<p>They gather the receipts from each above message execution into a set, merklize them, and put that root in <code>ReceiptsRoot</code>.</p>
-
-<p>Once the miner has the aggregate <code>ParentState</code>, they must apply the block reward. This is done by adding the correct block reward amount to the miner owner&rsquo;s account balance in the state tree. The reward will be spendable immediately in this block.</p>
-
-<p>Now, a set of messages is selected to put into the block. For each message, the miner subtracts <code>msg.GasPrice * msg.GasLimit</code> from the sender&rsquo;s account balance, returning a fatal processing error if the sender does not have enough funds (this message should not be included in the chain).</p>
-
-<p>Finally, the miner can generate a Unix Timestamp to add to their block, to show that the block generation was appropriately delayed.</p>
-
-<p>Now the block is complete, all that&rsquo;s left is to sign it. The miner serializes the block now (without the signature field), takes the sha256 hash of it, and signs that hash. They place the resultant signature in the <code>Signature</code> field.</p>
+<p>The block&rsquo;s signature ensures integrity of the block after propagation, since unlike many PoW blockchains,
+a winning ticket is found independently of block generation.</p>
 
 <h6 id="block-broadcast">Block Broadcast</h6>
 
-<p>An eligible miner broadcasts the completed block to the network and assuming everything was done correctly, the network will accept it and other miners will mine on top of it, earning the miner a block reward!</p>
+<p>An eligible miner broadcasts the completed block to the network and, assuming everything was done correctly,
+the network will accept it and other miners will mine on top of it, earning the miner a block reward!</p>
 
 <p>Miners should output their valid block as soon as it is produced, otherwise they risk other miners receiving the block after the EPOCH_CUTOFF and not including them.</p>
 
@@ -17204,7 +17241,7 @@ Heaviest tipset at H-1 is {B0}</p>
 
 <p>TODO: Rework this.</p>
 
-<p>Over the entire lifetime of the protocol, 1,400,000,000 FIL (<code>TotalIssuance</code>) will be given out to miners. The rate at which the funds are given out is set to halve every six years, smoothly (not a fixed jump like in Bitcoin). These funds are initially held by the network account actor, and are transferred to miners in blocks that they mine. Over time, the reward will eventually become close zero as the fractional amount given out at each step shrinks the network account&rsquo;s balance to 0.</p>
+<p>Over the entire lifetime of the protocol, 1,400,000,000 FIL (<code>TotalIssuance</code>) will be given out to miners. The rate at which the funds are given out is set to halve every six years, smoothly (not a fixed jump like in Bitcoin). These funds are initially held by the reward actor, and are transferred to miners in blocks that they mine. Over time, the reward will eventually become close zero as the fractional amount given out at each step shrinks the network account&rsquo;s balance to 0.</p>
 
 <p>The equation for the current block reward is of the form:</p>
 
@@ -17224,25 +17261,11 @@ HalvingPeriodBlocks = 6 * 365 * 24 * 60 * 2 = 6,307,200 blocks
 IV = TotalIssuance * (1-e^(-λ)) // Converted to attoFIL (10e18)
 </code></pre>
 
+<p>Each of the miners who produced a block in a tipset will receive a block reward.</p>
+
 <p>Note: Due to jitter in EC, and the gregorian calendar, there may be some error in the issuance schedule over time. This is expected to be small enough that it&rsquo;s not worth correcting for. Additionally, since the payout mechanism is transferring from the network account to the miner, there is no risk of minting <em>too much</em> FIL.</p>
 
 <p>TODO: Ensure that if a miner earns a block reward while undercollateralized, then <code>min(blockReward, requiredCollateral-availableBalance)</code> is garnished (transfered to the miner actor instead of the owner).</p>
-
-<h6 id="notes-on-block-reward-application">Notes on Block Reward Application</h6>
-
-<p>As mentioned above, every round, a miner checks to see if they have been selected as the leader for that particular round. Thus, it is possible that multiple miners may be selected as winners in a given round, and thus, that there will be multiple blocks with the same parents that are produced at the same block height (forming a Tipset). Each of the winning miners will apply the block reward directly to their actor&rsquo;s state in their state tree.</p>
-
-<p>Other nodes will receive these blocks and form a Tipset out of the eligible blocks (those that have the same parents and are at the same block height). These nodes will then validate the Tipset. To validate Tipset state, the validating node will, for each block in the Tipset, first apply the block reward value directly to the mining node&rsquo;s account and then apply the messages contained in the block.</p>
-
-<p>Thus, each of the miners who produced a block in the Tipset will receive a block reward. There will be no lockup. These rewards can be spent immediately.</p>
-
-<p>Messages in Filecoin also have an associated transaction fee (based on the gas costs of executing the message). In the case where multiple winning miners included the same message in their blocks, only the first miner will be paid this transaction fee. The first miner is the miner with the lowest ticket value (sorted lexicographically).</p>
-
-<h5 id="open-questions">Open Questions</h5>
-
-<ul>
-<li>How should receipts for tipsets be referenced? It is common for applications to provide the merkleproof of a receipt to prove that a transaction was successfully executed.</li>
-</ul>
 
 
 </div>
@@ -27950,8 +27973,8 @@ V1 will also include additional mechanisms for timeouts and cancellations. (to b
 
 <ul>
 <li><strong>Name</strong>: Query Protocol</li>
-<li><strong>Protocol ID V0</strong>: <code>/fil/retrieval/qry/0.0.1</code></li>
-<li><strong>Protocol ID V1</strong>: <code>/fil/retrieval/qry/1.0.0</code></li>
+<li><strong>Protocol ID V0</strong>: <code>/fil/&lt;network-name&gt;/retrieval/qry/0.0.1</code></li>
+<li><strong>Protocol ID V1</strong>: <code>/fil/&lt;network-name&gt;/retrieval/qry/1.0.0</code></li>
 </ul>
 
 <p>Request: CBOR Encoded RetrievalQuery Data Structure
@@ -27959,7 +27982,7 @@ Response: CBOR Encoded RetrievalQueryResponse Data Structure</p>
 
 <ul>
 <li><strong>Name</strong>: Retrieval Protocol</li>
-<li><strong>Protocol ID V0</strong>: <code>/fil/retrieval/0.0.1</code></li>
+<li><strong>Protocol ID V0</strong>: <code>/fil/&lt;network-name&gt;/retrieval/0.0.1</code></li>
 </ul>
 
 <p>V0:
