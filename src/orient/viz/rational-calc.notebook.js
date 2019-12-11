@@ -25,9 +25,16 @@ viewof window_size_mib_config = checkbox({
 
 md`#### Vars that matter`
 
-viewof decoding_time_parallel_weight = number({value: 1})
-viewof proofs_per_block_weight = number({value: 1})
-viewof epost_time_parallel_weight = number({value: 1})
+viewof utility_raw = codeView({
+  value: `// Please write all inside the function
+function (d) {
+  return 0.5 * d['porep_time_parallel']
+}`,
+  mode: 'javascript',
+  height: 300
+})
+
+
 
 table_constraints(solved_many, [
   'proof_name',
@@ -389,20 +396,12 @@ solved_many_pre = (await solve_many(combos)).map(d => d[0])
     return d
   })
 
-utility_function = (x1, x2, x3, w1, w2, w3) => w1 * x1 + w2 * x2 + w3 * x3
-
+utility_fun = (data) => ev(utility_raw, data)
 
 solved_many = solved_many_pre
   .filter(d => window_size_mib_config.some(c => d['window_size_mib'] === +c))
   .map(d => {
-    const utility = utility_function(
-      d['decoding_time_parallel'],
-      d['proofs_per_block_kib'],
-      d['epost_time_parallel'],
-      decoding_time_parallel_weight,
-      proofs_per_block_weight,
-      epost_time_parallel_weight
-    )
+    const utility = utility_fun(d)
     return Object.assign({}, d, {utility: utility})
   })
 // solved_manys = (await solve_manys(combos)).flat()
@@ -478,6 +477,18 @@ function solve_manys(json) {
       return results
     })
   })
+}
+
+function ev (func, data) {
+  let res
+
+  try {
+    res = (1, eval)(`(${func})`)(data)
+  } catch(err) {
+    throw err
+  }
+
+  return res
 }
 
 function solve_many(json) {
@@ -878,3 +889,80 @@ plotMultiLine = (solutions, x, names) => {
   return div
 }
 
+codeView =({value, mode, height}) => {
+  const fn = ({CodeMirror} = {}) => {
+    return ({id, value, mode}) => {
+      const cm = CodeMirror(document.body, {
+        value,
+        mode,
+        lineNumbers: true
+      })
+      CodeMirror.modeURL = 'https://codemirror.net/mode/%N/%N.js'
+      CodeMirror.autoLoadMode(cm, mode)
+
+      cm.on('keypress', (cm, event) => {
+        if (event.key === 'Enter' && event.shiftKey) {
+          event.preventDefault()
+          window.parent.postMessage({
+            id,
+            value: cm.getValue(),
+            height: document.body.offsetHeight
+          }, document.origin)
+        }
+      })
+      setInterval(() => {
+        window.parent.postMessage({
+          id,
+          height: document.body.offsetHeight
+        }, document.origin)
+      }, 100)
+    }
+  }
+  const randomId = `el${Math.floor(Math.random() * 1000000)}`
+  const frameSrc = `
+    <link rel="stylesheet" href="https://unpkg.com/codemirror@5.39.2/lib/codemirror.css" />
+    <script src="https://unpkg.com/codemirror@5.39.2/lib/codemirror.js"></script>
+    <script src="https://codemirror.net/addon/mode/loadmode.js"></script>
+    <script src="https://codemirror.net/mode/meta.js"></script>
+    <style type="text/css">
+      body, html {
+        margin: 0;
+        padding: 0;
+        overflow-y: hidden;
+      }
+      .CodeMirror {
+        border: 1px solid #eee;
+        height: auto;
+      }
+      .CodeMirror-scroll {
+        height: ${height}px;
+        overflow-y: hidden;
+        overflow-x: auto;
+      }
+    </style>
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', () => {
+        (${fn().toString().trim()})(${JSON.stringify({id: randomId, mode, value})})
+      })
+    </script>
+  `
+  const frameStyle = `width: 100%; height: 300px; border: 0; overflow-y: hidden;`
+  const frame = html`<iframe style="${frameStyle}"></iframe>`
+  const messageListener = event => {
+    if (document.contains(frame)) {
+      if (event.data.id === randomId) {
+        if (event.data.value !== undefined) {
+          frame.value = event.data.value
+          frame.dispatchEvent(new CustomEvent("input"))
+        }
+        frame.style.height = `${event.data.height}px`
+      }
+    } else {
+      window.removeEventListener('message', messageListener)
+    }
+  }
+  window.addEventListener('message', messageListener, false)
+  frame.srcdoc = frameSrc
+  frame.value = value
+  return frame
+}
