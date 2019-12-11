@@ -4,7 +4,7 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type ExpectedConsensus struct {
     expectedLeadersPerEpoch  UVarint
-    expectedRewardPerEpoch  UVarint
+    expectedRewardPerEpoch   UVarint
 
     ComputeChainWeight(tipset chain.Tipset) block.ChainWeight
     IsValidConsensusFault(faults ConsensusFaultType, blocks [block.Block]) bool

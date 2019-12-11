@@ -10,7 +10,8 @@ import (
 )
 
 func (self *ExpectedConsensus_I) ComputeChainWeight(tipset chain.Tipset) block.ChainWeight {
-	IMPL_FINISH()
+	util.IMPL_FINISH()
+	return block.ChainWeight(0)
 	// see expected_consensus.md for detail
 
 	// wPowerFactor := self.log2b(spa.GetTotalPower())
@@ -22,8 +23,8 @@ func (self *ExpectedConsensus_I) ComputeChainWeight(tipset chain.Tipset) block.C
 }
 
 func (self *ExpectedConsensus_I) IsValidConsensusFault(faults ConsensusFaultType, blocks []block.Block) bool {
-	IMPL_FINISH()
-
+	util.IMPL_FINISH()
+	return false
 	// 1. double-fork mining fault
 	// return block1.Miner == block2.Miner && block1.Epoch == block2.Epoch
 
@@ -54,7 +55,7 @@ func (self *ExpectedConsensus_I) IsWinningChallengeTicket(challengeTicket util.B
 	// sectorPower * 2^len(H)
 	rhs := new(big.Int).Lsh(util.BigFromUint64(uint64(sectorPower)), uint(SHA256Len))
 	rhs = rhs.Mul(rhs, util.BigFromUint64(uint64(numSectorsMiner)))
-	rhs = rhs.Mul(rhs, big.NewInt(int64(self.ExpectedLeadersPerEpoch())))
+	rhs = rhs.Mul(rhs, big.NewInt(int64(self.expectedLeadersPerEpoch())))
 
 	// lhs < rhs?
 	return lhs.Cmp(rhs) == -1

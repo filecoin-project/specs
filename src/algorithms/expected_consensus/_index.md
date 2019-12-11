@@ -80,10 +80,6 @@ The miner gets to draw one such challenge ticket per sector they have committed 
 The target is set as follows, for each sector sampled for a ticket from the miner's `ProvingSet` and the number of sectors in the set:
 `target = activePowerInSector/networkPower * EC.ExpectedLeadersPerEpoch * numSectorsMiner / numSectorsSampled`
 
-```text
-
-```
-
 The target ensures that the miner can express the power across all of their sectors through the tickets they have sampled. Specifically, on expectation, checking `numSectorsSampled` (with `numSectorsSampled = ceil(len(provingSet) * EPoStSamplingRate)`) challenge tickets in every epoch, a miner will find `minerPower/networkPower * EC.ExpectedLeadersPerEpoch` winning tickets per epoch on expectation. Note that while the sectorPower may differ based on the challenged sector, i.e. in any given epoch a miner may have an advantage (if picking sectors with more than the average across all their sectors) or a disadvantage (conversely) in their election; but over multiple epochs, on expectation the election will be fair.
 
 ```text
