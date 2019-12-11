@@ -26,8 +26,8 @@ const EPOST_SAMPLE_RATE_DENOM = 25 // placeholder
 const SPOST_SAMPLE_RATE_NUM = 1    // placeholder
 const SPOST_SAMPLE_RATE_DENOM = 50 // placeholder
 
-const MIN_MINER_SIZE_STOR = 1 << 40 // placeholder
-const MIN_MINER_SIZE_PERC = 33      // placeholder, 100 TB
+const MIN_MINER_SIZE_STOR = 1 << 40 // placeholder, 100 TB
+const MIN_MINER_SIZE_TOP = 3        // placeholder
 
 // FIL deposit per sector precommit in Interactive PoRep
 // refunded after ProveCommit but burned if PreCommit expires
