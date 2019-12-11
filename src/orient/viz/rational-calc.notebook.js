@@ -581,18 +581,21 @@ bar_chart = (raw, title, variables, group_by, opts) => {
           }
         }]
       },
-      {
-        "mark": "bar",
-        "width": 800,
-        "title": "Data filtered out",
-        "data": { values: discarded_data },
-        "encoding": {
-          "x": {"aggregate": "sum", "field": "value", "type": "quantitative"},
-          "y": {"field": "construction", "type": "nominal"},
-          "color": {"field": "type", "type": "nominal"}
-        }
-      }
     ]
+  }
+
+  if (discarded_data.length > 0) {
+    graph.vconcat.push({
+      "mark": "bar",
+      "width": 800,
+      "title": "Data filtered out",
+      "data": { values: discarded_data },
+      "encoding": {
+        "x": {"aggregate": "sum", "field": "value", "type": "quantitative"},
+        "y": {"field": "construction", "type": "nominal"},
+        "color": {"field": "type", "type": "nominal"}
+      }
+    })
   }
 
   if (opts && opts.yrule) {
