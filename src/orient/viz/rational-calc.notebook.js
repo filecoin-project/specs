@@ -5,6 +5,7 @@ md`# Proofs Tradeoff Report
 3. Fixing errors or change construction is easy
 `
 
+md`## Sliders`
 viewof config = {
   const form = formToObject(html`
 <form>
@@ -23,28 +24,33 @@ viewof window_size_mib_config = checkbox({
   value: window_size_mib_choices,
 })
 
-md`#### Vars that matter`
+md`## Utility`
+
+html`Link to <a href="?utility_raw=${encodeURIComponent(utility_raw)}&utility_cols=${encodeURIComponent(utility_cols.join(','))}">current setting</a>`
 
 viewof utility_raw = codeView({
-  value: `// Please write all inside the function
-function (d) {
+  localStorageKey: 'utility',
+  value: qs('utility_raw') || `function (d) {
   return 0.5 * d['porep_time_parallel']
 }`,
   mode: 'javascript',
   height: 300
 })
 
+// viewof reset_button = button({value: "Reset" })
 
+viewof utility_cols = checkbox({
+  title: "Vars to show in utility table",
+  options: Object.keys(vars).map(d => ({value: d, label: d})),
+  value: qs('utility_cols') || ['decoding_time_parallel', 'proofs_per_block_kib', 'epost_time_parallel']
+})
 
-table_constraints(solved_many, [
-  'proof_name',
-  'graph_name',
-  'window_size_mib',
-  'decoding_time_parallel',
-  'proofs_per_block_kib',
-  'epost_time_parallel',
-  'utility',
-], [], 'utility')
+table_constraints(
+  solved_many,
+  ['proof_name', 'graph_name', 'window_size_mib', 'utility'].concat(utility_cols),
+  [],
+  'utility'
+)
 
 md`## Graphs`
 md`### On-chain footprint
@@ -56,7 +62,10 @@ viewof proofs_per_block_kib_ruler = chooser(solved_many, 'proofs_per_block_kib',
 bar_chart(solved_many, 'proofs_per_block_kib', [
   'seals_size_per_block_kib',
   'posts_size_per_block_kib',
-], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < Math.pow(10, proofs_per_block_kib_ruler)})
+], ['proof_name', 'graph_name', 'window_size_mib'], {
+  filter: d => d < Math.pow(10, proofs_per_block_kib_ruler),
+  yrule: Math.pow(10, proofs_per_block_kib_ruler)
+})
 
 md`### Retrieval`
 
@@ -75,7 +84,10 @@ viewof decoding_time_ruler = chooser(solved_many, 'decoding_time', 16)
 bar_chart(solved_many, 'decoding_time', [
   'encoding_window_time',
   'window_read_time',
-], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < Math.pow(10, decoding_time_ruler)})
+], ['proof_name', 'graph_name', 'window_size_mib'], {
+  filter: d => d < Math.pow(10, decoding_time_ruler),
+  yrule: Math.pow(10, decoding_time_ruler)
+})
 
 
 // table_constraints(solved_many, [
@@ -95,18 +107,21 @@ bar_chart(solved_many, 'porep_time_parallel', [
   'porep_snark_time_parallel',
   'porep_commit_time_parallel',
   'encoding_time_parallel'
-], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < Math.pow(10, porep_time_parallel_ruler)})
+], ['proof_name', 'graph_name', 'window_size_mib'], {
+  filter: d => d < Math.pow(10, porep_time_parallel_ruler),
+  yrule: Math.pow(10, porep_time_parallel_ruler)
+})
 
-bar_chart(solved_many, 'porep_commit_time', [
-  'commr_time',
-  'commq_time',
-  'commc_time'
-], ['proof_name', 'graph_name', 'window_size_mib'])
+// bar_chart(solved_many, 'porep_commit_time', [
+//   'commr_time',
+//   'commq_time',
+//   'commc_time'
+// ], ['proof_name', 'graph_name', 'window_size_mib'])
 
-bar_chart(solved_many, 'commc_time', [
-  'commc_tree_time',
-  'commc_leaves_time',
-], ['proof_name', 'graph_name', 'window_size_mib'])
+// bar_chart(solved_many, 'commc_time', [
+//   'commc_tree_time',
+//   'commc_leaves_time',
+// ], ['proof_name', 'graph_name', 'window_size_mib'])
 
 md`### EPoSt`
 
@@ -119,7 +134,10 @@ bar_chart(solved_many, 'epost_time_parallel', [
   'post_ticket_gen',
   'epost_inclusions_time_parallel',
   'post_snark_time_parallel'
-], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < Math.pow(10, epost_time_parallel_ruler)})
+], ['proof_name', 'graph_name', 'window_size_mib'], {
+  filter: d => d < Math.pow(10, epost_time_parallel_ruler),
+  yrule: Math.pow(10, epost_time_parallel_ruler)
+})
 
 table_constraints(solved_many, [
   'proof_name',
@@ -704,10 +722,11 @@ function flatten(items) {
 
 md`### Imports`
 
-import {slider, checkbox, number} from "@jashkenas/inputs"
+import {slider, checkbox, number, button} from "@jashkenas/inputs"
 d3 = require('d3')
 vl = require('@observablehq/vega-lite')
 import { createJsonDownloadButton } from "@trebor/download-json"
+import {localStorage} from "@mbostock/safe-local-storage"
 
 md`### Styles`
 
@@ -719,6 +738,9 @@ table {
   font-size: 12px
 }
 th {
+  font-size: 10px;
+}
+label {
   font-size: 10px;
 }
 </style>`
@@ -889,7 +911,10 @@ plotMultiLine = (solutions, x, names) => {
   return div
 }
 
-codeView =({value, mode, height}) => {
+codeView =({value, mode, height, localStorageKey}) => {
+
+  value = localStorage.getItem(localStorageKey) || value
+
   const fn = ({CodeMirror} = {}) => {
     return ({id, value, mode}) => {
       const cm = CodeMirror(document.body, {
@@ -953,6 +978,7 @@ codeView =({value, mode, height}) => {
       if (event.data.id === randomId) {
         if (event.data.value !== undefined) {
           frame.value = event.data.value
+          localStorage.setItem(localStorageKey, frame.value)
           frame.dispatchEvent(new CustomEvent("input"))
         }
         frame.style.height = `${event.data.height}px`
@@ -965,4 +991,25 @@ codeView =({value, mode, height}) => {
   frame.srcdoc = frameSrc
   frame.value = value
   return frame
+}
+
+// {
+//   reset_button;
+//   if (this) {
+//     localStorage.removeItem('utility')
+//   }
+
+//   return !this
+// }
+
+function qs(variable) {
+  var query = window.location.search.substring(1);
+  var vars = query.split('&');
+  for (var i = 0; i < vars.length; i++) {
+    var pair = vars[i].split('=');
+    if (decodeURIComponent(pair[0]) == variable) {
+      return decodeURIComponent(pair[1]);
+    }
+  }
+  return false
 }
