@@ -42,7 +42,7 @@ Filecoin's ElectionPoSt process makes use of two calls to the system library:
 
 As stated above, a miner is incentivized to repeat this process at every block time in order to check whether they were elected leaders (see <<sref expected_consensus>>). The rationality assumption made by ElectionPoSt is thus that storing files continuously and earning block rewards accordingly will be more profitable to miners than regenerating data at various epochs to sporadically participate in leader election.
 
-At every epoch, each miner will challenge a portion of sectors `numSectorsSampled` from their `Proving Set` at random, according to some `ElectionPoStSamplingRate` with each sector being issued K PoSt challenges (coverage may not be perfect).
+At every epoch, each miner will challenge a portion of sectors `numSectorsSampled` from their `Proving Set` at random, according to some `ElectionPoStSampleRate` with each sector being issued K PoSt challenges (coverage may not be perfect).
 
 By proving access to the challenged range of nodes (i.e. merkle tree leaf from the committed sector) in the sector, the miner can generate a set of valid ChallengeTickets in order to check them as part of leader election in EC (in order to find the winning tickets). The winning tickets will be stored on the block and used to generate a PoSt (using a SNARK). A block header will thus contain a number of “winning” PoStCandidates (each containing a partialTicket, SectorID and other elements, used to verify the leader election) and a PostProof generated from the ChallengeTickets.
 
@@ -65,7 +65,7 @@ The miner calls `GenerateCandidates` from proofs with their non-faulted (declare
 
 ```text
     numSectorsMiner = len(miner.provingSet)
-    numSectorsSampled = ceil(EPoStSamplingRate * numSectorsMiner)
+    numSectorsSampled = ceil(EPoStSampleRate * numSectorsMiner)
 ```
 
 Note also that even with `numSectorsSampled == len(ProvingSet)`, this process may not sample all of a miner’s sectors in any given epoch, given how the data to be proven in challenged sectors is selected (there could be collisions, e.g. the same sectors selected multiple times).
@@ -96,7 +96,7 @@ def finalizeTicket(partialTicket):
 
 ```
 
-A single winning ticket and can be used to submit a block but a miner would want to check as many as possible to increase their potential rewards. The target ensures that on expectation, a miner's total power is expressed if they check all of their tickets, taking the `ElectionPoStSamplingRate` into account.
+A single winning ticket and can be used to submit a block but a miner would want to check as many as possible to increase their potential rewards. The target ensures that on expectation, a miner's total power is expressed if they check all of their tickets, taking the `ElectionPoStSampleRate` into account.
 
 5. **(generate a `PoStProof`)** for inclusion in the block header
 
@@ -110,8 +110,8 @@ If no one has found a winning ticket in this epoch, increment epoch value as par
 - `Randomness_lookback` -- how far back to draw randomness from the randomness ticket chain - it will be as large as allowed by PoSt security, likely 1 or 2 epochs
 - `K (e.g. 20-100s)` - number of  challenges per sector -- must be large enough such that the PoSpace is secure.
 - `ChallengeRangeSize` - challenge read size (between 32B and 256KB)  -- based on security analysis.
-- `samplingRate` - sector sampling fraction (e.g. 1, .10, .04) -- 1 to start-- It should be large enough to make it irrational to fully regenerate sectors. We may choose some subset if cost of verifying all is deleterious to disk
-- `sectorsSampled` - Number of sectors sampled given the `samplingRate`. `sectorsSampled = sectorsMiner * samplingRate`
+- `EPoStsampleRate` - sector sampling fraction (e.g. 1, .10, .04) -- 1 to start-- It should be large enough to make it irrational to fully regenerate sectors. We may choose some subset if cost of verifying all is deleterious to disk
+- `sectorsSampled` - Number of sectors sampled given the `EPoStsampleRate`.
 - `networkPower` - filecoin network’s power - read from the power table, expressed in number of bytes
 
 ## ElectionPoSt verification
