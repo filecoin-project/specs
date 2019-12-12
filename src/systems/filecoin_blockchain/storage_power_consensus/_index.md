@@ -133,7 +133,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 
 In order to secure Storage Power Consensus, the system defines a minimum miner size required to participate in consensus.
 
-Specifically, miners must have either at least `MIN_MINER_SIZE_STOR` of power (i.e. storage power currently used in storage deals) in order to participate in leader election. If no miner has `MIN_MINER_SIZE_STOR` power, miners in the top `MIN_MINER_SIZE_TARG` of miners by storage power will be able to participate in leader election.
+Specifically, miners must have either at least `MIN_MINER_SIZE_STOR` of power (i.e. storage power currently used in storage deals) in order to participate in leader election. If no miner has `MIN_MINER_SIZE_STOR` or more power, miners with at least as much power as the smallest miner in the top `MIN_MINER_SIZE_TARG` of miners (sorted by storage power) will be able to participate in leader election. In plain english, take `MIN_MINER_SIZE_TARG = 3` for instance, this means that miners with at least as much power as the 3rd largest miner will be eligible to participate in consensus.
 
 Miners smaller than this cannot mine blocks and earn block rewards in the network. Their power will not be counted as part of total network power. However, **it is important to note that such miners can still have their power faulted and be penalized accordingly**.
 

@@ -241,6 +241,16 @@ func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerRep
 	h, st := a.State(rt)
 
 	powerEntry := st._safeGetPowerEntry(rt, minerID)
+
+	// keep track of miners larger than minimum miner size before updating the PT
+	MIN_MINER_SIZE_STOR := block.StoragePower(0) // TODO: pull in from consts
+	if powerEntry.ActivePower() >= MIN_MINER_SIZE_STOR && report.ActivePower() < MIN_MINER_SIZE_STOR {
+		st.Impl()._minersLargerThanMin_ -= 1
+	}
+	if powerEntry.ActivePower() < MIN_MINER_SIZE_STOR && report.ActivePower() >= MIN_MINER_SIZE_STOR {
+		st.Impl()._minersLargerThanMin_ += 1
+	}
+
 	powerEntry.Impl().ActivePower_ = report.ActivePower()
 	powerEntry.Impl().InactivePower_ = report.InactivePower()
 	st.Impl().PowerTable_[minerID] = powerEntry

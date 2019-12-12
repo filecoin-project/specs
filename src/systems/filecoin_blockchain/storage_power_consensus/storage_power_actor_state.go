@@ -15,13 +15,18 @@ func (st *StoragePowerActorState_I) ActivePowerMeetsConsensusMinimum(minerPower 
 	MIN_MINER_SIZE_STOR := block.StoragePower(0)
 	MIN_MINER_SIZE_TARG := 0
 
-	// if a miner meets min power requirement check whether this one does
+	// if miner is larger than min power requirement, we're set
+	if minerPower >= MIN_MINER_SIZE_STOR {
+		return true
+	}
+
+	// otherwise, if another miner meets min power requirement check whether this one does
 	if st._minersLargerThanMin() > util.UVarint(0) {
 		return minerPower >= MIN_MINER_SIZE_STOR
 	}
 
 	// else check whether in MIN_MINER_SIZE_TARG miners
-	if len(st.PowerTable()) < MIN_MINER_SIZE_TARG {
+	if len(st.PowerTable()) <= MIN_MINER_SIZE_TARG {
 		// miner should pass
 		return true
 	}
@@ -31,7 +36,7 @@ func (st *StoragePowerActorState_I) ActivePowerMeetsConsensusMinimum(minerPower 
 	for _, v := range st.PowerTable() {
 		minerSizes = append(minerSizes, v.ActivePower())
 	}
-	sort.Slice(minerSizes, func(i, j int) bool { return int(i) < int(j) })
+	sort.Slice(minerSizes, func(i, j int) bool { return int(i) > int(j) })
 	return minerPower >= minerSizes[MIN_MINER_SIZE_TARG-1]
 }
 
