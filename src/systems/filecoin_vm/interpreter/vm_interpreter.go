@@ -157,10 +157,16 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 		return
 	}
 
-	fromActor := inTree.GetActorState(message.From())
-	if fromActor == nil {
+	fromActor, ok := inTree.GetActor(message.From())
+	if !ok {
 		// Execution error; sender does not exist at time of message execution.
 		_applyError(inTree, exitcode.ActorNotFound, SenderResolveSpec_Invalid)
+		return
+	}
+
+	// make sure this is the right message order for fromActor
+	if message.CallSeqNum() != fromActor.CallSeqNum() {
+		_applyError(inTree, exitcode.InvalidCallSeqNum, SenderResolveSpec_Invalid)
 		return
 	}
 
@@ -173,31 +179,26 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 		return
 	}
 
-	// make sure this is the right message order for fromActor
-	if message.CallSeqNum() != fromActor.CallSeqNum() {
-		_applyError(inTree, exitcode.InvalidCallSeqNum, SenderResolveSpec_Invalid)
+	// Check receiving actor and method exists, possibly creating an account actor.
+	// If this succeeds, compTreePreSend will become a state snapshot which includes
+	// implicit receiver creation, the sender (rather than miner) paying gas, and the sender's
+	// CallSeqNum being incremented; at least that much state change will be persisted even if the
+	// method invocation subsequently fails.
+	compTreePreSend, ok := _ensureReceiver(inTree, message)
+	if !ok {
+		// Execution error; receiver actor does not exist (and could not be implicitly created)
+		// at time of message execution.
+		_applyError(inTree, exitcode.ActorNotFound, SenderResolveSpec_Invalid)
 		return
 	}
 
-	compTreePreSend := inTree
-
-	// Deduct gas limit funds from sender first.
+	// Deduct gas limit funds from sender.
 	// (This should always succeed, due to the sender balance check above.)
 	compTreePreSend = _withTransferFundsAssert(
 		compTreePreSend, message.From(), addr.BurntFundsActorAddr, gasLimitCost)
 
 	// Increment sender CallSeqNum.
 	compTreePreSend = compTreePreSend.Impl().WithIncrementedCallSeqNum_Assert(message.From())
-
-	// WithActorForAddress may create new account actors
-	var toActor actor.ActorState
-	compTreePreSend, toActor = compTreePreSend.Impl().WithActorForAddress(message.To())
-	if toActor == nil {
-		// Execution error; receiver actor does not exist (and could not be implicitly created)
-		// at time of message execution.
-		_applyError(compTreePreSend, exitcode.ActorNotFound, SenderResolveSpec_OK)
-		return
-	}
 
 	sendRet, compTreePostSend := _applyMessageInternal(compTreePreSend, message, vmiGasRemaining, minerAddr)
 
@@ -224,6 +225,29 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 	return
 }
 
+// Ensures a messages's receiving actor exists in the state tree.
+// If it doesn't, and the message is a simple value send to a pubkey-style address,
+// creates the receiver as an account actor in the returned state.
+func _ensureReceiver(tree st.StateTree, message msg.UnsignedMessage) (st.StateTree, bool) {
+	_, found := tree.GetActor(message.To())
+
+	if found {
+		return tree, true
+	}
+	if !message.To().IsKeyType() {
+		// Don't implicitly create an account actor for an address without an associated key.
+		return tree, false
+	}
+	if message.Method() != actor.MethodSend {
+		// Don't implicitly create account actor if message was expecting to invoke a method.
+		return tree, false
+	}
+	// TODO Create a new account actor via the InitActor, which will receive a new ID address
+	// and be placed in the state tree under that address.
+	// The init actor will maintain a map from pubkey address to ID address.
+	return tree, true
+}
+
 func _applyMessageBuiltinAssert(tree st.StateTree, message msg.UnsignedMessage, topLevelBlockWinner addr.Address) st.StateTree {
 	Assert(message.From().Equals(addr.SystemActorAddr))
 	tree = tree.Impl().WithIncrementedCallSeqNum_Assert(message.From())
@@ -240,8 +264,8 @@ func _applyMessageInternal(
 	tree st.StateTree, message msg.UnsignedMessage, gasRemainingInit msg.GasAmount, topLevelBlockWinner addr.Address) (
 	vmr.MessageReceipt, st.StateTree) {
 
-	fromActor := tree.GetActorState(message.From())
-	Assert(fromActor != nil)
+	fromActor, ok := tree.GetActor(message.From())
+	Assert(ok)
 
 	rt := vmr.VMContext_Make(
 		message.From(),
@@ -286,7 +310,8 @@ func _makeBlockRewardMessage(state st.StateTree, minerAddr addr.Address, penalty
 	params[0] = addr.Serialize_Address(minerAddr)
 	params[1] = actor.Serialize_TokenAmount(penalty)
 
-	sysActor := state.GetActorState(addr.SystemActorAddr)
+	sysActor, ok := state.GetActor(addr.SystemActorAddr)
+	Assert(ok)
 	return &msg.UnsignedMessage_I{
 		From_:       addr.SystemActorAddr,
 		To_:         addr.RewardActorAddr,
@@ -304,7 +329,8 @@ func _makeElectionPoStMessage(state st.StateTree, minerActorAddr addr.Address) m
 	// TODO: determine parameters necessary for this message.
 	params := make([]util.Serialization, 0)
 
-	sysActor := state.GetActorState(addr.SystemActorAddr)
+	sysActor, ok := state.GetActor(addr.SystemActorAddr)
+	Assert(ok)
 	return &msg.UnsignedMessage_I{
 		From_:       addr.SystemActorAddr,
 		To_:         minerActorAddr,
@@ -319,7 +345,8 @@ func _makeElectionPoStMessage(state st.StateTree, minerActorAddr addr.Address) m
 
 // Builds a message for invoking the cron actor tick.
 func _makeCronTickMessage(state st.StateTree, minerActorAddr addr.Address) msg.UnsignedMessage {
-	sysActor := state.GetActorState(addr.SystemActorAddr)
+	sysActor, ok := state.GetActor(addr.SystemActorAddr)
+	Assert(ok)
 	return &msg.UnsignedMessage_I{
 		From_:       addr.SystemActorAddr,
 		To_:         addr.CronActorAddr,

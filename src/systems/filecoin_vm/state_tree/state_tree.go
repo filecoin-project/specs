@@ -1,46 +1,21 @@
 package state_tree
 
 import (
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	"github.com/filecoin-project/specs/libraries/ipld"
+	"github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	util "github.com/filecoin-project/specs/util"
+	"github.com/filecoin-project/specs/util"
 )
 
 var Assert = util.Assert
 
-func (inTree *StateTree_I) WithActorForAddress(a addr.Address) (StateTree, actor.ActorState) {
-	var err error
-	var actorState actor.ActorState
-	var compTree StateTree
-
-	actorState = inTree.GetActorState(a)
-	if actorState != nil {
-		return inTree, actorState // done
-	}
-
-	if !a.IsKeyType() { // BLS or Secp
-		return inTree, nil // not a key type, done.
-	}
-
-	compTree, actorState, err = inTree.Impl().WithNewAccountActor(a)
-	if err != nil {
-		return inTree, nil
-	}
-
-	return compTree, actorState
-}
-
-func (st *StateTree_I) GetActorAddress(n ActorName) addr.Address {
+func (st *StateTree_I) RootCID() ipld.CID {
 	panic("TODO")
 }
 
-// Note: may be nil if not found
-func (st *StateTree_I) GetActorState(a addr.Address) actor.ActorState {
-	panic("TODO")
-}
-
-func (st *StateTree_I) Balance(a addr.Address) actor.TokenAmount {
-	panic("TODO")
+func (st *StateTree_I) GetActor(a addr.Address) (actor.ActorState, bool) {
+	as, found := st.ActorStates()[a]
+	return as, found
 }
 
 func (st *StateTree_I) WithActorSubstate(a addr.Address, actorState actor.ActorSubstateCID) (StateTree, error) {

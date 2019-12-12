@@ -18,7 +18,8 @@ type Address struct {
 
     VerifySyntax()   bool
     String()         AddressString
-    IsKeyType()      bool
+    IsIDType()       bool  // Whether the address is an ID-address
+    IsKeyType()      bool  // Whether the address is a public key address (SECP or BLS)
     Equals(Address)  bool
     Ref()            Address_Ptr
 }

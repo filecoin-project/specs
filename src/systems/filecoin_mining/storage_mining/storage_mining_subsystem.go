@@ -152,7 +152,8 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 var node node_base.FilecoinNode
 
 func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateTree.StateTree, minerAddr addr.Address) StorageMinerActorState {
-	actorState := stateTree.GetActorState(minerAddr)
+	actorState, ok := stateTree.GetActor(minerAddr)
+	util.Assert(ok)
 	substateCID := actorState.State()
 
 	substate, err := node.LocalGraph().Get(ipld.CID(substateCID))
@@ -172,7 +173,8 @@ func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateT
 
 func (sms *StorageMiningSubsystem_I) _getStoragePowerActorState(stateTree stateTree.StateTree) spc.StoragePowerActorState {
 	powerAddr := addr.StoragePowerActorAddr
-	actorState := stateTree.GetActorState(powerAddr)
+	actorState, ok := stateTree.GetActor(powerAddr)
+	util.Assert(ok)
 	substateCID := actorState.State()
 
 	substate, err := node.LocalGraph().Get(ipld.CID(substateCID))
