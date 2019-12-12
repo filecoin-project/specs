@@ -653,7 +653,7 @@ multiple_solutions = (solutions, group_by, filter) => {
 table_constraints = (solutions, filter, group_by, sort_by) => {
   let results = multiple_solutions(solutions, group_by, filter)
   if (sort_by) {
-    results = results.sort((a, b) => +a[sort_by] > +b[sort_by])
+    results = results.sort((a, b) => +a[sort_by] - +b[sort_by])
   }
   const header = `
   ${sort_by ? `Sorted by: ${sort_by}` : ''}
