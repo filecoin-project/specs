@@ -79,6 +79,7 @@
     "ticket_constraints": 1376,
     "ticket_hash": 2.56e-7,
     "window_size_mib": 32768,
-    "wrapper_parents": 10
+    "wrapper_parents": 10,
+    "cost_honest_cpu_hour": 0.20833333
   }
 ]

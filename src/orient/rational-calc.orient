@@ -702,8 +702,19 @@ Rationality:
 
       hash_gib_per_second = hash_gb_per_second * gb_to_gib
       nodes_per_second = hash_gib_per_second / kdf_hash_size_gib
-      nodes_per_year = nodes_per_second * secs_in_year 
-      cost_node_encoding = rig_malicious_cost_per_year / nodes_per_year 
+      nodes_per_year = nodes_per_second * secs_in_year
+      cost_node_encoding = rig_malicious_cost_per_year / nodes_per_year
+
+      porep_cpu_time = porep_commit_time + encoding_time
+      porep_gpu_time = porep_proof_gen
+
+      describe (cost_honest_cpu_hour, "Cost of one CPU thread for an honest miner.", hour)
+      describe (cost_honest_cpu, "Cost of one CPU thread for an honest miner.", second)
+      describe (cost_honest_porep,"Cost of PoRep for an honest miner. Ignores GPU.", dollar)
+      describe (cost_honest_post, "Cost of PoSt for an honest miner. Ignores GPU.", dollar)
+      cost_honest_cpu = cost_honest_cpu_hour / (60 * 60)
+      cost_honest_porep = porep_time * cost_honest_cpu
+      cost_honest_post = post_time * cost_honest_cpu
 
     Storage:
       // TODO(important): add the hardware cost from first principle
@@ -714,5 +725,5 @@ Rationality:
       describe(extra_storage_time, "Time for which an honest user must be storing a file beyond the challenge period")
 
       cost_gib_per_month = cost_gb_per_month * gb_to_gib
-      cost_storage_gibs = cost_gib_per_month / secs_in_month 
+      cost_storage_gibs = cost_gib_per_month / secs_in_month
       cost_storage_sector_polling_time = cost_storage_gibs * (sector_size_gib * (polling_time + extra_storage_time))
