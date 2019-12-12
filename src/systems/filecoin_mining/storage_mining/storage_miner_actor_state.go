@@ -1,8 +1,6 @@
 package storage_mining
 
 import (
-	"errors"
-
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -44,55 +42,24 @@ func (st *StorageMinerActorState_I) _shouldChallenge(currEpoch block.ChainEpoch)
 
 func (st *StorageMinerActorState_I) _processStagedCommittedSectors(rt Runtime) {
 	for sectorNo, stagedInfo := range st.StagedCommittedSectors() {
-		st.Sectors()[sectorNo] = stagedInfo.Sector()
+		st.Sectors()[sectorNo] = stagedInfo
 		st.Impl().ProvingSet_.Add(sectorNo)
 		st.SectorTable().Impl().CommittedSectors_.Add(sectorNo)
-		st.SectorUtilization()[sectorNo] = stagedInfo.Utilization()
 	}
 
 	// empty StagedCommittedSectors
-	st.Impl().StagedCommittedSectors_ = make(map[sector.SectorNumber]StagedCommittedSectorInfo)
-}
-
-func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime, lastPoStResponse block.ChainEpoch) []deal.DealID {
-	// TODO: verify if we should update Sector utilization for failing sectors
-	// depends on decision around collateral requirement for the Proving Set
-	// and what happens when a failing sector expires
-
-	ret := make([]deal.DealID, 0)
-
-	for _, sectorNo := range st.Impl().ProvingSet_.SectorsOn() {
-
-		utilizationInfo := st._safeGetUtilizationInfo(rt, sectorNo)
-		newUtilization := utilizationInfo.CurrUtilization()
-
-		currEpoch := rt.CurrEpoch()
-		newExpiredDealIDs := make([]deal.DealID, 0)
-		newExpiredDeals := utilizationInfo.DealExpirationAMT().Impl().ExpiredDealsInRange(lastPoStResponse, currEpoch)
-
-		for _, expiredDeal := range newExpiredDeals {
-			expiredPower := expiredDeal.Power()
-			newUtilization -= expiredPower
-			newExpiredDealIDs = append(newExpiredDealIDs, expiredDeal.ID())
-		}
-
-		st.SectorUtilization()[sectorNo].Impl().CurrUtilization_ = newUtilization
-		ret = append(ret, newExpiredDealIDs...)
-	}
-
-	return ret
-
+	st.Impl().StagedCommittedSectors_ = make(map[sector.SectorNumber]SectorOnChainInfo)
 }
 
 func (st *StorageMinerActorState_I) _getActivePower(rt Runtime) (block.StoragePower, error) {
 	activePower := block.StoragePower(0)
 
 	for _, sectorNo := range st.SectorTable().Impl().ActiveSectors_.SectorsOn() {
-		utilInfo, err := st._getUtilizationInfo(sectorNo)
-		if err != nil {
-			return block.StoragePower(0), err
+		sectorPower, found := st._getSectorPower(sectorNo)
+		if !found {
+			panic("")
 		}
-		activePower += utilInfo.CurrUtilization()
+		activePower += sectorPower
 	}
 
 	return activePower, nil
@@ -106,11 +73,12 @@ func (st *StorageMinerActorState_I) _getInactivePower() (block.StoragePower, err
 	inactiveSectorSet := inactiveProvingSet.Extend(st.SectorTable().FailingSectors())
 
 	for _, sectorNo := range inactiveSectorSet.SectorsOn() {
-		utilizationInfo, err := st._getUtilizationInfo(sectorNo)
-		if err != nil {
-			return block.StoragePower(0), err
+
+		sectorPower, found := st._getSectorPower(sectorNo)
+		if !found {
+			panic("")
 		}
-		inactivePower += utilizationInfo.CurrUtilization()
+		inactivePower += sectorPower
 	}
 
 	return inactivePower, nil
@@ -135,7 +103,6 @@ func (st *StorageMinerActorState_I) _updateClearSector(rt Runtime, sectorNo sect
 	}
 
 	delete(st.Sectors(), sectorNo)
-	delete(st.SectorUtilization(), sectorNo)
 	st.ProvingSet_.Remove(sectorNo)
 	st.SectorExpirationQueue().Remove(sectorNo)
 }
@@ -202,33 +169,35 @@ func (st *StorageMinerActorState_I) _updateFailSector(rt Runtime, sectorNo secto
 	}
 }
 
-func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) {
+func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) []sector.SectorNumber {
 	currEpoch := rt.CurrEpoch()
 
 	queue := st.SectorExpirationQueue()
+	expiredSectorNos := make([]sector.SectorNumber, 0)
+
 	for queue.Peek().Expiration() <= currEpoch {
 		expiredSectorNo := queue.Pop().SectorNumber()
 
 		state := st.Sectors()[expiredSectorNo].State()
-
 		switch state.StateNumber {
 		case SectorActiveSN:
 			// Note: in order to verify if something was stored in the past, one must
 			// scan the chain. SectorNumber can be re-used.
-
-			// expiration settlement will be done at _updateSectorUtilization
 			st._updateClearSector(rt, expiredSectorNo)
+			expiredSectorNos = append(expiredSectorNos, expiredSectorNo)
 		case SectorFailingSN:
 			// TODO: check if there is any fault that we should handle here
 
 			// a failing sector expires, no change to FaultCount
-			// expiration settlement will be done at _updateSectorUtilization
 			st._updateClearSector(rt, expiredSectorNo)
+			expiredSectorNos = append(expiredSectorNos, expiredSectorNo)
 		default:
 			// Note: SectorCommittedSN, SectorRecoveringSN transition first to SectorFailingSN, then expire
 			rt.AbortStateMsg("Invalid sector state in SectorExpirationQueue")
 		}
 	}
+
+	return expiredSectorNos
 }
 
 func (st *StorageMinerActorState_I) _assertSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber) {
@@ -238,56 +207,28 @@ func (st *StorageMinerActorState_I) _assertSectorDidNotExist(rt Runtime, sectorN
 	}
 }
 
-func (st *StorageMinerActorState_I) _safeGetUtilizationInfo(rt Runtime, sectorNo sector.SectorNumber) sector.SectorUtilizationInfo {
-	utilizationInfo, err := st._getUtilizationInfo(sectorNo)
-
-	if err != nil {
-		rt.AbortStateMsg(err.Error())
-	}
-
-	return utilizationInfo
-}
-
-func (st *StorageMinerActorState_I) _getUtilizationInfo(sectorNo sector.SectorNumber) (sector.SectorUtilizationInfo, error) {
-	utilizationInfo, found := st.SectorUtilization()[sectorNo]
-
+func (st *StorageMinerActorState_I) _getSectorOnChainInfo(sectorNo sector.SectorNumber) (info SectorOnChainInfo, ok bool) {
+	sectorInfo, found := st.Sectors()[sectorNo]
 	if !found {
-		err := errors.New("sm._getUtilizationInfo: utilization info not found.")
-		return nil, err
+		return nil, false
 	}
-	return utilizationInfo, nil
+	return sectorInfo, true
 }
 
-func (st *StorageMinerActorState_I) _initializeUtilizationInfo(rt Runtime, deals []deal.OnChainDeal) sector.SectorUtilizationInfo {
-
-	var maxUtilization block.StoragePower
-	var dealExpirationAMT deal.DealExpirationAMT
-
-	for _, d := range deals {
-		dealID := d.ID()
-		dealExpiration := d.Deal().Proposal().EndEpoch()
-		// TODO: verify what counts towards power here
-		// There is PayloadSize, OverheadSize, and Total, see piece.id
-		dealPayloadPower := block.StoragePower(d.Deal().Proposal().PieceSize().PayloadSize())
-
-		expirationValue := &deal.DealExpirationValue_I{
-			ID_:    dealID,
-			Power_: dealPayloadPower,
-		}
-		dealExpirationAMT.Impl().Add(dealExpiration, expirationValue)
-
-		maxUtilization += dealPayloadPower
-
+func (st *StorageMinerActorState_I) _getSectorPower(sectorNo sector.SectorNumber) (power block.StoragePower, ok bool) {
+	sectorInfo, found := st._getSectorOnChainInfo(sectorNo)
+	if !found {
+		return block.StoragePower(0), false
 	}
+	return sectorInfo.Power(), true
+}
 
-	initialUtilizationInfo := &sector.SectorUtilizationInfo_I{
-		DealExpirationAMT_: dealExpirationAMT,
-		MaxUtilization_:    maxUtilization,
-		CurrUtilization_:   maxUtilization,
+func (st *StorageMinerActorState_I) _getSectorDealIDs(sectorNo sector.SectorNumber) (dealIDs []deal.DealID, ok bool) {
+	sectorInfo, found := st._getSectorOnChainInfo(sectorNo)
+	if !found {
+		return make([]deal.DealID, 0), false
 	}
-
-	return initialUtilizationInfo
-
+	return sectorInfo.SealCommitment().DealIDs(), true
 }
 
 func (st *StorageMinerActorState_I) _getPreCommitDepositReq(rt Runtime) actor.TokenAmount {

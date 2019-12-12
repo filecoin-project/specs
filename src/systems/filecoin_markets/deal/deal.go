@@ -47,28 +47,3 @@ func (p *StorageDealProposal_I) CID() ProposalCID {
 	var cid ProposalCID
 	return cid
 }
-
-func (amt *DealExpirationAMT_I) Size() int {
-	return 0
-}
-
-func (amt *DealExpirationAMT_I) Add(key block.ChainEpoch, value DealExpirationValue) {
-	// helper function to add entry into the AMT
-}
-
-func (amt *DealExpirationAMT_I) ActiveDealIDs() []DealID {
-	ret := make([]DealID, 0)
-	return ret
-}
-
-// return last item in the expiration amt
-func (q *DealExpirationAMT_I) LastDealExpiration() block.ChainEpoch {
-	ret := block.ChainEpoch(0)
-	return ret
-}
-
-// return deal IDs expiring in epoch range
-func (q *DealExpirationAMT_I) ExpiredDealsInRange(start block.ChainEpoch, end block.ChainEpoch) []DealExpirationValue {
-	ret := make([]DealExpirationValue, 0)
-	return ret
-}

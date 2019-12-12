@@ -57,19 +57,6 @@ type OnChainDeal struct {
     ID                DealID
 }
 
-// AMT from expiration epoch to dealID and to sectorNumber
-// defined as struct to specify helpers
-// effectively an AMT of the form DealExpirationAMT[Expiration][DealID] = PayloadPower
-type DealExpirationAMT struct {
-    Expiration  block.ChainEpoch  // key
-    Value       DealExpirationValue  // value
-}
-
-type DealExpirationValue struct {
-    ID     DealID  // key
-    Power  block.StoragePower  // value
-}
-
 type RetrievalDealProposal struct {}  // TODO
 type RetrievalDeal struct {
     Proposal          RetrievalDealProposal
