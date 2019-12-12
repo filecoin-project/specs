@@ -714,8 +714,8 @@ function formToObject (form) {
 
   Array.from(form.querySelectorAll('input')).forEach(el => {
     el.oninput = (e) => {
+      form[`output_${el.name}`].value = el.value
       e.stopPropagation()
-      console.log("internal input empty")
     }
   })
 
@@ -742,10 +742,9 @@ function formToObject (form) {
         return map;
       }, {});
 
-    // Object.keys(form.value).forEach(k => { form[`output_${k}`].value = form[k].value })
+    Object.keys(form.value).forEach(k => { form[`output_${k}`].value = form[k].value })
 
     form.dispatchEvent(new CustomEvent('input'));
-    console.log('mouse ended')
   };
 
   form.onmouseup()
