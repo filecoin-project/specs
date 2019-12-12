@@ -21,8 +21,6 @@ viewof base = jsonToSliders(
   { "!StackedReplicaUnaligned": true}
 )
 
-base
-
 md`### Constants`
 
 md`#### Graph`
