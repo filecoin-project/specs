@@ -4925,7 +4925,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_updateSectorUtilization</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">lastPoStResponse</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span> <span class="p">{</span>
     <span class="c1">// TODO: verify if we should update Sector utilization for failing sectors
-</span><span class="c1"></span>    <span class="c1">// depends on decision around collateral requirement for inactive power
+</span><span class="c1"></span>    <span class="c1">// depends on decision around collateral requirement for the Proving Set
 </span><span class="c1"></span>    <span class="c1">// and what happens when a failing sector expires
 </span><span class="c1"></span>
     <span class="nx">ret</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>

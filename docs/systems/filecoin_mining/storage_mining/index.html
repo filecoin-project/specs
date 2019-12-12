@@ -4664,13 +4664,11 @@ https://github.com/alex-shpak/hugo-book
 - <code>Active Sectors</code> which have successfully been proven and are used in <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus___index">Storage Power Consensus</a> (SPC), and
 - <code>Recovering Sectors</code> which were faulted and are poised to recover through a new PoSt.</p>
 
-<p>Sectors in the <code>Proving Set</code> can be faulted and marked as <code>Failing</code> by the miner itself declaring a fault (<code>Declared Faults</code>), or through automatic fault detection by the network using on-chain data (<code>Detected Faults</code>).</p>
+<p>Sectors in the <code>Proving Set</code> can be faulted and marked as <code>Failing</code> by the miner itself declaring a fault (<code>Declared Faults</code>), or through automatic fault detection by the network using on-chain data (<code>Detected Faults</code>). Note that storage in the <code>Proving Set</code> is used in SPC (specifically in-deal storage from the <code>Proving Set</code> counts toward <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power">Storage Power</a>). All storage is tracked by the system and affect a miner&rsquo;s ability to serve as a storage provider in the Filecoin Storage Market.</p>
 
 <p>A sector that is in the <code>Failing</code> state for three consecutive <code>Proving Period</code>s will be terminated (<code>Terminated Faults</code>) meaning its data will be deemed unrecoverable by PoSt and the sector will have to be SEALed once more (as part of PoRep).</p>
 
 <p>Conversely <code>RecoverFaults()</code> can be called any time by the miner on a failing sector to return it to the <code>ProvingSet</code> and attempt to prove data is being stored once more. For instance an Active sector might move into the failing state during a power outage (through a declared or detected fault). At the end of the outage, the miner may call <code>RecoverFaults</code> to transition the state to <code>Recovering</code> before proving it once more and returning it to <code>Active</code>.</p>
-
-<p>Through the above workflows, Filecoin (or Storage more generally) can more generally be described as being <strong>Active</strong> (<code>Active</code> sectors), or <strong>Inactive</strong> (<code>Committed</code>, <code>Recovering</code> and <code>Failing</code> sectors). Specifically, active storage is used in SPC (and in-deal active storage counts toward <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power">Storage Power</a>) whereas inactive storage is not. Both active and inactive storage is tracked by the system and affect a miner&rsquo;s ability to serve as a storage provider in the Filecoin Storage Market.</p>
 
 <p>We illustrate these states below.</p>
 

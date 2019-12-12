@@ -4639,6 +4639,41 @@ https://github.com/alex-shpak/hugo-book
 <p>The <code>Sector</code> is a fundamental &ldquo;storage container&rdquo; abstraction used in Filecoin Storage Mining. It is the basic unit of storage,
 and serves to make storage conform to a set of expectations.</p>
 
+<p>New sectors are empty upon creation. As the miner receives client data, they fill or &ldquo;pack&rdquo; the piece(s) into an unsealed sector.</p>
+
+<p>Once a sector is full, the unsealed sector is combined by a proving tree into a single root <code>UnsealedSectorCID</code>. The sealing process then encodes (using CBOR) an unsealed sector into a sealed sector, with the root <code>SealedSectorCID</code>.</p>
+
+<p>This diagram shows the composition of an unsealed sector and a sealed sector.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Unsealed Sectors and Sealed Sectors</span>
+
+
+
+
+(<a href="docs/systems/filecoin_mining/sector/diagrams/sectors.png" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_mining/sector/diagrams/sectors.png" />
+
+
+
+
+</div>
+
+
 
 
 
@@ -4763,8 +4798,6 @@ and serves to make storage conform to a set of expectations.</p>
 <p>TODO:</p>
 
 <ul>
-<li>sector illustration</li>
-<li>describe how Sectors are used in practice</li>
 <li>describe sizing ranges of sectors</li>
 <li>describe &ldquo;storage/shipping container&rdquo; analogy</li>
 </ul>

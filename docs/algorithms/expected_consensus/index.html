@@ -4677,18 +4677,19 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 
 <span class="kd">type</span> <span class="nx">ExpectedConsensus</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">expectedBlocksPerEpoch</span>  <span class="nx">UVarint</span>
-    <span class="nx">expectedRewardPerEpoch</span>  <span class="nx">UVarint</span>
+    <span class="nx">expectedLeadersPerEpoch</span>  <span class="nx">UVarint</span>
+    <span class="nx">expectedRewardPerEpoch</span>   <span class="nx">UVarint</span>
 
     <span class="nf">ComputeChainWeight</span><span class="p">(</span><span class="nx">tipset</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainWeight</span>
     <span class="nf">IsValidConsensusFault</span><span class="p">(</span><span class="nx">faults</span> <span class="nx">ConsensusFaultType</span><span class="p">,</span> <span class="nx">blocks</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">])</span> <span class="kt">bool</span>
     <span class="nf">IsWinningChallengeTicket</span><span class="p">(</span>
-        <span class="nx">challengeTicket</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span>
-        <span class="nx">sectorPower</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-        <span class="nx">totalPower</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-        <span class="nx">sampleNum</span>        <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
-        <span class="nx">sampleDenom</span>      <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+        <span class="nx">challengeTicket</span>    <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span>
+        <span class="nx">sectorPower</span>        <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+        <span class="nx">networkPower</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+        <span class="nx">numSectorsSampled</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+        <span class="nx">numSectorsMiner</span>    <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
     <span class="p">)</span> <span class="kt">bool</span>
+
     <span class="nf">GetBlockRewards</span><span class="p">(</span>
         <span class="nx">ePoStInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
     <span class="p">)</span> <span class="nx">UVarint</span>
@@ -4739,57 +4740,59 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">ExpectedConsensus_I</span><span class="p">)</span> <span class="nf">ComputeChainWeight</span><span class="p">(</span><span class="nx">tipset</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainWeight</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+	<span class="nx">util</span><span class="p">.</span><span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="k">return</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainWeight</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 	<span class="c1">// see expected_consensus.md for detail
 </span><span class="c1"></span>
 	<span class="c1">// wPowerFactor := self.log2b(spa.GetTotalPower())
 </span><span class="c1"></span>	<span class="c1">// wBlocksFactor_num := (wPowerFactor * len(tipset.Blocks) * self.wParams.wRatio_num)
-</span><span class="c1"></span>	<span class="c1">// wBlocksFactor_den := self.expectedBlocksPerEpoch * self.wParams.wRatio_den
+</span><span class="c1"></span>	<span class="c1">// wBlocksFactor_den := self.expectedLeadersPerEpoch * self.wParams.wRatio_den
 </span><span class="c1"></span>	<span class="c1">// return tipset.ParentTipset.ChainWeight
 </span><span class="c1"></span>	<span class="c1">// 	+wPowerFactor * self.wParams.wPrecision
 </span><span class="c1"></span>	<span class="c1">// 	+(wBlocksFactor_num * self.wParams.wPrecision / wBlocksFactor_den)
 </span><span class="c1"></span><span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">ExpectedConsensus_I</span><span class="p">)</span> <span class="nf">IsValidConsensusFault</span><span class="p">(</span><span class="nx">faults</span> <span class="nx">ConsensusFaultType</span><span class="p">,</span> <span class="nx">blocks</span> <span class="p">[]</span><span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-
+	<span class="nx">util</span><span class="p">.</span><span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="k">return</span> <span class="kc">false</span>
 	<span class="c1">// 1. double-fork mining fault
 </span><span class="c1"></span>	<span class="c1">// return block1.Miner == block2.Miner &amp;&amp; block1.Epoch == block2.Epoch
 </span><span class="c1"></span>
 	<span class="c1">// 2. time-offset mining fault
 </span><span class="c1"></span>	<span class="c1">// return block1.Miner == block2.Miner
-</span><span class="c1"></span>	<span class="c1">// &amp;&amp; block1.ParentTipset == block2.ParentTipset
+</span><span class="c1"></span>	<span class="c1">// &amp;&amp; block1.Parents == block2.Parents
 </span><span class="c1"></span>
 	<span class="c1">// 3. parent grinding fault
 </span><span class="c1"></span>	<span class="c1">// return block1.Miner == block2.Miner
 </span><span class="c1"></span>	<span class="c1">// &amp;&amp; abs(block1.Epoch - block2.Epoch) == 1
 </span><span class="c1"></span><span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">ExpectedConsensus_I</span><span class="p">)</span> <span class="nf">IsWinningChallengeTicket</span><span class="p">(</span><span class="nx">challengeTicket</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">maxTicket</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">sectorPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">totalPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">sampleNum</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">,</span> <span class="nx">sampleDenom</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">ExpectedConsensus_I</span><span class="p">)</span> <span class="nf">IsWinningChallengeTicket</span><span class="p">(</span><span class="nx">challengeTicket</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">sectorPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">networkPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">numSectorsSampled</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">,</span> <span class="nx">numSectorsMiner</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="c1">// Conceptually we are mapping the pseudorandom, deterministic hash output of the challenge ticket onto [0,1]
 </span><span class="c1"></span>	<span class="c1">// by dividing by 2^HashLen and comparing that to the sector&#39;s target.
-</span><span class="c1"></span>	<span class="c1">// if the challenge ticket hash / max hash val &lt; activeSectorPower / totalPower * 1 / sectorSampled * ec.ExpectedLeaders
+</span><span class="c1"></span>	<span class="c1">// if the challenge ticket hash / max hash val &lt; sectorPower / totalPower * ec.ExpectedLeaders * numSectorsMiner / numSectorsSampled
 </span><span class="c1"></span>	<span class="c1">// it is a winning challenge ticket.
+</span><span class="c1"></span>	<span class="c1">// note that the sectorPower may differ based on the challenged sector
 </span><span class="c1"></span>
-	<span class="c1">// lhs := challengeTicket * totalPower * sampleNum
-</span><span class="c1"></span>	<span class="c1">// rhs := maxTicket * minerPower * sampleDenom * self.expectedBlocksPerEpoch
+	<span class="c1">// lhs := challengeTicket * totalPower * numSectorsSampled
+</span><span class="c1"></span>	<span class="c1">// rhs := maxTicket * activeSectorPower * numSectorsMiner * self.ExpectedLeaders
 </span><span class="c1"></span>	<span class="nx">lhs</span> <span class="o">:=</span> <span class="nx">util</span><span class="p">.</span><span class="nf">BigFromBytes</span><span class="p">(</span><span class="nx">challengeTicket</span><span class="p">[:])</span>
-	<span class="nx">lhs</span> <span class="p">=</span> <span class="nx">lhs</span><span class="p">.</span><span class="nf">Mul</span><span class="p">(</span><span class="nx">lhs</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">BigFromUint64</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">totalPower</span><span class="p">)))</span>
-	<span class="nx">lhs</span> <span class="p">=</span> <span class="nx">lhs</span><span class="p">.</span><span class="nf">Mul</span><span class="p">(</span><span class="nx">lhs</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">BigFromUint64</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">sampleNum</span><span class="p">)))</span>
+	<span class="nx">lhs</span> <span class="p">=</span> <span class="nx">lhs</span><span class="p">.</span><span class="nf">Mul</span><span class="p">(</span><span class="nx">lhs</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">BigFromUint64</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">networkPower</span><span class="p">)))</span>
+	<span class="nx">lhs</span> <span class="p">=</span> <span class="nx">lhs</span><span class="p">.</span><span class="nf">Mul</span><span class="p">(</span><span class="nx">lhs</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">BigFromUint64</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">numSectorsSampled</span><span class="p">)))</span>
 
 	<span class="c1">// TODO: remove const here
 </span><span class="c1"></span>	<span class="nx">SHA256Len</span> <span class="o">:=</span> <span class="mi">256</span>
 	<span class="c1">// sectorPower * 2^len(H)
 </span><span class="c1"></span>	<span class="nx">rhs</span> <span class="o">:=</span> <span class="nb">new</span><span class="p">(</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span><span class="p">).</span><span class="nf">Lsh</span><span class="p">(</span><span class="nx">util</span><span class="p">.</span><span class="nf">BigFromUint64</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">sectorPower</span><span class="p">)),</span> <span class="nb">uint</span><span class="p">(</span><span class="nx">SHA256Len</span><span class="p">))</span>
-	<span class="nx">rhs</span> <span class="p">=</span> <span class="nx">rhs</span><span class="p">.</span><span class="nf">Mul</span><span class="p">(</span><span class="nx">rhs</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">BigFromUint64</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">sampleDenom</span><span class="p">)))</span>
-	<span class="nx">rhs</span> <span class="p">=</span> <span class="nx">rhs</span><span class="p">.</span><span class="nf">Mul</span><span class="p">(</span><span class="nx">rhs</span><span class="p">,</span> <span class="nx">big</span><span class="p">.</span><span class="nf">NewInt</span><span class="p">(</span><span class="nb">int64</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nf">expectedBlocksPerEpoch</span><span class="p">())))</span>
+	<span class="nx">rhs</span> <span class="p">=</span> <span class="nx">rhs</span><span class="p">.</span><span class="nf">Mul</span><span class="p">(</span><span class="nx">rhs</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">BigFromUint64</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">numSectorsMiner</span><span class="p">)))</span>
+	<span class="nx">rhs</span> <span class="p">=</span> <span class="nx">rhs</span><span class="p">.</span><span class="nf">Mul</span><span class="p">(</span><span class="nx">rhs</span><span class="p">,</span> <span class="nx">big</span><span class="p">.</span><span class="nf">NewInt</span><span class="p">(</span><span class="nb">int64</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nf">expectedLeadersPerEpoch</span><span class="p">())))</span>
 
 	<span class="c1">// lhs &lt; rhs?
 </span><span class="c1"></span>	<span class="k">return</span> <span class="nx">lhs</span><span class="p">.</span><span class="nf">Cmp</span><span class="p">(</span><span class="nx">rhs</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">ExpectedConsensus_I</span><span class="p">)</span> <span class="nf">GetBlockRewards</span><span class="p">(</span><span class="nx">ePoStInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4968,14 +4971,28 @@ How is K selected?
 
 <p>The miner gets to draw one such challenge ticket per sector they have committed and must then compare the value derived from the challenge ticket against a target to determine whether they are eligible to mine. This is called finding a winning ticket.</p>
 
-<p>The target is set as follows, for each ticket and its associated sector:
-<code>target = activePowerInSector/networkPower * sectorsSampled * EC.ExpectedLeaders</code>.</p>
+<p>The target is set as follows, for each sector sampled for a ticket from the miner&rsquo;s <code>ProvingSet</code> and the number of sectors in the set:
+<code>target = activePowerInSector/networkPower * EC.ExpectedLeadersPerEpoch * numSectorsMiner / numSectorsSampled</code></p>
 
-<p>This means that on expectation, sampling sectorsSampled * storedSectors challenge tickets in every epoch, a miner will find <code>minerPower * EC.ExpectedLeaders</code> winning tickets per round on expectation.</p>
+<p>The target ensures that the miner can express the power across all of their sectors through the tickets they have sampled. Specifically, on expectation, checking <code>numSectorsSampled</code> (with <code>numSectorsSampled = ceil(len(provingSet) * EPoStSampleRate)</code>) challenge tickets in every epoch, a miner will find <code>minerPower/networkPower * EC.ExpectedLeadersPerEpoch</code> winning tickets per epoch on expectation. Note that while the sectorPower may differ based on the challenged sector, i.e. in any given epoch a miner may have an advantage (if picking sectors with more than the average across all their sectors) or a disadvantage (conversely) in their election; but over multiple epochs, on expectation the election will be fair.</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">We elaborate on the above claim:
 
-<p>If the miner wins the election in this round, it can use wining challengeTicket, along with a new randomness ticket to generate and publish a new block. Otherwise, it waits to hear of another block generated in this round.</p>
+We want the miner&#39;s expected wins over time to be equal to w = minerPower/networkPower * EC.ExpectedLeadersPerEpoch
 
-<p>Each miner will be rewarded <code>blockRewardPerEpoch / EC.ExpectedLeaders</code> FIL per found winning ticket, all of which are submitted on chain.</p>
+Take P to be the average miner power over the N sectors in their ProvingSet.
+We have P = SUM_{i=0}^N P_i / N
+
+The miner&#39;s likelihood of winning an election in any epoch is, for C tickets randomly drawn
+W = C * target = C * P_i/networkPower * EC.ExpectedLeadersPerEpoch * N/C = N * P_i/networkPower * EC.ExpectedLeadersPerEpoch
+
+with N * P_i ~= minerPower on expectation over enough epochs. That is to say: W = minerPower/networkPower * EC.ExpectedLeadersPerEpoch as wanted.</code></pre></div>
+<p>We show this below, removing division for ease of implementation:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">const maxChallengeTicketSize = 2^len(H)
+
+def TicketIsWinner(challengeTicket):
+    // Check that `ChallengeTicket &lt; Target`
+    return challengeTicket * networkPower * numSectorsSampled &lt; activePowerInSector * EC.ExpectedLeadersPerEpoch * maxChallengeTicketSize * numSectorsMiner</code></pre></div>
+<p>If the miner finds any winning ticket in this round, it can use it, along with a new randomness ticket to generate and publish a new block. Otherwise, it waits to hear of another block generated in this round.</p>
 
 <p>We also use the VRF from <a href="../../../#algorithms__crypto__vrf">Verifiable Random Function</a> to draw randomness as part of crafting the Challenge Tickets in order to ensure leader election is secret (a miner cannot be known to win until they publish their ticket on the chain).</p>
 

@@ -4689,6 +4689,7 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
         <span class="nx">st</span>                 <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
         <span class="nx">partialTicket</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span>
         <span class="nx">sectorUtilization</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+        <span class="nx">numSectors</span>         <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
     <span class="p">)</span> <span class="kt">bool</span>
 
     <span class="nf">_getStoragePowerActorState</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="nx">StoragePowerActorState</span>
@@ -4742,9 +4743,12 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 
 <p>Per the above, we also clearly distinguish putting storage on-chain from gaining power in consensus (sometimes called &ldquo;Storage Power&rdquo;) as follows:</p>
 
-<p><strong>Consensus power in Filecoin is determined by in-deal storage</strong>. For instance, if a miner had a 32GB sector, 20 of which were used as part of storage deals, only those 20 would contribute to said miner&rsquo;s <em>Storage Power</em>.</p>
+<p>Consensus power in Filecoin is defined as the intersection between:
+- Proven Storage as of the PoSts verification (i.e. storage in the <code>Proving Set</code> since it will all be active by the time the PoSt is computed)
+- In-deal storage.
+Put another way <strong>consensus power is in-deal storage in the Proving Set</strong>. For instance, if a miner had two 32GB sector, each with 20 GB of in-deal storage; the miner would have 40GB worth of storage power for SPC.</p>
 
-<p>Thereafter, power can be either <em>active</em> or <em>inactive</em> as defined in <a href="../../../../#systems__filecoin_mining__storage_mining">Storage Miner</a>.</p>
+<p>Read more in <a href="../../../../#systems__filecoin_mining__storage_mining">Storage Miner</a>.</p>
 
 <div id="systems__filecoin_blockchain__storage_power_consensus__tickets"></div>
 
@@ -4968,6 +4972,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="nx">winningCandidates</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 	<span class="nx">st</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_getStorageMinerActorState</span><span class="p">(</span><span class="nx">currState</span><span class="p">,</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_keyStore</span><span class="p">().</span><span class="nf">MinerAddress</span><span class="p">())</span>
 
+	<span class="nx">numMinerSectors</span> <span class="o">:=</span> <span class="nb">uint64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">SectorTable</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">ActiveSectors_</span><span class="p">.</span><span class="nf">SectorsOn</span><span class="p">()))</span>
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">candidate</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">candidates</span> <span class="p">{</span>
 		<span class="nx">sectorNum</span> <span class="o">:=</span> <span class="nx">candidate</span><span class="p">.</span><span class="nf">SectorID</span><span class="p">().</span><span class="nf">Number</span><span class="p">()</span>
 		<span class="nx">utilInfo</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getUtilizationInfo</span><span class="p">(</span><span class="nx">sectorNum</span><span class="p">)</span>
@@ -4976,7 +4981,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 </span><span class="c1"></span>			<span class="k">return</span>
 		<span class="p">}</span>
 		<span class="nx">sectorPower</span> <span class="o">:=</span> <span class="nx">utilInfo</span><span class="p">.</span><span class="nf">CurrUtilization</span><span class="p">()</span>
-		<span class="k">if</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_consensus</span><span class="p">().</span><span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">currState</span><span class="p">,</span> <span class="nx">candidate</span><span class="p">.</span><span class="nf">PartialTicket</span><span class="p">(),</span> <span class="nx">sectorPower</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_consensus</span><span class="p">().</span><span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">currState</span><span class="p">,</span> <span class="nx">candidate</span><span class="p">.</span><span class="nf">PartialTicket</span><span class="p">(),</span> <span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">numMinerSectors</span><span class="p">)</span> <span class="p">{</span>
 			<span class="nx">winningCandidates</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">winningCandidates</span><span class="p">,</span> <span class="nx">candidate</span><span class="p">)</span>
 		<span class="p">}</span>
 	<span class="p">}</span>
@@ -5197,6 +5202,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">VerifyElection</span><span class="p">(</span><span class="nx">header</span> <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="nx">st</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_getStorageMinerActorState</span><span class="p">(</span><span class="nx">header</span><span class="p">.</span><span class="nf">ParentState</span><span class="p">(),</span> <span class="nx">header</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
+	<span class="nx">numMinerSectors</span> <span class="o">:=</span> <span class="nb">uint64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">SectorTable</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">ActiveSectors_</span><span class="p">.</span><span class="nf">SectorsOn</span><span class="p">()))</span>
 
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">info</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">Candidates</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nx">sectorNum</span> <span class="o">:=</span> <span class="nx">info</span><span class="p">.</span><span class="nf">SectorID</span><span class="p">().</span><span class="nf">Number</span><span class="p">()</span>
@@ -5206,7 +5212,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 </span><span class="c1"></span>			<span class="k">return</span> <span class="kc">false</span>
 		<span class="p">}</span>
 		<span class="nx">sectorPower</span> <span class="o">:=</span> <span class="nx">utilInfo</span><span class="p">.</span><span class="nf">CurrUtilization</span><span class="p">()</span>
-		<span class="k">if</span> <span class="p">!</span><span class="nx">sms</span><span class="p">.</span><span class="nf">_consensus</span><span class="p">().</span><span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">header</span><span class="p">.</span><span class="nf">ParentState</span><span class="p">(),</span> <span class="nx">info</span><span class="p">.</span><span class="nf">PartialTicket</span><span class="p">(),</span> <span class="nx">sectorPower</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="p">!</span><span class="nx">sms</span><span class="p">.</span><span class="nf">_consensus</span><span class="p">().</span><span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">header</span><span class="p">.</span><span class="nf">ParentState</span><span class="p">(),</span> <span class="nx">info</span><span class="p">.</span><span class="nf">PartialTicket</span><span class="p">(),</span> <span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">numMinerSectors</span><span class="p">)</span> <span class="p">{</span>
 			<span class="k">return</span> <span class="kc">false</span>
 		<span class="p">}</span>
 	<span class="p">}</span>
@@ -5308,6 +5314,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
         <span class="nx">st</span>                 <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
         <span class="nx">partialTicket</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span>
         <span class="nx">sectorUtilization</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+        <span class="nx">numSectors</span>         <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
     <span class="p">)</span> <span class="kt">bool</span>
 
     <span class="nf">_getStoragePowerActorState</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="nx">StoragePowerActorState</span>
@@ -5366,6 +5373,8 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_power_consensus</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+	<span class="s">&#34;math&#34;</span>
+
 	<span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 	<span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 	<span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
@@ -5406,19 +5415,20 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">partialTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span><span class="p">,</span> <span class="nx">sectorUtilization</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">partialTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span><span class="p">,</span> <span class="nx">sectorUtilization</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 
 	<span class="c1">// finalize the partial ticket
 </span><span class="c1"></span>	<span class="nx">challengeTicket</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">SHA256</span><span class="p">(</span><span class="nx">partialTicket</span><span class="p">)</span>
 
 	<span class="nx">st</span> <span class="o">:=</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">_getStoragePowerActorState</span><span class="p">(</span><span class="nx">stateTree</span><span class="p">)</span>
-	<span class="nx">activePower</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getActivePower</span><span class="p">()</span>
+	<span class="nx">networkPower</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getActivePower</span><span class="p">()</span>
 
 	<span class="c1">// TODO: pull from constants
-</span><span class="c1"></span>	<span class="nx">SAMPLE_NUM</span> <span class="o">:=</span> <span class="nx">util</span><span class="p">.</span><span class="nf">UVarint</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-	<span class="nx">SAMPLE_DENOM</span> <span class="o">:=</span> <span class="nx">util</span><span class="p">.</span><span class="nf">UVarint</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">EPOST_SAMPLE_RATE_NUM</span> <span class="o">:=</span> <span class="nx">util</span><span class="p">.</span><span class="nf">UVarint</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+	<span class="nx">EPOST_SAMPLE_RATE_DENOM</span> <span class="o">:=</span> <span class="nx">util</span><span class="p">.</span><span class="nf">UVarint</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+	<span class="nx">sectorsSampled</span> <span class="o">:=</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">math</span><span class="p">.</span><span class="nf">Ceil</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">EPOST_SAMPLE_RATE_NUM</span><span class="o">/</span><span class="nx">EPOST_SAMPLE_RATE_DENOM</span><span class="p">)</span> <span class="o">*</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">numSectors</span><span class="p">)))</span>
 
-	<span class="k">return</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">ec</span><span class="p">().</span><span class="nf">IsWinningChallengeTicket</span><span class="p">(</span><span class="nx">challengeTicket</span><span class="p">,</span> <span class="nx">sectorUtilization</span><span class="p">,</span> <span class="nx">activePower</span><span class="p">,</span> <span class="nx">SAMPLE_NUM</span><span class="p">,</span> <span class="nx">SAMPLE_DENOM</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">ec</span><span class="p">().</span><span class="nf">IsWinningChallengeTicket</span><span class="p">(</span><span class="nx">challengeTicket</span><span class="p">,</span> <span class="nx">sectorUtilization</span><span class="p">,</span> <span class="nx">networkPower</span><span class="p">,</span> <span class="nx">sectorsSampled</span><span class="p">,</span> <span class="nx">numSectors</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">// TODO: fix linking here
@@ -5485,13 +5495,13 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 
 <p>In order to secure Storage Power Consensus, the system defines a minimum miner size required to participate in consensus.</p>
 
-<p>Specifically, miners must have either at least <code>MIN_MINER_SIZE_STOR</code> of active power (i.e. storage power currently used in storage deals) or <code>MIN_MINER_SIZE_PERC</code> of the network&rsquo;s active storage power to participate in leader election.</p>
+<p>Specifically, miners must have either at least <code>MIN_MINER_SIZE_STOR</code> of power (i.e. storage power currently used in storage deals) or <code>MIN_MINER_SIZE_PERC</code> of the network&rsquo;s active storage power to participate in leader election.</p>
 
 <p>Miners smaller than this cannot mine blocks and earn block rewards in the network. Their power will not be counted as part of total network power. However, <strong>it is important to note that such miners can still have their power faulted and be penalized accordingly</strong>.</p>
 
 <p>Accordingly, to bootstrap the network, the genesis block must include miners taking part in valid storage deals along with appropriate committed storage.</p>
 
-<p>The <code>MIN_MINER_SIZE_PERC</code> condition will not be used in a network with more than <code>MIN_MINER_SIZE_STOR/MIN_MINER_SIZE_PERC</code> of active power. It is nonetheless defined to ensure liveness in small networks (e.g. close to genesis or after large power drops). Simply, a single miner can maintain network liveness for networks with less than <code>MIN_MINER_SIZE_STOR/MIN_MINER_SIZE_PERC</code> of active storage.</p>
+<p>The <code>MIN_MINER_SIZE_PERC</code> condition will not be used in a network with more than <code>MIN_MINER_SIZE_STOR/MIN_MINER_SIZE_PERC</code> of power. It is nonetheless defined to ensure liveness in small networks (e.g. close to genesis or after large power drops). Simply, a single miner can maintain network liveness for networks with less than <code>MIN_MINER_SIZE_STOR/MIN_MINER_SIZE_PERC</code> of active storage.</p>
 
 <div class="notices placeholder" >The below values are currently placeholders.</div>
 
