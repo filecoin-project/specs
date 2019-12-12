@@ -4657,33 +4657,18 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 
-<span class="c1">// Epoch is an epoch in time in the StateTree.
-</span><span class="c1">// It corresponds to rounds in the blockchain, but it
-</span><span class="c1">// is defined here as actors need a notion of time.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Epoch</span> <span class="nx">UVarint</span>
+<span class="c1">// The on-chain state data structure is a map (HAMT) of addresses to actor states.
+</span><span class="c1">// Only ID addresses are expected as keys.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">StateTree</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ActorStates</span>  <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span><span class="p">}</span>  <span class="c1">// HAMT
+</span><span class="c1"></span>
+    <span class="c1">// Returns the CID of the root node of the HAMT.
+</span><span class="c1"></span>    <span class="nf">RootCID</span><span class="p">()</span>    <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
 
-<span class="c1">// TODO: move this into a directory w/ all the actors + states
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">ActorName</span> <span class="nx">enum</span> <span class="p">{</span>
-    <span class="nx">StoragePowerActor</span>
-    <span class="nx">StorageMarketActor</span>
-    <span class="nx">StorageMinerActor</span>
-    <span class="nx">PaymentChannelActor</span>
-    <span class="nx">InitActor</span>
-    <span class="nx">AccountActor</span>
-    <span class="nx">CronActor</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">StateTree</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">SystemActors</span>  <span class="p">{</span><span class="nx">ActorName</span><span class="p">:</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">}</span>
-    <span class="nx">ActorStates</span>   <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span><span class="p">}</span>
-
-    <span class="c1">// TODO: API ConvenienceAPI
-</span><span class="c1"></span>    <span class="nf">GetActorAddress</span><span class="p">(</span><span class="nx">n</span> <span class="nx">ActorName</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nf">GetActorState</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span>
-
-    <span class="c1">// Balance returns the balance of a given actor
-</span><span class="c1"></span>    <span class="nf">Balance</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="c1">// Looks up an actor state by address.
+</span><span class="c1"></span>    <span class="nf">GetActor</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">state</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 

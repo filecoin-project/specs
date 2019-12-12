@@ -4975,12 +4975,11 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="nx">numMinerSectors</span> <span class="o">:=</span> <span class="nb">uint64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">SectorTable</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">ActiveSectors_</span><span class="p">.</span><span class="nf">SectorsOn</span><span class="p">()))</span>
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">candidate</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">candidates</span> <span class="p">{</span>
 		<span class="nx">sectorNum</span> <span class="o">:=</span> <span class="nx">candidate</span><span class="p">.</span><span class="nf">SectorID</span><span class="p">().</span><span class="nf">Number</span><span class="p">()</span>
-		<span class="nx">utilInfo</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getUtilizationInfo</span><span class="p">(</span><span class="nx">sectorNum</span><span class="p">)</span>
-		<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorPower</span><span class="p">(</span><span class="nx">sectorNum</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 			<span class="c1">// panic(err)
 </span><span class="c1"></span>			<span class="k">return</span>
 		<span class="p">}</span>
-		<span class="nx">sectorPower</span> <span class="o">:=</span> <span class="nx">utilInfo</span><span class="p">.</span><span class="nf">CurrUtilization</span><span class="p">()</span>
 		<span class="k">if</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_consensus</span><span class="p">().</span><span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">currState</span><span class="p">,</span> <span class="nx">candidate</span><span class="p">.</span><span class="nf">PartialTicket</span><span class="p">(),</span> <span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">numMinerSectors</span><span class="p">)</span> <span class="p">{</span>
 			<span class="nx">winningCandidates</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">winningCandidates</span><span class="p">,</span> <span class="nx">candidate</span><span class="p">)</span>
 		<span class="p">}</span>
@@ -5037,7 +5036,8 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 </span><span class="c1"></span><span class="kd">var</span> <span class="nx">node</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">FilecoinNode</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">_getStorageMinerActorState</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">StorageMinerActorState</span> <span class="p">{</span>
-	<span class="nx">actorState</span> <span class="o">:=</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+	<span class="nx">actorState</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="nx">substateCID</span> <span class="o">:=</span> <span class="nx">actorState</span><span class="p">.</span><span class="nf">State</span><span class="p">()</span>
 
 	<span class="nx">substate</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">node</span><span class="p">.</span><span class="nf">LocalGraph</span><span class="p">().</span><span class="nf">Get</span><span class="p">(</span><span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">substateCID</span><span class="p">))</span>
@@ -5057,7 +5057,8 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">_getStoragePowerActorState</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerActorState</span> <span class="p">{</span>
 	<span class="nx">powerAddr</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span>
-	<span class="nx">actorState</span> <span class="o">:=</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">powerAddr</span><span class="p">)</span>
+	<span class="nx">actorState</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">powerAddr</span><span class="p">)</span>
+	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="nx">substateCID</span> <span class="o">:=</span> <span class="nx">actorState</span><span class="p">.</span><span class="nf">State</span><span class="p">()</span>
 
 	<span class="nx">substate</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">node</span><span class="p">.</span><span class="nf">LocalGraph</span><span class="p">().</span><span class="nf">Get</span><span class="p">(</span><span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">substateCID</span><span class="p">))</span>
@@ -5206,12 +5207,11 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">info</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">Candidates</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nx">sectorNum</span> <span class="o">:=</span> <span class="nx">info</span><span class="p">.</span><span class="nf">SectorID</span><span class="p">().</span><span class="nf">Number</span><span class="p">()</span>
-		<span class="nx">utilInfo</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getUtilizationInfo</span><span class="p">(</span><span class="nx">sectorNum</span><span class="p">)</span>
-		<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorPower</span><span class="p">(</span><span class="nx">sectorNum</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 			<span class="c1">// panic(err)
 </span><span class="c1"></span>			<span class="k">return</span> <span class="kc">false</span>
 		<span class="p">}</span>
-		<span class="nx">sectorPower</span> <span class="o">:=</span> <span class="nx">utilInfo</span><span class="p">.</span><span class="nf">CurrUtilization</span><span class="p">()</span>
 		<span class="k">if</span> <span class="p">!</span><span class="nx">sms</span><span class="p">.</span><span class="nf">_consensus</span><span class="p">().</span><span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">header</span><span class="p">.</span><span class="nf">ParentState</span><span class="p">(),</span> <span class="nx">info</span><span class="p">.</span><span class="nf">PartialTicket</span><span class="p">(),</span> <span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">numMinerSectors</span><span class="p">)</span> <span class="p">{</span>
 			<span class="k">return</span> <span class="kc">false</span>
 		<span class="p">}</span>
@@ -5436,7 +5436,8 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">_getStoragePowerActorState</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="nx">StoragePowerActorState</span> <span class="p">{</span>
 	<span class="nx">powerAddr</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span>
-	<span class="nx">actorState</span> <span class="o">:=</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">powerAddr</span><span class="p">)</span>
+	<span class="nx">actorState</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">powerAddr</span><span class="p">)</span>
+	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="nx">substateCID</span> <span class="o">:=</span> <span class="nx">actorState</span><span class="p">.</span><span class="nf">State</span><span class="p">()</span>
 
 	<span class="nx">substate</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">node</span><span class="p">.</span><span class="nf">LocalGraph</span><span class="p">().</span><span class="nf">Get</span><span class="p">(</span><span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">substateCID</span><span class="p">))</span>

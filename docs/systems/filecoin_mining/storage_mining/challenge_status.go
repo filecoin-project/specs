@@ -27,6 +27,10 @@ func (cs *ChallengeStatus_I) LastPoStResponseEpoch() block.ChainEpoch {
 	return block.ChainEpoch(math.Max(float64(cs._lastPoStSuccessEpoch()), float64(cs._lastPoStFailureEpoch())))
 }
 
+func (cs *ChallengeStatus_I) LastPoStSuccessEpoch() block.ChainEpoch {
+	return cs._lastPoStSuccessEpoch()
+}
+
 func (cs *ChallengeStatus_I) IsChallenged() bool {
 	// true if most recent challenge has gone unanswered (with a PoSt or a failure)
 	return cs.LastChallengeEpoch() > cs.LastPoStResponseEpoch()

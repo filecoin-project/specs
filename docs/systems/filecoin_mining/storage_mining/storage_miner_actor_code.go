@@ -145,18 +145,19 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 	for _, sectorNo := range failingSectorNumbers {
 		st._updateFailSector(rt, sectorNo, true)
 	}
-	st._updateExpireSectors(rt)
+
 	UpdateRelease(rt, h, st)
+
+	a._expireSectors(rt)
 
 	h, st = a.State(rt)
 
 	newDetectedFaults := st.SectorTable().FailingSectors()
 	newTerminatedFaults := st.SectorTable().TerminatedFaults()
-	lastPoStResponse := st.ChallengeStatus().LastPoStResponseEpoch()
 
 	Release(rt, h, st)
 
-	a._submitPowerReport(rt, lastPoStResponse)
+	a._submitPowerReport(rt)
 
 	// Note: NewDetectedFaults is now the sum of all
 	// previously active, committed, and recovering sectors minus expired ones
@@ -177,12 +178,35 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 	UpdateRelease(rt, h, st)
 }
 
-// construct PowerReport from SectorTable
-// need lastPoSt to search for new expired deals in _updateSectorUtilization since the lastPost
-// where DealExpirationAMT takes in a range of Epoch and return a list of values that expire in that range
-func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStResponse block.ChainEpoch) {
+func (a *StorageMinerActorCode_I) _expireSectors(rt Runtime) {
+
 	h, st := a.State(rt)
-	newExpiredDealIDs := st._updateSectorUtilization(rt, lastPoStResponse)
+	expiredSectorNos := st._updateExpireSectors(rt)
+
+	// @param dealIDs
+	expireSectorParams := make([]util.Serialization, 1)
+	for _, sectorNo := range expiredSectorNos {
+		dealIDs, ok := st._getSectorDealIDs(sectorNo)
+		if !ok {
+			panic("")
+		}
+		for _, dealID := range dealIDs {
+			expireSectorParams = append(expireSectorParams, deal.Serialize_DealID(dealID))
+		}
+	}
+
+	UpdateRelease(rt, h, st)
+
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:     addr.StorageMarketActorAddr,
+		Method_: market.Method_StorageMarketActor_ProcessDealExpiration,
+		Params_: expireSectorParams,
+	})
+}
+
+// construct PowerReport from SectorTable
+func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime) {
+	h, st := a.State(rt)
 	activePower, err := st._getActivePower()
 	if err != nil {
 		rt.AbortStateMsg(err.Error())
@@ -200,9 +224,6 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStRespons
 
 	// @param powerReport spc.PowerReport
 	processPowerReportParam := make([]util.Serialization, 1)
-	// @param dealIDs []deal.DealID
-	processDealExpirationParam := make([]util.Serialization, 1)
-	panic("TODO: serialize arguments")
 
 	Release(rt, h, st)
 
@@ -219,32 +240,25 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStRespons
 		Method_: spc.Method_StoragePowerActor_ProcessPowerReport,
 		Params_: processPowerReportParam,
 	})
-
-	if len(newExpiredDealIDs) > 0 {
-		rt.SendPropagatingErrors(&vmr.InvocInput_I{
-			To_:     addr.StorageMarketActorAddr,
-			Method_: market.Method_StorageMarketActor_ProcessDealExpiration,
-			Params_: processDealExpirationParam,
-		})
-	}
 }
 
-func (a *StorageMinerActorCode_I) _claimDealPayments(rt Runtime) {
+func (a *StorageMinerActorCode_I) ClaimDealPaymentsForSector(rt Runtime, sectorNo sector.SectorNumber) {
 	h, st := a.State(rt)
 
-	activeDealIDs := make([]deal.DealID, 0)
-
-	for _, sectorNo := range st.SectorTable().Impl().ActiveSectors_.SectorsOn() {
-		utilizationInfo := st._safeGetUtilizationInfo(rt, sectorNo)
-		newActiveDealIDs := utilizationInfo.DealExpirationAMT().Impl().ActiveDealIDs()
-		activeDealIDs = append(activeDealIDs, newActiveDealIDs...)
+	dealIDs, ok := st._getSectorDealIDs(sectorNo)
+	if !ok {
+		rt.AbortArgMsg("sm.ClaimDealPaymentsForSector: invalid sector number.")
 	}
+
+	lastPoStEpoch := st.ChallengeStatus().Impl().LastPoStSuccessEpoch()
 
 	// @params dealIDs []deal.DealID activeDealIDs
+	// @params lastPoSt block.ChainEpoch
 	processDealPaymentParam := make([]util.Serialization, 1)
-	for _, dealID := range activeDealIDs {
+	for _, dealID := range dealIDs {
 		processDealPaymentParam = append(processDealPaymentParam, deal.Serialize_DealID(dealID))
 	}
+	processDealPaymentParam = append(processDealPaymentParam, block.Serialize_ChainEpoch(lastPoStEpoch))
 	Release(rt, h, st)
 
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
@@ -283,7 +297,7 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime) InvocOutput {
 		case SectorCommittedSN, SectorRecoveringSN:
 			st._updateActivateSector(rt, sectorNo)
 		case SectorActiveSN:
-			// do nothing, deal payment is made at the end of this method
+			// do nothing, deal payment is made lazily
 		default:
 			rt.AbortStateMsg("Invalid sector state in ProvingSet.SectorsOn()")
 		}
@@ -309,17 +323,15 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime) InvocOutput {
 		}
 	}
 
-	// Process Expiration.
-	st._updateExpireSectors(rt)
-
 	UpdateRelease(rt, h, st)
 
 	h, st = a.State(rt)
 	newTerminatedFaults := st.SectorTable().TerminatedFaults()
-	lastPoStResponse := st.ChallengeStatus().LastPoStResponseEpoch()
 	Release(rt, h, st)
 
-	a._submitPowerReport(rt, lastPoStResponse)
+	// Process Expiration.
+	a._expireSectors(rt)
+	a._submitPowerReport(rt)
 
 	a._slashCollateralForStorageFaults(
 		rt,
@@ -327,8 +339,6 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime) InvocOutput {
 		sector.CompactSectorSet(make([]byte, 0)), // NewDetectedFaults
 		newTerminatedFaults,
 	)
-
-	a._claimDealPayments(rt)
 
 	h, st = a.State(rt)
 	st.ChallengeStatus().Impl().OnPoStSuccess(rt.CurrEpoch())
@@ -441,11 +451,9 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 		st._updateFailSector(rt, sectorNo, false)
 	}
 
-	lastPoStResponse := st.ChallengeStatus().LastPoStResponseEpoch()
-
 	UpdateRelease(rt, h, st)
 
-	a._submitPowerReport(rt, lastPoStResponse)
+	a._submitPowerReport(rt)
 
 	a._slashCollateralForStorageFaults(
 		rt,
@@ -462,13 +470,12 @@ func (a *StorageMinerActorCode_I) _slashDealsForStorageFault(rt Runtime, sectorN
 	h, st := a.State(rt)
 
 	dealIDs := make([]deal.DealID, 0)
-
 	for _, sectorNo := range sectorNumbers {
-
-		utilizationInfo := st._safeGetUtilizationInfo(rt, sectorNo)
-		activeDealIDs := utilizationInfo.DealExpirationAMT().Impl().ActiveDealIDs()
-		dealIDs = append(dealIDs, activeDealIDs...)
-
+		sectorDealIDs, ok := st._getSectorDealIDs(sectorNo)
+		if !ok {
+			panic("")
+		}
+		dealIDs = append(dealIDs, sectorDealIDs...)
 	}
 
 	// @param dealIDs []deal.DealID
@@ -492,10 +499,11 @@ func (a *StorageMinerActorCode_I) _slashPledgeForStorageFault(rt Runtime, sector
 
 	affectedPower := block.StoragePower(0)
 	for _, sectorNo := range sectorNumbers {
-
-		utilizationInfo := st._safeGetUtilizationInfo(rt, sectorNo)
-		affectedPower += utilizationInfo.CurrUtilization()
-
+		sectorPower, ok := st._getSectorPower(sectorNo)
+		if !ok {
+			panic("")
+		}
+		affectedPower += sectorPower
 	}
 
 	// @param affectedPower block.StoragePower
@@ -513,7 +521,6 @@ func (a *StorageMinerActorCode_I) _slashPledgeForStorageFault(rt Runtime, sector
 	})
 }
 
-// should always happen after _submitPowerReport to have the most up to date utilization info
 // reset NewTerminatedFaults
 func (a *StorageMinerActorCode_I) _slashCollateralForStorageFaults(
 	rt Runtime,
@@ -696,7 +703,6 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 
 	// if more than MAX_PROVE_COMMIT_SECTOR_EPOCH has elapsed
 	if elapsedEpoch > sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
-
 		// PreCommittedSectors is cleaned up at _expirePreCommitSectors triggered by Cron
 		rt.Abort(
 			exitcode.UserDefinedError(exitcode.DeadlineExceeded),
@@ -719,14 +725,17 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 			"Seal verification failed")
 	}
 
-	_, utilizationFound := st.SectorUtilization()[onChainInfo.SectorNumber()]
-	if utilizationFound {
-		rt.AbortStateMsg("sm.ProveCommitSector: sector number found in SectorUtilization")
-	}
+	minerInfo := st.Info()
+	sectorSize := minerInfo.SectorSize()
+	sectorPower := block.StoragePower(sectorSize)
 
 	// Activate storage deals, abort if activation failed
+	// @param expiration block.ChainEpoch info.Expiration()
+	// @param sectorSize block.StoragePower sectorSize
 	// @param dealIDs []deal.DealID onChainInfo.DealIDs()
 	activateDealsParams := make([]util.Serialization, 1)
+	activateDealsParams = append(activateDealsParams, block.Serialize_ChainEpoch(info.Expiration()))
+	activateDealsParams = append(activateDealsParams, block.Serialize_StoragePower(sectorPower))
 	for _, dealID := range onChainInfo.DealIDs() {
 		activateDealsParams = append(activateDealsParams, deal.Serialize_DealID(dealID))
 	}
@@ -742,27 +751,22 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	h, st = a.State(rt)
 
 	activateDealsRet := activateDealsReceipt.ReturnValue()
-	deals := make([]deal.OnChainDeal, len(activateDealsRet))
-	onchainDeal, err := deal.Deserialize_OnChainDeal(activateDealsRet)
+	sectorActivePower, err := block.Deserialize_StoragePower(activateDealsRet)
 	if err != nil {
-		rt.AbortStateMsg("Failed to deserialize OnChainDeal")
+		rt.AbortStateMsg("Failed to deserialize sector power")
 	}
-	deals = append(deals, onchainDeal)
-	initialUtilization := st._initializeUtilizationInfo(rt, deals)
-	lastDealExpiration := initialUtilization.DealExpirationAMT().Impl().LastDealExpiration()
 
 	// add sector expiration to SectorExpirationQueue
 	st.SectorExpirationQueue().Add(&SectorExpirationQueueItem_I{
 		SectorNumber_: onChainInfo.SectorNumber(),
-		Expiration_:   lastDealExpiration,
+		Expiration_:   info.Expiration(),
 	})
 
 	// no need to store the proof and randomseed in the state tree
 	// verify and drop, only SealCommitment{CommR, DealIDs} on chain
 	sealCommitment := &sector.SealCommitment_I{
-		SealedCID_:  onChainInfo.SealedCID(),
-		DealIDs_:    onChainInfo.DealIDs(),
-		Expiration_: lastDealExpiration, // TODO decide if we need this too
+		SealedCID_: onChainInfo.SealedCID(),
+		DealIDs_:   onChainInfo.DealIDs(),
 	}
 
 	// add SectorNumber and SealCommitment to Sectors
@@ -771,22 +775,19 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	sealOnChainInfo := &SectorOnChainInfo_I{
 		SealCommitment_: sealCommitment,
 		State_:          SectorCommitted(),
+		Power_:          block.StoragePower(sectorActivePower),
+		Activation_:     rt.CurrEpoch(),
+		Expiration_:     info.Expiration(),
 	}
 
 	if a._isChallenged(rt) {
 		// move PreCommittedSector to StagedCommittedSectors if in Challenged status
-		stagedSectorInfo := &StagedCommittedSectorInfo_I{
-			Sector_:      sealOnChainInfo,
-			Utilization_: initialUtilization,
-		}
-
-		st.StagedCommittedSectors()[onChainInfo.SectorNumber()] = stagedSectorInfo
+		st.StagedCommittedSectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
 	} else {
 		// move PreCommittedSector to CommittedSectors if not in Challenged status
 		st.Sectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
 		st.Impl().ProvingSet_.Add(onChainInfo.SectorNumber())
 		st.SectorTable().Impl().CommittedSectors_.Add(onChainInfo.SectorNumber())
-		st.SectorUtilization()[onChainInfo.SectorNumber()] = initialUtilization
 	}
 
 	// now remove SectorNumber from PreCommittedSectors (processed)

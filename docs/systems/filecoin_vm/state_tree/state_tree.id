@@ -1,30 +1,15 @@
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
-// Epoch is an epoch in time in the StateTree.
-// It corresponds to rounds in the blockchain, but it
-// is defined here as actors need a notion of time.
-type Epoch UVarint
-
-// TODO: move this into a directory w/ all the actors + states
-type ActorName enum {
-    StoragePowerActor
-    StorageMarketActor
-    StorageMinerActor
-    PaymentChannelActor
-    InitActor
-    AccountActor
-    CronActor
-}
-
+// The on-chain state data structure is a map (HAMT) of addresses to actor states.
+// Only ID addresses are expected as keys.
 type StateTree struct {
-    SystemActors  {ActorName: addr.Address}
-    ActorStates   {addr.Address: actor.ActorState}
+    ActorStates  {addr.Address: actor.ActorState}  // HAMT
 
-    // TODO: API ConvenienceAPI
-    GetActorAddress(n ActorName) addr.Address
-    GetActorState(a addr.Address) actor.ActorState
+    // Returns the CID of the root node of the HAMT.
+    RootCID()    ipld.CID
 
-    // Balance returns the balance of a given actor
-    Balance(a addr.Address) actor.TokenAmount
+    // Looks up an actor state by address.
+    GetActor(a addr.Address) (state actor.ActorState, ok bool)
 }

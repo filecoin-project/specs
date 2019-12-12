@@ -202,7 +202,8 @@ func (rt *VMContext) _releaseActorSubstate(checkStateCID ActorSubstateCID) {
 	rt._checkRunning()
 	rt._checkActorStateAcquired()
 
-	prevState := rt._globalStatePending.GetActorState(rt._actorAddress)
+	prevState, ok := rt._globalStatePending.GetActor(rt._actorAddress)
+	util.Assert(ok)
 	prevStateCID := prevState.State()
 	if !ActorSubstateCID_Equals(prevStateCID, checkStateCID) {
 		rt.AbortAPI("State CID differs upon release call")
@@ -419,7 +420,10 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 
 	rtOuter._rtAllocGas(gascost.InvokeMethod(input.Value()))
 
-	toActor := rtOuter._globalStatePending.GetActorState(input.To())
+	toActor, ok := rtOuter._globalStatePending.GetActor(input.To())
+	if !ok {
+		rtOuter._throwError(exitcode.SystemError(exitcode.ActorCodeNotFound))
+	}
 
 	toActorCode, err := loadActorCode(toActor.CodeID())
 	if err != nil {
@@ -549,8 +553,10 @@ func (rt *VMContext) AcquireState() ActorStateHandle {
 	rt._checkActorStateNotAcquired()
 	rt._actorStateAcquired = true
 
+	state, ok := rt._globalStatePending.GetActor(rt._actorAddress)
+	util.Assert(ok)
 	return ActorStateHandle{
-		_initValue: rt._globalStatePending.GetActorState(rt._actorAddress).State().Ref(),
+		_initValue: state.State().Ref(),
 		_rt:        rt,
 	}
 }

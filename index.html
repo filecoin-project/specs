@@ -4811,9 +4811,9 @@ https://github.com/alex-shpak/hugo-book
   <img id="spec-logo" src="./docs/filspeclogo.png" />
   <div id="spec-version">
     protocol version: <span id="protocol-version-number">v0.1.0</span><br />
-    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">a0793d4b</span>
+    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">ff93a44d</span>
     <br />
-    last published: <span id="spec-version-date">2019-12-12_10:02:16Z</span>
+    last published: <span id="spec-version-date">2019-12-12_23:01:57Z</span>
   </div>
 </div>
 
@@ -12216,8 +12216,9 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 
     <span class="nf">VerifySyntax</span><span class="p">()</span>   <span class="kt">bool</span>
     <span class="nf">String</span><span class="p">()</span>         <span class="nx">AddressString</span>
-    <span class="nf">IsKeyType</span><span class="p">()</span>      <span class="kt">bool</span>
-    <span class="nf">Equals</span><span class="p">(</span><span class="nx">Address</span><span class="p">)</span>  <span class="kt">bool</span>
+    <span class="nf">IsIDType</span><span class="p">()</span>       <span class="kt">bool</span>  <span class="c1">// Whether the address is an ID-address
+</span><span class="c1"></span>    <span class="nf">IsKeyType</span><span class="p">()</span>      <span class="kt">bool</span>  <span class="c1">// Whether the address is a public key address (SECP or BLS)
+</span><span class="c1"></span>    <span class="nf">Equals</span><span class="p">(</span><span class="nx">Address</span><span class="p">)</span>  <span class="kt">bool</span>
     <span class="nf">Ref</span><span class="p">()</span>            <span class="nx">Address_Ptr</span>
 <span class="p">}</span>
 
@@ -12327,33 +12328,18 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 
-<span class="c1">// Epoch is an epoch in time in the StateTree.
-</span><span class="c1">// It corresponds to rounds in the blockchain, but it
-</span><span class="c1">// is defined here as actors need a notion of time.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Epoch</span> <span class="nx">UVarint</span>
+<span class="c1">// The on-chain state data structure is a map (HAMT) of addresses to actor states.
+</span><span class="c1">// Only ID addresses are expected as keys.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">StateTree</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ActorStates</span>  <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span><span class="p">}</span>  <span class="c1">// HAMT
+</span><span class="c1"></span>
+    <span class="c1">// Returns the CID of the root node of the HAMT.
+</span><span class="c1"></span>    <span class="nf">RootCID</span><span class="p">()</span>    <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
 
-<span class="c1">// TODO: move this into a directory w/ all the actors + states
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">ActorName</span> <span class="nx">enum</span> <span class="p">{</span>
-    <span class="nx">StoragePowerActor</span>
-    <span class="nx">StorageMarketActor</span>
-    <span class="nx">StorageMinerActor</span>
-    <span class="nx">PaymentChannelActor</span>
-    <span class="nx">InitActor</span>
-    <span class="nx">AccountActor</span>
-    <span class="nx">CronActor</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">StateTree</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">SystemActors</span>  <span class="p">{</span><span class="nx">ActorName</span><span class="p">:</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">}</span>
-    <span class="nx">ActorStates</span>   <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span><span class="p">}</span>
-
-    <span class="c1">// TODO: API ConvenienceAPI
-</span><span class="c1"></span>    <span class="nf">GetActorAddress</span><span class="p">(</span><span class="nx">n</span> <span class="nx">ActorName</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nf">GetActorState</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span>
-
-    <span class="c1">// Balance returns the balance of a given actor
-</span><span class="c1"></span>    <span class="nf">Balance</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="c1">// Looks up an actor state by address.
+</span><span class="c1"></span>    <span class="nf">GetActor</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">state</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -13158,7 +13144,8 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">()</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateAcquired</span><span class="p">()</span>
 
-	<span class="nx">prevState</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">)</span>
+	<span class="nx">prevState</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">)</span>
+	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="nx">prevStateCID</span> <span class="o">:=</span> <span class="nx">prevState</span><span class="p">.</span><span class="nf">State</span><span class="p">()</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nf">ActorSubstateCID_Equals</span><span class="p">(</span><span class="nx">prevStateCID</span><span class="p">,</span> <span class="nx">checkStateCID</span><span class="p">)</span> <span class="p">{</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;State CID differs upon release call&#34;</span><span class="p">)</span>
@@ -13375,7 +13362,10 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 
 	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nf">Value</span><span class="p">()))</span>
 
-	<span class="nx">toActor</span> <span class="o">:=</span> <span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nf">To</span><span class="p">())</span>
+	<span class="nx">toActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nf">To</span><span class="p">())</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+		<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorCodeNotFound</span><span class="p">))</span>
+	<span class="p">}</span>
 
 	<span class="nx">toActorCode</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">loadActorCode</span><span class="p">(</span><span class="nx">toActor</span><span class="p">.</span><span class="nf">CodeID</span><span class="p">())</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
@@ -13505,8 +13495,10 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateNotAcquired</span><span class="p">()</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nx">_actorStateAcquired</span> <span class="p">=</span> <span class="kc">true</span>
 
+	<span class="nx">state</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">)</span>
+	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">ActorStateHandle</span><span class="p">{</span>
-		<span class="nx">_initValue</span><span class="p">:</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">).</span><span class="nf">State</span><span class="p">().</span><span class="nf">Ref</span><span class="p">(),</span>
+		<span class="nx">_initValue</span><span class="p">:</span> <span class="nx">state</span><span class="p">.</span><span class="nf">State</span><span class="p">().</span><span class="nf">Ref</span><span class="p">(),</span>
 		<span class="nx">_rt</span><span class="p">:</span>        <span class="nx">rt</span><span class="p">,</span>
 	<span class="p">}</span>
 <span class="p">}</span>
@@ -15411,10 +15403,16 @@ it will be created as an account actor (only if the message has a MethodNum of z
 		<span class="k">return</span>
 	<span class="p">}</span>
 
-	<span class="nx">fromActor</span> <span class="o">:=</span> <span class="nx">inTree</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
-	<span class="k">if</span> <span class="nx">fromActor</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+	<span class="nx">fromActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">inTree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 		<span class="c1">// Execution error; sender does not exist at time of message execution.
 </span><span class="c1"></span>		<span class="nf">_applyError</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorNotFound</span><span class="p">,</span> <span class="nx">SenderResolveSpec_Invalid</span><span class="p">)</span>
+		<span class="k">return</span>
+	<span class="p">}</span>
+
+	<span class="c1">// make sure this is the right message order for fromActor
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">message</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">()</span> <span class="p">{</span>
+		<span class="nf">_applyError</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidCallSeqNum</span><span class="p">,</span> <span class="nx">SenderResolveSpec_Invalid</span><span class="p">)</span>
 		<span class="k">return</span>
 	<span class="p">}</span>
 
@@ -15427,31 +15425,26 @@ it will be created as an account actor (only if the message has a MethodNum of z
 		<span class="k">return</span>
 	<span class="p">}</span>
 
-	<span class="c1">// make sure this is the right message order for fromActor
-</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">message</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">()</span> <span class="p">{</span>
-		<span class="nf">_applyError</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidCallSeqNum</span><span class="p">,</span> <span class="nx">SenderResolveSpec_Invalid</span><span class="p">)</span>
+	<span class="c1">// Check receiving actor and method exists, possibly creating an account actor.
+</span><span class="c1"></span>	<span class="c1">// If this succeeds, compTreePreSend will become a state snapshot which includes
+</span><span class="c1"></span>	<span class="c1">// implicit receiver creation, the sender (rather than miner) paying gas, and the sender&#39;s
+</span><span class="c1"></span>	<span class="c1">// CallSeqNum being incremented; at least that much state change will be persisted even if the
+</span><span class="c1"></span>	<span class="c1">// method invocation subsequently fails.
+</span><span class="c1"></span>	<span class="nx">compTreePreSend</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nf">_ensureReceiver</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">message</span><span class="p">)</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+		<span class="c1">// Execution error; receiver actor does not exist (and could not be implicitly created)
+</span><span class="c1"></span>		<span class="c1">// at time of message execution.
+</span><span class="c1"></span>		<span class="nf">_applyError</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorNotFound</span><span class="p">,</span> <span class="nx">SenderResolveSpec_Invalid</span><span class="p">)</span>
 		<span class="k">return</span>
 	<span class="p">}</span>
 
-	<span class="nx">compTreePreSend</span> <span class="o">:=</span> <span class="nx">inTree</span>
-
-	<span class="c1">// Deduct gas limit funds from sender first.
+	<span class="c1">// Deduct gas limit funds from sender.
 </span><span class="c1"></span>	<span class="c1">// (This should always succeed, due to the sender balance check above.)
 </span><span class="c1"></span>	<span class="nx">compTreePreSend</span> <span class="p">=</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span>
 		<span class="nx">compTreePreSend</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(),</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">gasLimitCost</span><span class="p">)</span>
 
 	<span class="c1">// Increment sender CallSeqNum.
 </span><span class="c1"></span>	<span class="nx">compTreePreSend</span> <span class="p">=</span> <span class="nx">compTreePreSend</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithIncrementedCallSeqNum_Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
-
-	<span class="c1">// WithActorForAddress may create new account actors
-</span><span class="c1"></span>	<span class="kd">var</span> <span class="nx">toActor</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span>
-	<span class="nx">compTreePreSend</span><span class="p">,</span> <span class="nx">toActor</span> <span class="p">=</span> <span class="nx">compTreePreSend</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithActorForAddress</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">())</span>
-	<span class="k">if</span> <span class="nx">toActor</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="c1">// Execution error; receiver actor does not exist (and could not be implicitly created)
-</span><span class="c1"></span>		<span class="c1">// at time of message execution.
-</span><span class="c1"></span>		<span class="nf">_applyError</span><span class="p">(</span><span class="nx">compTreePreSend</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorNotFound</span><span class="p">,</span> <span class="nx">SenderResolveSpec_OK</span><span class="p">)</span>
-		<span class="k">return</span>
-	<span class="p">}</span>
 
 	<span class="nx">sendRet</span><span class="p">,</span> <span class="nx">compTreePostSend</span> <span class="o">:=</span> <span class="nf">_applyMessageInternal</span><span class="p">(</span><span class="nx">compTreePreSend</span><span class="p">,</span> <span class="nx">message</span><span class="p">,</span> <span class="nx">vmiGasRemaining</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
 
@@ -15478,6 +15471,29 @@ it will be created as an account actor (only if the message has a MethodNum of z
 	<span class="k">return</span>
 <span class="p">}</span>
 
+<span class="c1">// Ensures a messages&#39;s receiving actor exists in the state tree.
+</span><span class="c1">// If it doesn&#39;t, and the message is a simple value send to a pubkey-style address,
+</span><span class="c1">// creates the receiver as an account actor in the returned state.
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">_ensureReceiver</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">)</span> <span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">())</span>
+
+	<span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">tree</span><span class="p">,</span> <span class="kc">true</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">().</span><span class="nf">IsKeyType</span><span class="p">()</span> <span class="p">{</span>
+		<span class="c1">// Don&#39;t implicitly create an account actor for an address without an associated key.
+</span><span class="c1"></span>		<span class="k">return</span> <span class="nx">tree</span><span class="p">,</span> <span class="kc">false</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Method</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodSend</span> <span class="p">{</span>
+		<span class="c1">// Don&#39;t implicitly create account actor if message was expecting to invoke a method.
+</span><span class="c1"></span>		<span class="k">return</span> <span class="nx">tree</span><span class="p">,</span> <span class="kc">false</span>
+	<span class="p">}</span>
+	<span class="c1">// TODO Create a new account actor via the InitActor, which will receive a new ID address
+</span><span class="c1"></span>	<span class="c1">// and be placed in the state tree under that address.
+</span><span class="c1"></span>	<span class="c1">// The init actor will maintain a map from pubkey address to ID address.
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nx">tree</span><span class="p">,</span> <span class="kc">true</span>
+<span class="p">}</span>
+
 <span class="kd">func</span> <span class="nf">_applyMessageBuiltinAssert</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">topLevelBlockWinner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span> <span class="p">{</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">().</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">))</span>
 	<span class="nx">tree</span> <span class="p">=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithIncrementedCallSeqNum_Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
@@ -15494,8 +15510,8 @@ it will be created as an account actor (only if the message has a MethodNum of z
 	<span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">gasRemainingInit</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">topLevelBlockWinner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
 	<span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">,</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="p">{</span>
 
-	<span class="nx">fromActor</span> <span class="o">:=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
-	<span class="nf">Assert</span><span class="p">(</span><span class="nx">fromActor</span> <span class="o">!=</span> <span class="kc">nil</span><span class="p">)</span>
+	<span class="nx">fromActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
+	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 
 	<span class="nx">rt</span> <span class="o">:=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">VMContext_Make</span><span class="p">(</span>
 		<span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(),</span>
@@ -15540,7 +15556,8 @@ it will be created as an account actor (only if the message has a MethodNum of z
 	<span class="nx">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Serialize_Address</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
 	<span class="nx">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">Serialize_TokenAmount</span><span class="p">(</span><span class="nx">penalty</span><span class="p">)</span>
 
-	<span class="nx">sysActor</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="nx">sysActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
 		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">,</span>
 		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">RewardActorAddr</span><span class="p">,</span>
@@ -15558,7 +15575,8 @@ it will be created as an account actor (only if the message has a MethodNum of z
 	<span class="c1">// TODO: determine parameters necessary for this message.
 </span><span class="c1"></span>	<span class="nx">params</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-	<span class="nx">sysActor</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="nx">sysActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
 		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">,</span>
 		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">minerActorAddr</span><span class="p">,</span>
@@ -15573,7 +15591,8 @@ it will be created as an account actor (only if the message has a MethodNum of z
 
 <span class="c1">// Builds a message for invoking the cron actor tick.
 </span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeCronTickMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
-	<span class="nx">sysActor</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="nx">sysActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
 		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">,</span>
 		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">CronActorAddr</span><span class="p">,</span>
@@ -18820,12 +18839,11 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="nx">numMinerSectors</span> <span class="o">:=</span> <span class="nb">uint64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">SectorTable</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">ActiveSectors_</span><span class="p">.</span><span class="nf">SectorsOn</span><span class="p">()))</span>
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">candidate</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">candidates</span> <span class="p">{</span>
 		<span class="nx">sectorNum</span> <span class="o">:=</span> <span class="nx">candidate</span><span class="p">.</span><span class="nf">SectorID</span><span class="p">().</span><span class="nf">Number</span><span class="p">()</span>
-		<span class="nx">utilInfo</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getUtilizationInfo</span><span class="p">(</span><span class="nx">sectorNum</span><span class="p">)</span>
-		<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorPower</span><span class="p">(</span><span class="nx">sectorNum</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 			<span class="c1">// panic(err)
 </span><span class="c1"></span>			<span class="k">return</span>
 		<span class="p">}</span>
-		<span class="nx">sectorPower</span> <span class="o">:=</span> <span class="nx">utilInfo</span><span class="p">.</span><span class="nf">CurrUtilization</span><span class="p">()</span>
 		<span class="k">if</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_consensus</span><span class="p">().</span><span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">currState</span><span class="p">,</span> <span class="nx">candidate</span><span class="p">.</span><span class="nf">PartialTicket</span><span class="p">(),</span> <span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">numMinerSectors</span><span class="p">)</span> <span class="p">{</span>
 			<span class="nx">winningCandidates</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">winningCandidates</span><span class="p">,</span> <span class="nx">candidate</span><span class="p">)</span>
 		<span class="p">}</span>
@@ -18882,7 +18900,8 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 </span><span class="c1"></span><span class="kd">var</span> <span class="nx">node</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">FilecoinNode</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">_getStorageMinerActorState</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">StorageMinerActorState</span> <span class="p">{</span>
-	<span class="nx">actorState</span> <span class="o">:=</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+	<span class="nx">actorState</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="nx">substateCID</span> <span class="o">:=</span> <span class="nx">actorState</span><span class="p">.</span><span class="nf">State</span><span class="p">()</span>
 
 	<span class="nx">substate</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">node</span><span class="p">.</span><span class="nf">LocalGraph</span><span class="p">().</span><span class="nf">Get</span><span class="p">(</span><span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">substateCID</span><span class="p">))</span>
@@ -18902,7 +18921,8 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">_getStoragePowerActorState</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerActorState</span> <span class="p">{</span>
 	<span class="nx">powerAddr</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span>
-	<span class="nx">actorState</span> <span class="o">:=</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">powerAddr</span><span class="p">)</span>
+	<span class="nx">actorState</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">powerAddr</span><span class="p">)</span>
+	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="nx">substateCID</span> <span class="o">:=</span> <span class="nx">actorState</span><span class="p">.</span><span class="nf">State</span><span class="p">()</span>
 
 	<span class="nx">substate</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">node</span><span class="p">.</span><span class="nf">LocalGraph</span><span class="p">().</span><span class="nf">Get</span><span class="p">(</span><span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">substateCID</span><span class="p">))</span>
@@ -19051,12 +19071,11 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">info</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">Candidates</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nx">sectorNum</span> <span class="o">:=</span> <span class="nx">info</span><span class="p">.</span><span class="nf">SectorID</span><span class="p">().</span><span class="nf">Number</span><span class="p">()</span>
-		<span class="nx">utilInfo</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getUtilizationInfo</span><span class="p">(</span><span class="nx">sectorNum</span><span class="p">)</span>
-		<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorPower</span><span class="p">(</span><span class="nx">sectorNum</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 			<span class="c1">// panic(err)
 </span><span class="c1"></span>			<span class="k">return</span> <span class="kc">false</span>
 		<span class="p">}</span>
-		<span class="nx">sectorPower</span> <span class="o">:=</span> <span class="nx">utilInfo</span><span class="p">.</span><span class="nf">CurrUtilization</span><span class="p">()</span>
 		<span class="k">if</span> <span class="p">!</span><span class="nx">sms</span><span class="p">.</span><span class="nf">_consensus</span><span class="p">().</span><span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">header</span><span class="p">.</span><span class="nf">ParentState</span><span class="p">(),</span> <span class="nx">info</span><span class="p">.</span><span class="nf">PartialTicket</span><span class="p">(),</span> <span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">numMinerSectors</span><span class="p">)</span> <span class="p">{</span>
 			<span class="k">return</span> <span class="kc">false</span>
 		<span class="p">}</span>
@@ -19281,7 +19300,8 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">_getStoragePowerActorState</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="nx">StoragePowerActorState</span> <span class="p">{</span>
 	<span class="nx">powerAddr</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span>
-	<span class="nx">actorState</span> <span class="o">:=</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">powerAddr</span><span class="p">)</span>
+	<span class="nx">actorState</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">powerAddr</span><span class="p">)</span>
+	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="nx">substateCID</span> <span class="o">:=</span> <span class="nx">actorState</span><span class="p">.</span><span class="nf">State</span><span class="p">()</span>
 
 	<span class="nx">substate</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">node</span><span class="p">.</span><span class="nf">LocalGraph</span><span class="p">().</span><span class="nf">Get</span><span class="p">(</span><span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">substateCID</span><span class="p">))</span>
@@ -22079,9 +22099,9 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
 <span class="kn">import</span> <span class="nx">sealing</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 <span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
-<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 <span class="kn">import</span> <span class="nx">stateTree</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 <span class="kn">import</span> <span class="nx">spc</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus&#34;</span>
@@ -22098,7 +22118,7 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
     <span class="nf">Remove</span><span class="p">(</span><span class="nx">n</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">SectorTable</span> <span class="kd">struct</span> <span class="p">{</span>
+<span class="kd">type</span> <span class="nx">SectorStateTable</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SectorSize</span>         <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSize</span>
     <span class="nx">ActiveSectors</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
     <span class="nx">CommittedSectors</span>   <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
@@ -22109,14 +22129,12 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 </span><span class="c1"></span>    <span class="nx">TerminatedFaults</span>   <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">StagedCommittedSectorInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Sector</span>       <span class="nx">SectorOnChainInfo</span>
-    <span class="nx">Utilization</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorUtilizationInfo</span>
-<span class="p">}</span>
-
 <span class="kd">type</span> <span class="nx">SectorOnChainInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SealCommitment</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCommitment</span>
     <span class="nx">State</span>           <span class="nx">SectorState</span>
+    <span class="nx">Power</span>           <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nx">Activation</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">Expiration</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ChallengeStatus</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -22128,6 +22146,7 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 
     <span class="nf">OnNewChallenge</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
     <span class="nf">LastPoStResponseEpoch</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nf">LastPoStSuccessEpoch</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="nf">OnPoStSuccess</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
     <span class="nf">OnPoStFailure</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
 
@@ -22145,21 +22164,17 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">PreCommittedSectorsAMT</span> <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">PreCommittedSector</span><span class="p">}</span>
-<span class="kd">type</span> <span class="nx">StagedCommittedSectorAMT</span> <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">StagedCommittedSectorInfo</span><span class="p">}</span>
+<span class="kd">type</span> <span class="nx">StagedCommittedSectorAMT</span> <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">SectorOnChainInfo</span><span class="p">}</span>
 <span class="kd">type</span> <span class="nx">SectorsAMT</span> <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">SectorOnChainInfo</span><span class="p">}</span>
-
-<span class="c1">// map from SectorNumber to amout of storage in active deals
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorUtilizationAMT</span> <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorUtilizationInfo</span><span class="p">}</span>
 
 <span class="c1">// Balance of a StorageMinerActor should equal exactly the sum of PreCommit deposits that are not yet returned or burned
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageMinerActorState</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">PreCommittedSectors</span>     <span class="nx">PreCommittedSectorsAMT</span>
     <span class="nx">StagedCommittedSectors</span>  <span class="nx">StagedCommittedSectorAMT</span>
     <span class="nx">Sectors</span>                 <span class="nx">SectorsAMT</span>
-    <span class="nx">SectorUtilization</span>       <span class="nx">SectorUtilizationAMT</span>
     <span class="nx">ProvingSet</span>              <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
 
-    <span class="nx">SectorTable</span>
+    <span class="nx">SectorTable</span>             <span class="nx">SectorStateTable</span>
     <span class="nx">SectorExpirationQueue</span>
     <span class="nx">ChallengeStatus</span>
 
@@ -22182,17 +22197,17 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
         <span class="nx">sectorNo</span>             <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span>
         <span class="nx">incrementFaultCount</span>  <span class="kt">bool</span>
     <span class="p">)</span>
-    <span class="nf">_updateExpireSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
+    <span class="nf">_updateExpireSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">]</span>
     <span class="nf">_updateClearSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
     <span class="nf">_updateActivateSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
-    <span class="nf">_updateSectorUtilization</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">lastPoStResponse</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
-    <span class="nf">_initializeUtilizationInfo</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deals</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">])</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorUtilizationInfo</span>
 
     <span class="nf">_getActivePower</span><span class="p">()</span>    <span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
     <span class="nf">_getInactivePower</span><span class="p">()</span>  <span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
-    <span class="nf">_safeGetUtilizationInfo</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorUtilizationInfo</span>
-    <span class="nf">_getUtilizationInfo</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorUtilizationInfo</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
     <span class="nf">_getPreCommitDepositReq</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+
+    <span class="nf">_getSectorOnChainInfo</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">info</span> <span class="nx">SectorOnChainInfo</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
+    <span class="nf">_getSectorPower</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">power</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
+    <span class="nf">_getSectorDealIDs</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">],</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageMinerActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -22226,8 +22241,13 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
         <span class="nx">faultType</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">StorageFaultType</span>
     <span class="p">)</span>
 
-    <span class="nf">_claimDealPayments</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
+    <span class="nf">ClaimDealPaymentsForSector</span><span class="p">(</span>
+        <span class="nx">rt</span>        <span class="nx">Runtime</span>
+        <span class="nx">sectorNo</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span>
+        <span class="nx">lastPoSt</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="p">)</span>
     <span class="nf">_submitPowerReport</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">lastPoSt</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
+    <span class="nf">_expireSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
     <span class="nf">_expirePreCommittedSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
     <span class="nf">_ensurePledgeCollateralSatisfied</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 <span class="p">}</span>
@@ -22285,8 +22305,6 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_mining</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-	<span class="s">&#34;errors&#34;</span>
-
 	<span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 	<span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 	<span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
@@ -22328,55 +22346,24 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_processStagedCommittedSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
 	<span class="k">for</span> <span class="nx">sectorNo</span><span class="p">,</span> <span class="nx">stagedInfo</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">st</span><span class="p">.</span><span class="nf">StagedCommittedSectors</span><span class="p">()</span> <span class="p">{</span>
-		<span class="nx">st</span><span class="p">.</span><span class="nf">Sectors</span><span class="p">()[</span><span class="nx">sectorNo</span><span class="p">]</span> <span class="p">=</span> <span class="nx">stagedInfo</span><span class="p">.</span><span class="nf">Sector</span><span class="p">()</span>
+		<span class="nx">st</span><span class="p">.</span><span class="nf">Sectors</span><span class="p">()[</span><span class="nx">sectorNo</span><span class="p">]</span> <span class="p">=</span> <span class="nx">stagedInfo</span>
 		<span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">ProvingSet_</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
 		<span class="nx">st</span><span class="p">.</span><span class="nf">SectorTable</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">CommittedSectors_</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
-		<span class="nx">st</span><span class="p">.</span><span class="nf">SectorUtilization</span><span class="p">()[</span><span class="nx">sectorNo</span><span class="p">]</span> <span class="p">=</span> <span class="nx">stagedInfo</span><span class="p">.</span><span class="nf">Utilization</span><span class="p">()</span>
 	<span class="p">}</span>
 
 	<span class="c1">// empty StagedCommittedSectors
-</span><span class="c1"></span>	<span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">StagedCommittedSectors_</span> <span class="p">=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">]</span><span class="nx">StagedCommittedSectorInfo</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_updateSectorUtilization</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">lastPoStResponse</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span> <span class="p">{</span>
-	<span class="c1">// TODO: verify if we should update Sector utilization for failing sectors
-</span><span class="c1"></span>	<span class="c1">// depends on decision around collateral requirement for the Proving Set
-</span><span class="c1"></span>	<span class="c1">// and what happens when a failing sector expires
-</span><span class="c1"></span>
-	<span class="nx">ret</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
-	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">ProvingSet_</span><span class="p">.</span><span class="nf">SectorsOn</span><span class="p">()</span> <span class="p">{</span>
-
-		<span class="nx">utilizationInfo</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetUtilizationInfo</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">sectorNo</span><span class="p">)</span>
-		<span class="nx">newUtilization</span> <span class="o">:=</span> <span class="nx">utilizationInfo</span><span class="p">.</span><span class="nf">CurrUtilization</span><span class="p">()</span>
-
-		<span class="nx">currEpoch</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span>
-		<span class="nx">newExpiredDealIDs</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-		<span class="nx">newExpiredDeals</span> <span class="o">:=</span> <span class="nx">utilizationInfo</span><span class="p">.</span><span class="nf">DealExpirationAMT</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">ExpiredDealsInRange</span><span class="p">(</span><span class="nx">lastPoStResponse</span><span class="p">,</span> <span class="nx">currEpoch</span><span class="p">)</span>
-
-		<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">expiredDeal</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">newExpiredDeals</span> <span class="p">{</span>
-			<span class="nx">expiredPower</span> <span class="o">:=</span> <span class="nx">expiredDeal</span><span class="p">.</span><span class="nf">Power</span><span class="p">()</span>
-			<span class="nx">newUtilization</span> <span class="o">-=</span> <span class="nx">expiredPower</span>
-			<span class="nx">newExpiredDealIDs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">newExpiredDealIDs</span><span class="p">,</span> <span class="nx">expiredDeal</span><span class="p">.</span><span class="nf">ID</span><span class="p">())</span>
-		<span class="p">}</span>
-
-		<span class="nx">st</span><span class="p">.</span><span class="nf">SectorUtilization</span><span class="p">()[</span><span class="nx">sectorNo</span><span class="p">].</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">CurrUtilization_</span> <span class="p">=</span> <span class="nx">newUtilization</span>
-		<span class="nx">ret</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">ret</span><span class="p">,</span> <span class="nx">newExpiredDealIDs</span><span class="o">...</span><span class="p">)</span>
-	<span class="p">}</span>
-
-	<span class="k">return</span> <span class="nx">ret</span>
-
+</span><span class="c1"></span>	<span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">StagedCommittedSectors_</span> <span class="p">=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">]</span><span class="nx">SectorOnChainInfo</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getActivePower</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">activePower</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">st</span><span class="p">.</span><span class="nf">SectorTable</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">ActiveSectors_</span><span class="p">.</span><span class="nf">SectorsOn</span><span class="p">()</span> <span class="p">{</span>
-		<span class="nx">utilInfo</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getUtilizationInfo</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
-		<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-			<span class="k">return</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nx">err</span>
+		<span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorPower</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+			<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 		<span class="p">}</span>
-		<span class="nx">activePower</span> <span class="o">+=</span> <span class="nx">utilInfo</span><span class="p">.</span><span class="nf">CurrUtilization</span><span class="p">()</span>
+		<span class="nx">activePower</span> <span class="o">+=</span> <span class="nx">sectorPower</span>
 	<span class="p">}</span>
 
 	<span class="k">return</span> <span class="nx">activePower</span><span class="p">,</span> <span class="kc">nil</span>
@@ -22390,11 +22377,12 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 	<span class="nx">inactiveSectorSet</span> <span class="o">:=</span> <span class="nx">inactiveProvingSet</span><span class="p">.</span><span class="nf">Extend</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">SectorTable</span><span class="p">().</span><span class="nf">FailingSectors</span><span class="p">())</span>
 
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">inactiveSectorSet</span><span class="p">.</span><span class="nf">SectorsOn</span><span class="p">()</span> <span class="p">{</span>
-		<span class="nx">utilizationInfo</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getUtilizationInfo</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
-		<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-			<span class="k">return</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nx">err</span>
+
+		<span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorPower</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+			<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 		<span class="p">}</span>
-		<span class="nx">inactivePower</span> <span class="o">+=</span> <span class="nx">utilizationInfo</span><span class="p">.</span><span class="nf">CurrUtilization</span><span class="p">()</span>
+		<span class="nx">inactivePower</span> <span class="o">+=</span> <span class="nx">sectorPower</span>
 	<span class="p">}</span>
 
 	<span class="k">return</span> <span class="nx">inactivePower</span><span class="p">,</span> <span class="kc">nil</span>
@@ -22419,7 +22407,6 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 	<span class="p">}</span>
 
 	<span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">Sectors</span><span class="p">(),</span> <span class="nx">sectorNo</span><span class="p">)</span>
-	<span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">SectorUtilization</span><span class="p">(),</span> <span class="nx">sectorNo</span><span class="p">)</span>
 	<span class="nx">st</span><span class="p">.</span><span class="nx">ProvingSet_</span><span class="p">.</span><span class="nf">Remove</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
 	<span class="nx">st</span><span class="p">.</span><span class="nf">SectorExpirationQueue</span><span class="p">().</span><span class="nf">Remove</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
 <span class="p">}</span>
@@ -22486,33 +22473,35 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 	<span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_updateExpireSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_updateExpireSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span> <span class="p">{</span>
 	<span class="nx">currEpoch</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span>
 
 	<span class="nx">queue</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">SectorExpirationQueue</span><span class="p">()</span>
+	<span class="nx">expiredSectorNos</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
 	<span class="k">for</span> <span class="nx">queue</span><span class="p">.</span><span class="nf">Peek</span><span class="p">().</span><span class="nf">Expiration</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="nx">currEpoch</span> <span class="p">{</span>
 		<span class="nx">expiredSectorNo</span> <span class="o">:=</span> <span class="nx">queue</span><span class="p">.</span><span class="nf">Pop</span><span class="p">().</span><span class="nf">SectorNumber</span><span class="p">()</span>
 
 		<span class="nx">state</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Sectors</span><span class="p">()[</span><span class="nx">expiredSectorNo</span><span class="p">].</span><span class="nf">State</span><span class="p">()</span>
-
 		<span class="k">switch</span> <span class="nx">state</span><span class="p">.</span><span class="nx">StateNumber</span> <span class="p">{</span>
 		<span class="k">case</span> <span class="nx">SectorActiveSN</span><span class="p">:</span>
 			<span class="c1">// Note: in order to verify if something was stored in the past, one must
 </span><span class="c1"></span>			<span class="c1">// scan the chain. SectorNumber can be re-used.
-</span><span class="c1"></span>
-			<span class="c1">// expiration settlement will be done at _updateSectorUtilization
 </span><span class="c1"></span>			<span class="nx">st</span><span class="p">.</span><span class="nf">_updateClearSector</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">expiredSectorNo</span><span class="p">)</span>
+			<span class="nx">expiredSectorNos</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">expiredSectorNos</span><span class="p">,</span> <span class="nx">expiredSectorNo</span><span class="p">)</span>
 		<span class="k">case</span> <span class="nx">SectorFailingSN</span><span class="p">:</span>
 			<span class="c1">// TODO: check if there is any fault that we should handle here
 </span><span class="c1"></span>
 			<span class="c1">// a failing sector expires, no change to FaultCount
-</span><span class="c1"></span>			<span class="c1">// expiration settlement will be done at _updateSectorUtilization
 </span><span class="c1"></span>			<span class="nx">st</span><span class="p">.</span><span class="nf">_updateClearSector</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">expiredSectorNo</span><span class="p">)</span>
+			<span class="nx">expiredSectorNos</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">expiredSectorNos</span><span class="p">,</span> <span class="nx">expiredSectorNo</span><span class="p">)</span>
 		<span class="k">default</span><span class="p">:</span>
 			<span class="c1">// Note: SectorCommittedSN, SectorRecoveringSN transition first to SectorFailingSN, then expire
 </span><span class="c1"></span>			<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Invalid sector state in SectorExpirationQueue&#34;</span><span class="p">)</span>
 		<span class="p">}</span>
 	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="nx">expiredSectorNos</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_assertSectorDidNotExist</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">{</span>
@@ -22522,56 +22511,28 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 	<span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_safeGetUtilizationInfo</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorUtilizationInfo</span> <span class="p">{</span>
-	<span class="nx">utilizationInfo</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getUtilizationInfo</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
-
-	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">())</span>
-	<span class="p">}</span>
-
-	<span class="k">return</span> <span class="nx">utilizationInfo</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getUtilizationInfo</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorUtilizationInfo</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">utilizationInfo</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">SectorUtilization</span><span class="p">()[</span><span class="nx">sectorNo</span><span class="p">]</span>
-
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getSectorOnChainInfo</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">info</span> <span class="nx">SectorOnChainInfo</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">sectorInfo</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Sectors</span><span class="p">()[</span><span class="nx">sectorNo</span><span class="p">]</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
-		<span class="nx">err</span> <span class="o">:=</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;sm._getUtilizationInfo: utilization info not found.&#34;</span><span class="p">)</span>
-		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">err</span>
+		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="kc">false</span>
 	<span class="p">}</span>
-	<span class="k">return</span> <span class="nx">utilizationInfo</span><span class="p">,</span> <span class="kc">nil</span>
+	<span class="k">return</span> <span class="nx">sectorInfo</span><span class="p">,</span> <span class="kc">true</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_initializeUtilizationInfo</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deals</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorUtilizationInfo</span> <span class="p">{</span>
-
-	<span class="kd">var</span> <span class="nx">maxUtilization</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-	<span class="kd">var</span> <span class="nx">dealExpirationAMT</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealExpirationAMT</span>
-
-	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">d</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">deals</span> <span class="p">{</span>
-		<span class="nx">dealID</span> <span class="o">:=</span> <span class="nx">d</span><span class="p">.</span><span class="nf">ID</span><span class="p">()</span>
-		<span class="nx">dealExpiration</span> <span class="o">:=</span> <span class="nx">d</span><span class="p">.</span><span class="nf">Deal</span><span class="p">().</span><span class="nf">Proposal</span><span class="p">().</span><span class="nf">EndEpoch</span><span class="p">()</span>
-		<span class="c1">// TODO: verify what counts towards power here
-</span><span class="c1"></span>		<span class="c1">// There is PayloadSize, OverheadSize, and Total, see piece.id
-</span><span class="c1"></span>		<span class="nx">dealPayloadPower</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nf">Deal</span><span class="p">().</span><span class="nf">Proposal</span><span class="p">().</span><span class="nf">PieceSize</span><span class="p">().</span><span class="nf">PayloadSize</span><span class="p">())</span>
-
-		<span class="nx">expirationValue</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealExpirationValue_I</span><span class="p">{</span>
-			<span class="nx">ID_</span><span class="p">:</span>    <span class="nx">dealID</span><span class="p">,</span>
-			<span class="nx">Power_</span><span class="p">:</span> <span class="nx">dealPayloadPower</span><span class="p">,</span>
-		<span class="p">}</span>
-		<span class="nx">dealExpirationAMT</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">Add</span><span class="p">(</span><span class="nx">dealExpiration</span><span class="p">,</span> <span class="nx">expirationValue</span><span class="p">)</span>
-
-		<span class="nx">maxUtilization</span> <span class="o">+=</span> <span class="nx">dealPayloadPower</span>
-
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getSectorPower</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">power</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">sectorInfo</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorOnChainInfo</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="kc">false</span>
 	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">sectorInfo</span><span class="p">.</span><span class="nf">Power</span><span class="p">(),</span> <span class="kc">true</span>
+<span class="p">}</span>
 
-	<span class="nx">initialUtilizationInfo</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorUtilizationInfo_I</span><span class="p">{</span>
-		<span class="nx">DealExpirationAMT_</span><span class="p">:</span> <span class="nx">dealExpirationAMT</span><span class="p">,</span>
-		<span class="nx">MaxUtilization_</span><span class="p">:</span>    <span class="nx">maxUtilization</span><span class="p">,</span>
-		<span class="nx">CurrUtilization_</span><span class="p">:</span>   <span class="nx">maxUtilization</span><span class="p">,</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getSectorDealIDs</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">dealIDs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">sectorInfo</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorOnChainInfo</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="kc">false</span>
 	<span class="p">}</span>
-
-	<span class="k">return</span> <span class="nx">initialUtilizationInfo</span>
-
+	<span class="k">return</span> <span class="nx">sectorInfo</span><span class="p">.</span><span class="nf">SealCommitment</span><span class="p">().</span><span class="nf">DealIDs</span><span class="p">(),</span> <span class="kc">true</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getPreCommitDepositReq</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
@@ -22758,18 +22719,19 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">failingSectorNumbers</span> <span class="p">{</span>
 		<span class="nx">st</span><span class="p">.</span><span class="nf">_updateFailSector</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">sectorNo</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
 	<span class="p">}</span>
-	<span class="nx">st</span><span class="p">.</span><span class="nf">_updateExpireSectors</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+
 	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+
+	<span class="nx">a</span><span class="p">.</span><span class="nf">_expireSectors</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="p">=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
 	<span class="nx">newDetectedFaults</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">SectorTable</span><span class="p">().</span><span class="nf">FailingSectors</span><span class="p">()</span>
 	<span class="nx">newTerminatedFaults</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">SectorTable</span><span class="p">().</span><span class="nf">TerminatedFaults</span><span class="p">()</span>
-	<span class="nx">lastPoStResponse</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ChallengeStatus</span><span class="p">().</span><span class="nf">LastPoStResponseEpoch</span><span class="p">()</span>
 
 	<span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-	<span class="nx">a</span><span class="p">.</span><span class="nf">_submitPowerReport</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">lastPoStResponse</span><span class="p">)</span>
+	<span class="nx">a</span><span class="p">.</span><span class="nf">_submitPowerReport</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
 	<span class="c1">// Note: NewDetectedFaults is now the sum of all
 </span><span class="c1"></span>	<span class="c1">// previously active, committed, and recovering sectors minus expired ones
@@ -22790,12 +22752,35 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="c1">// construct PowerReport from SectorTable
-</span><span class="c1">// need lastPoSt to search for new expired deals in _updateSectorUtilization since the lastPost
-</span><span class="c1">// where DealExpirationAMT takes in a range of Epoch and return a list of values that expire in that range
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_submitPowerReport</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">lastPoStResponse</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_expireSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
+
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-	<span class="nx">newExpiredDealIDs</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_updateSectorUtilization</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">lastPoStResponse</span><span class="p">)</span>
+	<span class="nx">expiredSectorNos</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_updateExpireSectors</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+
+	<span class="c1">// @param dealIDs
+</span><span class="c1"></span>	<span class="nx">expireSectorParams</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">expiredSectorNos</span> <span class="p">{</span>
+		<span class="nx">dealIDs</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorDealIDs</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+			<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+		<span class="p">}</span>
+		<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">dealID</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">dealIDs</span> <span class="p">{</span>
+			<span class="nx">expireSectorParams</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">expireSectorParams</span><span class="p">,</span> <span class="nx">deal</span><span class="p">.</span><span class="nf">Serialize_DealID</span><span class="p">(</span><span class="nx">dealID</span><span class="p">))</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
+		<span class="nx">To_</span><span class="p">:</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">StorageMarketActorAddr</span><span class="p">,</span>
+		<span class="nx">Method_</span><span class="p">:</span> <span class="nx">market</span><span class="p">.</span><span class="nx">Method_StorageMarketActor_ProcessDealExpiration</span><span class="p">,</span>
+		<span class="nx">Params_</span><span class="p">:</span> <span class="nx">expireSectorParams</span><span class="p">,</span>
+	<span class="p">})</span>
+<span class="p">}</span>
+
+<span class="c1">// construct PowerReport from SectorTable
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_submitPowerReport</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 	<span class="nx">activePower</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getActivePower</span><span class="p">()</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">())</span>
@@ -22813,9 +22798,6 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 
 	<span class="c1">// @param powerReport spc.PowerReport
 </span><span class="c1"></span>	<span class="nx">processPowerReportParam</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-	<span class="c1">// @param dealIDs []deal.DealID
-</span><span class="c1"></span>	<span class="nx">processDealExpirationParam</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO: serialize arguments&#34;</span><span class="p">)</span>
 
 	<span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
@@ -22832,32 +22814,25 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 		<span class="nx">Method_</span><span class="p">:</span> <span class="nx">spc</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_ProcessPowerReport</span><span class="p">,</span>
 		<span class="nx">Params_</span><span class="p">:</span> <span class="nx">processPowerReportParam</span><span class="p">,</span>
 	<span class="p">})</span>
-
-	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">newExpiredDealIDs</span><span class="p">)</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
-			<span class="nx">To_</span><span class="p">:</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">StorageMarketActorAddr</span><span class="p">,</span>
-			<span class="nx">Method_</span><span class="p">:</span> <span class="nx">market</span><span class="p">.</span><span class="nx">Method_StorageMarketActor_ProcessDealExpiration</span><span class="p">,</span>
-			<span class="nx">Params_</span><span class="p">:</span> <span class="nx">processDealExpirationParam</span><span class="p">,</span>
-		<span class="p">})</span>
-	<span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_claimDealPayments</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">ClaimDealPaymentsForSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-	<span class="nx">activeDealIDs</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
-	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">st</span><span class="p">.</span><span class="nf">SectorTable</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">ActiveSectors_</span><span class="p">.</span><span class="nf">SectorsOn</span><span class="p">()</span> <span class="p">{</span>
-		<span class="nx">utilizationInfo</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetUtilizationInfo</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">sectorNo</span><span class="p">)</span>
-		<span class="nx">newActiveDealIDs</span> <span class="o">:=</span> <span class="nx">utilizationInfo</span><span class="p">.</span><span class="nf">DealExpirationAMT</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">ActiveDealIDs</span><span class="p">()</span>
-		<span class="nx">activeDealIDs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">activeDealIDs</span><span class="p">,</span> <span class="nx">newActiveDealIDs</span><span class="o">...</span><span class="p">)</span>
+	<span class="nx">dealIDs</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorDealIDs</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;sm.ClaimDealPaymentsForSector: invalid sector number.&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
+
+	<span class="nx">lastPoStEpoch</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ChallengeStatus</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">LastPoStSuccessEpoch</span><span class="p">()</span>
 
 	<span class="c1">// @params dealIDs []deal.DealID activeDealIDs
+</span><span class="c1"></span>	<span class="c1">// @params lastPoSt block.ChainEpoch
 </span><span class="c1"></span>	<span class="nx">processDealPaymentParam</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">dealID</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">activeDealIDs</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">dealID</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">dealIDs</span> <span class="p">{</span>
 		<span class="nx">processDealPaymentParam</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">processDealPaymentParam</span><span class="p">,</span> <span class="nx">deal</span><span class="p">.</span><span class="nf">Serialize_DealID</span><span class="p">(</span><span class="nx">dealID</span><span class="p">))</span>
 	<span class="p">}</span>
+	<span class="nx">processDealPaymentParam</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">processDealPaymentParam</span><span class="p">,</span> <span class="nx">block</span><span class="p">.</span><span class="nf">Serialize_ChainEpoch</span><span class="p">(</span><span class="nx">lastPoStEpoch</span><span class="p">))</span>
 	<span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
@@ -22896,7 +22871,7 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 		<span class="k">case</span> <span class="nx">SectorCommittedSN</span><span class="p">,</span> <span class="nx">SectorRecoveringSN</span><span class="p">:</span>
 			<span class="nx">st</span><span class="p">.</span><span class="nf">_updateActivateSector</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">sectorNo</span><span class="p">)</span>
 		<span class="k">case</span> <span class="nx">SectorActiveSN</span><span class="p">:</span>
-			<span class="c1">// do nothing, deal payment is made at the end of this method
+			<span class="c1">// do nothing, deal payment is made lazily
 </span><span class="c1"></span>		<span class="k">default</span><span class="p">:</span>
 			<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Invalid sector state in ProvingSet.SectorsOn()&#34;</span><span class="p">)</span>
 		<span class="p">}</span>
@@ -22922,17 +22897,15 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 		<span class="p">}</span>
 	<span class="p">}</span>
 
-	<span class="c1">// Process Expiration.
-</span><span class="c1"></span>	<span class="nx">st</span><span class="p">.</span><span class="nf">_updateExpireSectors</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-
 	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="p">=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 	<span class="nx">newTerminatedFaults</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">SectorTable</span><span class="p">().</span><span class="nf">TerminatedFaults</span><span class="p">()</span>
-	<span class="nx">lastPoStResponse</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ChallengeStatus</span><span class="p">().</span><span class="nf">LastPoStResponseEpoch</span><span class="p">()</span>
 	<span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-	<span class="nx">a</span><span class="p">.</span><span class="nf">_submitPowerReport</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">lastPoStResponse</span><span class="p">)</span>
+	<span class="c1">// Process Expiration.
+</span><span class="c1"></span>	<span class="nx">a</span><span class="p">.</span><span class="nf">_expireSectors</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+	<span class="nx">a</span><span class="p">.</span><span class="nf">_submitPowerReport</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
 	<span class="nx">a</span><span class="p">.</span><span class="nf">_slashCollateralForStorageFaults</span><span class="p">(</span>
 		<span class="nx">rt</span><span class="p">,</span>
@@ -22940,8 +22913,6 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 </span><span class="c1"></span>		<span class="nx">sector</span><span class="p">.</span><span class="nf">CompactSectorSet</span><span class="p">(</span><span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="c1">// NewDetectedFaults
 </span><span class="c1"></span>		<span class="nx">newTerminatedFaults</span><span class="p">,</span>
 	<span class="p">)</span>
-
-	<span class="nx">a</span><span class="p">.</span><span class="nf">_claimDealPayments</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="p">=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 	<span class="nx">st</span><span class="p">.</span><span class="nf">ChallengeStatus</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">OnPoStSuccess</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">())</span>
@@ -23054,11 +23025,9 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 		<span class="nx">st</span><span class="p">.</span><span class="nf">_updateFailSector</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">sectorNo</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
 	<span class="p">}</span>
 
-	<span class="nx">lastPoStResponse</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ChallengeStatus</span><span class="p">().</span><span class="nf">LastPoStResponseEpoch</span><span class="p">()</span>
-
 	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-	<span class="nx">a</span><span class="p">.</span><span class="nf">_submitPowerReport</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">lastPoStResponse</span><span class="p">)</span>
+	<span class="nx">a</span><span class="p">.</span><span class="nf">_submitPowerReport</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
 	<span class="nx">a</span><span class="p">.</span><span class="nf">_slashCollateralForStorageFaults</span><span class="p">(</span>
 		<span class="nx">rt</span><span class="p">,</span>
@@ -23075,13 +23044,12 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
 	<span class="nx">dealIDs</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">sectorNumbers</span> <span class="p">{</span>
-
-		<span class="nx">utilizationInfo</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetUtilizationInfo</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">sectorNo</span><span class="p">)</span>
-		<span class="nx">activeDealIDs</span> <span class="o">:=</span> <span class="nx">utilizationInfo</span><span class="p">.</span><span class="nf">DealExpirationAMT</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">ActiveDealIDs</span><span class="p">()</span>
-		<span class="nx">dealIDs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">dealIDs</span><span class="p">,</span> <span class="nx">activeDealIDs</span><span class="o">...</span><span class="p">)</span>
-
+		<span class="nx">sectorDealIDs</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorDealIDs</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+			<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+		<span class="p">}</span>
+		<span class="nx">dealIDs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">dealIDs</span><span class="p">,</span> <span class="nx">sectorDealIDs</span><span class="o">...</span><span class="p">)</span>
 	<span class="p">}</span>
 
 	<span class="c1">// @param dealIDs []deal.DealID
@@ -23105,10 +23073,11 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 
 	<span class="nx">affectedPower</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">sectorNumbers</span> <span class="p">{</span>
-
-		<span class="nx">utilizationInfo</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetUtilizationInfo</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">sectorNo</span><span class="p">)</span>
-		<span class="nx">affectedPower</span> <span class="o">+=</span> <span class="nx">utilizationInfo</span><span class="p">.</span><span class="nf">CurrUtilization</span><span class="p">()</span>
-
+		<span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorPower</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+			<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+		<span class="p">}</span>
+		<span class="nx">affectedPower</span> <span class="o">+=</span> <span class="nx">sectorPower</span>
 	<span class="p">}</span>
 
 	<span class="c1">// @param affectedPower block.StoragePower
@@ -23126,8 +23095,7 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 	<span class="p">})</span>
 <span class="p">}</span>
 
-<span class="c1">// should always happen after _submitPowerReport to have the most up to date utilization info
-</span><span class="c1">// reset NewTerminatedFaults
+<span class="c1">// reset NewTerminatedFaults
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_slashCollateralForStorageFaults</span><span class="p">(</span>
 	<span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span>
 	<span class="nx">newDeclaredFaults</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span><span class="p">,</span> <span class="c1">// diff value
@@ -23309,7 +23277,6 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 
 	<span class="c1">// if more than MAX_PROVE_COMMIT_SECTOR_EPOCH has elapsed
 </span><span class="c1"></span>	<span class="k">if</span> <span class="nx">elapsedEpoch</span> <span class="p">&gt;</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">MAX_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="p">{</span>
-
 		<span class="c1">// PreCommittedSectors is cleaned up at _expirePreCommitSectors triggered by Cron
 </span><span class="c1"></span>		<span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span>
 			<span class="nx">exitcode</span><span class="p">.</span><span class="nf">UserDefinedError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">DeadlineExceeded</span><span class="p">),</span>
@@ -23332,14 +23299,17 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 			<span class="s">&#34;Seal verification failed&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 
-	<span class="nx">_</span><span class="p">,</span> <span class="nx">utilizationFound</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">SectorUtilization</span><span class="p">()[</span><span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">SectorNumber</span><span class="p">()]</span>
-	<span class="k">if</span> <span class="nx">utilizationFound</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;sm.ProveCommitSector: sector number found in SectorUtilization&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
+	<span class="nx">minerInfo</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Info</span><span class="p">()</span>
+	<span class="nx">sectorSize</span> <span class="o">:=</span> <span class="nx">minerInfo</span><span class="p">.</span><span class="nf">SectorSize</span><span class="p">()</span>
+	<span class="nx">sectorPower</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="nx">sectorSize</span><span class="p">)</span>
 
 	<span class="c1">// Activate storage deals, abort if activation failed
+</span><span class="c1"></span>	<span class="c1">// @param expiration block.ChainEpoch info.Expiration()
+</span><span class="c1"></span>	<span class="c1">// @param sectorSize block.StoragePower sectorSize
 </span><span class="c1"></span>	<span class="c1">// @param dealIDs []deal.DealID onChainInfo.DealIDs()
 </span><span class="c1"></span>	<span class="nx">activateDealsParams</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+	<span class="nx">activateDealsParams</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">activateDealsParams</span><span class="p">,</span> <span class="nx">block</span><span class="p">.</span><span class="nf">Serialize_ChainEpoch</span><span class="p">(</span><span class="nx">info</span><span class="p">.</span><span class="nf">Expiration</span><span class="p">()))</span>
+	<span class="nx">activateDealsParams</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">activateDealsParams</span><span class="p">,</span> <span class="nx">block</span><span class="p">.</span><span class="nf">Serialize_StoragePower</span><span class="p">(</span><span class="nx">sectorPower</span><span class="p">))</span>
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">dealID</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">DealIDs</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nx">activateDealsParams</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">activateDealsParams</span><span class="p">,</span> <span class="nx">deal</span><span class="p">.</span><span class="nf">Serialize_DealID</span><span class="p">(</span><span class="nx">dealID</span><span class="p">))</span>
 	<span class="p">}</span>
@@ -23355,28 +23325,23 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="p">=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
 	<span class="nx">activateDealsRet</span> <span class="o">:=</span> <span class="nx">activateDealsReceipt</span><span class="p">.</span><span class="nf">ReturnValue</span><span class="p">()</span>
-	<span class="nx">deals</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">activateDealsRet</span><span class="p">))</span>
-	<span class="nx">onchainDeal</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">deal</span><span class="p">.</span><span class="nf">Deserialize_OnChainDeal</span><span class="p">(</span><span class="nx">activateDealsRet</span><span class="p">)</span>
+	<span class="nx">sectorActivePower</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">Deserialize_StoragePower</span><span class="p">(</span><span class="nx">activateDealsRet</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Failed to deserialize OnChainDeal&#34;</span><span class="p">)</span>
+		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Failed to deserialize sector power&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
-	<span class="nx">deals</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">deals</span><span class="p">,</span> <span class="nx">onchainDeal</span><span class="p">)</span>
-	<span class="nx">initialUtilization</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_initializeUtilizationInfo</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">deals</span><span class="p">)</span>
-	<span class="nx">lastDealExpiration</span> <span class="o">:=</span> <span class="nx">initialUtilization</span><span class="p">.</span><span class="nf">DealExpirationAMT</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">LastDealExpiration</span><span class="p">()</span>
 
 	<span class="c1">// add sector expiration to SectorExpirationQueue
 </span><span class="c1"></span>	<span class="nx">st</span><span class="p">.</span><span class="nf">SectorExpirationQueue</span><span class="p">().</span><span class="nf">Add</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">SectorExpirationQueueItem_I</span><span class="p">{</span>
 		<span class="nx">SectorNumber_</span><span class="p">:</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">SectorNumber</span><span class="p">(),</span>
-		<span class="nx">Expiration_</span><span class="p">:</span>   <span class="nx">lastDealExpiration</span><span class="p">,</span>
+		<span class="nx">Expiration_</span><span class="p">:</span>   <span class="nx">info</span><span class="p">.</span><span class="nf">Expiration</span><span class="p">(),</span>
 	<span class="p">})</span>
 
 	<span class="c1">// no need to store the proof and randomseed in the state tree
 </span><span class="c1"></span>	<span class="c1">// verify and drop, only SealCommitment{CommR, DealIDs} on chain
 </span><span class="c1"></span>	<span class="nx">sealCommitment</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SealCommitment_I</span><span class="p">{</span>
-		<span class="nx">SealedCID_</span><span class="p">:</span>  <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">SealedCID</span><span class="p">(),</span>
-		<span class="nx">DealIDs_</span><span class="p">:</span>    <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">DealIDs</span><span class="p">(),</span>
-		<span class="nx">Expiration_</span><span class="p">:</span> <span class="nx">lastDealExpiration</span><span class="p">,</span> <span class="c1">// TODO decide if we need this too
-</span><span class="c1"></span>	<span class="p">}</span>
+		<span class="nx">SealedCID_</span><span class="p">:</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">SealedCID</span><span class="p">(),</span>
+		<span class="nx">DealIDs_</span><span class="p">:</span>   <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">DealIDs</span><span class="p">(),</span>
+	<span class="p">}</span>
 
 	<span class="c1">// add SectorNumber and SealCommitment to Sectors
 </span><span class="c1"></span>	<span class="c1">// set Sectors.State to SectorCommitted
@@ -23384,22 +23349,19 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 </span><span class="c1"></span>	<span class="nx">sealOnChainInfo</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">SectorOnChainInfo_I</span><span class="p">{</span>
 		<span class="nx">SealCommitment_</span><span class="p">:</span> <span class="nx">sealCommitment</span><span class="p">,</span>
 		<span class="nx">State_</span><span class="p">:</span>          <span class="nf">SectorCommitted</span><span class="p">(),</span>
+		<span class="nx">Power_</span><span class="p">:</span>          <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="nx">sectorActivePower</span><span class="p">),</span>
+		<span class="nx">Activation_</span><span class="p">:</span>     <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(),</span>
+		<span class="nx">Expiration_</span><span class="p">:</span>     <span class="nx">info</span><span class="p">.</span><span class="nf">Expiration</span><span class="p">(),</span>
 	<span class="p">}</span>
 
 	<span class="k">if</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_isChallenged</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span> <span class="p">{</span>
 		<span class="c1">// move PreCommittedSector to StagedCommittedSectors if in Challenged status
-</span><span class="c1"></span>		<span class="nx">stagedSectorInfo</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">StagedCommittedSectorInfo_I</span><span class="p">{</span>
-			<span class="nx">Sector_</span><span class="p">:</span>      <span class="nx">sealOnChainInfo</span><span class="p">,</span>
-			<span class="nx">Utilization_</span><span class="p">:</span> <span class="nx">initialUtilization</span><span class="p">,</span>
-		<span class="p">}</span>
-
-		<span class="nx">st</span><span class="p">.</span><span class="nf">StagedCommittedSectors</span><span class="p">()[</span><span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">SectorNumber</span><span class="p">()]</span> <span class="p">=</span> <span class="nx">stagedSectorInfo</span>
+</span><span class="c1"></span>		<span class="nx">st</span><span class="p">.</span><span class="nf">StagedCommittedSectors</span><span class="p">()[</span><span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">SectorNumber</span><span class="p">()]</span> <span class="p">=</span> <span class="nx">sealOnChainInfo</span>
 	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
 		<span class="c1">// move PreCommittedSector to CommittedSectors if not in Challenged status
 </span><span class="c1"></span>		<span class="nx">st</span><span class="p">.</span><span class="nf">Sectors</span><span class="p">()[</span><span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">SectorNumber</span><span class="p">()]</span> <span class="p">=</span> <span class="nx">sealOnChainInfo</span>
 		<span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">ProvingSet_</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">SectorNumber</span><span class="p">())</span>
 		<span class="nx">st</span><span class="p">.</span><span class="nf">SectorTable</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">CommittedSectors_</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">SectorNumber</span><span class="p">())</span>
-		<span class="nx">st</span><span class="p">.</span><span class="nf">SectorUtilization</span><span class="p">()[</span><span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">SectorNumber</span><span class="p">()]</span> <span class="p">=</span> <span class="nx">initialUtilization</span>
 	<span class="p">}</span>
 
 	<span class="c1">// now remove SectorNumber from PreCommittedSectors (processed)
@@ -23614,7 +23576,6 @@ and serves to make storage conform to a set of expectations.</p>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Bytes32</span> <span class="nx">Bytes</span>
 <span class="kd">type</span> <span class="nx">MinerID</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
@@ -23628,12 +23589,6 @@ and serves to make storage conform to a set of expectations.</p>
 
 <span class="kd">type</span> <span class="nx">FaultSet</span> <span class="nx">CompactSectorSet</span>
 <span class="kd">type</span> <span class="nx">StorageFaultType</span> <span class="kt">int</span>
-
-<span class="kd">type</span> <span class="nx">SectorUtilizationInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">DealExpirationAMT</span>  <span class="nx">deal</span><span class="p">.</span><span class="nx">DealExpirationAMT</span>
-    <span class="nx">MaxUtilization</span>     <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-    <span class="nx">CurrUtilization</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-<span class="p">}</span>
 
 <span class="c1">// SectorSize indicates one of a set of possible sizes in the network.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorSize</span> <span class="nx">UInt</span>
@@ -23958,6 +23913,7 @@ and serves to make storage conform to a set of expectations.</p>
     <span class="nx">SectorNumber</span>
     <span class="nx">Proof</span>             <span class="nx">SealProof</span>
     <span class="nx">InteractiveEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">Expiration</span>        <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 
 <span class="c1">// PersistentProofAux is meta data required to generate certain proofs
@@ -25887,19 +25843,6 @@ G and T will be selected using these.</p>
 </span><span class="c1"></span>    <span class="nx">ID</span>                <span class="nx">DealID</span>
 <span class="p">}</span>
 
-<span class="c1">// AMT from expiration epoch to dealID and to sectorNumber
-</span><span class="c1">// defined as struct to specify helpers
-</span><span class="c1">// effectively an AMT of the form DealExpirationAMT[Expiration][DealID] = PayloadPower
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">DealExpirationAMT</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Expiration</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// key
-</span><span class="c1"></span>    <span class="nx">Value</span>       <span class="nx">DealExpirationValue</span>  <span class="c1">// value
-</span><span class="c1"></span><span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">DealExpirationValue</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ID</span>     <span class="nx">DealID</span>  <span class="c1">// key
-</span><span class="c1"></span>    <span class="nx">Power</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>  <span class="c1">// value
-</span><span class="c1"></span><span class="p">}</span>
-
 <span class="kd">type</span> <span class="nx">RetrievalDealProposal</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// TODO
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">RetrievalDeal</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Proposal</span>          <span class="nx">RetrievalDealProposal</span>
@@ -26212,10 +26155,17 @@ Storage Market subsystem is the data entry point into the network. Storage miner
     <span class="nf">_lockFundsForStorageDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span>
 
     <span class="nf">_safeGetOnChainDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span>
+    <span class="nf">_getOnChainDeal</span><span class="p">(</span><span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="p">(</span><span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
     <span class="nf">_safeGetBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">participant</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">StorageParticipantBalance</span>
     <span class="nf">_assertPublishedDealState</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span>
     <span class="nf">_assertActiveDealState</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span>
+    <span class="nf">_assertEpochEqual</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">epoch1</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">epoch2</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
     <span class="nf">_activateDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span>
+    <span class="nf">_getSectorPowerFromDeals</span><span class="p">(</span>
+        <span class="nx">sectorDuration</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">sectorSize</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+        <span class="nx">dealPs</span>          <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">]</span>
+    <span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
 
     <span class="nf">_getStorageFeeSinceLastPayment</span><span class="p">(</span>
         <span class="nx">rt</span>               <span class="nx">Runtime</span>
@@ -26228,6 +26178,8 @@ Storage Market subsystem is the data entry point into the network. Storage miner
         <span class="nx">rt</span>      <span class="nx">Runtime</span>
         <span class="nx">amount</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+
+    <span class="nf">_refundStartedDeals</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageMarketActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -26426,7 +26378,7 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 
 <span class="p">}</span>
 
-<span class="c1">// Call by PublishStorageDeals and GetInitialUtilization (consider remove this)
+<span class="c1">// Call by PublishStorageDeals
 </span><span class="c1">// This is the check before a StorageDeal appears onchain
 </span><span class="c1">// It checks the following:
 </span><span class="c1">//   - verify deal did not expire when it is signed
@@ -26507,8 +26459,16 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 	<span class="nx">st</span><span class="p">.</span><span class="nf">_lockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">p</span><span class="p">.</span><span class="nf">ProviderBalanceRequirement</span><span class="p">())</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_safeGetOnChainDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_getOnchainDeal</span><span class="p">(</span><span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="p">(</span><span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">deal</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Deals</span><span class="p">()[</span><span class="nx">dealID</span><span class="p">]</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="kc">false</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">deal</span><span class="p">,</span> <span class="kc">true</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_safeGetOnChainDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span> <span class="p">{</span>
+	<span class="nx">deal</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getOnchainDeal</span><span class="p">(</span><span class="nx">dealID</span><span class="p">)</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;sm._safeGetOnChainDeal: dealID not found in Deals.&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
@@ -26604,6 +26564,19 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 	<span class="nx">st</span><span class="p">.</span><span class="nf">_unlockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">clientCollateral</span><span class="o">+</span><span class="nx">lockedFee</span><span class="p">)</span>
 
 	<span class="k">return</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_slashDealCollateral</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_assertEpochEqual</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">epoch1</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">epoch2</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">epoch1</span> <span class="o">!=</span> <span class="nx">epoch2</span> <span class="p">{</span>
+		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;sm._assertEpochEqual: different epochs&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_getSectorPowerFromDeals</span><span class="p">(</span><span class="nx">sectorDuration</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">sectorSize</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">dealPs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span> <span class="p">{</span>
+	<span class="nf">TODO</span><span class="p">()</span>
+
+	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">ret</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -26748,7 +26721,7 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">PublishStorageDeals</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">newStorageDeals</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="p">[]</span><span class="nx">PublishStorageDealResponse</span> <span class="p">{</span>
 
-	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// verify StorageMinerActor
+	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// verify StorageMinerActor (note client can put the signed message onchain too)
 </span><span class="c1"></span>
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
@@ -26808,12 +26781,13 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 	<span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">ActivateDeals</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">ActivateDeals</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorExpiration</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">sectorSize</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span> <span class="p">{</span>
 
 	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// verify StorageMinerActor
 </span><span class="c1"></span>
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-	<span class="nx">ret</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">dealIDs</span><span class="p">))</span>
+	<span class="nx">lastDealExpiration</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+	<span class="nx">dealPs</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">dealIDs</span><span class="p">))</span>
 
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">dealID</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">dealIDs</span> <span class="p">{</span>
 		<span class="nx">publishedDeal</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetOnChainDeal</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealID</span><span class="p">)</span>
@@ -26822,13 +26796,25 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 		<span class="nx">dealP</span> <span class="o">:=</span> <span class="nx">publishedDeal</span><span class="p">.</span><span class="nf">Deal</span><span class="p">().</span><span class="nf">Proposal</span><span class="p">()</span>
 		<span class="nx">st</span><span class="p">.</span><span class="nf">_assertDealNotYetExpired</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">)</span>
 
-		<span class="nx">onchainDeal</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_activateDeal</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">publishedDeal</span><span class="p">)</span>
-		<span class="nx">ret</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">ret</span><span class="p">,</span> <span class="nx">onchainDeal</span><span class="p">)</span>
+		<span class="nx">dealEnd</span> <span class="o">:=</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">EndEpoch</span><span class="p">()</span>
+
+		<span class="k">if</span> <span class="nx">dealEnd</span> <span class="p">&gt;</span> <span class="nx">lastDealExpiration</span> <span class="p">{</span>
+			<span class="nx">lastDealExpiration</span> <span class="p">=</span> <span class="nx">dealEnd</span>
+		<span class="p">}</span>
+
+		<span class="nx">dealPs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">dealPs</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">)</span>
+		<span class="nx">st</span><span class="p">.</span><span class="nf">_activateDeal</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">publishedDeal</span><span class="p">)</span>
 	<span class="p">}</span>
+
+	<span class="nx">st</span><span class="p">.</span><span class="nf">_assertEpochEqual</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">lastDealExpiration</span><span class="p">,</span> <span class="nx">sectorExpiration</span><span class="p">)</span>
+
+	<span class="nx">sectorDuration</span> <span class="o">:=</span> <span class="nx">sectorExpiration</span> <span class="o">-</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span>
+	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorPowerFromDeals</span><span class="p">(</span><span class="nx">sectorDuration</span><span class="p">,</span> <span class="nx">sectorSize</span><span class="p">,</span> <span class="nx">dealPs</span><span class="p">)</span>
 
 	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-	<span class="k">return</span> <span class="nx">ret</span>
+	<span class="c1">// TODO potentially refund clients for started deals
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nx">ret</span>
 
 <span class="p">}</span>
 
@@ -26860,11 +26846,15 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">ProcessDealPayment</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">,</span> <span class="nx">newPaymentEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// verify caller must be StorageMinerActor
+</span><span class="c1"></span>
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">dealID</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">dealIDs</span> <span class="p">{</span>
-		<span class="nx">deal</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetOnChainDeal</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealID</span><span class="p">)</span>
-		<span class="nx">st</span><span class="p">.</span><span class="nf">_assertActiveDealState</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealID</span><span class="p">)</span>
+		<span class="nx">deal</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getOnChainDeal</span><span class="p">(</span><span class="nx">dealID</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+			<span class="k">continue</span>
+		<span class="p">}</span>
 
 		<span class="nx">fee</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getStorageFeeSinceLastPayment</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">deal</span><span class="p">,</span> <span class="nx">newPaymentEpoch</span><span class="p">)</span>
 
@@ -26883,6 +26873,8 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 </span><span class="c1">// remove deals from ActiveDeals
 </span><span class="c1">// return collaterals to both miner and client
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">ProcessDealExpiration</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// verify caller must be StorageMinerActor
+</span><span class="c1"></span>
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">dealID</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">dealIDs</span> <span class="p">{</span>
@@ -35482,8 +35474,9 @@ Given an array of size <code>N</code> and a fixed width of <code>W</code>.
 
     <span class="nf">VerifySyntax</span><span class="p">()</span>   <span class="kt">bool</span>
     <span class="nf">String</span><span class="p">()</span>         <span class="nx">AddressString</span>
-    <span class="nf">IsKeyType</span><span class="p">()</span>      <span class="kt">bool</span>
-    <span class="nf">Equals</span><span class="p">(</span><span class="nx">Address</span><span class="p">)</span>  <span class="kt">bool</span>
+    <span class="nf">IsIDType</span><span class="p">()</span>       <span class="kt">bool</span>  <span class="c1">// Whether the address is an ID-address
+</span><span class="c1"></span>    <span class="nf">IsKeyType</span><span class="p">()</span>      <span class="kt">bool</span>  <span class="c1">// Whether the address is a public key address (SECP or BLS)
+</span><span class="c1"></span>    <span class="nf">Equals</span><span class="p">(</span><span class="nx">Address</span><span class="p">)</span>  <span class="kt">bool</span>
     <span class="nf">Ref</span><span class="p">()</span>            <span class="nx">Address_Ptr</span>
 <span class="p">}</span>
 
@@ -35577,6 +35570,10 @@ Given an array of size <code>N</code> and a fixed width of <code>W</code>.
 	<span class="c1">// TODO: custom encoding as in
 </span><span class="c1"></span>	<span class="c1">// https://github.com/filecoin-project/lotus/blob/master/chain/address/address.go
 </span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">IsIDType</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">IsKeyType</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>

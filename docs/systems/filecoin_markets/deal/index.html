@@ -4797,19 +4797,6 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nx">ID</span>                <span class="nx">DealID</span>
 <span class="p">}</span>
 
-<span class="c1">// AMT from expiration epoch to dealID and to sectorNumber
-</span><span class="c1">// defined as struct to specify helpers
-</span><span class="c1">// effectively an AMT of the form DealExpirationAMT[Expiration][DealID] = PayloadPower
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">DealExpirationAMT</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Expiration</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// key
-</span><span class="c1"></span>    <span class="nx">Value</span>       <span class="nx">DealExpirationValue</span>  <span class="c1">// value
-</span><span class="c1"></span><span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">DealExpirationValue</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ID</span>     <span class="nx">DealID</span>  <span class="c1">// key
-</span><span class="c1"></span>    <span class="nx">Power</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>  <span class="c1">// value
-</span><span class="c1"></span><span class="p">}</span>
-
 <span class="kd">type</span> <span class="nx">RetrievalDealProposal</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// TODO
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">RetrievalDeal</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Proposal</span>          <span class="nx">RetrievalDealProposal</span>

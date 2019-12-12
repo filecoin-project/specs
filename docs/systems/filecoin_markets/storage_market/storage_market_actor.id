@@ -43,10 +43,17 @@ type StorageMarketActorState struct {
     _lockFundsForStorageDeal(rt Runtime, deal deal.StorageDeal)
 
     _safeGetOnChainDeal(rt Runtime, dealID deal.DealID) deal.OnChainDeal
+    _getOnChainDeal(dealID deal.DealID) (deal deal.OnChainDeal, ok bool)
     _safeGetBalance(rt Runtime, participant addr.Address) StorageParticipantBalance
     _assertPublishedDealState(rt Runtime, dealID deal.DealID)
     _assertActiveDealState(rt Runtime, dealID deal.DealID)
+    _assertEpochEqual(rt Runtime, epoch1 block.ChainEpoch, epoch2 block.ChainEpoch)
     _activateDeal(rt Runtime, deal deal.OnChainDeal) deal.OnChainDeal
+    _getSectorPowerFromDeals(
+        sectorDuration  block.ChainEpoch
+        sectorSize      block.StoragePower
+        dealPs          [deal.StorageDealProposal]
+    ) block.StoragePower
 
     _getStorageFeeSinceLastPayment(
         rt               Runtime
@@ -59,6 +66,8 @@ type StorageMarketActorState struct {
         rt      Runtime
         amount  actor.TokenAmount
     ) actor.TokenAmount
+
+    _refundStartedDeals(rt Runtime, dealIDs [deal.DealID])
 }
 
 type StorageMarketActorCode struct {

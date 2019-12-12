@@ -5012,7 +5012,8 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">()</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateAcquired</span><span class="p">()</span>
 
-	<span class="nx">prevState</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">)</span>
+	<span class="nx">prevState</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">)</span>
+	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="nx">prevStateCID</span> <span class="o">:=</span> <span class="nx">prevState</span><span class="p">.</span><span class="nf">State</span><span class="p">()</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nf">ActorSubstateCID_Equals</span><span class="p">(</span><span class="nx">prevStateCID</span><span class="p">,</span> <span class="nx">checkStateCID</span><span class="p">)</span> <span class="p">{</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;State CID differs upon release call&#34;</span><span class="p">)</span>
@@ -5229,7 +5230,10 @@ https://github.com/alex-shpak/hugo-book
 
 	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nf">Value</span><span class="p">()))</span>
 
-	<span class="nx">toActor</span> <span class="o">:=</span> <span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nf">To</span><span class="p">())</span>
+	<span class="nx">toActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nf">To</span><span class="p">())</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+		<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorCodeNotFound</span><span class="p">))</span>
+	<span class="p">}</span>
 
 	<span class="nx">toActorCode</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">loadActorCode</span><span class="p">(</span><span class="nx">toActor</span><span class="p">.</span><span class="nf">CodeID</span><span class="p">())</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
@@ -5359,8 +5363,10 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateNotAcquired</span><span class="p">()</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nx">_actorStateAcquired</span> <span class="p">=</span> <span class="kc">true</span>
 
+	<span class="nx">state</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">)</span>
+	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">ActorStateHandle</span><span class="p">{</span>
-		<span class="nx">_initValue</span><span class="p">:</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">).</span><span class="nf">State</span><span class="p">().</span><span class="nf">Ref</span><span class="p">(),</span>
+		<span class="nx">_initValue</span><span class="p">:</span> <span class="nx">state</span><span class="p">.</span><span class="nf">State</span><span class="p">().</span><span class="nf">Ref</span><span class="p">(),</span>
 		<span class="nx">_rt</span><span class="p">:</span>        <span class="nx">rt</span><span class="p">,</span>
 	<span class="p">}</span>
 <span class="p">}</span>

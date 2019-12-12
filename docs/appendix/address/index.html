@@ -4677,8 +4677,9 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nf">VerifySyntax</span><span class="p">()</span>   <span class="kt">bool</span>
     <span class="nf">String</span><span class="p">()</span>         <span class="nx">AddressString</span>
-    <span class="nf">IsKeyType</span><span class="p">()</span>      <span class="kt">bool</span>
-    <span class="nf">Equals</span><span class="p">(</span><span class="nx">Address</span><span class="p">)</span>  <span class="kt">bool</span>
+    <span class="nf">IsIDType</span><span class="p">()</span>       <span class="kt">bool</span>  <span class="c1">// Whether the address is an ID-address
+</span><span class="c1"></span>    <span class="nf">IsKeyType</span><span class="p">()</span>      <span class="kt">bool</span>  <span class="c1">// Whether the address is a public key address (SECP or BLS)
+</span><span class="c1"></span>    <span class="nf">Equals</span><span class="p">(</span><span class="nx">Address</span><span class="p">)</span>  <span class="kt">bool</span>
     <span class="nf">Ref</span><span class="p">()</span>            <span class="nx">Address_Ptr</span>
 <span class="p">}</span>
 
@@ -4772,6 +4773,10 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// TODO: custom encoding as in
 </span><span class="c1"></span>    <span class="c1">// https://github.com/filecoin-project/lotus/blob/master/chain/address/address.go
 </span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">IsIDType</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">IsKeyType</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>

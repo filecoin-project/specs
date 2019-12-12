@@ -4982,10 +4982,16 @@ it will be created as an account actor (only if the message has a MethodNum of z
 		<span class="k">return</span>
 	<span class="p">}</span>
 
-	<span class="nx">fromActor</span> <span class="o">:=</span> <span class="nx">inTree</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
-	<span class="k">if</span> <span class="nx">fromActor</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+	<span class="nx">fromActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">inTree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 		<span class="c1">// Execution error; sender does not exist at time of message execution.
 </span><span class="c1"></span>		<span class="nf">_applyError</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorNotFound</span><span class="p">,</span> <span class="nx">SenderResolveSpec_Invalid</span><span class="p">)</span>
+		<span class="k">return</span>
+	<span class="p">}</span>
+
+	<span class="c1">// make sure this is the right message order for fromActor
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">message</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">()</span> <span class="p">{</span>
+		<span class="nf">_applyError</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidCallSeqNum</span><span class="p">,</span> <span class="nx">SenderResolveSpec_Invalid</span><span class="p">)</span>
 		<span class="k">return</span>
 	<span class="p">}</span>
 
@@ -4998,31 +5004,26 @@ it will be created as an account actor (only if the message has a MethodNum of z
 		<span class="k">return</span>
 	<span class="p">}</span>
 
-	<span class="c1">// make sure this is the right message order for fromActor
-</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">message</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">()</span> <span class="p">{</span>
-		<span class="nf">_applyError</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidCallSeqNum</span><span class="p">,</span> <span class="nx">SenderResolveSpec_Invalid</span><span class="p">)</span>
+	<span class="c1">// Check receiving actor and method exists, possibly creating an account actor.
+</span><span class="c1"></span>	<span class="c1">// If this succeeds, compTreePreSend will become a state snapshot which includes
+</span><span class="c1"></span>	<span class="c1">// implicit receiver creation, the sender (rather than miner) paying gas, and the sender&#39;s
+</span><span class="c1"></span>	<span class="c1">// CallSeqNum being incremented; at least that much state change will be persisted even if the
+</span><span class="c1"></span>	<span class="c1">// method invocation subsequently fails.
+</span><span class="c1"></span>	<span class="nx">compTreePreSend</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nf">_ensureReceiver</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">message</span><span class="p">)</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+		<span class="c1">// Execution error; receiver actor does not exist (and could not be implicitly created)
+</span><span class="c1"></span>		<span class="c1">// at time of message execution.
+</span><span class="c1"></span>		<span class="nf">_applyError</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorNotFound</span><span class="p">,</span> <span class="nx">SenderResolveSpec_Invalid</span><span class="p">)</span>
 		<span class="k">return</span>
 	<span class="p">}</span>
 
-	<span class="nx">compTreePreSend</span> <span class="o">:=</span> <span class="nx">inTree</span>
-
-	<span class="c1">// Deduct gas limit funds from sender first.
+	<span class="c1">// Deduct gas limit funds from sender.
 </span><span class="c1"></span>	<span class="c1">// (This should always succeed, due to the sender balance check above.)
 </span><span class="c1"></span>	<span class="nx">compTreePreSend</span> <span class="p">=</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span>
 		<span class="nx">compTreePreSend</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(),</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">gasLimitCost</span><span class="p">)</span>
 
 	<span class="c1">// Increment sender CallSeqNum.
 </span><span class="c1"></span>	<span class="nx">compTreePreSend</span> <span class="p">=</span> <span class="nx">compTreePreSend</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithIncrementedCallSeqNum_Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
-
-	<span class="c1">// WithActorForAddress may create new account actors
-</span><span class="c1"></span>	<span class="kd">var</span> <span class="nx">toActor</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span>
-	<span class="nx">compTreePreSend</span><span class="p">,</span> <span class="nx">toActor</span> <span class="p">=</span> <span class="nx">compTreePreSend</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithActorForAddress</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">())</span>
-	<span class="k">if</span> <span class="nx">toActor</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="c1">// Execution error; receiver actor does not exist (and could not be implicitly created)
-</span><span class="c1"></span>		<span class="c1">// at time of message execution.
-</span><span class="c1"></span>		<span class="nf">_applyError</span><span class="p">(</span><span class="nx">compTreePreSend</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorNotFound</span><span class="p">,</span> <span class="nx">SenderResolveSpec_OK</span><span class="p">)</span>
-		<span class="k">return</span>
-	<span class="p">}</span>
 
 	<span class="nx">sendRet</span><span class="p">,</span> <span class="nx">compTreePostSend</span> <span class="o">:=</span> <span class="nf">_applyMessageInternal</span><span class="p">(</span><span class="nx">compTreePreSend</span><span class="p">,</span> <span class="nx">message</span><span class="p">,</span> <span class="nx">vmiGasRemaining</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
 
@@ -5049,6 +5050,29 @@ it will be created as an account actor (only if the message has a MethodNum of z
 	<span class="k">return</span>
 <span class="p">}</span>
 
+<span class="c1">// Ensures a messages&#39;s receiving actor exists in the state tree.
+</span><span class="c1">// If it doesn&#39;t, and the message is a simple value send to a pubkey-style address,
+</span><span class="c1">// creates the receiver as an account actor in the returned state.
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">_ensureReceiver</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">)</span> <span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">())</span>
+
+	<span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">tree</span><span class="p">,</span> <span class="kc">true</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">().</span><span class="nf">IsKeyType</span><span class="p">()</span> <span class="p">{</span>
+		<span class="c1">// Don&#39;t implicitly create an account actor for an address without an associated key.
+</span><span class="c1"></span>		<span class="k">return</span> <span class="nx">tree</span><span class="p">,</span> <span class="kc">false</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Method</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodSend</span> <span class="p">{</span>
+		<span class="c1">// Don&#39;t implicitly create account actor if message was expecting to invoke a method.
+</span><span class="c1"></span>		<span class="k">return</span> <span class="nx">tree</span><span class="p">,</span> <span class="kc">false</span>
+	<span class="p">}</span>
+	<span class="c1">// TODO Create a new account actor via the InitActor, which will receive a new ID address
+</span><span class="c1"></span>	<span class="c1">// and be placed in the state tree under that address.
+</span><span class="c1"></span>	<span class="c1">// The init actor will maintain a map from pubkey address to ID address.
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nx">tree</span><span class="p">,</span> <span class="kc">true</span>
+<span class="p">}</span>
+
 <span class="kd">func</span> <span class="nf">_applyMessageBuiltinAssert</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">topLevelBlockWinner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span> <span class="p">{</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">().</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">))</span>
 	<span class="nx">tree</span> <span class="p">=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithIncrementedCallSeqNum_Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
@@ -5065,8 +5089,8 @@ it will be created as an account actor (only if the message has a MethodNum of z
 	<span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">gasRemainingInit</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">topLevelBlockWinner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
 	<span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">,</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="p">{</span>
 
-	<span class="nx">fromActor</span> <span class="o">:=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
-	<span class="nf">Assert</span><span class="p">(</span><span class="nx">fromActor</span> <span class="o">!=</span> <span class="kc">nil</span><span class="p">)</span>
+	<span class="nx">fromActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
+	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 
 	<span class="nx">rt</span> <span class="o">:=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">VMContext_Make</span><span class="p">(</span>
 		<span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(),</span>
@@ -5111,7 +5135,8 @@ it will be created as an account actor (only if the message has a MethodNum of z
 	<span class="nx">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Serialize_Address</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
 	<span class="nx">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">Serialize_TokenAmount</span><span class="p">(</span><span class="nx">penalty</span><span class="p">)</span>
 
-	<span class="nx">sysActor</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="nx">sysActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
 		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">,</span>
 		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">RewardActorAddr</span><span class="p">,</span>
@@ -5129,7 +5154,8 @@ it will be created as an account actor (only if the message has a MethodNum of z
 	<span class="c1">// TODO: determine parameters necessary for this message.
 </span><span class="c1"></span>	<span class="nx">params</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-	<span class="nx">sysActor</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="nx">sysActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
 		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">,</span>
 		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">minerActorAddr</span><span class="p">,</span>
@@ -5144,7 +5170,8 @@ it will be created as an account actor (only if the message has a MethodNum of z
 
 <span class="c1">// Builds a message for invoking the cron actor tick.
 </span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeCronTickMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
-	<span class="nx">sysActor</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="nx">sysActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
 		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">,</span>
 		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">CronActorAddr</span><span class="p">,</span>

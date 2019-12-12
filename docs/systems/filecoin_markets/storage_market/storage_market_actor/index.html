@@ -4706,10 +4706,17 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">_lockFundsForStorageDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span>
 
     <span class="nf">_safeGetOnChainDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span>
+    <span class="nf">_getOnChainDeal</span><span class="p">(</span><span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="p">(</span><span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
     <span class="nf">_safeGetBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">participant</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">StorageParticipantBalance</span>
     <span class="nf">_assertPublishedDealState</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span>
     <span class="nf">_assertActiveDealState</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span>
+    <span class="nf">_assertEpochEqual</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">epoch1</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">epoch2</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
     <span class="nf">_activateDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span>
+    <span class="nf">_getSectorPowerFromDeals</span><span class="p">(</span>
+        <span class="nx">sectorDuration</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">sectorSize</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+        <span class="nx">dealPs</span>          <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">]</span>
+    <span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
 
     <span class="nf">_getStorageFeeSinceLastPayment</span><span class="p">(</span>
         <span class="nx">rt</span>               <span class="nx">Runtime</span>
@@ -4722,6 +4729,8 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">rt</span>      <span class="nx">Runtime</span>
         <span class="nx">amount</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+
+    <span class="nf">_refundStartedDeals</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageMarketActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4920,7 +4929,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="p">}</span>
 
-<span class="c1">// Call by PublishStorageDeals and GetInitialUtilization (consider remove this)
+<span class="c1">// Call by PublishStorageDeals
 </span><span class="c1">// This is the check before a StorageDeal appears onchain
 </span><span class="c1">// It checks the following:
 </span><span class="c1">//   - verify deal did not expire when it is signed
@@ -5001,8 +5010,16 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">st</span><span class="p">.</span><span class="nf">_lockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">p</span><span class="p">.</span><span class="nf">ProviderBalanceRequirement</span><span class="p">())</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_safeGetOnChainDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_getOnchainDeal</span><span class="p">(</span><span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="p">(</span><span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">deal</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Deals</span><span class="p">()[</span><span class="nx">dealID</span><span class="p">]</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="kc">false</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">deal</span><span class="p">,</span> <span class="kc">true</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_safeGetOnChainDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span> <span class="p">{</span>
+    <span class="nx">deal</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getOnchainDeal</span><span class="p">(</span><span class="nx">dealID</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;sm._safeGetOnChainDeal: dealID not found in Deals.&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -5098,6 +5115,19 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">st</span><span class="p">.</span><span class="nf">_unlockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">clientCollateral</span><span class="o">+</span><span class="nx">lockedFee</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_slashDealCollateral</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_assertEpochEqual</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">epoch1</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">epoch2</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">epoch1</span> <span class="o">!=</span> <span class="nx">epoch2</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;sm._assertEpochEqual: different epochs&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_getSectorPowerFromDeals</span><span class="p">(</span><span class="nx">sectorDuration</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">sectorSize</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">dealPs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span> <span class="p">{</span>
+    <span class="nf">TODO</span><span class="p">()</span>
+
+    <span class="nx">ret</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">ret</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -5242,7 +5272,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">PublishStorageDeals</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">newStorageDeals</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="p">[]</span><span class="nx">PublishStorageDealResponse</span> <span class="p">{</span>
 
-    <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// verify StorageMinerActor
+    <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// verify StorageMinerActor (note client can put the signed message onchain too)
 </span><span class="c1"></span>
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
@@ -5302,12 +5332,13 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">ActivateDeals</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">ActivateDeals</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorExpiration</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">sectorSize</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span> <span class="p">{</span>
 
     <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// verify StorageMinerActor
 </span><span class="c1"></span>
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-    <span class="nx">ret</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">dealIDs</span><span class="p">))</span>
+    <span class="nx">lastDealExpiration</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="nx">dealPs</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">dealIDs</span><span class="p">))</span>
 
     <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">dealID</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">dealIDs</span> <span class="p">{</span>
         <span class="nx">publishedDeal</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetOnChainDeal</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealID</span><span class="p">)</span>
@@ -5316,13 +5347,25 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">dealP</span> <span class="o">:=</span> <span class="nx">publishedDeal</span><span class="p">.</span><span class="nf">Deal</span><span class="p">().</span><span class="nf">Proposal</span><span class="p">()</span>
         <span class="nx">st</span><span class="p">.</span><span class="nf">_assertDealNotYetExpired</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">)</span>
 
-        <span class="nx">onchainDeal</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_activateDeal</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">publishedDeal</span><span class="p">)</span>
-        <span class="nx">ret</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">ret</span><span class="p">,</span> <span class="nx">onchainDeal</span><span class="p">)</span>
+        <span class="nx">dealEnd</span> <span class="o">:=</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">EndEpoch</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nx">dealEnd</span> <span class="p">&gt;</span> <span class="nx">lastDealExpiration</span> <span class="p">{</span>
+            <span class="nx">lastDealExpiration</span> <span class="p">=</span> <span class="nx">dealEnd</span>
+        <span class="p">}</span>
+
+        <span class="nx">dealPs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">dealPs</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">)</span>
+        <span class="nx">st</span><span class="p">.</span><span class="nf">_activateDeal</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">publishedDeal</span><span class="p">)</span>
     <span class="p">}</span>
+
+    <span class="nx">st</span><span class="p">.</span><span class="nf">_assertEpochEqual</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">lastDealExpiration</span><span class="p">,</span> <span class="nx">sectorExpiration</span><span class="p">)</span>
+
+    <span class="nx">sectorDuration</span> <span class="o">:=</span> <span class="nx">sectorExpiration</span> <span class="o">-</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span>
+    <span class="nx">ret</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorPowerFromDeals</span><span class="p">(</span><span class="nx">sectorDuration</span><span class="p">,</span> <span class="nx">sectorSize</span><span class="p">,</span> <span class="nx">dealPs</span><span class="p">)</span>
 
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="nx">ret</span>
+    <span class="c1">// TODO potentially refund clients for started deals
+</span><span class="c1"></span>    <span class="k">return</span> <span class="nx">ret</span>
 
 <span class="p">}</span>
 
@@ -5354,11 +5397,15 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">ProcessDealPayment</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">,</span> <span class="nx">newPaymentEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// verify caller must be StorageMinerActor
+</span><span class="c1"></span>
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">dealID</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">dealIDs</span> <span class="p">{</span>
-        <span class="nx">deal</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetOnChainDeal</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealID</span><span class="p">)</span>
-        <span class="nx">st</span><span class="p">.</span><span class="nf">_assertActiveDealState</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealID</span><span class="p">)</span>
+        <span class="nx">deal</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getOnChainDeal</span><span class="p">(</span><span class="nx">dealID</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+            <span class="k">continue</span>
+        <span class="p">}</span>
 
         <span class="nx">fee</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getStorageFeeSinceLastPayment</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">deal</span><span class="p">,</span> <span class="nx">newPaymentEpoch</span><span class="p">)</span>
 
@@ -5377,6 +5424,8 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// remove deals from ActiveDeals
 </span><span class="c1">// return collaterals to both miner and client
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">ProcessDealExpiration</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// verify caller must be StorageMinerActor
+</span><span class="c1"></span>
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">dealID</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">dealIDs</span> <span class="p">{</span>

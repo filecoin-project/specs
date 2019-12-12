@@ -90,12 +90,11 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 	numMinerSectors := uint64(len(st.SectorTable().Impl().ActiveSectors_.SectorsOn()))
 	for _, candidate := range candidates {
 		sectorNum := candidate.SectorID().Number()
-		utilInfo, err := st._getUtilizationInfo(sectorNum)
-		if err != nil {
+		sectorPower, ok := st._getSectorPower(sectorNum)
+		if !ok {
 			// panic(err)
 			return
 		}
-		sectorPower := utilInfo.CurrUtilization()
 		if sms._consensus().IsWinningPartialTicket(currState, candidate.PartialTicket(), sectorPower, numMinerSectors) {
 			winningCandidates = append(winningCandidates, candidate)
 		}
@@ -152,7 +151,8 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 var node node_base.FilecoinNode
 
 func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateTree.StateTree, minerAddr addr.Address) StorageMinerActorState {
-	actorState := stateTree.GetActorState(minerAddr)
+	actorState, ok := stateTree.GetActor(minerAddr)
+	util.Assert(ok)
 	substateCID := actorState.State()
 
 	substate, err := node.LocalGraph().Get(ipld.CID(substateCID))
@@ -172,7 +172,8 @@ func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateT
 
 func (sms *StorageMiningSubsystem_I) _getStoragePowerActorState(stateTree stateTree.StateTree) spc.StoragePowerActorState {
 	powerAddr := addr.StoragePowerActorAddr
-	actorState := stateTree.GetActorState(powerAddr)
+	actorState, ok := stateTree.GetActor(powerAddr)
+	util.Assert(ok)
 	substateCID := actorState.State()
 
 	substate, err := node.LocalGraph().Get(ipld.CID(substateCID))
@@ -321,12 +322,11 @@ func (sms *StorageMiningSubsystem_I) VerifyElection(header block.BlockHeader, on
 
 	for _, info := range onChainInfo.Candidates() {
 		sectorNum := info.SectorID().Number()
-		utilInfo, err := st._getUtilizationInfo(sectorNum)
-		if err != nil {
+		sectorPower, ok := st._getSectorPower(sectorNum)
+		if !ok {
 			// panic(err)
 			return false
 		}
-		sectorPower := utilInfo.CurrUtilization()
 		if !sms._consensus().IsWinningPartialTicket(header.ParentState(), info.PartialTicket(), sectorPower, numMinerSectors) {
 			return false
 		}

@@ -4673,8 +4673,9 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nf">VerifySyntax</span><span class="p">()</span>   <span class="kt">bool</span>
     <span class="nf">String</span><span class="p">()</span>         <span class="nx">AddressString</span>
-    <span class="nf">IsKeyType</span><span class="p">()</span>      <span class="kt">bool</span>
-    <span class="nf">Equals</span><span class="p">(</span><span class="nx">Address</span><span class="p">)</span>  <span class="kt">bool</span>
+    <span class="nf">IsIDType</span><span class="p">()</span>       <span class="kt">bool</span>  <span class="c1">// Whether the address is an ID-address
+</span><span class="c1"></span>    <span class="nf">IsKeyType</span><span class="p">()</span>      <span class="kt">bool</span>  <span class="c1">// Whether the address is a public key address (SECP or BLS)
+</span><span class="c1"></span>    <span class="nf">Equals</span><span class="p">(</span><span class="nx">Address</span><span class="p">)</span>  <span class="kt">bool</span>
     <span class="nf">Ref</span><span class="p">()</span>            <span class="nx">Address_Ptr</span>
 <span class="p">}</span>
 
