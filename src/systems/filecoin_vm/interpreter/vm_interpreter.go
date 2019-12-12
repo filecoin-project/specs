@@ -310,7 +310,8 @@ func _makeBlockRewardMessage(state st.StateTree, minerAddr addr.Address, penalty
 	params[0] = addr.Serialize_Address(minerAddr)
 	params[1] = actor.Serialize_TokenAmount(penalty)
 
-	sysActor := state.GetActorState(addr.SystemActorAddr)
+	sysActor, ok := state.GetActor(addr.SystemActorAddr)
+	Assert(ok)
 	return &msg.UnsignedMessage_I{
 		From_:       addr.SystemActorAddr,
 		To_:         addr.RewardActorAddr,
@@ -328,7 +329,8 @@ func _makeElectionPoStMessage(state st.StateTree, minerActorAddr addr.Address) m
 	// TODO: determine parameters necessary for this message.
 	params := make([]util.Serialization, 0)
 
-	sysActor := state.GetActorState(addr.SystemActorAddr)
+	sysActor, ok := state.GetActor(addr.SystemActorAddr)
+	Assert(ok)
 	return &msg.UnsignedMessage_I{
 		From_:       addr.SystemActorAddr,
 		To_:         minerActorAddr,
@@ -343,7 +345,8 @@ func _makeElectionPoStMessage(state st.StateTree, minerActorAddr addr.Address) m
 
 // Builds a message for invoking the cron actor tick.
 func _makeCronTickMessage(state st.StateTree, minerActorAddr addr.Address) msg.UnsignedMessage {
-	sysActor := state.GetActorState(addr.SystemActorAddr)
+	sysActor, ok := state.GetActor(addr.SystemActorAddr)
+	Assert(ok)
 	return &msg.UnsignedMessage_I{
 		From_:       addr.SystemActorAddr,
 		To_:         addr.CronActorAddr,

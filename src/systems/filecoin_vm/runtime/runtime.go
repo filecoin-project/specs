@@ -439,7 +439,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 		rtOuter._toplevelSender,
 		rtOuter._toplevelBlockWinner,
 		rtOuter._toplevelSenderCallSeqNum,
-		rtOuter._internalCallSeqNum,
+		rtOuter._internalCallSeqNum+1,
 		rtOuter._globalStatePending,
 		input.To(),
 		input.Value(),
