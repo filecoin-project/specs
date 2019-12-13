@@ -114,21 +114,21 @@ viewof rig = jsonToSliders({
 md`#### Benchmarks`
 
 bench = ({
-  "column_leaf_hash_time": 1.7028e-5,
-  "kdf_time": 5.4e-7,
-  "merkle_tree_datahash_time": 1.28e-8,
-  "merkle_tree_hash_time": 1.7028e-5,
-  "snark_constraint_time": 3.012e-5,
-  "ticket_hash": 1.7028e-5,
+  "column_leaf_hash_time": 1.7028e-5/2,
+  "kdf_time": 5.4e-7/2,
+  "merkle_tree_datahash_time": 1.28e-8/2,
+  "merkle_tree_hash_time": 1.7028e-5/2,
+  "snark_constraint_time": 3.012e-5/2,
+  "ticket_hash": 1.7028e-5/2,
 })
 
 md`### SNARKs`
 
 poseidon = ({
   "mtree_hash_name": "poseidon",
-  "merkle_tree_hash_constraints": 1376/8,
-  "ticket_constraints": 1376/8,
-  "column_leaf_hash_constraints": 1376/8,
+  "merkle_tree_hash_constraints": 1376/8/2,
+  "ticket_constraints": 1376/8/2,
+  "column_leaf_hash_constraints": 1376/8/2,
 })
 
 pedersen = ({
@@ -137,11 +137,11 @@ pedersen = ({
 
 
 constraints = ({
-  "merkle_tree_hash_constraints": 1376,
-  "ticket_constraints": 1376,
-  "merkle_tree_datahash_constraints": 25000,
-  "kdf_constraints": 14066,
-  "column_leaf_hash_constraints": 1376,
+  "merkle_tree_hash_constraints": 1376/2,
+  "ticket_constraints": 1376/2,
+  "merkle_tree_datahash_constraints": 25000/2,
+  "kdf_constraints": 14066/2,
+  "column_leaf_hash_constraints": 1376/2,
   "snark_size": 192,
   "porep_snark_partition_constraints": 100000000,
   "post_snark_partition_constraints": 3000000,
