@@ -1,6 +1,7 @@
 package storage_mining
 
 import (
+	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
@@ -348,19 +349,6 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime) InvocOutput {
 	return rt.SuccessReturn()
 }
 
-// called by verifier to update miner state on successful surprise post
-// after it has been verified in the storage_mining_subsystem
-func (a *StorageMinerActorCode_I) ProcessVerifiedSurprisePoSt(rt Runtime) InvocOutput {
-	TODO() // TODO: validate caller
-
-	// Ensure pledge collateral satisfied
-	// otherwise, abort ProcessVerifiedSurprisePoSt
-	a._ensurePledgeCollateralSatisfied(rt)
-
-	return a._onSuccessfulPoSt(rt)
-
-}
-
 // Called by StoragePowerConsensus subsystem after verifying the Election proof
 // and verifying the PoSt proof in the block header.
 // Assume ElectionPoSt has already been successfully verified (both proof and partial ticket
@@ -379,6 +367,103 @@ func (a *StorageMinerActorCode_I) ProcessVerifiedElectionPoSt(rt Runtime) InvocO
 
 	// the following will update last challenge response time
 	return a._onSuccessfulPoSt(rt)
+}
+
+// called by verifier to update miner state on successful surprise post
+// after it has been verified in the storage_mining_subsystem
+func (a *StorageMinerActorCode_I) ProcessSurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
+	TODO() // TODO: validate caller
+
+	if !a._verifySurprisePoSt(rt, onChainInfo) {
+		rt.Abort(
+			exitcode.UserDefinedError(exitcode.PoStVerificationFailed),
+			"PoSt verification failed")
+	}
+
+	// Ensure pledge collateral satisfied
+	// otherwise, abort ProcessVerifiedSurprisePoSt
+	a._ensurePledgeCollateralSatisfied(rt)
+
+	return a._onSuccessfulPoSt(rt)
+
+}
+
+func (a *StorageMinerActorCode_I) GetWorkerKeyByMinerAddress(minerAddr addr.Address) filcrypto.VRFPublicKey {
+	panic("TODO")
+}
+
+func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) bool {
+	h, st := a.State(rt)
+	info := st.Info()
+
+	// 1. Check that the miner in question is currently being challenged
+	if !st._isChallenged() {
+		// TODO: determine proper error here and error-handling machinery
+		// rt.Abort("cannot SubmitSurprisePoSt when not challenged")
+		rt.AbortStateMsg("Invalid Surprise PoSt. Miner not challenged.")
+	}
+
+	// 2. Check that the challenge has not expired
+	// Check that miner can still submit (i.e. that the challenge window has not passed)
+	// This will prevent miner from submitting a Surprise PoSt past the challenge period
+	if st._challengeHasExpired(rt.CurrEpoch()) {
+		rt.AbortStateMsg("Invalid Surprise PoSt. Challenge has expired.")
+	}
+
+	// 3. Verify the partialTicket values
+	if !a._verifySurprisePoStMeetsTargetReq(rt) {
+		rt.AbortStateMsg("Invalid Surprise PoSt. Tickets do not meet target.")
+	}
+
+	// verify the partialTickets themselves
+	// 4. Verify appropriate randomness
+
+	// pull from consts
+	SPC_LOOKBACK_POST := uint64(0)
+	randomnessEpoch := st.ChallengeStatus().LastChallengeEpoch()
+	randomness := rt.Randomness(randomnessEpoch, SPC_LOOKBACK_POST)
+	panic(randomness)                       // ignore circular dependency
+	var postRandomnessInput util.Randomness // sms.PreparePoStChallengeSeed(randomness, actorAddr)
+
+	postRand := &filcrypto.VRFResult_I{
+		Output_: onChainInfo.Randomness(),
+	}
+
+	// TODO: get worker key from minerAddr
+	var workerKey filcrypto.VRFPublicKey
+
+	if !postRand.Verify(postRandomnessInput, workerKey) {
+		rt.AbortStateMsg("Invalid Surprise PoSt. Invalid randomness.")
+	}
+
+	UpdateRelease(rt, h, st)
+
+	// 5. Get public inputs
+	sectorSize := info.SectorSize()
+
+	postCfg := sector.PoStCfg_I{
+		Type_:        sector.PoStType_SurprisePoSt,
+		SectorSize_:  sectorSize,
+		WindowCount_: info.WindowCount(),
+		Partitions_:  info.SurprisePoStPartitions(),
+	}
+
+	pvInfo := sector.PoStVerifyInfo_I{
+		OnChain_:    onChainInfo,
+		PoStCfg_:    &postCfg,
+		Randomness_: onChainInfo.Randomness(),
+	}
+
+	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{SurprisePoStCfg_: &postCfg})
+
+	// 6. Verify the PoSt Proof
+	return sdr.VerifySurprisePoSt(&pvInfo)
+}
+
+// todo: define target
+func (a *StorageMinerActorCode_I) _verifySurprisePoStMeetsTargetReq(rt Runtime) bool {
+	util.TODO()
+	return false
 }
 
 ////////////////////////////////////////////////////////////////////////////////

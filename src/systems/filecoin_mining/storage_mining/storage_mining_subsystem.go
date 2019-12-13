@@ -68,7 +68,7 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 	// Randomness for ElectionPoSt
 	randomnessK := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), sms._blockchain().LatestEpoch())
 
-	input := sms._preparePoStChallengeSeed(randomnessK, sms._keyStore().MinerAddress())
+	input := sms.PreparePoStChallengeSeed(randomnessK, sms._keyStore().MinerAddress())
 	postRandomness := sms._keyStore().WorkerKey().Impl().Generate(input).Output()
 
 	// TODO: add how sectors are actually stored in the SMS proving set
@@ -114,7 +114,7 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 	sms._blockProducer().GenerateBlock(postProof, winningCandidates, newTicket, chainHead, sms._keyStore().MinerAddress())
 }
 
-func (sms *StorageMiningSubsystem_I) _preparePoStChallengeSeed(randomness util.Randomness, minerAddr addr.Address) util.Randomness {
+func (sms *StorageMiningSubsystem_I) PreparePoStChallengeSeed(randomness util.Randomness, minerAddr addr.Address) util.Randomness {
 
 	randInput := Serialize_PoStChallengeSeedInput(&PoStChallengeSeedInput_I{
 		ticket_:    randomness,
@@ -192,10 +192,6 @@ func (sms *StorageMiningSubsystem_I) _getStoragePowerActorState(stateTree stateT
 	return st
 }
 
-func (sms *StorageMiningSubsystem_I) GetWorkerKeyByMinerAddress(minerAddr addr.Address) filcrypto.VRFPublicKey {
-	panic("TODO")
-}
-
 func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
 
 	sma := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
@@ -229,13 +225,15 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 	// 3. Verify appropriate randomness
 	// TODO: fix away from BestChain()... every block should track its own chain up to its own production.
 	randomness := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), header.Epoch())
-	postRandomnessInput := sector.PoStRandomness(sms._preparePoStChallengeSeed(randomness, header.Miner()))
+	postRandomnessInput := sector.PoStRandomness(sms.PreparePoStChallengeSeed(randomness, header.Miner()))
 
 	postRand := &filcrypto.VRFResult_I{
 		Output_: onChainInfo.Randomness(),
 	}
 
-	if !postRand.Verify(postRandomnessInput, sms.GetWorkerKeyByMinerAddress(header.Miner())) {
+	// TODO: get worker key from minerAddr
+	var workerKey filcrypto.VRFPublicKey
+	if !postRand.Verify(postRandomnessInput, workerKey) {
 		return false
 	}
 
@@ -264,68 +262,6 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 	return isPoStVerified
 }
 
-func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo, posterAddr addr.Address) bool {
-
-	st := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
-
-	// 1. Check that the miner in question is currently being challenged
-	if !st._isChallenged() {
-		// TODO: determine proper error here and error-handling machinery
-		// rt.Abort("cannot SubmitSurprisePoSt when not challenged")
-		return false
-	}
-
-	// 2. Check that the challenge has not expired
-	// Check that miner can still submit (i.e. that the challenge window has not passed)
-	// This will prevent miner from submitting a Surprise PoSt past the challenge period
-	if st._challengeHasExpired(header.Epoch()) {
-		return false
-	}
-
-	// 3. Verify the partialTicket values
-	if !sms._verifySurprisePoStMeetsTargetReq(header, onChainInfo) {
-		return false
-	}
-
-	// verify the partialTickets themselves
-	// 4. Verify appropriate randomness
-	randomnessEpoch := st.ChallengeStatus().LastChallengeEpoch()
-	// TODO: fix away from BestChain()... every block should track its own chain up to its own production.
-	randomness := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), randomnessEpoch)
-	postRandomnessInput := sms._preparePoStChallengeSeed(randomness, posterAddr)
-
-	postRand := &filcrypto.VRFResult_I{
-		Output_: onChainInfo.Randomness(),
-	}
-
-	if !postRand.Verify(postRandomnessInput, sms.GetWorkerKeyByMinerAddress(posterAddr)) {
-		return false
-	}
-
-	// 5. Get public inputs
-	info := st.Info()
-	sectorSize := info.SectorSize()
-
-	postCfg := sector.PoStCfg_I{
-		Type_:        sector.PoStType_SurprisePoSt,
-		SectorSize_:  sectorSize,
-		WindowCount_: info.WindowCount(),
-		Partitions_:  info.SurprisePoStPartitions(),
-	}
-
-	pvInfo := sector.PoStVerifyInfo_I{
-		OnChain_:    onChainInfo,
-		PoStCfg_:    &postCfg,
-		Randomness_: onChainInfo.Randomness(),
-	}
-
-	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{SurprisePoStCfg_: &postCfg})
-
-	// 6. Verify the PoSt Proof
-	isPoStVerified := sdr.VerifySurprisePoSt(&pvInfo)
-	return isPoStVerified
-}
-
 func (sms *StorageMiningSubsystem_I) _verifyElection(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
 	st := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
 	numMinerSectors := uint64(len(st.SectorTable().Impl().ActiveSectors_.SectorsOn()))
@@ -342,12 +278,6 @@ func (sms *StorageMiningSubsystem_I) _verifyElection(header block.BlockHeader, o
 		}
 	}
 	return true
-}
-
-// todo: define target
-func (sms *StorageMiningSubsystem_I) _verifySurprisePoStMeetsTargetReq(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
-	util.TODO()
-	return false
 }
 
 // func (sms *StorageMiningSubsystem_I) submitPoStMessage(postSubmission poster.PoStSubmission) error {

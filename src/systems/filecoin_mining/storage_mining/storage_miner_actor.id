@@ -118,10 +118,12 @@ type StorageMinerActorCode struct {
     PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo)  // TODO: check with Magik on sizes
     ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo)
 
-    ProcessVerifiedSurprisePoSt(rt Runtime)
+    ProcessSurprisePoSt(rt Runtime)
     ProcessVerifiedElectionPoSt(rt Runtime)
 
     _checkSurprisePoStSubmissionHappened(rt Runtime)
+    _verifySurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) bool
+    _verifySurprisePoStMeetsTargetReq(rt Runtime) bool
 
     DeclareFaults(rt Runtime, failingSet sector.CompactSectorSet)
     RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet)
