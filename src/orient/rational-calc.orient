@@ -445,6 +445,7 @@ ProofOfReplication:
   Cost:
     describe(porep_cost, "Cost of a seal proof", dollar)
     describe(porep_snark_cost, "Cost of a snark proof", dollar)
+    describe(porep_commit_cost, "Cost of generating merkle trees", dollar)
     describe(porep_decoding_cost, "Cost of decoding a sector", dollar)
     describe(porep_encoding_cost, "Cost of decoding a sector", dollar)
 
@@ -542,7 +543,7 @@ ProofOfReplication (StackedSDRParameters):
   sdr_layers_b = (log2(1 / (3 * (sdr_eps - 4 * sdr_delta)))) + 0.24 / (0.12 - sdr_delta) + 1
   sdr_layers_c = (log2(2 / (1 + 3 * (sdr_eps - 5 * sdr_delta)))) + (0.57 - sdr_eps + 3 * sdr_delta) / (0.12 - sdr_delta) + 1
 
-  //porep_challenges = -porep_lambda / (log2(1 - sdr_delta))
+  porep_challenges = -porep_lambda / (log2(1 - sdr_delta))
   post_challenges = -post_lambda / (log2(1 - sdr_eps/2))
 
   drg_parents = 6
