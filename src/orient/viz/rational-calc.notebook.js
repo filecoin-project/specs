@@ -45,6 +45,7 @@ viewof stackedSDRParams = jsonToSliders(
     "sdr_delta": 0.01
   })
 
+
 md`#### Proofs`
 
 wrapper = ({
@@ -123,6 +124,18 @@ bench = ({
 
 md`### SNARKs`
 
+poseidon = ({
+  "mtree_hash_name": "poseidon",
+  "merkle_tree_hash_constraints": 1376/8,
+  "ticket_constraints": 1376/8,
+  "column_leaf_hash_constraints": 1376/8,
+})
+
+pedersen = ({
+  "mtree_hash_name": "pedersen"
+})
+
+
 constraints = ({
   "merkle_tree_hash_constraints": 1376,
   "ticket_constraints": 1376,
@@ -182,7 +195,7 @@ viewof proofs_per_block_kib_ruler = chooser(solved_many, 'proofs_per_block_kib',
 bar_chart(solved_many, 'proofs_per_block_kib', [
   'seals_size_per_block_kib',
   'posts_size_per_block_kib',
-], ['proof_name', 'graph_name', 'window_size_mib'], {
+], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
   filter: d => d < Math.pow(10, proofs_per_block_kib_ruler),
   yrule: Math.pow(10, proofs_per_block_kib_ruler)
 })
@@ -194,7 +207,7 @@ viewof decoding_time_parallel_ruler = chooser(solved_many, 'decoding_time_parall
 bar_chart(solved_many, 'decoding_time_parallel', [
   'encoding_window_time_parallel',
   'window_read_time_parallel',
-], ['proof_name', 'graph_name', 'window_size_mib'], {
+], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
   filter: d => d < Math.pow(10, decoding_time_parallel_ruler),
   yrule: Math.pow(10, decoding_time_parallel_ruler)
 })
@@ -204,7 +217,7 @@ viewof decoding_time_ruler = chooser(solved_many, 'decoding_time', 16)
 bar_chart(solved_many, 'decoding_time', [
   'encoding_window_time',
   'window_read_time',
-], ['proof_name', 'graph_name', 'window_size_mib'], {
+], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
   filter: d => d < Math.pow(10, decoding_time_ruler),
   yrule: Math.pow(10, decoding_time_ruler)
 })
@@ -227,7 +240,7 @@ bar_chart(solved_many, 'porep_time_parallel', [
   'porep_snark_time_parallel',
   'porep_commit_time_parallel',
   'encoding_time_parallel'
-], ['proof_name', 'graph_name', 'window_size_mib'], {
+], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
   filter: d => d < Math.pow(10, porep_time_parallel_ruler),
   yrule: Math.pow(10, porep_time_parallel_ruler)
 })
@@ -240,7 +253,7 @@ bar_chart(solved_many, 'porep_cost', [
   'porep_commit_cost',
   'porep_encoding_cost',
   'porep_snark_cost'
-], ['proof_name', 'graph_name', 'window_size_mib'], {
+], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
   filter: d => d < Math.pow(10, porep_cost_ruler),
   yrule: Math.pow(10, porep_cost_ruler)
 })
@@ -268,7 +281,7 @@ bar_chart(solved_many, 'epost_time_parallel', [
   'post_ticket_gen',
   'epost_inclusions_time_parallel',
   'post_snark_time_parallel'
-], ['proof_name', 'graph_name', 'window_size_mib'], {
+], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
   filter: d => d < Math.pow(10, epost_time_parallel_ruler),
   yrule: Math.pow(10, epost_time_parallel_ruler)
 })
@@ -421,7 +434,8 @@ combos = {
   let start = [constants]
   let proofs = extend_query(start, [wrapperVariant, wrapper, stackedReplicas])
   let graphs = extend_query(proofs, [stackedChungParams, stackedSDRParams])
-  let query = extend_query(graphs, window_size_mib_choices.map(d => ({window_size_mib: +d})))
+  let windows = extend_query(graphs, window_size_mib_choices.map(d => ({window_size_mib: +d})))
+  let query = extend_query(windows, [poseidon, pedersen])
 
   return query
 }
