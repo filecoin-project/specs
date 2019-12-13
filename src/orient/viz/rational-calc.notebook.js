@@ -274,8 +274,8 @@ table_constraints(solved_many, [
 md`### Merkle tree caching`
 
 
-graph_constraints(mtree_solved, 'post_mtree_layers_cached', 'epost_time_parallel', ['proof_name'], { height: 100, yrule: 15 })
-graph_constraints(mtree_solved, 'post_mtree_layers_cached', 'post_inclusion_time', ['proof_name'], { height: 100 })
+// graph_constraints(mtree_solved, 'post_mtree_layers_cached', 'epost_time_parallel', ['proof_name'], { height: 100, yrule: 15 })
+// graph_constraints(mtree_solved, 'post_mtree_layers_cached', 'post_inclusion_time', ['proof_name'], { height: 100 })
 
 md`### Impact of \`chung_delta\` in StackedChung`
 queries = [...Array(8)].map((_, i) => {
@@ -294,23 +294,20 @@ queries = [...Array(8)].map((_, i) => {
   ]
 }).flat()
 
-delta_solved = (await solve_many(queries)).map(d => d[0])
+// delta_solved = (await solve_many(queries)).map(d => d[0])
 
-// graph_constraints(delta_solved, 'chung_delta', 'stacked_layers', [], { height: 100 })
-// graph_constraints(delta_solved, 'chung_delta', 'porep_challenges', [], { height: 100 })
-// graph_constraints(delta_solved, 'chung_delta', 'post_challenges', [], { height: 100 })
-graph_constraints(delta_solved, 'chung_delta', 'decoding_time_parallel', ['proof_name'], {yrule: 0.5, height: 100})
-graph_constraints(delta_solved, 'chung_delta', 'epost_time_parallel', ['proof_name'], {yrule: 10, height: 100})
-graph_constraints(delta_solved, 'chung_delta', 'porep_proof_size_kib', ['proof_name'], { height: 100 })
-graph_constraints(delta_solved, 'chung_delta', 'block_size_kib', ['proof_name'], { height: 100 })
-graph_constraints(delta_solved, 'chung_delta', 'onboard_tib_time_days', ['proof_name'], { height: 100 })
-graph_constraints(delta_solved, 'chung_delta', 'porep_time_parallel', ['proof_name'], { height: 100 })
-plot3d(delta_solved, 'chung_delta', 'epost_time_parallel', 'onboard_tib_time_days')
-md`---`
-
+// // graph_constraints(delta_solved, 'chung_delta', 'stacked_layers', [], { height: 100 })
+// // graph_constraints(delta_solved, 'chung_delta', 'porep_challenges', [], { height: 100 })
+// // graph_constraints(delta_solved, 'chung_delta', 'post_challenges', [], { height: 100 })
+// graph_constraints(delta_solved, 'chung_delta', 'decoding_time_parallel', ['proof_name'], {yrule: 0.5, height: 100})
+// graph_constraints(delta_solved, 'chung_delta', 'epost_time_parallel', ['proof_name'], {yrule: 10, height: 100})
+// graph_constraints(delta_solved, 'chung_delta', 'porep_proof_size_kib', ['proof_name'], { height: 100 })
+// graph_constraints(delta_solved, 'chung_delta', 'block_size_kib', ['proof_name'], { height: 100 })
+// graph_constraints(delta_solved, 'chung_delta', 'onboard_tib_time_days', ['proof_name'], { height: 100 })
+// graph_constraints(delta_solved, 'chung_delta', 'porep_time_parallel', ['proof_name'], { height: 100 })
+// plot3d(delta_solved, 'chung_delta', 'epost_time_parallel', 'onboard_tib_time_days')
 
 md`---`
-
 
 md`#### Other important vars`
 
@@ -413,7 +410,7 @@ combos = {
 
 createJsonDownloadButton(combos)
 
-solved_many_pre = (await solve_many(combos)).map(d => d[0])
+solved_many_pre = (await solve_manys(combos))
   .map(d => {
     d.construction = `${d.graph_name}_${d.proof_name}`
     return d
@@ -431,17 +428,17 @@ solved_many = solved_many_pre
 
 createJsonDownloadButton(solved_many)
 
-mtree_query = {
-  let query = [constants]
-  const proofs = [wrapper, wrapperVariant, stackedReplicas]
-  const post_mtree_layers_cached = [...Array(10)].map((_, i) => ({post_mtree_layers_cached: i+20}))
+// mtree_query = {
+//   let query = [constants]
+//   const proofs = [wrapper, wrapperVariant, stackedReplicas]
+//   const post_mtree_layers_cached = [...Array(10)].map((_, i) => ({post_mtree_layers_cached: i+20}))
 
-  query = extend_query(query, proofs, post_mtree_layers_cached, [stackedChungParams])
+//   query = extend_query(query, proofs, post_mtree_layers_cached, [stackedChungParams])
 
-  return query
-}
+//   return query
+// }
 
-mtree_solved = (await solve_many(mtree_query)).map(d => d[0])
+// mtree_solved = (await solve_many(mtree_query)).map(d => d[0])
 
 
 md`### Orient`
@@ -467,19 +464,22 @@ function solve_multiple(json) {
     body: JSON.stringify(json),
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     method: 'POST'
-  }).then(res => {
-    return res.json()
-  }).then(res => {
-    return res.map(d => {
-      const results = {}
-      Object.keys(res[0])
-        .filter(d => !d.includes('%'))
-        .map(d => {
-          results[d] = res[0][d]
-        })
-      return results
-    })
   })
+    .then(res => {
+      return res.json()
+    })
+    .then(res => {
+      return res.map(d => {
+        const results = {}
+        Object.keys(res[0])
+          .filter(d => !d.includes('%'))
+          .map(d => {
+            results[d] = res[0][d]
+          })
+        return results
+      })
+    })
+
 }
 
 function solve_manys(json) {
@@ -490,15 +490,20 @@ function solve_manys(json) {
   }).then(res => {
     return res.json()
   }).then(res => {
-    return res.flat().map(d => {
-      const results = {}
-      Object.keys(res[0])
-        .filter(d => !d.includes('%'))
-        .map(d => {
-          results[d] = res[0][d]
-        })
-      return results
-    })
+    return res
+      .map(d => d.flat())
+      .flat()
+      .map(d => {
+        console.log(d)
+        const results = {}
+        Object.keys(d)
+          .filter(key => !key.includes('%'))
+          .map(key => {
+            results[key] = d[key]
+          })
+
+        return results
+      })
   })
 }
 
@@ -515,7 +520,7 @@ function ev (func, data) {
 }
 
 function solve_many(json) {
-  return Promise.all(json.map(j => solve(j)))
+  return Promise.all(json.map(j => solve(j))).then(json => json.map(d => d[0]))
 }
 
 function solve(json) {
