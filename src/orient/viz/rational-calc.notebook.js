@@ -83,6 +83,7 @@ viewof filecoin = jsonToSliders({
   "spacegap": {value: 0.2, min: 0.01, max: 0.2, step: 0.01},
   "proofs_block_fraction": {value: 0.3, min: 0.01, max: 1, step: 0.01},
   "epost_challenged_sectors_fraction": {value: 0.04, min: 0.01, max: 1, step: 0.01},
+  "attack_cost_ratio": {value: 0.5, min: 0.01, max: 1, step: 0.01}
 }, {
   node_size: 32
 })
@@ -98,7 +99,7 @@ viewof rig = jsonToSliders({
   "rig_gpu_lifetime_years": {value: 2, min: 1, max: 10, step: 1},
   "rig_cores": {value: 16, min: 1, max: 512, step: 1},
   "rig_snark_parallelization": {value: 2, min: 1, max: 64, step: 1},
-  "rig_malicious_cost_per_year": {value: 2.5, min: 0, max: 10, step: 0.1},
+  "rig_malicious_cost_per_year": {value: 2000, min: 0, max: 10000, step: 0.1},
   "rig_ram_gib": {value: 32, min: 1, max: 128, step: 1},
   "rig_storage_latency": {value: 0.003, min: 0.0003, max: 0.01, step: 0.0001},
   "rig_storage_min_tib": {value: 100, min: 0.5, max: 1024, step: 0.5},
@@ -106,7 +107,7 @@ viewof rig = jsonToSliders({
   "rig_storage_read_mbs": {value: 80, min: 80, max: 1000, step: 1},
   "cost_gb_per_month": {value: 0.0025, min: 0.0001, max: 0.1, step: 0.0001},
   "extra_storage_time": {value: 0, min: 0, max: 10, step: 1 },
-  "hash_gb_per_second": {value: 5, min: 0, max: 10000, step: 1},
+  "hash_gb_per_second": {value: 6400, min: 0, max: 10000, step: 1},
 })
 
 md`#### Benchmarks`
