@@ -1,19 +1,5 @@
 // If you wish to make an apple pie from scratch, you must first uber-calc the universe.
 
-// TODO:
-// - make sure chung works so that we can remove hard-coded layers, parents and challenges
-// - update supranational calc with new one
-// - webserver for ubercalc
-// - UI
-// - Test all flags combos
-// - Review calculator again
-
-UtilityFunction:
-  x1 = decoding_time_parallel
-  x2 = proofs_per_block_kib
-  x3 = epost_time_parallel
-  utility = w1 * x1 + w2 * x2 + w3 * x3
-
 Rig:
   describe(rig_sectors_min, "Minimum sectors require to mine")
 
@@ -31,6 +17,13 @@ Rig:
   describe(rig_storage_read_mbs, "Sequential read speed (MB/s)")
   describe(rig_storage_read_mibs, "Sequential read speed (MiB/s)")
 
+  describe(rig_gpu_cost, "Cost of a GPU", dollar)
+  describe(rig_cpu_cost, "Cost of a CPU", dollar)
+  describe(rig_gpu_cost_secs, "Cost of a GPU per second", dollar)
+  describe(rig_cpu_core_cost_secs, "Cost of a CPU core per second", dollar)
+  describe(rig_cpu_lifetime_years, "Lifetime of a CPU", years)
+  describe(rig_gpu_lifetime_years, "Lifetime of a GPU", years)
+
   rig_storage_read_mibs = rig_storage_read_mbs * mb_to_mib
   rig_storage_min = rig_storage_min_tib * b_in_tib
   rig_sectors_min = rig_storage_min / sector_size
@@ -38,6 +31,10 @@ Rig:
 
   rig_storage_unit_max = rig_storage_min / rig_storage_parallelization_min
   rig_storage_unit_max_tib = rig_storage_unit_max / b_in_tib 
+
+  rig_gpu_cost_secs = rig_gpu_cost / (rig_gpu_lifetime_years * secs_in_year)
+  rig_cpu_core_cost = rig_cpu_cost / rig_cores
+  rig_cpu_core_cost_secs = rig_cpu_core_cost / (rig_cpu_lifetime_years * secs_in_year)
 
 Crypto:
   describe(snark_size, "Size of a SNARK proof", bytes)
@@ -315,7 +312,6 @@ ProofOfReplication:
     porep_proof_size = porep_snark_size + seal_onchain_commitments_size
     porep_proof_size_kib = porep_proof_size / b_in_kib
 
-
   // TODO: rename commR to commRLast
   Commitment:
     describe(window_comm_tree_time, "Time to generate a merkle tree of stacked windows", secs)
@@ -445,6 +441,19 @@ ProofOfReplication:
       decoding_time = encoding_time + window_read_time
       // Note: this is an upperbound, it can be lower in theory min(time, disk access)
       decoding_time_parallel = encoding_time_parallel + window_read_time_parallel
+
+  Cost:
+    describe(porep_cost, "Cost of a seal proof", dollar)
+    describe(porep_snark_cost, "Cost of a snark proof", dollar)
+    describe(porep_decoding_cost, "Cost of decoding a sector", dollar)
+    describe(porep_encoding_cost, "Cost of decoding a sector", dollar)
+
+    porep_commit_cost = porep_commit_time * rig_cpu_core_cost_secs
+    porep_encoding_cost = encoding_time * rig_cpu_core_cost_secs
+    porep_snark_cost = porep_snark_time * rig_gpu_cost_secs
+
+    porep_cost = porep_commit_cost + porep_encoding_cost + porep_snark_cost
+    porep_decoding_cost = decoding_time * rig_cpu_core_cost_secs
 
   SNARK:
     describe(porep_snark_constraints, "Constraints for a PoRep")
@@ -680,6 +689,15 @@ Filecoin:
 
       epost_time = epost_data_access + post_ticket_gen + epost_inclusions_time + post_snark_time
       epost_time_parallel = epost_data_access_parallel + post_ticket_gen + epost_inclusions_time_parallel + post_snark_time_parallel
+
+      describe(epost_cost, "Cost for generating a EPoSt", dollar)
+      describe(epost_snark_cost, "Cost for generating a EPoSt SNARK", dollar)
+      describe(epost_inclusions_cost, "Cost for generating a EPoSt mtrees", dollar)
+
+      epost_inclusions_cost = epost_inclusions_time * rig_cpu_core_cost_secs
+      epost_snark_cost = post_snark_time * rig_gpu_cost_secs
+      // TODO: missing disk access
+      epost_cost = epost_inclusions_cost + epost_snark_cost
 
 Rationality:
   describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to store the entire sector, than re-encode those")

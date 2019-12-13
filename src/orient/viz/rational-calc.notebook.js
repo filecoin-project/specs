@@ -92,6 +92,10 @@ md`### Miner`
 md`#### Hardware Config`
 
 viewof rig = jsonToSliders({
+  "rig_cpu_cost": {value: 700, min: 0, max: 10000, step: 1},
+  "rig_gpu_cost": {value: 1200, min: 0, max: 10000, step: 1},
+  "rig_cpu_lifetime_years": {value: 2, min: 1, max: 10, step: 1},
+  "rig_gpu_lifetime_years": {value: 2, min: 1, max: 10, step: 1},
   "rig_cores": {value: 16, min: 1, max: 512, step: 1},
   "rig_snark_parallelization": {value: 2, min: 1, max: 64, step: 1},
   "rig_malicious_cost_per_year": {value: 2.5, min: 0, max: 10, step: 0.1},
@@ -129,7 +133,6 @@ constraints = ({
   "post_snark_partition_constraints": 3000000,
 })
 
-
 md`## Filters`
 
 // Window size MiB
@@ -158,7 +161,7 @@ viewof utility_raw = codeView({
 viewof utility_cols = checkbox({
   title: "Vars to show in utility table",
   options: Object.keys(vars).map(d => ({value: d, label: d})),
-  value: qs('utility_cols') || ['decoding_time_parallel', 'proofs_per_block_kib', 'epost_time_parallel']
+  value: qs('utility_cols') || ['decoding_time_parallel', 'proofs_per_block_kib', 'epost_time_parallel', 'porep_cost', 'porep_decoding_cost', 'epost_cost']
 })
 
 table_constraints(
@@ -174,7 +177,7 @@ md`### On-chain footprint
 This graphshows the average proofs per block (assuming a network size of ${filecoin.filecoin_storage_capacity_eib}EiB)
 `
 
-viewof proofs_per_block_kib_ruler = chooser(solved_many, 'proofs_per_block_kib', 2000)
+viewof proofs_per_block_kib_ruler = chooser(solved_many, 'proofs_per_block_kib', 1000)
 bar_chart(solved_many, 'proofs_per_block_kib', [
   'seals_size_per_block_kib',
   'posts_size_per_block_kib',
@@ -215,7 +218,7 @@ bar_chart(solved_many, 'decoding_time', [
 //   'window_read_time_parallel'
 // ], [])
 
-md`### PoRep`
+md`### PoRep time`
 
 viewof porep_time_parallel_ruler = chooser(solved_many, 'porep_time_parallel', 12 * 60 * 60)
 
@@ -227,6 +230,20 @@ bar_chart(solved_many, 'porep_time_parallel', [
   filter: d => d < Math.pow(10, porep_time_parallel_ruler),
   yrule: Math.pow(10, porep_time_parallel_ruler)
 })
+
+md`### PoRep cost`
+
+viewof porep_cost_ruler = chooser(solved_many, 'porep_cost', 2)
+
+bar_chart(solved_many, 'porep_cost', [
+  'porep_commit_cost',
+  'porep_encoding_cost',
+  'porep_snark_cost'
+], ['proof_name', 'graph_name', 'window_size_mib'], {
+  filter: d => d < Math.pow(10, porep_cost_ruler),
+  yrule: Math.pow(10, porep_cost_ruler)
+})
+
 
 // bar_chart(solved_many, 'porep_commit_time', [
 //   'commr_time',
@@ -322,7 +339,7 @@ table_constraints(solved_many, [
   'epost_time_parallel',
 ], [])
 
-md`#### Graphs`
+// md`#### Graphs`
 // table_constraints(solved_many, [
 //   'proof_name',
 //   'graph_name',
@@ -339,7 +356,7 @@ md`#### Graphs`
 //   'sector_size_gib',
 // ], [])
 
-md`#### PoRep`
+// md`#### PoRep`
 // table_constraints(solved_many, [
 //   'proof_name',
 //   'graph_name',
@@ -355,7 +372,7 @@ md`#### PoRep`
 //   'porep_time'
 // ], [])
 
-md`#### PoSt`
+// md`#### PoSt`
 // table_constraints(solved_many, [
 //   'proof_name',
 //   'graph_name',
@@ -372,7 +389,7 @@ md`#### PoSt`
 //   'post_data_access_parallel'
 // ], [])
 
-md`#### EPoSt`
+// md`#### EPoSt`
 // table_constraints(solved_many, [
 //   'proof_name',
 //   'graph_name',
@@ -385,7 +402,7 @@ md`#### EPoSt`
 //   'epost_data_access_parallel'
 // ], [])
 
-md`## Debug`
+// md`## Debug`
 // report_from_result(solved_many[0], combos[0])
 // report_from_result(solved_many[1], combos[1])
 // report_from_result(solved_many[2], combos[2])
@@ -692,7 +709,7 @@ chooser = (data, field, base) => {
 
 md`### Utils`
 
-_f = (d) => typeof d == 'number' || !Number.isNaN(+d) ? d3.format('0.3~f')(d) : d
+_f = (d) => typeof d == 'number' || !Number.isNaN(+d) ? d3.format('0.6~f')(d) : d
 
 jsonToSliders = (obj, assigned) => {
   const inputs = Object.keys(obj).map(d => `<div><input type=range name=${d} min=${obj[d].min} max=${obj[d].max} step=${obj[d].step} value=${obj[d].value}> <i>${d}</i></div>`)
