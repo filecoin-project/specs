@@ -114,12 +114,12 @@ viewof rig = jsonToSliders({
 md`#### Benchmarks`
 
 bench = ({
-  "column_leaf_hash_time": 2.56e-7,
-  "kdf_time": 1.28e-8,
+  "column_leaf_hash_time": 1.7028e-5,
+  "kdf_time": 5.4e-7,
   "merkle_tree_datahash_time": 1.28e-8,
-  "merkle_tree_hash_time": 2.56e-7,
-  "snark_constraint_time": 0.000004642,
-  "ticket_hash": 2.56e-7,
+  "merkle_tree_hash_time": 1.7028e-5,
+  "snark_constraint_time": 3.012e-5,
+  "ticket_hash": 1.7028e-5,
 })
 
 md`### SNARKs`
@@ -139,8 +139,8 @@ pedersen = ({
 constraints = ({
   "merkle_tree_hash_constraints": 1376,
   "ticket_constraints": 1376,
-  "merkle_tree_datahash_constraints": 56000,
-  "kdf_constraints": 25000,
+  "merkle_tree_datahash_constraints": 25000,
+  "kdf_constraints": 14066,
   "column_leaf_hash_constraints": 1376,
   "snark_size": 192,
   "porep_snark_partition_constraints": 100000000,
@@ -180,7 +180,7 @@ viewof utility_cols = checkbox({
 
 table_constraints(
   solved_many,
-  ['proof_name', 'graph_name', 'window_size_mib', 'utility'].concat(utility_cols),
+  ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name', 'utility'].concat(utility_cols),
   [],
   'utility'
 )
@@ -290,6 +290,7 @@ table_constraints(solved_many, [
   'proof_name',
   'graph_name',
   'window_size_mib',
+  'mtree_hash_name',
   'epost_time_parallel',
   'epost_data_access_parallel',
   'epost_mtree_read_parallel',
@@ -346,6 +347,7 @@ table_constraints(solved_many, [
   'proof_name',
   'graph_name',
   'window_size_mib',
+  'mtree_hash_name',
   'decoding_time_parallel',
   'porep_time_parallel',
   'porep_proof_size_kib',
