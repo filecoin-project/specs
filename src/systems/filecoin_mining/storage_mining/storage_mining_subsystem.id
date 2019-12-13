@@ -86,7 +86,15 @@ type StorageMiningSubsystem struct {
         header       block.BlockHeader
         onChainInfo  sector.OnChainPoStVerifyInfo
     ) bool
-    IsValidElection(onChainInfo sector.OnChainPoStVerifyInfo) bool
+
+    _verifyElection(
+        header       block.BlockHeader
+        onChainInfo  sector.OnChainPoStVerifyInfo
+    ) bool
+    _verifySurprisePoStMeetsTargetReq(
+        header       block.BlockHeader
+        onChainInfo  sector.OnChainPoStVerifyInfo
+    ) bool
 }
 
 type PoStChallengeSeedInput struct {

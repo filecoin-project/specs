@@ -220,7 +220,13 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 		return false
 	}
 
-	// 2. Verify appropriate randomness
+	// 2. Verify partialTicket values are appropriate
+	if !sms._verifyElection(header, onChainInfo) {
+		return false
+	}
+
+	// verify the partialTickets themselves
+	// 3. Verify appropriate randomness
 	// TODO: fix away from BestChain()... every block should track its own chain up to its own production.
 	randomness := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), header.Epoch())
 	postRandomnessInput := sector.PoStRandomness(sms._preparePoStChallengeSeed(randomness, header.Miner()))
@@ -234,7 +240,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 	}
 
 	// A proof must be a valid snark proof with the correct public inputs
-	// 3. Get public inputs
+	// 4. Get public inputs
 	info := sma.Info()
 	sectorSize := info.SectorSize()
 
@@ -276,9 +282,13 @@ func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader
 		return false
 	}
 
-	// A proof must be a valid snark proof with the correct public inputs
+	// 3. Verify the partialTicket values
+	if !sms._verifySurprisePoStMeetsTargetReq(header, onChainInfo) {
+		return false
+	}
 
-	// 3. Verify appropriate randomness
+	// verify the partialTickets themselves
+	// 4. Verify appropriate randomness
 	randomnessEpoch := st.ChallengeStatus().LastChallengeEpoch()
 	// TODO: fix away from BestChain()... every block should track its own chain up to its own production.
 	randomness := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), randomnessEpoch)
@@ -292,7 +302,7 @@ func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader
 		return false
 	}
 
-	// 4. Get public inputs
+	// 5. Get public inputs
 	info := st.Info()
 	sectorSize := info.SectorSize()
 
@@ -311,12 +321,12 @@ func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader
 
 	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{SurprisePoStCfg_: &postCfg})
 
-	// 5. Verify the PoSt Proof
+	// 6. Verify the PoSt Proof
 	isPoStVerified := sdr.VerifySurprisePoSt(&pvInfo)
 	return isPoStVerified
 }
 
-func (sms *StorageMiningSubsystem_I) VerifyElection(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
+func (sms *StorageMiningSubsystem_I) _verifyElection(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
 	st := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
 	numMinerSectors := uint64(len(st.SectorTable().Impl().ActiveSectors_.SectorsOn()))
 
@@ -332,6 +342,12 @@ func (sms *StorageMiningSubsystem_I) VerifyElection(header block.BlockHeader, on
 		}
 	}
 	return true
+}
+
+// todo: define target
+func (sms *StorageMiningSubsystem_I) _verifySurprisePoStMeetsTargetReq(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
+	util.TODO()
+	return false
 }
 
 // func (sms *StorageMiningSubsystem_I) submitPoStMessage(postSubmission poster.PoStSubmission) error {

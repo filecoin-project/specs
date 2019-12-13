@@ -9,8 +9,10 @@ entries:
 The Storage Power Consensus subsystem is the main interface which enables Filecoin nodes to agree on the state of the system. SPC accounts for individual storage miners' effective power over consensus in given chains in its {{<sref power_table>}}. It also runs {{<sref expected_consensus>}} (the underlying consensus algorithm in use by Filecoin), enabling storage miners to run leader election and generate new blocks updating the state of the Filecoin system.
 
 Succinctly, the SPC subsystem offers the following services:
+
 - Access to the {{<sref power_table>}} for every subchain, accounting for individual storage miner power and total power on-chain.
 - Access to {{<sref expected_consensus>}} for individual storage miners, enabling:
+
     - Access to verifiable randomness {{<sref tickets>}} as needed in the rest of the protocol.
     - Running  {{<sref leader_election>}} to produce new blocks.
     - Running {{<sref chain_selection>}} across subchains using EC's weighting function.
@@ -23,6 +25,7 @@ Much of the Storage Power Consensus' subsystem functionality is detailed in the 
 ## Distinguishing between storage miners and block miners
 
 There are two ways to earn Filecoin tokens in the Filecoin network:
+
 - By participating in the {{<sref storage_market>}} as a storage provider and being paid by clients for file storage deals.
 - By mining new blocks on the network, helping modify system state and secure the Filecoin consensus mechanism.
 
@@ -36,6 +39,7 @@ However, given Filecoin's "useful Proof-of-Work" is achieved through file storag
 Per the above, we also clearly distinguish putting storage on-chain from gaining power in consensus (sometimes called "Storage Power") as follows:
 
 Consensus power in Filecoin is defined as the intersection between:
+
 - Proven Storage as of the PoSts verification (i.e. storage in the `Proving Set` since it will all be active by the time the PoSt is computed)
 - In-deal storage.
 Put another way **consensus power is in-deal storage in the Proving Set**. For instance, if a miner had two 32GB sector, each with 20 GB of in-deal storage; the miner would have 40GB worth of storage power for SPC.
@@ -46,6 +50,7 @@ Read more in {{<sref storage_mining_subsystem>}}.
 ## Tickets
 
 Tickets are used across the Filecoin protocol as sources of randomness:
+
 - The {{<sref sector_sealer>}} uses tickets as SealSeeds to bind sector commitments to a given subchain.
 - The {{<sref post_generator>}} likewise uses tickets as PoStChallenges to prove sectors remain committed as of a given block.
 - They are drawn by the Storage Power subsystem as randomness in {{<sref leader_election>}} to determine their eligibility to mine a block
