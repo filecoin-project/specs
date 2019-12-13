@@ -18,6 +18,8 @@ type RuntimeError = exitcode.RuntimeError
 
 var EnsureErrorCode = exitcode.EnsureErrorCode
 var SystemError = exitcode.SystemError
+
+var Assert = util.Assert
 var IMPL_FINISH = util.IMPL_FINISH
 var TODO = util.TODO
 
@@ -272,6 +274,19 @@ func CallerPattern_MakeSingleton(x addr.Address) CallerPattern {
 	}
 }
 
+func CallerPattern_MakeAcceptAnyOfType(rt *VMContext, type_ actor.BuiltinActorID) CallerPattern {
+	return CallerPattern{
+		Matches: func(y addr.Address) bool {
+			codeID, ok := rt._getActorCodeID(y)
+			if !ok {
+				panic("Internal runtime error: actor not found")
+			}
+			Assert(codeID != nil)
+			return (codeID.IsBuiltin() && (codeID.As_Builtin() == type_))
+		},
+	}
+}
+
 func CallerPattern_MakeAcceptAny() CallerPattern {
 	return CallerPattern{
 		Matches: func(addr.Address) bool { return true },
@@ -280,6 +295,10 @@ func CallerPattern_MakeAcceptAny() CallerPattern {
 
 func (rt *VMContext) ValidateImmediateCallerIs(callerExpected addr.Address) {
 	rt.ValidateImmediateCallerMatches(CallerPattern_MakeSingleton(callerExpected))
+}
+
+func (rt *VMContext) ValidateImmediateCallerAcceptAnyOfType(type_ actor.BuiltinActorID) {
+	rt.ValidateImmediateCallerMatches(CallerPattern_MakeAcceptAnyOfType(rt, type_))
 }
 
 func (rt *VMContext) ValidateImmediateCallerAcceptAny() {
@@ -345,6 +364,11 @@ func (rt *VMContext) _transferFunds(from addr.Address, to addr.Address, amount a
 
 	rt._globalStatePending = newGlobalStatePending
 	return nil
+}
+
+func (rt *VMContext) _getActorCodeID(actorAddr addr.Address) (ret actor.CodeID, ok bool) {
+	IMPL_FINISH()
+	panic("")
 }
 
 type ErrorHandlingSpec int

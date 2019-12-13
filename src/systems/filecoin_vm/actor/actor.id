@@ -1,6 +1,7 @@
 // This contains actor things that are _outside_ of VM exection.
 // The VM uses this to execute actors.
 
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
 // TokenAmount is an amount of Filecoin tokens. This type is used within
@@ -109,3 +110,5 @@ type ActorSubstateCID ipld.CID
 //         NextID      ActorID
 //     }
 // }
+
+type BalanceTableHAMT {addr.Address: TokenAmount}

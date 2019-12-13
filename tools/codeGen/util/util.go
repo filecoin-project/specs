@@ -64,6 +64,17 @@ func IMPL_FINISH() {
 	panic("Not yet implemented in the spec")
 }
 
+// Version of TODO() indicating that the operation is believed to be unambiguous,
+// except for some potential parameter settings (numerical or simple function
+// definitions) which have been deferred for the moment.
+//
+// Note: accepts variadic arguments, which can be used to indicate that certain
+// values are required for potential future completions of the parameterization,
+// and the caller must ensure they are available.
+func PARAM_FINISH(...interface{}) {
+	panic("Not yet implemented in the spec")
+}
+
 type UVarint = uint64
 type Varint = int64
 type UInt = uint64

@@ -13,6 +13,11 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
+var Assert = util.Assert
+var IMPL_FINISH = util.IMPL_FINISH
+var PARAM_FINISH = util.PARAM_FINISH
+var TODO = util.TODO
+
 const (
 	Method_StoragePowerActor_EpochTick = actor.MethodPlaceholder + iota
 	Method_StoragePowerActor_ProcessPowerReport
@@ -21,14 +26,23 @@ const (
 	Method_StoragePowerActor_EnsurePledgeCollateralSatisfied
 )
 
-// placeholder values
-// these are the scaling constants for percentage pledge collateral to slash
-// given a miner's affected power and its total power
-const (
-	DeclaredFaultSlashPercent   = 1   // placeholder
-	DetectedFaultSlashPercent   = 10  // placeholder
-	TerminatedFaultSlashPercent = 100 // placeholder
-)
+func _storageFaultSlashPledgePercent(faultType sector.StorageFaultType) int {
+	PARAM_FINISH() // TODO: instantiate these placeholders
+	panic("")
+
+	// these are the scaling constants for percentage pledge collateral to slash
+	// given a miner's affected power and its total power
+	switch faultType {
+	case sector.DeclaredFault:
+		return 1 // placeholder
+	case sector.DetectedFault:
+		return 10 // placeholder
+	case sector.TerminatedFault:
+		return 100 // placeholder
+	default:
+		panic("Case not supported")
+	}
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
@@ -66,129 +80,130 @@ func DeserializeState(x Bytes) State {
 ////////////////////////////////////////////////////////////////////////////////
 
 func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
 
+	ownerAddr := rt.ImmediateCaller()
 	msgValue := rt.ValueReceived()
-	minerID := rt.ImmediateCaller()
-	panic("TODO: fix minerID usage")
 
 	h, st := a.State(rt)
-
-	currEntry, found := st.PowerTable()[minerID]
-
-	if !found {
-		// AddBalance will just fail if miner is not created before hand
-		rt.AbortArgMsg("minerID not found.")
+	newTable, ok := actor.BalanceTable_WithAdd(st.EscrowTable(), ownerAddr, msgValue)
+	if !ok {
+		rt.AbortStateMsg("spa.AddBalance: Escrow operation failed.")
 	}
-	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() + msgValue
-	st.Impl().PowerTable_[minerID] = currEntry
-
+	st.Impl().EscrowTable_ = newTable
 	UpdateRelease(rt, h, st)
 }
 
-func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amount actor.TokenAmount) {
+func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amountRequested actor.TokenAmount) {
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
 
-	if amount < 0 {
+	if amountRequested < 0 {
 		rt.AbortArgMsg("spa.WithdrawBalance: negative amount.")
 	}
 
-	minerID := rt.ImmediateCaller()
-	panic("TODO: fix minerID usage and assert caller is miner worker")
+	minerAddr := rt.ImmediateCaller()
+
+	var ownerAddr addr.Address
+	TODO() // Determine owner address from miner
 
 	h, st := a.State(rt)
 
-	ret := st._ensurePledgeCollateralSatisfied(rt)
-	if !ret {
-		rt.AbortFundsMsg("spa.WithdrawBalance: insufficient pledge collateral.")
+	minerPowerTotal, ok := st._getPowerTotalForMiner(minerAddr)
+	if !ok {
+		rt.AbortArgMsg("spa.WithdrawBalance: Miner not found.")
 	}
 
-	currEntry := st._safeGetPowerEntry(rt, minerID)
-	if currEntry.AvailableBalance() < amount {
-		rt.AbortFundsMsg("spa.WithdrawBalance: insufficient available balance.")
+	minBalance := st._getPledgeCollateralReq(minerPowerTotal)
+	newTable, amountExtracted, ok := actor.BalanceTable_WithExtractPartial(
+		st.EscrowTable(), minerAddr, amountRequested, minBalance)
+	if !ok {
+		rt.AbortStateMsg("spa.WithdrawBalance: Escrow operation failed.")
 	}
-
-	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() - amount
-	st.Impl().PowerTable_[minerID] = currEntry
+	st.Impl().EscrowTable_ = newTable
 
 	UpdateRelease(rt, h, st)
 
 	// send funds to miner
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:    minerID,
-		Value_: amount,
+		To_:    ownerAddr,
+		Value_: amountExtracted,
 	})
 }
 
 func (a *StoragePowerActorCode_I) CreateStorageMiner(
-	rt Runtime,
-	ownerAddr addr.Address,
-	workerAddr addr.Address,
-	peerId libp2p.PeerID,
-) addr.Address {
+	rt Runtime, workerAddr addr.Address, peerId libp2p.PeerID) addr.Address {
+
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
+
+	// ownerAddr := rt.ImmediateCaller()
+	msgValue := rt.ValueReceived()
+
+	var newMinerAddr addr.Address
+	TODO() // TODO: call InitActor::Exec to create the StorageMinerActor
+	panic("")
 
 	// TODO: anything to check here?
-	newMiner := &PowerTableEntry_I{
-		ActivePower_:            block.StoragePower(0),
-		InactivePower_:          block.StoragePower(0),
-		AvailableBalance_:       actor.TokenAmount(0),
-		LockedPledgeCollateral_: actor.TokenAmount(0),
+	newMinerEntry := &PowerTableEntry_I{
+		ActivePower_:   block.StoragePower(0),
+		InactivePower_: block.StoragePower(0),
 	}
 
-	// TODO: call constructor of StorageMinerActor
-	// store ownerAddr and workerAddr there
-	// and return StorageMinerActor address
-
-	minerID := rt.ImmediateCaller()
-	panic("TODO: caller is not miner actor")
-
 	h, st := a.State(rt)
-
-	st.PowerTable()[minerID] = newMiner
-
+	newTable, ok := actor.BalanceTable_WithNewAddressEntry(st.EscrowTable(), newMinerAddr, msgValue)
+	if !ok {
+		panic("Internal error: newMinerAddr (result of InitActor::Exec) already exists in escrow table")
+	}
+	st.Impl().EscrowTable_ = newTable
+	st.PowerTable()[newMinerAddr] = newMinerEntry
 	UpdateRelease(rt, h, st)
 
-	return minerID
-
+	return newMinerAddr
 }
 
-func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime, address addr.Address) {
+func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime) {
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
 
-	minerID := rt.ImmediateCaller()
-	panic("TODO: use address and verify address is the caller")
-	panic(minerID)
+	minerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
 
-	if (st.PowerTable()[address].ActivePower() + st.PowerTable()[address].InactivePower()) > 0 {
+	minerPowerTotal, ok := st._getPowerTotalForMiner(minerAddr)
+	if !ok {
+		rt.AbortArgMsg("spa.RemoveStorageMiner: miner entry not found")
+	}
+	if minerPowerTotal > 0 {
+		// TODO: manually remove the power entries here (and update relevant counters),
+		// instead of throwing a runtime error?
 		rt.AbortStateMsg("power still remains.")
+
+		TODO()
+		// TODO: also fail if funds still remaining in escrow
 	}
 
-	delete(st.PowerTable(), address)
+	delete(st.PowerTable(), minerAddr)
+
+	newTable, ok := actor.BalanceTable_WithDeletedAddressEntry(st.EscrowTable(), minerAddr)
+	if !ok {
+		panic("Internal error: miner entry in escrow table does not exist")
+	}
+	st.Impl().EscrowTable_ = newTable
 
 	UpdateRelease(rt, h, st)
-}
-
-func (a *StoragePowerActorCode_I) GetTotalPower(rt Runtime) block.StoragePower {
-
-	totalPower := block.StoragePower(0)
-
-	h, st := a.State(rt)
-
-	for _, miner := range st.PowerTable() {
-		totalPower = totalPower + miner.ActivePower() + miner.InactivePower()
-	}
-
-	Release(rt, h, st)
-
-	return totalPower
 }
 
 func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) {
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+
+	TODO() // TODO: principal access control
+	minerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
-	ret := st._ensurePledgeCollateralSatisfied(rt)
+	pledgeReq := st._getPledgeCollateralReqForMiner(minerAddr)
 	UpdateRelease(rt, h, st)
 
-	if !ret {
+	balanceSufficient, ok := actor.BalanceTable_IsEntrySufficient(st.EscrowTable(), minerAddr, pledgeReq)
+	Assert(ok)
+	if !balanceSufficient {
 		rt.AbortFundsMsg("exitcode.InsufficientPledgeCollateral")
 	}
 
@@ -202,16 +217,10 @@ func (a *StoragePowerActorCode_I) SlashPledgeForStorageFault(rt Runtime, affecte
 	h, st := a.State(rt)
 
 	affectedPledge := st._getAffectedPledge(rt, minerID, affectedPower)
-	amountToSlash := actor.TokenAmount(0)
 
-	switch faultType {
-	case sector.DeclaredFault:
-		amountToSlash = actor.TokenAmount(DeclaredFaultSlashPercent * uint64(affectedPledge) / 100)
-	case sector.DetectedFault:
-		amountToSlash = actor.TokenAmount(DetectedFaultSlashPercent * uint64(affectedPledge) / 100)
-	case sector.TerminatedFault:
-		amountToSlash = actor.TokenAmount(TerminatedFaultSlashPercent * uint64(affectedPledge) / 100)
-	}
+	TODO() // BigInt arithmetic
+	amountToSlash := actor.TokenAmount(
+		_storageFaultSlashPledgePercent(faultType) * int(affectedPledge) / 100)
 
 	amountSlashed := st._slashPledgeCollateral(rt, minerID, amountToSlash)
 	UpdateRelease(rt, h, st)
@@ -263,7 +272,7 @@ func (a *StoragePowerActorCode_I) Surprise(rt Runtime) {
 
 	randomness := rt.Randomness(rt.CurrEpoch(), 0)
 	challengeCount := math.Ceil(float64(len(st.PowerTable())) / float64(PROVING_PERIOD))
-	surprisedMiners := st._selectMinersToSurprise(rt, int(challengeCount), randomness)
+	surprisedMiners := st._selectMinersToSurprise(int(challengeCount), randomness)
 
 	UpdateRelease(rt, h, st)
 
