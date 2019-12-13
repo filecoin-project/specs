@@ -28,7 +28,9 @@ md`#### Graph`
 viewof stackedChungParams = jsonToSliders(
   {
     "chung_delta": {value: 0.06, min: 0.01, max: 0.08, step: 0.01},
-    "expander_parents": {value: 16, min: 0, max: 128, step: 1}
+    "expander_parents": {value: 16, min: 0, max: 128, step: 1},
+    "rig_malicious_cost_per_year": {value: 2000, min: 0, max: 10000, step: 0.1},
+    "hash_gb_per_second": {value: 64000, min: 0, max: 10000, step: 1},
   },
   {
     "graph_name": "Chung",
@@ -37,7 +39,9 @@ viewof stackedChungParams = jsonToSliders(
 
 viewof stackedSDRParams = jsonToSliders(
   {
-    "sdr_delta": {value: 0.01, min: 0.01, max: 0.08, step: 0.01}
+    "sdr_delta": {value: 0.01, min: 0.01, max: 0.08, step: 0.01},
+    "rig_malicious_cost_per_year": {value: 3, min: 0, max: 10000, step: 0.1},
+    "hash_gb_per_second": {value: 5, min: 0, max: 10000, step: 1},
   },
   {
     "graph_name": "SDR",
@@ -100,7 +104,6 @@ viewof rig = jsonToSliders({
   "rig_gpu_lifetime_years": {value: 2, min: 1, max: 10, step: 1},
   "rig_cores": {value: 16, min: 1, max: 512, step: 1},
   "rig_snark_parallelization": {value: 2, min: 1, max: 64, step: 1},
-  "rig_malicious_cost_per_year": {value: 2000, min: 0, max: 10000, step: 0.1},
   "rig_ram_gib": {value: 32, min: 1, max: 128, step: 1},
   "rig_storage_latency": {value: 0.003, min: 0.0003, max: 0.01, step: 0.0001},
   "rig_storage_min_tib": {value: 100, min: 0.5, max: 1024, step: 0.5},
@@ -108,7 +111,6 @@ viewof rig = jsonToSliders({
   "rig_storage_read_mbs": {value: 80, min: 80, max: 1000, step: 1},
   "cost_gb_per_month": {value: 0.0025, min: 0.0001, max: 0.1, step: 0.0001},
   "extra_storage_time": {value: 0, min: 0, max: 10, step: 1 },
-  "hash_gb_per_second": {value: 6400, min: 0, max: 10000, step: 1},
 })
 
 md`#### Benchmarks`
