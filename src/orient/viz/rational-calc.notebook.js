@@ -14,9 +14,9 @@ viewof base = jsonToSliders(
     "porep_lambda": {value: 10, min: 0, max: 128, step: 1},
     "post_mtree_layers_cached": {value: 25, min: 0, max: 40, step: 1},
     "post_lambda": {value: 10, min: 0, max: 128, step: 1},
-    "sector_size_gib": {value: 32, min: 1, max: 1024, step: 1},
-    "window_size_mib": {value: 1024, min: 4, max: 32 * 1024, step: 1},
-    "wrapper_parents": {value: 100, min: 0, max: 1000, step: 1},
+    "sector_size_gib": {value: 1, min: 1, max: 1024, step: 1},
+    "window_size_mib": {value: 512, min: 4, max: 32 * 1024, step: 1},
+    "wrapper_parents": {value: 15, min: 0, max: 1000, step: 1},
   },
   { "!StackedReplicaUnaligned": true}
 )
@@ -28,7 +28,7 @@ md`#### Graph`
 viewof stackedChungParams = jsonToSliders(
   {
     "chung_delta": {value: 0.06, min: 0.01, max: 0.08, step: 0.01},
-    "expander_parents": {value: 16, min: 0, max: 128, step: 1}
+    "expander_parents": {value: 15, min: 0, max: 128, step: 1}
   },
   {
     "graph_name": "Chung",
@@ -113,10 +113,10 @@ md`#### Benchmarks`
 
 bench = ({
   "column_leaf_hash_time": 2.56e-7,
-  "kdf_time": 1.28e-8,
+  "kdf_time": 5.4e-7,
   "merkle_tree_datahash_time": 1.28e-8,
-  "merkle_tree_hash_time": 2.56e-7,
-  "snark_constraint_time": 0.000004642,
+  "merkle_tree_hash_time": 1.7028e-5,
+  "snark_constraint_time": 3.012e-5,
   "ticket_hash": 2.56e-7,
 })
 
@@ -126,7 +126,7 @@ constraints = ({
   "merkle_tree_hash_constraints": 1376,
   "ticket_constraints": 1376,
   "merkle_tree_datahash_constraints": 56000,
-  "kdf_constraints": 25000,
+  "kdf_constraints": 14066,
   "column_leaf_hash_constraints": 1376,
   "snark_size": 192,
   "porep_snark_partition_constraints": 100000000,
