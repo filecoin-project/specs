@@ -139,16 +139,16 @@ ProofOfSpacetime:
         post_inclusions_time_parallel = post_inclusions_time / rig_cores
 
       Generation (Wrapping):
-        post_inclusion_time = (post_mtree_regen_hashnodes * 2) * merkle_tree_hash_time
+        post_inclusion_time = (post_mtree_regen_hashnodes - 1) * merkle_tree_hash_time
 
       Generation (StackedReplicas):
-        post_inclusion_time = (post_mtree_regen_hashnodes * 2) * merkle_tree_hash_time
+        post_inclusion_time = (post_mtree_regen_hashnodes - 1) * merkle_tree_hash_time
 
       Generation (WrappingVariant):
         describe(wrapper_kdf_time, "Time to generate a node on the wrapper layer", secs)
 
         wrapper_kdf_time = kdf_time * wrapper_parents_all * post_mtree_regen_nodes
-        post_inclusion_time = (post_mtree_regen_hashnodes * 2) * merkle_tree_hash_time + wrapper_kdf_time
+        post_inclusion_time = (post_mtree_regen_hashnodes - 1) * merkle_tree_hash_time + wrapper_kdf_time
 
   StorageAccess:
     describe(post_challenge_read, "Time to read from storage medium data required for a single challenge in PoSt", secs)
@@ -334,8 +334,8 @@ ProofOfReplication:
     describe(commc_time, "Time to generate the merkle tree of CommC (assuming leaves in memory)", secs)
 
     commit_size = cid_size
-    window_comm_tree_time = merkle_tree_hash_time * (window_nodes * 2 - 1)
-    window_comm_leaves_time = column_leaf_hash_time * window_nodes
+    window_comm_tree_time = merkle_tree_hash_time * (window_nodes - 1)
+    window_comm_leaves_time = column_leaf_hash_time * (window_nodes - 1)
     commr_size = commit_size
     commd_size = commit_size
     commrlast_size = commit_size
@@ -343,7 +343,7 @@ ProofOfReplication:
     seal_onchain_commitments_size = commd_size + commr_size
     // seal_commitment_time = commr_time
 
-    commd_time = merkle_tree_datahash_time * (2 * nodes - 1)
+    commd_time = merkle_tree_datahash_time * (nodes - 1)
 
     commq_time = commr_time
     porep_commit_time = commr_time + commq_time + commc_time
@@ -351,17 +351,17 @@ ProofOfReplication:
     porep_commit_time_mins = porep_commit_time / 60
 
     CommR (Wrapping): // was VectorR
-      commr_time = merkle_tree_hash_time * 2 * nodes
+      commr_time = merkle_tree_hash_time * (nodes - 1)
       commr_tree_depth = log2(nodes) 
       commr_column_size = 1
 
     CommR (WrappingVariant): // was VectorR
-      commr_time = merkle_tree_hash_time * 2 * nodes
+      commr_time = merkle_tree_hash_time * (nodes - 1)
       commr_tree_depth = log2(nodes) 
       commr_column_size = 1
 
     CommR (StackedReplicas): // was ColumnR
-      commr_time = merkle_tree_hash_time * 2 * nodes
+      commr_time = merkle_tree_hash_time * (nodes - 1)
       commr_tree_depth = log2(nodes) 
       commr_column_size = 1
       // commr_time = window_comm_tree_time + window_comm_leaves_time 
@@ -386,7 +386,7 @@ ProofOfReplication:
 
     encoding_time = encoding_window_time * windows
 
-    encoding_window_time = window_nodes * (graph_parents * kdf_time) * stacked_layers
+    encoding_window_time = window_nodes * (1 + graph_parents * kdf_time) * stacked_layers
 
     ParallelEncoding (StackedSDRParameters):
       encoding_time_parallel = encoding_window_time + ((windows - 1) * encoding_window_time) / rig_cores
@@ -465,7 +465,7 @@ ProofOfReplication:
     describe(porep_snark_size_kib, "Size of a PoRep proof", kib)
     describe(porep_snark_partition_constraints, "Number of constraints for a PoRep partition")
 
-    describe(kdf_constraints, "Constraints of KDF per node")
+    describe(kdf_constraints, "Constraints of KDF per node parent")
     describe(labeling_proof, "Constraints to check labeling of a single node")
     describe(labeling_proofs, "Constraints to check labeling of a window")
     describe(window_labeling_proof, "Constraints to check correct labeling for all windows")
@@ -542,7 +542,7 @@ ProofOfReplication (StackedSDRParameters):
   sdr_layers_b = (log2(1 / (3 * (sdr_eps - 4 * sdr_delta)))) + 0.24 / (0.12 - sdr_delta) + 1
   sdr_layers_c = (log2(2 / (1 + 3 * (sdr_eps - 5 * sdr_delta)))) + (0.57 - sdr_eps + 3 * sdr_delta) / (0.12 - sdr_delta) + 1
 
-  porep_challenges = -porep_lambda / (log2(1 - sdr_delta))
+  //porep_challenges = -porep_lambda / (log2(1 - sdr_delta))
   post_challenges = -post_lambda / (log2(1 - sdr_eps/2))
 
   drg_parents = 6
