@@ -386,7 +386,7 @@ ProofOfReplication:
 
     encoding_time = encoding_window_time * windows
 
-    encoding_window_time = window_nodes * (1 + graph_parents * kdf_time) * stacked_layers
+    encoding_window_time = window_nodes * ((1 + graph_parents) * kdf_time) * stacked_layers
 
     ParallelEncoding (StackedSDRParameters):
       encoding_time_parallel = encoding_window_time + ((windows - 1) * encoding_window_time) / rig_cores
