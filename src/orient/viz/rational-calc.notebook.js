@@ -30,7 +30,7 @@ viewof stackedChungParams = jsonToSliders(
     "chung_delta": {value: 0.06, min: 0.01, max: 0.08, step: 0.01},
     "expander_parents": {value: 16, min: 0, max: 128, step: 1},
     "rig_malicious_cost_per_year": {value: 2000, min: 0, max: 10000, step: 0.1},
-    "hash_gb_per_second": {value: 6400000, min: 0, max: 10000, step: 1},
+    "hash_gb_per_second": {value: 640000 /*0*/, min: 0, max: 100000000, step: 1},
   },
   {
     "graph_name": "Chung",
@@ -527,8 +527,10 @@ function solve_manys(json) {
     return res.json()
   }).then(res => {
     return res
+      .filter(d => d !== null)
       .map(d => d.flat())
       .flat()
+      .filter(d => d !== null)
       .map(d => {
         console.log(d)
         const results = {}
