@@ -349,7 +349,6 @@ ProofOfReplication:
 
     commd_time = merkle_tree_datahash_time * (2 * nodes - 1)
 
-    // TODO commr might be twice depending on CommQ
     commq_time = commr_time
     porep_commit_time = commr_time + commq_time + commc_time
     porep_commit_time_parallel = porep_commit_time / rig_cores 
