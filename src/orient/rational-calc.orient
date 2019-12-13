@@ -705,7 +705,7 @@ Rationality:
   describe(challenge_periods_per_month, "Number of challenge periods in a month")
   describe(regeneration_fraction, "Fraction of nodes of a sector for which re-encoding them every `polling_time` costs as much as storing them")
 
-  breakeven_nodes = ((cost_gib_per_month *  sector_size_gib) / (cost_node_encoding * challenge_periods_per_month))
+  breakeven_nodes = ((cost_gib_per_month *  sector_size_gib) / ((1 - porep_soundness) * cost_node_encoding * challenge_periods_per_month))
   challenge_periods_per_month = secs_in_month / polling_time
   regeneration_fraction = breakeven_nodes / nodes
 
