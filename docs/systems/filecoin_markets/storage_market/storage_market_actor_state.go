@@ -9,17 +9,45 @@ import (
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+	util "github.com/filecoin-project/specs/util"
 )
 
+var Assert = util.Assert
+
 func (st *StorageMarketActorState_I) _generateStorageDealID(rt Runtime, storageDeal deal.StorageDeal) deal.DealID {
-	// TODO
+	TODO()
 	var dealID deal.DealID
 	return dealID
 }
 
-func (st *StorageMarketActorState_I) _isBalanceAvailable(rt Runtime, a addr.Address, amount actor.TokenAmount) bool {
-	bal := st._safeGetBalance(rt, a)
-	return bal.Available() >= amount
+func (st *StorageMarketActorState_I) _getTotalEscrowBalance(a addr.Address) actor.TokenAmount {
+	Assert(st._addressEntryExists(a))
+	ret, ok := actor.BalanceTable_GetEntry(st.EscrowTable(), a)
+	Assert(ok)
+	return ret
+}
+
+func (st *StorageMarketActorState_I) _getLockedReqBalance(a addr.Address) actor.TokenAmount {
+	Assert(st._addressEntryExists(a))
+	ret, ok := actor.BalanceTable_GetEntry(st.LockedReqTable(), a)
+	Assert(ok)
+	return ret
+}
+
+func (st *StorageMarketActorState_I) _getAvailableBalance(a addr.Address) actor.TokenAmount {
+	Assert(st._addressEntryExists(a))
+	escrowBalance := st._getTotalEscrowBalance(a)
+	lockedReqBalance := st._getLockedReqBalance(a)
+	ret := escrowBalance - lockedReqBalance
+	Assert(ret >= 0)
+	return ret
+}
+
+func (st *StorageMarketActorState_I) _isBalanceAvailable(a addr.Address, amount actor.TokenAmount) bool {
+	Assert(amount >= 0)
+	Assert(st._addressEntryExists(a))
+	availableBalance := st._getAvailableBalance(a)
+	return (availableBalance >= amount)
 }
 
 func (st *StorageMarketActorState_I) _assertValidClientSignature(rt Runtime, dealP deal.StorageDealProposal) {
@@ -88,8 +116,8 @@ func (st *StorageMarketActorState_I) _assertValidDealMinimum(rt Runtime, p deal.
 func (st *StorageMarketActorState_I) _assertSufficientBalanceAvailForDeal(rt Runtime, p deal.StorageDealProposal) {
 
 	// verify client and provider has sufficient balance
-	isClientBalAvailable := st._isBalanceAvailable(rt, p.Client(), p.ClientBalanceRequirement())
-	isProviderBalAvailable := st._isBalanceAvailable(rt, p.Provider(), p.ProviderBalanceRequirement())
+	isClientBalAvailable := st._isBalanceAvailable(p.Client(), p.ClientBalanceRequirement())
+	isProviderBalAvailable := st._isBalanceAvailable(p.Provider(), p.ProviderBalanceRequirement())
 
 	if !isClientBalAvailable || !isProviderBalAvailable {
 		rt.AbortFundsMsg("sma._validateNewStorageDeal: client or provider insufficient balance.")
@@ -137,56 +165,74 @@ func (st *StorageMarketActorState_I) _activateDeal(rt Runtime, deal deal.OnChain
 	return deal
 }
 
-func (st *StorageMarketActorState_I) _lockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount) {
-	if amount < 0 {
-		rt.AbortArgMsg("sma._lockBalance: negative amount.")
-	}
+func (st *StorageMarketActorState_I) _rtLockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount) {
+	Assert(amount >= 0)
+	Assert(st._addressEntryExists(addr))
 
-	currBalance := st._safeGetBalance(rt, addr)
-
-	if currBalance.Impl().Available() < amount {
+	prevLocked := st._getLockedReqBalance(addr)
+	if prevLocked+amount > st._getTotalEscrowBalance(addr) {
 		rt.AbortFundsMsg("sma._lockBalance: insufficient funds available to lock.")
 	}
 
-	currBalance.Impl().Available_ -= amount
-	currBalance.Impl().Locked_ += amount
+	newLockedReqTable, ok := actor.BalanceTable_WithAdd(st.LockedReqTable(), addr, amount)
+	Assert(ok)
+	st.Impl().LockedReqTable_ = newLockedReqTable
 }
 
-func (st *StorageMarketActorState_I) _unlockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount) {
-	if amount < 0 {
-		rt.AbortArgMsg("sma._unlockBalance: negative amount.")
+func (st *StorageMarketActorState_I) _rtUnlockBalance(
+	rt Runtime, addr addr.Address, unlockAmountRequested actor.TokenAmount) {
+
+	Assert(unlockAmountRequested >= 0)
+	Assert(st._addressEntryExists(addr))
+
+	st.Impl().LockedReqTable_ = st._rtTableWithDeductBalanceExact(rt, st.LockedReqTable(), addr, unlockAmountRequested)
+}
+
+func (st *StorageMarketActorState_I) _rtTableWithAddBalance(
+	rt Runtime, table actor.BalanceTableHAMT,
+	toAddr addr.Address, amountToAdd actor.TokenAmount) actor.BalanceTableHAMT {
+
+	Assert(amountToAdd >= 0)
+
+	newTable, ok := actor.BalanceTable_WithAdd(table, toAddr, amountToAdd)
+	Assert(ok)
+	return newTable
+}
+
+func (st *StorageMarketActorState_I) _rtTableWithDeductBalanceExact(
+	rt Runtime, table actor.BalanceTableHAMT,
+	fromAddr addr.Address, amountRequested actor.TokenAmount) actor.BalanceTableHAMT {
+
+	Assert(amountRequested >= 0)
+
+	newTable, amountDeducted, ok := actor.BalanceTable_WithSubtractPreservingNonnegative(
+		table, fromAddr, amountRequested)
+	Assert(ok)
+	if amountDeducted != amountRequested {
+		TODO() // Should be Assert(), as an invariant violation in SMA?
+		rt.AbortFundsMsg("sma._rtDeduct: attempt to deduct amount greater than present in table")
 	}
-
-	currBalance := st._safeGetBalance(rt, addr)
-
-	if currBalance.Impl().Locked() < amount {
-		rt.AbortFundsMsg("sma._unlockBalance: insufficient funds to unlock.")
-	}
-
-	currBalance.Impl().Locked_ -= amount
-	currBalance.Impl().Available_ += amount
+	return newTable
 }
 
 // move funds from locked in client to available in provider
-func (st *StorageMarketActorState_I) _transferBalance(rt Runtime, fromLocked addr.Address, toAvailable addr.Address, amount actor.TokenAmount) {
+func (st *StorageMarketActorState_I) _rtTransferBalance(
+	rt Runtime, fromAddr addr.Address, toAddr addr.Address, transferAmountRequested actor.TokenAmount) {
 
-	fromB := st._safeGetBalance(rt, fromLocked)
-	toB := st._safeGetBalance(rt, toAvailable)
+	Assert(transferAmountRequested >= 0)
+	Assert(st._addressEntryExists(fromAddr))
+	Assert(st._addressEntryExists(toAddr))
 
-	if fromB.Locked() < amount {
-		rt.AbortFundsMsg("sma._transferBalance: attempt to unlock funds greater than actor has")
-		return
-	}
-
-	fromB.Impl().Locked_ -= amount
-	toB.Impl().Available_ += amount
+	st.Impl().EscrowTable_ = st._rtTableWithDeductBalanceExact(rt, st.EscrowTable(), fromAddr, transferAmountRequested)
+	st.Impl().LockedReqTable_ = st._rtTableWithDeductBalanceExact(rt, st.LockedReqTable(), fromAddr, transferAmountRequested)
+	st.Impl().EscrowTable_ = st._rtTableWithAddBalance(rt, st.EscrowTable(), toAddr, transferAmountRequested)
 }
 
-func (st *StorageMarketActorState_I) _lockFundsForStorageDeal(rt Runtime, deal deal.StorageDeal) {
+func (st *StorageMarketActorState_I) _rtLockFundsForStorageDeal(rt Runtime, deal deal.StorageDeal) {
 	p := deal.Proposal()
 
-	st._lockBalance(rt, p.Client(), p.ClientBalanceRequirement())
-	st._lockBalance(rt, p.Provider(), p.ProviderBalanceRequirement())
+	st._rtLockBalance(rt, p.Client(), p.ClientBalanceRequirement())
+	st._rtLockBalance(rt, p.Provider(), p.ProviderBalanceRequirement())
 }
 
 func (st *StorageMarketActorState_I) _getOnchainDeal(dealID deal.DealID) (deal deal.OnChainDeal, ok bool) {
@@ -227,14 +273,13 @@ func (st *StorageMarketActorState_I) _assertActiveDealState(rt Runtime, dealID d
 	}
 }
 
-func (st *StorageMarketActorState_I) _safeGetBalance(rt Runtime, participant addr.Address) StorageParticipantBalance {
-	balance, found := st.Balances()[participant]
-
-	if !found {
-		rt.AbortStateMsg("sma._safeGetBalance: participant balance not found.")
-	}
-
-	return balance
+func (st *StorageMarketActorState_I) _addressEntryExists(address addr.Address) bool {
+	_, foundEscrow := actor.BalanceTable_GetEntry(st.EscrowTable(), address)
+	_, foundLocked := actor.BalanceTable_GetEntry(st.LockedReqTable(), address)
+	// Check that the tables are consistent (i.e. the address is found in one
+	// if and only if it is found in the other).
+	Assert(foundEscrow == foundLocked)
+	return foundEscrow
 }
 
 func (st *StorageMarketActorState_I) _getStorageFeeSinceLastPayment(rt Runtime, deal deal.OnChainDeal, newPaymentEpoch block.ChainEpoch) actor.TokenAmount {
@@ -247,9 +292,9 @@ func (st *StorageMarketActorState_I) _getStorageFeeSinceLastPayment(rt Runtime, 
 		unitPrice := dealP.StoragePricePerEpoch()
 		fee := actor.TokenAmount(uint64(duration) * uint64(unitPrice))
 
-		clientBalance := st._safeGetBalance(rt, dealP.Client())
+		clientLockedBalance := st._getLockedReqBalance(dealP.Client())
 
-		if fee > clientBalance.Locked() {
+		if fee > clientLockedBalance {
 			rt.AbortFundsMsg("sma._getStorageFeeSinceLastPayment: fee cannot exceed client LockedBalance.")
 		}
 
@@ -261,19 +306,16 @@ func (st *StorageMarketActorState_I) _getStorageFeeSinceLastPayment(rt Runtime, 
 
 }
 
-func (st *StorageMarketActorState_I) _slashDealCollateral(rt Runtime, dealP deal.StorageDealProposal) actor.TokenAmount {
-	amountToSlash := dealP.ProviderBalanceRequirement()
-	providerBal := st._safeGetBalance(rt, dealP.Provider())
+func (st *StorageMarketActorState_I) _rtSlashDealCollateral(rt Runtime, dealP deal.StorageDealProposal) actor.TokenAmount {
+	Assert(st._addressEntryExists(dealP.Provider()))
 
-	if providerBal.Locked() < amountToSlash {
-		amountToSlash = providerBal.Locked()
-		// TODO: decide on error handling here
-		panic("TODO")
-	}
+	slashAmount := dealP.ProviderBalanceRequirement()
+	Assert(slashAmount >= 0)
 
-	st.Balances()[dealP.Provider()].Impl().Locked_ -= amountToSlash
-	return amountToSlash
+	st.Impl().EscrowTable_ = st._rtTableWithDeductBalanceExact(rt, st.EscrowTable(), dealP.Provider(), slashAmount)
+	st.Impl().LockedReqTable_ = st._rtTableWithDeductBalanceExact(rt, st.LockedReqTable(), dealP.Provider(), slashAmount)
 
+	return slashAmount
 }
 
 // delete deal from active deals
@@ -291,9 +333,9 @@ func (st *StorageMarketActorState_I) _terminateDeal(rt Runtime, dealID deal.Deal
 	// return client collateral and locked storage fee
 	clientCollateral := dealP.TotalClientCollateral()
 	lockedFee := st._getStorageFeeSinceLastPayment(rt, deal, dealP.EndEpoch())
-	st._unlockBalance(rt, dealP.Client(), clientCollateral+lockedFee)
+	st._rtUnlockBalance(rt, dealP.Client(), clientCollateral+lockedFee)
 
-	return st._slashDealCollateral(rt, dealP)
+	return st._rtSlashDealCollateral(rt, dealP)
 }
 
 func (st *StorageMarketActorState_I) _assertEpochEqual(rt Runtime, epoch1 block.ChainEpoch, epoch2 block.ChainEpoch) {

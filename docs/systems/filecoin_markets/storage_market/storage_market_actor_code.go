@@ -61,53 +61,51 @@ func DeserializeState(x Bytes) State {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, amount actor.TokenAmount) {
+func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, amountRequested actor.TokenAmount) {
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
+	callerAddr := rt.ImmediateCaller()
+	TODO() // Restrict caller to miner owner? (May require an additional argument
+	// to specify miner actor.)
 
-	msgSender := rt.ImmediateCaller()
-	panic("TODO: assert caller is miner worker")
+	if amountRequested < 0 {
+		rt.AbortArgMsg("sma.WithdrawBalance: negative amount.")
+	}
 
 	h, st := a.State(rt)
 
-	if amount <= 0 {
-		rt.AbortArgMsg("non-positive balance to withdraw.")
+	if !st._addressEntryExists(callerAddr) {
+		rt.AbortArgMsg("sma.WithdrawBalance: address entry does not exist")
 	}
 
-	senderBalance := st._safeGetBalance(rt, msgSender)
-
-	if senderBalance.Available() < amount {
-		rt.AbortFundsMsg("insufficient balance.")
-	}
-
-	senderBalance.Impl().Available_ = senderBalance.Available() - amount
-	st.Balances()[msgSender] = senderBalance
+	minBalance := st._getLockedReqBalance(callerAddr)
+	newTable, amountExtracted, ok := actor.BalanceTable_WithExtractPartial(
+		st.EscrowTable(), callerAddr, amountRequested, minBalance)
+	Assert(ok)
+	st.Impl().EscrowTable_ = newTable
 
 	UpdateRelease(rt, h, st)
 
 	// send funds to miner
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:    msgSender,
-		Value_: amount,
+		To_:    callerAddr,
+		Value_: amountExtracted,
 	})
 }
 
 func (a *StorageMarketActorCode_I) AddBalance(rt Runtime) {
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
 
-	msgSender := rt.ImmediateCaller()
+	ownerAddr := rt.ImmediateCaller()
 	msgValue := rt.ValueReceived()
 
 	h, st := a.State(rt)
-
-	senderBalance, found := st.Balances()[msgSender]
-	if found {
-		senderBalance.Impl().Available_ = senderBalance.Available() + msgValue
-		st.Balances()[msgSender] = senderBalance
-	} else {
-		st.Balances()[msgSender] = &StorageParticipantBalance_I{
-			Locked_:    0,
-			Available_: msgValue,
-		}
+	newTable, ok := actor.BalanceTable_WithAdd(st.EscrowTable(), ownerAddr, msgValue)
+	if !ok {
+		// Entry not found; create implicitly.
+		newTable, ok = actor.BalanceTable_WithNewAddressEntry(st.EscrowTable(), ownerAddr, msgValue)
+		Assert(ok)
 	}
-
+	st.Impl().EscrowTable_ = newTable
 	UpdateRelease(rt, h, st)
 }
 
@@ -251,7 +249,7 @@ func (a *StorageMarketActorCode_I) ProcessDealPayment(rt Runtime, dealIDs []deal
 		fee := st._getStorageFeeSinceLastPayment(rt, deal, newPaymentEpoch)
 
 		dealP := deal.Deal().Proposal()
-		st._transferBalance(rt, dealP.Client(), dealP.Provider(), fee)
+		st._rtTransferBalance(rt, dealP.Client(), dealP.Provider(), fee)
 
 		// update LastPaymentEpoch in deal
 		deal.Impl().LastPaymentEpoch_ = newPaymentEpoch
@@ -278,11 +276,11 @@ func (a *StorageMarketActorCode_I) ProcessDealExpiration(rt Runtime, dealIDs []d
 		fee := st._getStorageFeeSinceLastPayment(rt, expiredDeal, dealP.EndEpoch())
 
 		delete(st.Deals(), dealID)
-		st._transferBalance(rt, dealP.Client(), dealP.Provider(), fee)
+		st._rtTransferBalance(rt, dealP.Client(), dealP.Provider(), fee)
 
 		// return storage deal collaterals to both miners and client
-		st._unlockBalance(rt, dealP.Provider(), dealP.ProviderBalanceRequirement())
-		st._unlockBalance(rt, dealP.Client(), dealP.TotalClientCollateral())
+		st._rtUnlockBalance(rt, dealP.Provider(), dealP.ProviderBalanceRequirement())
+		st._rtUnlockBalance(rt, dealP.Client(), dealP.TotalClientCollateral())
 
 	}
 
@@ -322,11 +320,11 @@ func (a *StorageMarketActorCode_I) ClearInactiveDealIDs(rt Runtime, dealIDs []de
 
 		// return client lock up (client deal collateral and total storage fee)
 		clientLockup := dealP.ClientBalanceRequirement()
-		st._unlockBalance(rt, dealP.Client(), clientLockup)
+		st._rtUnlockBalance(rt, dealP.Client(), clientLockup)
 
 		// return provider lock up
 		providerLockup := dealP.ProviderBalanceRequirement()
-		st._unlockBalance(rt, dealP.Provider(), providerLockup)
+		st._rtUnlockBalance(rt, dealP.Provider(), providerLockup)
 
 		// Note that there is no penalty on provider deal collateral
 		// since PreCommitDeposit has been burned

@@ -4688,6 +4688,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// Not necessarily the actor in the From field of the initial on-chain Message.
 </span><span class="c1"></span>    <span class="nf">ImmediateCaller</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
     <span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">caller</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
+    <span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">type_</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID</span><span class="p">)</span>
     <span class="nf">ValidateImmediateCallerAcceptAny</span><span class="p">()</span>
     <span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span><span class="nx">CallerPattern</span><span class="p">)</span>
 
@@ -4828,6 +4829,8 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">var</span> <span class="nx">EnsureErrorCode</span> <span class="p">=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">EnsureErrorCode</span>
 <span class="kd">var</span> <span class="nx">SystemError</span> <span class="p">=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">SystemError</span>
+
+<span class="kd">var</span> <span class="nx">Assert</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Assert</span>
 <span class="kd">var</span> <span class="nx">IMPL_FINISH</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">IMPL_FINISH</span>
 <span class="kd">var</span> <span class="nx">TODO</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">TODO</span>
 
@@ -5082,6 +5085,19 @@ https://github.com/alex-shpak/hugo-book
 	<span class="p">}</span>
 <span class="p">}</span>
 
+<span class="kd">func</span> <span class="nf">CallerPattern_MakeAcceptAnyOfType</span><span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">,</span> <span class="nx">type_</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID</span><span class="p">)</span> <span class="nx">CallerPattern</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">CallerPattern</span><span class="p">{</span>
+		<span class="nx">Matches</span><span class="p">:</span> <span class="kd">func</span><span class="p">(</span><span class="nx">y</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+			<span class="nx">codeID</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">_getActorCodeID</span><span class="p">(</span><span class="nx">y</span><span class="p">)</span>
+			<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+				<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Internal runtime error: actor not found&#34;</span><span class="p">)</span>
+			<span class="p">}</span>
+			<span class="nf">Assert</span><span class="p">(</span><span class="nx">codeID</span> <span class="o">!=</span> <span class="kc">nil</span><span class="p">)</span>
+			<span class="k">return</span> <span class="p">(</span><span class="nx">codeID</span><span class="p">.</span><span class="nf">IsBuiltin</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">codeID</span><span class="p">.</span><span class="nf">As_Builtin</span><span class="p">()</span> <span class="o">==</span> <span class="nx">type_</span><span class="p">))</span>
+		<span class="p">},</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
 <span class="kd">func</span> <span class="nf">CallerPattern_MakeAcceptAny</span><span class="p">()</span> <span class="nx">CallerPattern</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">CallerPattern</span><span class="p">{</span>
 		<span class="nx">Matches</span><span class="p">:</span> <span class="kd">func</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span> <span class="k">return</span> <span class="kc">true</span> <span class="p">},</span>
@@ -5090,6 +5106,10 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">callerExpected</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span><span class="nf">CallerPattern_MakeSingleton</span><span class="p">(</span><span class="nx">callerExpected</span><span class="p">))</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">type_</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span><span class="nf">CallerPattern_MakeAcceptAnyOfType</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">type_</span><span class="p">))</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ValidateImmediateCallerAcceptAny</span><span class="p">()</span> <span class="p">{</span>
@@ -5155,6 +5175,11 @@ https://github.com/alex-shpak/hugo-book
 
 	<span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span> <span class="p">=</span> <span class="nx">newGlobalStatePending</span>
 	<span class="k">return</span> <span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_getActorCodeID</span><span class="p">(</span><span class="nx">actorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">ret</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ErrorHandlingSpec</span> <span class="kt">int</span>

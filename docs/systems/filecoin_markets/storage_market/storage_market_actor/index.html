@@ -4667,17 +4667,22 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 
-<span class="kd">type</span> <span class="nx">StorageParticipantBalance</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Locked</span>     <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nx">Available</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">BalancesHAMT</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">StorageParticipantBalance</span><span class="p">}</span>
 <span class="kd">type</span> <span class="nx">DealsAMT</span> <span class="p">{</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">:</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageMarketActorState</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Balances</span>  <span class="nx">BalancesHAMT</span>
-    <span class="nx">Deals</span>     <span class="nx">DealsAMT</span>
+    <span class="nx">Deals</span>           <span class="nx">DealsAMT</span>
+
+    <span class="c1">// Total amount held in escrow, indexed by actor address (including both locked and unlocked amounts).
+</span><span class="c1"></span>    <span class="nx">EscrowTable</span>     <span class="nx">actor</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span>
+
+    <span class="c1">// Amount locked, indexed by actor address.
+</span><span class="c1"></span>    <span class="c1">// Note: the amounts in this table do not affect the overall amount in escrow:
+</span><span class="c1"></span>    <span class="c1">// only the _portion_ of the total escrow amount that is locked.
+</span><span class="c1"></span>    <span class="nx">LockedReqTable</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span>
+
+    <span class="nf">_getTotalEscrowBalance</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">_getLockedReqBalance</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">_getAvailableBalance</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
     <span class="nf">_generateStorageDealID</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
     <span class="nf">_isBalanceAvailable</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">bool</span>
@@ -4695,9 +4700,9 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// check if provider and client have sufficient balances
 </span><span class="c1"></span>    <span class="nf">_validateNewStorageDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="kt">bool</span>
 
-    <span class="nf">_lockBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
-    <span class="nf">_unlockBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
-    <span class="nf">_transferBalance</span><span class="p">(</span>
+    <span class="nf">_rtLockBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
+    <span class="nf">_rtUnlockBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
+    <span class="nf">_rtTransferBalance</span><span class="p">(</span>
         <span class="nx">rt</span>           <span class="nx">Runtime</span>
         <span class="nx">fromLocked</span>   <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
         <span class="nx">toAvailable</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
@@ -4707,7 +4712,6 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nf">_safeGetOnChainDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span>
     <span class="nf">_getOnChainDeal</span><span class="p">(</span><span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="p">(</span><span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
-    <span class="nf">_safeGetBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">participant</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">StorageParticipantBalance</span>
     <span class="nf">_assertPublishedDealState</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span>
     <span class="nf">_assertActiveDealState</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span>
     <span class="nf">_assertEpochEqual</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">epoch1</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">epoch2</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
@@ -4725,12 +4729,13 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
     <span class="nf">_terminateDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nf">_slashDealCollateral</span><span class="p">(</span>
+    <span class="nf">_rtSlashDealCollateral</span><span class="p">(</span>
         <span class="nx">rt</span>      <span class="nx">Runtime</span>
         <span class="nx">amount</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
     <span class="nf">_refundStartedDeals</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span>
+    <span class="nf">_addressEntryExists</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageMarketActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4830,17 +4835,45 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 
     <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+    <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
+<span class="kd">var</span> <span class="nx">Assert</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Assert</span>
+
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_generateStorageDealID</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">storageDeal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span> <span class="p">{</span>
-    <span class="c1">// TODO
-</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
+    <span class="nf">TODO</span><span class="p">()</span>
+    <span class="kd">var</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
     <span class="k">return</span> <span class="nx">dealID</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_isBalanceAvailable</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="nx">bal</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">a</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nx">bal</span><span class="p">.</span><span class="nf">Available</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="nx">amount</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_getTotalEscrowBalance</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">_addressEntryExists</span><span class="p">(</span><span class="nx">a</span><span class="p">))</span>
+    <span class="nx">ret</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">a</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">ret</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_getLockedReqBalance</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">_addressEntryExists</span><span class="p">(</span><span class="nx">a</span><span class="p">))</span>
+    <span class="nx">ret</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">LockedReqTable</span><span class="p">(),</span> <span class="nx">a</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">ret</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_getAvailableBalance</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">_addressEntryExists</span><span class="p">(</span><span class="nx">a</span><span class="p">))</span>
+    <span class="nx">escrowBalance</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getTotalEscrowBalance</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+    <span class="nx">lockedReqBalance</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getLockedReqBalance</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+    <span class="nx">ret</span> <span class="o">:=</span> <span class="nx">escrowBalance</span> <span class="o">-</span> <span class="nx">lockedReqBalance</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">ret</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">ret</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_isBalanceAvailable</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">amount</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">_addressEntryExists</span><span class="p">(</span><span class="nx">a</span><span class="p">))</span>
+    <span class="nx">availableBalance</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getAvailableBalance</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nx">availableBalance</span> <span class="o">&gt;=</span> <span class="nx">amount</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_assertValidClientSignature</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealP</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="p">{</span>
@@ -4909,8 +4942,8 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_assertSufficientBalanceAvailForDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">p</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="p">{</span>
 
     <span class="c1">// verify client and provider has sufficient balance
-</span><span class="c1"></span>    <span class="nx">isClientBalAvailable</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_isBalanceAvailable</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">p</span><span class="p">.</span><span class="nf">ClientBalanceRequirement</span><span class="p">())</span>
-    <span class="nx">isProviderBalAvailable</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_isBalanceAvailable</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">p</span><span class="p">.</span><span class="nf">ProviderBalanceRequirement</span><span class="p">())</span>
+</span><span class="c1"></span>    <span class="nx">isClientBalAvailable</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_isBalanceAvailable</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">p</span><span class="p">.</span><span class="nf">ClientBalanceRequirement</span><span class="p">())</span>
+    <span class="nx">isProviderBalAvailable</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_isBalanceAvailable</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">p</span><span class="p">.</span><span class="nf">ProviderBalanceRequirement</span><span class="p">())</span>
 
     <span class="k">if</span> <span class="p">!</span><span class="nx">isClientBalAvailable</span> <span class="o">||</span> <span class="p">!</span><span class="nx">isProviderBalAvailable</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortFundsMsg</span><span class="p">(</span><span class="s">&#34;sma._validateNewStorageDeal: client or provider insufficient balance.&#34;</span><span class="p">)</span>
@@ -4958,56 +4991,74 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">deal</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_lockBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="nx">amount</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;sma._lockBalance: negative amount.&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_rtLockBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">amount</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">_addressEntryExists</span><span class="p">(</span><span class="nx">addr</span><span class="p">))</span>
 
-    <span class="nx">currBalance</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">addr</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nx">currBalance</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">Available</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">amount</span> <span class="p">{</span>
+    <span class="nx">prevLocked</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getLockedReqBalance</span><span class="p">(</span><span class="nx">addr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nx">prevLocked</span><span class="o">+</span><span class="nx">amount</span> <span class="p">&gt;</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getTotalEscrowBalance</span><span class="p">(</span><span class="nx">addr</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortFundsMsg</span><span class="p">(</span><span class="s">&#34;sma._lockBalance: insufficient funds available to lock.&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="nx">currBalance</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Available_</span> <span class="o">-=</span> <span class="nx">amount</span>
-    <span class="nx">currBalance</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Locked_</span> <span class="o">+=</span> <span class="nx">amount</span>
+    <span class="nx">newLockedReqTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">LockedReqTable</span><span class="p">(),</span> <span class="nx">addr</span><span class="p">,</span> <span class="nx">amount</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">LockedReqTable_</span> <span class="p">=</span> <span class="nx">newLockedReqTable</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_unlockBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="nx">amount</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;sma._unlockBalance: negative amount.&#34;</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_rtUnlockBalance</span><span class="p">(</span>
+    <span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">unlockAmountRequested</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">unlockAmountRequested</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">_addressEntryExists</span><span class="p">(</span><span class="nx">addr</span><span class="p">))</span>
+
+    <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">LockedReqTable_</span> <span class="p">=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_rtTableWithDeductBalanceExact</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">st</span><span class="p">.</span><span class="nf">LockedReqTable</span><span class="p">(),</span> <span class="nx">addr</span><span class="p">,</span> <span class="nx">unlockAmountRequested</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_rtTableWithAddBalance</span><span class="p">(</span>
+    <span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">table</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span><span class="p">,</span>
+    <span class="nx">toAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amountToAdd</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span> <span class="p">{</span>
+
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">amountToAdd</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">table</span><span class="p">,</span> <span class="nx">toAddr</span><span class="p">,</span> <span class="nx">amountToAdd</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">newTable</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_rtTableWithDeductBalanceExact</span><span class="p">(</span>
+    <span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">table</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span><span class="p">,</span>
+    <span class="nx">fromAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amountRequested</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span> <span class="p">{</span>
+
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">amountRequested</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountDeducted</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithSubtractPreservingNonnegative</span><span class="p">(</span>
+        <span class="nx">table</span><span class="p">,</span> <span class="nx">fromAddr</span><span class="p">,</span> <span class="nx">amountRequested</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nx">amountDeducted</span> <span class="o">!=</span> <span class="nx">amountRequested</span> <span class="p">{</span>
+        <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// Should be Assert(), as an invariant violation in SMA?
+</span><span class="c1"></span>        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortFundsMsg</span><span class="p">(</span><span class="s">&#34;sma._rtDeduct: attempt to deduct amount greater than present in table&#34;</span><span class="p">)</span>
     <span class="p">}</span>
-
-    <span class="nx">currBalance</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">addr</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nx">currBalance</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">Locked</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">amount</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortFundsMsg</span><span class="p">(</span><span class="s">&#34;sma._unlockBalance: insufficient funds to unlock.&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="nx">currBalance</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Locked_</span> <span class="o">-=</span> <span class="nx">amount</span>
-    <span class="nx">currBalance</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Available_</span> <span class="o">+=</span> <span class="nx">amount</span>
+    <span class="k">return</span> <span class="nx">newTable</span>
 <span class="p">}</span>
 
 <span class="c1">// move funds from locked in client to available in provider
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_transferBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">fromLocked</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">toAvailable</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_rtTransferBalance</span><span class="p">(</span>
+    <span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">fromAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">toAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">transferAmountRequested</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
 
-    <span class="nx">fromB</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">fromLocked</span><span class="p">)</span>
-    <span class="nx">toB</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">toAvailable</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">transferAmountRequested</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">_addressEntryExists</span><span class="p">(</span><span class="nx">fromAddr</span><span class="p">))</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">_addressEntryExists</span><span class="p">(</span><span class="nx">toAddr</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="nx">fromB</span><span class="p">.</span><span class="nf">Locked</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">amount</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortFundsMsg</span><span class="p">(</span><span class="s">&#34;sma._transferBalance: attempt to unlock funds greater than actor has&#34;</span><span class="p">)</span>
-        <span class="k">return</span>
-    <span class="p">}</span>
-
-    <span class="nx">fromB</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Locked_</span> <span class="o">-=</span> <span class="nx">amount</span>
-    <span class="nx">toB</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Available_</span> <span class="o">+=</span> <span class="nx">amount</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">EscrowTable_</span> <span class="p">=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_rtTableWithDeductBalanceExact</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">fromAddr</span><span class="p">,</span> <span class="nx">transferAmountRequested</span><span class="p">)</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">LockedReqTable_</span> <span class="p">=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_rtTableWithDeductBalanceExact</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">st</span><span class="p">.</span><span class="nf">LockedReqTable</span><span class="p">(),</span> <span class="nx">fromAddr</span><span class="p">,</span> <span class="nx">transferAmountRequested</span><span class="p">)</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">EscrowTable_</span> <span class="p">=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_rtTableWithAddBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">toAddr</span><span class="p">,</span> <span class="nx">transferAmountRequested</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_lockFundsForStorageDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_rtLockFundsForStorageDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">p</span> <span class="o">:=</span> <span class="nx">deal</span><span class="p">.</span><span class="nf">Proposal</span><span class="p">()</span>
 
-    <span class="nx">st</span><span class="p">.</span><span class="nf">_lockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">p</span><span class="p">.</span><span class="nf">ClientBalanceRequirement</span><span class="p">())</span>
-    <span class="nx">st</span><span class="p">.</span><span class="nf">_lockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">p</span><span class="p">.</span><span class="nf">ProviderBalanceRequirement</span><span class="p">())</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">_rtLockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">p</span><span class="p">.</span><span class="nf">ClientBalanceRequirement</span><span class="p">())</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">_rtLockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">p</span><span class="p">.</span><span class="nf">ProviderBalanceRequirement</span><span class="p">())</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_getOnchainDeal</span><span class="p">(</span><span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="p">(</span><span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
@@ -5048,14 +5099,13 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_safeGetBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">participant</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">StorageParticipantBalance</span> <span class="p">{</span>
-    <span class="nx">balance</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Balances</span><span class="p">()[</span><span class="nx">participant</span><span class="p">]</span>
-
-    <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;sma._safeGetBalance: participant balance not found.&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="nx">balance</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_addressEntryExists</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="nx">_</span><span class="p">,</span> <span class="nx">foundEscrow</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">address</span><span class="p">)</span>
+    <span class="nx">_</span><span class="p">,</span> <span class="nx">foundLocked</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">LockedReqTable</span><span class="p">(),</span> <span class="nx">address</span><span class="p">)</span>
+    <span class="c1">// Check that the tables are consistent (i.e. the address is found in one
+</span><span class="c1"></span>    <span class="c1">// if and only if it is found in the other).
+</span><span class="c1"></span>    <span class="nf">Assert</span><span class="p">(</span><span class="nx">foundEscrow</span> <span class="o">==</span> <span class="nx">foundLocked</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">foundEscrow</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_getStorageFeeSinceLastPayment</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">,</span> <span class="nx">newPaymentEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
@@ -5068,9 +5118,9 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">unitPrice</span> <span class="o">:=</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">StoragePricePerEpoch</span><span class="p">()</span>
         <span class="nx">fee</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">duration</span><span class="p">)</span> <span class="o">*</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">unitPrice</span><span class="p">))</span>
 
-        <span class="nx">clientBalance</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Client</span><span class="p">())</span>
+        <span class="nx">clientLockedBalance</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getLockedReqBalance</span><span class="p">(</span><span class="nx">dealP</span><span class="p">.</span><span class="nf">Client</span><span class="p">())</span>
 
-        <span class="k">if</span> <span class="nx">fee</span> <span class="p">&gt;</span> <span class="nx">clientBalance</span><span class="p">.</span><span class="nf">Locked</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">fee</span> <span class="p">&gt;</span> <span class="nx">clientLockedBalance</span> <span class="p">{</span>
             <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortFundsMsg</span><span class="p">(</span><span class="s">&#34;sma._getStorageFeeSinceLastPayment: fee cannot exceed client LockedBalance.&#34;</span><span class="p">)</span>
         <span class="p">}</span>
 
@@ -5082,19 +5132,16 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_slashDealCollateral</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealP</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
-    <span class="nx">amountToSlash</span> <span class="o">:=</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">ProviderBalanceRequirement</span><span class="p">()</span>
-    <span class="nx">providerBal</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">())</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_rtSlashDealCollateral</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealP</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">_addressEntryExists</span><span class="p">(</span><span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">()))</span>
 
-    <span class="k">if</span> <span class="nx">providerBal</span><span class="p">.</span><span class="nf">Locked</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">amountToSlash</span> <span class="p">{</span>
-        <span class="nx">amountToSlash</span> <span class="p">=</span> <span class="nx">providerBal</span><span class="p">.</span><span class="nf">Locked</span><span class="p">()</span>
-        <span class="c1">// TODO: decide on error handling here
-</span><span class="c1"></span>        <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
+    <span class="nx">slashAmount</span> <span class="o">:=</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">ProviderBalanceRequirement</span><span class="p">()</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">slashAmount</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
 
-    <span class="nx">st</span><span class="p">.</span><span class="nf">Balances</span><span class="p">()[</span><span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">()].</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Locked_</span> <span class="o">-=</span> <span class="nx">amountToSlash</span>
-    <span class="k">return</span> <span class="nx">amountToSlash</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">EscrowTable_</span> <span class="p">=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_rtTableWithDeductBalanceExact</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">slashAmount</span><span class="p">)</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">LockedReqTable_</span> <span class="p">=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_rtTableWithDeductBalanceExact</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">st</span><span class="p">.</span><span class="nf">LockedReqTable</span><span class="p">(),</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">slashAmount</span><span class="p">)</span>
 
+    <span class="k">return</span> <span class="nx">slashAmount</span>
 <span class="p">}</span>
 
 <span class="c1">// delete deal from active deals
@@ -5112,9 +5159,9 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// return client collateral and locked storage fee
 </span><span class="c1"></span>    <span class="nx">clientCollateral</span> <span class="o">:=</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">TotalClientCollateral</span><span class="p">()</span>
     <span class="nx">lockedFee</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getStorageFeeSinceLastPayment</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">deal</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">EndEpoch</span><span class="p">())</span>
-    <span class="nx">st</span><span class="p">.</span><span class="nf">_unlockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">clientCollateral</span><span class="o">+</span><span class="nx">lockedFee</span><span class="p">)</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">_rtUnlockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">clientCollateral</span><span class="o">+</span><span class="nx">lockedFee</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_slashDealCollateral</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_rtSlashDealCollateral</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_assertEpochEqual</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">epoch1</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">epoch2</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">{</span>
@@ -5220,53 +5267,51 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1"></span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">WithdrawBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
-
-    <span class="nx">msgSender</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO: assert caller is miner worker&#34;</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">WithdrawBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">amountRequested</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_Account</span><span class="p">)</span>
+    <span class="nx">callerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+    <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// Restrict caller to miner owner? (May require an additional argument
+</span><span class="c1"></span>    <span class="c1">// to specify miner actor.)
+</span><span class="c1"></span>
+    <span class="k">if</span> <span class="nx">amountRequested</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;sma.WithdrawBalance: negative amount.&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nx">amount</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;non-positive balance to withdraw.&#34;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">st</span><span class="p">.</span><span class="nf">_addressEntryExists</span><span class="p">(</span><span class="nx">callerAddr</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;sma.WithdrawBalance: address entry does not exist&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="nx">senderBalance</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">msgSender</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nx">senderBalance</span><span class="p">.</span><span class="nf">Available</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">amount</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortFundsMsg</span><span class="p">(</span><span class="s">&#34;insufficient balance.&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="nx">senderBalance</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Available_</span> <span class="p">=</span> <span class="nx">senderBalance</span><span class="p">.</span><span class="nf">Available</span><span class="p">()</span> <span class="o">-</span> <span class="nx">amount</span>
-    <span class="nx">st</span><span class="p">.</span><span class="nf">Balances</span><span class="p">()[</span><span class="nx">msgSender</span><span class="p">]</span> <span class="p">=</span> <span class="nx">senderBalance</span>
+    <span class="nx">minBalance</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getLockedReqBalance</span><span class="p">(</span><span class="nx">callerAddr</span><span class="p">)</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountExtracted</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithExtractPartial</span><span class="p">(</span>
+        <span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">callerAddr</span><span class="p">,</span> <span class="nx">amountRequested</span><span class="p">,</span> <span class="nx">minBalance</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">EscrowTable_</span> <span class="p">=</span> <span class="nx">newTable</span>
 
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
     <span class="c1">// send funds to miner
 </span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
-        <span class="nx">To_</span><span class="p">:</span>    <span class="nx">msgSender</span><span class="p">,</span>
-        <span class="nx">Value_</span><span class="p">:</span> <span class="nx">amount</span><span class="p">,</span>
+        <span class="nx">To_</span><span class="p">:</span>    <span class="nx">callerAddr</span><span class="p">,</span>
+        <span class="nx">Value_</span><span class="p">:</span> <span class="nx">amountExtracted</span><span class="p">,</span>
     <span class="p">})</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">AddBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_Account</span><span class="p">)</span>
 
-    <span class="nx">msgSender</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+    <span class="nx">ownerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
     <span class="nx">msgValue</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReceived</span><span class="p">()</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-
-    <span class="nx">senderBalance</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Balances</span><span class="p">()[</span><span class="nx">msgSender</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
-        <span class="nx">senderBalance</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Available_</span> <span class="p">=</span> <span class="nx">senderBalance</span><span class="p">.</span><span class="nf">Available</span><span class="p">()</span> <span class="o">+</span> <span class="nx">msgValue</span>
-        <span class="nx">st</span><span class="p">.</span><span class="nf">Balances</span><span class="p">()[</span><span class="nx">msgSender</span><span class="p">]</span> <span class="p">=</span> <span class="nx">senderBalance</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="nx">st</span><span class="p">.</span><span class="nf">Balances</span><span class="p">()[</span><span class="nx">msgSender</span><span class="p">]</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">StorageParticipantBalance_I</span><span class="p">{</span>
-            <span class="nx">Locked_</span><span class="p">:</span>    <span class="mi">0</span><span class="p">,</span>
-            <span class="nx">Available_</span><span class="p">:</span> <span class="nx">msgValue</span><span class="p">,</span>
-        <span class="p">}</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">ownerAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+        <span class="c1">// Entry not found; create implicitly.
+</span><span class="c1"></span>        <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithNewAddressEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">ownerAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
+        <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
     <span class="p">}</span>
-
+    <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">EscrowTable_</span> <span class="p">=</span> <span class="nx">newTable</span>
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5410,7 +5455,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">fee</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getStorageFeeSinceLastPayment</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">deal</span><span class="p">,</span> <span class="nx">newPaymentEpoch</span><span class="p">)</span>
 
         <span class="nx">dealP</span> <span class="o">:=</span> <span class="nx">deal</span><span class="p">.</span><span class="nf">Deal</span><span class="p">().</span><span class="nf">Proposal</span><span class="p">()</span>
-        <span class="nx">st</span><span class="p">.</span><span class="nf">_transferBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">fee</span><span class="p">)</span>
+        <span class="nx">st</span><span class="p">.</span><span class="nf">_rtTransferBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">fee</span><span class="p">)</span>
 
         <span class="c1">// update LastPaymentEpoch in deal
 </span><span class="c1"></span>        <span class="nx">deal</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">LastPaymentEpoch_</span> <span class="p">=</span> <span class="nx">newPaymentEpoch</span>
@@ -5437,11 +5482,11 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">fee</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getStorageFeeSinceLastPayment</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">expiredDeal</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">EndEpoch</span><span class="p">())</span>
 
         <span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">Deals</span><span class="p">(),</span> <span class="nx">dealID</span><span class="p">)</span>
-        <span class="nx">st</span><span class="p">.</span><span class="nf">_transferBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">fee</span><span class="p">)</span>
+        <span class="nx">st</span><span class="p">.</span><span class="nf">_rtTransferBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">fee</span><span class="p">)</span>
 
         <span class="c1">// return storage deal collaterals to both miners and client
-</span><span class="c1"></span>        <span class="nx">st</span><span class="p">.</span><span class="nf">_unlockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">ProviderBalanceRequirement</span><span class="p">())</span>
-        <span class="nx">st</span><span class="p">.</span><span class="nf">_unlockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">TotalClientCollateral</span><span class="p">())</span>
+</span><span class="c1"></span>        <span class="nx">st</span><span class="p">.</span><span class="nf">_rtUnlockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">ProviderBalanceRequirement</span><span class="p">())</span>
+        <span class="nx">st</span><span class="p">.</span><span class="nf">_rtUnlockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">TotalClientCollateral</span><span class="p">())</span>
 
     <span class="p">}</span>
 
@@ -5481,11 +5526,11 @@ https://github.com/alex-shpak/hugo-book
 
         <span class="c1">// return client lock up (client deal collateral and total storage fee)
 </span><span class="c1"></span>        <span class="nx">clientLockup</span> <span class="o">:=</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">ClientBalanceRequirement</span><span class="p">()</span>
-        <span class="nx">st</span><span class="p">.</span><span class="nf">_unlockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">clientLockup</span><span class="p">)</span>
+        <span class="nx">st</span><span class="p">.</span><span class="nf">_rtUnlockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">clientLockup</span><span class="p">)</span>
 
         <span class="c1">// return provider lock up
 </span><span class="c1"></span>        <span class="nx">providerLockup</span> <span class="o">:=</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">ProviderBalanceRequirement</span><span class="p">()</span>
-        <span class="nx">st</span><span class="p">.</span><span class="nf">_unlockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">providerLockup</span><span class="p">)</span>
+        <span class="nx">st</span><span class="p">.</span><span class="nf">_rtUnlockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">providerLockup</span><span class="p">)</span>
 
         <span class="c1">// Note that there is no penalty on provider deal collateral
 </span><span class="c1"></span>        <span class="c1">// since PreCommitDeposit has been burned

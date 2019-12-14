@@ -5,10 +5,8 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type PowerTableEntry struct {
-    ActivePower             block.StoragePower
-    InactivePower           block.StoragePower
-    AvailableBalance        actor.TokenAmount
-    LockedPledgeCollateral  actor.TokenAmount
+    ActivePower    block.StoragePower
+    InactivePower  block.StoragePower
 }
 
 type PowerReport struct {
@@ -20,18 +18,19 @@ type PowerReport struct {
 type PowerTableHAMT {addr.Address: PowerTableEntry}  // TODO: convert address to ActorID
 
 type StoragePowerActorState struct {
-    // PowerTable is a mapping from MinerActorID to PowerTableEntry
-    PowerTable  PowerTableHAMT
-    EC          ExpectedConsensus
+    PowerTable   PowerTableHAMT
+    EscrowTable  actor.BalanceTableHAMT
 
     _slashPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) actor.TokenAmount
     _lockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
     _unlockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
-    _getPledgeCollateralReq(rt Runtime, newPower block.StoragePower) actor.TokenAmount
-    _selectMinersToSurprise(rt Runtime, challengeCount int, randomness util.Randomness) [addr.Address]
+    _getPowerTotalForMiner(minerAddr addr.Address) (power block.StoragePower, ok bool)
+    _getPledgeCollateralReq(power block.StoragePower) actor.TokenAmount
+    _getPledgeCollateralReqForMiner(minerAddr addr.Address) actor.TokenAmount
+    _selectMinersToSurprise(challengeCount int, randomness util.Randomness) [addr.Address]
+    _shouldChallenge(rt Runtime, networkPower block.StoragePower) bool
 
     _safeGetPowerEntry(rt Runtime, minerID addr.Address) PowerTableEntry
-    _ensurePledgeCollateralSatisfied(rt Runtime) bool
     _getAffectedPledge(
         rt             Runtime
         minerID        addr.Address
