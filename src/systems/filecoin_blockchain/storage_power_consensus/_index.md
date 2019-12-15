@@ -133,13 +133,13 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 
 In order to secure Storage Power Consensus, the system defines a minimum miner size required to participate in consensus.
 
-Specifically, miners must have either at least `MIN_MINER_SIZE_STOR` of power (i.e. storage power currently used in storage deals) or `MIN_MINER_SIZE_PERC` of the network's active storage power to participate in leader election.
+Specifically, miners must have either at least `MIN_MINER_SIZE_STOR` of power (i.e. storage power currently used in storage deals) in order to participate in leader election. If no miner has `MIN_MINER_SIZE_STOR` or more power, miners with at least as much power as the smallest miner in the top `MIN_MINER_SIZE_TARG` of miners (sorted by storage power) will be able to participate in leader election. In plain english, take `MIN_MINER_SIZE_TARG = 3` for instance, this means that miners with at least as much power as the 3rd largest miner will be eligible to participate in consensus.
 
 Miners smaller than this cannot mine blocks and earn block rewards in the network. Their power will not be counted as part of total network power. However, **it is important to note that such miners can still have their power faulted and be penalized accordingly**.
 
 Accordingly, to bootstrap the network, the genesis block must include miners taking part in valid storage deals along with appropriate committed storage.
 
-The `MIN_MINER_SIZE_PERC` condition will not be used in a network with more than `MIN_MINER_SIZE_STOR/MIN_MINER_SIZE_PERC` of power. It is nonetheless defined to ensure liveness in small networks (e.g. close to genesis or after large power drops). Simply, a single miner can maintain network liveness for networks with less than `MIN_MINER_SIZE_STOR/MIN_MINER_SIZE_PERC` of active storage.
+The `MIN_MINER_SIZE_TARG` condition will not be used in a network in which any miner has more than `MIN_MINER_SIZE_STOR` power. It is nonetheless defined to ensure liveness in small networks (e.g. close to genesis or after large power drops).
 
 {{% notice placeholder %}}
 The below values are currently placeholders.
@@ -147,4 +147,8 @@ The below values are currently placeholders.
 
 We currently set:
 - `MIN_MINER_SIZE_STOR = 1 << 40 Bytes` (100 TiB)
-- `MIN_MINER_SIZE_PERC = .33`
+- `MIN_MINER_SIZE_TARG = 3
+
+## Network recovery after halting
+
+Placeholder where we will define a means of rebooting network liveness after it halts catastrophically (i.e. empty power table).

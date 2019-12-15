@@ -1,6 +1,8 @@
 package storage_power_consensus
 
 import (
+	"sort"
+
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
@@ -9,17 +11,33 @@ import (
 )
 
 func (st *StoragePowerActorState_I) ActivePowerMeetsConsensusMinimum(minerPower block.StoragePower) bool {
-	totPower := st._getActivePower()
-
 	// TODO import from consts
 	MIN_MINER_SIZE_STOR := block.StoragePower(0)
-	MIN_MINER_SIZE_PERC := 0
+	MIN_MINER_SIZE_TARG := 0
 
-	// if miner smaller than both min size in bytes and min percentage
-	if (int(minerPower)*MIN_MINER_SIZE_PERC < int(totPower)*100) && minerPower < MIN_MINER_SIZE_STOR {
+	// if miner is larger than min power requirement, we're set
+	if minerPower >= MIN_MINER_SIZE_STOR {
+		return true
+	}
+
+	// otherwise, if another miner meets min power requirement, return false
+	if st._minersLargerThanMin() > util.UVarint(0) {
 		return false
 	}
-	return true
+
+	// else if none do, check whether in MIN_MINER_SIZE_TARG miners
+	if len(st.PowerTable()) <= MIN_MINER_SIZE_TARG {
+		// miner should pass
+		return true
+	}
+
+	// get size of MIN_MINER_SIZE_TARGth largest miner
+	minerSizes := make([]block.StoragePower, 0, len(st.PowerTable()))
+	for _, v := range st.PowerTable() {
+		minerSizes = append(minerSizes, v.ActivePower())
+	}
+	sort.Slice(minerSizes, func(i, j int) bool { return int(i) > int(j) })
+	return minerPower >= minerSizes[MIN_MINER_SIZE_TARG-1]
 }
 
 func (st *StoragePowerActorState_I) _getActivePower() block.StoragePower {
