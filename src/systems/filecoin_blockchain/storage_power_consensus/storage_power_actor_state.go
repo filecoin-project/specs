@@ -20,12 +20,12 @@ func (st *StoragePowerActorState_I) ActivePowerMeetsConsensusMinimum(minerPower 
 		return true
 	}
 
-	// otherwise, if another miner meets min power requirement check whether this one does
+	// otherwise, if another miner meets min power requirement, return false
 	if st._minersLargerThanMin() > util.UVarint(0) {
-		return minerPower >= MIN_MINER_SIZE_STOR
+		return false
 	}
 
-	// else check whether in MIN_MINER_SIZE_TARG miners
+	// else if none do, check whether in MIN_MINER_SIZE_TARG miners
 	if len(st.PowerTable()) <= MIN_MINER_SIZE_TARG {
 		// miner should pass
 		return true
