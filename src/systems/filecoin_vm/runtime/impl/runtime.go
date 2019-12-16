@@ -13,6 +13,7 @@ import (
 	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
+	sysactors "github.com/filecoin-project/specs/systems/filecoin_vm/sysactors"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -158,6 +159,10 @@ func (rt *VMContext) CreateActor(codeID actor.CodeID, address addr.Address) {
 		rt.AbortAPI("Only InitActor may call rt.CreateActor")
 	}
 
+	rt._createActor(codeID, address)
+}
+
+func (rt *VMContext) _createActor(codeID actor.CodeID, address addr.Address) {
 	// Create empty actor state.
 	actorState := &actor.ActorState_I{
 		CodeID_:     codeID,
@@ -414,17 +419,13 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 
 	rtOuter._rtAllocGas(gascost.InvokeMethod(input.Value()))
 
-	toActor, ok := rtOuter._globalStatePending.GetActor(input.To())
-	if !ok {
-		rtOuter._throwError(exitcode.SystemError(exitcode.ActorCodeNotFound))
-	}
-
-	toActorCode, err := loadActorCode(toActor.CodeID())
+	receiver, receiverAddr := rtOuter._resolveReceiver(input.To())
+	receiverCode, err := loadActorCode(receiver.CodeID())
 	if err != nil {
 		rtOuter._throwError(exitcode.SystemError(exitcode.ActorCodeNotFound))
 	}
 
-	err = rtOuter._transferFunds(rtOuter._actorAddress, input.To(), input.Value())
+	err = rtOuter._transferFunds(rtOuter._actorAddress, receiverAddr, input.Value())
 	if err != nil {
 		rtOuter._throwError(exitcode.SystemError(exitcode.InsufficientFunds_System))
 	}
@@ -435,14 +436,14 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 		rtOuter._toplevelSenderCallSeqNum,
 		rtOuter._internalCallSeqNum+1,
 		rtOuter._globalStatePending,
-		input.To(),
+		receiverAddr,
 		input.Value(),
 		rtOuter._gasRemaining,
 	)
 
 	invocOutput, exitCode, internalCallSeqNumFinal := _invokeMethodInternal(
 		rtInner,
-		toActorCode,
+		receiverCode,
 		input.Method(),
 		input.Params(),
 	)
@@ -470,8 +471,61 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 	return vmr.MessageReceipt_Make(invocOutput, exitCode, gasUsed)
 }
 
-func (rtOuter *VMContext) _sendInternalOutputs(input InvocInput, errSpec ErrorHandlingSpec) (InvocOutput, exitcode.ExitCode) {
-	ret := rtOuter._sendInternal(input, errSpec)
+// Loads a receiving actor state from the state tree, resolving non-ID addresses through the InitActor state.
+// If it doesn't exist, and the message is a simple value send to a pubkey-style address,
+// creates the receiver as an account actor in the returned state.
+// Aborts otherwise.
+func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState, addr.Address) {
+	// Resolve the target address via the InitActor, and attempt to load state.
+	initSubState := rt._loadInitActorState()
+	targetIdAddr := initSubState.ResolveAddress(targetRaw)
+	act, found := rt._globalStatePending.GetActor(targetIdAddr)
+	if found {
+		return act, targetIdAddr
+	}
+
+	if !targetRaw.IsKeyType() {
+		// Don't implicitly create an account actor for an address without an associated key.
+		rt._throwError(exitcode.SystemError(exitcode.ActorNotFound))
+	}
+
+	// Allocate an ID address from the init actor and map the pubkey To address to it.
+	newIdAddr := initSubState.MapAddressToNewID(targetRaw)
+	rt._saveInitActorState(initSubState)
+
+	// Create new account actor (charges gas).
+	rt._createActor(actor.CodeID(actor.CodeID_Make_Builtin(actor.BuiltinActorID_Account)), newIdAddr)
+
+	// Initialize account actor substate with it's pubkey address.
+	substate := &sysactors.AccountActorState_I{
+		Address_: targetRaw,
+	}
+	rt._saveAccountActorState(newIdAddr, substate)
+	act, _ = rt._globalStatePending.GetActor(newIdAddr)
+	return act, newIdAddr
+}
+
+func (rt *VMContext) _loadInitActorState() sysactors.InitActorState {
+	initState, ok := rt._globalStatePending.GetActor(addr.InitActorAddr)
+	util.Assert(ok)
+	initStateBytes := rt.IpldGet(ipld.CID(initState.State()))
+	initSubState, err := sysactors.Deserialize_InitActorState(util.Serialization(initStateBytes.As_Bytes()))
+	if err != nil {
+		rt.AbortAPI("State deserialization error")
+	}
+	return initSubState
+}
+
+func (rt *VMContext) _saveInitActorState(state sysactors.InitActorState) {
+	rt._updateActorSubstateInternal(addr.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
+}
+
+func (rt *VMContext) _saveAccountActorState(address addr.Address, state sysactors.AccountActorState) {
+	rt._updateActorSubstateInternal(address, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
+}
+
+func (rt *VMContext) _sendInternalOutputs(input InvocInput, errSpec ErrorHandlingSpec) (InvocOutput, exitcode.ExitCode) {
+	ret := rt._sendInternal(input, errSpec)
 	return vmr.InvocOutput_Make(ret.ReturnValue()), ret.ExitCode()
 }
 
