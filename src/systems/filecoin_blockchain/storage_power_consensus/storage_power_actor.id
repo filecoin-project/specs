@@ -42,8 +42,8 @@ type StoragePowerActorState struct {
 }
 
 type StoragePowerActorCode struct {
-    AddBalance(rt Runtime)
-    WithdrawBalance(rt Runtime, amount actor.TokenAmount)
+    AddBalance(rt Runtime, miner addr.Address)
+    WithdrawBalance(rt Runtime, miner addr.Address, amount actor.TokenAmount)
 
     // call by StorageMiningSubsytem on miner creation
     CreateStorageMiner(

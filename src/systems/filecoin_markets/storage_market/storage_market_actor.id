@@ -76,8 +76,8 @@ type StorageMarketActorState struct {
 }
 
 type StorageMarketActorCode struct {
-    WithdrawBalance(rt Runtime, balance actor.TokenAmount)
-    AddBalance(rt Runtime)  // amount is in the message
+    WithdrawBalance(rt Runtime, miner addr.Address, balance actor.TokenAmount)
+    AddBalance(rt Runtime, miner addr.Address)  // amount is in the message
 
     // call by StorageMiningSubsystem before PreCommitSector
     // a StorageDeal is only published on chain when it passes _validateNewStorageDeal

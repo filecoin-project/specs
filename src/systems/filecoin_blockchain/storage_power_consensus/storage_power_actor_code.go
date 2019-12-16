@@ -79,14 +79,11 @@ func DeserializeState(x Bytes) State {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
-
-	ownerAddr := rt.ImmediateCaller()
+func (a *StoragePowerActorCode_I) AddBalance(rt Runtime, miner addr.Address) {
 	msgValue := rt.ValueReceived()
 
 	h, st := a.State(rt)
-	newTable, ok := actor.BalanceTable_WithAdd(st.EscrowTable(), ownerAddr, msgValue)
+	newTable, ok := actor.BalanceTable_WithAdd(st.EscrowTable(), miner, msgValue)
 	if !ok {
 		rt.AbortStateMsg("spa.AddBalance: Escrow operation failed.")
 	}
@@ -94,28 +91,35 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 	UpdateRelease(rt, h, st)
 }
 
-func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amountRequested actor.TokenAmount) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
+func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, miner addr.Address, amount actor.TokenAmount) {
+	// Verify caller is miner's owner.
+	out := rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:     miner,
+		Method_: actor.MethodPlaceholder, //storage_mining.Method_StorageMinerActor_GetOwner,
+	})
+	owner, err := addr.Deserialize_Address_Compact(addr.AddressString(out.ReturnValue()))
 
-	if amountRequested < 0 {
+	if err != nil {
+		rt.AbortArgMsg("miner has invalid owner address")
+	}
+	if !owner.Equals(rt.ImmediateCaller()) {
+		rt.AbortArgMsg("caller is not owner")
+	}
+
+	if amount < 0 {
 		rt.AbortArgMsg("spa.WithdrawBalance: negative amount.")
 	}
 
-	minerAddr := rt.ImmediateCaller()
-
-	var ownerAddr addr.Address
-	TODO() // Determine owner address from miner
-
 	h, st := a.State(rt)
 
-	minerPowerTotal, ok := st._getPowerTotalForMiner(minerAddr)
+	minerPowerTotal, ok := st._getPowerTotalForMiner(miner)
 	if !ok {
 		rt.AbortArgMsg("spa.WithdrawBalance: Miner not found.")
 	}
 
 	minBalance := st._getPledgeCollateralReq(minerPowerTotal)
 	newTable, amountExtracted, ok := actor.BalanceTable_WithExtractPartial(
-		st.EscrowTable(), minerAddr, amountRequested, minBalance)
+		st.EscrowTable(), miner, amount, minBalance)
 	if !ok {
 		rt.AbortStateMsg("spa.WithdrawBalance: Escrow operation failed.")
 	}
@@ -125,7 +129,7 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amountRequested ac
 
 	// send funds to miner
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:    ownerAddr,
+		To_:    owner,
 		Value_: amountExtracted,
 	})
 }
@@ -133,9 +137,7 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amountRequested ac
 func (a *StoragePowerActorCode_I) CreateStorageMiner(
 	rt Runtime, workerAddr addr.Address, peerId libp2p.PeerID) addr.Address {
 
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
-
-	// ownerAddr := rt.ImmediateCaller()
+	//ownerAddr := rt.ImmediateCaller()
 	msgValue := rt.ValueReceived()
 
 	var newMinerAddr addr.Address
@@ -161,8 +163,6 @@ func (a *StoragePowerActorCode_I) CreateStorageMiner(
 }
 
 func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
-
 	minerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
@@ -192,9 +192,6 @@ func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime) {
 }
 
 func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
-
-	TODO() // TODO: principal access control
 	minerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)

@@ -265,10 +265,6 @@ func (rt *VMContext) ValidateImmediateCallerIs(callerExpected addr.Address) {
 	rt.ValidateImmediateCallerMatches(CallerPattern_MakeSingleton(callerExpected))
 }
 
-func (rt *VMContext) ValidateImmediateCallerAcceptAnyOfType(type_ actor.BuiltinActorID) {
-	rt.ValidateImmediateCallerMatches(CallerPattern_MakeAcceptAnyOfType(rt, type_))
-}
-
 func (rt *VMContext) ValidateImmediateCallerAcceptAny() {
 	rt.ValidateImmediateCallerMatches(CallerPattern_MakeAcceptAny())
 }

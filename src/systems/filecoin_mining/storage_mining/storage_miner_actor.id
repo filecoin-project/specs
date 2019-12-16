@@ -113,6 +113,9 @@ type StorageMinerActorState struct {
 }
 
 type StorageMinerActorCode struct {
+    GetOwner(rt Runtime) address.Address
+    GetWorker(rt Runtime) address.Address
+
     NotifyOfSurprisePoStChallenge(rt Runtime)
 
     PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo)  // TODO: check with Magik on sizes

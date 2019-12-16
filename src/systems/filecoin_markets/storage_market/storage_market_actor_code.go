@@ -61,11 +61,20 @@ func DeserializeState(x Bytes) State {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, amountRequested actor.TokenAmount) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
-	callerAddr := rt.ImmediateCaller()
-	TODO() // Restrict caller to miner owner? (May require an additional argument
-	// to specify miner actor.)
+func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, miner addr.Address, amountRequested actor.TokenAmount) {
+	// Verify caller is miner's owner.
+	out := rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:     miner,
+		Method_: actor.MethodPlaceholder, //storage_mining.Method_StorageMinerActor_GetOwner,
+	})
+	owner, err := addr.Deserialize_Address_Compact(addr.AddressString(out.ReturnValue()))
+
+	if err != nil {
+		rt.AbortArgMsg("miner has invalid owner address")
+	}
+	if !owner.Equals(rt.ImmediateCaller()) {
+		rt.AbortArgMsg("caller is not owner")
+	}
 
 	if amountRequested < 0 {
 		rt.AbortArgMsg("sma.WithdrawBalance: negative amount.")
@@ -73,36 +82,33 @@ func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, amountRequested a
 
 	h, st := a.State(rt)
 
-	if !st._addressEntryExists(callerAddr) {
+	if !st._addressEntryExists(miner) {
 		rt.AbortArgMsg("sma.WithdrawBalance: address entry does not exist")
 	}
 
-	minBalance := st._getLockedReqBalance(callerAddr)
+	minBalance := st._getLockedReqBalance(miner)
 	newTable, amountExtracted, ok := actor.BalanceTable_WithExtractPartial(
-		st.EscrowTable(), callerAddr, amountRequested, minBalance)
+		st.EscrowTable(), miner, amountRequested, minBalance)
 	Assert(ok)
 	st.Impl().EscrowTable_ = newTable
 
 	UpdateRelease(rt, h, st)
 
-	// send funds to miner
+	// Remit funds to owner.
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:    callerAddr,
+		To_:    owner,
 		Value_: amountExtracted,
 	})
 }
 
-func (a *StorageMarketActorCode_I) AddBalance(rt Runtime) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
-
-	ownerAddr := rt.ImmediateCaller()
+func (a *StorageMarketActorCode_I) AddBalance(rt Runtime, miner addr.Address) {
 	msgValue := rt.ValueReceived()
 
 	h, st := a.State(rt)
-	newTable, ok := actor.BalanceTable_WithAdd(st.EscrowTable(), ownerAddr, msgValue)
+	newTable, ok := actor.BalanceTable_WithAdd(st.EscrowTable(), miner, msgValue)
 	if !ok {
 		// Entry not found; create implicitly.
-		newTable, ok = actor.BalanceTable_WithNewAddressEntry(st.EscrowTable(), ownerAddr, msgValue)
+		newTable, ok = actor.BalanceTable_WithNewAddressEntry(st.EscrowTable(), miner, msgValue)
 		Assert(ok)
 	}
 	st.Impl().EscrowTable_ = newTable

@@ -17,7 +17,9 @@ import (
 )
 
 const (
-	Method_StorageMinerActor_ProcessVerifiedSurprisePoSt = actor.MethodPlaceholder + iota
+	Method_StorageMinerActor_GetOwner = actor.MethodPlaceholder + iota
+	Method_StorageMinerActor_GetWorker
+	Method_StorageMinerActor_ProcessVerifiedSurprisePoSt
 	Method_StorageMinerActor_ProcessVerifiedElectionPoSt
 	Method_StorageMinerActor_NotifyOfSurprisePoStChallenge
 )
@@ -60,6 +62,20 @@ func DeserializeState(x Bytes) State {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+func (a *StorageMinerActorCode_I) GetOwner(rt Runtime) addr.Address {
+	h, st := a.State(rt)
+	ret := st.Info().Owner()
+	Release(rt, h, st)
+	return ret
+}
+
+func (a *StorageMinerActorCode_I) GetWorker(rt Runtime) addr.Address {
+	h, st := a.State(rt)
+	ret := st.Info().Worker()
+	Release(rt, h, st)
+	return ret
+}
 
 func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
 	h, st := a.State(rt)
