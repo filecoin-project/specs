@@ -64,6 +64,7 @@ A semantically valid block must have:
 - `ParentMessageReceipts` identifying the receipt list produced by parent tipset execution, with one receipt for each unique message from the parent tipset, 
 - `ParentWeight` matching the weight of the chain up to and including the parent tipset,
 - `Epoch` greater than that of its parents, and not in the future according to the node's local clock reading of the current epoch,
+    - blocks with future epochs should not be rejected, but should not be evaluated (validated or included in a tipset) until the appropriate epoch
 - `Miner` that is active in the storage power table in the parent tipset state,  
 - a `Ticket` derived from the minimum ticket from the parent tipset's block headers, 
     - `Ticket.VRFResult` validly signed by the `Miner` actor's worker account public key,

@@ -22,14 +22,16 @@ The Filecoin system clock is used:
 
 In order to allow miners to do the above, the system clock must:
 
-1. Have low enough clock drift relative to other nodes so that blocks are not mined in epochs considered future epochs from the persective of other nodes.
+1. Have low enough clock drift (sub 1s) relative to other nodes so that blocks are not mined in epochs considered future epochs from the persective of other nodes (those blocks should not be validated until the proper epoch/time as per {{<sref block "validation rules">}}).
 2. Set epoch number on node initialization equal to `epoch = Floor[(current_time - genesis_time) / epoch_time]`
 
 It is expected that other subsystems will register to a NewRound() event from the clock subsystem.
 
 ## Clock Requirements
 
-Computer-grade clock crystals can be expected to have drift rates on the order of [1ppm](https://www.hindawi.com/journals/jcnc/2008/583162/) (i.e. 1 microsecond every second or .6 seconds a week), therefore, in order to respect the first above-requirement,
+Clocks used as part of the Filecoin protocol should be kept in sync, with drift less than 1 second so as to enable appropriate validation.
+
+Computer-grade clock crystals can be expected to have drift rates on the order of [1ppm](https://www.hindawi.com/journals/jcnc/2008/583162/) (i.e. 1 microsecond every second or .6 seconds a week), therefore, in order to respect the above-requirement,
 
 - clients SHOULD query an NTP server (`pool.ntp.org` is recommended) on an hourly basis to adjust clock skew.
   - We recommend one of the following:
