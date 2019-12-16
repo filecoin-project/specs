@@ -17,7 +17,9 @@ type Runtime interface {
     // Not necessarily the actor in the From field of the initial on-chain Message.
     ImmediateCaller() addr.Address
     ValidateImmediateCallerIs(caller addr.Address)
+    ValidateImmediateCallerInSet(callers [addr.Address])
     ValidateImmediateCallerAcceptAnyOfType(type_ actor.BuiltinActorID)
+    ValidateImmediateCallerAcceptAnyOfTypes(types [actor.BuiltinActorID])
     ValidateImmediateCallerAcceptAny()
     ValidateImmediateCallerMatches(CallerPattern)
 
@@ -66,6 +68,19 @@ type Runtime interface {
     // Sends a message to another actor.
     // If the invoked method does not return successfully, this caller will be aborted too.
     SendPropagatingErrors(input InvocInput) InvocOutput
+    Send(
+        toAddr     addr.Address
+        methodNum  actor.MethodNum
+        params     actor.MethodParams
+        value      actor.TokenAmount
+    ) InvocOutput
+    SendQuery(
+        toAddr     addr.Address
+        methodNum  actor.MethodNum
+        params     [util.Serialization]
+    ) util.Serialization
+    SendFunds(toAddr addr.Address, value actor.TokenAmount)
+
     // Sends a message to another actor, trapping an unsuccessful execution.
     // This may only be invoked by the singleton Cron actor.
     SendCatchingErrors(input InvocInput) (output InvocOutput, exitCode exitcode.ExitCode)

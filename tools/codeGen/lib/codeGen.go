@@ -248,8 +248,26 @@ func GenGoTypeSerializers(ctx GoGenContext, name string, interfaceID GoNode) {
 		funBody: GenGoPanicTodoBody(),
 	}
 
+	deserializeAssertDecl := GoFunDecl{
+		receiverVar:  nil,
+		receiverType: nil,
+		funName:      "Deserialize_" + name + "_Assert",
+		funType: GoFunType{
+			args: []GoField{
+				GoField{
+					fieldName: nil,
+					fieldType: TranslateGoIdent("Serialization", ctx),
+				},
+			},
+			retType: GoNode_Ref(interfaceID),
+		},
+		funArgs: []GoNode{GoIdent{name: "x"}},
+		funBody: GenGoPanicTodoBody(),
+	}
+
 	*ctx.retDecls = append(*ctx.retDecls, serializeDecl)
 	*ctx.retDecls = append(*ctx.retDecls, deserializeDecl)
+	*ctx.retDecls = append(*ctx.retDecls, deserializeAssertDecl)
 }
 
 func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {

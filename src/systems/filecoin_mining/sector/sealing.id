@@ -39,7 +39,7 @@ type OnChainSealVerifyInfo struct {
     SealEpoch         block.ChainEpoch
     InteractiveEpoch  block.ChainEpoch
     Proof             SealProof
-    DealIDs           [deal.DealID]
+    DealIDs           deal.DealIDs
     SectorNumber
 }
 
@@ -47,7 +47,7 @@ type OnChainSealVerifyInfo struct {
 // SealCommitment is a subset of OnChainSealVerifyInfo.
 type SealCommitment struct {
     SealedCID   SealedSectorCID  // CommR
-    DealIDs     [deal.DealID]
+    DealIDs     deal.DealIDs
     Expiration  block.ChainEpoch
 }
 
@@ -55,7 +55,8 @@ type SectorPreCommitInfo struct {
     SectorNumber
     SealedCID     SealedSectorCID  // CommR
     SealEpoch     block.ChainEpoch
-    DealIDs       [deal.DealID]
+    DealIDs       deal.DealIDs
+    Expiration    block.ChainEpoch
 }
 
 type SectorProveCommitInfo struct {
@@ -120,7 +121,8 @@ type SealOutputArtifacts struct {}
 type PieceInfo struct {
     Size      UVarint  // Size in nodes. For BLS12-381 (capacity 254 bits), must be >= 16. (16 * 8 = 128)
     PieceCID  piece.PieceCID
+}
 
-    // Data returns the serialized representation of the PieceInfo.
-    Data()    Bytes
+type PieceInfos struct {
+    Items [PieceInfo]
 }

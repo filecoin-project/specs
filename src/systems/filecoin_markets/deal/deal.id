@@ -6,6 +6,10 @@ import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
 type DealID UVarint
+type DealIDs struct {
+    Items [DealID]
+}
+
 type DealCID ipld.CID
 type ProposalCID ipld.CID
 type PayloadCID ipld.CID
@@ -26,17 +30,21 @@ type StorageDealProposal struct {
     Provider                      addr.Address
     ClientSignature               Signature
 
-    StartEpoch                    block.ChainEpoch  // a deal is invalid if it is published to the chain after StartEpoch
+    // Nominal start epoch. Deal payment is linear between StartEpoch and EndEpoch,
+    // with total amount StoragePricePerEpoch * (EndEpoch - StartEpoch).
+    // Storage deal must appear in a sealed (proven) sector no later than StartEpoch,
+    // otherwise it is invalid.
+    StartEpoch                    block.ChainEpoch
     EndEpoch                      block.ChainEpoch
     StoragePricePerEpoch          actor.TokenAmount
-    ProviderCollateralPerEpoch    actor.TokenAmount
-    ClientCollateralPerEpoch      actor.TokenAmount  // potentially collapse into one with ProviderDealCollateral
+
+    ProviderCollateral            actor.TokenAmount
+    ClientCollateral              actor.TokenAmount
 
     Duration()                    block.ChainEpoch   @(cached)  // EndEpoch - StartEpoch
-    ClientBalanceRequirement()    actor.TokenAmount  // (ClientCollateralPerEpoch + StoragePricePerEpoch) * Duration
     TotalStorageFee()             actor.TokenAmount  // StoragePricePerEpoch * Duration
-    TotalClientCollateral()       actor.TokenAmount  // ClientCollateralPerEpoch * Duration
-    ProviderBalanceRequirement()  actor.TokenAmount  // ProviderCollateralPerEpoch * Duration
+    ClientBalanceRequirement()    actor.TokenAmount  // ClientCollateral + TotalStorageFee
+    ProviderBalanceRequirement()  actor.TokenAmount  // ProviderCollateral
 
     CID()                         ProposalCID
 }
@@ -52,9 +60,9 @@ type StorageDeal struct {
 }
 
 type OnChainDeal struct {
-    Deal              StorageDeal
-    LastPaymentEpoch  block.ChainEpoch  // -1 = published
     ID                DealID
+    Deal              StorageDeal
+    SectorStartEpoch  block.ChainEpoch  // -1 if not yet included in proven sector
 }
 
 type RetrievalDealProposal struct {}  // TODO

@@ -7,21 +7,13 @@ import (
 	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-	market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 	util "github.com/filecoin-project/specs/util"
-)
-
-const (
-	Method_StorageMinerActor_GetOwnerKey = actor.MethodPlaceholder + iota
-	Method_StorageMinerActor_GetWorkerKey
-	Method_StorageMinerActor_ProcessVerifiedSurprisePoSt
-	Method_StorageMinerActor_ProcessVerifiedElectionPoSt
-	Method_StorageMinerActor_NotifyOfSurprisePoStChallenge
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -195,29 +187,9 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 }
 
 func (a *StorageMinerActorCode_I) _expireSectors(rt Runtime) {
-
 	h, st := a.State(rt)
-	expiredSectorNos := st._updateExpireSectors(rt)
-
-	// @param dealIDs
-	expireSectorParams := make([]util.Serialization, 1)
-	for _, sectorNo := range expiredSectorNos {
-		dealIDs, ok := st._getSectorDealIDs(sectorNo)
-		if !ok {
-			panic("")
-		}
-		for _, dealID := range dealIDs {
-			expireSectorParams = append(expireSectorParams, deal.Serialize_DealID(dealID))
-		}
-	}
-
+	st._updateExpireSectors(rt)
 	UpdateRelease(rt, h, st)
-
-	rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:     addr.StorageMarketActorAddr,
-		Method_: market.Method_StorageMarketActor_ProcessDealExpiration,
-		Params_: expireSectorParams,
-	})
 }
 
 // construct PowerReport from SectorTable
@@ -255,32 +227,6 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime) {
 		To_:     addr.StoragePowerActorAddr,
 		Method_: spc.Method_StoragePowerActor_ProcessPowerReport,
 		Params_: processPowerReportParam,
-	})
-}
-
-func (a *StorageMinerActorCode_I) ClaimDealPaymentsForSector(rt Runtime, sectorNo sector.SectorNumber) {
-	h, st := a.State(rt)
-
-	dealIDs, ok := st._getSectorDealIDs(sectorNo)
-	if !ok {
-		rt.AbortArgMsg("sm.ClaimDealPaymentsForSector: invalid sector number.")
-	}
-
-	lastPoStEpoch := st.ChallengeStatus().Impl().LastPoStSuccessEpoch()
-
-	// @params dealIDs []deal.DealID activeDealIDs
-	// @params lastPoSt block.ChainEpoch
-	processDealPaymentParam := make([]util.Serialization, 1)
-	for _, dealID := range dealIDs {
-		processDealPaymentParam = append(processDealPaymentParam, deal.Serialize_DealID(dealID))
-	}
-	processDealPaymentParam = append(processDealPaymentParam, block.Serialize_ChainEpoch(lastPoStEpoch))
-	Release(rt, h, st)
-
-	rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:     addr.StorageMarketActorAddr,
-		Method_: market.Method_StorageMarketActor_ProcessDealPayment,
-		Params_: processDealPaymentParam,
 	})
 }
 
@@ -571,33 +517,29 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 	return rt.SuccessReturn()
 }
 
-func (a *StorageMinerActorCode_I) _slashDealsForStorageFault(rt Runtime, sectorNumbers []sector.SectorNumber, faultType sector.StorageFaultType) {
-
+func (a *StorageMinerActorCode_I) _slashDealsForSectorTerminatedFault(rt Runtime, sectorNumbers []sector.SectorNumber) {
 	h, st := a.State(rt)
 
-	dealIDs := make([]deal.DealID, 0)
+	dealIDItems := make([]deal.DealID, 0)
 	for _, sectorNo := range sectorNumbers {
 		sectorDealIDs, ok := st._getSectorDealIDs(sectorNo)
 		if !ok {
 			panic("")
 		}
-		dealIDs = append(dealIDs, sectorDealIDs...)
+		dealIDItems = append(dealIDItems, sectorDealIDs.Items()...)
 	}
+	dealIDs := &deal.DealIDs_I{Items_: dealIDItems}
 
-	// @param dealIDs []deal.DealID
-	// @param faultType sector.StorageFaultType
-	processDealSlashParam := make([]util.Serialization, 2)
-	for _, dealID := range dealIDs {
-		processDealSlashParam = append(processDealSlashParam, deal.Serialize_DealID(dealID))
-	}
-	processDealSlashParam = append(processDealSlashParam, sector.Serialize_StorageFaultType(faultType))
 	Release(rt, h, st)
 
-	rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:     addr.StorageMarketActorAddr,
-		Method_: market.Method_StorageMarketActor_ProcessDealSlash,
-		Params_: processDealSlashParam,
-	})
+	rt.Send(
+		addr.StorageMarketActorAddr,
+		ai.Method_StorageMarketActor_TerminateDealsOnSlashProviderSector,
+		[]util.Serialization{
+			deal.Serialize_DealIDs(dealIDs),
+		},
+		actor.TokenAmount(0),
+	)
 }
 
 func (a *StorageMinerActorCode_I) _slashPledgeForStorageFault(rt Runtime, sectorNumbers []sector.SectorNumber, faultType sector.StorageFaultType) {
@@ -637,7 +579,7 @@ func (a *StorageMinerActorCode_I) _slashCollateralForStorageFaults(
 
 	// only terminatedFault will result in collateral deal slashing
 	if len(newTerminatedFaults) > 0 {
-		a._slashDealsForStorageFault(rt, newTerminatedFaults.SectorsOn(), sector.TerminatedFault)
+		a._slashDealsForSectorTerminatedFault(rt, newTerminatedFaults.SectorsOn())
 		a._slashPledgeForStorageFault(rt, newTerminatedFaults.SectorsOn(), sector.TerminatedFault)
 	}
 
@@ -663,35 +605,27 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 	h, st := a.State(rt)
 	info := st.Info()
 	sectorSize := info.SectorSize()
-
-	// @param sectorSize util.UVarint
-	// @param dealIDs []deal.DealID onChainInfo.DealIDs()
-	getPieceInfoParams := make([]util.Serialization, 2)
-	getPieceInfoParams = append(getPieceInfoParams, sector.Serialize_SectorSize(sectorSize))
-	for _, dealID := range onChainInfo.DealIDs() {
-		getPieceInfoParams = append(getPieceInfoParams, deal.Serialize_DealID(dealID))
-	}
-
 	Release(rt, h, st)
 
-	getPieceInfosReceipt := rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:     addr.StorageMarketActorAddr,
-		Method_: market.Method_StorageMarketActor_GetPieceInfosForDealIDs,
-		Params_: getPieceInfoParams,
-	})
-
-	getPieceInfosRet := getPieceInfosReceipt.ReturnValue()
-	pieceInfos := sector.PieceInfosFromBytes(getPieceInfosRet)
+	pieceInfos, err := sector.Deserialize_PieceInfos(rt.SendQuery(
+		addr.StorageMarketActorAddr,
+		ai.Method_StorageMarketActor_GetPieceInfosForDealIDs,
+		[]util.Serialization{
+			sector.Serialize_SectorSize(sectorSize),
+			deal.Serialize_DealIDs(onChainInfo.DealIDs()),
+		},
+	))
+	Assert(err == nil)
 
 	// Unless we enforce a minimum padding amount, this totalPieceSize calculation can be removed.
 	// Leaving for now until that decision is entirely finalized.
 	var totalPieceSize util.UInt
-	for _, pieceInfo := range pieceInfos {
-		pieceSize := (*pieceInfo).Size()
+	for _, pieceInfo := range pieceInfos.Items() {
+		pieceSize := pieceInfo.Size()
 		totalPieceSize += pieceSize
 	}
 
-	unsealedCID, _ := filproofs.ComputeUnsealedSectorCIDFromPieceInfos(sectorSize, pieceInfos)
+	unsealedCID, _ := filproofs.ComputeUnsealedSectorCIDFromPieceInfos(sectorSize, pieceInfos.Items())
 
 	sealCfg := sector.SealCfg_I{
 		SectorSize_:  sectorSize,
@@ -726,12 +660,12 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 // Deals must be posted on chain via sma.PublishStorageDeals before PreCommitSector
 // Optimization: PreCommitSector could contain a list of deals that are not published yet.
 func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo) InvocOutput {
-	TODO() // TODO: validate caller
+	h, st := a.State(rt)
+
+	rt.ValidateImmediateCallerIs(st.Info().Worker())
 	// can be called regardless of Challenged status
 
 	// TODO: might be a good place for Treasury
-
-	h, st := a.State(rt)
 
 	msgValue := rt.ValueReceived()
 	depositReq := st._getPreCommitDepositReq(rt)
@@ -749,22 +683,18 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 
 	st._assertSectorDidNotExist(rt, info.SectorNumber())
 
-	// @param dealIDs []deal.DealID info.DealIDs()
-	params := make([]util.Serialization, 1)
-	for _, dealID := range info.DealIDs() {
-		params = append(params, deal.Serialize_DealID(dealID))
-	}
-
 	Release(rt, h, st)
 
-	// verify every DealID has been published and will not expire
-	// before the MAX_PROVE_COMMIT_SECTOR_EPOCH + CurrEpoch
-	// abort otherwise
-	rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:     addr.StorageMarketActorAddr,
-		Method_: market.Method_StorageMarketActor_VerifyPublishedDealIDs,
-		Params_: params,
-	})
+	// verify deals with StorageMarketActor; abort if this fails
+	rt.Send(
+		addr.StorageMarketActorAddr,
+		ai.Method_StorageMarketActor_VerifyDealsOnSectorPreCommit,
+		[]util.Serialization{
+			deal.Serialize_DealIDs(info.DealIDs()),
+			sector.Serialize_SectorPreCommitInfo(info),
+		},
+		actor.TokenAmount(0),
+	)
 
 	h, st = a.State(rt)
 
@@ -779,11 +709,10 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 }
 
 func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo) InvocOutput {
-	TODO() // TODO: validate caller
-
-	msgSender := rt.ImmediateCaller()
-
 	h, st := a.State(rt)
+
+	workerAddr := st.Info().Worker()
+	rt.ValidateImmediateCallerIs(workerAddr)
 
 	preCommitSector, precommitFound := st.PreCommittedSectors()[info.SectorNumber()]
 
@@ -824,24 +753,19 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	sectorSize := minerInfo.SectorSize()
 	sectorPower := block.StoragePower(sectorSize)
 
-	// Activate storage deals, abort if activation failed
-	// @param expiration block.ChainEpoch info.Expiration()
-	// @param sectorSize block.StoragePower sectorSize
-	// @param dealIDs []deal.DealID onChainInfo.DealIDs()
-	activateDealsParams := make([]util.Serialization, 1)
-	activateDealsParams = append(activateDealsParams, block.Serialize_ChainEpoch(info.Expiration()))
-	activateDealsParams = append(activateDealsParams, block.Serialize_StoragePower(sectorPower))
-	for _, dealID := range onChainInfo.DealIDs() {
-		activateDealsParams = append(activateDealsParams, deal.Serialize_DealID(dealID))
-	}
-
 	UpdateRelease(rt, h, st)
 
-	activateDealsReceipt := rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:     addr.StorageMarketActorAddr,
-		Method_: market.Method_StorageMarketActor_ActivateDeals,
-		Params_: activateDealsParams,
-	})
+	// Activate storage deals, abort if activation failed
+	activateDealsReceipt := rt.Send(
+		addr.StorageMarketActorAddr,
+		ai.Method_StorageMarketActor_UpdateDealsOnSectorProveCommit,
+		[]util.Serialization{
+			block.Serialize_ChainEpoch(info.Expiration()),
+			block.Serialize_StoragePower(sectorPower),
+			deal.Serialize_DealIDs(onChainInfo.DealIDs()),
+		},
+		actor.TokenAmount(0),
+	)
 
 	h, st = a.State(rt)
 
@@ -892,7 +816,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 
 	// return deposit requirement to sender
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:    msgSender,
+		To_:    workerAddr,
 		Value_: depositReq,
 	})
 
@@ -922,7 +846,7 @@ func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
 		if elapsedEpoch > sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
 			delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
 			expiredSectorNum += 1
-			inactiveDealIDs = append(inactiveDealIDs, preCommitSector.Info().DealIDs()...)
+			inactiveDealIDs = append(inactiveDealIDs, preCommitSector.Info().DealIDs().Items()...)
 		}
 	}
 
@@ -934,21 +858,6 @@ func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
 		rt.SendPropagatingErrors(&vmr.InvocInput_I{
 			To_:    addr.BurntFundsActorAddr,
 			Value_: depositToBurn,
-		})
-	}
-
-	// clear inactive deals
-	if len(inactiveDealIDs) > 0 {
-		// @param []deal.DealID inactiveDealIDs
-		dealsToClearParams := make([]util.Serialization, 1)
-		for _, dealID := range inactiveDealIDs {
-			dealsToClearParams = append(dealsToClearParams, deal.Serialize_DealID(dealID))
-		}
-
-		rt.SendPropagatingErrors(&vmr.InvocInput_I{
-			To_:     addr.StorageMarketActorAddr,
-			Method_: market.Method_StorageMarketActor_ClearInactiveDealIDs,
-			Params_: dealsToClearParams,
 		})
 	}
 }

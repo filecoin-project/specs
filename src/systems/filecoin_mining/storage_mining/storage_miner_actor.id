@@ -110,7 +110,7 @@ type StorageMinerActorState struct {
 
     _getSectorOnChainInfo(sectorNo sector.SectorNumber) (info SectorOnChainInfo, ok bool)
     _getSectorPower(sectorNo sector.SectorNumber) (power block.StoragePower, ok bool)
-    _getSectorDealIDs(sectorNo sector.SectorNumber) (dealIDs [deal.DealID], ok bool)
+    _getSectorDealIDs(sectorNo sector.SectorNumber) (dealIDs deal.DealIDs, ok bool)
 }
 
 type StorageMinerActorCode struct {
@@ -148,11 +148,6 @@ type StorageMinerActorCode struct {
         faultType      sector.StorageFaultType
     )
 
-    ClaimDealPaymentsForSector(
-        rt        Runtime
-        sectorNo  sector.SectorNumber
-        lastPoSt  block.ChainEpoch
-    )
     _submitPowerReport(rt Runtime, lastPoSt block.ChainEpoch)
     _expireSectors(rt Runtime)
     _expirePreCommittedSectors(rt Runtime)

@@ -223,10 +223,10 @@ func (st *StorageMinerActorState_I) _getSectorPower(sectorNo sector.SectorNumber
 	return sectorInfo.Power(), true
 }
 
-func (st *StorageMinerActorState_I) _getSectorDealIDs(sectorNo sector.SectorNumber) (dealIDs []deal.DealID, ok bool) {
+func (st *StorageMinerActorState_I) _getSectorDealIDs(sectorNo sector.SectorNumber) (dealIDs deal.DealIDs, ok bool) {
 	sectorInfo, found := st._getSectorOnChainInfo(sectorNo)
 	if !found {
-		return make([]deal.DealID, 0), false
+		return nil, false
 	}
 	return sectorInfo.SealCommitment().DealIDs(), true
 }
