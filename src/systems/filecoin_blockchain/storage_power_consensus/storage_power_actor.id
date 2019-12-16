@@ -18,8 +18,9 @@ type PowerReport struct {
 type PowerTableHAMT {addr.Address: PowerTableEntry}  // TODO: convert address to ActorID
 
 type StoragePowerActorState struct {
-    PowerTable   PowerTableHAMT
-    EscrowTable  actor.BalanceTableHAMT
+    PowerTable            PowerTableHAMT
+    EscrowTable           actor.BalanceTableHAMT
+    _minersLargerThanMin  util.UVarint
 
     _slashPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) actor.TokenAmount
     _lockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)

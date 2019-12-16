@@ -9,6 +9,7 @@ import (
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
+	vmri "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/impl"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	sysactors "github.com/filecoin-project/specs/systems/filecoin_vm/sysactors"
 	util "github.com/filecoin-project/specs/util"
@@ -267,7 +268,7 @@ func _applyMessageInternal(
 	fromActor, ok := tree.GetActor(message.From())
 	Assert(ok)
 
-	rt := vmr.VMContext_Make(
+	rt := vmri.VMContext_Make(
 		message.From(),
 		topLevelBlockWinner,
 		fromActor.CallSeqNum(),
