@@ -63,7 +63,10 @@ A semantically valid block must have:
 - `ParentState` matching the state tree produced by executing the parent tipset's messages (as defined by the VM interpreter) against that tipset's parent state,
 - `ParentMessageReceipts` identifying the receipt list produced by parent tipset execution, with one receipt for each unique message from the parent tipset, 
 - `ParentWeight` matching the weight of the chain up to and including the parent tipset,
-- `Epoch` greater than that of its parents, and not in the future according to the node's local clock reading of the current epoch,
+- `Epoch` greater than that of its parents, and 
+    - not in the future according to the node's local clock reading of the current epoch,
+    - not farther in the past than the soft finality as defined by SPC ${{<sref finality>}},
+        - this rule only applied when receiving new gossip blocks (i.e. from the current chain head), not when syncing to the chain for the first time (e.g.)
 - `Miner` that is active in the storage power table in the parent tipset state,  
 - a `Ticket` derived from the minimum ticket from the parent tipset's block headers, 
     - `Ticket.VRFResult` validly signed by the `Miner` actor's worker account public key,
