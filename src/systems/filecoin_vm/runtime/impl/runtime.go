@@ -30,6 +30,8 @@ type ActorStateHandle = vmr.ActorStateHandle
 var EnsureErrorCode = exitcode.EnsureErrorCode
 var SystemError = exitcode.SystemError
 
+type Bytes = util.Bytes
+
 var Assert = util.Assert
 var IMPL_FINISH = util.IMPL_FINISH
 var TODO = util.TODO
@@ -258,16 +260,45 @@ func (rt *VMContext) ValidateImmediateCallerMatches(
 	rt._numValidateCalls += 1
 }
 
+func CallerPattern_MakeAcceptAnyOfTypes(rt *VMContext, types []actor.BuiltinActorID) CallerPattern {
+	return CallerPattern{
+		Matches: func(y addr.Address) bool {
+			codeID, ok := rt._getActorCodeID(y)
+			if !ok {
+				panic("Internal runtime error: actor not found")
+			}
+			Assert(codeID != nil)
+			if !codeID.IsBuiltin() {
+				return false
+			}
+			for _, type_ := range types {
+				if codeID.As_Builtin() == type_ {
+					return true
+				}
+			}
+			return false
+		},
+	}
+}
+
 func (rt *VMContext) ValidateImmediateCallerIs(callerExpected addr.Address) {
-	rt.ValidateImmediateCallerMatches(CallerPattern_MakeSingleton(callerExpected))
+	rt.ValidateImmediateCallerMatches(vmr.CallerPattern_MakeSingleton(callerExpected))
+}
+
+func (rt *VMContext) ValidateImmediateCallerInSet(callersExpected []addr.Address) {
+	rt.ValidateImmediateCallerMatches(vmr.CallerPattern_MakeSet(callersExpected))
 }
 
 func (rt *VMContext) ValidateImmediateCallerAcceptAnyOfType(type_ actor.BuiltinActorID) {
-	rt.ValidateImmediateCallerMatches(CallerPattern_MakeAcceptAnyOfType(rt, type_))
+	rt.ValidateImmediateCallerAcceptAnyOfTypes([]actor.BuiltinActorID{type_})
+}
+
+func (rt *VMContext) ValidateImmediateCallerAcceptAnyOfTypes(types []actor.BuiltinActorID) {
+	rt.ValidateImmediateCallerMatches(CallerPattern_MakeAcceptAnyOfTypes(rt, types))
 }
 
 func (rt *VMContext) ValidateImmediateCallerAcceptAny() {
-	rt.ValidateImmediateCallerMatches(CallerPattern_MakeAcceptAny())
+	rt.ValidateImmediateCallerMatches(vmr.CallerPattern_MakeAcceptAny())
 }
 
 func (rt *VMContext) _checkNumValidateCalls(x int) {
@@ -521,6 +552,23 @@ func (rt *VMContext) _sendInternalOutputs(input InvocInput, errSpec ErrorHandlin
 	return vmr.InvocOutput_Make(ret.ReturnValue()), ret.ExitCode()
 }
 
+func (rt *VMContext) Send(
+	toAddr addr.Address, methodNum actor.MethodNum, params actor.MethodParams, value actor.TokenAmount) InvocOutput {
+
+	return rt.SendPropagatingErrors(vmr.InvocInput_Make(toAddr, methodNum, params, value))
+}
+
+func (rt *VMContext) SendQuery(toAddr addr.Address, methodNum actor.MethodNum, params []util.Serialization) util.Serialization {
+	invocOutput := rt.Send(toAddr, methodNum, params, actor.TokenAmount(0))
+	ret := invocOutput.ReturnValue()
+	Assert(ret != nil)
+	return ret
+}
+
+func (rt *VMContext) SendFunds(toAddr addr.Address, value actor.TokenAmount) {
+	rt.Send(toAddr, actor.MethodSend, []util.Serialization{}, value)
+}
+
 func (rt *VMContext) SendPropagatingErrors(input InvocInput) InvocOutput {
 	ret, _ := rt._sendInternalOutputs(input, PropagateErrors)
 	return ret
@@ -611,29 +659,4 @@ func (rt *VMContext) Compute(f ComputeFunctionID, args []util.Any) Any {
 	gasCost := def.GasCostFn(args)
 	rt._rtAllocGas(gasCost)
 	return def.Body(args)
-}
-
-func CallerPattern_MakeSingleton(x addr.Address) CallerPattern {
-	return vmr.CallerPattern{
-		Matches: func(y addr.Address) bool { return x == y },
-	}
-}
-
-func CallerPattern_MakeAcceptAny() CallerPattern {
-	return vmr.CallerPattern{
-		Matches: func(addr.Address) bool { return true },
-	}
-}
-
-func CallerPattern_MakeAcceptAnyOfType(rt *VMContext, type_ actor.BuiltinActorID) CallerPattern {
-	return CallerPattern{
-		Matches: func(y addr.Address) bool {
-			codeID, ok := rt._getActorCodeID(y)
-			if !ok {
-				panic("Internal runtime error: actor not found")
-			}
-			Assert(codeID != nil)
-			return (codeID.IsBuiltin() && (codeID.As_Builtin() == type_))
-		},
-	}
 }

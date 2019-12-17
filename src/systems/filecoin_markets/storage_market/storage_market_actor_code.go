@@ -7,22 +7,10 @@ import (
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
-
-const (
-	Method_StorageMarketActor_EpochTick = actor.MethodPlaceholder + iota
-	Method_StorageMarketActor_GetPieceInfosForDealIDs
-	Method_StorageMarketActor_ProcessDealExpiration
-	Method_StorageMarketActor_ProcessDealSlash
-	Method_StorageMarketActor_ProcessDealPayment
-	Method_StorageMarketActor_VerifyPublishedDealIDs
-	Method_StorageMarketActor_ActivateDeals
-	Method_StorageMarketActor_ClearInactiveDealIDs
-)
-
-const LastPaymentEpochNone = 0
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
@@ -32,6 +20,7 @@ type Runtime = vmr.Runtime
 type Bytes = util.Bytes
 type State = StorageMarketActorState
 
+var IMPL_FINISH = util.IMPL_FINISH
 var TODO = util.TODO
 
 func (a *StorageMarketActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, State) {
@@ -53,19 +42,34 @@ func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st State) {
 	h.UpdateRelease(newCID)
 }
 func (st *StorageMarketActorState_I) CID() ipld.CID {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 func DeserializeState(x Bytes) State {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, amountRequested actor.TokenAmount) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
+func _rtGetMinerAccountsAssert(rt Runtime, minerAddr addr.Address) (ownerAddr addr.Address, workerAddr addr.Address) {
+	ownerAddr = addr.Deserialize_Address_Compact_Assert(
+		rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetOwnerAddr, []util.Serialization{}))
+
+	workerAddr = addr.Deserialize_Address_Compact_Assert(
+		rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetWorkerAddr, []util.Serialization{}))
+
+	return
+}
+
+func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Address, amountRequested actor.TokenAmount) {
+	TODO() // TODO: must also handle case of non-miner (client) sender
+
+	ownerAddr, workerAddr := _rtGetMinerAccountsAssert(rt, minerAddr)
+	rt.ValidateImmediateCallerInSet([]addr.Address{ownerAddr, workerAddr})
+	TODO() // TODO: should workerAddr be permitted here? Depends on actor principal security assumptions.
+
 	callerAddr := rt.ImmediateCaller()
-	TODO() // Restrict caller to miner owner? (May require an additional argument
-	// to specify miner actor.)
 
 	if amountRequested < 0 {
 		rt.AbortArgMsg("sma.WithdrawBalance: negative amount.")
@@ -73,50 +77,62 @@ func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, amountRequested a
 
 	h, st := a.State(rt)
 
-	if !st._addressEntryExists(callerAddr) {
+	if !st._addressEntryExists(minerAddr) {
 		rt.AbortArgMsg("sma.WithdrawBalance: address entry does not exist")
 	}
 
-	minBalance := st._getLockedReqBalance(callerAddr)
+	// Before any operations that check the balance tables for funds, execute all deferred
+	// deal state updates.
+	//
+	// Note: as an optimization, implementations may cache efficient data structures indicating
+	// which of the following set of updates are redundant and can be skipped.
+	st._rtUpdatePendingDealStatesForParty(rt, minerAddr)
+
+	minBalance := st._getLockedReqBalanceInternal(minerAddr)
 	newTable, amountExtracted, ok := actor.BalanceTable_WithExtractPartial(
-		st.EscrowTable(), callerAddr, amountRequested, minBalance)
+		st.EscrowTable(), minerAddr, amountRequested, minBalance)
 	Assert(ok)
 	st.Impl().EscrowTable_ = newTable
 
 	UpdateRelease(rt, h, st)
 
-	// send funds to miner
+	// send funds to caller
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:    callerAddr,
 		Value_: amountExtracted,
 	})
 }
 
-func (a *StorageMarketActorCode_I) AddBalance(rt Runtime) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
+func (a *StorageMarketActorCode_I) AddBalance(rt Runtime, minerAddr addr.Address) {
+	TODO() // TODO: must also handle case of non-miner (client) sender
 
-	ownerAddr := rt.ImmediateCaller()
+	ownerAddr, workerAddr := _rtGetMinerAccountsAssert(rt, minerAddr)
+	rt.ValidateImmediateCallerInSet([]addr.Address{ownerAddr, workerAddr})
+	TODO() // TODO: should workerAddr be permitted here? Depends on actor principal security assumptions.
+
 	msgValue := rt.ValueReceived()
 
 	h, st := a.State(rt)
-	newTable, ok := actor.BalanceTable_WithAdd(st.EscrowTable(), ownerAddr, msgValue)
+
+	if !st._addressEntryExists(minerAddr) {
+		rt.AbortArgMsg("sma.WithdrawBalance: address entry does not exist")
+	}
+
+	newTable, ok := actor.BalanceTable_WithAdd(st.EscrowTable(), minerAddr, msgValue)
 	if !ok {
 		// Entry not found; create implicitly.
-		newTable, ok = actor.BalanceTable_WithNewAddressEntry(st.EscrowTable(), ownerAddr, msgValue)
+		newTable, ok = actor.BalanceTable_WithNewAddressEntry(st.EscrowTable(), minerAddr, msgValue)
 		Assert(ok)
 	}
 	st.Impl().EscrowTable_ = newTable
 	UpdateRelease(rt, h, st)
 }
 
-func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDeals []deal.StorageDeal) []PublishStorageDealResponse {
-
-	TODO() // verify StorageMinerActor (note client can put the signed message onchain too)
+func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDeals []deal.StorageDeal) {
+	// Deals may be submitted by any party (but are signed by their client and provider).
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
 
 	h, st := a.State(rt)
-
-	l := len(newStorageDeals)
-	response := make([]PublishStorageDealResponse, l)
 
 	// all storage deals will be added in an atomic transaction
 	// _validateNewStorageDeal will throw if
@@ -125,215 +141,280 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 	//     - incorrect client and provider addresses
 	//     - insufficient balance lock up
 	// this operation will be unrolled if any of the above triggers a throw
-	for i, newDeal := range newStorageDeals {
-		if st._validateNewStorageDeal(rt, newDeal) {
-			st._lockFundsForStorageDeal(rt, newDeal)
-			id := st._generateStorageDealID(rt, newDeal)
+	for _, newDeal := range newStorageDeals {
+		p := newDeal.Proposal()
 
-			onchainDeal := &deal.OnChainDeal_I{
-				ID_:               id,
-				Deal_:             newDeal,
-				LastPaymentEpoch_: block.ChainEpoch(LastPaymentEpochNone), // -1 = inactive
-			}
-			st.Deals()[id] = onchainDeal
-			response[i] = PublishStorageDealSuccess(id)
-		} else {
-			response[i] = PublishStorageDealError()
+		st._rtAbortIfNewDealInvalid(rt, newDeal)
+
+		// Before any operations that check the balance tables for funds, execute all deferred
+		// deal state updates.
+		//
+		// Note: as an optimization, implementations may cache efficient data structures indicating
+		// which of the following set of updates are redundant and can be skipped.
+		st._rtUpdatePendingDealStatesForParty(rt, p.Client())
+		st._rtUpdatePendingDealStatesForParty(rt, p.Provider())
+
+		st._rtLockBalanceUntrusted(rt, p.Client(), p.ClientBalanceRequirement())
+		st._rtLockBalanceUntrusted(rt, p.Provider(), p.ProviderBalanceRequirement())
+
+		id := st._rtGenerateStorageDealID(rt, newDeal)
+
+		onchainDeal := &deal.OnChainDeal_I{
+			ID_:               id,
+			Deal_:             newDeal,
+			SectorStartEpoch_: block.ChainEpoch_None,
 		}
+		st.Deals()[id] = onchainDeal
 	}
 
 	UpdateRelease(rt, h, st)
-
-	return response
 }
 
-func (a *StorageMarketActorCode_I) VerifyPublishedDealIDs(rt Runtime, dealIDs []deal.DealID) {
-
-	TODO() // verify StorageMinerActor
+// Note: in the case of a capacity-commitment sector (one with zero deals), this function should succeed vacuously.
+func (a *StorageMarketActorCode_I) VerifyDealsOnSectorPreCommit(rt Runtime, dealIDs deal.DealIDs, sectorInfo sector.SectorPreCommitInfo) {
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	minerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
 
-	for _, dealID := range dealIDs {
-
-		publishedDeal := st._safeGetOnChainDeal(rt, dealID)
-		st._assertPublishedDealState(rt, dealID)
-
-		dealP := publishedDeal.Deal().Proposal()
-		st._assertDealStartAfterCurrEpoch(rt, dealP)
-
-		// deal must not expire before the maximum allowable epoch between pre and prove commits
-		// we do not have to check if the deal has expired at ProveCommit
-		// if the MAX_PROVE_COMMIT_SECTOR_EPOCH constraint is not violated
-		st._assertDealExpireAfterMaxProveCommitWindow(rt, dealP)
-
+	for _, dealID := range dealIDs.Items() {
+		deal, _ := st._rtGetOnChainDealOrAbort(rt, dealID)
+		_rtAbortIfDealInvalidForNewSectorSeal(rt, minerAddr, sectorInfo.Expiration(), deal)
 	}
 
 	Release(rt, h, st)
 }
 
-func (a *StorageMarketActorCode_I) ActivateDeals(rt Runtime, sectorExpiration block.ChainEpoch, sectorSize block.StoragePower, dealIDs []deal.DealID) block.StoragePower {
-
-	TODO() // verify StorageMinerActor
+func (a *StorageMarketActorCode_I) UpdateDealsOnSectorProveCommit(rt Runtime, dealIDs deal.DealIDs, sectorInfo sector.SectorProveCommitInfo) {
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	minerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
-	lastDealExpiration := block.ChainEpoch(0)
-	dealPs := make([]deal.StorageDealProposal, len(dealIDs))
 
-	for _, dealID := range dealIDs {
-		publishedDeal := st._safeGetOnChainDeal(rt, dealID)
-		st._assertPublishedDealState(rt, dealID)
-
-		dealP := publishedDeal.Deal().Proposal()
-		st._assertDealNotYetExpired(rt, dealP)
-
-		dealEnd := dealP.EndEpoch()
-
-		if dealEnd > lastDealExpiration {
-			lastDealExpiration = dealEnd
-		}
-
-		dealPs = append(dealPs, dealP)
-		st._activateDeal(rt, publishedDeal)
+	for _, dealID := range dealIDs.Items() {
+		deal, _ := st._rtGetOnChainDealOrAbort(rt, dealID)
+		_rtAbortIfDealInvalidForNewSectorSeal(rt, minerAddr, sectorInfo.Expiration(), deal)
+		st.Deals()[dealID].Impl().SectorStartEpoch_ = rt.CurrEpoch()
 	}
 
-	st._assertEpochEqual(rt, lastDealExpiration, sectorExpiration)
+	UpdateRelease(rt, h, st)
+}
 
-	sectorDuration := sectorExpiration - rt.CurrEpoch()
-	ret := st._getSectorPowerFromDeals(sectorDuration, sectorSize, dealPs)
+func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, dealIDs deal.DealIDs) sector.PieceInfos {
+	ret := []sector.PieceInfo{}
+
+	h, st := a.State(rt)
+
+	for _, dealID := range dealIDs.Items() {
+		_, dealP := st._rtGetOnChainDealOrAbort(rt, dealID)
+		ret = append(ret, sector.PieceInfo_I{
+			PieceCID_: dealP.PieceCID(),
+			Size_:     util.UInt(dealP.PieceSize().Total()),
+		}.Ref())
+	}
+
+	Release(rt, h, st)
+
+	return &sector.PieceInfos_I{Items_: ret}
+}
+
+func (a *StorageMarketActorCode_I) GetWeightForDealSet(rt Runtime, dealIDs deal.DealIDs) int {
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	minerAddr := rt.ImmediateCaller()
+
+	IMPL_FINISH() // BigInt arithmetic
+	ret := 0
+
+	h, st := a.State(rt)
+
+	for _, dealID := range dealIDs.Items() {
+		_, dealP := st._getOnChainDealAssert(dealID)
+		Assert(dealP.Provider().Equals(minerAddr))
+
+		IMPL_FINISH() // BigInt arithmetic
+		ret += int(dealP.Duration()) * int(dealP.PieceSize().Total())
+	}
 
 	UpdateRelease(rt, h, st)
 
-	// TODO potentially refund clients for started deals
 	return ret
-
 }
 
-func (a *StorageMarketActorCode_I) ProcessDealSlash(rt Runtime, dealIDs []deal.DealID, faultType sector.StorageFaultType) {
-
-	TODO() // only call by StorageMinerActor
+func (a *StorageMarketActorCode_I) TerminateDealsOnSlashProviderSector(rt Runtime, dealIDs deal.DealIDs) {
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	minerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
 
-	// only terminated fault will result in slashing of deal collateral
-	amountSlashed := actor.TokenAmount(0)
-	switch faultType {
-	case sector.TerminatedFault:
-		for _, dealID := range dealIDs {
-			amountSlashed += st._terminateDeal(rt, dealID)
+	for _, dealID := range dealIDs.Items() {
+		_, dealP := st._rtGetOnChainDealOrAbort(rt, dealID)
+		Assert(dealP.Provider().Equals(minerAddr))
+
+		TODO()
+		// TODO: back-date the slash epoch to the epoch in which the sector entered failing state
+		// (provided by StoragePowerActor/StorageMinerActor)
+
+		// Note: we do not perform the balance transfers here, but rather simply record the flag
+		// to indicate that _rtProcessDealSlashed should be called when the deferred state computation
+		// is performed.
+		st.Deals()[dealID].Impl().SlashEpoch_ = rt.CurrEpoch()
+	}
+
+	UpdateRelease(rt, h, st)
+}
+
+func (st *StorageMarketActorState_I) _rtUpdatePendingDealStatesForParty(rt Runtime, addr addr.Address) {
+	// For consistency with OnEpochTickEnd, only process updates up to the end of the _previous_ epoch.
+	epoch := rt.CurrEpoch() - 1
+
+	var relevantDealIDs []deal.DealID
+	// Populate with the set of all elements in st.Deals() in which addr is one of the parties
+	// (either client or provider).
+	IMPL_FINISH()
+
+	st._rtUpdatePendingDealStates(rt, relevantDealIDs, epoch)
+}
+
+func (st *StorageMarketActorState_I) _rtUpdatePendingDealStates(rt Runtime, dealIDs []deal.DealID, epoch block.ChainEpoch) {
+	for _, dealID := range dealIDs {
+		st._rtUpdatePendingDealState(rt, dealID, epoch)
+	}
+}
+
+func (st *StorageMarketActorState_I) _rtUpdatePendingDealState(rt Runtime, dealID deal.DealID, epoch block.ChainEpoch) {
+	deal, dealP := st._getOnChainDealAssert(dealID)
+
+	everUpdated := (deal.LastUpdatedEpoch() != block.ChainEpoch_None)
+	everSlashed := (deal.SlashEpoch() != block.ChainEpoch_None)
+
+	Assert(!everUpdated || (deal.LastUpdatedEpoch() <= epoch))
+	if deal.LastUpdatedEpoch() == epoch {
+		return
+	}
+
+	if deal.SectorStartEpoch() == block.ChainEpoch_None {
+		// Not yet appeared in proven sector; check for timeout.
+		if dealP.StartEpoch() >= epoch {
+			st._rtProcessDealInitTimedOut(rt, dealID)
 		}
-	default:
-		// do nothing
+		return
 	}
 
-	UpdateRelease(rt, h, st)
+	Assert(dealP.StartEpoch() <= epoch)
 
-	// send funds to BurntFundsActor
-	rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:    addr.BurntFundsActorAddr,
-		Value_: amountSlashed,
-	})
+	dealEnd := dealP.EndEpoch()
+	if everSlashed {
+		Assert(deal.SlashEpoch() <= dealEnd)
+		dealEnd = deal.SlashEpoch()
+	}
 
+	elapsedStart := dealP.StartEpoch()
+	if everUpdated && deal.LastUpdatedEpoch() > elapsedStart {
+		elapsedStart = deal.LastUpdatedEpoch()
+	}
+
+	elapsedEnd := dealEnd
+	if epoch < elapsedEnd {
+		elapsedEnd = epoch
+	}
+
+	numEpochsElapsed := elapsedEnd - elapsedStart
+	st._rtProcessDealPaymentEpochsElapsed(rt, dealID, numEpochsElapsed)
+
+	if everSlashed {
+		st._rtProcessDealSlashed(rt, dealID)
+		return
+	}
+
+	if epoch >= dealP.EndEpoch() {
+		st._rtProcessDealExpired(rt, dealID)
+		return
+	}
+
+	st.Deals()[dealID].Impl().LastUpdatedEpoch_ = epoch
 }
 
-func (a *StorageMarketActorCode_I) ProcessDealPayment(rt Runtime, dealIDs []deal.DealID, newPaymentEpoch block.ChainEpoch) {
-	TODO() // verify caller must be StorageMinerActor
+// Note: only processes deal payments, not deal expiration (even if the deal has expired).
+func (st *StorageMarketActorState_I) _rtProcessDealPaymentEpochsElapsed(rt Runtime, dealID deal.DealID, numEpochsElapsed block.ChainEpoch) {
+	deal, dealP := st._getOnChainDealAssert(dealID)
+	Assert(deal.SectorStartEpoch() != block.ChainEpoch_None)
 
-	h, st := a.State(rt)
-
-	for _, dealID := range dealIDs {
-		deal, ok := st._getOnChainDeal(dealID)
-		if !ok {
-			continue
-		}
-
-		fee := st._getStorageFeeSinceLastPayment(rt, deal, newPaymentEpoch)
-
-		dealP := deal.Deal().Proposal()
-		st._rtTransferBalance(rt, dealP.Client(), dealP.Provider(), fee)
-
-		// update LastPaymentEpoch in deal
-		deal.Impl().LastPaymentEpoch_ = newPaymentEpoch
-		st.Deals()[dealID] = deal
-	}
-
-	UpdateRelease(rt, h, st)
+	// Process deal payment for the elapsed epochs.
+	IMPL_FINISH() // BigInt arithmetic
+	totalPayment := int(numEpochsElapsed) * int(dealP.StoragePricePerEpoch())
+	st._rtTransferBalance(rt, dealP.Client(), dealP.Provider(), actor.TokenAmount(totalPayment))
 }
 
-// unlock remaining payments and return all UnlockedStorageFee to Provider
-// remove deals from ActiveDeals
-// return collaterals to both miner and client
-func (a *StorageMarketActorCode_I) ProcessDealExpiration(rt Runtime, dealIDs []deal.DealID) {
-	TODO() // verify caller must be StorageMinerActor
+func (st *StorageMarketActorState_I) _rtProcessDealSlashed(rt Runtime, dealID deal.DealID) {
+	deal, dealP := st._getOnChainDealAssert(dealID)
+	Assert(deal.SectorStartEpoch() != block.ChainEpoch_None)
 
-	h, st := a.State(rt)
+	slashEpoch := deal.SlashEpoch()
+	Assert(slashEpoch != block.ChainEpoch_None)
 
-	for _, dealID := range dealIDs {
+	// unlock client collateral and locked storage fee
+	clientCollateral := dealP.ClientCollateral()
+	paymentRemaining := _dealGetPaymentRemaining(deal, rt.CurrEpoch())
+	st._rtUnlockBalance(rt, dealP.Client(), clientCollateral+paymentRemaining)
 
-		expiredDeal := st._safeGetOnChainDeal(rt, dealID)
-		st._assertActiveDealState(rt, dealID)
+	// slash provider collateral
+	slashAmount := dealP.ProviderCollateral()
+	st._rtSlashBalance(rt, dealP.Provider(), slashAmount)
 
-		dealP := expiredDeal.Deal().Proposal()
-		fee := st._getStorageFeeSinceLastPayment(rt, expiredDeal, dealP.EndEpoch())
+	TODO() // TODO: tabulate for later send (can't send while holding state lock)
+	rt.SendFunds(addr.BurntFundsActorAddr, slashAmount)
 
-		delete(st.Deals(), dealID)
-		st._rtTransferBalance(rt, dealP.Client(), dealP.Provider(), fee)
-
-		// return storage deal collaterals to both miners and client
-		st._rtUnlockBalance(rt, dealP.Provider(), dealP.ProviderBalanceRequirement())
-		st._rtUnlockBalance(rt, dealP.Client(), dealP.TotalClientCollateral())
-
-	}
-
-	UpdateRelease(rt, h, st)
+	delete(st.Deals(), dealID)
 }
 
-func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, sectorSize util.UVarint, dealIDs []deal.DealID) []sector.PieceInfo_I {
-	pieceInfos := make([]sector.PieceInfo_I, len(dealIDs))
+// Deal start deadline elapsed without appearing in a proven sector.
+// (TODO: slash portion of provider's collateral TBD)
+// Delete deal and unlock collaterals for both provider and client.
+func (st *StorageMarketActorState_I) _rtProcessDealInitTimedOut(rt Runtime, dealID deal.DealID) {
+	deal, dealP := st._getOnChainDealAssert(dealID)
+	Assert(deal.SectorStartEpoch() == block.ChainEpoch_None)
 
-	h, st := a.State(rt)
+	st._rtUnlockBalance(rt, dealP.Client(), dealP.ClientBalanceRequirement())
 
-	for index, deal := range st.Deals() {
-		proposal := deal.Deal().Proposal()
-		pieceSize := util.UInt(proposal.PieceSize().Total())
+	TODO() // slash portion of provider's collateral TBD
+	st._rtUnlockBalance(rt, dealP.Provider(), dealP.ProviderBalanceRequirement())
 
-		var pieceInfo sector.PieceInfo_I
-		pieceInfo.PieceCID_ = proposal.PieceCID()
-		pieceInfo.Size_ = pieceSize
-
-		pieceInfos[index] = pieceInfo
-	}
-
-	Release(rt, h, st)
-
-	return pieceInfos
+	delete(st.Deals(), dealID)
 }
 
-func (a *StorageMarketActorCode_I) ClearInactiveDealIDs(rt Runtime, dealIDs []deal.DealID) {
+// Normal expiration. Delete deal and unlock collaterals for both miner and client.
+func (st *StorageMarketActorState_I) _rtProcessDealExpired(rt Runtime, dealID deal.DealID) {
+	deal, dealP := st._getOnChainDealAssert(dealID)
+	Assert(deal.SectorStartEpoch() != block.ChainEpoch_None)
+
+	// Note: payment has already been completed at this point (_rtProcessDealPaymentEpochsElapsed)
+	st._rtUnlockBalance(rt, dealP.Provider(), dealP.ProviderCollateral())
+	st._rtUnlockBalance(rt, dealP.Client(), dealP.ClientCollateral())
+
+	delete(st.Deals(), dealID)
+}
+
+func (a *StorageMarketActorCode_I) OnEpochTickEnd(rt Runtime) {
 	h, st := a.State(rt)
 
-	for _, dealID := range dealIDs {
-		deal := st._safeGetOnChainDeal(rt, dealID)
-		st._assertPublishedDealState(rt, dealID)
+	// Some deals may never be affected by the normal calls to _rtUpdatePendingDealStatesForParty
+	// (notably, if the relevant party never checks its balance).
+	// Without some cleanup mechanism, these deals may gradually accumulate and cause
+	// the StorageMarketActor state to grow without bound.
+	// To prevent this, we amortize the cost of this cleanup by processing a relatively
+	// small number of deals every epoch, independent of the calls above.
+	var cleanupDealIDs []deal.DealID
+	// Populate with the N oldest deals (e.g., by a priority queue on EndEpoch).
+	// N is a system parameter TBD, which may be a function of the global statistics
+	// (including the number of deals in each prior epoch).
+	IMPL_FINISH()
 
-		dealP := deal.Deal().Proposal()
-		delete(st.Deals(), dealID)
-
-		// return client lock up (client deal collateral and total storage fee)
-		clientLockup := dealP.ClientBalanceRequirement()
-		st._rtUnlockBalance(rt, dealP.Client(), clientLockup)
-
-		// return provider lock up
-		providerLockup := dealP.ProviderBalanceRequirement()
-		st._rtUnlockBalance(rt, dealP.Provider(), providerLockup)
-
-		// Note that there is no penalty on provider deal collateral
-		// since PreCommitDeposit has been burned
-		// TODO: decide if this is sufficient and if we need to burn any deal collateral
-	}
+	st._rtUpdatePendingDealStates(rt, cleanupDealIDs, rt.CurrEpoch())
 
 	UpdateRelease(rt, h, st)
 }
 
 func (a *StorageMarketActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }

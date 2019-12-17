@@ -1,0 +1,26 @@
+package actor_interfaces
+
+import (
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+)
+
+const (
+	Method_StorageMinerActor_ProcessVerifiedSurprisePoSt = actor.MethodPlaceholder + iota
+	Method_StorageMinerActor_ProcessVerifiedElectionPoSt
+	Method_StorageMinerActor_NotifyOfSurprisePoStChallenge
+	Method_StorageMinerActor_GetOwnerAddr
+	Method_StorageMinerActor_GetWorkerAddr
+	Method_StorageMinerActor_GetWorkerKey
+)
+
+const (
+	Method_StorageMarketActor_OnEpochTickEnd = actor.MethodPlaceholder + iota
+	Method_StorageMarketActor_AddBalance
+	Method_StorageMarketActor_WithdrawBalance
+	Method_StorageMarketActor_PublishStorageDeals
+	Method_StorageMarketActor_VerifyDealsOnSectorPreCommit
+	Method_StorageMarketActor_UpdateDealsOnSectorProveCommit
+	Method_StorageMarketActor_GetPieceInfosForDealIDs
+	Method_StorageMarketActor_GetWeightForDealSet
+	Method_StorageMarketActor_TerminateDealsOnSlashProviderSector
+)

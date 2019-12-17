@@ -1,6 +1,6 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
@@ -17,119 +17,100 @@ type StorageMarketActorState struct {
     // only the _portion_ of the total escrow amount that is locked.
     LockedReqTable  actor.BalanceTableHAMT
 
-    _getTotalEscrowBalance(a addr.Address) actor.TokenAmount
-    _getLockedReqBalance(a addr.Address) actor.TokenAmount
-    _getAvailableBalance(a addr.Address) actor.TokenAmount
-
-    _generateStorageDealID(rt Runtime, deal deal.StorageDeal) deal.DealID
-    _isBalanceAvailable(rt Runtime, a addr.Address, amount actor.TokenAmount) bool
-    _assertValidClientSignature(rt Runtime, dealP deal.StorageDealProposal)
-    _assertDealStartAfterCurrEpoch(rt Runtime, p deal.StorageDealProposal)
-    _assertDealNotYetExpired(rt Runtime, p deal.StorageDealProposal)
-    _assertValidDealTimingAtPublish(rt Runtime, p deal.StorageDealProposal)
-    _assertValidDealMinimum(rt Runtime, p deal.StorageDealProposal)
-    _assertSufficientBalanceAvailForDeal(rt Runtime, p deal.StorageDealProposal)
-    _assertDealExpireAfterMaxProveCommitWindow(rt Runtime, p deal.StorageDealProposal)
-
-    // check if StorageDeal is signed before expiry
-    // check if StorageDeal has the right signatures
-    // check if minimum StoragePrice and StorageCollateral are met
-    // check if provider and client have sufficient balances
-    _validateNewStorageDeal(rt Runtime, deal deal.StorageDeal) bool
-
-    _rtLockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount)
-    _rtUnlockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount)
-    _rtTransferBalance(
-        rt           Runtime
-        fromLocked   addr.Address
-        toAvailable  addr.Address
-        amount       actor.TokenAmount
+    _rtUpdatePendingDealStatesForParty(rt Runtime, addr addr.Address)
+    _rtUpdatePendingDealStates(rt Runtime, dealIDs [deal.DealID], epoch block.ChainEpoch)
+    _rtUpdatePendingDealState(rt Runtime, dealID deal.DealID, epoch block.ChainEpoch)
+    _rtProcessDealPaymentEpochsElapsed(
+        rt                Runtime
+        dealID            deal.DealID
+        numEpochsElapsed  block.ChainEpoch
     )
-    _lockFundsForStorageDeal(rt Runtime, deal deal.StorageDeal)
+    _rtProcessDealSlashed(rt Runtime, dealID deal.DealID)
+    _rtProcessDealInitTimedOut(rt Runtime, dealID deal.DealID)
+    _rtProcessDealExpired(rt Runtime, dealID deal.DealID)
 
-    _safeGetOnChainDeal(rt Runtime, dealID deal.DealID) deal.OnChainDeal
-    _getOnChainDeal(dealID deal.DealID) (deal deal.OnChainDeal, ok bool)
-    _assertPublishedDealState(rt Runtime, dealID deal.DealID)
-    _assertActiveDealState(rt Runtime, dealID deal.DealID)
-    _assertEpochEqual(rt Runtime, epoch1 block.ChainEpoch, epoch2 block.ChainEpoch)
-    _activateDeal(rt Runtime, deal deal.OnChainDeal) deal.OnChainDeal
-    _getSectorPowerFromDeals(
-        sectorDuration  block.ChainEpoch
-        sectorSize      block.StoragePower
-        dealPs          [deal.StorageDealProposal]
-    ) block.StoragePower
+    _rtAbortIfNewDealInvalid(rt Runtime, deal deal.StorageDeal)
+    _rtAbortIfDealFailsParamBounds(rt Runtime, dealP deal.StorageDealProposal)
+    _rtGetOnChainDealOrAbort(rt Runtime, dealID deal.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal)
 
-    _getStorageFeeSinceLastPayment(
-        rt               Runtime
-        deal             deal.OnChainDeal
-        newPaymentEpoch  block.ChainEpoch
-    ) actor.TokenAmount
+    _rtGenerateStorageDealID(rt Runtime, storageDeal deal.StorageDeal) deal.DealID
 
-    _terminateDeal(rt Runtime, dealID deal.DealID) actor.TokenAmount
-    _rtSlashDealCollateral(
-        rt      Runtime
-        amount  actor.TokenAmount
-    ) actor.TokenAmount
-
-    _refundStartedDeals(rt Runtime, dealIDs [deal.DealID])
+    _getOnChainDealAssert(dealID deal.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal)
     _addressEntryExists(address addr.Address) bool
+    _getTotalEscrowBalanceInternal(a addr.Address) actor.TokenAmount
+    _getLockedReqBalanceInternal(a addr.Address) actor.TokenAmount
+
+    _rtLockBalanceUntrusted(rt Runtime, addr addr.Address, amount actor.TokenAmount)
+
+    _rtUnlockBalance(
+        rt                     Runtime
+        addr                   addr.Address
+        unlockAmountRequested  actor.TokenAmount
+    )
+    _rtTableWithAddBalance(
+        rt           Runtime
+        table        actor.BalanceTableHAMT
+        toAddr       addr.Address
+        amountToAdd  actor.TokenAmount
+    ) actor.BalanceTableHAMT
+
+    _rtTableWithDeductBalanceExact(
+        rt               Runtime
+        table            actor.BalanceTableHAMT
+        fromAddr         addr.Address
+        amountRequested  actor.TokenAmount
+    ) actor.BalanceTableHAMT
+
+    _rtTransferBalance(
+        rt                       Runtime
+        fromAddr                 addr.Address
+        toAddr                   addr.Address
+        transferAmountRequested  actor.TokenAmount
+    )
+
+    _rtSlashBalance(rt Runtime, addr addr.Address, slashAmount actor.TokenAmount)
 }
 
 type StorageMarketActorCode struct {
-    WithdrawBalance(rt Runtime, balance actor.TokenAmount)
-    AddBalance(rt Runtime)  // amount is in the message
+    // Deposits the specified amount into the balance held in escrow.
+    // Note: the amount is included implicitly in the message.
+    AddBalance(rt Runtime)
 
-    // call by StorageMiningSubsystem before PreCommitSector
-    // a StorageDeal is only published on chain when it passes _validateNewStorageDeal
-    // _validateNewStorageDeal checks for the following:
-    //     - deal did not start/expire when it is signed
-    //     - deal hits the chain before its StartEpoch
-    //     - client and provider address and signature are correct (TODO may be unnecessary)
-    //     - client and provider have sufficient balances to lock up
-    // a DealID will be assigned and stored in the mapping of DealID to StorageDeal
-    // _lockBalance is then called after each _validateNewStorageDeal to lock up balances
-    PublishStorageDeals(rt Runtime, deals [deal.StorageDeal]) [PublishStorageDealResponse]
+    // Attempt to withdraw the specified amount from the balance held in escrow.
+    // If less than the specified amount is available, yields the entire available balance.
+    WithdrawBalance(rt Runtime, amount actor.TokenAmount)
 
-    // Call by sm.PreCommitSector
-    // Verify the following:
-    //     - dealIDs have been registered in PublishedDeals
-    //     - deals will not expire by the time ProveCommit hits
-    //     - deals have not started
-    // Fail PreCommit if any of above is not true and abort
-    VerifyPublishedDealIDs(rt Runtime, dealIDs [deal.DealID])
+    // Publish a new set of storage deals (not yet included in a sector).
+    PublishStorageDeals(rt Runtime, deals [deal.StorageDeal])
 
-    // Call by sm.ProveCommitSector
-    // Verify the following:
-    //     - dealIDs are in PublishedDeals
-    //     - deals have not expired, OK if deals have started
-    // Fail ProveCommit if any of the above is not true and abort
-    // Move deals from PublishDeals to ActiveDeals if all deals satisfy the requirement
-    ActivateDeals(rt Runtime, dealIDs [deal.DealID]) [deal.OnChainDeal]
-
-    // call by StorageMinerActor
-    // slash deal collateral depending on the faults (only TerminatedFault)
-    ProcessDealSlash(
-        rt         Runtime
-        dealIDs    [deal.DealID]
-        faultType  sector.StorageFaultType
+    // Verify that a given set of storage deals is valid for a sector currently being PreCommitted.
+    VerifyDealsOnSectorPreCommit(
+        rt          Runtime
+        dealIDs     deal.DealIDs
+        sectorInfo  sector.SectorPreCommitInfo
     )
 
-    // batch process storage deal payment
-    // Note: if a sector enters into a Failing state but later recovers, client still pays miner as usual
-    // client only stops paying when a sector gets cleared (expired or faulted)
-    // Note: Clients stop paying when miners enter into Failing state
-    // payment happens at next _onSuccessfulPoSt when miner recovers
-    // If a miner did not recover, payment will stop at the first fault
-    ProcessDealPayment(
-        rt               Runtime
-        dealIDs          [deal.DealID]
-        newPaymentEpoch  block.ChainEpoch
+    // Verify that a given set of storage deals is valid for a sector currently being ProveCommitted,
+    // and update the market's internal state accordingly.
+    UpdateDealsOnSectorProveCommit(
+        rt          Runtime
+        dealIDs     deal.DealIDs
+        sectorInfo  sector.SectorProveCommitInfo
     )
 
-    // batch process storage deal expiration
-    ProcessDealExpiration(rt Runtime, dealIDs [deal.DealID])
+    // Get the weight for a given set of storage deals.
+    // The weight is defined as the sum, over all deals in the set, of the product of its size
+    // with its duration. This quantity may be an input into the functions specifying block reward,
+    // sector power, collateral, and/or other parameters.
+    GetWeightForDealSet(rt Runtime, dealIDs deal.DealIDs) int
 
-    GetPieceInfosForDealIDs(rt Runtime, dealIDs [deal.DealID]) [sector.PieceInfo]
+    // Terminate a set of deals in response to their containing sector being terminated.
+    // Slash provider collateral, refund client collateral, and refund partial unpaid escrow
+    // amount to client.
+    TerminateDealsOnSlashProviderSector(rt Runtime, dealIDs deal.DealIDs)
 
-    ClearInactiveDealIDs(rt Runtime, dealIDs [deal.DealID])
+    // Should be registered with CronActor to be called at the end of each EpochTick iteration.
+    // Processes any deals that have expired, as well as any deals for which the timeout
+    // has elapsed for their initial appearance in a proven sector.
+    OnEpochTickEnd(rt Runtime)
 }

@@ -6,6 +6,8 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
+var Assert = util.Assert
+
 type Int = util.Int
 
 // Addresses for singleton system actors.
@@ -42,20 +44,26 @@ func (a *Address_I) Equals(Address) bool {
 	panic("TODO")
 }
 
-func (a *Address_I) String() AddressString {
-	return Serialize_Address_Compact(a)
+func (a *Address_I) String() string {
+	return string(Serialize_Address_Compact(a))
 }
 
-func Serialize_Address_Compact(Address) AddressString {
+func Serialize_Address_Compact(Address) util.Serialization {
 	// TODO: custom encoding as in
 	// https://github.com/filecoin-project/lotus/blob/master/chain/address/address.go
 	panic("TODO")
 }
 
-func Deserialize_Address_Compact(AddressString) (Address, error) {
+func Deserialize_Address_Compact(util.Serialization) (Address, error) {
 	// TODO: custom encoding as in
 	// https://github.com/filecoin-project/lotus/blob/master/chain/address/address.go
 	panic("TODO")
+}
+
+func Deserialize_Address_Compact_Assert(x util.Serialization) Address {
+	ret, err := Deserialize_Address_Compact(x)
+	Assert(err == nil)
+	return ret
 }
 
 func (a *Address_I) IsIDType() bool {

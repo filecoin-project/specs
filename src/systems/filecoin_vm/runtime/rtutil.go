@@ -25,6 +25,31 @@ type CallerPattern struct {
 	Matches func(addr.Address) bool
 }
 
+func CallerPattern_MakeSingleton(x addr.Address) CallerPattern {
+	return CallerPattern{
+		Matches: func(y addr.Address) bool { return x == y },
+	}
+}
+
+func CallerPattern_MakeSet(x []addr.Address) CallerPattern {
+	return CallerPattern{
+		Matches: func(y addr.Address) bool {
+			for _, xi := range x {
+				if y == xi {
+					return true
+				}
+			}
+			return false
+		},
+	}
+}
+
+func CallerPattern_MakeAcceptAny() CallerPattern {
+	return CallerPattern{
+		Matches: func(addr.Address) bool { return true },
+	}
+}
+
 func InvocInput_Make(to addr.Address, method actor.MethodNum, params actor.MethodParams, value actor.TokenAmount) InvocInput {
 	return &InvocInput_I{
 		To_:     to,

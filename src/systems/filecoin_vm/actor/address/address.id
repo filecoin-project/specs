@@ -17,7 +17,7 @@ type Address struct {
     }
 
     VerifySyntax()   bool
-    String()         AddressString
+    String()         string
     IsIDType()       bool  // Whether the address is an ID-address
     IsKeyType()      bool  // Whether the address is a public key address (SECP or BLS)
     Equals(Address)  bool
@@ -34,5 +34,3 @@ type ActorID Int
 
 type KeyHash Bytes
 type ActorExecHash Bytes
-
-type AddressString string

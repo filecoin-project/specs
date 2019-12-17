@@ -22,7 +22,7 @@ type SHA256Hash Bytes32
 type PedersenHash Bytes32
 type Bytes32 []byte
 type UInt = util.UInt
-type PieceInfo = *sector.PieceInfo_I
+type PieceInfo = sector.PieceInfo
 type Label Bytes32
 type Commitment = sector.Commitment
 
