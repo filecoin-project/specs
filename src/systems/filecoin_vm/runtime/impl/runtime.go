@@ -8,6 +8,7 @@ import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
@@ -635,6 +636,13 @@ func (rt *VMContext) IpldGet(c ipld.CID) vmr.Runtime_IpldGet_FunRet {
 
 func (rt *VMContext) CurrEpoch() block.ChainEpoch {
 	IMPL_FINISH()
+	panic("")
+}
+
+func (rt *VMContext) CurrIndices() indices.Indices {
+	// TODO: compute from state tree (rt._globalStatePending), using individual actor
+	// state helper functions when possible
+	TODO()
 	panic("")
 }
 

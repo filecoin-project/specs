@@ -1,0 +1,6 @@
+type Indices struct {
+    TotalNetworkPower  BigInt
+    TotalMintedFIL     BigInt
+    TotalBurnedFIL     BigInt
+    // TODO: extend
+}
