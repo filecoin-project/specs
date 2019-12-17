@@ -20,7 +20,7 @@ type StorageMarketActorState struct {
     _rtAbortIfAddressEntryDoesNotExist(rt Runtime, entryAddr addr.Address)
     _rtUpdatePendingDealStatesForParty(rt Runtime, addr addr.Address) (amountSlashedTotal actor.TokenAmount)
     _rtGetOnChainDealOrAbort(rt Runtime, dealID deal.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal)
-    _rtLockBalanceUntrusted(rt Runtime, addr addr.Address, amount actor.TokenAmount)
+    _rtLockBalanceOrAbort(rt Runtime, addr addr.Address, amount actor.TokenAmount)
 
     _updatePendingDealStates(dealIDs [deal.DealID], epoch block.ChainEpoch) (amountSlashedTotal actor.TokenAmount)
     _updatePendingDealState(dealID deal.DealID, epoch block.ChainEpoch) (amountSlashed actor.TokenAmount)
