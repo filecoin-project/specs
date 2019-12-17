@@ -87,8 +87,8 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 		amountSlashedTotal += st._rtUpdatePendingDealStatesForParty(rt, p.Client())
 		amountSlashedTotal += st._rtUpdatePendingDealStatesForParty(rt, p.Provider())
 
-		st._rtLockBalanceUntrusted(rt, p.Client(), p.ClientBalanceRequirement())
-		st._rtLockBalanceUntrusted(rt, p.Provider(), p.ProviderBalanceRequirement())
+		st._rtLockBalanceOrAbort(rt, p.Client(), p.ClientBalanceRequirement())
+		st._rtLockBalanceOrAbort(rt, p.Provider(), p.ProviderBalanceRequirement())
 
 		id := st._generateStorageDealID(newDeal)
 
@@ -229,6 +229,9 @@ func (st *StorageMarketActorState_I) _rtUpdatePendingDealStatesForParty(rt Runti
 	var relevantDealIDs []deal.DealID
 	// Populate with the set of all elements in st.Deals() in which addr is one of the parties
 	// (either client or provider).
+	//
+	// Note: as an optimization, implementations may cache efficient data structures to maintain
+	// this index.
 	IMPL_FINISH()
 
 	amountSlashedTotal = st._updatePendingDealStates(relevantDealIDs, epoch)
@@ -353,7 +356,7 @@ func (st *StorageMarketActorState_I) _rtGetOnChainDealOrAbort(rt Runtime, dealID
 	return
 }
 
-func (st *StorageMarketActorState_I) _rtLockBalanceUntrusted(rt Runtime, addr addr.Address, amount actor.TokenAmount) {
+func (st *StorageMarketActorState_I) _rtLockBalanceOrAbort(rt Runtime, addr addr.Address, amount actor.TokenAmount) {
 	if amount < 0 {
 		rt.AbortArgMsg("Negative amount")
 	}
