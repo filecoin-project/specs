@@ -749,10 +749,6 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 			"Seal verification failed")
 	}
 
-	minerInfo := st.Info()
-	sectorSize := minerInfo.SectorSize()
-	sectorPower := block.StoragePower(sectorSize)
-
 	UpdateRelease(rt, h, st)
 
 	// Activate storage deals, abort if activation failed
@@ -760,12 +756,13 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		addr.StorageMarketActorAddr,
 		ai.Method_StorageMarketActor_UpdateDealsOnSectorProveCommit,
 		[]util.Serialization{
-			block.Serialize_ChainEpoch(info.Expiration()),
-			block.Serialize_StoragePower(sectorPower),
 			deal.Serialize_DealIDs(onChainInfo.DealIDs()),
+			sector.Serialize_SectorProveCommitInfo(info),
 		},
 		actor.TokenAmount(0),
 	)
+	TODO()
+	// TODO: compute sector power from query to GetWeightForDealSet instead of this return value
 
 	h, st = a.State(rt)
 

@@ -61,7 +61,9 @@ func _dealProposalIsInternallyValid(dealP deal.StorageDealProposal) bool {
 	if dealP.Duration() != dealP.EndEpoch()-dealP.StartEpoch() {
 		return false
 	}
-	TODO() // validate client and provider signatures
+
+	IMPL_FINISH() // Verify client and provider signatures.
+
 	return true
 }
 
@@ -71,7 +73,8 @@ func _dealGetPaymentRemaining(deal deal.OnChainDeal, epoch block.ChainEpoch) act
 
 	durationRemaining := dealP.EndEpoch() - (epoch - 1)
 	Assert(durationRemaining > 0)
-	// TODO: BigInt arithmetic
+
+	IMPL_FINISH() // BigInt arithmetic
 	return actor.TokenAmount(int(durationRemaining) * int(dealP.StoragePricePerEpoch()))
 }
 
@@ -105,12 +108,12 @@ func (st *StorageMarketActorState_I) _rtAbortIfDealFailsParamBounds(rt Runtime, 
 	}
 }
 
-func (st *StorageMarketActorState_I) _generateStorageDealID(rt Runtime, storageDeal deal.StorageDeal) deal.DealID {
+func (st *StorageMarketActorState_I) _rtGenerateStorageDealID(rt Runtime, storageDeal deal.StorageDeal) deal.DealID {
 	TODO() // use pair (minerAddr.ID, sequence number)?
 	panic("")
 }
 
-func (st *StorageMarketActorState_I) _getOnchainDeal(dealID deal.DealID) (
+func (st *StorageMarketActorState_I) _getOnChainDeal(dealID deal.DealID) (
 	deal deal.OnChainDeal, dealP deal.StorageDealProposal, ok bool) {
 
 	var found bool
@@ -124,9 +127,18 @@ func (st *StorageMarketActorState_I) _getOnchainDeal(dealID deal.DealID) (
 	return
 }
 
+func (st *StorageMarketActorState_I) _getOnChainDealAssert(dealID deal.DealID) (
+	deal deal.OnChainDeal, dealP deal.StorageDealProposal) {
+
+	var ok bool
+	deal, dealP, ok = st._getOnChainDeal(dealID)
+	Assert(ok)
+	return
+}
+
 func (st *StorageMarketActorState_I) _rtGetOnChainDealOrAbort(rt Runtime, dealID deal.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal) {
 	var found bool
-	deal, dealP, found = st._getOnchainDeal(dealID)
+	deal, dealP, found = st._getOnChainDeal(dealID)
 	if !found {
 		rt.AbortStateMsg("dealID not found in Deals.")
 	}
@@ -208,10 +220,7 @@ func (st *StorageMarketActorState_I) _rtTableWithDeductBalanceExact(
 	newTable, amountDeducted, ok := actor.BalanceTable_WithSubtractPreservingNonnegative(
 		table, fromAddr, amountRequested)
 	Assert(ok)
-	if amountDeducted != amountRequested {
-		TODO() // Should be Assert(), as an invariant violation in SMA?
-		rt.AbortFundsMsg("Attempt to deduct amount greater than present in table")
-	}
+	Assert(amountDeducted == amountRequested)
 	return newTable
 }
 

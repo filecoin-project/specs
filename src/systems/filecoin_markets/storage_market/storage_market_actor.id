@@ -20,7 +20,7 @@ type StorageMarketActorState struct {
     _rtUpdatePendingDealStatesForParty(rt Runtime, addr addr.Address)
     _rtUpdatePendingDealStates(rt Runtime, dealIDs [deal.DealID], epoch block.ChainEpoch)
     _rtUpdatePendingDealState(rt Runtime, dealID deal.DealID, epoch block.ChainEpoch)
-    _rtProcessDealEpochsElapsed(
+    _rtProcessDealPaymentEpochsElapsed(
         rt                Runtime
         dealID            deal.DealID
         numEpochsElapsed  block.ChainEpoch
@@ -33,8 +33,9 @@ type StorageMarketActorState struct {
     _rtAbortIfDealFailsParamBounds(rt Runtime, dealP deal.StorageDealProposal)
     _rtGetOnChainDealOrAbort(rt Runtime, dealID deal.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal)
 
-    _generateStorageDealID(rt Runtime, storageDeal deal.StorageDeal) deal.DealID
+    _rtGenerateStorageDealID(rt Runtime, storageDeal deal.StorageDeal) deal.DealID
 
+    _getOnChainDealAssert(dealID deal.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal)
     _addressEntryExists(address addr.Address) bool
     _getTotalEscrowBalanceInternal(a addr.Address) actor.TokenAmount
     _getLockedReqBalanceInternal(a addr.Address) actor.TokenAmount
@@ -107,11 +108,6 @@ type StorageMarketActorCode struct {
     // Slash provider collateral, refund client collateral, and refund partial unpaid escrow
     // amount to client.
     TerminateDealsOnSlashProviderSector(rt Runtime, dealIDs deal.DealIDs)
-
-    // TODO: previously read:
-    //   > Clients stop paying when miners enter into Failing state
-    // Is this desired? If so, need to deal with possibility that the total paid might be
-    // less than the nominal deal amount.
 
     // Should be registered with CronActor to be called at the end of each EpochTick iteration.
     // Processes any deals that have expired, as well as any deals for which the timeout
