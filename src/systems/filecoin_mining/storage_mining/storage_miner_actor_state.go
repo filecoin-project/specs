@@ -40,7 +40,7 @@ func (st *StorageMinerActorState_I) _shouldChallenge(currEpoch block.ChainEpoch)
 	return st.ChallengeStatus().ShouldChallenge(currEpoch)
 }
 
-func (st *StorageMinerActorState_I) _processStagedCommittedSectors(rt Runtime) {
+func (st *StorageMinerActorState_I) _processStagedCommittedSectors() {
 	for sectorNo, stagedInfo := range st.StagedCommittedSectors() {
 		st.Sectors()[sectorNo] = stagedInfo
 		st.Impl().ProvingSet_.Add(sectorNo)
@@ -51,7 +51,7 @@ func (st *StorageMinerActorState_I) _processStagedCommittedSectors(rt Runtime) {
 	st.Impl().StagedCommittedSectors_ = make(map[sector.SectorNumber]SectorOnChainInfo)
 }
 
-func (st *StorageMinerActorState_I) _getActivePower(rt Runtime) (block.StoragePower, error) {
+func (st *StorageMinerActorState_I) _getActivePower() (block.StoragePower, error) {
 	activePower := block.StoragePower(0)
 
 	for _, sectorNo := range st.SectorTable().Impl().ActiveSectors_.SectorsOn() {
@@ -88,7 +88,7 @@ func (st *StorageMinerActorState_I) _getInactivePower() (block.StoragePower, err
 // into Cleared State which means deleting the Sector from state
 // remove SectorNumber from all states on chain
 // update SectorTable
-func (st *StorageMinerActorState_I) _updateClearSector(rt Runtime, sectorNo sector.SectorNumber) {
+func (st *StorageMinerActorState_I) _updateClearSectorAssert(sectorNo sector.SectorNumber) {
 	sectorState := st.Sectors()[sectorNo].State()
 	switch sectorState.StateNumber {
 	case SectorActiveSN:
@@ -99,7 +99,7 @@ func (st *StorageMinerActorState_I) _updateClearSector(rt Runtime, sectorNo sect
 		st.SectorTable().Impl().FailingSectors_.Remove(sectorNo)
 	default:
 		// Committed and Recovering should not go to Cleared directly
-		rt.AbortStateMsg("invalid state in clearSector")
+		Assert(false)
 	}
 
 	delete(st.Sectors(), sectorNo)
@@ -110,7 +110,7 @@ func (st *StorageMinerActorState_I) _updateClearSector(rt Runtime, sectorNo sect
 // move Sector from Committed/Recovering into Active State
 // reset FaultCount to zero
 // update SectorTable
-func (st *StorageMinerActorState_I) _updateActivateSector(rt Runtime, sectorNo sector.SectorNumber) {
+func (st *StorageMinerActorState_I) _updateActivateSectorAssert(sectorNo sector.SectorNumber) {
 	sectorState := st.Sectors()[sectorNo].State()
 	switch sectorState.StateNumber {
 	case SectorCommittedSN:
@@ -118,7 +118,8 @@ func (st *StorageMinerActorState_I) _updateActivateSector(rt Runtime, sectorNo s
 	case SectorRecoveringSN:
 		st.SectorTable().Impl().RecoveringSectors_.Remove(sectorNo)
 	default:
-		rt.AbortStateMsg("sm._updateActivateSector: invalid state in activateSector")
+		// sm._updateActivateSectorAssert: invalid state in activateSector
+		Assert(false)
 	}
 
 	st.Sectors()[sectorNo].Impl().State_ = SectorActive()
@@ -130,7 +131,7 @@ func (st *StorageMinerActorState_I) _updateActivateSector(rt Runtime, sectorNo s
 // move Sector from Failing to Cleared State if increment results in faultCount exceeds MAX_CONSECUTIVE_FAULTS
 // update SectorTable
 // remove from ProvingSet
-func (st *StorageMinerActorState_I) _updateFailSector(rt Runtime, sectorNo sector.SectorNumber, increment bool) {
+func (st *StorageMinerActorState_I) _updateFailSectorAssert(sectorNo sector.SectorNumber, increment bool) {
 	newFaultCount := st.Sectors()[sectorNo].State().FaultCount
 
 	if increment {
@@ -159,19 +160,18 @@ func (st *StorageMinerActorState_I) _updateFailSector(rt Runtime, sectorNo secto
 		// no change to SectorTable but increase in FaultCount
 		st.Sectors()[sectorNo].Impl().State_ = SectorFailing(newFaultCount)
 	default:
-		rt.AbortStateMsg("Invalid sector state in CronAction")
+		// Invalid sector state in CronAction
+		Assert(false)
 	}
 
 	if newFaultCount > MAX_CONSECUTIVE_FAULTS {
 		// slashing is done at _slashCollateralForStorageFaults
-		st._updateClearSector(rt, sectorNo)
+		st._updateClearSectorAssert(sectorNo)
 		st.SectorTable().Impl().TerminatedFaults_.Add(sectorNo)
 	}
 }
 
-func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) []sector.SectorNumber {
-	currEpoch := rt.CurrEpoch()
-
+func (st *StorageMinerActorState_I) _updateExpireSectors(currEpoch block.ChainEpoch) []sector.SectorNumber {
 	queue := st.SectorExpirationQueue()
 	expiredSectorNos := make([]sector.SectorNumber, 0)
 
@@ -183,28 +183,22 @@ func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) []sector.Se
 		case SectorActiveSN:
 			// Note: in order to verify if something was stored in the past, one must
 			// scan the chain. SectorNumber can be re-used.
-			st._updateClearSector(rt, expiredSectorNo)
+			st._updateClearSectorAssert(expiredSectorNo)
 			expiredSectorNos = append(expiredSectorNos, expiredSectorNo)
 		case SectorFailingSN:
 			// TODO: check if there is any fault that we should handle here
 
 			// a failing sector expires, no change to FaultCount
-			st._updateClearSector(rt, expiredSectorNo)
+			st._updateClearSectorAssert(expiredSectorNo)
 			expiredSectorNos = append(expiredSectorNos, expiredSectorNo)
 		default:
 			// Note: SectorCommittedSN, SectorRecoveringSN transition first to SectorFailingSN, then expire
-			rt.AbortStateMsg("Invalid sector state in SectorExpirationQueue")
+			// Invalid sector state in SectorExpirationQueue
+			Assert(false)
 		}
 	}
 
 	return expiredSectorNos
-}
-
-func (st *StorageMinerActorState_I) _assertSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber) {
-	_, found := st.Sectors()[sectorNo]
-	if found {
-		rt.AbortStateMsg("sm._assertSectorDidNotExist: sector already exists.")
-	}
 }
 
 func (st *StorageMinerActorState_I) _getSectorOnChainInfo(sectorNo sector.SectorNumber) (info SectorOnChainInfo, ok bool) {
@@ -231,7 +225,7 @@ func (st *StorageMinerActorState_I) _getSectorDealIDs(sectorNo sector.SectorNumb
 	return sectorInfo.SealCommitment().DealIDs(), true
 }
 
-func (st *StorageMinerActorState_I) _getPreCommitDepositReq(rt Runtime) actor.TokenAmount {
+func (st *StorageMinerActorState_I) _getPreCommitDepositReq() actor.TokenAmount {
 
 	// TODO: move this to Construct
 	minerInfo := st.Info()
