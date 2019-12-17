@@ -68,12 +68,11 @@ func (h *ActorStateHandle_I) Take() ActorSubstateCID {
 // interpreter once per actor method invocation, and responds to that method's Runtime
 // API calls.
 type VMContext struct {
-	_globalStateInit      st.StateTree
-	_globalStatePending   st.StateTree
-	_running              bool
-	_actorAddress         addr.Address
-	_actorStateAcquired   bool
-	_actorSubstateUpdated bool
+	_globalStateInit    st.StateTree
+	_globalStatePending st.StateTree
+	_running            bool
+	_actorAddress       addr.Address
+	_actorStateAcquired bool
 
 	_immediateCaller addr.Address
 	// Note: This is the actor in the From field of the initial on-chain message.
@@ -103,12 +102,11 @@ func VMContext_Make(
 	gasRemaining msg.GasAmount) *VMContext {
 
 	return &VMContext{
-		_globalStateInit:      globalState,
-		_globalStatePending:   globalState,
-		_running:              false,
-		_actorAddress:         actorAddress,
-		_actorStateAcquired:   false,
-		_actorSubstateUpdated: false,
+		_globalStateInit:    globalState,
+		_globalStatePending: globalState,
+		_running:            false,
+		_actorAddress:       actorAddress,
+		_actorStateAcquired: false,
 
 		_toplevelSender:           toplevelSender,
 		_toplevelBlockWinner:      toplevelBlockWinner,
@@ -192,8 +190,8 @@ func (rt *VMContext) _updateActorSubstateInternal(actorAddress addr.Address, new
 func (rt *VMContext) _updateReleaseActorSubstate(newStateCID ActorSubstateCID) {
 	rt._checkRunning()
 	rt._checkActorStateAcquired()
+	rt._rtAllocGas(gascost.UpdateActorSubstate)
 	rt._updateActorSubstateInternal(rt._actorAddress, newStateCID)
-	rt._actorSubstateUpdated = true
 	rt._actorStateAcquired = false
 }
 
@@ -421,9 +419,6 @@ func _invokeMethodInternal(
 	rt._running = true
 	ret, exitCode = _catchRuntimeErrors(func() InvocOutput {
 		methodOutput := actorCode.InvokeMethod(rt, method, params)
-		if rt._actorSubstateUpdated {
-			rt._rtAllocGas(gascost.UpdateActorSubstate)
-		}
 		rt._checkActorStateNotAcquired()
 		rt._checkNumValidateCalls(1)
 		return methodOutput
@@ -441,7 +436,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 
 	initGasRemaining := rtOuter._gasRemaining
 
-	rtOuter._rtAllocGas(gascost.InvokeMethod(input.Value()))
+	rtOuter._rtAllocGas(gascost.InvokeMethod(input.Value(), input.Method()))
 
 	receiver, receiverAddr := rtOuter._resolveReceiver(input.To())
 	receiverCode, err := loadActorCode(receiver.CodeID())
@@ -541,10 +536,12 @@ func (rt *VMContext) _loadInitActorState() sysactors.InitActorState {
 }
 
 func (rt *VMContext) _saveInitActorState(state sysactors.InitActorState) {
+	rt._rtAllocGas(gascost.UpdateActorSubstate)
 	rt._updateActorSubstateInternal(addr.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
 }
 
 func (rt *VMContext) _saveAccountActorState(address addr.Address, state sysactors.AccountActorState) {
+	rt._rtAllocGas(gascost.UpdateActorSubstate)
 	rt._updateActorSubstateInternal(address, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
 }
 
