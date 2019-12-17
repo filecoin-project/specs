@@ -329,21 +329,28 @@ func _rtAbortIfNewDealInvalid(rt Runtime, deal deal.StorageDeal) {
 }
 
 func _rtAbortIfDealFailsParamBounds(rt Runtime, dealP deal.StorageDealProposal) {
-	TODO() // Parameterize the following bounds by global statistics (rt.Indices?)
+	inds := rt.CurrIndices()
 
-	// minimum deal duration
-	if dealP.Duration() < deal.MIN_DEAL_DURATION {
-		rt.AbortStateMsg("sma._assertValidDealMinimum: deal duration shorter than minimum.")
+	minDuration, maxDuration := inds.StorageDeal_DurationBounds(dealP.PieceSize(), dealP.StartEpoch())
+	if dealP.Duration() < minDuration || dealP.Duration() > maxDuration {
+		rt.AbortStateMsg("Deal duration out of bounds.")
 	}
 
-	if dealP.StoragePricePerEpoch() <= deal.MIN_DEAL_PRICE {
-		rt.AbortStateMsg("sma._assertValidDealMinimum: storage price less than minimum.")
+	minPrice, maxPrice := inds.StorageDeal_StoragePricePerEpochBounds(dealP.PieceSize(), dealP.StartEpoch(), dealP.EndEpoch())
+	if dealP.StoragePricePerEpoch() < minPrice || dealP.StoragePricePerEpoch() > maxPrice {
+		rt.AbortStateMsg("Storage price out of bounds.")
 	}
 
-	// verify StorageDealCollateral match requirements for MinimumStorageDealCollateral
-	if dealP.ProviderCollateral() < deal.MIN_PROVIDER_DEAL_COLLATERAL ||
-		dealP.ClientCollateral() < deal.MIN_CLIENT_DEAL_COLLATERAL {
-		rt.AbortStateMsg("sma._assertValidDealMinimum: deal collaterals less than minimum.")
+	minProviderCollateral, maxProviderCollateral := inds.StorageDeal_ProviderCollateralBounds(
+		dealP.PieceSize(), dealP.StartEpoch(), dealP.EndEpoch())
+	if dealP.ProviderCollateral() < minProviderCollateral || dealP.ProviderCollateral() > maxProviderCollateral {
+		rt.AbortStateMsg("Provider collateral out of bounds.")
+	}
+
+	minClientCollateral, maxClientCollateral := inds.StorageDeal_ClientCollateralBounds(
+		dealP.PieceSize(), dealP.StartEpoch(), dealP.EndEpoch())
+	if dealP.ClientCollateral() < minClientCollateral || dealP.ClientCollateral() > maxClientCollateral {
+		rt.AbortStateMsg("Client collateral out of bounds.")
 	}
 }
 
