@@ -17,6 +17,7 @@ type StorageMarketActorState struct {
     // only the _portion_ of the total escrow amount that is locked.
     LockedReqTable  actor.BalanceTableHAMT
 
+    _rtAbortIfAddressEntryDoesNotExist(rt Runtime, entryAddr addr.Address)
     _rtUpdatePendingDealStatesForParty(rt Runtime, addr addr.Address) (amountSlashedTotal actor.TokenAmount)
     _rtGetOnChainDealOrAbort(rt Runtime, dealID deal.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal)
     _rtLockBalanceUntrusted(rt Runtime, addr addr.Address, amount actor.TokenAmount)
