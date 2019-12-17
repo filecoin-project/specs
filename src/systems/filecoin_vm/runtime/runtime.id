@@ -64,6 +64,9 @@ type Runtime interface {
     // Look up the current values of several system-wide economic indices.
     CurrIndices()     indices.Indices
 
+    // Look up the code ID of a given actor address.
+    GetActorCodeID(addr addr.Address) (ret actor.CodeID, ok bool)
+
     // Run a (pure function) computation, consuming the gas cost associated with that function.
     // This mechanism is intended to capture the notion of an ABI between the VM and native
     // functions, and should be used for any function whose computation is expensive.

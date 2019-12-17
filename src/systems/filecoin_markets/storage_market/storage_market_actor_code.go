@@ -7,7 +7,6 @@ import (
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
-	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -15,74 +14,53 @@ import (
 // Actor methods
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Address, amountRequested actor.TokenAmount) {
+func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, entryAddr addr.Address, amountRequested actor.TokenAmount) {
 	IMPL_FINISH() // BigInt arithmetic
 	amountSlashedTotal := actor.TokenAmount(0)
 
-	TODO() // TODO: must also handle case of non-miner (client) sender
-
-	ownerAddr, workerAddr := _rtGetMinerAccountsAssert(rt, minerAddr)
-	rt.ValidateImmediateCallerInSet([]addr.Address{ownerAddr, workerAddr})
-	TODO() // TODO: should workerAddr be permitted here? Depends on actor principal security assumptions.
-
-	callerAddr := rt.ImmediateCaller()
-
 	if amountRequested < 0 {
-		rt.AbortArgMsg("sma.WithdrawBalance: negative amount.")
+		rt.AbortArgMsg("Negative amount.")
 	}
+
+	recipientAddr := _rtValidateImmediateCallerDetermineRecipient(rt, entryAddr)
 
 	h, st := a.State(rt)
-
-	if !st._addressEntryExists(minerAddr) {
-		rt.AbortArgMsg("sma.WithdrawBalance: address entry does not exist")
-	}
+	st._rtAbortIfAddressEntryDoesNotExist(rt, entryAddr)
 
 	// Before any operations that check the balance tables for funds, execute all deferred
 	// deal state updates.
 	//
 	// Note: as an optimization, implementations may cache efficient data structures indicating
 	// which of the following set of updates are redundant and can be skipped.
-	amountSlashedTotal += st._rtUpdatePendingDealStatesForParty(rt, minerAddr)
+	amountSlashedTotal += st._rtUpdatePendingDealStatesForParty(rt, entryAddr)
 
-	minBalance := st._getLockedReqBalanceInternal(minerAddr)
+	minBalance := st._getLockedReqBalanceInternal(entryAddr)
 	newTable, amountExtracted, ok := actor.BalanceTable_WithExtractPartial(
-		st.EscrowTable(), minerAddr, amountRequested, minBalance)
+		st.EscrowTable(), entryAddr, amountRequested, minBalance)
 	Assert(ok)
 	st.Impl().EscrowTable_ = newTable
 
 	UpdateRelease(rt, h, st)
 
-	// send funds to caller
-	rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:    callerAddr,
-		Value_: amountExtracted,
-	})
-
 	rt.SendFunds(addr.BurntFundsActorAddr, amountSlashedTotal)
+	rt.SendFunds(recipientAddr, amountExtracted)
 }
 
-func (a *StorageMarketActorCode_I) AddBalance(rt Runtime, minerAddr addr.Address) {
-	TODO() // TODO: must also handle case of non-miner (client) sender
-
-	ownerAddr, workerAddr := _rtGetMinerAccountsAssert(rt, minerAddr)
-	rt.ValidateImmediateCallerInSet([]addr.Address{ownerAddr, workerAddr})
-	TODO() // TODO: should workerAddr be permitted here? Depends on actor principal security assumptions.
-
-	msgValue := rt.ValueReceived()
+func (a *StorageMarketActorCode_I) AddBalance(rt Runtime, entryAddr addr.Address) {
+	_rtValidateImmediateCallerDetermineRecipient(rt, entryAddr)
 
 	h, st := a.State(rt)
+	st._rtAbortIfAddressEntryDoesNotExist(rt, entryAddr)
 
-	if !st._addressEntryExists(minerAddr) {
-		rt.AbortArgMsg("sma.WithdrawBalance: address entry does not exist")
-	}
-
-	newTable, ok := actor.BalanceTable_WithAdd(st.EscrowTable(), minerAddr, msgValue)
+	msgValue := rt.ValueReceived()
+	newTable, ok := actor.BalanceTable_WithAdd(st.EscrowTable(), entryAddr, msgValue)
 	if !ok {
 		// Entry not found; create implicitly.
-		newTable, ok = actor.BalanceTable_WithNewAddressEntry(st.EscrowTable(), minerAddr, msgValue)
+		newTable, ok = actor.BalanceTable_WithNewAddressEntry(st.EscrowTable(), entryAddr, msgValue)
 		Assert(ok)
 	}
 	st.Impl().EscrowTable_ = newTable
+
 	UpdateRelease(rt, h, st)
 }
 
@@ -95,8 +73,7 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 
 	h, st := a.State(rt)
 
-	// All storage deals will be added in an atomic transaction;
-	// this operation will be unrolled if any of them fails.
+	// All storage deals will be added in an atomic transaction; this operation will be unrolled if any of them fails.
 	for _, newDeal := range newStorageDeals {
 		p := newDeal.Proposal()
 
@@ -288,6 +265,12 @@ func _rtAbortIfDealExceedsSectorLifetime(rt Runtime, dealP deal.StorageDealPropo
 	}
 }
 
+func (st *StorageMarketActorState_I) _rtAbortIfAddressEntryDoesNotExist(rt Runtime, entryAddr addr.Address) {
+	if !st._addressEntryExists(entryAddr) {
+		rt.AbortArgMsg("Address entry does not exist")
+	}
+}
+
 func _rtAbortIfDealInvalidForNewSectorSeal(
 	rt Runtime, minerAddr addr.Address, sectorExpiration block.ChainEpoch, deal deal.OnChainDeal) {
 
@@ -297,6 +280,28 @@ func _rtAbortIfDealInvalidForNewSectorSeal(
 	_rtAbortIfDealAlreadyProven(rt, deal)
 	_rtAbortIfDealStartElapsed(rt, dealP)
 	_rtAbortIfDealExceedsSectorLifetime(rt, dealP, sectorExpiration)
+}
+
+func _rtValidateImmediateCallerDetermineRecipient(rt Runtime, entryAddr addr.Address) addr.Address {
+	if _rtIsStorageMiner(rt, entryAddr) {
+		// Storage miner actor; implied funds recipient is the associated owner address.
+		ownerAddr, workerAddr := _rtGetMinerAccountsAssert(rt, entryAddr)
+		rt.ValidateImmediateCallerInSet([]addr.Address{ownerAddr, workerAddr})
+		return ownerAddr
+	} else {
+		// Account actor (client); funds recipient is just the entry address itself.
+		rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
+		return entryAddr
+	}
+}
+
+func _rtIsStorageMiner(rt Runtime, minerAddr addr.Address) bool {
+	codeID, ok := rt.GetActorCodeID(minerAddr)
+	Assert(ok)
+	if !codeID.IsBuiltin() {
+		return false
+	}
+	return (codeID.As_Builtin() == actor.BuiltinActorID_StorageMiner)
 }
 
 func _rtGetMinerAccountsAssert(rt Runtime, minerAddr addr.Address) (ownerAddr addr.Address, workerAddr addr.Address) {
@@ -353,9 +358,7 @@ func (st *StorageMarketActorState_I) _rtLockBalanceUntrusted(rt Runtime, addr ad
 		rt.AbortArgMsg("Negative amount")
 	}
 
-	if !st._addressEntryExists(addr) {
-		rt.AbortArgMsg("Address does not exist in escrow table")
-	}
+	st._rtAbortIfAddressEntryDoesNotExist(rt, addr)
 
 	ok := st._lockBalanceMaybe(addr, amount)
 
