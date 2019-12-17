@@ -10,6 +10,7 @@ const (
 	Method_StorageMinerActor_NotifyOfSurprisePoStChallenge
 	Method_StorageMinerActor_GetOwnerAddr
 	Method_StorageMinerActor_GetWorkerAddr
+	Method_StorageMinerActor_GetWorkerKey
 )
 
 const (

@@ -389,7 +389,7 @@ func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime, onChainInfo se
 	// get worker key from minerAddr
 	out := rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     rt.ImmediateCaller(),
-		Method_: Method_StorageMinerActor_GetWorkerKey,
+		Method_: ai.Method_StorageMinerActor_GetWorkerKey,
 	})
 	temp, err := filcrypto.Deserialize_VRFPublicKey(out.ReturnValue())
 	// ignore below line, redeclaring because of a code generation issue :/
