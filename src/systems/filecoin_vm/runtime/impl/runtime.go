@@ -146,14 +146,6 @@ func (rt *VMContext) AbortAPI(msg string) {
 	rt.Abort(exitcode.SystemError(exitcode.RuntimeAPIError), msg)
 }
 
-func (rt *VMContext) _rtAllocGasCreateActor() {
-	if !rt._actorAddress.Equals(addr.InitActorAddr) {
-		rt.AbortAPI("Only InitActor may call rt.CreateActor_DeductGas")
-	}
-
-	rt._rtAllocGas(gascost.ExecNewActor)
-}
-
 func (rt *VMContext) CreateActor(codeID actor.CodeID, address addr.Address) {
 	if !rt._actorAddress.Equals(addr.InitActorAddr) {
 		rt.AbortAPI("Only InitActor may call rt.CreateActor")
@@ -175,7 +167,7 @@ func (rt *VMContext) _createActor(codeID actor.CodeID, address addr.Address) {
 	actorStateCID := actor.ActorSystemStateCID(rt.IpldPut(actorState))
 	rt._updateActorSystemStateInternal(address, actorStateCID)
 
-	rt._rtAllocGasCreateActor()
+	rt._rtAllocGas(gascost.ExecNewActor)
 }
 
 func (rt *VMContext) _updateActorSystemStateInternal(actorAddress addr.Address, newStateCID actor.ActorSystemStateCID) {
@@ -491,7 +483,7 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 
 	// Allocate an ID address from the init actor and map the pubkey To address to it.
 	newIdAddr := initSubState.MapAddressToNewID(targetRaw)
-	rt._saveInitActorState(initSubState)
+	rt._saveInitActorState(initSubState) // TODO: refactor so that this charges gas in _updateActorSubstateInternal.
 
 	// Create new account actor (charges gas).
 	rt._createActor(actor.CodeID(actor.CodeID_Make_Builtin(actor.BuiltinActorID_Account)), newIdAddr)
@@ -500,7 +492,7 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 	substate := &sysactors.AccountActorState_I{
 		Address_: targetRaw,
 	}
-	rt._saveAccountActorState(newIdAddr, substate)
+	rt._saveAccountActorState(newIdAddr, substate) // TODO: refactor to charge gas implicitly.
 	act, _ = rt._globalStatePending.GetActor(newIdAddr)
 	return act, newIdAddr
 }

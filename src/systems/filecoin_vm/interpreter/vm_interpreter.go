@@ -1,13 +1,13 @@
 package interpreter
 
 import (
-	"github.com/filecoin-project/specs/libraries/ipld"
-	"github.com/filecoin-project/specs/systems/filecoin_mining/storage_mining"
-	"github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
+	storage_mining "github.com/filecoin-project/specs/systems/filecoin_mining/storage_mining"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-	"github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	vmri "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/impl"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
