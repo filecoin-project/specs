@@ -23,6 +23,9 @@ type Runtime interface {
     ValidateImmediateCallerAcceptAnyOfTypes(types [actor.BuiltinActorID])
     ValidateImmediateCallerAcceptAny()
     ValidateImmediateCallerMatches(CallerPattern)
+    ValidateIsStorageMiner(minerAddr addr.Address) bool
+    ValidateImmediateCallerDetermineRecipient(entryAddr addr.Address) addr.Address
+    GetMinerAccountsAssert(minerAddr addr.Address) (ownerAddr addr.Address, workerAddr addr.Address)
 
     // The address of the actor receiving the message.
     CurrReceiver()         addr.Address

@@ -74,7 +74,7 @@ func _registerBuiltinActors() {
 	// TODO: there's probably a better place to put this, but for now, do it here.
 	cron.Entries_ = append(cron.Entries_, &sysactors.CronTableEntry_I{
 		ToAddr_:    addr.StoragePowerActorAddr,
-		MethodNum_: spc.Method_StoragePowerActor_EpochTick,
+		MethodNum_: ai.Method_StoragePowerActor_EpochTickEnd,
 	})
 
 	cron.Entries_ = append(cron.Entries_, &sysactors.CronTableEntry_I{

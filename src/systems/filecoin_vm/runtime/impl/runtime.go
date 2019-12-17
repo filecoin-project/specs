@@ -8,6 +8,7 @@ import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
@@ -308,6 +309,38 @@ func (rt *VMContext) _checkNumValidateCalls(x int) {
 	if rt._numValidateCalls != x {
 		rt.AbortAPI("Method must validate caller identity exactly once")
 	}
+}
+
+func (rt *VMContext) ValidateIsStorageMiner(minerAddr addr.Address) bool {
+	codeID, ok := rt.GetActorCodeID(minerAddr)
+	Assert(ok)
+	if !codeID.IsBuiltin() {
+		return false
+	}
+	return (codeID.As_Builtin() == actor.BuiltinActorID_StorageMiner)
+}
+
+func (rt *VMContext) ValidateImmediateCallerDetermineRecipient(entryAddr addr.Address) addr.Address {
+	if rt.ValidateIsStorageMiner(entryAddr) {
+		// Storage miner actor; implied funds recipient is the associated owner address.
+		ownerAddr, workerAddr := rt.GetMinerAccountsAssert(entryAddr)
+		rt.ValidateImmediateCallerInSet([]addr.Address{ownerAddr, workerAddr})
+		return ownerAddr
+	} else {
+		// Account actor (client); funds recipient is just the entry address itself.
+		rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
+		return entryAddr
+	}
+}
+
+func (rt *VMContext) GetMinerAccountsAssert(minerAddr addr.Address) (ownerAddr addr.Address, workerAddr addr.Address) {
+	ownerAddr = addr.Deserialize_Address_Compact_Assert(
+		rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetOwnerAddr, []util.Serialization{}))
+
+	workerAddr = addr.Deserialize_Address_Compact_Assert(
+		rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetWorkerAddr, []util.Serialization{}))
+
+	return
 }
 
 func (rt *VMContext) _checkRunning() {

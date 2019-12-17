@@ -49,7 +49,7 @@ func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree st
 	challengeTicket := filcrypto.SHA256(partialTicket)
 
 	st := spc._getStoragePowerActorState(stateTree)
-	networkPower := st._getActivePower()
+	networkPower := st._getActivePowerForConsensus()
 
 	// TODO: pull from constants
 	EPOST_SAMPLE_RATE_NUM := util.UVarint(1)

@@ -5,6 +5,7 @@ import (
 
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
@@ -40,7 +41,7 @@ func (st *StoragePowerActorState_I) ActivePowerMeetsConsensusMinimum(minerPower 
 	return minerPower >= minerSizes[MIN_MINER_SIZE_TARG-1]
 }
 
-func (st *StoragePowerActorState_I) _getActivePower() block.StoragePower {
+func (st *StoragePowerActorState_I) _getActivePowerForConsensus() block.StoragePower {
 	activePower := block.StoragePower(0)
 
 	for _, miner := range st.PowerTable() {
@@ -127,16 +128,6 @@ func (st *StoragePowerActorState_I) _selectMinersToSurprise(challengeCount int, 
 	return selectedMiners
 }
 
-func (st *StoragePowerActorState_I) _safeGetPowerEntry(rt Runtime, minerID addr.Address) PowerTableEntry {
-	powerEntry, found := st.PowerTable()[minerID]
-
-	if !found {
-		rt.AbortStateMsg("sm._safeGetPowerEntry: miner not found in power table.")
-	}
-
-	return powerEntry
-}
-
 func (st *StoragePowerActorState_I) _getTotalPower() block.StoragePower {
 	// TODO (optimization): cache this as a counter in the actor state,
 	// and update it for relevant operations.
@@ -156,7 +147,7 @@ func (st *StoragePowerActorState_I) _getPowerTotalForMiner(minerAddr addr.Addres
 }
 
 func (st *StoragePowerActorState_I) _getAffectedPledge(
-	rt Runtime, minerAddr addr.Address, affectedPower block.StoragePower) actor.TokenAmount {
+	minerAddr addr.Address, affectedPower block.StoragePower) actor.TokenAmount {
 
 	// TODO: revisit this calculation
 	minerPowerTotal, ok := st._getPowerTotalForMiner(minerAddr)
@@ -165,4 +156,22 @@ func (st *StoragePowerActorState_I) _getAffectedPledge(
 	affectedPledge := actor.TokenAmount(uint64(pledgeRequired) * uint64(affectedPower) / uint64(minerPowerTotal))
 
 	return affectedPledge
+}
+
+func _getStorageFaultSlashPledgePercent(faultType sector.StorageFaultType) int {
+	PARAM_FINISH() // TODO: instantiate these placeholders
+	panic("")
+
+	// these are the scaling constants for percentage pledge collateral to slash
+	// given a miner's affected power and its total power
+	switch faultType {
+	case sector.DeclaredFault:
+		return 1 // placeholder
+	case sector.DetectedFault:
+		return 10 // placeholder
+	case sector.TerminatedFault:
+		return 100 // placeholder
+	default:
+		panic("Case not supported")
+	}
 }
