@@ -151,8 +151,9 @@ func (st *StorageMarketActorState_I) _processDealExpired(dealID deal.DealID) {
 }
 
 func (st *StorageMarketActorState_I) _generateStorageDealID(storageDeal deal.StorageDeal) deal.DealID {
-	TODO()
-	panic("")
+	ret := st.NextID()
+	st.NextID_ = st.NextID_ + deal.DealID(1)
+	return ret
 }
 
 ////////////////////////////////////////////////////////////////////////////////

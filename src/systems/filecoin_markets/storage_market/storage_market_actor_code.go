@@ -216,6 +216,22 @@ func (a *StorageMarketActorCode_I) OnEpochTickEnd(rt Runtime) {
 	rt.SendFunds(addr.BurntFundsActorAddr, amountSlashedTotal)
 }
 
+func (a *StorageMarketActorCode_I) Constructor(rt Runtime) {
+	h := rt.AcquireState()
+
+	IMPL_FINISH() // Initialize these structures
+	var dealsAMTEmpty DealsAMT
+	var balanceTableEmpty actor.BalanceTableHAMT
+
+	st := &StorageMarketActorState_I{
+		Deals_:          dealsAMTEmpty,
+		EscrowTable_:    balanceTableEmpty,
+		LockedReqTable_: balanceTableEmpty,
+		NextID_:         deal.DealID(0),
+	}
+	UpdateRelease(rt, h, st)
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Method utility functions
 ////////////////////////////////////////////////////////////////////////////////
