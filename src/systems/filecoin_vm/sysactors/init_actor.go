@@ -98,12 +98,13 @@ func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParam
 		Bytes(addr.Serialize_Address_Compact(idAddr)))
 }
 
-func (a *InitActorCode_I) GetActorIDForAddress(rt Runtime, address addr.Address) InvocOutput {
-	h, st := _loadState(rt)
-	actorID := st.AddressMap()[address]
-	Release(rt, h, st)
-	return rt.ValueReturn(Bytes(addr.Serialize_ActorID(actorID)))
-}
+// This method is disabled until proven necessary.
+//func (a *InitActorCode_I) GetActorIDForAddress(rt Runtime, address addr.Address) InvocOutput {
+//	h, st := _loadState(rt)
+//	actorID := st.AddressMap()[address]
+//	Release(rt, h, st)
+//	return rt.ValueReturn(Bytes(addr.Serialize_ActorID(actorID)))
+//}
 
 func (s *InitActorState_I) ResolveAddress(address addr.Address) addr.Address {
 	actorID, ok := s.AddressMap()[address]
@@ -152,11 +153,11 @@ func (a *InitActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, param
 		// Note: do not call ArgEnd (params is forwarded to Exec)
 		return a.Exec(rt, codeId, params)
 
-	case Method_InitActor_GetActorIDForAddress:
-		address, err := addr.Deserialize_Address(ArgPop(&params, rt))
-		CheckArgs(&params, rt, err == nil)
-		ArgEnd(&params, rt)
-		return a.GetActorIDForAddress(rt, address)
+	//case Method_InitActor_GetActorIDForAddress:
+	//	address, err := addr.Deserialize_Address(ArgPop(&params, rt))
+	//	CheckArgs(&params, rt, err == nil)
+	//	ArgEnd(&params, rt)
+	//	return a.GetActorIDForAddress(rt, address)
 
 	default:
 		rt.Abort(exitcode.SystemError(exitcode.InvalidMethod), "Invalid method")

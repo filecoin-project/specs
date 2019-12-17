@@ -13,7 +13,6 @@ import (
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
-	sys "github.com/filecoin-project/specs/systems/filecoin_vm/sysactors"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -700,26 +699,15 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 		Partitions_:  info.SealPartitions(),
 	}
 
-	// @param address addr.Address info.Worker()
-	getActorIDParams := make([]util.Serialization, 1)
-	getActorIDParams = append(getActorIDParams, addr.Serialize_Address(info.Worker()))
-
-	getActorIDReceipt := rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:     addr.InitActorAddr,
-		Method_: sys.Method_InitActor_GetActorIDForAddress,
-		Params_: getActorIDParams,
-	})
-
-	getActorIDRet := getActorIDReceipt.ReturnValue()
-	minerID, err := addr.Deserialize_Address(getActorIDRet)
+	minerActorID, err := rt.CurrReceiver().GetID()
 	if err != nil {
-		rt.AbortStateMsg("sm.verifySeal: failed to get actor id")
+		rt.AbortStateMsg("receiver must be ID address")
 	}
 
 	svInfo := sector.SealVerifyInfo_I{
 		SectorID_: &sector.SectorID_I{
-			MinerID_: minerID,
-			Number_:  onChainInfo.SectorNumber(),
+			Miner_:  minerActorID,
+			Number_: onChainInfo.SectorNumber(),
 		},
 		OnChain_: onChainInfo,
 

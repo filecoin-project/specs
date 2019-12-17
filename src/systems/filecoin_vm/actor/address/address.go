@@ -1,6 +1,8 @@
 package address
 
 import (
+	"errors"
+
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -62,6 +64,13 @@ func (a *Address_I) IsIDType() bool {
 
 func (a *Address_I) IsKeyType() bool {
 	panic("TODO")
+}
+
+func (a *Address_I) GetID() (ActorID, error) {
+	if !a.IsIDType() {
+		return ActorID(0), errors.New("not an ID address")
+	}
+	return a.Data_.As_ID(), nil
 }
 
 func Address_Make_ID(net Address_NetworkID, x ActorID) Address {

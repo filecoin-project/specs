@@ -10,15 +10,12 @@ import (
 	"encoding/binary"
 	big "math/big"
 
-	util "github.com/filecoin-project/specs/util"
-
 	file "github.com/filecoin-project/specs/systems/filecoin_files/file"
-
 	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
-
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-
 	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	util "github.com/filecoin-project/specs/util"
 )
 
 type SHA256Hash Bytes32
@@ -282,11 +279,12 @@ func (sdr *WinStackedDRG_I) GenerateCommitments(replica []byte, windowKeyLayers 
 	return commC, commQ, commRLast, commR, commCTreePath, commQTreePath, commRLastTreePath
 }
 
-func getProverID(minerID sector.MinerID) []byte {
+func getProverID(minerID addr.ActorID) []byte {
+	// return leb128(minerID)
 	panic("TODO")
 }
 func computeSealSeed(sid sector.SectorID, randomness sector.SealRandomness, commD sector.UnsealedSectorCID) sector.SealSeed {
-	proverId := getProverID(sid.MinerID())
+	proverId := getProverID(sid.Miner())
 	sectorNumber := sid.Number()
 
 	var preimage []byte
@@ -965,7 +963,7 @@ func generateCandidate(randomness sector.PoStRandomness, aux sector.PersistentPr
 
 func computePartialTicket(randomness sector.PoStRandomness, sectorID sector.SectorID, data []byte) sector.PartialTicket {
 	preimage := randomness
-	preimage = append(preimage, getProverID(sectorID.MinerID())...)
+	preimage = append(preimage, getProverID(sectorID.Miner())...)
 	preimage = append(preimage, littleEndianBytesFromUInt(UInt(sectorID.Number()), 8)...)
 	preimage = append(preimage, data...)
 	partialTicket := sector.PartialTicket(HashBytes_PedersenHash(preimage))
