@@ -17,58 +17,25 @@ type StorageMarketActorState struct {
     // only the _portion_ of the total escrow amount that is locked.
     LockedReqTable  actor.BalanceTableHAMT
 
-    _rtUpdatePendingDealStatesForParty(rt Runtime, addr addr.Address)
-    _rtUpdatePendingDealStates(rt Runtime, dealIDs [deal.DealID], epoch block.ChainEpoch)
-    _rtUpdatePendingDealState(rt Runtime, dealID deal.DealID, epoch block.ChainEpoch)
-    _rtProcessDealPaymentEpochsElapsed(
-        rt                Runtime
-        dealID            deal.DealID
-        numEpochsElapsed  block.ChainEpoch
-    )
-    _rtProcessDealSlashed(rt Runtime, dealID deal.DealID)
-    _rtProcessDealInitTimedOut(rt Runtime, dealID deal.DealID)
-    _rtProcessDealExpired(rt Runtime, dealID deal.DealID)
-
-    _rtAbortIfNewDealInvalid(rt Runtime, deal deal.StorageDeal)
-    _rtAbortIfDealFailsParamBounds(rt Runtime, dealP deal.StorageDealProposal)
+    _rtUpdatePendingDealStatesForParty(rt Runtime, addr addr.Address) (amountSlashedTotal actor.TokenAmount)
     _rtGetOnChainDealOrAbort(rt Runtime, dealID deal.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal)
-
-    _rtGenerateStorageDealID(rt Runtime, storageDeal deal.StorageDeal) deal.DealID
-
-    _getOnChainDealAssert(dealID deal.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal)
-    _addressEntryExists(address addr.Address) bool
-    _getTotalEscrowBalanceInternal(a addr.Address) actor.TokenAmount
-    _getLockedReqBalanceInternal(a addr.Address) actor.TokenAmount
-
     _rtLockBalanceUntrusted(rt Runtime, addr addr.Address, amount actor.TokenAmount)
 
-    _rtUnlockBalance(
-        rt                     Runtime
-        addr                   addr.Address
-        unlockAmountRequested  actor.TokenAmount
-    )
-    _rtTableWithAddBalance(
-        rt           Runtime
-        table        actor.BalanceTableHAMT
-        toAddr       addr.Address
-        amountToAdd  actor.TokenAmount
-    ) actor.BalanceTableHAMT
+    _updatePendingDealStates(dealIDs [deal.DealID], epoch block.ChainEpoch) (amountSlashedTotal actor.TokenAmount)
+    _updatePendingDealState(dealID deal.DealID, epoch block.ChainEpoch) (amountSlashed actor.TokenAmount)
+    _processDealPaymentEpochsElapsed(dealID deal.DealID, numEpochsElapsed block.ChainEpoch)
+    _processDealSlashed(dealID deal.DealID)
+    _processDealInitTimedOut(dealID deal.DealID)
+    _processDealExpired(dealID deal.DealID)
+    _generateStorageDealID(storageDeal deal.StorageDeal) deal.DealID
 
-    _rtTableWithDeductBalanceExact(
-        rt               Runtime
-        table            actor.BalanceTableHAMT
-        fromAddr         addr.Address
-        amountRequested  actor.TokenAmount
-    ) actor.BalanceTableHAMT
+    _getLockedReqBalanceInternal(a addr.Address) actor.TokenAmount
+    _lockBalanceMaybe(addr addr.Address, amount actor.TokenAmount)
+    _unlockBalance(addr addr.Address, unlockAmountRequested actor.TokenAmount)
 
-    _rtTransferBalance(
-        rt                       Runtime
-        fromAddr                 addr.Address
-        toAddr                   addr.Address
-        transferAmountRequested  actor.TokenAmount
-    )
-
-    _rtSlashBalance(rt Runtime, addr addr.Address, slashAmount actor.TokenAmount)
+    _getOnChainDeal(dealID deal.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal, ok bool)
+    _getOnChainDealAssert(dealID deal.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal)
+    _addressEntryExists(address addr.Address) bool
 }
 
 type StorageMarketActorCode struct {
