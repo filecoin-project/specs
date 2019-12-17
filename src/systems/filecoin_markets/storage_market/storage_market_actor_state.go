@@ -2,12 +2,10 @@ package storage_market
 
 import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -114,27 +112,30 @@ func (st *StorageMarketActorState_I) _processDealSlashed(dealID deal.DealID) (am
 	st._unlockBalance(dealP.Client(), clientCollateral+paymentRemaining)
 
 	// slash provider collateral
-	slashAmount := dealP.ProviderCollateral()
-	st._slashBalance(dealP.Provider(), slashAmount)
+	amountSlashed = dealP.ProviderCollateral()
+	st._slashBalance(dealP.Provider(), amountSlashed)
 
 	delete(st.Deals(), dealID)
-
-	return slashAmount
+	return
 }
 
 // Deal start deadline elapsed without appearing in a proven sector.
-// (TODO: slash portion of provider's collateral TBD)
-// Delete deal and unlock collaterals for both provider and client.
-func (st *StorageMarketActorState_I) _processDealInitTimedOut(dealID deal.DealID) {
+// Delete deal, slash a portion of provider's collateral, and unlock remaining collaterals
+// for both provider and client.
+func (st *StorageMarketActorState_I) _processDealInitTimedOut(dealID deal.DealID) (amountSlashed actor.TokenAmount) {
 	deal, dealP := st._getOnChainDealAssert(dealID)
 	Assert(deal.SectorStartEpoch() == block.ChainEpoch_None)
 
 	st._unlockBalance(dealP.Client(), dealP.ClientBalanceRequirement())
 
-	TODO() // slash portion of provider's collateral TBD
-	st._unlockBalance(dealP.Provider(), dealP.ProviderBalanceRequirement())
+	amountSlashed = indices.StorageDeal_ProviderInitTimedOutSlashAmount(deal)
+	amountRemaining := dealP.ProviderBalanceRequirement() - amountSlashed
+
+	st._slashBalance(dealP.Provider(), amountSlashed)
+	st._unlockBalance(dealP.Provider(), amountRemaining)
 
 	delete(st.Deals(), dealID)
+	return
 }
 
 // Normal expiration. Delete deal and unlock collaterals for both miner and client.

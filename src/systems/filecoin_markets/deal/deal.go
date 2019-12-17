@@ -8,11 +8,6 @@ import util "github.com/filecoin-project/specs/util"
 var IMPL_FINISH = util.IMPL_FINISH
 var TODO = util.TODO
 
-var MIN_PROVIDER_DEAL_COLLATERAL = actor.TokenAmount_Placeholder()
-var MIN_CLIENT_DEAL_COLLATERAL = actor.TokenAmount_Placeholder()
-var MIN_DEAL_DURATION = block.ChainEpoch(0) // TODO: Placeholder
-var MIN_DEAL_PRICE = actor.TokenAmount_Placeholder()
-
 func (d *StorageDeal_I) Proposal() StorageDealProposal {
 	// extract from d.ProposalMessage
 	TODO()
