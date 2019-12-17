@@ -70,25 +70,22 @@ func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParam
 		rt.AbortArgMsg("cannot exec an actor of this type")
 	}
 
-	// Allocate an ID for this actor.
-	h, st := _loadState(rt)
-	actorID := st._assignNextID()
-	idAddr := addr.Address_Make_ID(addr.Address_NetworkID_Testnet, actorID)
-
-	// Store the mapping of a re-org-stable address to actor ID.
+	// Compute a re-org-stable address.
 	// This address exists for use by messages coming from outside the system, in order to
 	// stably address the newly created actor even if a chain re-org causes it to end up with
 	// a different ID.
 	newAddr := rt.NewActorAddress()
-	st.AddressMap()[newAddr] = actorID
+
+	// Allocate an ID for this actor.
+	// Store mapping of pubkey or actor address to actor ID
+	h, st := _loadState(rt)
+	idAddr := st.MapAddressToNewID(newAddr)
 	UpdateRelease(rt, h, st)
 
-	// Create the empty actor.
-	// It's (empty) state must be stored under the ID-address before the constructor can be
-	// invoked to initialize it.
+	// Create an empty actor.
 	rt.CreateActor(codeID, idAddr)
 
-	// Invoke its constructor. If construction fails, the error should propagate and cause
+	// Invoke constructor. If construction fails, the error should propagate and cause
 	// Exec to fail too.
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     idAddr,
@@ -101,17 +98,26 @@ func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParam
 		Bytes(addr.Serialize_Address_Compact(idAddr)))
 }
 
-func (s *InitActorState_I) _assignNextID() addr.ActorID {
-	actorID := s.NextID_
-	s.NextID_++
-	return actorID
-}
-
 func (a *InitActorCode_I) GetActorIDForAddress(rt Runtime, address addr.Address) InvocOutput {
 	h, st := _loadState(rt)
 	actorID := st.AddressMap()[address]
 	Release(rt, h, st)
 	return rt.ValueReturn(Bytes(addr.Serialize_ActorID(actorID)))
+}
+
+func (s *InitActorState_I) ResolveAddress(address addr.Address) addr.Address {
+	actorID, ok := s.AddressMap()[address]
+	if ok {
+		return addr.Address_Make_ID(addr.Address_NetworkID_Testnet, actorID)
+	}
+	return address
+}
+
+func (s *InitActorState_I) MapAddressToNewID(address addr.Address) addr.Address {
+	actorID := s.NextID_
+	s.NextID_++
+	s.AddressMap()[address] = actorID
+	return addr.Address_Make_ID(addr.Address_NetworkID_Testnet, actorID)
 }
 
 func _codeIDSupportsExec(codeID actor.CodeID) bool {

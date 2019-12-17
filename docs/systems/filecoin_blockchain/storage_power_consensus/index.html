@@ -4639,13 +4639,20 @@ https://github.com/alex-shpak/hugo-book
 <p><div id="systems__filecoin_blockchain__storage_power_consensus__storage_power_consensus"></div>
 The Storage Power Consensus subsystem is the main interface which enables Filecoin nodes to agree on the state of the system. SPC accounts for individual storage miners&rsquo; effective power over consensus in given chains in its <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor__power_table">Power Table</a>. It also runs <a href="../../../../#algorithms__expected_consensus___index">Expected Consensus</a> (the underlying consensus algorithm in use by Filecoin), enabling storage miners to run leader election and generate new blocks updating the state of the Filecoin system.</p>
 
-<p>Succinctly, the SPC subsystem offers the following services:
-- Access to the <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor__power_table">Power Table</a> for every subchain, accounting for individual storage miner power and total power on-chain.
-- Access to <a href="../../../../#algorithms__expected_consensus___index">Expected Consensus</a> for individual storage miners, enabling:
-    - Access to verifiable randomness <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a> as needed in the rest of the protocol.
-    - Running  <a href="../../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> to produce new blocks.
-    - Running <a href="../../../../#algorithms__expected_consensus__chain_selection">Chain Selection</a> across subchains using EC&rsquo;s weighting function.
-    - Identification of <a href="../../../../#algorithms__expected_consensus__finality">the most recently finalized tipset</a>, for use by all protocol participants.</p>
+<p>Succinctly, the SPC subsystem offers the following services:</p>
+
+<ul>
+<li>Access to the <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor__power_table">Power Table</a> for every subchain, accounting for individual storage miner power and total power on-chain.</li>
+
+<li><p>Access to <a href="../../../../#algorithms__expected_consensus___index">Expected Consensus</a> for individual storage miners, enabling:</p>
+
+<ul>
+<li>Access to verifiable randomness <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a> as needed in the rest of the protocol.</li>
+<li>Running  <a href="../../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> to produce new blocks.</li>
+<li>Running <a href="../../../../#algorithms__expected_consensus__chain_selection">Chain Selection</a> across subchains using EC&rsquo;s weighting function.</li>
+<li>Identification of <a href="../../../../#algorithms__expected_consensus__finality">the most recently finalized tipset</a>, for use by all protocol participants.</li>
+</ul></li>
+</ul>
 
 <p>Much of the Storage Power Consensus&rsquo; subsystem functionality is detailed in the code below but we touch upon some of its behaviors in more detail.</p>
 
@@ -4729,9 +4736,12 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 
 <h2 id="distinguishing-between-storage-miners-and-block-miners">Distinguishing between storage miners and block miners</h2>
 
-<p>There are two ways to earn Filecoin tokens in the Filecoin network:
-- By participating in the <a href="../../../../#systems__filecoin_markets__storage_market___index">Storage Market</a> as a storage provider and being paid by clients for file storage deals.
-- By mining new blocks on the network, helping modify system state and secure the Filecoin consensus mechanism.</p>
+<p>There are two ways to earn Filecoin tokens in the Filecoin network:</p>
+
+<ul>
+<li>By participating in the <a href="../../../../#systems__filecoin_markets__storage_market___index">Storage Market</a> as a storage provider and being paid by clients for file storage deals.</li>
+<li>By mining new blocks on the network, helping modify system state and secure the Filecoin consensus mechanism.</li>
+</ul>
 
 <p>We must distinguish between both types of &ldquo;miners&rdquo; (storage and block miners). <a href="../../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> in Filecoin is predicated on a miner&rsquo;s storage power. Thus, while all block miners will be storage miners, the reverse is not necessarily true.</p>
 
@@ -4743,10 +4753,13 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 
 <p>Per the above, we also clearly distinguish putting storage on-chain from gaining power in consensus (sometimes called &ldquo;Storage Power&rdquo;) as follows:</p>
 
-<p>Consensus power in Filecoin is defined as the intersection between:
-- Proven Storage as of the PoSts verification (i.e. storage in the <code>Proving Set</code> since it will all be active by the time the PoSt is computed)
-- In-deal storage.
-Put another way <strong>consensus power is in-deal storage in the Proving Set</strong>. For instance, if a miner had two 32GB sector, each with 20 GB of in-deal storage; the miner would have 40GB worth of storage power for SPC.</p>
+<p>Consensus power in Filecoin is defined as the intersection between:</p>
+
+<ul>
+<li>Proven Storage as of the PoSts verification (i.e. storage in the <code>Proving Set</code> since it will all be active by the time the PoSt is computed)</li>
+<li>In-deal storage.
+Put another way <strong>consensus power is in-deal storage in the Proving Set</strong>. For instance, if a miner had two 32GB sector, each with 20 GB of in-deal storage; the miner would have 40GB worth of storage power for SPC.</li>
+</ul>
 
 <p>Read more in <a href="../../../../#systems__filecoin_mining__storage_mining">Storage Miner</a>.</p>
 
@@ -4754,11 +4767,14 @@ Put another way <strong>consensus power is in-deal storage in the Proving Set</s
 
 <h2 id="tickets">Tickets</h2>
 
-<p>Tickets are used across the Filecoin protocol as sources of randomness:
-- The <a href="../../../../#systems__filecoin_mining__storage_proving__sector_sealer">Sector Sealer</a> uses tickets as SealSeeds to bind sector commitments to a given subchain.
-- The <a href="../../../../#systems__filecoin_mining__storage_mining">Storage Miner</a> likewise uses tickets as PoStChallenges to prove sectors remain committed as of a given block.
-- They are drawn by the Storage Power subsystem as randomness in <a href="../../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> to determine their eligibility to mine a block
-- They are drawn by the Storage Power subsystem in order to generate new tickets for future use.</p>
+<p>Tickets are used across the Filecoin protocol as sources of randomness:</p>
+
+<ul>
+<li>The <a href="../../../../#systems__filecoin_mining__storage_proving__sector_sealer">Sector Sealer</a> uses tickets as SealSeeds to bind sector commitments to a given subchain.</li>
+<li>The <a href="../../../../#systems__filecoin_mining__storage_mining">Storage Miner</a> likewise uses tickets as PoStChallenges to prove sectors remain committed as of a given block.</li>
+<li>They are drawn by the Storage Power subsystem as randomness in <a href="../../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> to determine their eligibility to mine a block</li>
+<li>They are drawn by the Storage Power subsystem in order to generate new tickets for future use.</li>
+</ul>
 
 <p>Each of these ticket uses may require drawing tickets at different chain epochs, according to the security requirements of the particular protocol making use of tickets. Specifically, the ticket output (which is a SHA256 output) is used for randomness.</p>
 
@@ -4953,7 +4969,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="c1">// Randomness for ElectionPoSt
 </span><span class="c1"></span>	<span class="nx">randomnessK</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_consensus</span><span class="p">().</span><span class="nf">GetPoStChallengeRand</span><span class="p">(</span><span class="nx">sms</span><span class="p">.</span><span class="nf">_blockchain</span><span class="p">().</span><span class="nf">BestChain</span><span class="p">(),</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_blockchain</span><span class="p">().</span><span class="nf">LatestEpoch</span><span class="p">())</span>
 
-	<span class="nx">input</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_preparePoStChallengeSeed</span><span class="p">(</span><span class="nx">randomnessK</span><span class="p">,</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_keyStore</span><span class="p">().</span><span class="nf">MinerAddress</span><span class="p">())</span>
+	<span class="nx">input</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">PreparePoStChallengeSeed</span><span class="p">(</span><span class="nx">randomnessK</span><span class="p">,</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_keyStore</span><span class="p">().</span><span class="nf">MinerAddress</span><span class="p">())</span>
 	<span class="nx">postRandomness</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_keyStore</span><span class="p">().</span><span class="nf">WorkerKey</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">Generate</span><span class="p">(</span><span class="nx">input</span><span class="p">).</span><span class="nf">Output</span><span class="p">()</span>
 
 	<span class="c1">// TODO: add how sectors are actually stored in the SMS proving set
@@ -4999,7 +5015,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="nx">sms</span><span class="p">.</span><span class="nf">_blockProducer</span><span class="p">().</span><span class="nf">GenerateBlock</span><span class="p">(</span><span class="nx">postProof</span><span class="p">,</span> <span class="nx">winningCandidates</span><span class="p">,</span> <span class="nx">newTicket</span><span class="p">,</span> <span class="nx">chainHead</span><span class="p">,</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_keyStore</span><span class="p">().</span><span class="nf">MinerAddress</span><span class="p">())</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">_preparePoStChallengeSeed</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">PreparePoStChallengeSeed</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
 
 	<span class="nx">randInput</span> <span class="o">:=</span> <span class="nf">Serialize_PoStChallengeSeedInput</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">PoStChallengeSeedInput_I</span><span class="p">{</span>
 		<span class="nx">ticket_</span><span class="p">:</span>    <span class="nx">randomness</span><span class="p">,</span>
@@ -5077,10 +5093,6 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="k">return</span> <span class="nx">st</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">GetWorkerKeyByMinerAddress</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
 <span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">VerifyElectionPoSt</span><span class="p">(</span><span class="nx">header</span> <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 
 	<span class="nx">sma</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_getStorageMinerActorState</span><span class="p">(</span><span class="nx">header</span><span class="p">.</span><span class="nf">ParentState</span><span class="p">(),</span> <span class="nx">header</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
@@ -5105,21 +5117,30 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 		<span class="k">return</span> <span class="kc">false</span>
 	<span class="p">}</span>
 
-	<span class="c1">// 2. Verify appropriate randomness
+	<span class="c1">// 2. Verify partialTicket values are appropriate
+</span><span class="c1"></span>	<span class="k">if</span> <span class="p">!</span><span class="nx">sms</span><span class="p">.</span><span class="nf">_verifyElection</span><span class="p">(</span><span class="nx">header</span><span class="p">,</span> <span class="nx">onChainInfo</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="kc">false</span>
+	<span class="p">}</span>
+
+	<span class="c1">// verify the partialTickets themselves
+</span><span class="c1"></span>	<span class="c1">// 3. Verify appropriate randomness
 </span><span class="c1"></span>	<span class="c1">// TODO: fix away from BestChain()... every block should track its own chain up to its own production.
 </span><span class="c1"></span>	<span class="nx">randomness</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_consensus</span><span class="p">().</span><span class="nf">GetPoStChallengeRand</span><span class="p">(</span><span class="nx">sms</span><span class="p">.</span><span class="nf">_blockchain</span><span class="p">().</span><span class="nf">BestChain</span><span class="p">(),</span> <span class="nx">header</span><span class="p">.</span><span class="nf">Epoch</span><span class="p">())</span>
-	<span class="nx">postRandomnessInput</span> <span class="o">:=</span> <span class="nx">sector</span><span class="p">.</span><span class="nf">PoStRandomness</span><span class="p">(</span><span class="nx">sms</span><span class="p">.</span><span class="nf">_preparePoStChallengeSeed</span><span class="p">(</span><span class="nx">randomness</span><span class="p">,</span> <span class="nx">header</span><span class="p">.</span><span class="nf">Miner</span><span class="p">()))</span>
+	<span class="nx">postRandomnessInput</span> <span class="o">:=</span> <span class="nx">sector</span><span class="p">.</span><span class="nf">PoStRandomness</span><span class="p">(</span><span class="nx">sms</span><span class="p">.</span><span class="nf">PreparePoStChallengeSeed</span><span class="p">(</span><span class="nx">randomness</span><span class="p">,</span> <span class="nx">header</span><span class="p">.</span><span class="nf">Miner</span><span class="p">()))</span>
 
 	<span class="nx">postRand</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFResult_I</span><span class="p">{</span>
 		<span class="nx">Output_</span><span class="p">:</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(),</span>
 	<span class="p">}</span>
 
-	<span class="k">if</span> <span class="p">!</span><span class="nx">postRand</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">postRandomnessInput</span><span class="p">,</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">GetWorkerKeyByMinerAddress</span><span class="p">(</span><span class="nx">header</span><span class="p">.</span><span class="nf">Miner</span><span class="p">()))</span> <span class="p">{</span>
+	<span class="c1">// get worker key from minerAddr
+</span><span class="c1"></span>	<span class="nx">workerKey</span> <span class="o">:=</span> <span class="nx">sma</span><span class="p">.</span><span class="nf">Info</span><span class="p">().</span><span class="nf">WorkerKey</span><span class="p">()</span>
+
+	<span class="k">if</span> <span class="p">!</span><span class="nx">postRand</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">postRandomnessInput</span><span class="p">,</span> <span class="nx">workerKey</span><span class="p">)</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="kc">false</span>
 	<span class="p">}</span>
 
 	<span class="c1">// A proof must be a valid snark proof with the correct public inputs
-</span><span class="c1"></span>	<span class="c1">// 3. Get public inputs
+</span><span class="c1"></span>	<span class="c1">// 4. Get public inputs
 </span><span class="c1"></span>	<span class="nx">info</span> <span class="o">:=</span> <span class="nx">sma</span><span class="p">.</span><span class="nf">Info</span><span class="p">()</span>
 	<span class="nx">sectorSize</span> <span class="o">:=</span> <span class="nx">info</span><span class="p">.</span><span class="nf">SectorSize</span><span class="p">()</span>
 
@@ -5143,65 +5164,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="k">return</span> <span class="nx">isPoStVerified</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">VerifySurprisePoSt</span><span class="p">(</span><span class="nx">header</span> <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">,</span> <span class="nx">posterAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-
-	<span class="nx">st</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_getStorageMinerActorState</span><span class="p">(</span><span class="nx">header</span><span class="p">.</span><span class="nf">ParentState</span><span class="p">(),</span> <span class="nx">header</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
-
-	<span class="c1">// 1. Check that the miner in question is currently being challenged
-</span><span class="c1"></span>	<span class="k">if</span> <span class="p">!</span><span class="nx">st</span><span class="p">.</span><span class="nf">_isChallenged</span><span class="p">()</span> <span class="p">{</span>
-		<span class="c1">// TODO: determine proper error here and error-handling machinery
-</span><span class="c1"></span>		<span class="c1">// rt.Abort(&#34;cannot SubmitSurprisePoSt when not challenged&#34;)
-</span><span class="c1"></span>		<span class="k">return</span> <span class="kc">false</span>
-	<span class="p">}</span>
-
-	<span class="c1">// 2. Check that the challenge has not expired
-</span><span class="c1"></span>	<span class="c1">// Check that miner can still submit (i.e. that the challenge window has not passed)
-</span><span class="c1"></span>	<span class="c1">// This will prevent miner from submitting a Surprise PoSt past the challenge period
-</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_challengeHasExpired</span><span class="p">(</span><span class="nx">header</span><span class="p">.</span><span class="nf">Epoch</span><span class="p">())</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="kc">false</span>
-	<span class="p">}</span>
-
-	<span class="c1">// A proof must be a valid snark proof with the correct public inputs
-</span><span class="c1"></span>
-	<span class="c1">// 3. Verify appropriate randomness
-</span><span class="c1"></span>	<span class="nx">randomnessEpoch</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ChallengeStatus</span><span class="p">().</span><span class="nf">LastChallengeEpoch</span><span class="p">()</span>
-	<span class="c1">// TODO: fix away from BestChain()... every block should track its own chain up to its own production.
-</span><span class="c1"></span>	<span class="nx">randomness</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_consensus</span><span class="p">().</span><span class="nf">GetPoStChallengeRand</span><span class="p">(</span><span class="nx">sms</span><span class="p">.</span><span class="nf">_blockchain</span><span class="p">().</span><span class="nf">BestChain</span><span class="p">(),</span> <span class="nx">randomnessEpoch</span><span class="p">)</span>
-	<span class="nx">postRandomnessInput</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_preparePoStChallengeSeed</span><span class="p">(</span><span class="nx">randomness</span><span class="p">,</span> <span class="nx">posterAddr</span><span class="p">)</span>
-
-	<span class="nx">postRand</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFResult_I</span><span class="p">{</span>
-		<span class="nx">Output_</span><span class="p">:</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(),</span>
-	<span class="p">}</span>
-
-	<span class="k">if</span> <span class="p">!</span><span class="nx">postRand</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">postRandomnessInput</span><span class="p">,</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">GetWorkerKeyByMinerAddress</span><span class="p">(</span><span class="nx">posterAddr</span><span class="p">))</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="kc">false</span>
-	<span class="p">}</span>
-
-	<span class="c1">// 4. Get public inputs
-</span><span class="c1"></span>	<span class="nx">info</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Info</span><span class="p">()</span>
-	<span class="nx">sectorSize</span> <span class="o">:=</span> <span class="nx">info</span><span class="p">.</span><span class="nf">SectorSize</span><span class="p">()</span>
-
-	<span class="nx">postCfg</span> <span class="o">:=</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg_I</span><span class="p">{</span>
-		<span class="nx">Type_</span><span class="p">:</span>        <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStType_SurprisePoSt</span><span class="p">,</span>
-		<span class="nx">SectorSize_</span><span class="p">:</span>  <span class="nx">sectorSize</span><span class="p">,</span>
-		<span class="nx">WindowCount_</span><span class="p">:</span> <span class="nx">info</span><span class="p">.</span><span class="nf">WindowCount</span><span class="p">(),</span>
-		<span class="nx">Partitions_</span><span class="p">:</span>  <span class="nx">info</span><span class="p">.</span><span class="nf">SurprisePoStPartitions</span><span class="p">(),</span>
-	<span class="p">}</span>
-
-	<span class="nx">pvInfo</span> <span class="o">:=</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStVerifyInfo_I</span><span class="p">{</span>
-		<span class="nx">OnChain_</span><span class="p">:</span>    <span class="nx">onChainInfo</span><span class="p">,</span>
-		<span class="nx">PoStCfg_</span><span class="p">:</span>    <span class="o">&amp;</span><span class="nx">postCfg</span><span class="p">,</span>
-		<span class="nx">Randomness_</span><span class="p">:</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(),</span>
-	<span class="p">}</span>
-
-	<span class="nx">sdr</span> <span class="o">:=</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">WinSDRParams</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">filproofs</span><span class="p">.</span><span class="nx">SDRCfg_I</span><span class="p">{</span><span class="nx">SurprisePoStCfg_</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">postCfg</span><span class="p">})</span>
-
-	<span class="c1">// 5. Verify the PoSt Proof
-</span><span class="c1"></span>	<span class="nx">isPoStVerified</span> <span class="o">:=</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">VerifySurprisePoSt</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">pvInfo</span><span class="p">)</span>
-	<span class="k">return</span> <span class="nx">isPoStVerified</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">VerifyElection</span><span class="p">(</span><span class="nx">header</span> <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">_verifyElection</span><span class="p">(</span><span class="nx">header</span> <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="nx">st</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_getStorageMinerActorState</span><span class="p">(</span><span class="nx">header</span><span class="p">.</span><span class="nf">ParentState</span><span class="p">(),</span> <span class="nx">header</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
 	<span class="nx">numMinerSectors</span> <span class="o">:=</span> <span class="nb">uint64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">SectorTable</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">ActiveSectors_</span><span class="p">.</span><span class="nf">SectorsOn</span><span class="p">()))</span>
 
@@ -5496,19 +5459,23 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 
 <p>In order to secure Storage Power Consensus, the system defines a minimum miner size required to participate in consensus.</p>
 
-<p>Specifically, miners must have either at least <code>MIN_MINER_SIZE_STOR</code> of power (i.e. storage power currently used in storage deals) or <code>MIN_MINER_SIZE_PERC</code> of the network&rsquo;s active storage power to participate in leader election.</p>
+<p>Specifically, miners must have either at least <code>MIN_MINER_SIZE_STOR</code> of power (i.e. storage power currently used in storage deals) in order to participate in leader election. If no miner has <code>MIN_MINER_SIZE_STOR</code> or more power, miners with at least as much power as the smallest miner in the top <code>MIN_MINER_SIZE_TARG</code> of miners (sorted by storage power) will be able to participate in leader election. In plain english, take <code>MIN_MINER_SIZE_TARG = 3</code> for instance, this means that miners with at least as much power as the 3rd largest miner will be eligible to participate in consensus.</p>
 
 <p>Miners smaller than this cannot mine blocks and earn block rewards in the network. Their power will not be counted as part of total network power. However, <strong>it is important to note that such miners can still have their power faulted and be penalized accordingly</strong>.</p>
 
 <p>Accordingly, to bootstrap the network, the genesis block must include miners taking part in valid storage deals along with appropriate committed storage.</p>
 
-<p>The <code>MIN_MINER_SIZE_PERC</code> condition will not be used in a network with more than <code>MIN_MINER_SIZE_STOR/MIN_MINER_SIZE_PERC</code> of power. It is nonetheless defined to ensure liveness in small networks (e.g. close to genesis or after large power drops). Simply, a single miner can maintain network liveness for networks with less than <code>MIN_MINER_SIZE_STOR/MIN_MINER_SIZE_PERC</code> of active storage.</p>
+<p>The <code>MIN_MINER_SIZE_TARG</code> condition will not be used in a network in which any miner has more than <code>MIN_MINER_SIZE_STOR</code> power. It is nonetheless defined to ensure liveness in small networks (e.g. close to genesis or after large power drops).</p>
 
 <div class="notices placeholder" >The below values are currently placeholders.</div>
 
 <p>We currently set:
 - <code>MIN_MINER_SIZE_STOR = 1 &lt;&lt; 40 Bytes</code> (100 TiB)
-- <code>MIN_MINER_SIZE_PERC = .33</code></p>
+- `MIN_MINER_SIZE_TARG = 3</p>
+
+<h2 id="network-recovery-after-halting">Network recovery after halting</h2>
+
+<p>Placeholder where we will define a means of rebooting network liveness after it halts catastrophically (i.e. empty power table).</p>
 </article>
 
       
@@ -5537,6 +5504,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 </ul></li>
 <li><a href="#repeated-leader-election-attempts">Repeated Leader Election attempts</a></li>
 <li><a href="#minimum-miner-size">Minimum Miner Size</a></li>
+<li><a href="#network-recovery-after-halting">Network recovery after halting</a></li>
 </ul></li>
 </ul>
 </nav>

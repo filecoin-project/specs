@@ -1,8 +1,11 @@
-package runtime
+package impl
 
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import (
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+)
 
-func loadActorCode(codeID actor.CodeID) (ActorCode, error) {
+func loadActorCode(codeID actor.CodeID) (vmr.ActorCode, error) {
 
 	panic("TODO")
 	// TODO: resolve circular dependency

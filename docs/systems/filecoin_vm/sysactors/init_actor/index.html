@@ -4661,11 +4661,14 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">InitActorState</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// responsible for create new actors
-</span><span class="c1"></span>    <span class="nx">AddressMap</span>       <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">}</span>
-    <span class="nx">NextID</span>           <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span>
-    <span class="nx">NetworkName</span>      <span class="kt">string</span>
+</span><span class="c1"></span>    <span class="nx">AddressMap</span>   <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">}</span>
+    <span class="nx">NextID</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span>
+    <span class="nx">NetworkName</span>  <span class="kt">string</span>
 
-    <span class="nf">_assignNextID</span><span class="p">()</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span>
+    <span class="c1">// Allocates a new ID and maps another address to it. Returns the ID-address.
+</span><span class="c1"></span>    <span class="nf">MapAddressToNewID</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="c1">// Resolves an address to an ID-address, if possible. Returns the argument if un-mapped.
+</span><span class="c1"></span>    <span class="nf">ResolveAddress</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">InitActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4771,25 +4774,22 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;cannot exec an actor of this type&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="c1">// Allocate an ID for this actor.
-</span><span class="c1"></span>    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nf">_loadState</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-    <span class="nx">actorID</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_assignNextID</span><span class="p">()</span>
-    <span class="nx">idAddr</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="nx">actorID</span><span class="p">)</span>
-
-    <span class="c1">// Store the mapping of a re-org-stable address to actor ID.
+    <span class="c1">// Compute a re-org-stable address.
 </span><span class="c1"></span>    <span class="c1">// This address exists for use by messages coming from outside the system, in order to
 </span><span class="c1"></span>    <span class="c1">// stably address the newly created actor even if a chain re-org causes it to end up with
 </span><span class="c1"></span>    <span class="c1">// a different ID.
 </span><span class="c1"></span>    <span class="nx">newAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">NewActorAddress</span><span class="p">()</span>
-    <span class="nx">st</span><span class="p">.</span><span class="nf">AddressMap</span><span class="p">()[</span><span class="nx">newAddr</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actorID</span>
+
+    <span class="c1">// Allocate an ID for this actor.
+</span><span class="c1"></span>    <span class="c1">// Store mapping of pubkey or actor address to actor ID
+</span><span class="c1"></span>    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nf">_loadState</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">idAddr</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">MapAddressToNewID</span><span class="p">(</span><span class="nx">newAddr</span><span class="p">)</span>
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-    <span class="c1">// Create the empty actor.
-</span><span class="c1"></span>    <span class="c1">// It&#39;s (empty) state must be stored under the ID-address before the constructor can be
-</span><span class="c1"></span>    <span class="c1">// invoked to initialize it.
+    <span class="c1">// Create an empty actor.
 </span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">CreateActor</span><span class="p">(</span><span class="nx">codeID</span><span class="p">,</span> <span class="nx">idAddr</span><span class="p">)</span>
 
-    <span class="c1">// Invoke its constructor. If construction fails, the error should propagate and cause
+    <span class="c1">// Invoke constructor. If construction fails, the error should propagate and cause
 </span><span class="c1"></span>    <span class="c1">// Exec to fail too.
 </span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
         <span class="nx">To_</span><span class="p">:</span>     <span class="nx">idAddr</span><span class="p">,</span>
@@ -4802,17 +4802,26 @@ https://github.com/alex-shpak/hugo-book
         <span class="nf">Bytes</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nf">Serialize_Address_Compact</span><span class="p">(</span><span class="nx">idAddr</span><span class="p">)))</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">InitActorState_I</span><span class="p">)</span> <span class="nf">_assignNextID</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span> <span class="p">{</span>
-    <span class="nx">actorID</span> <span class="o">:=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">NextID_</span>
-    <span class="nx">s</span><span class="p">.</span><span class="nx">NextID_</span><span class="o">++</span>
-    <span class="k">return</span> <span class="nx">actorID</span>
-<span class="p">}</span>
-
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">GetActorIDForAddress</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nf">_loadState</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
     <span class="nx">actorID</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">AddressMap</span><span class="p">()[</span><span class="nx">address</span><span class="p">]</span>
     <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
     <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReturn</span><span class="p">(</span><span class="nf">Bytes</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nf">Serialize_ActorID</span><span class="p">(</span><span class="nx">actorID</span><span class="p">)))</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">InitActorState_I</span><span class="p">)</span> <span class="nf">ResolveAddress</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
+    <span class="nx">actorID</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">s</span><span class="p">.</span><span class="nf">AddressMap</span><span class="p">()[</span><span class="nx">address</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nx">ok</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="nx">actorID</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">address</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">InitActorState_I</span><span class="p">)</span> <span class="nf">MapAddressToNewID</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
+    <span class="nx">actorID</span> <span class="o">:=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">NextID_</span>
+    <span class="nx">s</span><span class="p">.</span><span class="nx">NextID_</span><span class="o">++</span>
+    <span class="nx">s</span><span class="p">.</span><span class="nf">AddressMap</span><span class="p">()[</span><span class="nx">address</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actorID</span>
+    <span class="k">return</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="nx">actorID</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_codeIDSupportsExec</span><span class="p">(</span><span class="nx">codeID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>

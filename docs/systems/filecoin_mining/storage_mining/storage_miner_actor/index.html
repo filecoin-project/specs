@@ -4670,6 +4670,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 <span class="kn">import</span> <span class="nx">stateTree</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 <span class="kn">import</span> <span class="nx">spc</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus&#34;</span>
+<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 
 <span class="kd">type</span> <span class="nx">SectorExpirationQueueItem</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SectorNumber</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span>
@@ -4776,15 +4777,19 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageMinerActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nf">GetOwnerKey</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span>
+    <span class="nf">GetWorkerKey</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span>
     <span class="nf">NotifyOfSurprisePoStChallenge</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 
     <span class="nf">PreCommitSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">info</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorPreCommitInfo</span><span class="p">)</span>  <span class="c1">// TODO: check with Magik on sizes
 </span><span class="c1"></span>    <span class="nf">ProveCommitSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">info</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorProveCommitInfo</span><span class="p">)</span>
 
-    <span class="nf">ProcessVerifiedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
+    <span class="nf">ProcessSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
     <span class="nf">ProcessVerifiedElectionPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 
     <span class="nf">_checkSurprisePoStSubmissionHappened</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
+    <span class="nf">_verifySurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_verifySurprisePoStMeetsTargetReq</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="kt">bool</span>
 
     <span class="nf">DeclareFaults</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">failingSet</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span><span class="p">)</span>
     <span class="nf">RecoverFaults</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">recoveringSet</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span><span class="p">)</span>
@@ -4822,12 +4827,14 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// - Income and returned collateral are paid to this address.
 </span><span class="c1"></span>    <span class="c1">// - This address is also allowed to change the worker address for the miner.
 </span><span class="c1"></span>    <span class="nx">Owner</span>                   <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">OwnerKey</span>                <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span>
 
     <span class="c1">// Worker account for this miner.
 </span><span class="c1"></span>    <span class="c1">// This will be the key that is used to sign blocks created by this miner, and
 </span><span class="c1"></span>    <span class="c1">// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
 </span><span class="c1"></span>    <span class="c1">// other day to day miner activities.
 </span><span class="c1"></span>    <span class="nx">Worker</span>                  <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">WorkerKey</span>               <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span>
 
     <span class="c1">// Libp2p identity that should be used when connecting to this miner.
 </span><span class="c1"></span>    <span class="nx">PeerId</span>                  <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
@@ -5140,6 +5147,7 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_mining</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+    <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
     <span class="nx">filproofs</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto/filproofs&#34;</span>
     <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
     <span class="nx">spc</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus&#34;</span>
@@ -5156,7 +5164,9 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">)</span>
 
 <span class="kd">const</span> <span class="p">(</span>
-    <span class="nx">Method_StorageMinerActor_ProcessVerifiedSurprisePoSt</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodPlaceholder</span> <span class="o">+</span> <span class="kc">iota</span>
+    <span class="nx">Method_StorageMinerActor_GetOwnerKey</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodPlaceholder</span> <span class="o">+</span> <span class="kc">iota</span>
+    <span class="nx">Method_StorageMinerActor_GetWorkerKey</span>
+    <span class="nx">Method_StorageMinerActor_ProcessVerifiedSurprisePoSt</span>
     <span class="nx">Method_StorageMinerActor_ProcessVerifiedElectionPoSt</span>
     <span class="nx">Method_StorageMinerActor_NotifyOfSurprisePoStChallenge</span>
 <span class="p">)</span>
@@ -5200,6 +5210,20 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1"></span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">GetOwnerKey</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span> <span class="p">{</span>
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">ret</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Info</span><span class="p">().</span><span class="nf">OwnerKey</span><span class="p">()</span>
+    <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">ret</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">GetWorkerKey</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span> <span class="p">{</span>
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">ret</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Info</span><span class="p">().</span><span class="nf">WorkerKey</span><span class="p">()</span>
+    <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">ret</span>
+<span class="p">}</span>
+
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_isChallenged</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
     <span class="nx">ret</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_isChallenged</span><span class="p">()</span>
@@ -5487,19 +5511,6 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SuccessReturn</span><span class="p">()</span>
 <span class="p">}</span>
 
-<span class="c1">// called by verifier to update miner state on successful surprise post
-</span><span class="c1">// after it has been verified in the storage_mining_subsystem
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">ProcessVerifiedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
-    <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// TODO: validate caller
-</span><span class="c1"></span>
-    <span class="c1">// Ensure pledge collateral satisfied
-</span><span class="c1"></span>    <span class="c1">// otherwise, abort ProcessVerifiedSurprisePoSt
-</span><span class="c1"></span>    <span class="nx">a</span><span class="p">.</span><span class="nf">_ensurePledgeCollateralSatisfied</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-
-<span class="p">}</span>
-
 <span class="c1">// Called by StoragePowerConsensus subsystem after verifying the Election proof
 </span><span class="c1">// and verifying the PoSt proof in the block header.
 </span><span class="c1">// Assume ElectionPoSt has already been successfully verified (both proof and partial ticket
@@ -5518,6 +5529,109 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>
     <span class="c1">// the following will update last challenge response time
 </span><span class="c1"></span>    <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// called by verifier to update miner state on successful surprise post
+</span><span class="c1">// after it has been verified in the storage_mining_subsystem
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">ProcessSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+    <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// TODO: validate caller
+</span><span class="c1"></span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">a</span><span class="p">.</span><span class="nf">_verifySurprisePoSt</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">onChainInfo</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span>
+            <span class="nx">exitcode</span><span class="p">.</span><span class="nf">UserDefinedError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">PoStVerificationFailed</span><span class="p">),</span>
+            <span class="s">&#34;PoSt verification failed&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Ensure pledge collateral satisfied
+</span><span class="c1"></span>    <span class="c1">// otherwise, abort ProcessVerifiedSurprisePoSt
+</span><span class="c1"></span>    <span class="nx">a</span><span class="p">.</span><span class="nf">_ensurePledgeCollateralSatisfied</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_verifySurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">info</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Info</span><span class="p">()</span>
+
+    <span class="c1">// 1. Check that the miner in question is currently being challenged
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">!</span><span class="nx">st</span><span class="p">.</span><span class="nf">_isChallenged</span><span class="p">()</span> <span class="p">{</span>
+        <span class="c1">// TODO: determine proper error here and error-handling machinery
+</span><span class="c1"></span>        <span class="c1">// rt.Abort(&#34;cannot SubmitSurprisePoSt when not challenged&#34;)
+</span><span class="c1"></span>        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Invalid Surprise PoSt. Miner not challenged.&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 2. Check that the challenge has not expired
+</span><span class="c1"></span>    <span class="c1">// Check that miner can still submit (i.e. that the challenge window has not passed)
+</span><span class="c1"></span>    <span class="c1">// This will prevent miner from submitting a Surprise PoSt past the challenge period
+</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_challengeHasExpired</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">())</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Invalid Surprise PoSt. Challenge has expired.&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 3. Verify the partialTicket values
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">!</span><span class="nx">a</span><span class="p">.</span><span class="nf">_verifySurprisePoStMeetsTargetReq</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Invalid Surprise PoSt. Tickets do not meet target.&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="c1">// verify the partialTickets themselves
+</span><span class="c1"></span>    <span class="c1">// 4. Verify appropriate randomness
+</span><span class="c1"></span>
+    <span class="c1">// pull from consts
+</span><span class="c1"></span>    <span class="nx">SPC_LOOKBACK_POST</span> <span class="o">:=</span> <span class="nb">uint64</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="nx">randomnessEpoch</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ChallengeStatus</span><span class="p">().</span><span class="nf">LastChallengeEpoch</span><span class="p">()</span>
+    <span class="nx">randomness</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(</span><span class="nx">randomnessEpoch</span><span class="p">,</span> <span class="nx">SPC_LOOKBACK_POST</span><span class="p">)</span>
+    <span class="nb">panic</span><span class="p">(</span><span class="nx">randomness</span><span class="p">)</span>                       <span class="c1">// ignore circular dependency
+</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">postRandomnessInput</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="c1">// sms.PreparePoStChallengeSeed(randomness, actorAddr)
+</span><span class="c1"></span>
+    <span class="nx">postRand</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFResult_I</span><span class="p">{</span>
+        <span class="nx">Output_</span><span class="p">:</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(),</span>
+    <span class="p">}</span>
+
+    <span class="c1">// get worker key from minerAddr
+</span><span class="c1"></span>    <span class="nx">out</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
+        <span class="nx">To_</span><span class="p">:</span>     <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(),</span>
+        <span class="nx">Method_</span><span class="p">:</span> <span class="nx">Method_StorageMinerActor_GetWorkerKey</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="nx">temp</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">Deserialize_VRFPublicKey</span><span class="p">(</span><span class="nx">out</span><span class="p">.</span><span class="nf">ReturnValue</span><span class="p">())</span>
+    <span class="c1">// ignore below line, redeclaring because of a code generation issue :/
+</span><span class="c1"></span>    <span class="nx">workerKey</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">VRFPublicKey</span><span class="p">(</span><span class="nx">temp</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;miner has invalid owner address&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">!</span><span class="nx">postRand</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">postRandomnessInput</span><span class="p">,</span> <span class="nx">workerKey</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Invalid Surprise PoSt. Invalid randomness.&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+
+    <span class="c1">// 5. Get public inputs
+</span><span class="c1"></span>    <span class="nx">sectorSize</span> <span class="o">:=</span> <span class="nx">info</span><span class="p">.</span><span class="nf">SectorSize</span><span class="p">()</span>
+
+    <span class="nx">postCfg</span> <span class="o">:=</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg_I</span><span class="p">{</span>
+        <span class="nx">Type_</span><span class="p">:</span>        <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStType_SurprisePoSt</span><span class="p">,</span>
+        <span class="nx">SectorSize_</span><span class="p">:</span>  <span class="nx">sectorSize</span><span class="p">,</span>
+        <span class="nx">WindowCount_</span><span class="p">:</span> <span class="nx">info</span><span class="p">.</span><span class="nf">WindowCount</span><span class="p">(),</span>
+        <span class="nx">Partitions_</span><span class="p">:</span>  <span class="nx">info</span><span class="p">.</span><span class="nf">SurprisePoStPartitions</span><span class="p">(),</span>
+    <span class="p">}</span>
+
+    <span class="nx">pvInfo</span> <span class="o">:=</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStVerifyInfo_I</span><span class="p">{</span>
+        <span class="nx">OnChain_</span><span class="p">:</span>    <span class="nx">onChainInfo</span><span class="p">,</span>
+        <span class="nx">PoStCfg_</span><span class="p">:</span>    <span class="o">&amp;</span><span class="nx">postCfg</span><span class="p">,</span>
+        <span class="nx">Randomness_</span><span class="p">:</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(),</span>
+    <span class="p">}</span>
+
+    <span class="nx">sdr</span> <span class="o">:=</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">WinSDRParams</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">filproofs</span><span class="p">.</span><span class="nx">SDRCfg_I</span><span class="p">{</span><span class="nx">SurprisePoStCfg_</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">postCfg</span><span class="p">})</span>
+
+    <span class="c1">// 6. Verify the PoSt Proof
+</span><span class="c1"></span>    <span class="k">return</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">VerifySurprisePoSt</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">pvInfo</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// todo: define target
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_verifySurprisePoStMeetsTargetReq</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="nx">util</span><span class="p">.</span><span class="nf">TODO</span><span class="p">()</span>
+    <span class="k">return</span> <span class="kc">false</span>
 <span class="p">}</span>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////

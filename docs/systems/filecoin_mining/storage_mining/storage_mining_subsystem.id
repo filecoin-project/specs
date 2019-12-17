@@ -49,9 +49,6 @@ type StorageMiningSubsystem struct {
         pledgeAmt     actor.TokenAmount
     )
 
-    // get miner key by address
-    GetWorkerKeyByMinerAddress(minerAddr addr.Address) filcrypto.PublicKey
-
     // call by StorageMarket.StorageProvider at the start of a deal.
     // Triggers AddNewDeal on SectorIndexer
     // StorageDeal contains DealCID
@@ -66,7 +63,7 @@ type StorageMiningSubsystem struct {
         minerAddr   addr.Address
     ) block.Ticket
 
-    _preparePoStChallengeSeed(randomness util.Randomness, minerAddr addr.Address) util.Randomness
+    PreparePoStChallengeSeed(randomness util.Randomness, minerAddr addr.Address) util.Randomness
     _getStorageMinerActorState(stateTree stateTree.StateTree, minerAddr addr.Address) StorageMinerActorState
 
     // call by BlockChain when a new block is produced
@@ -82,11 +79,11 @@ type StorageMiningSubsystem struct {
         header       block.BlockHeader
         onChainInfo  sector.OnChainPoStVerifyInfo
     ) bool
-    VerifySurprisePoSt(
+
+    _verifyElection(
         header       block.BlockHeader
         onChainInfo  sector.OnChainPoStVerifyInfo
     ) bool
-    IsValidElection(onChainInfo sector.OnChainPoStVerifyInfo) bool
 }
 
 type PoStChallengeSeedInput struct {

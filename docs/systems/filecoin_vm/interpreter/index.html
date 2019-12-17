@@ -4729,19 +4729,19 @@ to cover the maximum message cost, then the miner pays a penalty by burning the 
 <li>the <code>From</code> actor does not exist in the state (miner penalized),</li>
 <li>the <code>From</code> actor is not an account actor (miner penalized),</li>
 <li>the <code>CallSeqNum</code> of the message does not match the <code>CallSeqNum</code> of the <code>From</code> actor (miner penalized),</li>
-<li>the <code>To</code> actor does not exist in state and the <code>To</code> address is not a pubkey-style address (miner penalized),</li>
-<li>the <code>To</code> actor does not exist in state and the message has a non-zero <code>MethodNum</code> (miner penalized),</li>
-<li>the <code>To</code> actor exists but does not have a method corresponding to the non-zero <code>MethodNum</code>,</li>
-<li>deserialized <code>Params</code> is not an array of length matching the arity of the <code>To</code> actor&rsquo;s <code>MethodNum</code> method,</li>
-<li>deserialized <code>Params</code> are not valid for the types specified by the <code>To</code> actor&rsquo;s <code>MethodNum</code> method,</li>
 <li>the <code>From</code> actor does not have sufficient balance to cover the sum of the message <code>Value</code> plus the
 maximum gas cost, <code>GasLimit * GasPrice</code> (miner penalized),</li>
-<li>the invoked method consumes more gas than the <code>GasLimit</code> allows, or</li>
-<li>the invoked method exits with a non-zero code (via <code>Runtime.Abort()</code>).</li>
+<li>the <code>To</code> actor does not exist in state and the <code>To</code> address is not a pubkey-style address,</li>
+<li>the <code>To</code> actor exists (or is implicitly created as an account) but does not have a method corresponding to the non-zero <code>MethodNum</code>,</li>
+<li>deserialized <code>Params</code> is not an array of length matching the arity of the <code>To</code> actor&rsquo;s <code>MethodNum</code> method,</li>
+<li>deserialized <code>Params</code> are not valid for the types specified by the <code>To</code> actor&rsquo;s <code>MethodNum</code> method,</li>
+<li>the invoked method consumes more gas than the <code>GasLimit</code> allows,</li>
+<li>the invoked method exits with a non-zero code (via <code>Runtime.Abort()</code>), or</li>
+<li>any inner message sent by the receiver fails for any of the above reasons.</li>
 </ul>
 
 <p>Note that if the <code>To</code> actor does not exist in state and the address is a valid <code>H(pubkey)</code> address,
-it will be created as an account actor (only if the message has a MethodNum of zero).</p>
+it will be created as an account actor.</p>
 
 <p>(You can see the <em>old</em> VM interpreter <a href="docs/systems/filecoin_vm/vm_interpreter_old">here</a> )</p>
 
@@ -4834,6 +4834,7 @@ it will be created as an account actor (only if the message has a MethodNum of z
 	<span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
 	<span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
 	<span class="nx">gascost</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost&#34;</span>
+	<span class="nx">vmri</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/impl&#34;</span>
 	<span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 	<span class="nx">sysactors</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/sysactors&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
@@ -4900,12 +4901,7 @@ it will be created as an account actor (only if the message has a MethodNum of z
 	<span class="p">}</span>
 
 	<span class="c1">// Invoke cron tick, attributing it to the miner of the first block.
-</span><span class="c1"></span>
-	<span class="nf">TODO</span><span class="p">()</span>
-	<span class="c1">// TODO: miners shouldn&#39;t be able to trigger cron by sending messages;
-</span><span class="c1"></span>	<span class="c1">// use ControlActor instead (https://github.com/filecoin-project/specs/issues/665)
-</span><span class="c1"></span>
-	<span class="nx">firstMiner</span> <span class="o">:=</span> <span class="nx">msgs</span><span class="p">.</span><span class="nf">Blocks</span><span class="p">()[</span><span class="mi">0</span><span class="p">].</span><span class="nf">Miner</span><span class="p">()</span>
+</span><span class="c1"></span>	<span class="nx">firstMiner</span> <span class="o">:=</span> <span class="nx">msgs</span><span class="p">.</span><span class="nf">Blocks</span><span class="p">()[</span><span class="mi">0</span><span class="p">].</span><span class="nf">Miner</span><span class="p">()</span>
 	<span class="nx">cronMessage</span> <span class="o">:=</span> <span class="nf">_makeCronTickMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">firstMiner</span><span class="p">)</span>
 	<span class="nx">outTree</span> <span class="p">=</span> <span class="nf">_applyMessageBuiltinAssert</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">cronMessage</span><span class="p">,</span> <span class="nx">firstMiner</span><span class="p">)</span>
 
@@ -4982,7 +4978,8 @@ it will be created as an account actor (only if the message has a MethodNum of z
 		<span class="k">return</span>
 	<span class="p">}</span>
 
-	<span class="nx">fromActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">inTree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
+	<span class="c1">// TODO: From() must be resolved to an ID-address via the init actor.
+</span><span class="c1"></span>	<span class="nx">fromActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">inTree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 		<span class="c1">// Execution error; sender does not exist at time of message execution.
 </span><span class="c1"></span>		<span class="nf">_applyError</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorNotFound</span><span class="p">,</span> <span class="nx">SenderResolveSpec_Invalid</span><span class="p">)</span>
@@ -5004,26 +5001,12 @@ it will be created as an account actor (only if the message has a MethodNum of z
 		<span class="k">return</span>
 	<span class="p">}</span>
 
-	<span class="c1">// Check receiving actor and method exists, possibly creating an account actor.
-</span><span class="c1"></span>	<span class="c1">// If this succeeds, compTreePreSend will become a state snapshot which includes
-</span><span class="c1"></span>	<span class="c1">// implicit receiver creation, the sender (rather than miner) paying gas, and the sender&#39;s
-</span><span class="c1"></span>	<span class="c1">// CallSeqNum being incremented; at least that much state change will be persisted even if the
+	<span class="c1">// At this point, construct compTreePreSend as a state snapshot which includes
+</span><span class="c1"></span>	<span class="c1">// the sender paying gas, and the sender&#39;s CallSeqNum being incremented;
+</span><span class="c1"></span>	<span class="c1">// at least that much state change will be persisted even if the
 </span><span class="c1"></span>	<span class="c1">// method invocation subsequently fails.
-</span><span class="c1"></span>	<span class="nx">compTreePreSend</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nf">_ensureReceiver</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">message</span><span class="p">)</span>
-	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
-		<span class="c1">// Execution error; receiver actor does not exist (and could not be implicitly created)
-</span><span class="c1"></span>		<span class="c1">// at time of message execution.
-</span><span class="c1"></span>		<span class="nf">_applyError</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorNotFound</span><span class="p">,</span> <span class="nx">SenderResolveSpec_Invalid</span><span class="p">)</span>
-		<span class="k">return</span>
-	<span class="p">}</span>
-
-	<span class="c1">// Deduct gas limit funds from sender.
-</span><span class="c1"></span>	<span class="c1">// (This should always succeed, due to the sender balance check above.)
-</span><span class="c1"></span>	<span class="nx">compTreePreSend</span> <span class="p">=</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span>
-		<span class="nx">compTreePreSend</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(),</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">gasLimitCost</span><span class="p">)</span>
-
-	<span class="c1">// Increment sender CallSeqNum.
-</span><span class="c1"></span>	<span class="nx">compTreePreSend</span> <span class="p">=</span> <span class="nx">compTreePreSend</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithIncrementedCallSeqNum_Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
+</span><span class="c1"></span>	<span class="nx">compTreePreSend</span> <span class="o">:=</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(),</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">gasLimitCost</span><span class="p">)</span>
+	<span class="nx">compTreePreSend</span> <span class="p">=</span> <span class="nx">compTreePreSend</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithIncrementedCallSeqNum_Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
 
 	<span class="nx">sendRet</span><span class="p">,</span> <span class="nx">compTreePostSend</span> <span class="o">:=</span> <span class="nf">_applyMessageInternal</span><span class="p">(</span><span class="nx">compTreePreSend</span><span class="p">,</span> <span class="nx">message</span><span class="p">,</span> <span class="nx">vmiGasRemaining</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
 
@@ -5050,32 +5033,13 @@ it will be created as an account actor (only if the message has a MethodNum of z
 	<span class="k">return</span>
 <span class="p">}</span>
 
-<span class="c1">// Ensures a messages&#39;s receiving actor exists in the state tree.
-</span><span class="c1">// If it doesn&#39;t, and the message is a simple value send to a pubkey-style address,
-</span><span class="c1">// creates the receiver as an account actor in the returned state.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">_ensureReceiver</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">)</span> <span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">())</span>
-
-	<span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="nx">tree</span><span class="p">,</span> <span class="kc">true</span>
-	<span class="p">}</span>
-	<span class="k">if</span> <span class="p">!</span><span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">().</span><span class="nf">IsKeyType</span><span class="p">()</span> <span class="p">{</span>
-		<span class="c1">// Don&#39;t implicitly create an account actor for an address without an associated key.
-</span><span class="c1"></span>		<span class="k">return</span> <span class="nx">tree</span><span class="p">,</span> <span class="kc">false</span>
-	<span class="p">}</span>
-	<span class="k">if</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Method</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodSend</span> <span class="p">{</span>
-		<span class="c1">// Don&#39;t implicitly create account actor if message was expecting to invoke a method.
-</span><span class="c1"></span>		<span class="k">return</span> <span class="nx">tree</span><span class="p">,</span> <span class="kc">false</span>
-	<span class="p">}</span>
-	<span class="c1">// TODO Create a new account actor via the InitActor, which will receive a new ID address
-</span><span class="c1"></span>	<span class="c1">// and be placed in the state tree under that address.
-</span><span class="c1"></span>	<span class="c1">// The init actor will maintain a map from pubkey address to ID address.
-</span><span class="c1"></span>	<span class="k">return</span> <span class="nx">tree</span><span class="p">,</span> <span class="kc">true</span>
-<span class="p">}</span>
-
 <span class="kd">func</span> <span class="nf">_applyMessageBuiltinAssert</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">topLevelBlockWinner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span> <span class="p">{</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">().</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">))</span>
-	<span class="nx">tree</span> <span class="p">=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithIncrementedCallSeqNum_Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
+	<span class="c1">// Note: this message CallSeqNum is never checked (b/c it&#39;s created in this file), but probably should be.
+</span><span class="c1"></span>	<span class="c1">// Since it changes state, we should be sure about the state transition.
+</span><span class="c1"></span>	<span class="c1">// Alternatively we could special-case the system actor and declare that its CallSeqNumber
+</span><span class="c1"></span>	<span class="c1">// never changes (saving us the state-change overhead).
+</span><span class="c1"></span>	<span class="nx">tree</span> <span class="p">=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithIncrementedCallSeqNum_Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
 
 	<span class="nx">retReceipt</span><span class="p">,</span> <span class="nx">retTree</span> <span class="o">:=</span> <span class="nf">_applyMessageInternal</span><span class="p">(</span><span class="nx">tree</span><span class="p">,</span> <span class="nx">message</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(),</span> <span class="nx">topLevelBlockWinner</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">retReceipt</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">()</span> <span class="p">{</span>
@@ -5092,7 +5056,7 @@ it will be created as an account actor (only if the message has a MethodNum of z
 	<span class="nx">fromActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 
-	<span class="nx">rt</span> <span class="o">:=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">VMContext_Make</span><span class="p">(</span>
+	<span class="nx">rt</span> <span class="o">:=</span> <span class="nx">vmri</span><span class="p">.</span><span class="nf">VMContext_Make</span><span class="p">(</span>
 		<span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(),</span>
 		<span class="nx">topLevelBlockWinner</span><span class="p">,</span>
 		<span class="nx">fromActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>

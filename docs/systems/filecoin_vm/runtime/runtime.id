@@ -61,7 +61,7 @@ type Runtime interface {
     // Run a (pure function) computation, consuming the gas cost associated with that function.
     // This mechanism is intended to capture the notion of an ABI between the VM and native
     // functions, and should be used for any function whose computation is expensive.
-    Compute(ComputeFunctionID, args [Any]) Any
+    Compute(ComputeFunctionID, args [util.Any]) util.Any
 
     // Sends a message to another actor.
     // If the invoked method does not return successfully, this caller will be aborted too.
@@ -95,8 +95,7 @@ type InvocInput struct {
 }
 
 type InvocOutput struct {
-    ExitCode     exitcode.ExitCode
-    ReturnValue  Bytes
+    ReturnValue Bytes
 }
 
 type MessageReceipt struct {
@@ -105,8 +104,10 @@ type MessageReceipt struct {
     GasUsed      msg.GasAmount
 }  // representation tuple
 
-type ActorExecAddressSeed struct {
-    creator             addr.Address
-    toplevelCallSeqNum  actor.CallSeqNum
-    internalCallSeqNum  actor.CallSeqNum
+type ActorStateHandle interface {
+    UpdateRelease(newStateCID actor.ActorSubstateCID)
+    Release(checkStateCID actor.ActorSubstateCID)
+    Take() actor.ActorSubstateCID
 }
+
+type ComputeFunctionID Int

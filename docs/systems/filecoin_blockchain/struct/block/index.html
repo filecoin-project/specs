@@ -4843,7 +4843,16 @@ header and messages themselves, in particular the parent tipset and state on whi
 <li><code>ParentState</code> matching the state tree produced by executing the parent tipset&rsquo;s messages (as defined by the VM interpreter) against that tipset&rsquo;s parent state,</li>
 <li><code>ParentMessageReceipts</code> identifying the receipt list produced by parent tipset execution, with one receipt for each unique message from the parent tipset,</li>
 <li><code>ParentWeight</code> matching the weight of the chain up to and including the parent tipset,</li>
-<li><code>Epoch</code> greater than that of its parents, and not in the future according to the node&rsquo;s local clock reading of the current epoch,</li>
+<li><code>Epoch</code> greater than that of its parents, and
+
+<ul>
+<li>not in the future according to the node&rsquo;s local clock reading of the current epoch,</li>
+<li>not farther in the past than the soft finality as defined by SPC $<a href="../../../../../#algorithms__expected_consensus__finality">EC Finality</a>,
+
+<ul>
+<li>this rule only applied when receiving new gossip blocks (i.e. from the current chain head), not when syncing to the chain for the first time (e.g.)</li>
+</ul></li>
+</ul></li>
 <li><code>Miner</code> that is active in the storage power table in the parent tipset state,<br /></li>
 <li>a <code>Ticket</code> derived from the minimum ticket from the parent tipset&rsquo;s block headers,
 

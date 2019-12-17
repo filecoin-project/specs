@@ -4742,9 +4742,6 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">pledgeAmt</span>     <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="p">)</span>
 
-    <span class="c1">// get miner key by address
-</span><span class="c1"></span>    <span class="nf">GetWorkerKeyByMinerAddress</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span>
-
     <span class="c1">// call by StorageMarket.StorageProvider at the start of a deal.
 </span><span class="c1"></span>    <span class="c1">// Triggers AddNewDeal on SectorIndexer
 </span><span class="c1"></span>    <span class="c1">// StorageDeal contains DealCID
@@ -4759,7 +4756,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">minerAddr</span>   <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
     <span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
 
-    <span class="nf">_preparePoStChallengeSeed</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+    <span class="nf">PreparePoStChallengeSeed</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
     <span class="nf">_getStorageMinerActorState</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">StorageMinerActorState</span>
 
     <span class="c1">// call by BlockChain when a new block is produced
@@ -4775,11 +4772,11 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">header</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span>
         <span class="nx">onChainInfo</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
     <span class="p">)</span> <span class="kt">bool</span>
-    <span class="nf">VerifySurprisePoSt</span><span class="p">(</span>
+
+    <span class="nf">_verifyElection</span><span class="p">(</span>
         <span class="nx">header</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span>
         <span class="nx">onChainInfo</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
     <span class="p">)</span> <span class="kt">bool</span>
-    <span class="nf">IsValidElection</span><span class="p">(</span><span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">PoStChallengeSeedInput</span> <span class="kd">struct</span> <span class="p">{</span>

@@ -1,20 +1,31 @@
-package runtime
+package impl
 
 import (
+	"bytes"
+	"encoding/binary"
+
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
+	sysactors "github.com/filecoin-project/specs/systems/filecoin_vm/sysactors"
 	util "github.com/filecoin-project/specs/util"
 )
 
 type ActorSubstateCID = actor.ActorSubstateCID
 type ExitCode = exitcode.ExitCode
 type RuntimeError = exitcode.RuntimeError
+type CallerPattern = vmr.CallerPattern
+type Runtime = vmr.Runtime
+type InvocInput = vmr.InvocInput
+type InvocOutput = vmr.InvocOutput
+type MessageReceipt = vmr.MessageReceipt
+type ActorStateHandle = vmr.ActorStateHandle
 
 var EnsureErrorCode = exitcode.EnsureErrorCode
 var SystemError = exitcode.SystemError
@@ -23,38 +34,25 @@ var Assert = util.Assert
 var IMPL_FINISH = util.IMPL_FINISH
 var TODO = util.TODO
 
-// Name should be set per unique filecoin network
-var Name = "mainnet"
-
 func ActorSubstateCID_Equals(x, y ActorSubstateCID) bool {
 	IMPL_FINISH()
 	panic("")
 }
 
-func NetworkName() string {
-	return Name
-}
-
-// ActorCode is the interface that all actor code types should satisfy.
-// It is merely a method dispatch interface.
-type ActorCode interface {
-	InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput
-}
-
-type ActorStateHandle struct {
+type ActorStateHandle_I struct {
 	_initValue *ActorSubstateCID
 	_rt        *VMContext
 }
 
-func (h *ActorStateHandle) UpdateRelease(newStateCID ActorSubstateCID) {
+func (h *ActorStateHandle_I) UpdateRelease(newStateCID ActorSubstateCID) {
 	h._rt._updateReleaseActorSubstate(newStateCID)
 }
 
-func (h *ActorStateHandle) Release(checkStateCID ActorSubstateCID) {
+func (h *ActorStateHandle_I) Release(checkStateCID ActorSubstateCID) {
 	h._rt._releaseActorSubstate(checkStateCID)
 }
 
-func (h *ActorStateHandle) Take() ActorSubstateCID {
+func (h *ActorStateHandle_I) Take() ActorSubstateCID {
 	if h._initValue == nil {
 		h._rt._apiError("Must call Take() only once on actor substate object")
 	}
@@ -88,7 +86,7 @@ type VMContext struct {
 	_valueReceived      actor.TokenAmount
 	_gasRemaining       msg.GasAmount
 	_numValidateCalls   int
-	_output             InvocOutput
+	_output             vmr.InvocOutput
 }
 
 func VMContext_Make(
@@ -148,19 +146,15 @@ func (rt *VMContext) AbortAPI(msg string) {
 	rt.Abort(exitcode.SystemError(exitcode.RuntimeAPIError), msg)
 }
 
-func (rt *VMContext) _rtAllocGasCreateActor() {
-	if !rt._actorAddress.Equals(addr.InitActorAddr) {
-		rt.AbortAPI("Only InitActor may call rt.CreateActor_DeductGas")
-	}
-
-	rt._rtAllocGas(gascost.ExecNewActor)
-}
-
 func (rt *VMContext) CreateActor(codeID actor.CodeID, address addr.Address) {
 	if !rt._actorAddress.Equals(addr.InitActorAddr) {
 		rt.AbortAPI("Only InitActor may call rt.CreateActor")
 	}
 
+	rt._createActor(codeID, address)
+}
+
+func (rt *VMContext) _createActor(codeID actor.CodeID, address addr.Address) {
 	// Create empty actor state.
 	actorState := &actor.ActorState_I{
 		CodeID_:     codeID,
@@ -173,7 +167,7 @@ func (rt *VMContext) CreateActor(codeID actor.CodeID, address addr.Address) {
 	actorStateCID := actor.ActorSystemStateCID(rt.IpldPut(actorState))
 	rt._updateActorSystemStateInternal(address, actorStateCID)
 
-	rt._rtAllocGasCreateActor()
+	rt._rtAllocGas(gascost.ExecNewActor)
 }
 
 func (rt *VMContext) _updateActorSystemStateInternal(actorAddress addr.Address, newStateCID actor.ActorSystemStateCID) {
@@ -264,35 +258,6 @@ func (rt *VMContext) ValidateImmediateCallerMatches(
 	rt._numValidateCalls += 1
 }
 
-type CallerPattern struct {
-	Matches func(addr.Address) bool
-}
-
-func CallerPattern_MakeSingleton(x addr.Address) CallerPattern {
-	return CallerPattern{
-		Matches: func(y addr.Address) bool { return x == y },
-	}
-}
-
-func CallerPattern_MakeAcceptAnyOfType(rt *VMContext, type_ actor.BuiltinActorID) CallerPattern {
-	return CallerPattern{
-		Matches: func(y addr.Address) bool {
-			codeID, ok := rt._getActorCodeID(y)
-			if !ok {
-				panic("Internal runtime error: actor not found")
-			}
-			Assert(codeID != nil)
-			return (codeID.IsBuiltin() && (codeID.As_Builtin() == type_))
-		},
-	}
-}
-
-func CallerPattern_MakeAcceptAny() CallerPattern {
-	return CallerPattern{
-		Matches: func(addr.Address) bool { return true },
-	}
-}
-
 func (rt *VMContext) ValidateImmediateCallerIs(callerExpected addr.Address) {
 	rt.ValidateImmediateCallerMatches(CallerPattern_MakeSingleton(callerExpected))
 }
@@ -317,11 +282,11 @@ func (rt *VMContext) _checkRunning() {
 	}
 }
 func (rt *VMContext) SuccessReturn() InvocOutput {
-	return InvocOutput_Make(nil)
+	return vmr.InvocOutput_Make(nil)
 }
 
 func (rt *VMContext) ValueReturn(value util.Bytes) InvocOutput {
-	return InvocOutput_Make(value)
+	return vmr.InvocOutput_Make(value)
 }
 
 func (rt *VMContext) _throwError(exitCode ExitCode) {
@@ -380,8 +345,10 @@ const (
 
 // TODO: This function should be private (not intended to be exposed to actors).
 // (merging runtime and interpreter packages should solve this)
-func (rt *VMContext) SendToplevelFromInterpreter(input InvocInput) (
-	MessageReceipt, st.StateTree) {
+// TODO: this should not use the MessageReceipt return type, even though it needs the same triple
+// of values. This method cannot compute the total gas cost and the returned receipt will never
+// go on chain.
+func (rt *VMContext) SendToplevelFromInterpreter(input InvocInput) (MessageReceipt, st.StateTree) {
 
 	rt._running = true
 	ret := rt._sendInternal(input, CatchErrors)
@@ -394,7 +361,7 @@ func _catchRuntimeErrors(f func() InvocOutput) (output InvocOutput, exitCode exi
 		if r := recover(); r != nil {
 			switch r.(type) {
 			case *RuntimeError:
-				output = InvocOutput_Make(nil)
+				output = vmr.InvocOutput_Make(nil)
 				exitCode = (r.(*RuntimeError).ExitCode)
 			default:
 				panic(r)
@@ -409,13 +376,13 @@ func _catchRuntimeErrors(f func() InvocOutput) (output InvocOutput, exitCode exi
 
 func _invokeMethodInternal(
 	rt *VMContext,
-	actorCode ActorCode,
+	actorCode vmr.ActorCode,
 	method actor.MethodNum,
 	params actor.MethodParams) (
 	ret InvocOutput, exitCode exitcode.ExitCode, internalCallSeqNumFinal actor.CallSeqNum) {
 
 	if method == actor.MethodSend {
-		ret = InvocOutput_Make(nil)
+		ret = vmr.InvocOutput_Make(nil)
 		return
 	}
 
@@ -444,17 +411,13 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 
 	rtOuter._rtAllocGas(gascost.InvokeMethod(input.Value()))
 
-	toActor, ok := rtOuter._globalStatePending.GetActor(input.To())
-	if !ok {
-		rtOuter._throwError(exitcode.SystemError(exitcode.ActorCodeNotFound))
-	}
-
-	toActorCode, err := loadActorCode(toActor.CodeID())
+	receiver, receiverAddr := rtOuter._resolveReceiver(input.To())
+	receiverCode, err := loadActorCode(receiver.CodeID())
 	if err != nil {
 		rtOuter._throwError(exitcode.SystemError(exitcode.ActorCodeNotFound))
 	}
 
-	err = rtOuter._transferFunds(rtOuter._actorAddress, input.To(), input.Value())
+	err = rtOuter._transferFunds(rtOuter._actorAddress, receiverAddr, input.Value())
 	if err != nil {
 		rtOuter._throwError(exitcode.SystemError(exitcode.InsufficientFunds_System))
 	}
@@ -465,14 +428,14 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 		rtOuter._toplevelSenderCallSeqNum,
 		rtOuter._internalCallSeqNum+1,
 		rtOuter._globalStatePending,
-		input.To(),
+		receiverAddr,
 		input.Value(),
 		rtOuter._gasRemaining,
 	)
 
 	invocOutput, exitCode, internalCallSeqNumFinal := _invokeMethodInternal(
 		rtInner,
-		toActorCode,
+		receiverCode,
 		input.Method(),
 		input.Params(),
 	)
@@ -497,12 +460,65 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 		rtOuter._globalStatePending = rtInner._globalStatePending
 	}
 
-	return MessageReceipt_Make(invocOutput, exitCode, gasUsed)
+	return vmr.MessageReceipt_Make(invocOutput, exitCode, gasUsed)
 }
 
-func (rtOuter *VMContext) _sendInternalOutputs(input InvocInput, errSpec ErrorHandlingSpec) (InvocOutput, exitcode.ExitCode) {
-	ret := rtOuter._sendInternal(input, errSpec)
-	return InvocOutput_Make(ret.ReturnValue()), ret.ExitCode()
+// Loads a receiving actor state from the state tree, resolving non-ID addresses through the InitActor state.
+// If it doesn't exist, and the message is a simple value send to a pubkey-style address,
+// creates the receiver as an account actor in the returned state.
+// Aborts otherwise.
+func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState, addr.Address) {
+	// Resolve the target address via the InitActor, and attempt to load state.
+	initSubState := rt._loadInitActorState()
+	targetIdAddr := initSubState.ResolveAddress(targetRaw)
+	act, found := rt._globalStatePending.GetActor(targetIdAddr)
+	if found {
+		return act, targetIdAddr
+	}
+
+	if !targetRaw.IsKeyType() {
+		// Don't implicitly create an account actor for an address without an associated key.
+		rt._throwError(exitcode.SystemError(exitcode.ActorNotFound))
+	}
+
+	// Allocate an ID address from the init actor and map the pubkey To address to it.
+	newIdAddr := initSubState.MapAddressToNewID(targetRaw)
+	rt._saveInitActorState(initSubState) // TODO: refactor so that this charges gas in _updateActorSubstateInternal.
+
+	// Create new account actor (charges gas).
+	rt._createActor(actor.CodeID(actor.CodeID_Make_Builtin(actor.BuiltinActorID_Account)), newIdAddr)
+
+	// Initialize account actor substate with it's pubkey address.
+	substate := &sysactors.AccountActorState_I{
+		Address_: targetRaw,
+	}
+	rt._saveAccountActorState(newIdAddr, substate) // TODO: refactor to charge gas implicitly.
+	act, _ = rt._globalStatePending.GetActor(newIdAddr)
+	return act, newIdAddr
+}
+
+func (rt *VMContext) _loadInitActorState() sysactors.InitActorState {
+	initState, ok := rt._globalStatePending.GetActor(addr.InitActorAddr)
+	util.Assert(ok)
+	initStateBytes := rt.IpldGet(ipld.CID(initState.State()))
+	initSubState, err := sysactors.Deserialize_InitActorState(util.Serialization(initStateBytes.As_Bytes()))
+	if err != nil {
+		rt.AbortAPI("State deserialization error")
+	}
+	return initSubState
+}
+
+func (rt *VMContext) _saveInitActorState(state sysactors.InitActorState) {
+	rt._updateActorSubstateInternal(addr.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
+}
+
+func (rt *VMContext) _saveAccountActorState(address addr.Address, state sysactors.AccountActorState) {
+	rt._updateActorSubstateInternal(address, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
+}
+
+func (rt *VMContext) _sendInternalOutputs(input InvocInput, errSpec ErrorHandlingSpec) (InvocOutput, exitcode.ExitCode) {
+	ret := rt._sendInternal(input, errSpec)
+	return vmr.InvocOutput_Make(ret.ReturnValue()), ret.ExitCode()
 }
 
 func (rt *VMContext) SendPropagatingErrors(input InvocInput) InvocOutput {
@@ -532,13 +548,15 @@ func (rt *VMContext) Randomness(e block.ChainEpoch, offset uint64) util.Randomne
 }
 
 func (rt *VMContext) NewActorAddress() addr.Address {
-	seed := &ActorExecAddressSeed_I{
-		creator_:            rt._immediateCaller,
-		toplevelCallSeqNum_: rt._toplevelSenderCallSeqNum,
-		internalCallSeqNum_: rt._internalCallSeqNum,
-	}
-	hash := addr.ActorExecHash(Serialize_ActorExecAddressSeed(seed))
+	buf := new(bytes.Buffer)
+	_, err := buf.Write(addr.Serialize_Address(rt._immediateCaller))
+	util.Assert(err != nil)
+	err = binary.Write(buf, binary.BigEndian, rt._toplevelSenderCallSeqNum)
+	util.Assert(err != nil)
+	err = binary.Write(buf, binary.BigEndian, rt._internalCallSeqNum)
+	util.Assert(err != nil)
 
+	hash := addr.ActorExecHash(buf.Bytes())
 	return addr.Address_Make_ActorExec(addr.Address_NetworkID_Testnet, hash)
 }
 
@@ -553,7 +571,7 @@ func (rt *VMContext) IpldPut(x ipld.Object) ipld.CID {
 	panic("") // write to IPLD store
 }
 
-func (rt *VMContext) IpldGet(c ipld.CID) Runtime_IpldGet_FunRet {
+func (rt *VMContext) IpldGet(c ipld.CID) vmr.Runtime_IpldGet_FunRet {
 	IMPL_FINISH()
 	panic("") // get from IPLD store
 
@@ -579,13 +597,13 @@ func (rt *VMContext) AcquireState() ActorStateHandle {
 
 	state, ok := rt._globalStatePending.GetActor(rt._actorAddress)
 	util.Assert(ok)
-	return ActorStateHandle{
+	return &ActorStateHandle_I{
 		_initValue: state.State().Ref(),
 		_rt:        rt,
 	}
 }
 
-func (rt *VMContext) Compute(f ComputeFunctionID, args []Any) Any {
+func (rt *VMContext) Compute(f ComputeFunctionID, args []util.Any) Any {
 	def, found := _computeFunctionDefs[f]
 	if !found {
 		rt.AbortAPI("Function definition in rt.Compute() not found")
@@ -595,33 +613,27 @@ func (rt *VMContext) Compute(f ComputeFunctionID, args []Any) Any {
 	return def.Body(args)
 }
 
-func MessageReceipt_Make(output InvocOutput, exitCode exitcode.ExitCode, gasUsed msg.GasAmount) MessageReceipt {
-	return &MessageReceipt_I{
-		ExitCode_:    exitCode,
-		ReturnValue_: output.ReturnValue(),
-		GasUsed_:     gasUsed,
+func CallerPattern_MakeSingleton(x addr.Address) CallerPattern {
+	return vmr.CallerPattern{
+		Matches: func(y addr.Address) bool { return x == y },
 	}
 }
 
-func MessageReceipt_MakeSystemError(errCode exitcode.SystemErrorCode, gasUsed msg.GasAmount) MessageReceipt {
-	return MessageReceipt_Make(
-		InvocOutput_Make(nil),
-		exitcode.SystemError(errCode),
-		gasUsed,
-	)
-}
-
-func InvocInput_Make(to addr.Address, method actor.MethodNum, params actor.MethodParams, value actor.TokenAmount) InvocInput {
-	return &InvocInput_I{
-		To_:     to,
-		Method_: method,
-		Params_: params,
-		Value_:  value,
+func CallerPattern_MakeAcceptAny() CallerPattern {
+	return vmr.CallerPattern{
+		Matches: func(addr.Address) bool { return true },
 	}
 }
 
-func InvocOutput_Make(returnValue util.Bytes) InvocOutput {
-	return &InvocOutput_I{
-		ReturnValue_: returnValue,
+func CallerPattern_MakeAcceptAnyOfType(rt *VMContext, type_ actor.BuiltinActorID) CallerPattern {
+	return CallerPattern{
+		Matches: func(y addr.Address) bool {
+			codeID, ok := rt._getActorCodeID(y)
+			if !ok {
+				panic("Internal runtime error: actor not found")
+			}
+			Assert(codeID != nil)
+			return (codeID.IsBuiltin() && (codeID.As_Builtin() == type_))
+		},
 	}
 }
