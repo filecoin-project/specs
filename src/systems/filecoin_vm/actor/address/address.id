@@ -22,6 +22,9 @@ type Address struct {
     IsKeyType()      bool  // Whether the address is a public key address (SECP or BLS)
     Equals(Address)  bool
     Ref()            Address_Ptr
+
+    // Returns the ID from an ID address (or error otherwise).
+    GetID()          (ActorID, error)
 }
 
 // ActorID is a sequential number assigned to actors in a Filecoin Chain.
