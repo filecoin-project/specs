@@ -264,7 +264,7 @@ func (rt *VMContext) ValidateImmediateCallerMatches(
 func CallerPattern_MakeAcceptAnyOfTypes(rt *VMContext, types []actor.BuiltinActorID) CallerPattern {
 	return CallerPattern{
 		Matches: func(y addr.Address) bool {
-			codeID, ok := rt._getActorCodeID(y)
+			codeID, ok := rt.GetActorCodeID(y)
 			if !ok {
 				panic("Internal runtime error: actor not found")
 			}
@@ -363,7 +363,7 @@ func (rt *VMContext) _transferFunds(from addr.Address, to addr.Address, amount a
 	return nil
 }
 
-func (rt *VMContext) _getActorCodeID(actorAddr addr.Address) (ret actor.CodeID, ok bool) {
+func (rt *VMContext) GetActorCodeID(actorAddr addr.Address) (ret actor.CodeID, ok bool) {
 	IMPL_FINISH()
 	panic("")
 }
