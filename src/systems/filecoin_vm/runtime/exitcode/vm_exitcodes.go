@@ -2,9 +2,9 @@ package exitcode
 
 import (
 	"fmt"
-)
 
-import util "github.com/filecoin-project/specs/util"
+	util "github.com/filecoin-project/specs/util"
+)
 
 type SystemErrorCode int
 type UserDefinedErrorCode int
@@ -69,6 +69,7 @@ const (
 
 	InvalidSectorPacking
 	SealVerificationFailed
+	PoStVerificationFailed
 	DeadlineExceeded
 	InsufficientPledgeCollateral
 )

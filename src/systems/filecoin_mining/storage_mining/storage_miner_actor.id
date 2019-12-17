@@ -7,6 +7,7 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 
 type SectorExpirationQueueItem struct {
     SectorNumber  sector.SectorNumber
@@ -113,15 +114,19 @@ type StorageMinerActorState struct {
 }
 
 type StorageMinerActorCode struct {
+    GetOwnerKey(rt Runtime) filcrypto.VRFPublicKey
+    GetWorkerKey(rt Runtime) filcrypto.VRFPublicKey
     NotifyOfSurprisePoStChallenge(rt Runtime)
 
     PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo)  // TODO: check with Magik on sizes
     ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo)
 
-    ProcessVerifiedSurprisePoSt(rt Runtime)
+    ProcessSurprisePoSt(rt Runtime)
     ProcessVerifiedElectionPoSt(rt Runtime)
 
     _checkSurprisePoStSubmissionHappened(rt Runtime)
+    _verifySurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) bool
+    _verifySurprisePoStMeetsTargetReq(rt Runtime) bool
 
     DeclareFaults(rt Runtime, failingSet sector.CompactSectorSet)
     RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet)
@@ -159,12 +164,14 @@ type MinerInfo struct {
     // - Income and returned collateral are paid to this address.
     // - This address is also allowed to change the worker address for the miner.
     Owner                   address.Address
+    OwnerKey                filcrypto.VRFPublicKey
 
     // Worker account for this miner.
     // This will be the key that is used to sign blocks created by this miner, and
     // sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
     // other day to day miner activities.
     Worker                  address.Address
+    WorkerKey               filcrypto.VRFPublicKey
 
     // Libp2p identity that should be used when connecting to this miner.
     PeerId                  libp2p.PeerID
