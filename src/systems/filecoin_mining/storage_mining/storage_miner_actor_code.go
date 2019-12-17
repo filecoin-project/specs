@@ -18,7 +18,9 @@ import (
 )
 
 const (
-	Method_StorageMinerActor_ProcessVerifiedSurprisePoSt = actor.MethodPlaceholder + iota
+	Method_StorageMinerActor_GetOwnerKey = actor.MethodPlaceholder + iota
+	Method_StorageMinerActor_GetWorkerKey
+	Method_StorageMinerActor_ProcessVerifiedSurprisePoSt
 	Method_StorageMinerActor_ProcessVerifiedElectionPoSt
 	Method_StorageMinerActor_NotifyOfSurprisePoStChallenge
 )
@@ -61,6 +63,20 @@ func DeserializeState(x Bytes) State {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+func (a *StorageMinerActorCode_I) GetOwnerKey(rt Runtime) filcrypto.VRFPublicKey {
+	h, st := a.State(rt)
+	ret := st.Info().OwnerKey()
+	Release(rt, h, st)
+	return ret
+}
+
+func (a *StorageMinerActorCode_I) GetWorkerKey(rt Runtime) filcrypto.VRFPublicKey {
+	h, st := a.State(rt)
+	ret := st.Info().WorkerKey()
+	Release(rt, h, st)
+	return ret
+}
 
 func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
 	h, st := a.State(rt)
@@ -388,10 +404,6 @@ func (a *StorageMinerActorCode_I) ProcessSurprisePoSt(rt Runtime, onChainInfo se
 
 }
 
-func (a *StorageMinerActorCode_I) GetWorkerKeyByMinerAddress(minerAddr addr.Address) filcrypto.VRFPublicKey {
-	panic("TODO")
-}
-
 func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) bool {
 	h, st := a.State(rt)
 	info := st.Info()
@@ -429,8 +441,18 @@ func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime, onChainInfo se
 		Output_: onChainInfo.Randomness(),
 	}
 
-	// TODO: get worker key from minerAddr
-	var workerKey filcrypto.VRFPublicKey
+	// get worker key from minerAddr
+	out := rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:     rt.ImmediateCaller(),
+		Method_: Method_StorageMinerActor_GetWorkerKey,
+	})
+	temp, err := filcrypto.Deserialize_VRFPublicKey(out.ReturnValue())
+	// ignore below line, redeclaring because of a code generation issue :/
+	workerKey := filcrypto.VRFPublicKey(temp)
+
+	if err != nil {
+		rt.AbortArgMsg("miner has invalid owner address")
+	}
 
 	if !postRand.Verify(postRandomnessInput, workerKey) {
 		rt.AbortStateMsg("Invalid Surprise PoSt. Invalid randomness.")

@@ -231,8 +231,9 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 		Output_: onChainInfo.Randomness(),
 	}
 
-	// TODO: get worker key from minerAddr
-	var workerKey filcrypto.VRFPublicKey
+	// get worker key from minerAddr
+	workerKey := sma.Info().WorkerKey()
+
 	if !postRand.Verify(postRandomnessInput, workerKey) {
 		return false
 	}
