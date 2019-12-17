@@ -87,18 +87,18 @@ A message execution will fail if, in the immediately preceding state:
 - the `From` actor does not exist in the state (miner penalized),
 - the `From` actor is not an account actor (miner penalized),
 - the `CallSeqNum` of the message does not match the `CallSeqNum` of the `From` actor (miner penalized),
-- the `To` actor does not exist in state and the `To` address is not a pubkey-style address (miner penalized),
-- the `To` actor does not exist in state and the message has a non-zero `MethodNum` (miner penalized),
-- the `To` actor exists but does not have a method corresponding to the non-zero `MethodNum`,
-- deserialized `Params` is not an array of length matching the arity of the `To` actor's `MethodNum` method,
-- deserialized `Params` are not valid for the types specified by the `To` actor's `MethodNum` method,
 - the `From` actor does not have sufficient balance to cover the sum of the message `Value` plus the
 maximum gas cost, `GasLimit * GasPrice` (miner penalized),
-- the invoked method consumes more gas than the `GasLimit` allows, or
-- the invoked method exits with a non-zero code (via `Runtime.Abort()`).
+- the `To` actor does not exist in state and the `To` address is not a pubkey-style address,
+- the `To` actor exists (or is implicitly created as an account) but does not have a method corresponding to the non-zero `MethodNum`,
+- deserialized `Params` is not an array of length matching the arity of the `To` actor's `MethodNum` method,
+- deserialized `Params` are not valid for the types specified by the `To` actor's `MethodNum` method,
+- the invoked method consumes more gas than the `GasLimit` allows,
+- the invoked method exits with a non-zero code (via `Runtime.Abort()`), or
+- any inner message sent by the receiver fails for any of the above reasons.
 
 Note that if the `To` actor does not exist in state and the address is a valid `H(pubkey)` address, 
-it will be created as an account actor (only if the message has a MethodNum of zero).
+it will be created as an account actor.
 
 (You can see the _old_ VM interpreter [here](docs/systems/filecoin_vm/vm_interpreter_old) )
 

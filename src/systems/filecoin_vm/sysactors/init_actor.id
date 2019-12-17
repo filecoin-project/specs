@@ -4,11 +4,14 @@ import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
 type InitActorState struct {
     // responsible for create new actors
-    AddressMap       {addr.Address: addr.ActorID}
-    NextID           addr.ActorID
-    NetworkName      string
+    AddressMap   {addr.Address: addr.ActorID}
+    NextID       addr.ActorID
+    NetworkName  string
 
-    _assignNextID()  addr.ActorID
+    // Allocates a new ID and maps another address to it. Returns the ID-address.
+    MapAddressToNewID(address addr.Address) addr.Address
+    // Resolves an address to an ID-address, if possible. Returns the argument if un-mapped.
+    ResolveAddress(address addr.Address) addr.Address
 }
 
 type InitActorCode struct {
