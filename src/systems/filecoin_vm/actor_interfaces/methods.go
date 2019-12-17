@@ -24,3 +24,11 @@ const (
 	Method_StorageMarketActor_GetWeightForDealSet
 	Method_StorageMarketActor_TerminateDealsOnSlashProviderSector
 )
+
+const (
+	Method_StoragePowerActor_EpochTickEnd = actor.MethodPlaceholder + iota
+	Method_StoragePowerActor_ProcessPowerReport
+	Method_StoragePowerActor_ProcessFaultReport
+	Method_StoragePowerActor_SlashPledgeForStorageFault
+	Method_StoragePowerActor_EnsurePledgeCollateralSatisfied
+)

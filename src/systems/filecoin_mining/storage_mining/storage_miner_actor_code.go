@@ -225,7 +225,7 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime) {
 	// if the block winning miner is undercollateralized
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     addr.StoragePowerActorAddr,
-		Method_: spc.Method_StoragePowerActor_ProcessPowerReport,
+		Method_: ai.Method_StoragePowerActor_ProcessPowerReport,
 		Params_: processPowerReportParam,
 	})
 }
@@ -564,7 +564,7 @@ func (a *StorageMinerActorCode_I) _slashPledgeForStorageFault(rt Runtime, sector
 
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     addr.StoragePowerActorAddr,
-		Method_: spc.Method_StoragePowerActor_SlashPledgeForStorageFault,
+		Method_: ai.Method_StoragePowerActor_SlashPledgeForStorageFault,
 		Params_: slashPledgeParams,
 	})
 }
@@ -824,7 +824,7 @@ func (a *StorageMinerActorCode_I) _ensurePledgeCollateralSatisfied(rt Runtime) {
 	emptyParams := make([]util.Serialization, 0)
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     addr.StoragePowerActorAddr,
-		Method_: spc.Method_StoragePowerActor_EnsurePledgeCollateralSatisfied,
+		Method_: ai.Method_StoragePowerActor_EnsurePledgeCollateralSatisfied,
 		Params_: emptyParams,
 	})
 }
