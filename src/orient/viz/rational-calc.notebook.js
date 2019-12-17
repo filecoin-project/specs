@@ -30,7 +30,7 @@ viewof stackedChungParams = jsonToSliders(
     "chung_delta": {value: 0.06, min: 0.01, max: 0.08, step: 0.01},
     "expander_parents": {value: 16, min: 0, max: 128, step: 1},
     "rig_malicious_cost_per_year": {value: 2000, min: 0, max: 10000, step: 0.1},
-    "hash_gb_per_second": {value: 6 /*40000*/, min: 0, max: 100000000, step: 1},
+    "hash_gb_per_second": {value: 640000, min: 0, max: 100000000, step: 1},
   },
   {
     "graph_name": "Chung",
@@ -437,7 +437,7 @@ constants = Object.assign({}, base, constraints, filecoin, bench, rig)
 combos = {
   let start = [constants]
   let proofs = extend_query(start, [wrapperVariant, wrapper, stackedReplicas])
-  let graphs = extend_query(proofs, [/*stackedChungParams, */stackedSDRParams])
+  let graphs = extend_query(proofs, [stackedChungParams, stackedSDRParams])
   let windows = extend_query(graphs, window_size_mib_choices.map(d => ({window_size_mib: +d})))
   let query = extend_query(windows, [poseidon, pedersen])
 
