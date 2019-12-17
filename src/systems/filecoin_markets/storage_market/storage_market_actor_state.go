@@ -146,34 +146,18 @@ func (st *StorageMarketActorState_I) _addressEntryExists(address addr.Address) b
 	return foundEscrow
 }
 
-func (st *StorageMarketActorState_I) _getTotalEscrowBalance(a addr.Address) actor.TokenAmount {
+func (st *StorageMarketActorState_I) _getTotalEscrowBalanceInternal(a addr.Address) actor.TokenAmount {
 	Assert(st._addressEntryExists(a))
 	ret, ok := actor.BalanceTable_GetEntry(st.EscrowTable(), a)
 	Assert(ok)
 	return ret
 }
 
-func (st *StorageMarketActorState_I) _getLockedReqBalance(a addr.Address) actor.TokenAmount {
+func (st *StorageMarketActorState_I) _getLockedReqBalanceInternal(a addr.Address) actor.TokenAmount {
 	Assert(st._addressEntryExists(a))
 	ret, ok := actor.BalanceTable_GetEntry(st.LockedReqTable(), a)
 	Assert(ok)
 	return ret
-}
-
-func (st *StorageMarketActorState_I) _getAvailableBalance(a addr.Address) actor.TokenAmount {
-	Assert(st._addressEntryExists(a))
-	escrowBalance := st._getTotalEscrowBalance(a)
-	lockedReqBalance := st._getLockedReqBalance(a)
-	ret := escrowBalance - lockedReqBalance
-	Assert(ret >= 0)
-	return ret
-}
-
-func (st *StorageMarketActorState_I) _isBalanceAvailable(a addr.Address, amount actor.TokenAmount) bool {
-	Assert(amount >= 0)
-	Assert(st._addressEntryExists(a))
-	availableBalance := st._getAvailableBalance(a)
-	return (availableBalance >= amount)
 }
 
 func (st *StorageMarketActorState_I) _rtLockBalanceUntrusted(rt Runtime, addr addr.Address, amount actor.TokenAmount) {
@@ -185,8 +169,8 @@ func (st *StorageMarketActorState_I) _rtLockBalanceUntrusted(rt Runtime, addr ad
 		rt.AbortArgMsg("Address does not exist in escrow table")
 	}
 
-	prevLocked := st._getLockedReqBalance(addr)
-	if prevLocked+amount > st._getTotalEscrowBalance(addr) {
+	prevLocked := st._getLockedReqBalanceInternal(addr)
+	if prevLocked+amount > st._getTotalEscrowBalanceInternal(addr) {
 		rt.AbortFundsMsg("Insufficient funds available to lock.")
 	}
 

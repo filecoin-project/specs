@@ -63,6 +63,8 @@ type OnChainDeal struct {
     ID                DealID
     Deal              StorageDeal
     SectorStartEpoch  block.ChainEpoch  // -1 if not yet included in proven sector
+    LastUpdatedEpoch  block.ChainEpoch  // -1 if deal state never updated
+    SlashEpoch        block.ChainEpoch  // -1 if deal never slashed
 }
 
 type RetrievalDealProposal struct {}  // TODO
