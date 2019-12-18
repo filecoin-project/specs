@@ -9,6 +9,7 @@ type DealID UVarint
 type DealIDs struct {
     Items [DealID]
 }
+type DealWeight int  // should be BigInt
 
 type DealCID ipld.CID
 type ProposalCID ipld.CID
