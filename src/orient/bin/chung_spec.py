@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
+import os.path
 import sys
+import os
 import json
 import argparse
 import warnings
@@ -43,6 +45,14 @@ def find_max_beta(d,alpha):
             max_beta = b
     return max_beta
 
+
+def find_optimal_degree(alpha, target_beta,max_degree=1000):
+    degree = 1
+    while degree < max_degree:
+        r = chung_formula(degree,alpha,target_beta)
+        if r < 0:
+            return degree
+        degree += 1
 
 def parse():
     parser = argparse.ArgumentParser()
@@ -103,22 +113,39 @@ def inject_value(input_json,search_key,inject_key,inject_value):
                 extract(item)
     extract(input_json)
 
+path = "/orientd/build/orient/chung.log"
+def rmlog():
+    if os.path.isfile(path):
+        os.remove(path)
+
+def log(msg):
+    try:
+        with open(path,"a+") as f:
+            f.write(msg + "\n")
+    except Exception as e:
+        sys.stderr.write("[LOG] %s \n" % msg)
+
 def main():
+    rmlog()
     jinput, alphaT,betaT, degreeT = parse()
     alpha = extract_value(jinput,alphaT)
+    beta = extract_value(jinput,betaT)
     degree = extract_value(jinput,degreeT)
 
-    if alpha is None or degree is None:
-        # default behavior: return same thing if nothing to be done
-        # sys.stderr.write("alpha %s or degree %s" % (alpha,degree))
-        json.dump(jinput, sys.stdout)
-        sys.exit(0)
-
-    beta = find_max_beta(degree,alpha)
-    # sys.stderr.write("found alpha %f -> beta %f" % (alpha,beta))
-    rounded = round(beta,5)
-    inject_value(jinput,alphaT,betaT,rounded)
-    # json.dump(jinput,sys.stdout)
-    print("{\"chung_beta\": %s}" % rounded)
-
+    # find the optimal degree (lowest)
+    if alpha is not None and beta is not None:
+        degree = find_optimal_degree(alpha,beta)
+        # print("{\"chung_degree\": %s}" % degree)
+        inject_value(jinput,alphaT,degreeT,degree)
+        log("injecting degree %s" % degree)
+    elif alpha is not None and degree is not None:   
+        beta = find_max_beta(degree,alpha)
+        rounded = round(beta,5)
+        inject_value(jinput,alphaT,betaT,rounded)
+        # print("{\"chung_beta\": %s}" % rounded)
+        log("injecting beta %s" % rounded)
+    # default behavior: return same thing if nothing to be done
+    log("json is now: %s" % str(jinput))
+    json.dump(jinput, sys.stdout)
+    
 main()
