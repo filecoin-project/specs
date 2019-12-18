@@ -68,11 +68,13 @@ func (h *ActorStateHandle_I) Take() ActorSubstateCID {
 // interpreter once per actor method invocation, and responds to that method's Runtime
 // API calls.
 type VMContext struct {
-	_globalStateInit      st.StateTree
-	_globalStatePending   st.StateTree
-	_running              bool
-	_actorAddress         addr.Address
-	_actorStateAcquired   bool
+	_globalStateInit    st.StateTree
+	_globalStatePending st.StateTree
+	_running            bool
+	_actorAddress       addr.Address
+	_actorStateAcquired bool
+	// Tracks whether actor substate has changed in order to charge gas just once
+	// regardless of how many times it's written.
 	_actorSubstateUpdated bool
 
 	_immediateCaller addr.Address
@@ -441,7 +443,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 
 	initGasRemaining := rtOuter._gasRemaining
 
-	rtOuter._rtAllocGas(gascost.InvokeMethod(input.Value()))
+	rtOuter._rtAllocGas(gascost.InvokeMethod(input.Value(), input.Method()))
 
 	receiver, receiverAddr := rtOuter._resolveReceiver(input.To())
 	receiverCode, err := loadActorCode(receiver.CodeID())
@@ -515,7 +517,7 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 
 	// Allocate an ID address from the init actor and map the pubkey To address to it.
 	newIdAddr := initSubState.MapAddressToNewID(targetRaw)
-	rt._saveInitActorState(initSubState) // TODO: refactor so that this charges gas in _updateActorSubstateInternal.
+	rt._saveInitActorState(initSubState)
 
 	// Create new account actor (charges gas).
 	rt._createActor(actor.CodeID(actor.CodeID_Make_Builtin(actor.BuiltinActorID_Account)), newIdAddr)
@@ -524,7 +526,7 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 	substate := &sysactors.AccountActorState_I{
 		Address_: targetRaw,
 	}
-	rt._saveAccountActorState(newIdAddr, substate) // TODO: refactor to charge gas implicitly.
+	rt._saveAccountActorState(newIdAddr, substate)
 	act, _ = rt._globalStatePending.GetActor(newIdAddr)
 	return act, newIdAddr
 }
@@ -541,10 +543,16 @@ func (rt *VMContext) _loadInitActorState() sysactors.InitActorState {
 }
 
 func (rt *VMContext) _saveInitActorState(state sysactors.InitActorState) {
+	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
+	// than the receiver.
+	rt._rtAllocGas(gascost.UpdateActorSubstate)
 	rt._updateActorSubstateInternal(addr.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
 }
 
 func (rt *VMContext) _saveAccountActorState(address addr.Address, state sysactors.AccountActorState) {
+	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
+	// than the receiver.
+	rt._rtAllocGas(gascost.UpdateActorSubstate)
 	rt._updateActorSubstateInternal(address, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
 }
 
