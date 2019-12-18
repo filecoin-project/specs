@@ -111,7 +111,16 @@ def inject_value(input_json,search_key,inject_key,inject_value):
                 extract(item)
     extract(input_json)
 
+path = "/orientd/build/orient/chung.log"
+def rmlog():
+    os.remove(path)
+
+def log(msg):
+    with open(path,"a+") as f:
+        f.write(msg + "\n")
+
 def main():
+    rmlog()
     jinput, alphaT,betaT, degreeT = parse()
     alpha = extract_value(jinput,alphaT)
     beta = extract_value(jinput,betaT)
@@ -122,13 +131,15 @@ def main():
         degree = find_optimal_degree(alpha,beta)
         # print("{\"chung_degree\": %s}" % degree)
         inject_value(jinput,alphaT,degreeT,degree)
+        log("injecting degree %s" % degree)
     elif alpha is not None and degree is not None:   
         beta = find_max_beta(degree,alpha)
         rounded = round(beta,5)
         inject_value(jinput,alphaT,betaT,rounded)
         # print("{\"chung_beta\": %s}" % rounded)
+        log("injecting beta %s" % rounded)
     # default behavior: return same thing if nothing to be done
-
+    log("dumping to stdout")
     json.dump(jinput, sys.stdout)
     
 main()
