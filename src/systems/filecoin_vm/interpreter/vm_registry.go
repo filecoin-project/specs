@@ -15,6 +15,7 @@ var (
 
 // CodeIDs for system actors
 var (
+	SystemActorCodeID         = actor.CodeID_Make_Builtin(actor.BuiltinActorID_System)
 	InitActorCodeID           = actor.CodeID_Make_Builtin(actor.BuiltinActorID_Init)
 	CronActorCodeID           = actor.CodeID_Make_Builtin(actor.BuiltinActorID_Cron)
 	AccountActorCodeID        = actor.CodeID_Make_Builtin(actor.BuiltinActorID_Account)
