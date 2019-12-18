@@ -135,17 +135,17 @@ def main():
     # find the optimal degree (lowest)
     if alpha is not None and beta is not None:
         degree = find_optimal_degree(alpha,beta)
-        # print("{\"chung_degree\": %s}" % degree)
-        inject_value(jinput,alphaT,degreeT,degree)
+        print("{\"expander_parents\": %s}" % degree)
+        # inject_value(jinput,alphaT,degreeT,degree)
         log("injecting degree %s" % degree)
     elif alpha is not None and degree is not None:   
         beta = find_max_beta(degree,alpha)
         rounded = round(beta,5)
-        inject_value(jinput,alphaT,betaT,rounded)
-        # print("{\"chung_beta\": %s}" % rounded)
+        # inject_value(jinput,alphaT,betaT,rounded)
+        print("{\"chung_beta\": %s}" % rounded)
         log("injecting beta %s" % rounded)
     # default behavior: return same thing if nothing to be done
-    log("json is now: %s" % str(jinput))
-    json.dump(jinput, sys.stdout)
+    # log("json is now: %s" % str(jinput))
+    # json.dump(jinput, sys.stdout)
     
 main()
