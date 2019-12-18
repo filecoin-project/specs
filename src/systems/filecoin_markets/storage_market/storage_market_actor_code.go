@@ -207,7 +207,7 @@ func (a *StorageMarketActorCode_I) OnEpochTickEnd(rt Runtime) {
 	// Populate with the N oldest deals (e.g., by a priority queue on EndEpoch).
 	// N is a system parameter TBD, which may be a function of the global statistics
 	// (including the number of deals in each prior epoch).
-	IMPL_FINISH()
+	IMPL_TODO()
 
 	amountSlashedTotal := st._updatePendingDealStates(cleanupDealIDs, rt.CurrEpoch())
 
@@ -248,7 +248,7 @@ func (st *StorageMarketActorState_I) _rtUpdatePendingDealStatesForParty(rt Runti
 	//
 	// Note: as an optimization, implementations may cache efficient data structures to maintain
 	// this index.
-	IMPL_FINISH()
+	IMPL_TODO()
 
 	amountSlashedTotal = st._updatePendingDealStates(relevantDealIDs, epoch)
 	return
