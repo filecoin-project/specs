@@ -122,15 +122,13 @@ def main():
         degree = find_optimal_degree(alpha,beta)
         # print("{\"chung_degree\": %s}" % degree)
         inject_value(jinput,alphaT,degreeT,degree)
-        json.dump(jinput,sys.stdout)
     elif alpha is not None and degree is not None:   
         beta = find_max_beta(degree,alpha)
         rounded = round(beta,5)
         inject_value(jinput,alphaT,betaT,rounded)
-        json.dump(jinput,sys.stdout)
         # print("{\"chung_beta\": %s}" % rounded)
-    else:
-        # default behavior: return same thing if nothing to be done
-        json.dump(jinput, sys.stdout)
+    # default behavior: return same thing if nothing to be done
+
+    json.dump(jinput, sys.stdout)
     
 main()
