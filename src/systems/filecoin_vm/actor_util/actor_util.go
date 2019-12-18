@@ -1,6 +1,7 @@
 package actor_util
 
 import (
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
@@ -11,6 +12,7 @@ type TokenAmount = actor.TokenAmount
 
 type Serialization = util.Serialization
 
+var Assert = util.Assert
 var IMPL_FINISH = util.IMPL_FINISH
 
 // Interface for runtime/VMContext functionality (to avoid circular dependency in Go imports)
@@ -110,4 +112,49 @@ func BalanceTable_GetEntry(
 
 	IMPL_FINISH()
 	panic("")
+}
+
+func BalanceTableHAMT_Empty() BalanceTableHAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
+func IntToDealIDHAMT_Empty() IntToDealIDHAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
+func DealIDSetHAMT_Empty() DealIDSetHAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
+func DealIDQueue_Empty() DealIDQueue {
+	return &DealIDQueue_I{
+		Values_:     IntToDealIDHAMT_Empty(),
+		StartIndex_: 0,
+		EndIndex_:   0,
+	}
+}
+
+func (x *DealIDQueue_I) Enqueue(dealID deal.DealID) {
+	nextIndex := x.EndIndex()
+	x.Values()[nextIndex] = dealID
+	x.EndIndex_ = nextIndex + 1
+}
+
+func (x *DealIDQueue_I) Dequeue() (dealID deal.DealID, ok bool) {
+	Assert(x.StartIndex() <= x.EndIndex())
+
+	if x.StartIndex() == x.EndIndex() {
+		dealID = deal.DealID(-1)
+		ok = false
+		return
+	} else {
+		dealID = x.Values()[x.StartIndex()]
+		delete(x.Values(), x.StartIndex())
+		x.StartIndex_ += 1
+		ok = true
+		return
+	}
 }

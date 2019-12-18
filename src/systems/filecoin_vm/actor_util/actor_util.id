@@ -1,4 +1,17 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
 type BalanceTableHAMT {addr.Address: actor.TokenAmount}
+
+type DealIDSetHAMT {deal.DealID: bool}
+type IntToDealIDHAMT {Int: deal.DealID}
+
+type DealIDQueue struct {
+    Values      IntToDealIDHAMT
+    StartIndex  Int
+    EndIndex    Int
+
+    Enqueue(dealID deal.DealID)
+    Dequeue() (dealID deal.DealID, ok bool)
+}

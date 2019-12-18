@@ -7,18 +7,27 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type DealsAMT {deal.DealID: deal.OnChainDeal}
 
+type CachedDealIDsByPartyHAMT {addr.Address: actor_util.DealIDSetHAMT}
+type CachedExpirationsPendingHAMT {block.ChainEpoch: DealIDQueue}
+
 type StorageMarketActorState struct {
-    Deals           DealsAMT
+    Deals                           DealsAMT
 
     // Total amount held in escrow, indexed by actor address (including both locked and unlocked amounts).
-    EscrowTable     actor_util.BalanceTableHAMT
+    EscrowTable                     actor_util.BalanceTableHAMT
 
     // Amount locked, indexed by actor address.
     // Note: the amounts in this table do not affect the overall amount in escrow:
     // only the _portion_ of the total escrow amount that is locked.
-    LockedReqTable  actor_util.BalanceTableHAMT
+    LockedReqTable                  actor_util.BalanceTableHAMT
 
-    NextID          deal.DealID
+    NextID                          deal.DealID
+
+    // Metadata cached for efficient iteration over deals.
+    CachedDealIDsByParty            CachedDealIDsByPartyHAMT
+    CachedExpirationsPending        CachedExpirationsPendingHAMT
+    CachedExpirationsNextProcEpoch  block.ChainEpoch
+    CurrEpochNumDealsPublished      int
 
     _rtAbortIfAddressEntryDoesNotExist(rt Runtime, entryAddr addr.Address)
     _rtUpdatePendingDealStatesForParty(rt Runtime, addr addr.Address) (amountSlashedTotal actor.TokenAmount)

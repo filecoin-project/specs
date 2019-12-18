@@ -9,6 +9,7 @@ import (
 )
 
 type BalanceTableHAMT = actor_util.BalanceTableHAMT
+type DealIDQueue = actor_util.DealIDQueue
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
@@ -44,6 +45,21 @@ func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st StorageMarketActorStat
 	h.UpdateRelease(newCID)
 }
 func (st *StorageMarketActorState_I) CID() ipld.CID {
+	IMPL_FINISH()
+	panic("")
+}
+
+func DealsAMT_Empty() DealsAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
+func CachedDealIDsByPartyHAMT_Empty() CachedDealIDsByPartyHAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
+func CachedExpirationsPendingHAMT_Empty() CachedExpirationsPendingHAMT {
 	IMPL_FINISH()
 	panic("")
 }

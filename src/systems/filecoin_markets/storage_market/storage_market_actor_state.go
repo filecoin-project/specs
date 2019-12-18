@@ -89,6 +89,13 @@ func (st *StorageMarketActorState_I) _updatePendingDealState(dealID deal.DealID,
 	return
 }
 
+func (st *StorageMarketActorState_I) _deleteDeal(dealID deal.DealID) {
+	_, dealP := st._getOnChainDealAssert(dealID)
+	delete(st.Deals(), dealID)
+	delete(st.CachedDealIDsByParty()[dealP.Provider()], dealID)
+	delete(st.CachedDealIDsByParty()[dealP.Client()], dealID)
+}
+
 // Note: only processes deal payments, not deal expiration (even if the deal has expired).
 func (st *StorageMarketActorState_I) _processDealPaymentEpochsElapsed(dealID deal.DealID, numEpochsElapsed block.ChainEpoch) {
 	deal, dealP := st._getOnChainDealAssert(dealID)
@@ -116,7 +123,7 @@ func (st *StorageMarketActorState_I) _processDealSlashed(dealID deal.DealID) (am
 	amountSlashed = dealP.ProviderCollateral()
 	st._slashBalance(dealP.Provider(), amountSlashed)
 
-	delete(st.Deals(), dealID)
+	st._deleteDeal(dealID)
 	return
 }
 
@@ -135,7 +142,7 @@ func (st *StorageMarketActorState_I) _processDealInitTimedOut(dealID deal.DealID
 	st._slashBalance(dealP.Provider(), amountSlashed)
 	st._unlockBalance(dealP.Provider(), amountRemaining)
 
-	delete(st.Deals(), dealID)
+	st._deleteDeal(dealID)
 	return
 }
 
@@ -148,7 +155,7 @@ func (st *StorageMarketActorState_I) _processDealExpired(dealID deal.DealID) {
 	st._unlockBalance(dealP.Provider(), dealP.ProviderCollateral())
 	st._unlockBalance(dealP.Client(), dealP.ClientCollateral())
 
-	delete(st.Deals(), dealID)
+	st._deleteDeal(dealID)
 }
 
 func (st *StorageMarketActorState_I) _generateStorageDealID(storageDeal deal.StorageDeal) deal.DealID {
