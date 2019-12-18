@@ -73,6 +73,9 @@ type VMContext struct {
 	_running            bool
 	_actorAddress       addr.Address
 	_actorStateAcquired bool
+	// Tracks whether actor substate has changed in order to charge gas just once
+	// regardless of how many times it's written.
+	_actorSubstateUpdated bool
 
 	_immediateCaller addr.Address
 	// Note: This is the actor in the From field of the initial on-chain message.
@@ -102,11 +105,12 @@ func VMContext_Make(
 	gasRemaining msg.GasAmount) *VMContext {
 
 	return &VMContext{
-		_globalStateInit:    globalState,
-		_globalStatePending: globalState,
-		_running:            false,
-		_actorAddress:       actorAddress,
-		_actorStateAcquired: false,
+		_globalStateInit:      globalState,
+		_globalStatePending:   globalState,
+		_running:              false,
+		_actorAddress:         actorAddress,
+		_actorStateAcquired:   false,
+		_actorSubstateUpdated: false,
 
 		_toplevelSender:           toplevelSender,
 		_toplevelBlockWinner:      toplevelBlockWinner,
@@ -190,8 +194,8 @@ func (rt *VMContext) _updateActorSubstateInternal(actorAddress addr.Address, new
 func (rt *VMContext) _updateReleaseActorSubstate(newStateCID ActorSubstateCID) {
 	rt._checkRunning()
 	rt._checkActorStateAcquired()
-	rt._rtAllocGas(gascost.UpdateActorSubstate)
 	rt._updateActorSubstateInternal(rt._actorAddress, newStateCID)
+	rt._actorSubstateUpdated = true
 	rt._actorStateAcquired = false
 }
 
@@ -419,6 +423,9 @@ func _invokeMethodInternal(
 	rt._running = true
 	ret, exitCode = _catchRuntimeErrors(func() InvocOutput {
 		methodOutput := actorCode.InvokeMethod(rt, method, params)
+		if rt._actorSubstateUpdated {
+			rt._rtAllocGas(gascost.UpdateActorSubstate)
+		}
 		rt._checkActorStateNotAcquired()
 		rt._checkNumValidateCalls(1)
 		return methodOutput
@@ -510,7 +517,7 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 
 	// Allocate an ID address from the init actor and map the pubkey To address to it.
 	newIdAddr := initSubState.MapAddressToNewID(targetRaw)
-	rt._saveInitActorState(initSubState) // TODO: refactor so that this charges gas in _updateActorSubstateInternal.
+	rt._saveInitActorState(initSubState)
 
 	// Create new account actor (charges gas).
 	rt._createActor(actor.CodeID(actor.CodeID_Make_Builtin(actor.BuiltinActorID_Account)), newIdAddr)
@@ -519,7 +526,7 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 	substate := &sysactors.AccountActorState_I{
 		Address_: targetRaw,
 	}
-	rt._saveAccountActorState(newIdAddr, substate) // TODO: refactor to charge gas implicitly.
+	rt._saveAccountActorState(newIdAddr, substate)
 	act, _ = rt._globalStatePending.GetActor(newIdAddr)
 	return act, newIdAddr
 }
@@ -536,11 +543,15 @@ func (rt *VMContext) _loadInitActorState() sysactors.InitActorState {
 }
 
 func (rt *VMContext) _saveInitActorState(state sysactors.InitActorState) {
+	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
+	// than the receiver.
 	rt._rtAllocGas(gascost.UpdateActorSubstate)
 	rt._updateActorSubstateInternal(addr.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
 }
 
 func (rt *VMContext) _saveAccountActorState(address addr.Address, state sysactors.AccountActorState) {
+	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
+	// than the receiver.
 	rt._rtAllocGas(gascost.UpdateActorSubstate)
 	rt._updateActorSubstateInternal(address, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
 }
