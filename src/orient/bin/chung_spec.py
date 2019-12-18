@@ -112,18 +112,21 @@ def inject_value(input_json,search_key,inject_key,inject_value):
             for item in obj:
                 extract(item)
     extract(input_json)
-
-path = "/orientd/build/orient/chung.log"
+localPath = "build/orient/chung.log"
+dockerPath = "/orientd/" + localPath
 def rmlog():
-    if os.path.isfile(path):
-        os.remove(path)
+    if os.path.isfile(dockerPath):
+        os.remove(dockerPath)
+    if os.path.isfile(localPath):
+        os.remove(localPath)
 
 def log(msg):
     try:
-        with open(path,"a+") as f:
+        with open(dockerPath,"a+") as f:
             f.write(msg + "\n")
-    except Exception as e:
-        sys.stderr.write("[LOG] %s \n" % msg)
+    except:
+        with open(localPath,"a+") as f:
+            f.write(msg + "\n")
 
 def main():
     rmlog()
@@ -137,13 +140,13 @@ def main():
         degree = find_optimal_degree(alpha,beta)
         print("{\"expander_parents\": %s}" % degree)
         # inject_value(jinput,alphaT,degreeT,degree)
-        log("injecting degree %s" % degree)
+        log("returning degree %s for alpha %s and beta %s" % (degree,alpha,beta))
     elif alpha is not None and degree is not None:   
         beta = find_max_beta(degree,alpha)
         rounded = round(beta,5)
         # inject_value(jinput,alphaT,betaT,rounded)
         print("{\"chung_beta\": %s}" % rounded)
-        log("injecting beta %s" % rounded)
+        log("injecting beta %s for alpha %s and degree %s" % (rounded,alpha,degree))
     # default behavior: return same thing if nothing to be done
     # log("json is now: %s" % str(jinput))
     # json.dump(jinput, sys.stdout)
