@@ -61,6 +61,11 @@ type CodeID union {
 }
 
 type BuiltinActorID enum {
+    // The SystemActor has no methods and no state.
+    // It exists only to be the implicit sender of privileged messages that arise from
+    // the VM interpreter itself (e.g., cron and block reward triggers and EPoSts).
+    System
+
     Init
     Cron
     Account
