@@ -42,6 +42,7 @@ md`##### SDR params`
 viewof stackedSDRParams = jsonToSliders(
   {
     "sdr_delta": {value: 0.01, min: 0.01, max: 0.08, step: 0.01},
+    "time_amax": { value: 2, min: 1, max: 10, step: 1 },
     "rig_malicious_cost_per_year": {value: 3, min: 0, max: 10000, step: 0.1},
     "hash_gb_per_second": {value: 5, min: 0, max: 10000, step: 1},
   },
@@ -49,9 +50,7 @@ viewof stackedSDRParams = jsonToSliders(
     "graph_name": "SDR",
     "!StackedSDRParameters": true,
     "!TimingAssumption": true,
-    "sdr_delta": 0.01,
     "windows": 1,
-    "time_amax": 2
   })
 
 
@@ -121,12 +120,12 @@ md`#### Benchmarks`
 
 bench = ({
   "column_leaf_hash_time": 1.7028e-5/2,
-  "kdf_time": 5.4e-7/2,
+  "kdf_time": 5.4e-7,
   "merkle_tree_datahash_time": 1.28e-8/2,
   "merkle_tree_hash_time": 1.7028e-5/2,
   "snark_constraint_time": 3.012e-5/2,
   "ticket_hash": 1.7028e-5/2,
-  "kdf_time_fastcpu": 0.0000000128/2
+  "kdf_time_fastcpu": 0.0000000128 // TODO check if this should be divided by 2
 })
 
 md`### SNARKs`
@@ -181,7 +180,7 @@ viewof utility_raw = codeView({
 
 viewof utility_cols = checkbox({
   title: "Vars to show in utility table",
-  options: Object.keys(vars).map(d => ({value: d, label: d})),
+  options: Object.keys(vars).sort().map(d => ({value: d, label: d})),
   value: qs('utility_cols') || ['decoding_time_parallel', 'proofs_per_block_kib', 'epost_time_parallel', 'porep_cost', 'porep_decoding_cost', 'epost_cost']
 })
 
