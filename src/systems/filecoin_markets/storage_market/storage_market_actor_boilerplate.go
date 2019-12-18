@@ -28,13 +28,12 @@ var IMPL_TODO = util.IMPL_TODO
 
 func (a *StorageMarketActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, StorageMarketActorState) {
 	h := rt.AcquireState()
-	stateCID := h.Take()
-	stateBytes := rt.IpldGet(ipld.CID(stateCID))
-	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
-		rt.AbortAPI("IPLD lookup error")
+	var state StorageMarketActorState_I
+	stateCID := ipld.CID(h.Take())
+	if !rt.IpldGet(stateCID, &state) {
+		rt.AbortAPI("state not found")
 	}
-	state := Deserialize_StorageMarketActorState_Assert(stateBytes.As_Bytes())
-	return h, state
+	return h, &state
 }
 func Release(rt Runtime, h vmr.ActorStateHandle, st StorageMarketActorState) {
 	checkCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))

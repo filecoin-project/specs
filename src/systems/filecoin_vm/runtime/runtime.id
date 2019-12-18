@@ -105,7 +105,9 @@ type Runtime interface {
         address  addr.Address
     )
 
-    IpldGet(c ipld.CID) union {Bytes, error}
+    // Retrieves and deserializes an object from the store into o. Returns whether successful.
+    IpldGet(c ipld.CID, o ipld.Object) bool
+    // Serializes and stores an object, returning its CID.
     IpldPut(x ipld.Object) ipld.CID
 }
 

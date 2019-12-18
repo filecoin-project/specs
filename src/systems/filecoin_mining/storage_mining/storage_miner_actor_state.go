@@ -217,6 +217,11 @@ func (st *StorageMinerActorState_I) _getSectorWeight(sectorNo sector.SectorNumbe
 	return sectorInfo.SectorWeight(), true
 }
 
+func (st *StorageMinerActorState_I) _getSectorPower(sectorNo sector.SectorNumber) (power block.StoragePower, ok bool) {
+	TODO()
+	panic("")
+}
+
 func (st *StorageMinerActorState_I) _getSectorDealIDs(sectorNo sector.SectorNumber) (dealIDs deal.DealIDs, ok bool) {
 	sectorInfo, found := st._getSectorOnChainInfo(sectorNo)
 	if !found {
