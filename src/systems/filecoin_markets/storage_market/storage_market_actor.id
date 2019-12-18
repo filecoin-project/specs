@@ -1,4 +1,5 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
@@ -10,12 +11,12 @@ type StorageMarketActorState struct {
     Deals           DealsAMT
 
     // Total amount held in escrow, indexed by actor address (including both locked and unlocked amounts).
-    EscrowTable     actor.BalanceTableHAMT
+    EscrowTable     actor_util.BalanceTableHAMT
 
     // Amount locked, indexed by actor address.
     // Note: the amounts in this table do not affect the overall amount in escrow:
     // only the _portion_ of the total escrow amount that is locked.
-    LockedReqTable  actor.BalanceTableHAMT
+    LockedReqTable  actor_util.BalanceTableHAMT
 
     NextID          deal.DealID
 

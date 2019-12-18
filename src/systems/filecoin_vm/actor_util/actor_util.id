@@ -1,0 +1,4 @@
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+
+type BalanceTableHAMT {addr.Address: actor.TokenAmount}

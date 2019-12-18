@@ -8,6 +8,7 @@ import (
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -62,7 +63,7 @@ func (st *StoragePowerActorState_I) _slashPledgeCollateral(
 		panic("_slashPledgeCollateral: error: negative amount specified")
 	}
 
-	newTable, amountSlashed, ok := actor.BalanceTable_WithSubtractPreservingNonnegative(
+	newTable, amountSlashed, ok := actor_util.BalanceTable_WithSubtractPreservingNonnegative(
 		st.EscrowTable(), minerAddr, slashAmountRequested)
 	// TODO: extra handling of not having enough pledge collateral to be slashed?
 	if !ok {

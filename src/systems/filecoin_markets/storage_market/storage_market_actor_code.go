@@ -7,6 +7,7 @@ import (
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
+	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -35,7 +36,7 @@ func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, entryAddr addr.Ad
 	amountSlashedTotal += st._rtUpdatePendingDealStatesForParty(rt, entryAddr)
 
 	minBalance := st._getLockedReqBalanceInternal(entryAddr)
-	newTable, amountExtracted, ok := actor.BalanceTable_WithExtractPartial(
+	newTable, amountExtracted, ok := actor_util.BalanceTable_WithExtractPartial(
 		st.EscrowTable(), entryAddr, amountRequested, minBalance)
 	Assert(ok)
 	st.Impl().EscrowTable_ = newTable
@@ -53,10 +54,10 @@ func (a *StorageMarketActorCode_I) AddBalance(rt Runtime, entryAddr addr.Address
 	st._rtAbortIfAddressEntryDoesNotExist(rt, entryAddr)
 
 	msgValue := rt.ValueReceived()
-	newTable, ok := actor.BalanceTable_WithAdd(st.EscrowTable(), entryAddr, msgValue)
+	newTable, ok := actor_util.BalanceTable_WithAdd(st.EscrowTable(), entryAddr, msgValue)
 	if !ok {
 		// Entry not found; create implicitly.
-		newTable, ok = actor.BalanceTable_WithNewAddressEntry(st.EscrowTable(), entryAddr, msgValue)
+		newTable, ok = actor_util.BalanceTable_WithNewAddressEntry(st.EscrowTable(), entryAddr, msgValue)
 		Assert(ok)
 	}
 	st.Impl().EscrowTable_ = newTable
@@ -221,7 +222,7 @@ func (a *StorageMarketActorCode_I) Constructor(rt Runtime) {
 
 	IMPL_FINISH() // Initialize these structures
 	var dealsAMTEmpty DealsAMT
-	var balanceTableEmpty actor.BalanceTableHAMT
+	var balanceTableEmpty actor_util.BalanceTableHAMT
 
 	st := &StorageMarketActorState_I{
 		Deals_:          dealsAMTEmpty,

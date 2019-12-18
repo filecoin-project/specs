@@ -3,12 +3,15 @@ package storage_market
 import (
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
 
+type BalanceTableHAMT = actor_util.BalanceTableHAMT
+
 ////////////////////////////////////////////////////////////////////////////////
-// Boilerplate: StorageMarketActor
+// Boilerplate
 //
 // This boilerplate should be essentially identical for all actors, and
 // conceptually belongs in the runtime/VM. It is only duplicated here as a

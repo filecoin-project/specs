@@ -9,6 +9,7 @@ import (
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
+	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -23,7 +24,7 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime, minerAddr addr.Address)
 	msgValue := rt.ValueReceived()
 
 	h, st := a.State(rt)
-	newTable, ok := actor.BalanceTable_WithAdd(st.EscrowTable(), minerAddr, msgValue)
+	newTable, ok := actor_util.BalanceTable_WithAdd(st.EscrowTable(), minerAddr, msgValue)
 	if !ok {
 		rt.AbortStateMsg("spa.AddBalance: Escrow operation failed.")
 	}
@@ -49,7 +50,7 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Add
 	}
 
 	minBalance := st._getPledgeCollateralReq(minerPowerTotal)
-	newTable, amountExtracted, ok := actor.BalanceTable_WithExtractPartial(
+	newTable, amountExtracted, ok := actor_util.BalanceTable_WithExtractPartial(
 		st.EscrowTable(), minerAddr, amountRequested, minBalance)
 	if !ok {
 		rt.AbortStateMsg("spa.WithdrawBalance: Escrow operation failed.")
@@ -81,7 +82,7 @@ func (a *StoragePowerActorCode_I) CreateStorageMiner(
 	}
 
 	h, st := a.State(rt)
-	newTable, ok := actor.BalanceTable_WithNewAddressEntry(st.EscrowTable(), newMinerAddr, msgValue)
+	newTable, ok := actor_util.BalanceTable_WithNewAddressEntry(st.EscrowTable(), newMinerAddr, msgValue)
 	if !ok {
 		panic("Internal error: newMinerAddr (result of InitActor::Exec) already exists in escrow table")
 	}
@@ -109,7 +110,7 @@ func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime) {
 		rt.AbortStateMsg("spa.RemoveStorageMiner: power still remains.")
 	}
 
-	minerPledgeBalance, ok := actor.BalanceTable_GetEntry(st.EscrowTable(), minerAddr)
+	minerPledgeBalance, ok := actor_util.BalanceTable_GetEntry(st.EscrowTable(), minerAddr)
 	if !ok {
 		rt.AbortArgMsg("spa.RemoveStorageMiner: miner entry not found in escrow.")
 	}
@@ -120,7 +121,7 @@ func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime) {
 
 	delete(st.PowerTable(), minerAddr)
 
-	newTable, ok := actor.BalanceTable_WithDeletedAddressEntry(st.EscrowTable(), minerAddr)
+	newTable, ok := actor_util.BalanceTable_WithDeletedAddressEntry(st.EscrowTable(), minerAddr)
 	if !ok {
 		panic("Internal error: miner entry in escrow table does not exist")
 	}
@@ -140,7 +141,7 @@ func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) {
 	pledgeReq := st._getPledgeCollateralReqForMiner(minerAddr)
 	UpdateRelease(rt, h, st)
 
-	balanceSufficient, ok := actor.BalanceTable_IsEntrySufficient(st.EscrowTable(), minerAddr, pledgeReq)
+	balanceSufficient, ok := actor_util.BalanceTable_IsEntrySufficient(st.EscrowTable(), minerAddr, pledgeReq)
 	Assert(ok)
 	if !balanceSufficient {
 		rt.AbortFundsMsg("exitcode.InsufficientPledgeCollateral")

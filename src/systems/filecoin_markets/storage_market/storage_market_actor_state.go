@@ -5,6 +5,7 @@ import (
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -161,8 +162,8 @@ func (st *StorageMarketActorState_I) _generateStorageDealID(storageDeal deal.Sto
 ////////////////////////////////////////////////////////////////////////////////
 
 func (st *StorageMarketActorState_I) _addressEntryExists(address addr.Address) bool {
-	_, foundEscrow := actor.BalanceTable_GetEntry(st.EscrowTable(), address)
-	_, foundLocked := actor.BalanceTable_GetEntry(st.LockedReqTable(), address)
+	_, foundEscrow := actor_util.BalanceTable_GetEntry(st.EscrowTable(), address)
+	_, foundLocked := actor_util.BalanceTable_GetEntry(st.LockedReqTable(), address)
 	// Check that the tables are consistent (i.e. the address is found in one
 	// if and only if it is found in the other).
 	Assert(foundEscrow == foundLocked)
@@ -171,14 +172,14 @@ func (st *StorageMarketActorState_I) _addressEntryExists(address addr.Address) b
 
 func (st *StorageMarketActorState_I) _getTotalEscrowBalanceInternal(a addr.Address) actor.TokenAmount {
 	Assert(st._addressEntryExists(a))
-	ret, ok := actor.BalanceTable_GetEntry(st.EscrowTable(), a)
+	ret, ok := actor_util.BalanceTable_GetEntry(st.EscrowTable(), a)
 	Assert(ok)
 	return ret
 }
 
 func (st *StorageMarketActorState_I) _getLockedReqBalanceInternal(a addr.Address) actor.TokenAmount {
 	Assert(st._addressEntryExists(a))
-	ret, ok := actor.BalanceTable_GetEntry(st.LockedReqTable(), a)
+	ret, ok := actor_util.BalanceTable_GetEntry(st.LockedReqTable(), a)
 	Assert(ok)
 	return ret
 }
@@ -195,7 +196,7 @@ func (st *StorageMarketActorState_I) _lockBalanceMaybe(addr addr.Address, amount
 		return
 	}
 
-	newLockedReqTable, ok := actor.BalanceTable_WithAdd(st.LockedReqTable(), addr, amount)
+	newLockedReqTable, ok := actor_util.BalanceTable_WithAdd(st.LockedReqTable(), addr, amount)
 	Assert(ok)
 	st.Impl().LockedReqTable_ = newLockedReqTable
 
@@ -213,21 +214,21 @@ func (st *StorageMarketActorState_I) _unlockBalance(
 }
 
 func (st *StorageMarketActorState_I) _tableWithAddBalance(
-	table actor.BalanceTableHAMT, toAddr addr.Address, amountToAdd actor.TokenAmount) actor.BalanceTableHAMT {
+	table actor_util.BalanceTableHAMT, toAddr addr.Address, amountToAdd actor.TokenAmount) actor_util.BalanceTableHAMT {
 
 	Assert(amountToAdd >= 0)
 
-	newTable, ok := actor.BalanceTable_WithAdd(table, toAddr, amountToAdd)
+	newTable, ok := actor_util.BalanceTable_WithAdd(table, toAddr, amountToAdd)
 	Assert(ok)
 	return newTable
 }
 
 func (st *StorageMarketActorState_I) _tableWithDeductBalanceExact(
-	table actor.BalanceTableHAMT, fromAddr addr.Address, amountRequested actor.TokenAmount) actor.BalanceTableHAMT {
+	table actor_util.BalanceTableHAMT, fromAddr addr.Address, amountRequested actor.TokenAmount) actor_util.BalanceTableHAMT {
 
 	Assert(amountRequested >= 0)
 
-	newTable, amountDeducted, ok := actor.BalanceTable_WithSubtractPreservingNonnegative(
+	newTable, amountDeducted, ok := actor_util.BalanceTable_WithSubtractPreservingNonnegative(
 		table, fromAddr, amountRequested)
 	Assert(ok)
 	Assert(amountDeducted == amountRequested)
