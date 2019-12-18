@@ -88,7 +88,6 @@ viewof filecoin = jsonToSliders({
   "spacegap": {value: 0.2, min: 0.01, max: 0.2, step: 0.01},
   "proofs_block_fraction": {value: 0.3, min: 0.01, max: 1, step: 0.01},
   "epost_challenged_sectors_fraction": {value: 0.04, min: 0.01, max: 1, step: 0.01},
-  "attack_cost_ratio": {value: 0.5, min: 0.01, max: 1, step: 0.01}
 }, {
   node_size: 32
 })
@@ -733,7 +732,14 @@ md`### Utils`
 _f = (d) => typeof d == 'number' || !Number.isNaN(+d) ? d3.format('0.6~f')(d) : d
 
 jsonToSliders = (obj, assigned) => {
-  const inputs = Object.keys(obj).map(d => `<div><input type=range name=${d} min=${obj[d].min} max=${obj[d].max} step=${obj[d].step} value=${obj[d].value}> <i>${d}</i></div>`)
+  const inputs = Object.keys(obj).map(d => `
+<div style="padding-bottom: 10px; padding-top: 10px;">
+  <div style="font: 700 0.9rem sans-serif;">${d}</div>
+  <div class="input">
+    <input type=range name=${d} min=${obj[d].min} max=${obj[d].max} step=${obj[d].step} value=${obj[d].value}>
+  </div>
+<div style="font-size: 0.85rem; font-style: italic;">${vars && vars[d] && vars[d].description ? vars[d].description : ''}</div>
+</div>`)
   const form = formToObject(html`
 <form>
   ${inputs.join('\n')}
@@ -757,7 +763,7 @@ function formToObject (form) {
 
   Array.from(form.querySelectorAll('input')).forEach(el => {
     el.oninput = (e) => {
-      form[`output_${el.name}`].value = el.value
+      form[`output_${el.name}`].value = `${el.value} ${vars[el.name].type || ''}`
       e.stopPropagation()
     }
   })
@@ -771,7 +777,9 @@ function formToObject (form) {
         return map;
       }, {});
 
-    Object.keys(value).forEach(k => { form[`output_${k}`].value = form[k].value })
+    Object.keys(value).forEach(k => {
+      form[`output_${k}`].value = `${form[k].value} ${vars && vars[k] ? vars[k].type || '' : ''}`
+    })
 
     e.stopPropagation()
   }
@@ -785,7 +793,9 @@ function formToObject (form) {
         return map;
       }, {});
 
-    Object.keys(form.value).forEach(k => { form[`output_${k}`].value = form[k].value })
+    Object.keys(form.value).forEach(k => {
+      form[`output_${k}`].value = `${form[k].value} ${vars && vars[k] ? vars[k].type || '' : ''}`
+    })
 
     form.dispatchEvent(new CustomEvent('input'));
   };

@@ -113,7 +113,7 @@ def inject_value(input_json,search_key,inject_key,inject_value):
                 extract(item)
     extract(input_json)
 
-path = "/orientd/build/orient/chung.log"
+path = "./chung.log"
 def rmlog():
     if os.path.isfile(path):
         os.remove(path)
@@ -144,6 +144,8 @@ def main():
         # inject_value(jinput,alphaT,betaT,rounded)
         print("{\"chung_beta\": %s}" % rounded)
         log("injecting beta %s" % rounded)
+        log("injecting alpha %s" % alpha)
+        log("injecting degree %s" % degree)
     # default behavior: return same thing if nothing to be done
     # log("json is now: %s" % str(jinput))
     # json.dump(jinput, sys.stdout)
