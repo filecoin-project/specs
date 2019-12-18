@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os.path
 import sys
 import os
 import json
@@ -114,11 +115,15 @@ def inject_value(input_json,search_key,inject_key,inject_value):
 
 path = "/orientd/build/orient/chung.log"
 def rmlog():
-    os.remove(path)
+    if os.path.isfile(path):
+        os.remove(path)
 
 def log(msg):
-    with open(path,"a+") as f:
-        f.write(msg + "\n")
+    try:
+        with open(path,"a+") as f:
+            f.write(msg + "\n")
+    except Exception as e:
+        sys.stderr.write("[LOG] %s \n" % msg)
 
 def main():
     rmlog()
