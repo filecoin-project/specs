@@ -20,7 +20,7 @@ type Runtime = vmr.Runtime
 type Bytes = util.Bytes
 
 var IMPL_FINISH = util.IMPL_FINISH
-var TODO = util.TODO
+var IMPL_TODO = util.IMPL_TODO
 
 func (a *StorageMarketActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, StorageMarketActorState) {
 	h := rt.AcquireState()
