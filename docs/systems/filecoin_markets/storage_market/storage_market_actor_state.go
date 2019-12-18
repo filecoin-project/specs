@@ -2,276 +2,163 @@ package storage_market
 
 import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	util "github.com/filecoin-project/specs/util"
 )
 
 var Assert = util.Assert
 
-func (st *StorageMarketActorState_I) _generateStorageDealID(rt Runtime, storageDeal deal.StorageDeal) deal.DealID {
-	TODO()
-	var dealID deal.DealID
-	return dealID
+////////////////////////////////////////////////////////////////////////////////
+// Deal state operations
+////////////////////////////////////////////////////////////////////////////////
+
+func (st *StorageMarketActorState_I) _updatePendingDealStates(dealIDs []deal.DealID, epoch block.ChainEpoch) (
+	amountSlashedTotal actor.TokenAmount) {
+
+	IMPL_FINISH() // BigInt arithmetic
+	amountSlashedTotal = 0
+
+	for _, dealID := range dealIDs {
+		amountSlashedCurr := st._updatePendingDealState(dealID, epoch)
+		amountSlashedTotal += amountSlashedCurr
+	}
+
+	return
 }
 
-func (st *StorageMarketActorState_I) _getTotalEscrowBalance(a addr.Address) actor.TokenAmount {
-	Assert(st._addressEntryExists(a))
-	ret, ok := actor.BalanceTable_GetEntry(st.EscrowTable(), a)
-	Assert(ok)
+func (st *StorageMarketActorState_I) _updatePendingDealState(dealID deal.DealID, epoch block.ChainEpoch) (
+	amountSlashed actor.TokenAmount) {
+
+	IMPL_FINISH() // BigInt arithmetic
+	amountSlashed = 0
+
+	deal, dealP := st._getOnChainDealAssert(dealID)
+
+	everUpdated := (deal.LastUpdatedEpoch() != block.ChainEpoch_None)
+	everSlashed := (deal.SlashEpoch() != block.ChainEpoch_None)
+
+	Assert(!everUpdated || (deal.LastUpdatedEpoch() <= epoch))
+	if deal.LastUpdatedEpoch() == epoch {
+		return
+	}
+
+	if deal.SectorStartEpoch() == block.ChainEpoch_None {
+		// Not yet appeared in proven sector; check for timeout.
+		if dealP.StartEpoch() >= epoch {
+			st._processDealInitTimedOut(dealID)
+		}
+		return
+	}
+
+	Assert(dealP.StartEpoch() <= epoch)
+
+	dealEnd := dealP.EndEpoch()
+	if everSlashed {
+		Assert(deal.SlashEpoch() <= dealEnd)
+		dealEnd = deal.SlashEpoch()
+	}
+
+	elapsedStart := dealP.StartEpoch()
+	if everUpdated && deal.LastUpdatedEpoch() > elapsedStart {
+		elapsedStart = deal.LastUpdatedEpoch()
+	}
+
+	elapsedEnd := dealEnd
+	if epoch < elapsedEnd {
+		elapsedEnd = epoch
+	}
+
+	numEpochsElapsed := elapsedEnd - elapsedStart
+	st._processDealPaymentEpochsElapsed(dealID, numEpochsElapsed)
+
+	if everSlashed {
+		amountSlashed = st._processDealSlashed(dealID)
+		return
+	}
+
+	if epoch >= dealP.EndEpoch() {
+		st._processDealExpired(dealID)
+		return
+	}
+
+	st.Deals()[dealID].Impl().LastUpdatedEpoch_ = epoch
+	return
+}
+
+// Note: only processes deal payments, not deal expiration (even if the deal has expired).
+func (st *StorageMarketActorState_I) _processDealPaymentEpochsElapsed(dealID deal.DealID, numEpochsElapsed block.ChainEpoch) {
+	deal, dealP := st._getOnChainDealAssert(dealID)
+	Assert(deal.SectorStartEpoch() != block.ChainEpoch_None)
+
+	// Process deal payment for the elapsed epochs.
+	IMPL_FINISH() // BigInt arithmetic
+	totalPayment := int(numEpochsElapsed) * int(dealP.StoragePricePerEpoch())
+	st._transferBalance(dealP.Client(), dealP.Provider(), actor.TokenAmount(totalPayment))
+}
+
+func (st *StorageMarketActorState_I) _processDealSlashed(dealID deal.DealID) (amountSlashed actor.TokenAmount) {
+	deal, dealP := st._getOnChainDealAssert(dealID)
+	Assert(deal.SectorStartEpoch() != block.ChainEpoch_None)
+
+	slashEpoch := deal.SlashEpoch()
+	Assert(slashEpoch != block.ChainEpoch_None)
+
+	// unlock client collateral and locked storage fee
+	clientCollateral := dealP.ClientCollateral()
+	paymentRemaining := _dealGetPaymentRemaining(deal, slashEpoch)
+	st._unlockBalance(dealP.Client(), clientCollateral+paymentRemaining)
+
+	// slash provider collateral
+	amountSlashed = dealP.ProviderCollateral()
+	st._slashBalance(dealP.Provider(), amountSlashed)
+
+	delete(st.Deals(), dealID)
+	return
+}
+
+// Deal start deadline elapsed without appearing in a proven sector.
+// Delete deal, slash a portion of provider's collateral, and unlock remaining collaterals
+// for both provider and client.
+func (st *StorageMarketActorState_I) _processDealInitTimedOut(dealID deal.DealID) (amountSlashed actor.TokenAmount) {
+	deal, dealP := st._getOnChainDealAssert(dealID)
+	Assert(deal.SectorStartEpoch() == block.ChainEpoch_None)
+
+	st._unlockBalance(dealP.Client(), dealP.ClientBalanceRequirement())
+
+	amountSlashed = indices.StorageDeal_ProviderInitTimedOutSlashAmount(deal)
+	amountRemaining := dealP.ProviderBalanceRequirement() - amountSlashed
+
+	st._slashBalance(dealP.Provider(), amountSlashed)
+	st._unlockBalance(dealP.Provider(), amountRemaining)
+
+	delete(st.Deals(), dealID)
+	return
+}
+
+// Normal expiration. Delete deal and unlock collaterals for both miner and client.
+func (st *StorageMarketActorState_I) _processDealExpired(dealID deal.DealID) {
+	deal, dealP := st._getOnChainDealAssert(dealID)
+	Assert(deal.SectorStartEpoch() != block.ChainEpoch_None)
+
+	// Note: payment has already been completed at this point (_rtProcessDealPaymentEpochsElapsed)
+	st._unlockBalance(dealP.Provider(), dealP.ProviderCollateral())
+	st._unlockBalance(dealP.Client(), dealP.ClientCollateral())
+
+	delete(st.Deals(), dealID)
+}
+
+func (st *StorageMarketActorState_I) _generateStorageDealID(storageDeal deal.StorageDeal) deal.DealID {
+	ret := st.NextID()
+	st.NextID_ = st.NextID_ + deal.DealID(1)
 	return ret
 }
 
-func (st *StorageMarketActorState_I) _getLockedReqBalance(a addr.Address) actor.TokenAmount {
-	Assert(st._addressEntryExists(a))
-	ret, ok := actor.BalanceTable_GetEntry(st.LockedReqTable(), a)
-	Assert(ok)
-	return ret
-}
-
-func (st *StorageMarketActorState_I) _getAvailableBalance(a addr.Address) actor.TokenAmount {
-	Assert(st._addressEntryExists(a))
-	escrowBalance := st._getTotalEscrowBalance(a)
-	lockedReqBalance := st._getLockedReqBalance(a)
-	ret := escrowBalance - lockedReqBalance
-	Assert(ret >= 0)
-	return ret
-}
-
-func (st *StorageMarketActorState_I) _isBalanceAvailable(a addr.Address, amount actor.TokenAmount) bool {
-	Assert(amount >= 0)
-	Assert(st._addressEntryExists(a))
-	availableBalance := st._getAvailableBalance(a)
-	return (availableBalance >= amount)
-}
-
-func (st *StorageMarketActorState_I) _assertValidClientSignature(rt Runtime, dealP deal.StorageDealProposal) {
-	// TODO: verify if we need to check provider signature
-	// or it is implicit in the message
-
-	// Optimization: make this a batch verification
-	panic("TODO")
-}
-
-func (st *StorageMarketActorState_I) _assertDealStartAfterCurrEpoch(rt Runtime, p deal.StorageDealProposal) {
-
-	currEpoch := rt.CurrEpoch()
-
-	// deal has started before or in current epoch
-	if p.StartEpoch() <= currEpoch {
-		rt.AbortStateMsg("sma._assertDealStartAfterCurrEpoch: deal started before or in CurrEpoch.")
-	}
-
-}
-
-func (st *StorageMarketActorState_I) _assertDealNotYetExpired(rt Runtime, p deal.StorageDealProposal) {
-	currEpoch := rt.CurrEpoch()
-
-	if p.EndEpoch() <= currEpoch {
-		rt.AbortStateMsg("st._assertDealNotYetExpired: deal has expired.")
-	}
-}
-
-func (st *StorageMarketActorState_I) _assertValidDealTimingAtPublish(rt Runtime, p deal.StorageDealProposal) {
-
-	// TODO: verify deal did not expire when it is signed
-
-	st._assertDealStartAfterCurrEpoch(rt, p)
-
-	// deal ends before it starts
-	if p.EndEpoch() <= p.StartEpoch() {
-		rt.AbortStateMsg("sma._assertValidDealTimingAtPublish: deal ends before it starts.")
-	}
-
-	// duration validation
-	if p.Duration() != p.EndEpoch()-p.StartEpoch() {
-		rt.AbortStateMsg("sma._assertValidDealTimingAtPublish: deal duration does not match end - start.")
-	}
-}
-
-func (st *StorageMarketActorState_I) _assertValidDealMinimum(rt Runtime, p deal.StorageDealProposal) {
-
-	// minimum deal duration
-	if p.Duration() < deal.MIN_DEAL_DURATION {
-		rt.AbortStateMsg("sma._assertValidDealMinimum: deal duration shorter than minimum.")
-	}
-
-	if p.StoragePricePerEpoch() <= deal.MIN_DEAL_PRICE {
-		rt.AbortStateMsg("sma._assertValidDealMinimum: storage price less than minimum.")
-	}
-
-	// verify StorageDealCollateral match requirements for MinimumStorageDealCollateral
-	if p.ProviderCollateralPerEpoch() < deal.MIN_PROVIDER_DEAL_COLLATERAL_PER_EPOCH ||
-		p.ClientCollateralPerEpoch() < deal.MIN_CLIENT_DEAL_COLLATERAL_PER_EPOCH {
-		rt.AbortStateMsg("sma._assertValidDealMinimum: deal collaterals less than minimum.")
-	}
-
-}
-
-func (st *StorageMarketActorState_I) _assertSufficientBalanceAvailForDeal(rt Runtime, p deal.StorageDealProposal) {
-
-	// verify client and provider has sufficient balance
-	isClientBalAvailable := st._isBalanceAvailable(p.Client(), p.ClientBalanceRequirement())
-	isProviderBalAvailable := st._isBalanceAvailable(p.Provider(), p.ProviderBalanceRequirement())
-
-	if !isClientBalAvailable || !isProviderBalAvailable {
-		rt.AbortFundsMsg("sma._validateNewStorageDeal: client or provider insufficient balance.")
-	}
-
-}
-
-func (st *StorageMarketActorState_I) _assertDealExpireAfterMaxProveCommitWindow(rt Runtime, dealP deal.StorageDealProposal) {
-
-	currEpoch := rt.CurrEpoch()
-	dealExpiration := dealP.EndEpoch()
-
-	if dealExpiration <= (currEpoch + sector.MAX_PROVE_COMMIT_SECTOR_EPOCH) {
-		rt.AbortStateMsg("sma._assertDealExpireAfterMaxProveCommitWindow: deal might expire before prove commit.")
-	}
-
-}
-
-// Call by PublishStorageDeals
-// This is the check before a StorageDeal appears onchain
-// It checks the following:
-//   - verify deal did not expire when it is signed
-//   - verify deal hits the chain before StartEpoch
-//   - verify client and provider address and signature are correct (TODO may not be needed)
-//   - verify StorageDealCollateral match requirements for MinimumStorageDealCollateral
-//   - verify client and provider has sufficient balance
-func (st *StorageMarketActorState_I) _validateNewStorageDeal(rt Runtime, d deal.StorageDeal) bool {
-
-	p := d.Proposal()
-
-	st._assertValidClientSignature(rt, p)
-	st._assertValidDealTimingAtPublish(rt, p)
-	st._assertValidDealMinimum(rt, p)
-	st._assertSufficientBalanceAvailForDeal(rt, p)
-
-	return true
-}
-
-func (st *StorageMarketActorState_I) _activateDeal(rt Runtime, deal deal.OnChainDeal) deal.OnChainDeal {
-
-	dealP := deal.Deal().Proposal()
-	deal.Impl().LastPaymentEpoch_ = dealP.StartEpoch()
-	st.Deals()[deal.ID()] = deal
-
-	return deal
-}
-
-func (st *StorageMarketActorState_I) _rtLockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount) {
-	Assert(amount >= 0)
-	Assert(st._addressEntryExists(addr))
-
-	prevLocked := st._getLockedReqBalance(addr)
-	if prevLocked+amount > st._getTotalEscrowBalance(addr) {
-		rt.AbortFundsMsg("sma._lockBalance: insufficient funds available to lock.")
-	}
-
-	newLockedReqTable, ok := actor.BalanceTable_WithAdd(st.LockedReqTable(), addr, amount)
-	Assert(ok)
-	st.Impl().LockedReqTable_ = newLockedReqTable
-}
-
-func (st *StorageMarketActorState_I) _rtUnlockBalance(
-	rt Runtime, addr addr.Address, unlockAmountRequested actor.TokenAmount) {
-
-	Assert(unlockAmountRequested >= 0)
-	Assert(st._addressEntryExists(addr))
-
-	st.Impl().LockedReqTable_ = st._rtTableWithDeductBalanceExact(rt, st.LockedReqTable(), addr, unlockAmountRequested)
-}
-
-func (st *StorageMarketActorState_I) _rtTableWithAddBalance(
-	rt Runtime, table actor.BalanceTableHAMT,
-	toAddr addr.Address, amountToAdd actor.TokenAmount) actor.BalanceTableHAMT {
-
-	Assert(amountToAdd >= 0)
-
-	newTable, ok := actor.BalanceTable_WithAdd(table, toAddr, amountToAdd)
-	Assert(ok)
-	return newTable
-}
-
-func (st *StorageMarketActorState_I) _rtTableWithDeductBalanceExact(
-	rt Runtime, table actor.BalanceTableHAMT,
-	fromAddr addr.Address, amountRequested actor.TokenAmount) actor.BalanceTableHAMT {
-
-	Assert(amountRequested >= 0)
-
-	newTable, amountDeducted, ok := actor.BalanceTable_WithSubtractPreservingNonnegative(
-		table, fromAddr, amountRequested)
-	Assert(ok)
-	if amountDeducted != amountRequested {
-		TODO() // Should be Assert(), as an invariant violation in SMA?
-		rt.AbortFundsMsg("sma._rtDeduct: attempt to deduct amount greater than present in table")
-	}
-	return newTable
-}
-
-// move funds from locked in client to available in provider
-func (st *StorageMarketActorState_I) _rtTransferBalance(
-	rt Runtime, fromAddr addr.Address, toAddr addr.Address, transferAmountRequested actor.TokenAmount) {
-
-	Assert(transferAmountRequested >= 0)
-	Assert(st._addressEntryExists(fromAddr))
-	Assert(st._addressEntryExists(toAddr))
-
-	st.Impl().EscrowTable_ = st._rtTableWithDeductBalanceExact(rt, st.EscrowTable(), fromAddr, transferAmountRequested)
-	st.Impl().LockedReqTable_ = st._rtTableWithDeductBalanceExact(rt, st.LockedReqTable(), fromAddr, transferAmountRequested)
-	st.Impl().EscrowTable_ = st._rtTableWithAddBalance(rt, st.EscrowTable(), toAddr, transferAmountRequested)
-}
-
-func (st *StorageMarketActorState_I) _rtLockFundsForStorageDeal(rt Runtime, deal deal.StorageDeal) {
-	p := deal.Proposal()
-
-	st._rtLockBalance(rt, p.Client(), p.ClientBalanceRequirement())
-	st._rtLockBalance(rt, p.Provider(), p.ProviderBalanceRequirement())
-}
-
-func (st *StorageMarketActorState_I) _getOnchainDeal(dealID deal.DealID) (deal deal.OnChainDeal, ok bool) {
-	deal, found := st.Deals()[dealID]
-	if !found {
-		return nil, false
-	}
-	return deal, true
-}
-
-func (st *StorageMarketActorState_I) _safeGetOnChainDeal(rt Runtime, dealID deal.DealID) deal.OnChainDeal {
-	deal, found := st._getOnchainDeal(dealID)
-	if !found {
-		rt.AbortStateMsg("sm._safeGetOnChainDeal: dealID not found in Deals.")
-	}
-
-	return deal
-}
-
-func (st *StorageMarketActorState_I) _assertPublishedDealState(rt Runtime, dealID deal.DealID) {
-
-	// if returns then it is on chain
-	deal := st._safeGetOnChainDeal(rt, dealID)
-
-	// must not be active
-	if deal.LastPaymentEpoch() != block.ChainEpoch(LastPaymentEpochNone) {
-		rt.AbortStateMsg("sma._assertPublishedDealState: deal is not in PublishedDealState.")
-	}
-
-}
-
-func (st *StorageMarketActorState_I) _assertActiveDealState(rt Runtime, dealID deal.DealID) {
-
-	deal := st._safeGetOnChainDeal(rt, dealID)
-
-	if deal.LastPaymentEpoch() == block.ChainEpoch(LastPaymentEpochNone) {
-		rt.AbortStateMsg("sma._assertActiveDealState: deal is not in ActiveDealState.")
-	}
-}
+////////////////////////////////////////////////////////////////////////////////
+// Balance table operations
+////////////////////////////////////////////////////////////////////////////////
 
 func (st *StorageMarketActorState_I) _addressEntryExists(address addr.Address) bool {
 	_, foundEscrow := actor.BalanceTable_GetEntry(st.EscrowTable(), address)
@@ -282,71 +169,139 @@ func (st *StorageMarketActorState_I) _addressEntryExists(address addr.Address) b
 	return foundEscrow
 }
 
-func (st *StorageMarketActorState_I) _getStorageFeeSinceLastPayment(rt Runtime, deal deal.OnChainDeal, newPaymentEpoch block.ChainEpoch) actor.TokenAmount {
-
-	duration := newPaymentEpoch - deal.LastPaymentEpoch()
-	dealP := deal.Deal().Proposal()
-	fee := actor.TokenAmount(0)
-
-	if duration > 0 {
-		unitPrice := dealP.StoragePricePerEpoch()
-		fee := actor.TokenAmount(uint64(duration) * uint64(unitPrice))
-
-		clientLockedBalance := st._getLockedReqBalance(dealP.Client())
-
-		if fee > clientLockedBalance {
-			rt.AbortFundsMsg("sma._getStorageFeeSinceLastPayment: fee cannot exceed client LockedBalance.")
-		}
-
-	} else {
-		rt.AbortStateMsg("sma._getStorageFeeSinceLastPayment: no new payment since last payment.")
-	}
-
-	return fee
-
+func (st *StorageMarketActorState_I) _getTotalEscrowBalanceInternal(a addr.Address) actor.TokenAmount {
+	Assert(st._addressEntryExists(a))
+	ret, ok := actor.BalanceTable_GetEntry(st.EscrowTable(), a)
+	Assert(ok)
+	return ret
 }
 
-func (st *StorageMarketActorState_I) _rtSlashDealCollateral(rt Runtime, dealP deal.StorageDealProposal) actor.TokenAmount {
-	Assert(st._addressEntryExists(dealP.Provider()))
+func (st *StorageMarketActorState_I) _getLockedReqBalanceInternal(a addr.Address) actor.TokenAmount {
+	Assert(st._addressEntryExists(a))
+	ret, ok := actor.BalanceTable_GetEntry(st.LockedReqTable(), a)
+	Assert(ok)
+	return ret
+}
 
-	slashAmount := dealP.ProviderBalanceRequirement()
+func (st *StorageMarketActorState_I) _lockBalanceMaybe(addr addr.Address, amount actor.TokenAmount) (
+	lockBalanceOK bool) {
+
+	Assert(amount >= 0)
+	Assert(st._addressEntryExists(addr))
+
+	prevLocked := st._getLockedReqBalanceInternal(addr)
+	if prevLocked+amount > st._getTotalEscrowBalanceInternal(addr) {
+		lockBalanceOK = false
+		return
+	}
+
+	newLockedReqTable, ok := actor.BalanceTable_WithAdd(st.LockedReqTable(), addr, amount)
+	Assert(ok)
+	st.Impl().LockedReqTable_ = newLockedReqTable
+
+	lockBalanceOK = true
+	return
+}
+
+func (st *StorageMarketActorState_I) _unlockBalance(
+	addr addr.Address, unlockAmountRequested actor.TokenAmount) {
+
+	Assert(unlockAmountRequested >= 0)
+	Assert(st._addressEntryExists(addr))
+
+	st.Impl().LockedReqTable_ = st._tableWithDeductBalanceExact(st.LockedReqTable(), addr, unlockAmountRequested)
+}
+
+func (st *StorageMarketActorState_I) _tableWithAddBalance(
+	table actor.BalanceTableHAMT, toAddr addr.Address, amountToAdd actor.TokenAmount) actor.BalanceTableHAMT {
+
+	Assert(amountToAdd >= 0)
+
+	newTable, ok := actor.BalanceTable_WithAdd(table, toAddr, amountToAdd)
+	Assert(ok)
+	return newTable
+}
+
+func (st *StorageMarketActorState_I) _tableWithDeductBalanceExact(
+	table actor.BalanceTableHAMT, fromAddr addr.Address, amountRequested actor.TokenAmount) actor.BalanceTableHAMT {
+
+	Assert(amountRequested >= 0)
+
+	newTable, amountDeducted, ok := actor.BalanceTable_WithSubtractPreservingNonnegative(
+		table, fromAddr, amountRequested)
+	Assert(ok)
+	Assert(amountDeducted == amountRequested)
+	return newTable
+}
+
+// move funds from locked in client to available in provider
+func (st *StorageMarketActorState_I) _transferBalance(
+	fromAddr addr.Address, toAddr addr.Address, transferAmountRequested actor.TokenAmount) {
+
+	Assert(transferAmountRequested >= 0)
+	Assert(st._addressEntryExists(fromAddr))
+	Assert(st._addressEntryExists(toAddr))
+
+	st.Impl().EscrowTable_ = st._tableWithDeductBalanceExact(st.EscrowTable(), fromAddr, transferAmountRequested)
+	st.Impl().LockedReqTable_ = st._tableWithDeductBalanceExact(st.LockedReqTable(), fromAddr, transferAmountRequested)
+	st.Impl().EscrowTable_ = st._tableWithAddBalance(st.EscrowTable(), toAddr, transferAmountRequested)
+}
+
+func (st *StorageMarketActorState_I) _slashBalance(addr addr.Address, slashAmount actor.TokenAmount) {
+	Assert(st._addressEntryExists(addr))
 	Assert(slashAmount >= 0)
 
-	st.Impl().EscrowTable_ = st._rtTableWithDeductBalanceExact(rt, st.EscrowTable(), dealP.Provider(), slashAmount)
-	st.Impl().LockedReqTable_ = st._rtTableWithDeductBalanceExact(rt, st.LockedReqTable(), dealP.Provider(), slashAmount)
-
-	return slashAmount
+	st.Impl().EscrowTable_ = st._tableWithDeductBalanceExact(st.EscrowTable(), addr, slashAmount)
+	st.Impl().LockedReqTable_ = st._tableWithDeductBalanceExact(st.LockedReqTable(), addr, slashAmount)
 }
 
-// delete deal from active deals
-// send deal collateral to BurntFundsActor
-// return locked storage fee to client
-// return client collateral
-func (st *StorageMarketActorState_I) _terminateDeal(rt Runtime, dealID deal.DealID) actor.TokenAmount {
+////////////////////////////////////////////////////////////////////////////////
+// State utility functions
+////////////////////////////////////////////////////////////////////////////////
 
-	deal := st._safeGetOnChainDeal(rt, dealID)
-	st._assertActiveDealState(rt, dealID)
-
-	dealP := deal.Deal().Proposal()
-	delete(st.Deals(), dealID)
-
-	// return client collateral and locked storage fee
-	clientCollateral := dealP.TotalClientCollateral()
-	lockedFee := st._getStorageFeeSinceLastPayment(rt, deal, dealP.EndEpoch())
-	st._rtUnlockBalance(rt, dealP.Client(), clientCollateral+lockedFee)
-
-	return st._rtSlashDealCollateral(rt, dealP)
-}
-
-func (st *StorageMarketActorState_I) _assertEpochEqual(rt Runtime, epoch1 block.ChainEpoch, epoch2 block.ChainEpoch) {
-	if epoch1 != epoch2 {
-		rt.AbortArgMsg("sm._assertEpochEqual: different epochs")
+func _dealProposalIsInternallyValid(dealP deal.StorageDealProposal) bool {
+	if dealP.EndEpoch() <= dealP.StartEpoch() {
+		return false
 	}
+	if dealP.Duration() != dealP.EndEpoch()-dealP.StartEpoch() {
+		return false
+	}
+
+	IMPL_FINISH() // Verify client and provider signatures.
+
+	return true
 }
 
-func (st *StorageMarketActorState_I) _getSectorPowerFromDeals(sectorDuration block.ChainEpoch, sectorSize block.StoragePower, dealPs []deal.StorageDealProposal) block.StoragePower {
-	TODO()
+func _dealGetPaymentRemaining(deal deal.OnChainDeal, epoch block.ChainEpoch) actor.TokenAmount {
+	dealP := deal.Deal().Proposal()
+	Assert(epoch <= dealP.EndEpoch())
 
-	ret := block.StoragePower(0)
-	return ret
+	durationRemaining := dealP.EndEpoch() - (epoch - 1)
+	Assert(durationRemaining > 0)
+
+	IMPL_FINISH() // BigInt arithmetic
+	return actor.TokenAmount(int(durationRemaining) * int(dealP.StoragePricePerEpoch()))
+}
+
+func (st *StorageMarketActorState_I) _getOnChainDeal(dealID deal.DealID) (
+	deal deal.OnChainDeal, dealP deal.StorageDealProposal, ok bool) {
+
+	var found bool
+	deal, found = st.Deals()[dealID]
+	if found {
+		dealP = deal.Deal().Proposal()
+	} else {
+		deal = nil
+		dealP = nil
+	}
+	return
+}
+
+func (st *StorageMarketActorState_I) _getOnChainDealAssert(dealID deal.DealID) (
+	deal deal.OnChainDeal, dealP deal.StorageDealProposal) {
+
+	var ok bool
+	deal, dealP, ok = st._getOnChainDeal(dealID)
+	Assert(ok)
+	return
 }

@@ -4681,23 +4681,22 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">EscrowTable</span>           <span class="nx">actor</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span>
     <span class="nx">_minersLargerThanMin</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
 
-    <span class="nf">_slashPledgeCollateral</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nf">_lockPledgeCollateral</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
-    <span class="nf">_unlockPledgeCollateral</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
+    <span class="nf">ActivePowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">minPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_getActivePowerForConsensus</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nf">_slashPledgeCollateral</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+
     <span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">power</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
+    <span class="nf">_getTotalPower</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
     <span class="nf">_getPledgeCollateralReq</span><span class="p">(</span><span class="nx">power</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="nf">_getPledgeCollateralReqForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="nf">_selectMinersToSurprise</span><span class="p">(</span><span class="nx">challengeCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
-    <span class="nf">_shouldChallenge</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">networkPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="kt">bool</span>
-
-    <span class="nf">_safeGetPowerEntry</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerID</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">PowerTableEntry</span>
     <span class="nf">_getAffectedPledge</span><span class="p">(</span>
-        <span class="nx">rt</span>             <span class="nx">Runtime</span>
         <span class="nx">minerID</span>        <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
         <span class="nx">affectedPower</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
     <span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nf">_getActivePower</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-    <span class="nf">ActivePowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">minPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="kt">bool</span>
+
+    <span class="nf">_getStorageFaultSlashPledgePercent</span><span class="p">(</span><span class="nx">faultType</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">StorageFaultType</span><span class="p">)</span> <span class="kt">int</span>
+    <span class="nf">_rtGetPowerEntryOrAbort</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerID</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">PowerTableEntry</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4714,13 +4713,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="nf">RemoveStorageMiner</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
-
-    <span class="c1">// PowerTable Operations
-</span><span class="c1"></span>    <span class="nf">GetTotalPower</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-    <span class="nf">GetSectorPower</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-
     <span class="nf">EnsurePledgeCollateralSatisfied</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
-
     <span class="nf">ProcessPowerReport</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">report</span> <span class="nx">PowerReport</span><span class="p">)</span>
     <span class="nf">SlashPledgeForStorageFault</span><span class="p">(</span>
         <span class="nx">rt</span>             <span class="nx">Runtime</span>
@@ -4736,12 +4729,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">)</span>
 
     <span class="nf">Surprise</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">ticket</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
-
-    <span class="nf">PowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span>
-
-    <span class="c1">// this should call ReportConsensusFault, numSectors should be all sectors
-</span><span class="c1"></span>    <span class="c1">// ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors UVarint)
-</span><span class="c1"></span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
 
 
@@ -4777,6 +4765,7 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
     <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
+    <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
     <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
     <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
@@ -4812,7 +4801,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">minerPower</span> <span class="o">&gt;=</span> <span class="nx">minerSizes</span><span class="p">[</span><span class="nx">MIN_MINER_SIZE_TARG</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getActivePower</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getActivePowerForConsensus</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span> <span class="p">{</span>
     <span class="nx">activePower</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">miner</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()</span> <span class="p">{</span>
@@ -4899,16 +4888,6 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">selectedMiners</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_safeGetPowerEntry</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerID</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">PowerTableEntry</span> <span class="p">{</span>
-    <span class="nx">powerEntry</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()[</span><span class="nx">minerID</span><span class="p">]</span>
-
-    <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;sm._safeGetPowerEntry: miner not found in power table.&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="nx">powerEntry</span>
-<span class="p">}</span>
-
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getTotalPower</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span> <span class="p">{</span>
     <span class="c1">// TODO (optimization): cache this as a counter in the actor state,
 </span><span class="c1"></span>    <span class="c1">// and update it for relevant operations.
@@ -4928,7 +4907,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getAffectedPledge</span><span class="p">(</span>
-    <span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">affectedPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+    <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">affectedPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 
     <span class="c1">// TODO: revisit this calculation
 </span><span class="c1"></span>    <span class="nx">minerPowerTotal</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
@@ -4937,6 +4916,24 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">affectedPledge</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">pledgeRequired</span><span class="p">)</span> <span class="o">*</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">affectedPower</span><span class="p">)</span> <span class="o">/</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">minerPowerTotal</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="nx">affectedPledge</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">_getStorageFaultSlashPledgePercent</span><span class="p">(</span><span class="nx">faultType</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">StorageFaultType</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+    <span class="nf">PARAM_FINISH</span><span class="p">()</span> <span class="c1">// TODO: instantiate these placeholders
+</span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+
+    <span class="c1">// these are the scaling constants for percentage pledge collateral to slash
+</span><span class="c1"></span>    <span class="c1">// given a miner&#39;s affected power and its total power
+</span><span class="c1"></span>    <span class="k">switch</span> <span class="nx">faultType</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">DeclaredFault</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="c1">// placeholder
+</span><span class="c1"></span>    <span class="k">case</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">DetectedFault</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">10</span> <span class="c1">// placeholder
+</span><span class="c1"></span>    <span class="k">case</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">TerminatedFault</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">100</span> <span class="c1">// placeholder
+</span><span class="c1"></span>    <span class="k">default</span><span class="p">:</span>
+        <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Case not supported&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4971,90 +4968,27 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="p">(</span>
     <span class="s">&#34;math&#34;</span>
 
-    <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
     <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
     <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
     <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
     <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-    <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
+    <span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
     <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
-<span class="kd">var</span> <span class="nx">Assert</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Assert</span>
-<span class="kd">var</span> <span class="nx">IMPL_FINISH</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">IMPL_FINISH</span>
-<span class="kd">var</span> <span class="nx">PARAM_FINISH</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">PARAM_FINISH</span>
-<span class="kd">var</span> <span class="nx">TODO</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">TODO</span>
-
-<span class="kd">const</span> <span class="p">(</span>
-    <span class="nx">Method_StoragePowerActor_EpochTick</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodPlaceholder</span> <span class="o">+</span> <span class="kc">iota</span>
-    <span class="nx">Method_StoragePowerActor_ProcessPowerReport</span>
-    <span class="nx">Method_StoragePowerActor_ProcessFaultReport</span>
-    <span class="nx">Method_StoragePowerActor_SlashPledgeForStorageFault</span>
-    <span class="nx">Method_StoragePowerActor_EnsurePledgeCollateralSatisfied</span>
-<span class="p">)</span>
-
-<span class="kd">func</span> <span class="nf">_storageFaultSlashPledgePercent</span><span class="p">(</span><span class="nx">faultType</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">StorageFaultType</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
-    <span class="nf">PARAM_FINISH</span><span class="p">()</span> <span class="c1">// TODO: instantiate these placeholders
-</span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-
-    <span class="c1">// these are the scaling constants for percentage pledge collateral to slash
-</span><span class="c1"></span>    <span class="c1">// given a miner&#39;s affected power and its total power
-</span><span class="c1"></span>    <span class="k">switch</span> <span class="nx">faultType</span> <span class="p">{</span>
-    <span class="k">case</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">DeclaredFault</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mi">1</span> <span class="c1">// placeholder
-</span><span class="c1"></span>    <span class="k">case</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">DetectedFault</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mi">10</span> <span class="c1">// placeholder
-</span><span class="c1"></span>    <span class="k">case</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">TerminatedFault</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mi">100</span> <span class="c1">// placeholder
-</span><span class="c1"></span>    <span class="k">default</span><span class="p">:</span>
-        <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Case not supported&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
-</span><span class="c1">// Boilerplate
+</span><span class="c1">// Actor methods
 </span><span class="c1">////////////////////////////////////////////////////////////////////////////////
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="p">=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span>
-<span class="kd">type</span> <span class="nx">Runtime</span> <span class="p">=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span>
-<span class="kd">type</span> <span class="nx">Bytes</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span>
-<span class="kd">type</span> <span class="nx">State</span> <span class="p">=</span> <span class="nx">StoragePowerActorState</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">State</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">State</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
-    <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">()</span>
-    <span class="nx">stateBytes</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">stateCID</span><span class="p">))</span>
-    <span class="k">if</span> <span class="nx">stateBytes</span><span class="p">.</span><span class="nf">Which</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime_IpldGet_FunRet_Case_Bytes</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;IPLD lookup error&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="nx">state</span> <span class="o">:=</span> <span class="nf">DeserializeState</span><span class="p">(</span><span class="nx">stateBytes</span><span class="p">.</span><span class="nf">As_Bytes</span><span class="p">())</span>
-    <span class="k">return</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">state</span>
-<span class="p">}</span>
-<span class="kd">func</span> <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">h</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">st</span> <span class="nx">State</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">checkCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">()))</span>
-    <span class="nx">h</span><span class="p">.</span><span class="nf">Release</span><span class="p">(</span><span class="nx">checkCID</span><span class="p">)</span>
-<span class="p">}</span>
-<span class="kd">func</span> <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">h</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">st</span> <span class="nx">State</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">newCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">()))</span>
-    <span class="nx">h</span><span class="p">.</span><span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">newCID</span><span class="p">)</span>
-<span class="p">}</span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-<span class="kd">func</span> <span class="nf">DeserializeState</span><span class="p">(</span><span class="nx">x</span> <span class="nx">Bytes</span><span class="p">)</span> <span class="nx">State</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1"></span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">AddBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_Account</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">AddBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// caller verification
+</span><span class="c1"></span>    <span class="nf">TODO</span><span class="p">()</span>
 
-    <span class="nx">ownerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
     <span class="nx">msgValue</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReceived</span><span class="p">()</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">ownerAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;spa.AddBalance: Escrow operation failed.&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -5062,18 +4996,16 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">WithdrawBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">amountRequested</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_Account</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">WithdrawBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amountRequested</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
 
     <span class="k">if</span> <span class="nx">amountRequested</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa.WithdrawBalance: negative amount.&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+    <span class="c1">// caller verification
+</span><span class="c1"></span>    <span class="nf">TODO</span><span class="p">()</span>
+    <span class="nx">msgSender</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
 
-    <span class="kd">var</span> <span class="nx">ownerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// Determine owner address from miner
-</span><span class="c1"></span>
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
     <span class="nx">minerPowerTotal</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
@@ -5091,11 +5023,8 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-    <span class="c1">// send funds to miner
-</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
-        <span class="nx">To_</span><span class="p">:</span>    <span class="nx">ownerAddr</span><span class="p">,</span>
-        <span class="nx">Value_</span><span class="p">:</span> <span class="nx">amountExtracted</span><span class="p">,</span>
-    <span class="p">})</span>
+    <span class="c1">// send funds to sender (pledge collateral)
+</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">msgSender</span><span class="p">,</span> <span class="nx">amountExtracted</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">CreateStorageMiner</span><span class="p">(</span>
@@ -5129,24 +5058,30 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">RemoveStorageMiner</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_StorageMiner</span><span class="p">)</span>
 
     <span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+
+    <span class="c1">// caller verification
+</span><span class="c1"></span>    <span class="nf">TODO</span><span class="p">()</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
     <span class="nx">minerPowerTotal</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa.RemoveStorageMiner: miner entry not found&#34;</span><span class="p">)</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa.RemoveStorageMiner: miner entry not found in PowerTable.&#34;</span><span class="p">)</span>
     <span class="p">}</span>
     <span class="k">if</span> <span class="nx">minerPowerTotal</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
-        <span class="c1">// TODO: manually remove the power entries here (and update relevant counters),
-</span><span class="c1"></span>        <span class="c1">// instead of throwing a runtime error?
-</span><span class="c1"></span>        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;power still remains.&#34;</span><span class="p">)</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;spa.RemoveStorageMiner: power still remains.&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
 
-        <span class="nf">TODO</span><span class="p">()</span>
-        <span class="c1">// TODO: also fail if funds still remaining in escrow
-</span><span class="c1"></span>    <span class="p">}</span>
+    <span class="nx">minerPledgeBalance</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa.RemoveStorageMiner: miner entry not found in escrow.&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="nx">minerPledgeBalance</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;spa.RemoveStorageMiner: pledge collateral still remains.&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
 
     <span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
 
@@ -5160,10 +5095,11 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">EnsurePledgeCollateralSatisfied</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_StorageMiner</span><span class="p">)</span>
 
-    <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// TODO: principal access control
-</span><span class="c1"></span>    <span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+    <span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+
+    <span class="c1">// caller verification
+</span><span class="c1"></span>    <span class="nf">TODO</span><span class="p">()</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
     <span class="nx">pledgeReq</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPledgeCollateralReqForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
@@ -5180,23 +5116,23 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">// slash pledge collateral for Declared, Detected and Terminated faults
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">SlashPledgeForStorageFault</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">affectedPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">faultType</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">StorageFaultType</span><span class="p">)</span> <span class="p">{</span>
 
-    <span class="nx">minerID</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+    <span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+
+    <span class="c1">// caller verification
+</span><span class="c1"></span>    <span class="nf">TODO</span><span class="p">()</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-    <span class="nx">affectedPledge</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getAffectedPledge</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerID</span><span class="p">,</span> <span class="nx">affectedPower</span><span class="p">)</span>
+    <span class="nx">affectedPledge</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getAffectedPledge</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">affectedPower</span><span class="p">)</span>
 
     <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// BigInt arithmetic
 </span><span class="c1"></span>    <span class="nx">amountToSlash</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span>
-        <span class="nf">_storageFaultSlashPledgePercent</span><span class="p">(</span><span class="nx">faultType</span><span class="p">)</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="nx">affectedPledge</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="nx">st</span><span class="p">.</span><span class="nf">_getStorageFaultSlashPledgePercent</span><span class="p">(</span><span class="nx">faultType</span><span class="p">)</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="nx">affectedPledge</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span>
 
-    <span class="nx">amountSlashed</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_slashPledgeCollateral</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerID</span><span class="p">,</span> <span class="nx">amountToSlash</span><span class="p">)</span>
+    <span class="nx">amountSlashed</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_slashPledgeCollateral</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">amountToSlash</span><span class="p">)</span>
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
-        <span class="nx">To_</span><span class="p">:</span>    <span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span>
-        <span class="nx">Value_</span><span class="p">:</span> <span class="nx">amountSlashed</span><span class="p">,</span>
-    <span class="p">})</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">amountSlashed</span><span class="p">)</span>
 
 <span class="p">}</span>
 
@@ -5204,11 +5140,14 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// update miner power based on the power report
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">ProcessPowerReport</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">report</span> <span class="nx">PowerReport</span><span class="p">)</span> <span class="p">{</span>
 
-    <span class="nx">minerID</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+    <span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+
+    <span class="c1">// caller verification
+</span><span class="c1"></span>    <span class="nf">TODO</span><span class="p">()</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-    <span class="nx">powerEntry</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetPowerEntry</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerID</span><span class="p">)</span>
+    <span class="nx">powerEntry</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_rtGetPowerEntryOrAbort</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
 
     <span class="c1">// keep track of miners larger than minimum miner size before updating the PT
 </span><span class="c1"></span>    <span class="nx">MIN_MINER_SIZE_STOR</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// TODO: pull in from consts
@@ -5221,7 +5160,7 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nx">powerEntry</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">ActivePower_</span> <span class="p">=</span> <span class="nx">report</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">()</span>
     <span class="nx">powerEntry</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">InactivePower_</span> <span class="p">=</span> <span class="nx">report</span><span class="p">.</span><span class="nf">InactivePower</span><span class="p">()</span>
-    <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">PowerTable_</span><span class="p">[</span><span class="nx">minerID</span><span class="p">]</span> <span class="p">=</span> <span class="nx">powerEntry</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">PowerTable_</span><span class="p">[</span><span class="nx">minerAddr</span><span class="p">]</span> <span class="p">=</span> <span class="nx">powerEntry</span>
 
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 <span class="p">}</span>
@@ -5257,15 +5196,30 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// now send the messages
 </span><span class="c1"></span>    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">addr</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">surprisedMiners</span> <span class="p">{</span>
         <span class="c1">// For each miner here send message
-</span><span class="c1"></span>        <span class="nb">panic</span><span class="p">(</span><span class="nx">addr</span><span class="p">)</span> <span class="c1">// hack coz of import cycle
-</span><span class="c1"></span>        <span class="c1">// rt.SendPropagatingErrors(&amp;vmr.InvocInput_I{
-</span><span class="c1"></span>        <span class="c1">//     To_:     addr,
-</span><span class="c1"></span>        <span class="c1">//     Method_: sms.Method_StorageMinerActor_NotifyOfSurprisePoStChallenge,
-</span><span class="c1"></span>        <span class="c1">// })
-</span><span class="c1"></span>    <span class="p">}</span>
+</span><span class="c1"></span>        <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span><span class="nx">addr</span><span class="p">,</span> <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StorageMinerActor_NotifyOfSurprisePoStChallenge</span><span class="p">,</span> <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{},</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+    <span class="p">}</span>
 <span class="p">}</span>
 
+<span class="c1">////////////////////////////////////////////////////////////////////////////////
+</span><span class="c1">// Method utility functions
+</span><span class="c1">////////////////////////////////////////////////////////////////////////////////
+</span><span class="c1"></span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_rtGetPowerEntryOrAbort</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">PowerTableEntry</span> <span class="p">{</span>
+    <span class="nx">powerEntry</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()[</span><span class="nx">minerAddr</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;sm._rtGetPowerEntryOrAbort: miner not found in power table.&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="nx">powerEntry</span>
+<span class="p">}</span>
+
+<span class="c1">////////////////////////////////////////////////////////////////////////////////
+</span><span class="c1">// Dispatch table
+</span><span class="c1">////////////////////////////////////////////////////////////////////////////////
+</span><span class="c1"></span>
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+    <span class="nf">IMPL_FINISH</span><span class="p">()</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>

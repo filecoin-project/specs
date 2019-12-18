@@ -5384,7 +5384,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 </span><span class="c1"></span>	<span class="nx">challengeTicket</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">SHA256</span><span class="p">(</span><span class="nx">partialTicket</span><span class="p">)</span>
 
 	<span class="nx">st</span> <span class="o">:=</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">_getStoragePowerActorState</span><span class="p">(</span><span class="nx">stateTree</span><span class="p">)</span>
-	<span class="nx">networkPower</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getActivePower</span><span class="p">()</span>
+	<span class="nx">networkPower</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getActivePowerForConsensus</span><span class="p">()</span>
 
 	<span class="c1">// TODO: pull from constants
 </span><span class="c1"></span>	<span class="nx">EPOST_SAMPLE_RATE_NUM</span> <span class="o">:=</span> <span class="nx">util</span><span class="p">.</span><span class="nf">UVarint</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>

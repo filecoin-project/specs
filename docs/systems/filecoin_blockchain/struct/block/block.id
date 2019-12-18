@@ -6,7 +6,7 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
 type ChainWeight UVarint
-type ChainEpoch UVarint
+type ChainEpoch Int
 type MessageReceipt util.Bytes
 
 // On-chain representation of a block header.

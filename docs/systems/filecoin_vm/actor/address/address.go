@@ -1,8 +1,12 @@
 package address
 
 import (
+	"errors"
+
 	util "github.com/filecoin-project/specs/util"
 )
+
+var Assert = util.Assert
 
 type Int = util.Int
 
@@ -40,20 +44,26 @@ func (a *Address_I) Equals(Address) bool {
 	panic("TODO")
 }
 
-func (a *Address_I) String() AddressString {
-	return Serialize_Address_Compact(a)
+func (a *Address_I) String() string {
+	return string(Serialize_Address_Compact(a))
 }
 
-func Serialize_Address_Compact(Address) AddressString {
+func Serialize_Address_Compact(Address) util.Serialization {
 	// TODO: custom encoding as in
 	// https://github.com/filecoin-project/lotus/blob/master/chain/address/address.go
 	panic("TODO")
 }
 
-func Deserialize_Address_Compact(AddressString) (Address, error) {
+func Deserialize_Address_Compact(util.Serialization) (Address, error) {
 	// TODO: custom encoding as in
 	// https://github.com/filecoin-project/lotus/blob/master/chain/address/address.go
 	panic("TODO")
+}
+
+func Deserialize_Address_Compact_Assert(x util.Serialization) Address {
+	ret, err := Deserialize_Address_Compact(x)
+	Assert(err == nil)
+	return ret
 }
 
 func (a *Address_I) IsIDType() bool {
@@ -62,6 +72,13 @@ func (a *Address_I) IsIDType() bool {
 
 func (a *Address_I) IsKeyType() bool {
 	panic("TODO")
+}
+
+func (a *Address_I) GetID() (ActorID, error) {
+	if !a.IsIDType() {
+		return ActorID(0), errors.New("not an ID address")
+	}
+	return a.Data_.As_ID(), nil
 }
 
 func Address_Make_ID(net Address_NetworkID, x ActorID) Address {

@@ -3,90 +3,27 @@ package storage_power_consensus
 import (
 	"math"
 
-	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	util "github.com/filecoin-project/specs/util"
 )
 
-var Assert = util.Assert
-var IMPL_FINISH = util.IMPL_FINISH
-var PARAM_FINISH = util.PARAM_FINISH
-var TODO = util.TODO
-
-const (
-	Method_StoragePowerActor_EpochTick = actor.MethodPlaceholder + iota
-	Method_StoragePowerActor_ProcessPowerReport
-	Method_StoragePowerActor_ProcessFaultReport
-	Method_StoragePowerActor_SlashPledgeForStorageFault
-	Method_StoragePowerActor_EnsurePledgeCollateralSatisfied
-)
-
-func _storageFaultSlashPledgePercent(faultType sector.StorageFaultType) int {
-	PARAM_FINISH() // TODO: instantiate these placeholders
-	panic("")
-
-	// these are the scaling constants for percentage pledge collateral to slash
-	// given a miner's affected power and its total power
-	switch faultType {
-	case sector.DeclaredFault:
-		return 1 // placeholder
-	case sector.DetectedFault:
-		return 10 // placeholder
-	case sector.TerminatedFault:
-		return 100 // placeholder
-	default:
-		panic("Case not supported")
-	}
-}
-
 ////////////////////////////////////////////////////////////////////////////////
-// Boilerplate
-////////////////////////////////////////////////////////////////////////////////
-type InvocOutput = vmr.InvocOutput
-type Runtime = vmr.Runtime
-type Bytes = util.Bytes
-type State = StoragePowerActorState
-
-func (a *StoragePowerActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, State) {
-	h := rt.AcquireState()
-	stateCID := h.Take()
-	stateBytes := rt.IpldGet(ipld.CID(stateCID))
-	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
-		rt.AbortAPI("IPLD lookup error")
-	}
-	state := DeserializeState(stateBytes.As_Bytes())
-	return h, state
-}
-func Release(rt Runtime, h vmr.ActorStateHandle, st State) {
-	checkCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
-	h.Release(checkCID)
-}
-func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st State) {
-	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
-	h.UpdateRelease(newCID)
-}
-func (st *StoragePowerActorState_I) CID() ipld.CID {
-	panic("TODO")
-}
-func DeserializeState(x Bytes) State {
-	panic("TODO")
-}
-
+// Actor methods
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
+func (a *StoragePowerActorCode_I) AddBalance(rt Runtime, minerAddr addr.Address) {
+	// caller verification
+	TODO()
 
-	ownerAddr := rt.ImmediateCaller()
 	msgValue := rt.ValueReceived()
 
 	h, st := a.State(rt)
-	newTable, ok := actor.BalanceTable_WithAdd(st.EscrowTable(), ownerAddr, msgValue)
+	newTable, ok := actor.BalanceTable_WithAdd(st.EscrowTable(), minerAddr, msgValue)
 	if !ok {
 		rt.AbortStateMsg("spa.AddBalance: Escrow operation failed.")
 	}
@@ -94,17 +31,15 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 	UpdateRelease(rt, h, st)
 }
 
-func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amountRequested actor.TokenAmount) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
+func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Address, amountRequested actor.TokenAmount) {
 
 	if amountRequested < 0 {
 		rt.AbortArgMsg("spa.WithdrawBalance: negative amount.")
 	}
 
-	minerAddr := rt.ImmediateCaller()
-
-	var ownerAddr addr.Address
-	TODO() // Determine owner address from miner
+	// caller verification
+	TODO()
+	msgSender := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
 
@@ -123,11 +58,8 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amountRequested ac
 
 	UpdateRelease(rt, h, st)
 
-	// send funds to miner
-	rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:    ownerAddr,
-		Value_: amountExtracted,
-	})
+	// send funds to sender (pledge collateral)
+	rt.SendFunds(msgSender, amountExtracted)
 }
 
 func (a *StoragePowerActorCode_I) CreateStorageMiner(
@@ -161,23 +93,29 @@ func (a *StoragePowerActorCode_I) CreateStorageMiner(
 }
 
 func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
 
 	minerAddr := rt.ImmediateCaller()
+
+	// caller verification
+	TODO()
 
 	h, st := a.State(rt)
 
 	minerPowerTotal, ok := st._getPowerTotalForMiner(minerAddr)
 	if !ok {
-		rt.AbortArgMsg("spa.RemoveStorageMiner: miner entry not found")
+		rt.AbortArgMsg("spa.RemoveStorageMiner: miner entry not found in PowerTable.")
 	}
 	if minerPowerTotal > 0 {
-		// TODO: manually remove the power entries here (and update relevant counters),
-		// instead of throwing a runtime error?
-		rt.AbortStateMsg("power still remains.")
+		rt.AbortStateMsg("spa.RemoveStorageMiner: power still remains.")
+	}
 
-		TODO()
-		// TODO: also fail if funds still remaining in escrow
+	minerPledgeBalance, ok := actor.BalanceTable_GetEntry(st.EscrowTable(), minerAddr)
+	if !ok {
+		rt.AbortArgMsg("spa.RemoveStorageMiner: miner entry not found in escrow.")
+	}
+
+	if minerPledgeBalance > 0 {
+		rt.AbortStateMsg("spa.RemoveStorageMiner: pledge collateral still remains.")
 	}
 
 	delete(st.PowerTable(), minerAddr)
@@ -192,10 +130,11 @@ func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime) {
 }
 
 func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
 
-	TODO() // TODO: principal access control
 	minerAddr := rt.ImmediateCaller()
+
+	// caller verification
+	TODO()
 
 	h, st := a.State(rt)
 	pledgeReq := st._getPledgeCollateralReqForMiner(minerAddr)
@@ -212,23 +151,23 @@ func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) {
 // slash pledge collateral for Declared, Detected and Terminated faults
 func (a *StoragePowerActorCode_I) SlashPledgeForStorageFault(rt Runtime, affectedPower block.StoragePower, faultType sector.StorageFaultType) {
 
-	minerID := rt.ImmediateCaller()
+	minerAddr := rt.ImmediateCaller()
+
+	// caller verification
+	TODO()
 
 	h, st := a.State(rt)
 
-	affectedPledge := st._getAffectedPledge(rt, minerID, affectedPower)
+	affectedPledge := st._getAffectedPledge(minerAddr, affectedPower)
 
 	TODO() // BigInt arithmetic
 	amountToSlash := actor.TokenAmount(
-		_storageFaultSlashPledgePercent(faultType) * int(affectedPledge) / 100)
+		st._getStorageFaultSlashPledgePercent(faultType) * int(affectedPledge) / 100)
 
-	amountSlashed := st._slashPledgeCollateral(rt, minerID, amountToSlash)
+	amountSlashed := st._slashPledgeCollateral(minerAddr, amountToSlash)
 	UpdateRelease(rt, h, st)
 
-	rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:    addr.BurntFundsActorAddr,
-		Value_: amountSlashed,
-	})
+	rt.SendFunds(addr.BurntFundsActorAddr, amountSlashed)
 
 }
 
@@ -236,11 +175,14 @@ func (a *StoragePowerActorCode_I) SlashPledgeForStorageFault(rt Runtime, affecte
 // update miner power based on the power report
 func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerReport) {
 
-	minerID := rt.ImmediateCaller()
+	minerAddr := rt.ImmediateCaller()
+
+	// caller verification
+	TODO()
 
 	h, st := a.State(rt)
 
-	powerEntry := st._safeGetPowerEntry(rt, minerID)
+	powerEntry := st._rtGetPowerEntryOrAbort(rt, minerAddr)
 
 	// keep track of miners larger than minimum miner size before updating the PT
 	MIN_MINER_SIZE_STOR := block.StoragePower(0) // TODO: pull in from consts
@@ -253,7 +195,7 @@ func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerRep
 
 	powerEntry.Impl().ActivePower_ = report.ActivePower()
 	powerEntry.Impl().InactivePower_ = report.InactivePower()
-	st.Impl().PowerTable_[minerID] = powerEntry
+	st.Impl().PowerTable_[minerAddr] = powerEntry
 
 	UpdateRelease(rt, h, st)
 }
@@ -289,14 +231,29 @@ func (a *StoragePowerActorCode_I) Surprise(rt Runtime) {
 	// now send the messages
 	for _, addr := range surprisedMiners {
 		// For each miner here send message
-		panic(addr) // hack coz of import cycle
-		// rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		// 	To_:     addr,
-		// 	Method_: sms.Method_StorageMinerActor_NotifyOfSurprisePoStChallenge,
-		// })
+		rt.Send(addr, ai.Method_StorageMinerActor_NotifyOfSurprisePoStChallenge, []util.Serialization{}, actor.TokenAmount(0))
 	}
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Method utility functions
+////////////////////////////////////////////////////////////////////////////////
+
+func (st *StoragePowerActorState_I) _rtGetPowerEntryOrAbort(rt Runtime, minerAddr addr.Address) PowerTableEntry {
+	powerEntry, found := st.PowerTable()[minerAddr]
+
+	if !found {
+		rt.AbortStateMsg("sm._rtGetPowerEntryOrAbort: miner not found in power table.")
+	}
+
+	return powerEntry
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Dispatch table
+////////////////////////////////////////////////////////////////////////////////
+
 func (a *StoragePowerActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
+	IMPL_FINISH()
 	panic("TODO")
 }

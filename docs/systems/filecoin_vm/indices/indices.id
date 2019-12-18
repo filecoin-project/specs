@@ -1,0 +1,40 @@
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+
+type Indices struct {
+    Epoch              block.ChainEpoch
+    TotalNetworkPower  BigInt
+    TotalMintedFIL     BigInt
+    TotalBurnedFIL     BigInt
+    // TODO: extend
+
+    StorageDeal_DurationBounds(
+        pieceSize   piece.PieceSize
+        startEpoch  block.ChainEpoch
+    ) (minDuration block.ChainEpoch, maxDuration block.ChainEpoch)
+
+    StorageDeal_StoragePricePerEpochBounds(
+        pieceSize   piece.PieceSize
+        startEpoch  block.ChainEpoch
+        endEpoch    block.ChainEpoch
+    ) (minPrice actor.TokenAmount, maxPrice actor.TokenAmount)
+
+    StorageDeal_ProviderCollateralBounds(
+        pieceSize   piece.PieceSize
+        startEpoch  block.ChainEpoch
+        endEpoch    block.ChainEpoch
+    ) (
+        minProviderCollateral  actor.TokenAmount
+        maxProviderCollateral  actor.TokenAmount
+    )
+
+    StorageDeal_ClientCollateralBounds(
+        pieceSize   piece.PieceSize
+        startEpoch  block.ChainEpoch
+        endEpoch    block.ChainEpoch
+    ) (
+        minClientCollateral  actor.TokenAmount
+        maxClientCollateral  actor.TokenAmount
+    )
+}

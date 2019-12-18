@@ -4699,7 +4699,6 @@ and serves to make storage conform to a set of expectations.</p>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Bytes32</span> <span class="nx">Bytes</span>
-<span class="kd">type</span> <span class="nx">MinerID</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 <span class="kd">type</span> <span class="nx">Commitment</span> <span class="nx">Bytes32</span>  <span class="c1">// TODO
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">UnsealedSectorCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
 <span class="kd">type</span> <span class="nx">SealedSectorCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
@@ -4725,8 +4724,8 @@ and serves to make storage conform to a set of expectations.</p>
 </span><span class="c1"></span>
 <span class="c1">// TODO make sure this is globally unique
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorID</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">MinerID</span>
-    <span class="nx">Number</span> <span class="nx">SectorNumber</span>
+    <span class="nx">Miner</span>   <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span>
+    <span class="nx">Number</span>  <span class="nx">SectorNumber</span>
 <span class="p">}</span>
 
 <span class="c1">// SectorInDetail describes all the bits of information associated

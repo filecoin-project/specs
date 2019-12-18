@@ -4676,11 +4676,14 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
 
     <span class="nf">VerifySyntax</span><span class="p">()</span>   <span class="kt">bool</span>
-    <span class="nf">String</span><span class="p">()</span>         <span class="nx">AddressString</span>
+    <span class="nf">String</span><span class="p">()</span>         <span class="kt">string</span>
     <span class="nf">IsIDType</span><span class="p">()</span>       <span class="kt">bool</span>  <span class="c1">// Whether the address is an ID-address
 </span><span class="c1"></span>    <span class="nf">IsKeyType</span><span class="p">()</span>      <span class="kt">bool</span>  <span class="c1">// Whether the address is a public key address (SECP or BLS)
 </span><span class="c1"></span>    <span class="nf">Equals</span><span class="p">(</span><span class="nx">Address</span><span class="p">)</span>  <span class="kt">bool</span>
     <span class="nf">Ref</span><span class="p">()</span>            <span class="nx">Address_Ptr</span>
+
+    <span class="c1">// Returns the ID from an ID address (or error otherwise).
+</span><span class="c1"></span>    <span class="nf">GetID</span><span class="p">()</span>          <span class="p">(</span><span class="nx">ActorID</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">// ActorID is a sequential number assigned to actors in a Filecoin Chain.
@@ -4690,8 +4693,6 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">KeyHash</span> <span class="nx">Bytes</span>
 <span class="kd">type</span> <span class="nx">ActorExecHash</span> <span class="nx">Bytes</span>
-
-<span class="kd">type</span> <span class="nx">AddressString</span> <span class="kt">string</span>
 </code></pre></div>
 
 
@@ -4720,8 +4721,12 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">address</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+    <span class="s">&#34;errors&#34;</span>
+
     <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
+
+<span class="kd">var</span> <span class="nx">Assert</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Assert</span>
 
 <span class="kd">type</span> <span class="nx">Int</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Int</span>
 
@@ -4759,20 +4764,26 @@ https://github.com/alex-shpak/hugo-book
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">String</span><span class="p">()</span> <span class="nx">AddressString</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nf">Serialize_Address_Compact</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">String</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nb">string</span><span class="p">(</span><span class="nf">Serialize_Address_Compact</span><span class="p">(</span><span class="nx">a</span><span class="p">))</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">Serialize_Address_Compact</span><span class="p">(</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">AddressString</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">Serialize_Address_Compact</span><span class="p">(</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span> <span class="p">{</span>
     <span class="c1">// TODO: custom encoding as in
 </span><span class="c1"></span>    <span class="c1">// https://github.com/filecoin-project/lotus/blob/master/chain/address/address.go
 </span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">Deserialize_Address_Compact</span><span class="p">(</span><span class="nx">AddressString</span><span class="p">)</span> <span class="p">(</span><span class="nx">Address</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">Deserialize_Address_Compact</span><span class="p">(</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">)</span> <span class="p">(</span><span class="nx">Address</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// TODO: custom encoding as in
 </span><span class="c1"></span>    <span class="c1">// https://github.com/filecoin-project/lotus/blob/master/chain/address/address.go
 </span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">Deserialize_Address_Compact_Assert</span><span class="p">(</span><span class="nx">x</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
+    <span class="nx">ret</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">Deserialize_Address_Compact</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">ret</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">IsIDType</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
@@ -4781,6 +4792,13 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">IsKeyType</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">GetID</span><span class="p">()</span> <span class="p">(</span><span class="nx">ActorID</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">a</span><span class="p">.</span><span class="nf">IsIDType</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nf">ActorID</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;not an ID address&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Data_</span><span class="p">.</span><span class="nf">As_ID</span><span class="p">(),</span> <span class="kc">nil</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">net</span> <span class="nx">Address_NetworkID</span><span class="p">,</span> <span class="nx">x</span> <span class="nx">ActorID</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>

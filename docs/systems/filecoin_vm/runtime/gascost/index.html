@@ -4677,6 +4677,9 @@ https://github.com/alex-shpak/hugo-book
 	<span class="c1">// Gas cost charged to the originator of an on-chain message (regardless of
 </span><span class="c1"></span>	<span class="c1">// whether it succeeds or fails in application) is given by:
 </span><span class="c1"></span>	<span class="c1">//   OnChainMessageBase + len(serialized message)*OnChainMessagePerByte
+</span><span class="c1"></span>	<span class="c1">// Together, these account for the cost of message propagation and validation,
+</span><span class="c1"></span>	<span class="c1">// up to but excluding any actual processing by the VM.
+</span><span class="c1"></span>	<span class="c1">// This is the cost a block producer burns when including an invalid message.
 </span><span class="c1"></span>	<span class="nx">OnChainMessageBase</span>    <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
 	<span class="nx">OnChainMessagePerByte</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
 
@@ -4685,13 +4688,23 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>	<span class="c1">//   len(return value)*OnChainReturnValuePerByte
 </span><span class="c1"></span>	<span class="nx">OnChainReturnValuePerByte</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
 
-	<span class="c1">// Gas cost for any method invocation (including the original one initiated
-</span><span class="c1"></span>	<span class="c1">// by an on-chain message).
-</span><span class="c1"></span>	<span class="nx">InvokeMethodBase</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
+	<span class="c1">// Gas cost for any message send execution(including the top-level one
+</span><span class="c1"></span>	<span class="c1">// initiated by an on-chain message).
+</span><span class="c1"></span>	<span class="c1">// This accounts for the cost of loading sender and receiver actors and
+</span><span class="c1"></span>	<span class="c1">// (for top-level messages) incrementing the sender&#39;s sequence number.
+</span><span class="c1"></span>	<span class="c1">// Load and store of actor sub-state is charged separately.
+</span><span class="c1"></span>	<span class="nx">SendBase</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
 
-	<span class="c1">// Gas cost charged, in addition to InvokeMethodBase, if a method invocation
+	<span class="c1">// Gas cost charged, in addition to SendBase, if a message send
 </span><span class="c1"></span>	<span class="c1">// is accompanied by any nonzero currency amount.
-</span><span class="c1"></span>	<span class="nx">InvokeMethodTransferFunds</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder_UpdateStateTree</span>
+</span><span class="c1"></span>	<span class="c1">// Accounts for writing receiver&#39;s new balance (the sender&#39;s state is
+</span><span class="c1"></span>	<span class="c1">// already accounted for).
+</span><span class="c1"></span>	<span class="nx">SendTransferFunds</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
+
+	<span class="c1">// Gas cost charged, in addition to SendBase, if a message invokes
+</span><span class="c1"></span>	<span class="c1">// a method on the receiver.
+</span><span class="c1"></span>	<span class="c1">// Accounts for the cost of loading receiver code and method dispatch.
+</span><span class="c1"></span>	<span class="nx">SendInvokeMethod</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
 
 	<span class="c1">// Gas cost (Base + len*PerByte) for any Get operation to the IPLD store
 </span><span class="c1"></span>	<span class="c1">// in the runtime VM context.
@@ -4708,9 +4721,11 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">IpldPutPerByte</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
 
 	<span class="c1">// Gas cost for updating an actor&#39;s substate (i.e., UpdateRelease).
+</span><span class="c1"></span>	<span class="c1">// This is in addition to a per-byte fee for the state as for IPLD Get/Put.
 </span><span class="c1"></span>	<span class="nx">UpdateActorSubstate</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder_UpdateStateTree</span>
 
 	<span class="c1">// Gas cost for creating a new actor (via InitActor&#39;s Exec method).
+</span><span class="c1"></span>	<span class="c1">// Actor sub-state is charged separately.
 </span><span class="c1"></span>	<span class="nx">ExecNewActor</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
 
 	<span class="c1">///////////////////////////////////////////////////////////////////////////
@@ -4743,12 +4758,13 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Affine</span><span class="p">(</span><span class="nx">IpldPutBase</span><span class="p">,</span> <span class="nx">dataSize</span><span class="p">,</span> <span class="nx">IpldPutPerByte</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">valueSent</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span> <span class="p">{</span>
-	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">InvokeMethodBase</span>
-
-	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// TODO: BigInt
-</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">valueSent</span> <span class="p">&gt;</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-		<span class="nx">ret</span> <span class="p">=</span> <span class="nx">ret</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">InvokeMethodTransferFunds</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">value</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span> <span class="p">{</span>
+	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">SendBase</span>
+	<span class="k">if</span> <span class="nx">value</span> <span class="o">!=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+		<span class="nx">ret</span> <span class="p">=</span> <span class="nx">ret</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">SendTransferFunds</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="nx">method</span> <span class="o">!=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodSend</span> <span class="p">{</span>
+		<span class="nx">ret</span> <span class="p">=</span> <span class="nx">ret</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">SendInvokeMethod</span><span class="p">)</span>
 	<span class="p">}</span>
 	<span class="k">return</span> <span class="nx">ret</span>
 <span class="p">}</span>

@@ -91,48 +91,44 @@ type StorageMinerActorState struct {
     _shouldChallenge(
         currEpoch block.ChainEpoch
     ) bool
-    _verifySeal(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
-    _assertSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber)
 
-    _processStagedCommittedSectors(rt Runtime)
-    _updateFailSector(
-        rt                   Runtime
+    _processStagedCommittedSectors()
+    _updateFailSectorAssert(
         sectorNo             sector.SectorNumber
         incrementFaultCount  bool
     )
-    _updateExpireSectors(rt Runtime) [sector.SectorNumber]
-    _updateClearSector(rt Runtime, sectorNo sector.SectorNumber)
-    _updateActivateSector(rt Runtime, sectorNo sector.SectorNumber)
+    _updateExpireSectors(currEpoch block.ChainEpoch) [sector.SectorNumber]
+    _updateClearSectorAssert(sectorNo sector.SectorNumber)
+    _updateActivateSectorAssert(sectorNo sector.SectorNumber)
 
-    _getActivePower()    (block.StoragePower, error)
-    _getInactivePower()  (block.StoragePower, error)
-    _getPreCommitDepositReq(rt Runtime) actor.TokenAmount
+    _getActivePower()          (block.StoragePower, error)
+    _getInactivePower()        (block.StoragePower, error)
+    _getPreCommitDepositReq()  actor.TokenAmount
 
     _getSectorOnChainInfo(sectorNo sector.SectorNumber) (info SectorOnChainInfo, ok bool)
     _getSectorPower(sectorNo sector.SectorNumber) (power block.StoragePower, ok bool)
-    _getSectorDealIDs(sectorNo sector.SectorNumber) (dealIDs [deal.DealID], ok bool)
+    _getSectorDealIDs(sectorNo sector.SectorNumber) (dealIDs deal.DealIDs, ok bool)
 }
 
 type StorageMinerActorCode struct {
     GetOwnerKey(rt Runtime) filcrypto.VRFPublicKey
     GetWorkerKey(rt Runtime) filcrypto.VRFPublicKey
+    OnCronTickEnd(rt Runtime)
     NotifyOfSurprisePoStChallenge(rt Runtime)
+    ProcessSurprisePoSt(rt Runtime)
 
     PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo)  // TODO: check with Magik on sizes
     ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo)
-
-    ProcessSurprisePoSt(rt Runtime)
     ProcessVerifiedElectionPoSt(rt Runtime)
-
-    _checkSurprisePoStSubmissionHappened(rt Runtime)
-    _verifySurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) bool
-    _verifySurprisePoStMeetsTargetReq(rt Runtime) bool
-
     DeclareFaults(rt Runtime, failingSet sector.CompactSectorSet)
     RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet)
 
-    _isChallenged(rt Runtime) bool
-    _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
+    _checkSurprisePoStSubmissionHappened(rt Runtime)
+    _rtVerifySurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) bool
+    _rtVerifySurprisePoStMeetsTargetReq(rt Runtime) bool
+    _rtVerifySeal(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
+    _rtAbortIfSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber)
+
     _onMissedSurprisePoSt(rt Runtime)
     _onSuccessfulPoSt(rt Runtime)
 
@@ -148,15 +144,8 @@ type StorageMinerActorCode struct {
         faultType      sector.StorageFaultType
     )
 
-    ClaimDealPaymentsForSector(
-        rt        Runtime
-        sectorNo  sector.SectorNumber
-        lastPoSt  block.ChainEpoch
-    )
     _submitPowerReport(rt Runtime, lastPoSt block.ChainEpoch)
-    _expireSectors(rt Runtime)
     _expirePreCommittedSectors(rt Runtime)
-    _ensurePledgeCollateralSatisfied(rt Runtime)
 }
 
 type MinerInfo struct {

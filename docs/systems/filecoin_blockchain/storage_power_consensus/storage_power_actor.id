@@ -22,23 +22,22 @@ type StoragePowerActorState struct {
     EscrowTable           actor.BalanceTableHAMT
     _minersLargerThanMin  util.UVarint
 
-    _slashPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) actor.TokenAmount
-    _lockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
-    _unlockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
+    ActivePowerMeetsConsensusMinimum(minPower block.StoragePower) bool
+    _getActivePowerForConsensus() block.StoragePower
+    _slashPledgeCollateral(address addr.Address, amount actor.TokenAmount) actor.TokenAmount
+
     _getPowerTotalForMiner(minerAddr addr.Address) (power block.StoragePower, ok bool)
+    _getTotalPower() block.StoragePower
     _getPledgeCollateralReq(power block.StoragePower) actor.TokenAmount
     _getPledgeCollateralReqForMiner(minerAddr addr.Address) actor.TokenAmount
     _selectMinersToSurprise(challengeCount int, randomness util.Randomness) [addr.Address]
-    _shouldChallenge(rt Runtime, networkPower block.StoragePower) bool
-
-    _safeGetPowerEntry(rt Runtime, minerID addr.Address) PowerTableEntry
     _getAffectedPledge(
-        rt             Runtime
         minerID        addr.Address
         affectedPower  block.StoragePower
     ) actor.TokenAmount
-    _getActivePower() block.StoragePower
-    ActivePowerMeetsConsensusMinimum(minPower block.StoragePower) bool
+
+    _getStorageFaultSlashPledgePercent(faultType sector.StorageFaultType) int
+    _rtGetPowerEntryOrAbort(rt Runtime, minerID addr.Address) PowerTableEntry
 }
 
 type StoragePowerActorCode struct {
@@ -55,13 +54,7 @@ type StoragePowerActorCode struct {
     ) addr.Address
 
     RemoveStorageMiner(rt Runtime, addr addr.Address)
-
-    // PowerTable Operations
-    GetTotalPower(rt Runtime) block.StoragePower
-    GetSectorPower(rt Runtime) block.StoragePower
-
     EnsurePledgeCollateralSatisfied(rt Runtime)
-
     ProcessPowerReport(rt Runtime, report PowerReport)
     SlashPledgeForStorageFault(
         rt             Runtime
@@ -77,9 +70,4 @@ type StoragePowerActorCode struct {
     )
 
     Surprise(rt Runtime, ticket block.Ticket) [addr.Address]
-
-    PowerMeetsConsensusMinimum(rt Runtime, minerPower block.StoragePower)
-
-    // this should call ReportConsensusFault, numSectors should be all sectors
-    // ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors UVarint)
 }

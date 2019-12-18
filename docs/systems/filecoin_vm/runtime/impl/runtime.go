@@ -8,6 +8,7 @@ import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
@@ -29,6 +30,8 @@ type ActorStateHandle = vmr.ActorStateHandle
 
 var EnsureErrorCode = exitcode.EnsureErrorCode
 var SystemError = exitcode.SystemError
+
+type Bytes = util.Bytes
 
 var Assert = util.Assert
 var IMPL_FINISH = util.IMPL_FINISH
@@ -65,11 +68,13 @@ func (h *ActorStateHandle_I) Take() ActorSubstateCID {
 // interpreter once per actor method invocation, and responds to that method's Runtime
 // API calls.
 type VMContext struct {
-	_globalStateInit      st.StateTree
-	_globalStatePending   st.StateTree
-	_running              bool
-	_actorAddress         addr.Address
-	_actorStateAcquired   bool
+	_globalStateInit    st.StateTree
+	_globalStatePending st.StateTree
+	_running            bool
+	_actorAddress       addr.Address
+	_actorStateAcquired bool
+	// Tracks whether actor substate has changed in order to charge gas just once
+	// regardless of how many times it's written.
 	_actorSubstateUpdated bool
 
 	_immediateCaller addr.Address
@@ -258,16 +263,45 @@ func (rt *VMContext) ValidateImmediateCallerMatches(
 	rt._numValidateCalls += 1
 }
 
+func CallerPattern_MakeAcceptAnyOfTypes(rt *VMContext, types []actor.BuiltinActorID) CallerPattern {
+	return CallerPattern{
+		Matches: func(y addr.Address) bool {
+			codeID, ok := rt.GetActorCodeID(y)
+			if !ok {
+				panic("Internal runtime error: actor not found")
+			}
+			Assert(codeID != nil)
+			if !codeID.IsBuiltin() {
+				return false
+			}
+			for _, type_ := range types {
+				if codeID.As_Builtin() == type_ {
+					return true
+				}
+			}
+			return false
+		},
+	}
+}
+
 func (rt *VMContext) ValidateImmediateCallerIs(callerExpected addr.Address) {
-	rt.ValidateImmediateCallerMatches(CallerPattern_MakeSingleton(callerExpected))
+	rt.ValidateImmediateCallerMatches(vmr.CallerPattern_MakeSingleton(callerExpected))
+}
+
+func (rt *VMContext) ValidateImmediateCallerInSet(callersExpected []addr.Address) {
+	rt.ValidateImmediateCallerMatches(vmr.CallerPattern_MakeSet(callersExpected))
 }
 
 func (rt *VMContext) ValidateImmediateCallerAcceptAnyOfType(type_ actor.BuiltinActorID) {
-	rt.ValidateImmediateCallerMatches(CallerPattern_MakeAcceptAnyOfType(rt, type_))
+	rt.ValidateImmediateCallerAcceptAnyOfTypes([]actor.BuiltinActorID{type_})
+}
+
+func (rt *VMContext) ValidateImmediateCallerAcceptAnyOfTypes(types []actor.BuiltinActorID) {
+	rt.ValidateImmediateCallerMatches(CallerPattern_MakeAcceptAnyOfTypes(rt, types))
 }
 
 func (rt *VMContext) ValidateImmediateCallerAcceptAny() {
-	rt.ValidateImmediateCallerMatches(CallerPattern_MakeAcceptAny())
+	rt.ValidateImmediateCallerMatches(vmr.CallerPattern_MakeAcceptAny())
 }
 
 func (rt *VMContext) _checkNumValidateCalls(x int) {
@@ -331,7 +365,7 @@ func (rt *VMContext) _transferFunds(from addr.Address, to addr.Address, amount a
 	return nil
 }
 
-func (rt *VMContext) _getActorCodeID(actorAddr addr.Address) (ret actor.CodeID, ok bool) {
+func (rt *VMContext) GetActorCodeID(actorAddr addr.Address) (ret actor.CodeID, ok bool) {
 	IMPL_FINISH()
 	panic("")
 }
@@ -409,7 +443,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 
 	initGasRemaining := rtOuter._gasRemaining
 
-	rtOuter._rtAllocGas(gascost.InvokeMethod(input.Value()))
+	rtOuter._rtAllocGas(gascost.InvokeMethod(input.Value(), input.Method()))
 
 	receiver, receiverAddr := rtOuter._resolveReceiver(input.To())
 	receiverCode, err := loadActorCode(receiver.CodeID())
@@ -483,7 +517,7 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 
 	// Allocate an ID address from the init actor and map the pubkey To address to it.
 	newIdAddr := initSubState.MapAddressToNewID(targetRaw)
-	rt._saveInitActorState(initSubState) // TODO: refactor so that this charges gas in _updateActorSubstateInternal.
+	rt._saveInitActorState(initSubState)
 
 	// Create new account actor (charges gas).
 	rt._createActor(actor.CodeID(actor.CodeID_Make_Builtin(actor.BuiltinActorID_Account)), newIdAddr)
@@ -492,7 +526,7 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 	substate := &sysactors.AccountActorState_I{
 		Address_: targetRaw,
 	}
-	rt._saveAccountActorState(newIdAddr, substate) // TODO: refactor to charge gas implicitly.
+	rt._saveAccountActorState(newIdAddr, substate)
 	act, _ = rt._globalStatePending.GetActor(newIdAddr)
 	return act, newIdAddr
 }
@@ -509,16 +543,39 @@ func (rt *VMContext) _loadInitActorState() sysactors.InitActorState {
 }
 
 func (rt *VMContext) _saveInitActorState(state sysactors.InitActorState) {
+	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
+	// than the receiver.
+	rt._rtAllocGas(gascost.UpdateActorSubstate)
 	rt._updateActorSubstateInternal(addr.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
 }
 
 func (rt *VMContext) _saveAccountActorState(address addr.Address, state sysactors.AccountActorState) {
+	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
+	// than the receiver.
+	rt._rtAllocGas(gascost.UpdateActorSubstate)
 	rt._updateActorSubstateInternal(address, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
 }
 
 func (rt *VMContext) _sendInternalOutputs(input InvocInput, errSpec ErrorHandlingSpec) (InvocOutput, exitcode.ExitCode) {
 	ret := rt._sendInternal(input, errSpec)
 	return vmr.InvocOutput_Make(ret.ReturnValue()), ret.ExitCode()
+}
+
+func (rt *VMContext) Send(
+	toAddr addr.Address, methodNum actor.MethodNum, params actor.MethodParams, value actor.TokenAmount) InvocOutput {
+
+	return rt.SendPropagatingErrors(vmr.InvocInput_Make(toAddr, methodNum, params, value))
+}
+
+func (rt *VMContext) SendQuery(toAddr addr.Address, methodNum actor.MethodNum, params []util.Serialization) util.Serialization {
+	invocOutput := rt.Send(toAddr, methodNum, params, actor.TokenAmount(0))
+	ret := invocOutput.ReturnValue()
+	Assert(ret != nil)
+	return ret
+}
+
+func (rt *VMContext) SendFunds(toAddr addr.Address, value actor.TokenAmount) {
+	rt.Send(toAddr, actor.MethodSend, []util.Serialization{}, value)
 }
 
 func (rt *VMContext) SendPropagatingErrors(input InvocInput) InvocOutput {
@@ -590,6 +647,13 @@ func (rt *VMContext) CurrEpoch() block.ChainEpoch {
 	panic("")
 }
 
+func (rt *VMContext) CurrIndices() indices.Indices {
+	// TODO: compute from state tree (rt._globalStatePending), using individual actor
+	// state helper functions when possible
+	TODO()
+	panic("")
+}
+
 func (rt *VMContext) AcquireState() ActorStateHandle {
 	rt._checkRunning()
 	rt._checkActorStateNotAcquired()
@@ -611,29 +675,4 @@ func (rt *VMContext) Compute(f ComputeFunctionID, args []util.Any) Any {
 	gasCost := def.GasCostFn(args)
 	rt._rtAllocGas(gasCost)
 	return def.Body(args)
-}
-
-func CallerPattern_MakeSingleton(x addr.Address) CallerPattern {
-	return vmr.CallerPattern{
-		Matches: func(y addr.Address) bool { return x == y },
-	}
-}
-
-func CallerPattern_MakeAcceptAny() CallerPattern {
-	return vmr.CallerPattern{
-		Matches: func(addr.Address) bool { return true },
-	}
-}
-
-func CallerPattern_MakeAcceptAnyOfType(rt *VMContext, type_ actor.BuiltinActorID) CallerPattern {
-	return CallerPattern{
-		Matches: func(y addr.Address) bool {
-			codeID, ok := rt._getActorCodeID(y)
-			if !ok {
-				panic("Internal runtime error: actor not found")
-			}
-			Assert(codeID != nil)
-			return (codeID.IsBuiltin() && (codeID.As_Builtin() == type_))
-		},
-	}
 }
