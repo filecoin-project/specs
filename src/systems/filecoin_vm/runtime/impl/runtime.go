@@ -64,10 +64,21 @@ func (h *ActorStateHandle_I) Take() ActorSubstateCID {
 	return ret
 }
 
+// Placeholder interface for IPLD state-tree storage.
+// TODO: rework the state tree to write to this store.
+// Maybe push serialization down into it.
+type IPLDStore interface {
+	// Puts a serialized value in the store, returning the CID.
+	Put(value []byte) ipld.CID
+	// Retrieves a serialized value from the store by CID. Returns the value and whether it was found.
+	Get(cid ipld.CID) ([]byte, bool)
+}
+
 // Concrete instantiation of the Runtime interface. This should be instantiated by the
 // interpreter once per actor method invocation, and responds to that method's Runtime
 // API calls.
 type VMContext struct {
+	_store              IPLDStore
 	_globalStateInit    st.StateTree
 	_globalStatePending st.StateTree
 	_running            bool
@@ -95,6 +106,7 @@ type VMContext struct {
 }
 
 func VMContext_Make(
+	store IPLDStore,
 	toplevelSender addr.Address,
 	toplevelBlockWinner addr.Address,
 	toplevelSenderCallSeqNum actor.CallSeqNum,
@@ -105,6 +117,7 @@ func VMContext_Make(
 	gasRemaining msg.GasAmount) *VMContext {
 
 	return &VMContext{
+		_store:                store,
 		_globalStateInit:      globalState,
 		_globalStatePending:   globalState,
 		_running:              false,
@@ -457,6 +470,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 	}
 
 	rtInner := VMContext_Make(
+		rtOuter._store,
 		rtOuter._toplevelSender,
 		rtOuter._toplevelBlockWinner,
 		rtOuter._toplevelSenderCallSeqNum,
@@ -534,12 +548,10 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 func (rt *VMContext) _loadInitActorState() sysactors.InitActorState {
 	initState, ok := rt._globalStatePending.GetActor(addr.InitActorAddr)
 	util.Assert(ok)
-	initStateBytes := rt.IpldGet(ipld.CID(initState.State()))
-	initSubState, err := sysactors.Deserialize_InitActorState(util.Serialization(initStateBytes.As_Bytes()))
-	if err != nil {
-		rt.AbortAPI("State deserialization error")
-	}
-	return initSubState
+	var initSubState sysactors.InitActorState_I
+	ok = rt.IpldGet(ipld.CID(initState.State()), &initSubState)
+	util.Assert(ok)
+	return &initSubState
 }
 
 func (rt *VMContext) _saveInitActorState(state sysactors.InitActorState) {
@@ -618,28 +630,20 @@ func (rt *VMContext) NewActorAddress() addr.Address {
 }
 
 func (rt *VMContext) IpldPut(x ipld.Object) ipld.CID {
-	var serializedSize int
-	IMPL_FINISH()
-	panic("") // compute serializedSize
-
-	rt._rtAllocGas(gascost.IpldPut(serializedSize))
-
-	IMPL_FINISH()
-	panic("") // write to IPLD store
+	IMPL_FINISH() // Serialization
+	serialized := []byte{}
+	cid := rt._store.Put(serialized)
+	rt._rtAllocGas(gascost.IpldPut(len(serialized)))
+	return cid
 }
 
-func (rt *VMContext) IpldGet(c ipld.CID) vmr.Runtime_IpldGet_FunRet {
-	IMPL_FINISH()
-	panic("") // get from IPLD store
-
-	var serializedSize int
-	IMPL_FINISH()
-	panic("") // retrieve serializedSize
-
-	rt._rtAllocGas(gascost.IpldGet(serializedSize))
-
-	IMPL_FINISH()
-	panic("") // return item
+func (rt *VMContext) IpldGet(c ipld.CID, o ipld.Object) bool {
+	serialized, ok := rt._store.Get(c)
+	if ok {
+		rt._rtAllocGas(gascost.IpldGet(len(serialized)))
+	}
+	IMPL_FINISH() // Deserialization into o
+	return ok
 }
 
 func (rt *VMContext) CurrEpoch() block.ChainEpoch {

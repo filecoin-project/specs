@@ -40,6 +40,10 @@ func (st *StorageMinerActorState_I) _shouldChallenge(currEpoch block.ChainEpoch)
 	return st.ChallengeStatus().ShouldChallenge(currEpoch)
 }
 
+func (st *StorageMinerActorState_I) _verifySeal(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool {
+	panic("TODO")
+}
+
 func (st *StorageMinerActorState_I) _processStagedCommittedSectors(rt Runtime) {
 	for sectorNo, stagedInfo := range st.StagedCommittedSectors() {
 		st.Sectors()[sectorNo] = stagedInfo
@@ -51,7 +55,7 @@ func (st *StorageMinerActorState_I) _processStagedCommittedSectors(rt Runtime) {
 	st.Impl().StagedCommittedSectors_ = make(map[sector.SectorNumber]SectorOnChainInfo)
 }
 
-func (st *StorageMinerActorState_I) _getActivePower(rt Runtime) (block.StoragePower, error) {
+func (st *StorageMinerActorState_I) _getActivePower() (block.StoragePower, error) {
 	activePower := block.StoragePower(0)
 
 	for _, sectorNo := range st.SectorTable().Impl().ActiveSectors_.SectorsOn() {

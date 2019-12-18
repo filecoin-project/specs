@@ -54,7 +54,7 @@ func (st *StoragePowerActorState_I) _getActivePower() block.StoragePower {
 	return activePower
 }
 
-func (st *StoragePowerActorState_I) _slashPledgeCollateral(
+func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime,
 	minerAddr addr.Address, slashAmountRequested actor.TokenAmount) actor.TokenAmount {
 
 	if slashAmountRequested < 0 {
@@ -71,6 +71,14 @@ func (st *StoragePowerActorState_I) _slashPledgeCollateral(
 	st.Impl().EscrowTable_ = newTable
 
 	return amountSlashed
+}
+
+func (st *StoragePowerActorState_I) _lockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) {
+	panic("TODO")
+}
+
+func (st *StoragePowerActorState_I) _unlockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) {
+	panic("TODO")
 }
 
 func (st *StoragePowerActorState_I) _getPledgeCollateralReq(power block.StoragePower) actor.TokenAmount {
@@ -125,6 +133,10 @@ func (st *StoragePowerActorState_I) _selectMinersToSurprise(challengeCount int, 
 	}
 
 	return selectedMiners
+}
+
+func (st *StoragePowerActorState_I) _shouldChallenge(rt Runtime, networkPower block.StoragePower) bool {
+	panic("TODO")
 }
 
 func (st *StoragePowerActorState_I) _safeGetPowerEntry(rt Runtime, minerID addr.Address) PowerTableEntry {

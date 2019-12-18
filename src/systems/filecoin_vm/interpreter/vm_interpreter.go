@@ -29,6 +29,9 @@ const (
 	SenderResolveSpec_Invalid
 )
 
+// Placeholder for an IPLD tree store which is provided to the interpreter.
+var store vmri.IPLDStore
+
 // Applies all the message in a tipset, along with implicit block- and tipset-specific state
 // transitions.
 func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSetMessages) (outTree st.StateTree, receipts []vmr.MessageReceipt) {
@@ -233,6 +236,7 @@ func _applyMessageInternal(
 	Assert(ok)
 
 	rt := vmri.VMContext_Make(
+		store,
 		message.From(),
 		topLevelBlockWinner,
 		fromActor.CallSeqNum(),
