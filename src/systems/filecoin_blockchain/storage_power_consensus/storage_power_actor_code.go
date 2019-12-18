@@ -17,11 +17,8 @@ import (
 ////////////////////////////////////////////////////////////////////////////////
 
 func (a *StoragePowerActorCode_I) AddBalance(rt Runtime, minerAddr addr.Address) {
-	if !rt.ValidateIsStorageMiner(minerAddr) {
-		rt.AbortArgMsg("spa.AddBalance: invalid minerAdder.")
-	}
-	// either worker or owner can add balance to a miner
-	rt.ValidateImmediateCallerDetermineRecipient(minerAddr)
+	// caller verification
+	TODO()
 
 	msgValue := rt.ValueReceived()
 
@@ -40,11 +37,8 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Add
 		rt.AbortArgMsg("spa.WithdrawBalance: negative amount.")
 	}
 
-	if !rt.ValidateIsStorageMiner(minerAddr) {
-		rt.AbortArgMsg("spa.WithdrawBalance: invalid minerAddr.")
-	}
-	// either worker or owner can withdraw balance from a miner
-	rt.ValidateImmediateCallerDetermineRecipient(minerAddr)
+	// caller verification
+	TODO()
 	msgSender := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
@@ -99,9 +93,11 @@ func (a *StoragePowerActorCode_I) CreateStorageMiner(
 }
 
 func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
 
 	minerAddr := rt.ImmediateCaller()
+
+	// caller verification
+	TODO()
 
 	h, st := a.State(rt)
 
@@ -136,10 +132,9 @@ func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime) {
 func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) {
 
 	minerAddr := rt.ImmediateCaller()
-	ok := rt.ValidateIsStorageMiner(minerAddr)
-	if !ok {
-		rt.AbortStateMsg("spa.EnsurePledgeCollateralSatisfied: caller must be StorageMiner.")
-	}
+
+	// caller verification
+	TODO()
 
 	h, st := a.State(rt)
 	pledgeReq := st._getPledgeCollateralReqForMiner(minerAddr)
@@ -157,10 +152,9 @@ func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) {
 func (a *StoragePowerActorCode_I) SlashPledgeForStorageFault(rt Runtime, affectedPower block.StoragePower, faultType sector.StorageFaultType) {
 
 	minerAddr := rt.ImmediateCaller()
-	ok := rt.ValidateIsStorageMiner(minerAddr)
-	if !ok {
-		rt.AbortStateMsg("spa.SlashPledgeForStorageFault: caller must be StorageMiner.")
-	}
+
+	// caller verification
+	TODO()
 
 	h, st := a.State(rt)
 
@@ -182,10 +176,9 @@ func (a *StoragePowerActorCode_I) SlashPledgeForStorageFault(rt Runtime, affecte
 func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerReport) {
 
 	minerAddr := rt.ImmediateCaller()
-	ok := rt.ValidateIsStorageMiner(minerAddr)
-	if !ok {
-		rt.AbortStateMsg("spa.ProcessPowerReport: caller must be StorageMiner.")
-	}
+
+	// caller verification
+	TODO()
 
 	h, st := a.State(rt)
 
