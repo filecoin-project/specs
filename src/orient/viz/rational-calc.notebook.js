@@ -14,9 +14,6 @@ viewof base = jsonToSliders(
     "porep_lambda": {value: 10, min: 0, max: 128, step: 1},
     "post_mtree_layers_cached": {value: 25, min: 0, max: 40, step: 1},
     "post_lambda": {value: 10, min: 0, max: 128, step: 1},
-    "sector_size_gib": {value: 32, min: 1, max: 1024, step: 1},
-    "window_size_mib": {value: 1024, min: 4, max: 32 * 1024, step: 1},
-    "wrapper_parents": {value: 100, min: 0, max: 1000, step: 1},
   },
   { "!StackedReplicaUnaligned": true}
 )
@@ -25,18 +22,23 @@ md`### Constants`
 
 md`#### Graph`
 
+md`##### Chung params`
 viewof stackedChungParams = jsonToSliders(
   {
     "chung_delta": {value: 0.06, min: 0.01, max: 0.08, step: 0.01},
     "expander_parents": {value: 16, min: 0, max: 128, step: 1},
     "rig_malicious_cost_per_year": {value: 2000, min: 0, max: 10000, step: 0.1},
     "hash_gb_per_second": {value: 640000, min: 0, max: 100000000, step: 1},
+    "sector_size_gib": {value: 32, min: 1, max: 1024, step: 1},
+    "window_size_mib": {value: 1024, min: 4, max: 32 * 1024, step: 1},
+    "wrapper_parents": {value: 100, min: 0, max: 1000, step: 1},
   },
   {
     "graph_name": "Chung",
     "!StackedChungParameters": true,
   })
 
+md`##### SDR params`
 viewof stackedSDRParams = jsonToSliders(
   {
     "sdr_delta": {value: 0.01, min: 0.01, max: 0.08, step: 0.01},
@@ -46,7 +48,10 @@ viewof stackedSDRParams = jsonToSliders(
   {
     "graph_name": "SDR",
     "!StackedSDRParameters": true,
-    "sdr_delta": 0.01
+    "!TimingAssumption": true,
+    "sdr_delta": 0.01,
+    "windows": 1,
+    "time_amax": 2
   })
 
 
@@ -82,7 +87,7 @@ viewof filecoin = jsonToSliders({
   "fallback_ratio": {value: 0.05, min: 0.01, max: 1, step: 0.01},
   "filecoin_reseals_per_year": {value: 1, min: 0, max: 365, step: 1},
   "filecoin_storage_capacity_eib": {value: 1, min: 0.5, max: 20, step: 0.5},
-  "polling_time": {value: 15, min: 15, max: 60, step: 1},
+  "block_time": {value: 15, min: 15, max: 60, step: 1},
   "cost_amax": {value: 1, min: 1, max: 10, step: 1},
   "hashing_amax": {value: 2, min: 1, max: 10, step: 1},
   "spacegap": {value: 0.2, min: 0.01, max: 0.2, step: 0.01},
@@ -97,8 +102,8 @@ md`### Miner`
 md`#### Hardware Config`
 
 viewof rig = jsonToSliders({
-  "rig_cpu_cost": {value: 700, min: 0, max: 10000, step: 1},
-  "rig_gpu_cost": {value: 1200, min: 0, max: 10000, step: 1},
+  "rig_cpu_cost": {value: 1200, min: 0, max: 10000, step: 100},
+  "rig_gpu_cost": {value: 1200, min: 0, max: 10000, step: 100},
   "rig_cpu_lifetime_years": {value: 2, min: 1, max: 10, step: 1},
   "rig_gpu_lifetime_years": {value: 2, min: 1, max: 10, step: 1},
   "rig_cores": {value: 16, min: 1, max: 512, step: 1},
@@ -106,7 +111,7 @@ viewof rig = jsonToSliders({
   "rig_ram_gib": {value: 32, min: 1, max: 128, step: 1},
   "rig_storage_latency": {value: 0.003, min: 0.0003, max: 0.01, step: 0.0001},
   "rig_storage_min_tib": {value: 100, min: 0.5, max: 1024, step: 0.5},
-  "rig_storage_parallelization": {value: 2, min: 1, max: 128, step: 1},
+  "rig_storage_parallelization": {value: 4, min: 1, max: 128, step: 1},
   "rig_storage_read_mbs": {value: 80, min: 80, max: 1000, step: 1},
   "cost_gb_per_month": {value: 0.0025, min: 0.0001, max: 0.1, step: 0.0001},
   "extra_storage_time": {value: 0, min: 0, max: 10, step: 1 },
@@ -121,6 +126,7 @@ bench = ({
   "merkle_tree_hash_time": 1.7028e-5/2,
   "snark_constraint_time": 3.012e-5/2,
   "ticket_hash": 1.7028e-5/2,
+  "kdf_time_fastcpu": 0.0000000128/2
 })
 
 md`### SNARKs`
@@ -151,12 +157,12 @@ constraints = ({
 md`## Filters`
 
 // Window size MiB
-window_size_mib_choices = [4, 64, 128, 1024, 16384, 32768]
-viewof window_size_mib_config = checkbox({
-  title: "Window Sizes",
-  options: window_size_mib_choices.map(d => ({value: d, label: d})),
-  value: window_size_mib_choices,
-})
+// window_size_mib_choices = [4, 64, 128, 1024, 16384, 32768]
+// viewof window_size_mib_config = checkbox({
+//   title: "Window Sizes",
+//   options: solved_many_pre.map(d => d['window_size_mib']).map(d => ({value: d, label: d})),
+//   value: solved_many_pre.map(d => d['window_size_mib']),
+// })
 
 md`## Utility`
 
@@ -200,6 +206,30 @@ bar_chart(solved_many, 'proofs_per_block_kib', [
   filter: d => d < Math.pow(10, proofs_per_block_kib_ruler),
   yrule: Math.pow(10, proofs_per_block_kib_ruler)
 })
+
+md`### Encoding time (estimated from benchmarks)`
+
+viewof encoding_time_ruler = chooser(solved_many, 'encoding_time', 3*60*60)
+
+bar_chart(solved_many, 'encoding_time', [
+  'encoding_time',
+], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
+  filter: d => d < Math.pow(10, encoding_time_ruler),
+  yrule: Math.pow(10, encoding_time_ruler)
+})
+
+md`### Encoding time (estimated from fastest CPU)`
+
+viewof encoding_time_fastcpu_ruler = chooser(solved_many, 'encoding_time_fastcpu', 3*60*60)
+
+bar_chart(solved_many, 'encoding_time_fastcpu', [
+  'encoding_time_fastcpu',
+], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
+  filter: d => d < Math.pow(10, encoding_time_fastcpu_ruler),
+  yrule: Math.pow(10, encoding_time_fastcpu_ruler)
+})
+
+
 
 md`### Retrieval`
 
@@ -259,6 +289,34 @@ bar_chart(solved_many, 'porep_cost', [
   yrule: Math.pow(10, porep_cost_ruler)
 })
 
+md`### PoRep constraints`
+
+viewof porep_snark_constraints_ruler = chooser(solved_many, 'porep_snark_constraints', 1000 * 1000 * 1000)
+
+bar_chart(solved_many, 'porep_snark_constraints', [
+  'porep_commc_leaves_constraints',
+  'porep_commc_inclusions_constraints',
+  'porep_commr_inclusions_constraints',
+  'porep_commd_inclusions_constraints',
+  'porep_labeling_proofs_constraints'
+], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
+  filter: d => d < Math.pow(10, porep_snark_constraints_ruler),
+  yrule: Math.pow(10, porep_snark_constraints_ruler)
+})
+
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'window_size_mib',
+  'mtree_hash_name',
+  'porep_commc_leaves_constraints',
+  'porep_commc_inclusions_constraints',
+  'porep_commr_inclusions_constraints',
+  'porep_commd_inclusions_constraints',
+  'porep_labeling_proofs'
+], [])
+
+
 
 // bar_chart(solved_many, 'porep_commit_time', [
 //   'commr_time',
@@ -296,6 +354,9 @@ table_constraints(solved_many, [
   'epost_data_access_parallel',
   'epost_mtree_read_parallel',
   'epost_leaves_read_parallel',
+  'epost_leaves_read',
+  'epost_challenged_sectors',
+  'post_leaf_read',
   'post_ticket_gen',
   'epost_inclusions_time_parallel',
   'post_snark_time_parallel',
@@ -434,14 +495,22 @@ md`### Vars`
 constants = Object.assign({}, base, constraints, filecoin, bench, rig)
 
 combos = {
-  let start = [constants]
-  let proofs = extend_query(start, [wrapperVariant, wrapper, stackedReplicas])
-  let graphs = extend_query(proofs, [stackedChungParams, stackedSDRParams])
-  let windows = extend_query(graphs, window_size_mib_choices.map(d => ({window_size_mib: +d})))
-  let query = extend_query(windows, [poseidon, pedersen])
-
+  let query = [constants]
+  query = extend_query(query, [stackedReplicas])
+  query = extend_query(query, [stackedSDRParams])
+  query = extend_query(query, [poseidon, pedersen])
   return query
 }
+
+// combos = {
+//   let start = [constants]
+//   let proofs = extend_query(start, [wrapperVariant, wrapper, stackedReplicas])
+//   let graphs = extend_query(proofs, [stackedChungParams, stackedSDRParams])
+//   let windows = extend_query(graphs, window_size_mib_choices.map(d => ({window_size_mib: +d})))
+//   let query = extend_query(windows, [poseidon, pedersen])
+
+//   return query
+// }
 
 createJsonDownloadButton(combos)
 
@@ -454,7 +523,7 @@ solved_many_pre = (await solve_manys(combos))
 utility_fun = (data) => ev(utility_raw, data)
 
 solved_many = solved_many_pre
-  .filter(d => window_size_mib_config.some(c => d['window_size_mib'] === +c))
+  // .filter(d => window_size_mib_config.some(c => d['window_size_mib'] === +c))
   .map(d => {
     const utility = utility_fun(d)
     return Object.assign({}, d, {utility: utility})
@@ -531,7 +600,6 @@ function solve_manys(json) {
       .flat()
       .filter(d => d !== null)
       .map(d => {
-        console.log(d)
         const results = {}
         Object.keys(d)
           .filter(key => !key.includes('%'))

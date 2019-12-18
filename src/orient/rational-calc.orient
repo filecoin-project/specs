@@ -28,7 +28,7 @@ Rig:
   rig_storage_read_mibs = rig_storage_read_mbs * mb_to_mib
   rig_storage_min = rig_storage_min_tib * b_in_tib
   rig_sectors_min = rig_storage_min / sector_size
-  rig_storage_parallelization_min = epost_data_access / polling_time
+  rig_storage_parallelization_min = epost_data_access / block_time
 
   rig_storage_unit_max = rig_storage_min / rig_storage_parallelization_min
   rig_storage_unit_max_tib = rig_storage_unit_max / b_in_tib 
@@ -383,13 +383,13 @@ ProofOfReplication:
     describe(encoding_time, "Time to encode a sector", secs)
     describe(encoding_time_parallel, "Time to encode a sector in parallel", secs)
     describe(encoding_time_asic, "Time to encode a sector with an ASIC", secs)
-    describe(encoding_time_parallel_asic, "Time to encode a sector in parallel with ASICs", secs)
     describe(encoding_window_time, "Time to encode a window", secs)
     describe(encoding_window_time_parallel, "Time to encode a window in parallel", secs)
     describe(encoding_window_time_asic, "Time to encode a window with an ASIC", secs)
     describe(encoding_window_time_parallel_asic, "Time to encode a window in parallel with ASICs", secs)
     describe(kdf_time, "Time to compute a KDF", secs)
 
+    // TODO: adding wrapper layer
     encoding_time = encoding_window_time * windows
 
     encoding_window_time = window_nodes * ((1 + graph_parents) * kdf_time) * stacked_layers
@@ -402,11 +402,16 @@ ProofOfReplication:
       encoding_time_parallel = encoding_time / rig_cores
       encoding_window_time_parallel = encoding_window_time / rig_cores
 
-    // TODO: adding wrapper layer
+    Fastest:
+      describe(encoding_time_fastcpu, "Time to encode with the fastest stock CPU", secs)
+      describe(encoding_time_mins_fastcpu, "Time to encode with the fastest stock CPU", mins)
+      describe(kdf_time_fastcpu, "Time to do a 32 bytes hash on the fastest stock CPU", secs)
+      encoding_time_fastcpu = windows * (window_nodes * ((1 + graph_parents) * kdf_time_fastcpu) * stacked_layers)
+
+      encoding_time_mins_fastcpu = encoding_time_fastcpu / secs_in_min
 
     Asic:
-      encoding_time_parallel_asic = encoding_time_parallel / hashing_amax
-      encoding_time_asic = encoding_time / hashing_amax
+      encoding_time_asic = encoding_time_fastcpu / hashing_amax
       encoding_window_time_asic = encoding_window_time / hashing_amax
       encoding_window_time_parallel_asic = encoding_window_time_parallel / hashing_amax
 
@@ -419,7 +424,6 @@ ProofOfReplication:
     describe(decoding_first_node_time_parallel, "Time to decode the first node in a sector in parallel", secs)
 
     // This scales down encoding time by one layer
-
     Decoding (StackedReplicas):
       // Decoding in StackedReplicas: read the window output and decode it
       window_read_time = window_size_mib / rig_storage_read_mibs
@@ -463,7 +467,7 @@ ProofOfReplication:
     porep_decoding_cost = decoding_time * rig_cpu_core_cost_secs
 
   SNARK:
-    describe(porep_snark_constraints, "Constraints for a PoRep")
+    describe(porep_snark_constraints, "Constraints for a PoRep", constraints)
     describe(porep_snark_partitions, "Number of partitions of a PoRep proof")
     describe(porep_snark_time, "Time to generate a PoRep SNARK proof", secs)
     describe(porep_snark_time_mins, "Time to generate a PoRep SNARK proof", mins)
@@ -488,6 +492,11 @@ ProofOfReplication:
     describe(column_leaves, "Constraints to check all the leaves generation required in a window")
     describe(window_column_leaves, "Constraints to check all the leaves generation required for all windows")
     describe(porep_snark_partition_time, "Time to compute a single snark partion", secs)
+    describe(porep_commd_inclusions_constraints, "Constraints for CommD inclusions (PoRep)")
+    describe(porep_commr_inclusions_constraints, "Constraints for CommR inclusions (PoRep)")
+    describe(porep_commc_inclusions_constraints, "Constraints for CommC inclusions (PoRep)")
+    describe(porep_commc_leaves_constraints, "Constraints for CommC leaves (PoRep)")
+    describe(porep_labeling_proofs_constraints, "Constraints for labeling proofs (PoRep)")
 
     // D
     // Data layer committed with merkle tree
@@ -525,8 +534,17 @@ ProofOfReplication:
     // Constraints (WindowEncoding):
     //   porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + window_data_inclusions + window_replica_inclusions*2
 
+
     Constraints (StackedReplicas):
-      porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + data_inclusions + replica_inclusions*2
+      porep_commd_inclusions_constraints = data_inclusions
+      porep_commr_inclusions_constraints = replica_inclusions
+      porep_commc_inclusions_constraints = window_inclusions
+      porep_commc_leaves_constraints = window_column_leaves
+      porep_labeling_proofs_constraints = window_labeling_proof
+
+      porep_snark_constraints = porep_commc_leaves_constraints + porep_commc_inclusions_constraints + porep_commr_inclusions_constraints + porep_commd_inclusions_constraints + porep_labeling_proofs_constraints
+
+      // porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + data_inclusions + replica_inclusions*2
 
     // TODO: add wrapper constraints
     Constraints (Wrapping):
@@ -553,6 +571,8 @@ ProofOfReplication (StackedSDRParameters):
   porep_challenges = -porep_lambda / (log2(1 - sdr_delta))
   post_challenges = -post_lambda / (log2(1 - sdr_eps/2))
 
+  drg_e = 0.8
+  drg_d = 1/4
   drg_parents = 6
   expander_parents = 8
 
@@ -589,7 +609,7 @@ Filecoin:
   describe(filecoin_block_time, "Time between two blocks", secs)
   describe(blocks_in_a_year, "Number of blocks in a year")
 
-  filecoin_block_time = polling_time
+  filecoin_block_time = block_time
   blocks_in_a_year = (secs_in_year / filecoin_block_time) * ec_e
 
   Onboarding:
@@ -715,14 +735,23 @@ Filecoin:
       // TODO: missing disk access
       epost_cost = epost_inclusions_cost + epost_snark_cost
 
+Timing:
+  describe(malicious_regen_time, "Time for a malicious adversary to regenerate a sector", secs)
+  describe(time_amax, "Factor of how much slower than the blocktime the malicious encoding should take")
+
+Timing (TimingAssumption):
+  RegenAttack (StackedSDRParameters):
+  malicious_regen_time = (encoding_time_asic * drg_d) / (stacked_layers)
+  malicious_regen_time = block_time * time_amax
+
 Rationality:
   describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to store the entire sector, than re-encode those")
-  describe(polling_time, "Time between two PoSt proofs", secs)
+  describe(block_time, "Time between two PoSt proofs", secs)
   describe(challenge_periods_per_month, "Number of challenge periods in a month")
-  describe(regeneration_fraction, "Fraction of nodes of a sector for which re-encoding them every `polling_time` costs as much as storing them")
+  describe(regeneration_fraction, "Fraction of nodes of a sector for which re-encoding them every `block_time` costs as much as storing them")
 
   breakeven_nodes = ((cost_gib_per_month *  sector_size_gib) / ((1 - porep_soundness) * cost_node_encoding * challenge_periods_per_month))
-  challenge_periods_per_month = secs_in_month / polling_time
+  challenge_periods_per_month = secs_in_month / block_time
   regeneration_fraction = breakeven_nodes / nodes
 
   Costs:
@@ -743,9 +772,9 @@ Rationality:
       describe(cost_gb_per_month, "Cost of storing 1GB per month")
       describe(cost_gib_per_month, "Cost of storing 1GiB per month")
       describe(cost_storage_gibs, "Cost of storing 1GiB per second")
-      describe(cost_storage_sector_polling_time, "Cost of storage for `polling_time`")
+      describe(cost_storage_sector_block_time, "Cost of storage for `block_time`")
       describe(extra_storage_time, "Time for which an honest user must be storing a file beyond the challenge period")
 
       cost_gib_per_month = cost_gb_per_month * gb_to_gib
       cost_storage_gibs = cost_gib_per_month / secs_in_month 
-      cost_storage_sector_polling_time = cost_storage_gibs * (sector_size_gib * (polling_time + extra_storage_time))
+      cost_storage_sector_block_time = cost_storage_gibs * (sector_size_gib * (block_time + extra_storage_time))
