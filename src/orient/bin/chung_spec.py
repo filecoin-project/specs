@@ -112,8 +112,10 @@ def inject_value(input_json,search_key,inject_key,inject_value):
             for item in obj:
                 extract(item)
     extract(input_json)
+
 localPath = "build/orient/chung.log"
 dockerPath = "/orientd/" + localPath
+
 def rmlog():
     if os.path.isfile(dockerPath):
         os.remove(dockerPath)

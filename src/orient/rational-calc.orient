@@ -20,6 +20,7 @@ Rig:
   describe(rig_gpu_cost, "Cost of a GPU", dollar)
   describe(rig_cpu_cost, "Cost of a CPU", dollar)
   describe(rig_gpu_cost_secs, "Cost of a GPU per second", dollar)
+  describe(rig_cpu_core_cost, "Cost of a single CPU core", dollar)
   describe(rig_cpu_core_cost_secs, "Cost of a CPU core per second", dollar)
   describe(rig_cpu_lifetime_years, "Lifetime of a CPU", years)
   describe(rig_gpu_lifetime_years, "Lifetime of a GPU", years)
@@ -151,6 +152,8 @@ ProofOfSpacetime:
         post_inclusion_time = (post_mtree_regen_hashnodes - 1) * merkle_tree_hash_time + wrapper_kdf_time
 
   StorageAccess:
+    describe(post_mtree_read, "Time to read Merkle tree data during PoSt", secs)
+    describe(post_mtree_read_parallel, "Time to read Merkle tree data during PoSt", secs)
     describe(post_challenge_read, "Time to read from storage medium data required for a single challenge in PoSt", secs)
     describe(post_data_access, "Time to retrieve from the storage unit the data for PoSt", secs)
     describe(post_data_access_parallel, "Time to retrieve from the storage unit the data in parallel for PoSt", secs)
@@ -330,6 +333,7 @@ ProofOfReplication:
     describe(porep_commit_time_parallel, "Time to generate CommC, CommR and CommQ in parallel", secs)
 
     describe(commr_time, "Time to generate CommR", secs)
+    describe(commq_time, "Time to generate CommQ", secs)
     describe(commd_time, "Time to generate CommD", secs)
     describe(commc_time, "Time to generate the merkle tree of CommC (assuming leaves in memory)", secs)
 
@@ -369,6 +373,8 @@ ProofOfReplication:
       // commr_column_size = windows
 
     CommC:
+      describe(commc_tree_time, "Time to generate CommC (Merkle tree only)", secs)
+      describe(commc_leaves_time, "Time to generate CommC (Leaves only)", secs)
       commc_tree_time = window_comm_tree_time
       commc_leaves_time = window_comm_leaves_time * stacked_layers * windows
       commc_time = commc_tree_time + commc_leaves_time
@@ -535,6 +541,7 @@ ProofOfReplication (StackedSDRParameters):
   describe(sdr_layers_a, "SDR layers computation a")
   describe(sdr_layers_b, "SDR layers computation b")
   describe(sdr_layers_c, "SDR layers computation c")
+  describe(sdr_delta, "Fraction of pebbled nodes encoded incorrectly")
 
   sdr_eps = spacegap
 
@@ -632,8 +639,12 @@ Filecoin:
     describe(posts_size_per_year, "Size of post proofs per year", bytes)
     describe(seals_size_per_block, "Size of seal proofs per block", bytes)
     describe(posts_size_per_block, "Size of post proofs per block", bytes)
+    describe(posts_size_per_block_kib, "Size of post proofs per block", kib)
+    describe(seals_size_per_block_kib, "Size of seal proofs per block", kib)
     describe(proofs_per_block, "Size of proofs per block", bytes)
     describe(proofs_per_block_kib, "Size of proofs per block", kib)
+    describe(not_proofs_per_block, "Size of non-proof data per block", bytes)
+    describe(not_proofs_per_block_kib, "Size of non-proof data per block", kib)
 
     seals_per_sector_per_year = filecoin_reseals_per_year + 1
     seals_per_year = filecoin_sectors * seals_per_sector_per_year
@@ -677,6 +688,10 @@ Filecoin:
       describe(epost_time_parallel, "Time to generate an Election PoSt in parallel", secs)
       describe(epost_inclusions_time, "Time to generate all inclusions in Election PoSt", secs)
       describe(epost_inclusions_time_parallel, "Time to generate all the inclusions in Election PoSt in parallel", secs)
+      describe(epost_leaves_read, "Time to read the challenged leaves nodes during EPoSt", secs)
+      describe(epost_leaves_read_parallel, "Time to read the challenged leaves nodes during EPoSt in parallel", secs)
+      describe(epost_mtree_read, "Time to read Merkle tree nodes during EPoSt", secs)
+      describe(epost_mtree_read_parallel, "Time to read the Merkle tree during EPoSt in parallel", secs)
 
       epost_challenged_sectors = rig_sectors_min * epost_challenged_sectors_fraction
       epost_leaves_read = post_leaves_read * epost_challenged_sectors
