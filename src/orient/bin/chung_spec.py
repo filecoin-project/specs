@@ -145,7 +145,7 @@ def main():
         # print("{\"chung_beta\": %s}" % rounded)
         log("injecting beta %s" % rounded)
     # default behavior: return same thing if nothing to be done
-    log("dumping to stdout")
+    log("json is now: %s" % str(jinput))
     json.dump(jinput, sys.stdout)
     
 main()
