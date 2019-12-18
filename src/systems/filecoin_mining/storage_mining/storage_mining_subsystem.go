@@ -303,23 +303,19 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 	info := sma.Info()
 	sectorSize := info.SectorSize()
 
-	postCfg := sector.PoStCfg_I{
-		Type_:        sector.PoStType_ElectionPoSt,
-		SectorSize_:  sectorSize,
-		WindowCount_: info.WindowCount(),
-		Partitions_:  info.ElectionPoStPartitions(),
-	}
+	postCfg := filproofs.ElectionPoStCfg(sectorSize)
 
 	pvInfo := sector.PoStVerifyInfo_I{
 		OnChain_:    onChainInfo,
-		PoStCfg_:    &postCfg,
+		PoStCfg_:    postCfg,
 		Randomness_: onChainInfo.Randomness(),
 	}
 
-	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{ElectionPoStCfg_: &postCfg})
+	pv := filproofs.ElectionPoStVerifier(postCfg)
 
-	// 6. Verify the PoSt Proof
-	isPoStVerified := sdr.VerifyElectionPoSt(&pvInfo)
+	// 5. Verify the PoSt Proof
+	isPoStVerified := pv.VerifyElectionPoSt(&pvInfo)
+
 	return isPoStVerified
 }
 

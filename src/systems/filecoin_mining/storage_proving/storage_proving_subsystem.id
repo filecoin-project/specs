@@ -34,9 +34,4 @@ type StorageProvingSubsystem struct {
         challengeSeed  sector.PoStRandomness
         candidates     [sector.PoStCandidate]
     ) sector.PoStProof
-
-    VerifyPoStProof(
-        challengeSeed  sector.PoStRandomness
-        proof          [sector.PoStProof]
-    ) bool
 }

@@ -8,12 +8,18 @@ import (
 )
 
 func (sps *StorageProvingSubsystem_I) VerifySeal(sv sector.SealVerifyInfo) StorageProvingSubsystem_VerifySeal_FunRet {
-	cfg := filproofs.SDRCfg_I{
+	cfg := filproofs.ProofsCfg_I{
 		SealCfg_: sv.SealCfg(),
 	}
-	sdr := filproofs.WinSDRParams(&cfg)
 
-	result := sdr.VerifySeal(sv)
+	var result bool
+
+	// TODO: Presumably this can be done with interfaces or whatever method we intend for such things,
+	// but for now this expresses intent simply enough.
+	switch sv.SealCfg().Algorithm() {
+	case sector.SealAlgorithm_WinStackedDRG:
+		result = filproofs.WinSDRParams(&cfg).VerifySeal(sv)
+	}
 
 	return StorageProvingSubsystem_VerifySeal_FunRet_Make_ok(StorageProvingSubsystem_VerifySeal_FunRet_ok(result)) //,
 }
@@ -35,19 +41,16 @@ func (sps *StorageProvingSubsystem_I) GenerateElectionPoStCandidates(challengeSe
 
 	var poster = sps.PoStGenerator()
 
-	poster.GeneratePoStCandidates(challengeSeed, numChallengeTickets, sectorIDs)
-
-	todo := make([]sector.PoStCandidate, 0)
-	return todo
+	return poster.GeneratePoStCandidates(challengeSeed, numChallengeTickets, sectorIDs)
 }
 
-func (sps *StorageProvingSubsystem_I) CreateElectionPoStProof(challengeSeed sector.PoStRandomness, challengeTickets []sector.PoStCandidate) sector.PoStProof {
+func (sps *StorageProvingSubsystem_I) CreateElectionPoStProof(challengeSeed sector.PoStRandomness, candidates []sector.PoStCandidate) sector.PoStProof {
 	witness := &sector.PoStWitness_I{
-		Candidates_: challengeTickets,
+		Candidates_: candidates,
 	}
 
 	var poster = sps.PoStGenerator()
-	return poster.CreateElectionPoStProof(witness)
+	return poster.CreateElectionPoStProof(challengeSeed, witness)
 }
 
 // TODO also return error
@@ -56,17 +59,14 @@ func (sps *StorageProvingSubsystem_I) GenerateSurprisePoStCandidates(challengeSe
 
 	var poster = sps.PoStGenerator()
 
-	poster.GeneratePoStCandidates(challengeSeed, numChallengeTickets, sectorIDs)
-
-	todo := make([]sector.PoStCandidate, 0)
-	return todo
+	return poster.GeneratePoStCandidates(challengeSeed, numChallengeTickets, sectorIDs)
 }
 
-func (sps *StorageProvingSubsystem_I) CreateSurprisePoStProof(challengeSeed sector.PoStRandomness, challengeTickets []sector.PoStCandidate) sector.PoStProof {
+func (sps *StorageProvingSubsystem_I) CreateSurprisePoStProof(challengeSeed sector.PoStRandomness, candidates []sector.PoStCandidate) sector.PoStProof {
 	witness := &sector.PoStWitness_I{
-		Candidates_: challengeTickets,
+		Candidates_: candidates,
 	}
 
 	var poster = sps.PoStGenerator()
-	return poster.CreateSurprisePoStProof(witness)
+	return poster.CreateSurprisePoStProof(challengeSeed, witness)
 }

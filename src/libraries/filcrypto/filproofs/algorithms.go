@@ -26,16 +26,52 @@ type PieceInfo = sector.PieceInfo
 type Label Bytes32
 type Commitment = sector.Commitment
 
+type PrivatePostCandidateProof = sector.PrivatePoStCandidateProof
+
 const WRAPPER_LAYER_WINDOW_INDEX = -1
 
-func WinSDRParams(cfg SDRCfg) *WinStackedDRG_I {
+const NODE_SIZE = 32
+const ELECTION_POST_PARTITIONS = 1
+const SURPRISE_POST_PARTITIONS = 1
+const POST_LEAF_CHALLENGE_COUNT = 66
+const POST_CHALLENGE_RANGE_SIZE = 1
+
+func PoStCfg(pType sector.PoStType, sectorSize sector.SectorSize, partitions UInt) *sector.PoStCfg_I {
+	nodes := UInt(sectorSize / NODE_SIZE)
+	return &sector.PoStCfg_I{
+		Type_:               pType,
+		Nodes_:              nodes,
+		Partitions_:         partitions,
+		LeafChallengeCount_: POST_LEAF_CHALLENGE_COUNT,
+		ChallengeRangeSize_: POST_CHALLENGE_RANGE_SIZE,
+	}
+}
+func SurprisePoStCfg(sectorSize sector.SectorSize) *sector.PoStCfg_I {
+	return PoStCfg(sector.PoStType_SurprisePoSt, sectorSize, SURPRISE_POST_PARTITIONS)
+}
+
+func ElectionPoStCfg(sectorSize sector.SectorSize) *sector.PoStCfg_I {
+	return PoStCfg(sector.PoStType_ElectionPoSt, sectorSize, ELECTION_POST_PARTITIONS)
+}
+
+func ElectionPoStVerifier(cfg sector.PoStCfg) *PoStVerifier_I {
+	return &PoStVerifier_I{
+		ElectionPoStCfg_: cfg,
+	}
+}
+
+func SurprisePoStVerifier(cfg sector.PoStCfg) *PoStVerifier_I {
+	return &PoStVerifier_I{
+		SurprisePoStCfg_: cfg,
+	}
+}
+
+func WinSDRParams(cfg ProofsCfg) *WinStackedDRG_I {
+	util.Assert(cfg.SealCfg().Algorithm() == sector.SealAlgorithm_WinStackedDRG)
 	// TODO: Bridge constants with orient model.
 	const LAYERS = 10
-	const NODE_SIZE = 32
 	const OFFLINE_CHALLENGES = 6666
 	const OFFLINE_WINDOW_CHALLENGES = 1111
-	const POST_LEAF_CHALLENGE_COUNT = 66
-	const POST_CHALLENGE_RANGE_SIZE = 1
 	const FEISTEL_ROUNDS = 3
 	var FEISTEL_KEYS = [FEISTEL_ROUNDS]UInt{1, 2, 3}
 	var FIELD_MODULUS = new(big.Int)
@@ -45,14 +81,12 @@ func WinSDRParams(cfg SDRCfg) *WinStackedDRG_I {
 	nodes := UInt(cfg.SealCfg().SectorSize() / NODE_SIZE)
 
 	return &WinStackedDRG_I{
-		Layers_:             WinStackedDRGLayers(LAYERS),
-		Challenges_:         WinStackedDRGChallenges(OFFLINE_CHALLENGES),
-		WindowChallenges_:   WinStackedDRGWindowChallenges(OFFLINE_WINDOW_CHALLENGES),
-		LeafChallengeCount_: WinStackedDRGLeafChallengeCount(POST_LEAF_CHALLENGE_COUNT),
-		ChallengeRangeSize_: WinStackedDRGChallengeRangeSize(POST_CHALLENGE_RANGE_SIZE),
-		NodeSize_:           WinStackedDRGNodeSize(NODE_SIZE),
-		Nodes_:              WinStackedDRGNodes(nodes),
-		Algorithm_:          &WinStackedDRG_Algorithm_I{},
+		Layers_:           WinStackedDRGLayers(LAYERS),
+		Challenges_:       WinStackedDRGChallenges(OFFLINE_CHALLENGES),
+		WindowChallenges_: WinStackedDRGWindowChallenges(OFFLINE_WINDOW_CHALLENGES),
+		NodeSize_:         WinStackedDRGNodeSize(NODE_SIZE),
+		Nodes_:            WinStackedDRGNodes(nodes),
+		Algorithm_:        &WinStackedDRG_Algorithm_I{},
 		DRGCfg_: &DRGCfg_I{
 			Algorithm_: &DRGCfg_Algorithm_I{
 				ParentsAlgorithm_: DRGCfg_Algorithm_ParentsAlgorithm_DRSample,
@@ -661,11 +695,6 @@ type PrivateOfflineProof struct {
 	WrapperProofs []OfflineWrapperProof
 }
 
-// // Column proofs for all windows.
-// type OfflineWindowColumnProof struct {
-// 	ColumnProofs []SDRColumnProof
-// }
-
 type OfflineWindowProof struct {
 	// TODO: these proofs need to depend on hash function.
 	DataProof   InclusionProof // SHA256
@@ -803,8 +832,6 @@ func ComputeUnsealedSectorCIDFromPieceInfos(sectorSize sector.SectorSize, pieceI
 	return UnsealedSectorCID(AsBytes_PieceCID(rootPieceInfo.PieceCID())), nil
 }
 
-// commD := rootPieceInfo.CommP()
-
 func computeRootPieceInfo(pieceInfos []PieceInfo) PieceInfo {
 	// Construct root PieceInfo by (shift-reduce) parsing the constituent PieceInfo array.
 	// Later pieces must always be joined with equal-sized predecessors to create a new root twice their size.
@@ -893,7 +920,7 @@ func (sdr *WinStackedDRG_I) _verifyOfflineCircuitProof(commD sector.UnsealedSect
 ////////////////////////////////////////////////////////////////////////////////
 // PoSt
 
-func (sdr *WinStackedDRG_I) _getChallengedSectors(sectorIDs []sector.SectorID, randomness sector.PoStRandomness, eligibleSectors []sector.SectorID, candidateCount int) (sectors []sector.SectorID) {
+func getChallengedSectors(cfg sector.PoStCfg, sectorIDs []sector.SectorID, randomness sector.PoStRandomness, eligibleSectors []sector.SectorID, candidateCount int) (sectors []sector.SectorID) {
 	for i := 0; i < candidateCount; i++ {
 		sector := generateSectorChallenge(randomness, i, sectorIDs)
 		sectors = append(sectors, sector)
@@ -929,7 +956,22 @@ func generateLeafChallenge(randomness sector.PoStRandomness, sectorChallengeInde
 	return leafChallenge.Uint64()
 }
 
-func generateCandidate(randomness sector.PoStRandomness, aux sector.PersistentProofAux, sectorID sector.SectorID, sectorChallengeIndex UInt, leafChallengeCount int, nodes int, challengeRangeSize int) sector.PoStCandidate {
+func generateCandidate(algorithm sector.SealAlgorithm, cfg sector.PoStCfg, randomness sector.PoStRandomness, aux sector.PersistentProofAux, sectorID sector.SectorID, sectorChallengeIndex UInt) sector.PoStCandidate {
+	var candidate sector.PoStCandidate
+	switch algorithm {
+	case sector.SealAlgorithm_StackedDRG:
+		panic("TODO")
+	case sector.SealAlgorithm_WinStackedDRG:
+		sdr := WinStackedDRG_I{}
+		candidate = sdr._generateCandidate(cfg, randomness, aux, sectorID, sectorChallengeIndex)
+	}
+	return candidate
+}
+
+func (sdr *WinStackedDRG_I) _generateCandidate(cfg sector.PoStCfg, randomness sector.PoStRandomness, aux sector.PersistentProofAux, sectorID sector.SectorID, sectorChallengeIndex UInt) sector.PoStCandidate {
+	nodes := int(cfg.Nodes())
+	leafChallengeCount := int(cfg.LeafChallengeCount())
+	challengeRangeSize := int(cfg.ChallengeRangeSize())
 	treePath := aux.CommRLastTreePath()
 	tree := LoadMerkleTree(treePath)
 
@@ -954,7 +996,7 @@ func generateCandidate(randomness sector.PoStRandomness, aux sector.PersistentPr
 
 	candidate := sector.PoStCandidate_I{
 		PartialTicket_:  partialTicket,
-		PrivateProof_:   privateProof.externalize(),
+		PrivateProof_:   privateProof.externalize(sector.SealAlgorithm_WinStackedDRG),
 		SectorID_:       sectorID,
 		ChallengeIndex_: sectorChallengeIndex,
 	}
@@ -971,42 +1013,59 @@ func computePartialTicket(randomness sector.PoStRandomness, sectorID sector.Sect
 	return partialTicket
 }
 
-func (sdr *WinStackedDRG_I) _generatePoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorID, candidateCount int, sectorStore sector_index.SectorStore) (candidates []sector.PoStCandidate) {
+type PoStCandidatesMap map[sector.SealAlgorithm][]sector.PoStCandidate
 
-	nodes := int(sdr.Nodes())
-	leafChallengeCount := int(sdr.LeafChallengeCount())
-	challengeRangeSize := int(sdr.ChallengeRangeSize())
-	challengedSectors := sdr._getChallengedSectors(eligibleSectors, challengeSeed, eligibleSectors, candidateCount)
+func CreatePoStProof(cfg sector.PoStCfg, privateCandidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) (proof sector.PoStProof) {
+	var proofsMap map[sector.SealAlgorithm][]PrivatePostCandidateProof
 
-	for i, sectorID := range challengedSectors {
-		proofAux := sectorStore.GetSectorPersistentProofAux(sectorID)
-
-		candidate := generateCandidate(challengeSeed, proofAux, sectorID, UInt(i), leafChallengeCount, nodes, challengeRangeSize)
-
-		candidates = append(candidates, candidate)
+	for _, proof := range privateCandidateProofs {
+		algorithm := proof.Algorithm()
+		proofsMap[algorithm] = append(proofsMap[algorithm], proof)
 	}
 
-	return candidates
+	var circuitProofs []sector.PoStProof
+	for algorithm, proofs := range proofsMap {
+		privateProof := createPrivatePoStProof(algorithm, proofs, challengeSeed)
+		// Hmmmmm: we cannot perform this santiy check without the sectorIDs. Should we require them just for that purpose or perform the check earlier?
+		// Sanity check: newly-created proofs must pass verification.
+		//util.Assert(sdr.VerifyPrivatePoStProof(privateProof, candidates, sectorIDs, sectorCommitments))
+
+		circuitProof := createPoStCircuitProof(cfg, algorithm, privateProof)
+		circuitProofs = append(circuitProofs, circuitProof)
+	}
+
+	return combinePoStCircuitProofs(circuitProofs)
 }
 
-func (sdr *WinStackedDRG_I) CreatePoStProof(privateCandidateProofs []sector.PrivatePoStCandidateProof, challengeSeed sector.PoStRandomness) sector.PoStProof {
-	privateProof := sdr.CreatePrivatePoStProof(privateCandidateProofs, challengeSeed)
+func combinePoStCircuitProofs(proofs []sector.PoStProof) sector.PoStProof {
+	var combinedCandidates []sector.PoStCandidate
+	var combinedBytes []byte
 
-	// var candidates []sector.PoStCandidate // FIXME
+	var postType sector.PoStType
+	if len(proofs) > 0 {
+		postType = proofs[0].Type()
+	}
+	for _, proof := range proofs {
+		// All provided proofs must have same type.
+		util.Assert(postType == proof.Type())
 
-	// Hmmmmm: we cannot perform this santiy check without the sectorIDs. Should we require them just for that purpose or perform the check earlier?
-	// Sanity check: newly-created proofs must pass verification.
-	//util.Assert(sdr.VerifyPrivatePoStProof(privateProof, candidates, sectorIDs, sectorCommitments))
-
-	return sdr.CreatePoStCircuitProof(privateProof)
+		combinedCandidates = append(combinedCandidates, proof.Candidates()...)
+		combinedBytes = append(combinedBytes, proof.ProofBytes()...)
+	}
+	combinedProof := sector.PoStProof_I{
+		Type_:       postType,
+		Candidates_: combinedCandidates,
+		ProofBytes_: combinedBytes,
+	}
+	return &combinedProof
 }
 
 type PrivatePoStProof struct {
 	ChallengeSeed   sector.PoStRandomness
-	CandidateProofs []sector.PrivatePoStCandidateProof
+	CandidateProofs []PrivatePostCandidateProof
 }
 
-func (sdr *WinStackedDRG_I) CreatePrivatePoStProof(candidateProofs []sector.PrivatePoStCandidateProof, challengeSeed sector.PoStRandomness) PrivatePoStProof {
+func createPrivatePoStProof(algorithm sector.SealAlgorithm, candidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) PrivatePoStProof {
 	return PrivatePoStProof{
 		ChallengeSeed:   challengeSeed,
 		CandidateProofs: candidateProofs,
@@ -1019,20 +1078,23 @@ type InternalPrivateCandidateProof struct {
 
 // This exists because we need to pass private proofs out of filproofs for winner selection.
 // Actually implementing it would (will?) be tedious, since it means doing the same for InclusionProofs.
-func (p *InternalPrivateCandidateProof) externalize() sector.PrivatePoStCandidateProof {
-	panic("TODO")
+func (p *InternalPrivateCandidateProof) externalize(algorithm sector.SealAlgorithm) sector.PrivatePoStCandidateProof {
+	return &sector.PrivatePoStCandidateProof_I{
+		Algorithm_:    algorithm,
+		Externalized_: []byte{}, // Unimplemented.
+	}
 }
 
 // This is the inverse of InternalPrivateCandidateProof.externalize and equally tedious.
-func newInternalPrivateProof(externalPrivateProof sector.PrivatePoStCandidateProof) InternalPrivateCandidateProof {
+func newInternalPrivateProof(externalPrivateProof PrivatePostCandidateProof) InternalPrivateCandidateProof {
 	return InternalPrivateCandidateProof{}
 }
 
-func (sdr *WinStackedDRG_I) VerifyInternalPrivateCandidateProof(p *InternalPrivateCandidateProof, challengeSeed sector.PoStRandomness, candidate sector.PoStCandidate, commRLast Commitment) bool {
+func (sdr *WinStackedDRG_I) VerifyInternalPrivateCandidateProof(cfg sector.PoStCfg, p *InternalPrivateCandidateProof, challengeSeed sector.PoStRandomness, candidate sector.PoStCandidate, commRLast Commitment) bool {
 	util.Assert(candidate.PrivateProof() == nil)
 
-	nodes := int(sdr.Nodes())
-	challengeRangeSize := int(sdr.ChallengeRangeSize())
+	nodes := int(cfg.Nodes())
+	challengeRangeSize := int(cfg.ChallengeRangeSize())
 
 	sectorID := candidate.SectorID()
 	claimedPartialTicket := candidate.PartialTicket()
@@ -1069,7 +1131,7 @@ func (sdr *WinStackedDRG_I) VerifyInternalPrivateCandidateProof(p *InternalPriva
 	}
 
 	// Check all inclusion proofs.
-	for i := 0; i < int(sdr.LeafChallengeCount()); i++ {
+	for i := 0; i < int(cfg.LeafChallengeCount()); i++ {
 		leafChallenge := generateLeafChallenge(challengeSeed, candidate.ChallengeIndex(), i, nodes, challengeRangeSize)
 		for j := 0; j < challengeRangeSize; j++ {
 			leafIndex := leafChallenge + UInt(j)
@@ -1087,7 +1149,7 @@ func (sdr *WinStackedDRG_I) VerifyInternalPrivateCandidateProof(p *InternalPriva
 	return true
 }
 
-func (sdr *WinStackedDRG_I) VerifyPrivatePoStProof(privateProof PrivatePoStProof, candidates []sector.PoStCandidate, sectorIDs []sector.SectorID, sectorCommitments sector.SectorCommitments) bool {
+func (sdr *WinStackedDRG_I) VerifyPrivatePoStProof(cfg sector.PoStCfg, privateProof PrivatePoStProof, candidates []sector.PoStCandidate, sectorIDs []sector.SectorID, sectorCommitments sector.SectorCommitments) bool {
 	// This is safe by construction.
 	challengeSeed := privateProof.ChallengeSeed
 
@@ -1106,18 +1168,27 @@ func (sdr *WinStackedDRG_I) VerifyPrivatePoStProof(privateProof PrivatePoStProof
 
 		commRLast := sectorCommitments[expectedSectorID]
 
-		if !sdr.VerifyInternalPrivateCandidateProof(&proof, challengeSeed, candidate, commRLast) {
+		if !sdr.VerifyInternalPrivateCandidateProof(cfg, &proof, challengeSeed, candidate, commRLast) {
 			return false
 		}
 	}
 	return true
 }
 
-func (sdr *WinStackedDRG_I) CreatePoStCircuitProof(privateProof PrivatePoStProof) sector.PoStProof {
+func createPoStCircuitProof(postCfg sector.PoStCfg, algorithm sector.SealAlgorithm, privateProof PrivatePoStProof) (proof sector.PoStProof) {
+	switch algorithm {
+	case sector.SealAlgorithm_WinStackedDRG:
+		sdr := WinStackedDRG_I{}
+		proof = sdr._createPoStCircuitProof(postCfg, privateProof)
+	}
+	return proof
+}
+
+func (sdr *WinStackedDRG_I) _createPoStCircuitProof(postCfg sector.PoStCfg, privateProof PrivatePoStProof) sector.PoStProof {
 	panic("TODO")
 }
 
-func (sdr *WinStackedDRG_I) _verifyPoStProof(sv sector.PoStVerifyInfo) bool {
+func (pv *PoStVerifier_I) _verifyPoStProof(sv sector.PoStVerifyInfo) bool {
 	// commT := sv.CommT()
 	// candidates := sv.Candidates()
 	// randomness := sv.Randomness()
@@ -1128,33 +1199,51 @@ func (sdr *WinStackedDRG_I) _verifyPoStProof(sv sector.PoStVerifyInfo) bool {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// General PoSt
+
+func generatePoStCandidates(cfg sector.PoStCfg, challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorID, candidateCount int, sectorStore sector_index.SectorStore) (candidates []sector.PoStCandidate) {
+	challengedSectors := getChallengedSectors(cfg, eligibleSectors, challengeSeed, eligibleSectors, candidateCount)
+
+	for i, sectorID := range challengedSectors {
+		proofAux := sectorStore.GetSectorPersistentProofAux(sectorID)
+		sealAlgorithm := sectorStore.GetSectorSealAlgorithm(sectorID).As_a()
+
+		candidate := generateCandidate(sealAlgorithm, cfg, challengeSeed, proofAux, sectorID, UInt(i))
+
+		candidates = append(candidates, candidate)
+	}
+
+	return candidates
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Election PoSt
 
-func (sdr *WinStackedDRG_I) GenerateElectionPoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorID, candidateCount int, sectorStore sector_index.SectorStore) []sector.PoStCandidate {
-	return sdr._generatePoStCandidates(challengeSeed, eligibleSectors, candidateCount, sectorStore)
+func GenerateElectionPoStCandidates(cfg sector.PoStCfg, challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorID, candidateCount int, sectorStore sector_index.SectorStore) (candidates []sector.PoStCandidate) {
+	return generatePoStCandidates(cfg, challengeSeed, eligibleSectors, candidateCount, sectorStore)
 }
 
-func (sdr *WinStackedDRG_I) CreateElectionPoStProof(privateCandidateProofs []sector.PrivatePoStCandidateProof, challengeSeed sector.PoStRandomness) sector.PoStProof {
-	return sdr.CreatePoStProof(privateCandidateProofs, challengeSeed)
+func CreateElectionPoStProof(cfg sector.PoStCfg, privateCandidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) sector.PoStProof {
+	return CreatePoStProof(cfg, privateCandidateProofs, challengeSeed)
 }
 
-func (sdr *WinStackedDRG_I) VerifyElectionPoSt(sv sector.PoStVerifyInfo) bool {
-	return sdr._verifyPoStProof(sv)
+func (pv *PoStVerifier_I) VerifyElectionPoSt(sv sector.PoStVerifyInfo) bool {
+	return pv._verifyPoStProof(sv)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Surprise PoSt
 
-func (sdr *WinStackedDRG_I) GenerateSurprisePoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorID, candidateCount int, sectorStore sector_index.SectorStore) []sector.PoStCandidate {
-	return sdr._generatePoStCandidates(challengeSeed, eligibleSectors, candidateCount, sectorStore)
+func GenerateSurprisePoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorID, candidateCount int, sectorStore sector_index.SectorStore) []sector.PoStCandidate {
+	panic("TODO")
 }
 
-func (sdr *WinStackedDRG_I) CreateSurprisePoStProof(privateCandidateProofs []sector.PrivatePoStCandidateProof, challengeSeed sector.PoStRandomness) sector.PoStProof {
-	return sdr.CreatePoStProof(privateCandidateProofs, challengeSeed)
+func CreateSurprisePoStProof(cfg sector.PoStCfg, privateCandidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) sector.PoStProof {
+	return CreatePoStProof(cfg, privateCandidateProofs, challengeSeed)
 }
 
-func (sdr *WinStackedDRG_I) VerifySurprisePoSt(sv sector.PoStVerifyInfo) bool {
-	return sdr._verifyPoStProof(sv)
+func (pv *PoStVerifier_I) VerifySurprisePoSt(sv sector.PoStVerifyInfo) bool {
+	return pv._verifyPoStProof(sv)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

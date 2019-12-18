@@ -17,6 +17,7 @@ type SealCfg struct {
     SectorSize
     WindowCount  UInt
     Partitions   UInt
+    Algorithm    SealAlgorithm
 }
 
 // SealVerifyInfo is the structure of all the information a verifier
@@ -111,6 +112,7 @@ type FilecoinSNARKProof struct {}  //<bls12-381, Groth16>
 
 type SealAlgorithm enum {
     StackedDRG
+    WinStackedDRG
 }
 
 // TODO

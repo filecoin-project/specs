@@ -2,12 +2,12 @@ type PartialTicket Bytes  // 32 bytes
 type ChallengeTicketsCommitment Bytes
 type PoStRandomness Bytes
 
-// Can move to a new posting.id if we think worth it.
 type PoStCfg struct {
-    Type         PoStType
-    SectorSize
-    WindowCount  UInt
-    Partitions   UInt
+    Type                PoStType
+    Nodes               UInt
+    Partitions          UInt
+    LeafChallengeCount  UInt
+    ChallengeRangeSize  UInt
 }
 
 type PoStType enum {
@@ -47,4 +47,7 @@ type PoStProof struct {//<curve, system> {
     ProofBytes  Bytes
 }
 
-type PrivatePoStCandidateProof struct {}
+type PrivatePoStCandidateProof struct {
+    Algorithm     SealAlgorithm
+    Externalized  Bytes
+}

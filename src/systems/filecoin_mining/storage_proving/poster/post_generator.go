@@ -27,45 +27,25 @@ func (pg *PoStGenerator_I) GeneratePoStCandidates(challengeSeed sector.PoStRando
 
 	// For now, dodge this by passing the whole SectorStore. Once we decide how we want to represent this, we can narrow the call.
 
-	sdr := makeStackedDRGForPoSt(pg.PoStCfg())
-	return sdr.GenerateElectionPoStCandidates(challengeSeed, sectors, candidateCount, pg.SectorStore())
+	return filproofs.GenerateElectionPoStCandidates(pg.PoStCfg(), challengeSeed, sectors, candidateCount, pg.SectorStore())
 }
 
-func (pg *PoStGenerator_I) CreateElectionPoStProof(postCfg sector.PoStCfg, randomness sector.PoStRandomness, witness sector.PoStWitness) sector.PoStProof {
-	sdr := makeStackedDRGForPoSt(postCfg)
+func (pg *PoStGenerator_I) CreateElectionPoStProof(randomness sector.PoStRandomness, witness sector.PoStWitness) sector.PoStProof {
 	var privateProofs []sector.PrivatePoStCandidateProof
 
 	for _, candidate := range witness.Candidates() {
 		privateProofs = append(privateProofs, candidate.PrivateProof())
 	}
 
-	return sdr.CreateElectionPoStProof(privateProofs, randomness)
+	return filproofs.CreateElectionPoStProof(pg.PoStCfg(), privateProofs, randomness)
 }
 
 func (pg *PoStGenerator_I) CreateSurprisePoStProof(postCfg sector.PoStCfg, randomness sector.PoStRandomness, witness sector.PoStWitness) sector.PoStProof {
-	sdr := makeStackedDRGForPoSt(postCfg)
 	var privateProofs []sector.PrivatePoStCandidateProof
 
 	for _, candidate := range witness.Candidates() {
 		privateProofs = append(privateProofs, candidate.PrivateProof())
 	}
 
-	return sdr.CreateSurprisePoStProof(privateProofs, randomness)
-}
-
-func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.WinStackedDRG_I) {
-	var cfg filproofs.SDRCfg_I
-
-	switch postCfg.Type() {
-	case sector.PoStType_ElectionPoSt:
-		cfg = filproofs.SDRCfg_I{
-			ElectionPoStCfg_: postCfg,
-		}
-	case sector.PoStType_SurprisePoSt:
-		cfg = filproofs.SDRCfg_I{
-			SurprisePoStCfg_: postCfg,
-		}
-	}
-
-	return filproofs.WinSDRParams(&cfg)
+	return filproofs.CreateSurprisePoStProof(pg.PoStCfg(), privateProofs, randomness)
 }
