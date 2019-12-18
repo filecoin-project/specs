@@ -36,6 +36,8 @@ consensus_faults: "Consensus Faults"
 chain_sync: "Chain Sync"
 block_validation: "Block Validation"
 
+block_sync: "Block Sync"
+
 ### Message Pool
 message_pool: "Message Pool"
 message_syncer: "Message Syncer"

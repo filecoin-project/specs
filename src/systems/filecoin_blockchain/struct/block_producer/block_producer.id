@@ -7,18 +7,7 @@ import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 
 type BlockProducer struct {
     // call by StorageMiningSubsystem when elected as a leader
-    // a procedural call that calls GetMostProfitableMessages(minerAddr Address)
-    // and then get back the messages and call AssembleBlock
-    // TODO minerAddr is of type StorageMiner.Address
-    GenerateBlock(
-        postProof              sector.PoStProof
-        winningPoStCandidates  [sector.PoStCandidate]
-        newTicket              block.Ticket
-        chainHead              chain.Tipset
-        minerAddr              addr.Address
-    )
-
-    // call by BlockProducer itself after getting back messages
+    // accompanied by a call to messagePool's GetMostProfitableMessages(minerAddr Address)
     AssembleBlock(
         ePoStInfo  sector.OnChainPoStVerifyInfo
         T0         block.Ticket

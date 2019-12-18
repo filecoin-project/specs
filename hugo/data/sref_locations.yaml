@@ -14,9 +14,11 @@ vm_interpreter: [systems, filecoin_vm, interpreter]
 
 ### blockchain
 block_producer: [systems, filecoin_blockchain, struct]
-chainsync: [systems, filecoin_blockchain, chainsync]
+chain_sync: [systems, filecoin_blockchain, chainsync]
 block: [systems, filecoin_blockchain, block]
 block_validation: [systems, filecoin_blockchain, block, block_validation]
+block_sync: [algorithms, block_sync]
+
 
 ### SPC
 storage_power_consensus: [systems, filecoin_blockchain, storage_power_consensus]

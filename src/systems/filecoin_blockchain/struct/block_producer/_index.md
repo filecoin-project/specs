@@ -6,41 +6,35 @@ title: Block Producer
 
 # Mining Blocks
 
-A miner registered with the storage power actor may begin generating and checking election tickets
-if it has proven storage meeting the minimum miner size threshold requirement. 
+A miner registered with the storage power actor may begin generating and checking election tickets if it has proven storage meeting the {{<sref min_miner_size>}} threshold requirement. 
 
 In order to do so, the miner must be running chain validation, and be keeping track of the most recent
-blocks received. A miner's new block will be based on parents from a previous epoch.
+blocks received. A miner's new block will be based on parents from the previous epoch.
 
 For additional details around how consensus works in Filecoin, see {{<sref expected_consensus>}}. For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner is eligible to mine a block itself, and other rules pertaining to the production of some artifacts required of valid blocks (e.g. Tickets, ElectionPoSt).
 
 ## Mining Cycle
+
+After the chain has caught up to the current head using {{<sref chain_sync>}}, the mining process is as follows:
+
+- The node continuously receives and transmits messages using the {{<sref message_syncer>}}
+- At the same time it continuously {{<sref block_sync "receives blocks">}}
+    - Each block has an associated timestamp and epoch (quantized time window in which it was crafted)
+    - Blocks are validated as they come in during an epoch (provided it is their epoch, see {{<sref block "validation">}})
+- At the end of a given epoch, the miner should take all the valid blocks received for this epoch and assemble them into tipsets according to {{<sref tipset "tipset validation rules">}}
+- The miner then attempts to mine atop the heaviest tipset (as calculated with {{<sref chain_selection "EC's weight function">}}) using its smallest ticket to run leader election
+    - The miner runs an {{<sref election_post>}} on their sectors in order to generate partial tickets
+    - The miner uses these tickets in order to run {{<sref leader_election>}}
+        - if successful, the miner generates a new {{<sref tickets "randomness ticket">}} for inclusion in the block
+        - the miner then assembles a new block (see "block creation" below) and broadcasts it
+
+This process is repeated until either the {{<sref election_post>}} process yields a winning ticket (in EC) and a block published or a new valid {{<sref tipset>}} comes in from the network.
 
 At any height `H`, there are three possible situations:
 
 - The miner is eligible to mine a block: they produce their block and propagate it. They then resume mining at the next height `H+1`.
 - The miner is not eligible to mine a block but has received blocks: they form a Tipset with them and resume mining at the next height `H+1`.
 - The miner is not eligible to mine a block and has received no blocks: prompted by their clock they run leader election again, incrementing the epoch number.
-
-This process is repeated until either a winning ticket is found (and block published) or a new valid Tipset comes in from the network.
-
-Let's illustrate this with an example.
-
-Miner M is mining at epoch H.
-Heaviest tipset at H-1 is {B0}
-
-- New Epoch:
-    - M produces a ticket at H, from B0's ticket (the min ticket at H-1)
-    - M draws the ticket from height H-K to generate a set of ElectionPoSt partial Tickets and uses them to run leader election
-    - If M has no winning tickets
-    - M has not heard about other blocks on the network.
-- New Epoch:
-    - Height is incremented to H + 1.
-    - M generates a new ElectionProof with this new epoch number.
-    - If M has winning tickets
-    - M generates a block B1 using the new ElectionProof and the ticket drawn last epoch.
-    - M has received blocks B2, B3 from the network with the same parents and same height.
-    - M forms a tipset {B1, B2, B3}
 
 Anytime a miner receives new valid blocks, it should evaluate what is the heaviest Tipset it knows about and mine atop it.
 
