@@ -64,7 +64,7 @@ When they have a full sector, they should seal it. This is done by invoking the 
 
 #### Owner/Worker distinction
 
-The miner actor has two distinct 'controller' {{<sref address "addresses">}}. One is the worker, which is the address which will be responsible for doing all of the work, submitting proofs, committing new sectors, and all other day to day activities. The owner address is the address that created the miner, paid the collateral, and has block rewards paid out to it. The reason for the distinction is to allow different parties to fulfil the different roles. One example would be for the owner to be a multisig wallet, or a cold storage key, and the worker key to be a 'hot wallet' key.
+The miner actor has two distinct 'controller' {{<sref app_address "addresses">}}. One is the worker, which is the address which will be responsible for doing all of the work, submitting proofs, committing new sectors, and all other day to day activities. The owner address is the address that created the miner, paid the collateral, and has block rewards paid out to it. The reason for the distinction is to allow different parties to fulfil the different roles. One example would be for the owner to be a multisig wallet, or a cold storage key, and the worker key to be a 'hot wallet' key.
 
 #### Changing Worker Addresses
 
@@ -78,9 +78,9 @@ You can read more about sectors {{<sref sector "here">}}.
 
 ### Step 2: Getting Power
 
-As part of the ${{<sref election-post>}} process. A miner will be challenged by the blockchain with a surprise PoSt once per proving period on expectation.
+As part of the ${{<sref election_post>}} process. A miner will be challenged by the blockchain with a surprise PoSt once per proving period on expectation.
 
-The miner's committed sectors will turn into {{<storage_power>}} enabling them to run {{<sref leader_election>}} after the first successful PoSt submission on these committed sectors. If the miner is committing sectors for the first time, a SurprisePoSt will move the sectors from the miner's `ProvingSet` into the active state, otherwise an ElectionPoSt could also do this.
+The miner's committed sectors will turn into {{<sref storage_power>}} enabling them to run {{<sref leader_election>}} after the first successful PoSt submission on these committed sectors. If the miner is committing sectors for the first time, a SurprisePoSt will move the sectors from the miner's `ProvingSet` into the active state, otherwise an ElectionPoSt could also do this.
 
 During this period, the miner may also commit to new sectors, but they will not be included in proofs of space time until the next successful PoSt they submit to the chain.
 
@@ -100,7 +100,7 @@ In this period, the miner can still:
 
 ### Faults
 
-If a miner detects {{<sref storage_faults>} among their seectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the `DeclareFaults()` method of the Storage Miner Actor. 
+If a miner detects {{<sref storage_faults>}} among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the `DeclareFaults()` method of the Storage Miner Actor. 
 
 The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of winning Election and SurprisePoSts. By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can reverse the fault by calling `RecoverFaults()` to add the sector back into the `ProvingSet` and regain power.
 

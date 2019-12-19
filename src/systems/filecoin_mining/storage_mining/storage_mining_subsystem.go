@@ -15,6 +15,7 @@ import (
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
+	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -24,17 +25,20 @@ type Serialization = util.Serialization
 // Note that implementations may choose to provide default generation methods for miners created
 // without miner/owner keypairs. We omit these details from the spec.
 func (sms *StorageMiningSubsystem_I) CreateMiner(
+	state stateTree.StateTree,
 	ownerAddr addr.Address,
 	workerAddr addr.Address,
 	sectorSize util.UInt,
 	peerId libp2p.PeerID,
-) addr.Address {
+) (addr.Address, error) {
 
 	params := make([]util.Serialization, 4)
 	params[0] = addr.Serialize_Address(ownerAddr)
 	params[1] = addr.Serialize_Address(workerAddr)
 	params[2] = libp2p.Serialize_PeerID(peerId)
 
+	sysActor, ok := state.GetActor(addr.SystemActorAddr)
+	Assert(ok)
 	var pledgeAmt actor.TokenAmount // TODO: unclear how to pass the amount/pay
 	unsignedCreationMessage := &msg.UnsignedMessage_I{
 		From_:       ownerAddr,
@@ -47,14 +51,15 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 		GasLimit_:   msg.GasAmount_SentinelUnlimited(),
 	}
 
-	signedMessage, err := msg.Sign(unsignedMessage, sms._keyStore.WorkerKey())
+	var workerKey filcrypto.SigKeyPair // sms._keyStore().WorkerKey()
+	signedMessage, err := msg.Sign(unsignedCreationMessage, workerKey)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = sms.FilecoinNode().SubmitMessage(signedMessage)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// TODO: WAIT for block reception
@@ -62,7 +67,7 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 
 	var storageMinerAddr addr.Address
 	// and set in key store appropriately
-	return storageMinerAddr
+	return storageMinerAddr, nil
 }
 
 func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
@@ -91,16 +96,16 @@ func (sms *StorageMiningSubsystem_I) OnNewRound() {
 
 func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 	chainHead := sms._blockchain().BestChain().HeadTipset()
-	sma := sms._getStorageMinerActorState(chainHead.StateTree(), sms._keyStore.MinerAddress())
+	sma := sms._getStorageMinerActorState(chainHead.StateTree(), sms._keyStore().MinerAddress())
 
 	if sma.ChallengeStatus().CanBeElected(chainHead.Epoch() + 1) {
 		sms._tryLeaderElection(chainHead.StateTree(), sma)
 	} else if sma.ChallengeStatus().IsChallenged() {
 		sPoSt := sms._trySurprisePoSt(chainHead.StateTree(), sma)
 		// TODO: how to set these?
-		var gasLimit msg.GasLimit
-		var gasPrice = util.UVarint(0)
-		sms._submitSurprisePoStMessage(sPoSt, gasPrice, gasLimit)
+		var gasLimit msg.GasAmount
+		var gasPrice = actor.TokenAmount(0)
+		sms._submitSurprisePoStMessage(chainHead.StateTree(), sPoSt, gasPrice, gasLimit)
 	}
 }
 
@@ -148,8 +153,8 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.Stat
 	postProof := sms.StorageProving().Impl().CreateElectionPoStProof(postRandomness, winningCandidates)
 	chainHead := sms._blockchain().BestChain().HeadTipset()
 
-	var ctc ChallengeTicketsCommitment // TODO: proofs to fix when complete
-	electionPoSt := &OnChainPoStVerifyInfo_I{
+	var ctc sector.ChallengeTicketsCommitment // TODO: proofs to fix when complete
+	electionPoSt := &sector.OnChainPoStVerifyInfo_I{
 		CommT_:      ctc,
 		Candidates_: winningCandidates,
 		Randomness_: postRandomness,
@@ -277,9 +282,12 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 	}
 
 	// get worker key from minerAddr
-	workerKey := sma.Info().WorkerKey()
+	workerKey, err := sma.Info().Worker().GetKey()
+	if err != nil {
+		return false
+	}
 
-	if !postRand.Verify(postRandomnessInput, workerKey) {
+	if !postRand.Verify(postRandomnessInput, filcrypto.VRFPublicKey(workerKey)) {
 		return false
 	}
 
@@ -326,9 +334,10 @@ func (sms *StorageMiningSubsystem_I) _verifyElection(header block.BlockHeader, o
 	return true
 }
 
-func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateTree, sma StorageMinerActorState) OnChainPoStVerifyInfo {
+func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateTree, sma StorageMinerActorState) sector.OnChainPoStVerifyInfo {
 
 	// get randomness for SurprisePoSt
+	challEpoch := sma.ChallengeStatus().LastChallengeEpoch()
 	randomnessK := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), challEpoch)
 	input := sms.PreparePoStChallengeSeed(randomnessK, sms._keyStore().MinerAddress())
 	postRandomness := sms._keyStore().WorkerKey().Impl().Generate(input).Output()
@@ -341,16 +350,15 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 
 	if len(candidates) <= 0 {
 		// Error. Will fail this surprise post and must then redeclare faults
-		return // fail to generate post candidates
+		return nil // fail to generate post candidates
 	}
 
 	winningCandidates := make([]sector.PoStCandidate, 0)
 	postProof := sms.StorageProving().Impl().CreateSurprisePoStProof(postRandomness, winningCandidates)
-	chainHead := sms._blockchain().BestChain().HeadTipset()
 
 	// TODO: run surprisepost target check
-	var ctc ChallengeTicketsCommitment // TODO: proofs to fix when complete
-	surprisePoSt := &OnChainPoStVerifyInfo_I{
+	var ctc sector.ChallengeTicketsCommitment // TODO: proofs to fix when complete
+	surprisePoSt := &sector.OnChainPoStVerifyInfo_I{
 		CommT_:      ctc,
 		Candidates_: winningCandidates,
 		Randomness_: postRandomness,
@@ -359,24 +367,26 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 	return surprisePoSt
 }
 
-func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(sPoSt OnChainPoStVerifyInfo, gasPrice util.UVarint, gasLimit msg.GasLimit) error {
+func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.StateTree, sPoSt sector.OnChainPoStVerifyInfo, gasPrice actor.TokenAmount, gasLimit msg.GasAmount) error {
 
 	params := make([]util.Serialization, 1)
-	params[0] = addr.Serialize_OnChainPoStVerifyInfo(sPoSt)
+	params[0] = sector.Serialize_OnChainPoStVerifyInfo(sPoSt)
 
-	var pledgeAmt actor.TokenAmount // TODO: unclear how to pass the amount/pay
+	sysActor, ok := state.GetActor(addr.SystemActorAddr)
+	Assert(ok)
 	unsignedCreationMessage := &msg.UnsignedMessage_I{
 		From_:       sms._keyStore().MinerAddress(),
-		To_:         addr.StorageMinerActor,
+		To_:         sms._keyStore().MinerAddress(),
 		Method_:     ai.Method_StorageMinerActor_ProcessSurprisePoSt,
 		Params_:     params,
 		CallSeqNum_: sysActor.CallSeqNum(),
-		Value_:      nil,
+		Value_:      actor.TokenAmount(0),
 		GasPrice_:   gasPrice,
 		GasLimit_:   gasLimit,
 	}
 
-	signedMessage, err := msg.Sign(unsignedMessage, sms._keyStore.WorkerKey())
+	var workerKey filcrypto.SigKeyPair // sms._keyStore().WorkerKey()
+	signedMessage, err := msg.Sign(unsignedCreationMessage, workerKey)
 	if err != nil {
 		return err
 	}

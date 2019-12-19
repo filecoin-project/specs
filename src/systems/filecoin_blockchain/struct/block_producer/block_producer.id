@@ -12,9 +12,9 @@ type BlockProducer struct {
     // TODO minerAddr is of type StorageMiner.Address
     GenerateBlock(
         ePoStInfo  sector.OnChainPoStVerifyInfo
-        newTicket              block.Ticket
-        chainHead              chain.Tipset
-        minerAddr              addr.Address
+        newTicket  block.Ticket
+        chainHead  chain.Tipset
+        minerAddr  addr.Address
     )
 
     // call by BlockProducer itself after getting back messages
