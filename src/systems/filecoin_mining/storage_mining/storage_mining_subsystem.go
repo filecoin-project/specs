@@ -65,9 +65,10 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 		return nil, err
 	}
 
-	// TODO: WAIT for block reception
+	// WAIT for block reception with appropriate response from SPA
 	util.IMPL_TODO()
 
+	// harvest address from that block
 	var storageMinerAddr addr.Address
 	// and set in key store appropriately
 	return storageMinerAddr, nil
@@ -112,7 +113,7 @@ func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 		}
 	} else if sma.ChallengeStatus().IsChallenged() {
 		sPoSt := sms._trySurprisePoSt(chainHead.StateTree(), sma)
-		// TODO: how to set these?
+		// TODO: read from consts (in this case user set param)
 		var gasLimit msg.GasAmount
 		var gasPrice = actor.TokenAmount(0)
 		sms._submitSurprisePoStMessage(chainHead.StateTree(), sPoSt, gasPrice, gasLimit)
