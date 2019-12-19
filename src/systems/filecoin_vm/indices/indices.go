@@ -62,12 +62,12 @@ func (inds *Indices_I) StorageDeal_ClientCollateralBounds(
 	panic("")
 }
 
-func (inds *Indices_I) BlockReward_SectorPower(
+func (inds *Indices_I) BlockReward_SectorWeight(
 	sectorSize sector.SectorSize,
 	startEpoch block.ChainEpoch,
 	endEpoch block.ChainEpoch,
 	dealWeight deal.DealWeight,
-) block.StoragePower {
+) block.SectorWeight {
 	// for every sector, given its size, start, end, and deals within the sector
 	// assign sector power for the duration of its lifetime
 	PARAM_FINISH()
@@ -75,48 +75,55 @@ func (inds *Indices_I) BlockReward_SectorPower(
 }
 
 func (inds *Indices_I) BlockReward_PledgeCollateralReq(
-	minerActiveStoragePower block.StoragePower,
-	minerInactiveStoragePower block.StoragePower,
+	minerActiveSectorWeight block.SectorWeight,
+	minerInactiveSectorWeight block.SectorWeight,
 	minerPledgeCollateral actor.TokenAmount,
 ) actor.TokenAmount {
 	PARAM_FINISH()
 	panic("")
 }
 
-func (inds *Indices_I) BlockReward_StoragePowerProportion(minerActiveStoragePower block.StoragePower) util.BigInt {
-	// return proportion of StoragePower for miner
+func (inds *Indices_I) BlockReward_SectorWeightProportion(minerActiveSectorWeight block.SectorWeight) util.BigInt {
+	// return proportion of SectorWeight for miner
 	PARAM_FINISH()
 	panic("")
 }
 
-func (inds *Indices_I) BlockReward_CollateralPowerProportion(minerPledgeCollateral actor.TokenAmount) util.BigInt {
+func (inds *Indices_I) BlockReward_PledgeCollateralProportion(minerPledgeCollateral actor.TokenAmount) util.BigInt {
 	// return proportion of Pledge Collateral for miner
 	PARAM_FINISH()
 	panic("")
 }
 
-func (inds *Indices_I) BlockReward_EarningPowerProportion(
-	minerActiveStoragePower block.StoragePower,
+func (inds *Indices_I) BlockReward_StoragePower(
+	minerActiveSectorWeight block.SectorWeight,
 	minerPledgeCollateral actor.TokenAmount,
+) block.StoragePower {
+	// return StoragePower based on inputs
+	// StoragePower for miner = func(ActiveSectorWeight for miner, PledgeCollateral for miner, global indices)
+	PARAM_FINISH()
+	panic("")
+}
+
+func (inds *Indices_I) BlockReward_StoragePowerProportion(
+	minerStoragePower block.StoragePower,
 ) util.BigInt {
-	// Earning Power for miner = func(proportion of StoragePower for miner, proportion of CollateralPower for miner)
-	// EarningPowerProportion is a normalized proportion of TotalEarningPower
 	PARAM_FINISH()
 	panic("")
 }
 
 func (inds *Indices_I) BlockReward_CurrEpochReward() actor.TokenAmount {
 	// total block reward allocated for CurrEpoch
-	// each expected winner get a share of this reward
+	// each expected winner get an equal share of this reward
 	// computed as a function of NetworkKPI, LastEpochReward, TotalUnmminedFIL, etc
 	PARAM_FINISH()
 	panic("")
 }
 
 func (inds *Indices_I) BlockReward_GetCurrRewardForMiner(
-	minerActiveStoragePower block.StoragePower,
+	minerStoragePower block.StoragePower,
 	minerPledgeCollateral actor.TokenAmount,
-	// TODO extend
+	// TODO extend or eliminate
 ) actor.TokenAmount {
 	PARAM_FINISH()
 	panic("")
@@ -124,8 +131,8 @@ func (inds *Indices_I) BlockReward_GetCurrRewardForMiner(
 
 func (inds *Indices_I) BlockReward_GetPledgeSlashForStorageFault(
 	affectedPower block.StoragePower,
-	newActivePower block.StoragePower,
-	newInactivePower block.StoragePower,
+	newActiveSectorWeight block.SectorWeight,
+	newInactiveSectorWeight block.SectorWeight,
 	currPledge actor.TokenAmount,
 ) actor.TokenAmount {
 	PARAM_FINISH()
