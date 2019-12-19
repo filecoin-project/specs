@@ -3,11 +3,23 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
+type VestingFunction enum {
+    None
+    Linear
+    // TODO: potential options
+    // PieceWise
+    // Quadratic
+    // Exponential
+}
+
 type Reward struct {
+    VestingFunction
     StartEpoch       block.ChainEpoch
+    EndEpoch         block.ChainEpoch
     Value            actor.TokenAmount
-    ReleaseRate      actor.TokenAmount  // linear slope, unit: FIL per Epoch
     AmountWithdrawn  actor.TokenAmount
+
+    AmountVested(elapsedEpoch block.ChainEpoch) actor.TokenAmount
 }
 
 // ownerAddr to a collection of Reward

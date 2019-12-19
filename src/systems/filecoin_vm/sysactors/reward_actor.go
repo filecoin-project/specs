@@ -39,6 +39,18 @@ func DeserializeState(x Bytes) RewardActorState {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+func (r *Reward_I) AmountVested(elapsedEpoch block.ChainEpoch) actor.TokenAmount {
+	switch r.VestingFunction() {
+	case VestingFunction_None:
+		return r.Value()
+	case VestingFunction_Linear:
+		vestedProportion := math.Max(1.0, float64(elapsedEpoch)/float64(r.StartEpoch()-r.EndEpoch()))
+		return actor.TokenAmount(uint64(r.Value()) * uint64(vestedProportion))
+	default:
+		return actor.TokenAmount(0)
+	}
+}
+
 func (st *RewardActorState_I) _withdrawReward(rt vmr.Runtime, ownerAddr addr.Address) actor.TokenAmount {
 
 	rewards, found := st.RewardMap()[ownerAddr]
@@ -51,7 +63,7 @@ func (st *RewardActorState_I) _withdrawReward(rt vmr.Runtime, ownerAddr addr.Add
 
 	for i, r := range rewards {
 		elapsedEpoch := rt.CurrEpoch() - r.StartEpoch()
-		unlockedReward := actor.TokenAmount(uint64(r.ReleaseRate()) * uint64(elapsedEpoch))
+		unlockedReward := r.AmountVested(elapsedEpoch)
 		withdrawableReward := unlockedReward - r.AmountWithdrawn()
 
 		if withdrawableReward < 0 {
@@ -114,9 +126,10 @@ func (a *RewardActorCode_I) AwardBlockReward(
 		// put Reward into RewardMap
 		newReward := &Reward_I{
 			StartEpoch_:      rt.CurrEpoch(),
+			EndEpoch_:        rt.CurrEpoch(),
 			Value_:           actualReward,
-			ReleaseRate_:     actualReward,
 			AmountWithdrawn_: actor.TokenAmount(0),
+			VestingFunction_: VestingFunction_None,
 		}
 		rewards, found := st.RewardMap()[miner]
 		if !found {
