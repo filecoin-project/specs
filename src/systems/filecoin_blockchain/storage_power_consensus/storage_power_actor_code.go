@@ -41,15 +41,9 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Add
 	// caller verification
 	TODO()
 	msgSender := rt.ImmediateCaller()
+	minBalance := a._rtGetPledgeCollateralReqForMinerOrAbort(rt, minerAddr)
 
 	h, st := a.State(rt)
-
-	minerPowerTotal, ok := st._getPowerTotalForMiner(minerAddr)
-	if !ok {
-		rt.AbortArgMsg("spa.WithdrawBalance: Miner not found.")
-	}
-
-	minBalance := st._getPledgeCollateralReq(minerPowerTotal)
 	newTable, amountExtracted, ok := actor_util.BalanceTable_WithExtractPartial(
 		st.EscrowTable(), minerAddr, amountRequested, minBalance)
 	if !ok {
@@ -102,11 +96,11 @@ func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime) {
 
 	h, st := a.State(rt)
 
-	minerPowerTotal, ok := st._getPowerTotalForMiner(minerAddr)
+	activePower, inactivePower, ok := st._getPowerTotalForMiner(minerAddr)
 	if !ok {
 		rt.AbortArgMsg("spa.RemoveStorageMiner: miner entry not found in PowerTable.")
 	}
-	if minerPowerTotal > 0 {
+	if activePower > 0 || inactivePower > 0 {
 		rt.AbortStateMsg("spa.RemoveStorageMiner: power still remains.")
 	}
 
@@ -137,9 +131,9 @@ func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) {
 	// caller verification
 	TODO()
 
+	pledgeReq := a._rtGetPledgeCollateralReqForMinerOrAbort(rt, minerAddr)
+
 	h, st := a.State(rt)
-	pledgeReq := st._getPledgeCollateralReqForMiner(minerAddr)
-	UpdateRelease(rt, h, st)
 
 	balanceSufficient, ok := actor_util.BalanceTable_IsEntrySufficient(st.EscrowTable(), minerAddr, pledgeReq)
 	Assert(ok)
@@ -147,19 +141,27 @@ func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) {
 		rt.AbortFundsMsg("exitcode.InsufficientPledgeCollateral")
 	}
 
+	Release(rt, h, st)
+
 }
 
 // slash pledge collateral for Declared, Detected and Terminated faults
 func (a *StoragePowerActorCode_I) SlashPledgeForStorageFault(rt Runtime, affectedPower block.StoragePower, faultType sector.StorageFaultType) {
 
 	minerAddr := rt.ImmediateCaller()
+	inds := rt.CurrIndices()
 
 	// caller verification
 	TODO()
 
 	h, st := a.State(rt)
 
-	affectedPledge := st._getAffectedPledge(minerAddr, affectedPower)
+	// getAffectedPledge
+	activePower, inactivePower, ok := st._getPowerTotalForMiner(minerAddr)
+	Assert(ok)
+	currPledge, ok := st._getCurrPledgeForMiner(minerAddr)
+	Assert(ok)
+	affectedPledge := inds.BlockReward_GetPledgeSlashForStorageFault(affectedPower, activePower, inactivePower, currPledge)
 
 	TODO() // BigInt arithmetic
 	amountToSlash := actor.TokenAmount(
@@ -181,9 +183,9 @@ func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerRep
 	// caller verification
 	TODO()
 
-	h, st := a.State(rt)
+	powerEntry := a._rtGetPowerEntryOrAbort(rt, minerAddr)
 
-	powerEntry := st._rtGetPowerEntryOrAbort(rt, minerAddr)
+	h, st := a.State(rt)
 
 	// keep track of miners larger than minimum miner size before updating the PT
 	MIN_MINER_SIZE_STOR := block.StoragePower(0) // TODO: pull in from consts
@@ -240,14 +242,36 @@ func (a *StoragePowerActorCode_I) Surprise(rt Runtime) {
 // Method utility functions
 ////////////////////////////////////////////////////////////////////////////////
 
-func (st *StoragePowerActorState_I) _rtGetPowerEntryOrAbort(rt Runtime, minerAddr addr.Address) PowerTableEntry {
+func (a *StoragePowerActorCode_I) _rtGetPowerEntryOrAbort(rt Runtime, minerAddr addr.Address) PowerTableEntry {
+	h, st := a.State(rt)
 	powerEntry, found := st.PowerTable()[minerAddr]
 
 	if !found {
-		rt.AbortStateMsg("sm._rtGetPowerEntryOrAbort: miner not found in power table.")
+		rt.AbortStateMsg("spa._rtGetPowerEntryOrAbort: miner not found in power table.")
 	}
 
+	Release(rt, h, st)
 	return powerEntry
+}
+
+func (a *StoragePowerActorCode_I) _rtGetPledgeCollateralReqForMinerOrAbort(rt Runtime, minerAddr addr.Address) actor.TokenAmount {
+	inds := rt.CurrIndices()
+	h, st := a.State(rt)
+
+	activePower, inactivePower, ok := st._getPowerTotalForMiner(minerAddr)
+	if !ok {
+		rt.AbortArgMsg("spa._rtGetPledgeCollateralReqForMinerOrAbort: miner not in PowerTable.")
+	}
+
+	currPledge, ok := st._getCurrPledgeForMiner(minerAddr)
+	if !ok {
+		rt.AbortArgMsg("spa._rtGetPledgeCollateralReqForMinerOrAbort: miner not in EscrowTable.")
+	}
+
+	minBalance := inds.BlockReward_PledgeCollateralReq(activePower, inactivePower, currPledge)
+
+	Release(rt, h, st)
+	return minBalance
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -121,3 +121,13 @@ func (inds *Indices_I) BlockReward_GetCurrRewardForMiner(
 	PARAM_FINISH()
 	panic("")
 }
+
+func (inds *Indices_I) BlockReward_GetPledgeSlashForStorageFault(
+	affectedPower block.StoragePower,
+	newActivePower block.StoragePower,
+	newInactivePower block.StoragePower,
+	currPledge actor.TokenAmount,
+) actor.TokenAmount {
+	PARAM_FINISH()
+	panic("")
+}
