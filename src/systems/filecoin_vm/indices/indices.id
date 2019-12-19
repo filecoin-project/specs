@@ -9,19 +9,19 @@ import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 // it is a passive data structure that allows for convenience access to network indices
 // and pure functions in implementing economic policies given states
 type Indices struct {
-
     // these fields are computed from StateTree upon construction
     // they are treated as globally available states
-    Epoch                    block.ChainEpoch
-    NetworkKPI               BigInt
-    TotalNetworkSectorWeight block.SectorWeight
-    TotalPledgeCollateral    actor.TokenAmount
-    TotalNetworkPower  block.StoragePower
+    Epoch                       block.ChainEpoch
+    NetworkKPI                  BigInt
+    TotalNetworkSectorWeight    block.SectorWeight
+    TotalPledgeCollateral       actor.TokenAmount
+    TotalNetworkEffectivePower  block.StoragePower  // power above minimum miner size
+    TotalNetworkPower           block.StoragePower
 
-    TotalMinedFIL            actor.TokenAmount
-    TotalUnminedFIL          actor.TokenAmount
-    TotalBurnedFIL           actor.TokenAmount
-    LastEpochReward          actor.TokenAmount
+    TotalMinedFIL               actor.TokenAmount
+    TotalUnminedFIL             actor.TokenAmount
+    TotalBurnedFIL              actor.TokenAmount
+    LastEpochReward             actor.TokenAmount
 
     // these methods produce policy output based on user state/action
     StorageDeal_DurationBounds(
@@ -75,26 +75,27 @@ type Indices struct {
     ) BigInt
 
     BlockReward_StoragePower(
-        minerActiveSectorWeight block.SectorWeight,
-        minerPledgeCollateral actor.TokenAmount,
+        minerActiveSectorWeight    block.SectorWeight
+        minerInactiveSectorWeight  block.SectorWeight
+        minerPledgeCollateral      actor.TokenAmount
     ) block.StoragePower
 
     BlockReward_StoragePowerProportion(
-        minerStoragePower  block.StoragePower
-        minerPledgeCollateral    actor.TokenAmount
+        minerStoragePower      block.StoragePower
+        minerPledgeCollateral  actor.TokenAmount
     ) BigInt
 
     BlockReward_CurrEpochReward() actor.TokenAmount
 
     BlockReward_GetCurrRewardForMiner(
-        minerStoragePower  block.StoragePower
-        minerPledgeCollateral    actor.TokenAmount
+        minerStoragePower      block.StoragePower
+        minerPledgeCollateral  actor.TokenAmount
     ) actor.TokenAmount
 
     BlockReward_GetPledgeSlashForStorageFault(
-        affectedPower     block.StoragePower
-        newActivePower    block.StoragePower
-        newInactivePower  block.StoragePower
-        currPledge        actor.TokenAmount
+        affectedPower            block.StoragePower
+        newActiveSectorWeight    block.SectorWeight
+        newInactiveSectorWeight  block.SectorWeight
+        currPledge               actor.TokenAmount
     ) actor.TokenAmount
 }

@@ -96,16 +96,17 @@ func (a *RewardActorCode_I) AwardBlockReward(
 	rt vmr.Runtime,
 	miner addr.Address,
 	penalty actor.TokenAmount,
-	minerActivePower block.StoragePower,
-	minerInactivePower block.StoragePower,
+	minerStoragePower block.StoragePower,
+	minerActiveSectorWeight block.SectorWeight,
+	minerInactiveSectorWeight block.SectorWeight,
 	currPledge actor.TokenAmount,
 ) {
 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
 
 	inds := rt.CurrIndices()
-	pledgeReq := inds.BlockReward_PledgeCollateralReq(minerActivePower, minerInactivePower, currPledge)
-	currReward := inds.BlockReward_GetCurrRewardForMiner(minerActivePower, currPledge)
-	TODO() // BigInt
+	pledgeReq := inds.BlockReward_PledgeCollateralReq(minerActiveSectorWeight, minerInactiveSectorWeight, currPledge)
+	currReward := inds.BlockReward_GetCurrRewardForMiner(minerStoragePower, currPledge)
+	TODO()                                                                                // BigInt
 	underPledge := math.Max(float64(actor.TokenAmount(0)), float64(pledgeReq-currPledge)) // 0 if over collateralized
 	rewardToGarnish := math.Min(float64(currReward), float64(underPledge))
 

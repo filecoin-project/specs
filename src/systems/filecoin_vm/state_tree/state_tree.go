@@ -8,6 +8,7 @@ import (
 )
 
 var Assert = util.Assert
+var IMPL_TODO = util.IMPL_TODO
 
 func (st *StateTree_I) RootCID() ipld.CID {
 	panic("TODO")

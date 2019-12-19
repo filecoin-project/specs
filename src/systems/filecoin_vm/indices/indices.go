@@ -97,6 +97,7 @@ func (inds *Indices_I) BlockReward_PledgeCollateralProportion(minerPledgeCollate
 
 func (inds *Indices_I) BlockReward_StoragePower(
 	minerActiveSectorWeight block.SectorWeight,
+	minerInactiveSectorWeight block.SectorWeight,
 	minerPledgeCollateral actor.TokenAmount,
 ) block.StoragePower {
 	// return StoragePower based on inputs

@@ -12,7 +12,7 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
-func (st *StoragePowerActorState_I) ActivePowerMeetsConsensusMinimum(minerPower block.StoragePower) bool {
+func (st *StoragePowerActorState_I) MinerPowerMeetsConsensusMinimum(minerPower block.StoragePower) bool {
 	// TODO import from consts
 	MIN_MINER_SIZE_STOR := block.StoragePower(0)
 	MIN_MINER_SIZE_TARG := 0
@@ -36,24 +36,10 @@ func (st *StoragePowerActorState_I) ActivePowerMeetsConsensusMinimum(minerPower 
 	// get size of MIN_MINER_SIZE_TARGth largest miner
 	minerSizes := make([]block.StoragePower, 0, len(st.PowerTable()))
 	for _, v := range st.PowerTable() {
-		minerSizes = append(minerSizes, v.ActivePower())
+		minerSizes = append(minerSizes, v.Power())
 	}
 	sort.Slice(minerSizes, func(i, j int) bool { return int(i) > int(j) })
 	return minerPower >= minerSizes[MIN_MINER_SIZE_TARG-1]
-}
-
-func (st *StoragePowerActorState_I) _getActivePowerForConsensus() block.StoragePower {
-	activePower := block.StoragePower(0)
-
-	for _, miner := range st.PowerTable() {
-		// only count miner power if they are larger than MIN_MINER_SIZE
-		// (need to use either condition) in case no one meets MIN_MINER_SIZE_STOR
-		if st.ActivePowerMeetsConsensusMinimum(miner.ActivePower()) {
-			activePower = activePower + miner.ActivePower()
-		}
-	}
-
-	return activePower
 }
 
 func (st *StoragePowerActorState_I) _slashPledgeCollateral(
@@ -115,30 +101,19 @@ func (st *StoragePowerActorState_I) _selectMinersToSurprise(challengeCount int, 
 	return selectedMiners
 }
 
-func (st *StoragePowerActorState_I) _getTotalPower() block.StoragePower {
-	// TODO (optimization): cache this as a counter in the actor state,
-	// and update it for relevant operations.
-
-	totalPower := block.StoragePower(0)
-	for _, minerEntry := range st.PowerTable() {
-		totalPower = totalPower + minerEntry.ActivePower() + minerEntry.InactivePower()
-	}
-	return totalPower
-}
-
-func (st *StoragePowerActorState_I) _getPowerTotalForMiner(minerAddr addr.Address) (
-	activePower block.StoragePower, inactivePower block.StoragePower, ok bool) {
+func (st *StoragePowerActorState_I) GetSectorWeightForMiner(minerAddr addr.Address) (
+	activeSectorWeight block.SectorWeight, inactiveSectorWeight block.SectorWeight, ok bool) {
 
 	powerEntry, found := st.PowerTable()[minerAddr]
 	if !found {
-		return block.StoragePower(0), block.StoragePower(0), found
+		return block.SectorWeight(0), block.SectorWeight(0), found
 	}
 
-	return powerEntry.ActivePower(), powerEntry.InactivePower(), true
+	return powerEntry.ActiveSectorWeight(), powerEntry.InactiveSectorWeight(), true
 
 }
 
-func (st *StoragePowerActorState_I) _getCurrPledgeForMiner(minerAddr addr.Address) (currPledge actor.TokenAmount, ok bool) {
+func (st *StoragePowerActorState_I) GetCurrPledgeForMiner(minerAddr addr.Address) (currPledge actor.TokenAmount, ok bool) {
 	return actor_util.BalanceTable_GetEntry(st.EscrowTable(), minerAddr)
 }
 

@@ -10,6 +10,7 @@ import (
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	inds "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -40,13 +41,12 @@ func (spc *StoragePowerConsensusSubsystem_I) ComputeChainWeight(tipset chain.Tip
 	return spc.ec().ComputeChainWeight(tipset)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree stateTree.StateTree, partialTicket sector.PartialTicket, sectorUtilization block.StoragePower, numSectors util.UVarint) bool {
+func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree stateTree.StateTree, inds inds.Indices, partialTicket sector.PartialTicket, sectorUtilization block.StoragePower, numSectors util.UVarint) bool {
 
 	// finalize the partial ticket
 	challengeTicket := filcrypto.SHA256(partialTicket)
 
-	st := spc._getStoragePowerActorState(stateTree)
-	networkPower := st._getActivePowerForConsensus()
+	networkPower := inds.TotalNetworkEffectivePower()
 
 	// TODO: pull from constants
 	EPOST_SAMPLE_RATE_NUM := util.UVarint(1)
