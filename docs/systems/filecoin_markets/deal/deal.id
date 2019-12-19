@@ -5,10 +5,11 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
-type DealID UVarint
+type DealID Int
 type DealIDs struct {
     Items [DealID]
 }
+type DealWeight int  // should be BigInt
 
 type DealCID ipld.CID
 type ProposalCID ipld.CID

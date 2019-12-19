@@ -1,23 +1,34 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type DealsAMT {deal.DealID: deal.OnChainDeal}
+type DealWeight deal.DealWeight
+
+type CachedDealIDsByPartyHAMT {addr.Address: actor_util.DealIDSetHAMT}
+type CachedExpirationsPendingHAMT {block.ChainEpoch: DealIDQueue}
 
 type StorageMarketActorState struct {
-    Deals           DealsAMT
+    Deals                           DealsAMT
 
     // Total amount held in escrow, indexed by actor address (including both locked and unlocked amounts).
-    EscrowTable     actor.BalanceTableHAMT
+    EscrowTable                     actor_util.BalanceTableHAMT
 
     // Amount locked, indexed by actor address.
     // Note: the amounts in this table do not affect the overall amount in escrow:
     // only the _portion_ of the total escrow amount that is locked.
-    LockedReqTable  actor.BalanceTableHAMT
+    LockedReqTable                  actor_util.BalanceTableHAMT
 
-    NextID          deal.DealID
+    NextID                          deal.DealID
+
+    // Metadata cached for efficient iteration over deals.
+    CachedDealIDsByParty            CachedDealIDsByPartyHAMT
+    CachedExpirationsPending        CachedExpirationsPendingHAMT
+    CachedExpirationsNextProcEpoch  block.ChainEpoch
+    CurrEpochNumDealsPublished      int
 
     _rtAbortIfAddressEntryDoesNotExist(rt Runtime, entryAddr addr.Address)
     _rtUpdatePendingDealStatesForParty(rt Runtime, addr addr.Address) (amountSlashedTotal actor.TokenAmount)
@@ -72,7 +83,7 @@ type StorageMarketActorCode struct {
     // The weight is defined as the sum, over all deals in the set, of the product of its size
     // with its duration. This quantity may be an input into the functions specifying block reward,
     // sector power, collateral, and/or other parameters.
-    GetWeightForDealSet(rt Runtime, dealIDs deal.DealIDs) int
+    GetWeightForDealSet(rt Runtime, dealIDs deal.DealIDs) DealWeight
 
     // Terminate a set of deals in response to their containing sector being terminated.
     // Slash provider collateral, refund client collateral, and refund partial unpaid escrow

@@ -4656,7 +4656,6 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// This contains actor things that are _outside_ of VM exection.
 </span><span class="c1">// The VM uses this to execute actors.
 </span><span class="c1"></span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 
 <span class="c1">// TokenAmount is an amount of Filecoin tokens. This type is used within
@@ -4716,6 +4715,11 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">BuiltinActorID</span> <span class="nx">enum</span> <span class="p">{</span>
+    <span class="c1">// The SystemActor has no methods and no state.
+</span><span class="c1"></span>    <span class="c1">// It exists only to be the implicit sender of privileged messages that arise from
+</span><span class="c1"></span>    <span class="c1">// the VM interpreter itself (e.g., cron and block reward triggers and EPoSts).
+</span><span class="c1"></span>    <span class="nx">System</span>
+
     <span class="nx">Init</span>
     <span class="nx">Cron</span>
     <span class="nx">Account</span>
@@ -4765,9 +4769,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">//         NextID      ActorID
 </span><span class="c1">//     }
 </span><span class="c1">// }
-</span><span class="c1"></span>
-<span class="kd">type</span> <span class="nx">BalanceTableHAMT</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">TokenAmount</span><span class="p">}</span>
-</code></pre></div>
+</span></code></pre></div>
 
 
 
@@ -4795,9 +4797,10 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">actor</span>
 
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
-<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="p">)</span>
 
 <span class="kd">var</span> <span class="nx">IMPL_FINISH</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">IMPL_FINISH</span>
 <span class="kd">var</span> <span class="nx">TODO</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">TODO</span>
@@ -4861,105 +4864,6 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="nf">TokenAmount_Placeholder</span><span class="p">()</span> <span class="nx">TokenAmount</span> <span class="p">{</span>
 	<span class="nf">TODO</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Interface for runtime/VMContext functionality (to avoid circular dependency in Go imports)
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Has_AbortArg</span> <span class="kd">interface</span> <span class="p">{</span>
-	<span class="nf">AbortArg</span><span class="p">()</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">CheckArgs</span><span class="p">(</span><span class="nx">params</span> <span class="o">*</span><span class="nx">MethodParams</span><span class="p">,</span> <span class="nx">rt</span> <span class="nx">Has_AbortArg</span><span class="p">,</span> <span class="nx">cond</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="p">!</span><span class="nx">cond</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArg</span><span class="p">()</span>
-	<span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">ArgPop</span><span class="p">(</span><span class="nx">params</span> <span class="o">*</span><span class="nx">MethodParams</span><span class="p">,</span> <span class="nx">rt</span> <span class="nx">Has_AbortArg</span><span class="p">)</span> <span class="nx">Serialization</span> <span class="p">{</span>
-	<span class="nf">CheckArgs</span><span class="p">(</span><span class="nx">params</span><span class="p">,</span> <span class="nx">rt</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="o">*</span><span class="nx">params</span><span class="p">)</span> <span class="p">&gt;</span> <span class="mi">0</span><span class="p">)</span>
-	<span class="nx">ret</span> <span class="o">:=</span> <span class="p">(</span><span class="o">*</span><span class="nx">params</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-	<span class="o">*</span><span class="nx">params</span> <span class="p">=</span> <span class="p">(</span><span class="o">*</span><span class="nx">params</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
-	<span class="k">return</span> <span class="nx">ret</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">ArgEnd</span><span class="p">(</span><span class="nx">params</span> <span class="o">*</span><span class="nx">MethodParams</span><span class="p">,</span> <span class="nx">rt</span> <span class="nx">Has_AbortArg</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nf">CheckArgs</span><span class="p">(</span><span class="nx">params</span><span class="p">,</span> <span class="nx">rt</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="o">*</span><span class="nx">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Create a new entry in the balance table, with the specified initial balance.
-</span><span class="c1">// May fail if the specified address already exists in the table.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BalanceTable_WithNewAddressEntry</span><span class="p">(</span><span class="nx">table</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">initBalance</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">ret</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Delete the specified entry in the balance table.
-</span><span class="c1">// May fail if the specified address does not exist in the table.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BalanceTable_WithDeletedAddressEntry</span><span class="p">(</span><span class="nx">table</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">ret</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Add the given amount to the given address&#39;s balance table entry.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">table</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">ret</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Subtract the given amount (or as much as possible, without making the resulting amount negative)
-</span><span class="c1">// from the given address&#39;s balance table entry, independent of any minimum balance maintenance
-</span><span class="c1">// requirement.
-</span><span class="c1">// Note: ok should be set to true here, even if the operation caused the entry to hit zero.
-</span><span class="c1">// The only failure case is when the address does not exist in the table.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BalanceTable_WithSubtractPreservingNonnegative</span><span class="p">(</span>
-	<span class="nx">table</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">ret</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">amountSubtracted</span> <span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="k">return</span> <span class="nf">BalanceTable_WithExtractPartial</span><span class="p">(</span><span class="nx">table</span><span class="p">,</span> <span class="nx">address</span><span class="p">,</span> <span class="nx">amount</span><span class="p">,</span> <span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-<span class="p">}</span>
-
-<span class="c1">// Extract the given amount from the given address&#39;s balance table entry, subject to the requirement
-</span><span class="c1">// of a minimum balance `minBalanceMaintain`. If not possible to withdraw the entire amount
-</span><span class="c1">// requested, then the balance will remain unchanged.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BalanceTable_WithExtract</span><span class="p">(</span>
-	<span class="nx">table</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">minBalanceMaintain</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">ret</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Extract as much as possible (may be zero) up to the specified amount from the given address&#39;s
-</span><span class="c1">// balance table entry, subject to the requirement of a minimum balance `minBalanceMaintain`.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BalanceTable_WithExtractPartial</span><span class="p">(</span>
-	<span class="nx">table</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">minBalanceMaintain</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">ret</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">amountExtracted</span> <span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Determine whether the given address&#39;s entry in the balance table meets the required minimum
-</span><span class="c1">// `minBalanceMaintain`.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BalanceTable_IsEntrySufficient</span><span class="p">(</span>
-	<span class="nx">table</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">minBalanceMaintain</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">(</span><span class="nx">ret</span> <span class="kt">bool</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Retrieve the balance table entry corresponding to the given address.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BalanceTable_GetEntry</span><span class="p">(</span>
-	<span class="nx">table</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">ret</span> <span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>

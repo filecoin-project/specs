@@ -3,12 +3,16 @@ package storage_market
 import (
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
 
+type BalanceTableHAMT = actor_util.BalanceTableHAMT
+type DealIDQueue = actor_util.DealIDQueue
+
 ////////////////////////////////////////////////////////////////////////////////
-// Boilerplate: StorageMarketActor
+// Boilerplate
 //
 // This boilerplate should be essentially identical for all actors, and
 // conceptually belongs in the runtime/VM. It is only duplicated here as a
@@ -20,7 +24,7 @@ type Runtime = vmr.Runtime
 type Bytes = util.Bytes
 
 var IMPL_FINISH = util.IMPL_FINISH
-var TODO = util.TODO
+var IMPL_TODO = util.IMPL_TODO
 
 func (a *StorageMarketActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, StorageMarketActorState) {
 	h := rt.AcquireState()
@@ -41,6 +45,21 @@ func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st StorageMarketActorStat
 	h.UpdateRelease(newCID)
 }
 func (st *StorageMarketActorState_I) CID() ipld.CID {
+	IMPL_FINISH()
+	panic("")
+}
+
+func DealsAMT_Empty() DealsAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
+func CachedDealIDsByPartyHAMT_Empty() CachedDealIDsByPartyHAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
+func CachedExpirationsPendingHAMT_Empty() CachedExpirationsPendingHAMT {
 	IMPL_FINISH()
 	panic("")
 }

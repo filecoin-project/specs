@@ -4745,11 +4745,12 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 <span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 
-<span class="kd">type</span> <span class="nx">DealID</span> <span class="nx">UVarint</span>
+<span class="kd">type</span> <span class="nx">DealID</span> <span class="nx">Int</span>
 <span class="kd">type</span> <span class="nx">DealIDs</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Items</span> <span class="p">[</span><span class="nx">DealID</span><span class="p">]</span>
 <span class="p">}</span>
-
+<span class="kd">type</span> <span class="nx">DealWeight</span> <span class="kt">int</span>  <span class="c1">// should be BigInt
+</span><span class="c1"></span>
 <span class="kd">type</span> <span class="nx">DealCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
 <span class="kd">type</span> <span class="nx">ProposalCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
 <span class="kd">type</span> <span class="nx">PayloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>

@@ -1,7 +1,6 @@
 // This contains actor things that are _outside_ of VM exection.
 // The VM uses this to execute actors.
 
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
 // TokenAmount is an amount of Filecoin tokens. This type is used within
@@ -61,6 +60,11 @@ type CodeID union {
 }
 
 type BuiltinActorID enum {
+    // The SystemActor has no methods and no state.
+    // It exists only to be the implicit sender of privileged messages that arise from
+    // the VM interpreter itself (e.g., cron and block reward triggers and EPoSts).
+    System
+
     Init
     Cron
     Account
@@ -110,5 +114,3 @@ type ActorSubstateCID ipld.CID
 //         NextID      ActorID
 //     }
 // }
-
-type BalanceTableHAMT {addr.Address: TokenAmount}

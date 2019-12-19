@@ -1,3 +1,4 @@
+import actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
@@ -19,7 +20,7 @@ type PowerTableHAMT {addr.Address: PowerTableEntry}  // TODO: convert address to
 
 type StoragePowerActorState struct {
     PowerTable            PowerTableHAMT
-    EscrowTable           actor.BalanceTableHAMT
+    EscrowTable           actor_util.BalanceTableHAMT
     _minersLargerThanMin  util.UVarint
 
     ActivePowerMeetsConsensusMinimum(minPower block.StoragePower) bool

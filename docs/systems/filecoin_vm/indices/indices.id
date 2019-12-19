@@ -1,13 +1,25 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
+type CollateralPower block.BytesAmount
+type EarningPower block.BytesAmount
+
+// Data in Indices are populated at instantiation with data from the state tree
+// Indices itself has no state tree or access to the runtime
+// it is a passive data structure that allows for convenience access to network indices
+// and pure functions in implementing economic policies given states
 type Indices struct {
-    Epoch              block.ChainEpoch
-    TotalNetworkPower  BigInt
-    TotalMintedFIL     BigInt
-    TotalBurnedFIL     BigInt
-    // TODO: extend
+    Epoch                    block.ChainEpoch
+    NetworkKPI               BigInt
+    TotalNetworkActivePower  BigInt
+    TotalPledgeCollateral    BigInt
+    TotalEarningPower        BigInt
+    TotalMinedFIL            BigInt
+    TotalUnminedFIL          BigInt
+    TotalBurnedFIL           BigInt
 
     StorageDeal_DurationBounds(
         pieceSize   piece.PieceSize
@@ -37,4 +49,37 @@ type Indices struct {
         minClientCollateral  actor.TokenAmount
         maxClientCollateral  actor.TokenAmount
     )
+
+    BlockReward_SectorPower(
+        sectorSize  sector.SectorSize
+        startEpoch  block.ChainEpoch
+        endEpoch    block.ChainEpoch
+        dealWeight  deal.DealWeight
+    ) block.StoragePower
+
+    BlockReward_PledgeCollateralReq(
+        minerActiveStoragePower    block.StoragePower
+        minerInactiveStoragePower  block.StoragePower
+        minerPledgeCollateral      actor.TokenAmount
+    ) actor.TokenAmount
+
+    BlockReward_StoragePowerProportion(
+        minerActiveStoragePower block.StoragePower
+    ) BigInt
+
+    BlockReward_CollateralPowerProportion(
+        minerPledgeCollateral actor.TokenAmount
+    ) BigInt
+
+    BlockReward_EarningPowerProportion(
+        minerActiveStoragePower  block.StoragePower
+        minerPledgeCollateral    actor.TokenAmount
+    ) EarningPower
+
+    BlockReward_CurrEpochReward() actor.TokenAmount
+
+    BlockReward_GetCurrRewardForMiner(
+        minerActiveStoragePower  block.StoragePower
+        minerPledgeCollateral    actor.TokenAmount
+    ) actor.TokenAmount
 }

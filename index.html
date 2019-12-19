@@ -4811,9 +4811,9 @@ https://github.com/alex-shpak/hugo-book
   <img id="spec-logo" src="./docs/filspeclogo.png" />
   <div id="spec-version">
     protocol version: <span id="protocol-version-number">v0.1.0</span><br />
-    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">681f2365</span>
+    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">cc555b28</span>
     <br />
-    last published: <span id="spec-version-date">2019-12-18_17:54:18Z</span>
+    last published: <span id="spec-version-date">2019-12-19_12:21:19Z</span>
   </div>
 </div>
 
@@ -11889,7 +11889,6 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// This contains actor things that are _outside_ of VM exection.
 </span><span class="c1">// The VM uses this to execute actors.
 </span><span class="c1"></span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 
 <span class="c1">// TokenAmount is an amount of Filecoin tokens. This type is used within
@@ -11949,6 +11948,11 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">BuiltinActorID</span> <span class="nx">enum</span> <span class="p">{</span>
+    <span class="c1">// The SystemActor has no methods and no state.
+</span><span class="c1"></span>    <span class="c1">// It exists only to be the implicit sender of privileged messages that arise from
+</span><span class="c1"></span>    <span class="c1">// the VM interpreter itself (e.g., cron and block reward triggers and EPoSts).
+</span><span class="c1"></span>    <span class="nx">System</span>
+
     <span class="nx">Init</span>
     <span class="nx">Cron</span>
     <span class="nx">Account</span>
@@ -11998,9 +12002,7 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 </span><span class="c1">//         NextID      ActorID
 </span><span class="c1">//     }
 </span><span class="c1">// }
-</span><span class="c1"></span>
-<span class="kd">type</span> <span class="nx">BalanceTableHAMT</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">TokenAmount</span><span class="p">}</span>
-</code></pre></div>
+</span></code></pre></div>
 
 
 
@@ -12028,9 +12030,10 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">actor</span>
 
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
-<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="p">)</span>
 
 <span class="kd">var</span> <span class="nx">IMPL_FINISH</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">IMPL_FINISH</span>
 <span class="kd">var</span> <span class="nx">TODO</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">TODO</span>
@@ -12094,105 +12097,6 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 
 <span class="kd">func</span> <span class="nf">TokenAmount_Placeholder</span><span class="p">()</span> <span class="nx">TokenAmount</span> <span class="p">{</span>
 	<span class="nf">TODO</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Interface for runtime/VMContext functionality (to avoid circular dependency in Go imports)
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Has_AbortArg</span> <span class="kd">interface</span> <span class="p">{</span>
-	<span class="nf">AbortArg</span><span class="p">()</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">CheckArgs</span><span class="p">(</span><span class="nx">params</span> <span class="o">*</span><span class="nx">MethodParams</span><span class="p">,</span> <span class="nx">rt</span> <span class="nx">Has_AbortArg</span><span class="p">,</span> <span class="nx">cond</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="p">!</span><span class="nx">cond</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArg</span><span class="p">()</span>
-	<span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">ArgPop</span><span class="p">(</span><span class="nx">params</span> <span class="o">*</span><span class="nx">MethodParams</span><span class="p">,</span> <span class="nx">rt</span> <span class="nx">Has_AbortArg</span><span class="p">)</span> <span class="nx">Serialization</span> <span class="p">{</span>
-	<span class="nf">CheckArgs</span><span class="p">(</span><span class="nx">params</span><span class="p">,</span> <span class="nx">rt</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="o">*</span><span class="nx">params</span><span class="p">)</span> <span class="p">&gt;</span> <span class="mi">0</span><span class="p">)</span>
-	<span class="nx">ret</span> <span class="o">:=</span> <span class="p">(</span><span class="o">*</span><span class="nx">params</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-	<span class="o">*</span><span class="nx">params</span> <span class="p">=</span> <span class="p">(</span><span class="o">*</span><span class="nx">params</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
-	<span class="k">return</span> <span class="nx">ret</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">ArgEnd</span><span class="p">(</span><span class="nx">params</span> <span class="o">*</span><span class="nx">MethodParams</span><span class="p">,</span> <span class="nx">rt</span> <span class="nx">Has_AbortArg</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nf">CheckArgs</span><span class="p">(</span><span class="nx">params</span><span class="p">,</span> <span class="nx">rt</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="o">*</span><span class="nx">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Create a new entry in the balance table, with the specified initial balance.
-</span><span class="c1">// May fail if the specified address already exists in the table.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BalanceTable_WithNewAddressEntry</span><span class="p">(</span><span class="nx">table</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">initBalance</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">ret</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Delete the specified entry in the balance table.
-</span><span class="c1">// May fail if the specified address does not exist in the table.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BalanceTable_WithDeletedAddressEntry</span><span class="p">(</span><span class="nx">table</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">ret</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Add the given amount to the given address&#39;s balance table entry.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">table</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">ret</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Subtract the given amount (or as much as possible, without making the resulting amount negative)
-</span><span class="c1">// from the given address&#39;s balance table entry, independent of any minimum balance maintenance
-</span><span class="c1">// requirement.
-</span><span class="c1">// Note: ok should be set to true here, even if the operation caused the entry to hit zero.
-</span><span class="c1">// The only failure case is when the address does not exist in the table.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BalanceTable_WithSubtractPreservingNonnegative</span><span class="p">(</span>
-	<span class="nx">table</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">ret</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">amountSubtracted</span> <span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="k">return</span> <span class="nf">BalanceTable_WithExtractPartial</span><span class="p">(</span><span class="nx">table</span><span class="p">,</span> <span class="nx">address</span><span class="p">,</span> <span class="nx">amount</span><span class="p">,</span> <span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-<span class="p">}</span>
-
-<span class="c1">// Extract the given amount from the given address&#39;s balance table entry, subject to the requirement
-</span><span class="c1">// of a minimum balance `minBalanceMaintain`. If not possible to withdraw the entire amount
-</span><span class="c1">// requested, then the balance will remain unchanged.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BalanceTable_WithExtract</span><span class="p">(</span>
-	<span class="nx">table</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">minBalanceMaintain</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">ret</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Extract as much as possible (may be zero) up to the specified amount from the given address&#39;s
-</span><span class="c1">// balance table entry, subject to the requirement of a minimum balance `minBalanceMaintain`.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BalanceTable_WithExtractPartial</span><span class="p">(</span>
-	<span class="nx">table</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">minBalanceMaintain</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">ret</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">amountExtracted</span> <span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Determine whether the given address&#39;s entry in the balance table meets the required minimum
-</span><span class="c1">// `minBalanceMaintain`.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BalanceTable_IsEntrySufficient</span><span class="p">(</span>
-	<span class="nx">table</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">minBalanceMaintain</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">(</span><span class="nx">ret</span> <span class="kt">bool</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Retrieve the balance table entry corresponding to the given address.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BalanceTable_GetEntry</span><span class="p">(</span>
-	<span class="nx">table</span> <span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">ret</span> <span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -13741,55 +13645,12 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 <span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
 <span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
 <span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
-<span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 
 <span class="kd">const</span> <span class="p">(</span>
 	<span class="nx">Method_InitActor_Exec</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodPlaceholder</span> <span class="o">+</span> <span class="kc">iota</span>
 	<span class="nx">Method_InitActor_GetActorIDForAddress</span>
 <span class="p">)</span>
 
-<span class="c1">////////////////////////////////////////////////////////////////////////////////
-</span><span class="c1">// Boilerplate
-</span><span class="c1">////////////////////////////////////////////////////////////////////////////////
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="p">=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span>
-<span class="kd">type</span> <span class="nx">Runtime</span> <span class="p">=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span>
-<span class="kd">type</span> <span class="nx">Bytes</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span>
-<span class="kd">type</span> <span class="nx">Serialization</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
-
-<span class="kd">var</span> <span class="nx">CheckArgs</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CheckArgs</span>
-<span class="kd">var</span> <span class="nx">ArgPop</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ArgPop</span>
-<span class="kd">var</span> <span class="nx">ArgEnd</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ArgEnd</span>
-
-<span class="kd">func</span> <span class="nf">_loadState</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">InitActorState</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
-	<span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">())</span>
-	<span class="k">if</span> <span class="nx">ipld</span><span class="p">.</span><span class="nf">CID_Equals</span><span class="p">(</span><span class="nx">stateCID</span><span class="p">,</span> <span class="nx">ipld</span><span class="p">.</span><span class="nf">EmptyCID</span><span class="p">())</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;Actor state not initialized&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
-	<span class="nx">stateBytes</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">stateCID</span><span class="p">))</span>
-	<span class="k">if</span> <span class="nx">stateBytes</span><span class="p">.</span><span class="nf">Which</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime_IpldGet_FunRet_Case_Bytes</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;IPLD lookup error&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
-	<span class="nx">state</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">Deserialize_InitActorState</span><span class="p">(</span><span class="nf">Serialization</span><span class="p">(</span><span class="nx">stateBytes</span><span class="p">.</span><span class="nf">As_Bytes</span><span class="p">()))</span>
-	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;State deserialization error&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
-	<span class="k">return</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">state</span>
-<span class="p">}</span>
-<span class="kd">func</span> <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">h</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">st</span> <span class="nx">InitActorState</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">checkCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">()))</span>
-	<span class="nx">h</span><span class="p">.</span><span class="nf">Release</span><span class="p">(</span><span class="nx">checkCID</span><span class="p">)</span>
-<span class="p">}</span>
-<span class="kd">func</span> <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">h</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">st</span> <span class="nx">InitActorState</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">newCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">()))</span>
-	<span class="nx">h</span><span class="p">.</span><span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">newCID</span><span class="p">)</span>
-<span class="p">}</span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">InitActorState_I</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">////////////////////////////////////////////////////////////////////////////////
-</span><span class="c1"></span>
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
 	<span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
 	<span class="nx">st</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">InitActorState_I</span><span class="p">{</span>
@@ -15130,6 +14991,7 @@ it will be created as an account actor.</p>
 
 <span class="c1">// CodeIDs for system actors
 </span><span class="c1"></span><span class="kd">var</span> <span class="p">(</span>
+	<span class="nx">SystemActorCodeID</span>         <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_System</span><span class="p">)</span>
 	<span class="nx">InitActorCodeID</span>           <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_Init</span><span class="p">)</span>
 	<span class="nx">CronActorCodeID</span>           <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_Cron</span><span class="p">)</span>
 	<span class="nx">AccountActorCodeID</span>        <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_Account</span><span class="p">)</span>
@@ -18907,7 +18769,8 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
@@ -18928,7 +18791,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 </span><span class="c1"></span>
 <span class="kd">type</span> <span class="nx">StoragePowerActorState</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">PowerTable</span>            <span class="nx">PowerTableHAMT</span>
-    <span class="nx">EscrowTable</span>           <span class="nx">actor</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span>
+    <span class="nx">EscrowTable</span>           <span class="nx">actor_util</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span>
     <span class="nx">_minersLargerThanMin</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
 
     <span class="nf">ActivePowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">minPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="kt">bool</span>
@@ -19018,6 +18881,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 	<span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 	<span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+	<span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
@@ -19072,7 +18936,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;_slashPledgeCollateral: error: negative amount specified&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 
-	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountSlashed</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithSubtractPreservingNonnegative</span><span class="p">(</span>
+	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountSlashed</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithSubtractPreservingNonnegative</span><span class="p">(</span>
 		<span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">slashAmountRequested</span><span class="p">)</span>
 	<span class="c1">// TODO: extra handling of not having enough pledge collateral to be slashed?
 </span><span class="c1"></span>	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
@@ -19224,6 +19088,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 	<span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 	<span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
+	<span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
@@ -19238,7 +19103,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 	<span class="nx">msgValue</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReceived</span><span class="p">()</span>
 
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
+	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;spa.AddBalance: Escrow operation failed.&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
@@ -19264,7 +19129,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 	<span class="p">}</span>
 
 	<span class="nx">minBalance</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPledgeCollateralReq</span><span class="p">(</span><span class="nx">minerPowerTotal</span><span class="p">)</span>
-	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountExtracted</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithExtractPartial</span><span class="p">(</span>
+	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountExtracted</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithExtractPartial</span><span class="p">(</span>
 		<span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">amountRequested</span><span class="p">,</span> <span class="nx">minBalance</span><span class="p">)</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;spa.WithdrawBalance: Escrow operation failed.&#34;</span><span class="p">)</span>
@@ -19296,7 +19161,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 	<span class="p">}</span>
 
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithNewAddressEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">newMinerAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
+	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithNewAddressEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">newMinerAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Internal error: newMinerAddr (result of InitActor::Exec) already exists in escrow table&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
@@ -19324,7 +19189,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;spa.RemoveStorageMiner: power still remains.&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 
-	<span class="nx">minerPledgeBalance</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
+	<span class="nx">minerPledgeBalance</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa.RemoveStorageMiner: miner entry not found in escrow.&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
@@ -19335,7 +19200,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 
 	<span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
 
-	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithDeletedAddressEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
+	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithDeletedAddressEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Internal error: miner entry in escrow table does not exist&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
@@ -19355,7 +19220,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 	<span class="nx">pledgeReq</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPledgeCollateralReqForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
 	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-	<span class="nx">balanceSufficient</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_IsEntrySufficient</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">pledgeReq</span><span class="p">)</span>
+	<span class="nx">balanceSufficient</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_IsEntrySufficient</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">pledgeReq</span><span class="p">)</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">balanceSufficient</span> <span class="p">{</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortFundsMsg</span><span class="p">(</span><span class="s">&#34;exitcode.InsufficientPledgeCollateral&#34;</span><span class="p">)</span>
@@ -25122,11 +24987,12 @@ G and T will be selected using these.</p>
 <span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 <span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 
-<span class="kd">type</span> <span class="nx">DealID</span> <span class="nx">UVarint</span>
+<span class="kd">type</span> <span class="nx">DealID</span> <span class="nx">Int</span>
 <span class="kd">type</span> <span class="nx">DealIDs</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Items</span> <span class="p">[</span><span class="nx">DealID</span><span class="p">]</span>
 <span class="p">}</span>
-
+<span class="kd">type</span> <span class="nx">DealWeight</span> <span class="kt">int</span>  <span class="c1">// should be BigInt
+</span><span class="c1"></span>
 <span class="kd">type</span> <span class="nx">DealCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
 <span class="kd">type</span> <span class="nx">ProposalCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
 <span class="kd">type</span> <span class="nx">PayloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
@@ -25452,25 +25318,36 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 
 <span class="kd">type</span> <span class="nx">DealsAMT</span> <span class="p">{</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">:</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">}</span>
+<span class="kd">type</span> <span class="nx">DealWeight</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealWeight</span>
+
+<span class="kd">type</span> <span class="nx">CachedDealIDsByPartyHAMT</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">DealIDSetHAMT</span><span class="p">}</span>
+<span class="kd">type</span> <span class="nx">CachedExpirationsPendingHAMT</span> <span class="p">{</span><span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">:</span> <span class="nx">DealIDQueue</span><span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageMarketActorState</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Deals</span>           <span class="nx">DealsAMT</span>
+    <span class="nx">Deals</span>                           <span class="nx">DealsAMT</span>
 
     <span class="c1">// Total amount held in escrow, indexed by actor address (including both locked and unlocked amounts).
-</span><span class="c1"></span>    <span class="nx">EscrowTable</span>     <span class="nx">actor</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span>
+</span><span class="c1"></span>    <span class="nx">EscrowTable</span>                     <span class="nx">actor_util</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span>
 
     <span class="c1">// Amount locked, indexed by actor address.
 </span><span class="c1"></span>    <span class="c1">// Note: the amounts in this table do not affect the overall amount in escrow:
 </span><span class="c1"></span>    <span class="c1">// only the _portion_ of the total escrow amount that is locked.
-</span><span class="c1"></span>    <span class="nx">LockedReqTable</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span>
+</span><span class="c1"></span>    <span class="nx">LockedReqTable</span>                  <span class="nx">actor_util</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span>
 
-    <span class="nx">NextID</span>          <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
+    <span class="nx">NextID</span>                          <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
+
+    <span class="c1">// Metadata cached for efficient iteration over deals.
+</span><span class="c1"></span>    <span class="nx">CachedDealIDsByParty</span>            <span class="nx">CachedDealIDsByPartyHAMT</span>
+    <span class="nx">CachedExpirationsPending</span>        <span class="nx">CachedExpirationsPendingHAMT</span>
+    <span class="nx">CachedExpirationsNextProcEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">CurrEpochNumDealsPublished</span>      <span class="kt">int</span>
 
     <span class="nf">_rtAbortIfAddressEntryDoesNotExist</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">entryAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
     <span class="nf">_rtUpdatePendingDealStatesForParty</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">amountSlashedTotal</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
@@ -25525,7 +25402,7 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 </span><span class="c1"></span>    <span class="c1">// The weight is defined as the sum, over all deals in the set, of the product of its size
 </span><span class="c1"></span>    <span class="c1">// with its duration. This quantity may be an input into the functions specifying block reward,
 </span><span class="c1"></span>    <span class="c1">// sector power, collateral, and/or other parameters.
-</span><span class="c1"></span>    <span class="nf">GetWeightForDealSet</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealIDs</span><span class="p">)</span> <span class="kt">int</span>
+</span><span class="c1"></span>    <span class="nf">GetWeightForDealSet</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealIDs</span><span class="p">)</span> <span class="nx">DealWeight</span>
 
     <span class="c1">// Terminate a set of deals in response to their containing sector being terminated.
 </span><span class="c1"></span>    <span class="c1">// Slash provider collateral, refund client collateral, and refund partial unpaid escrow
@@ -25572,6 +25449,7 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 	<span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 	<span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+	<span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&#34;</span>
 	<span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/indices&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
@@ -25655,6 +25533,13 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 	<span class="k">return</span>
 <span class="p">}</span>
 
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_deleteDeal</span><span class="p">(</span><span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">_</span><span class="p">,</span> <span class="nx">dealP</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getOnChainDealAssert</span><span class="p">(</span><span class="nx">dealID</span><span class="p">)</span>
+	<span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">Deals</span><span class="p">(),</span> <span class="nx">dealID</span><span class="p">)</span>
+	<span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">CachedDealIDsByParty</span><span class="p">()[</span><span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">()],</span> <span class="nx">dealID</span><span class="p">)</span>
+	<span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">CachedDealIDsByParty</span><span class="p">()[</span><span class="nx">dealP</span><span class="p">.</span><span class="nf">Client</span><span class="p">()],</span> <span class="nx">dealID</span><span class="p">)</span>
+<span class="p">}</span>
+
 <span class="c1">// Note: only processes deal payments, not deal expiration (even if the deal has expired).
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_processDealPaymentEpochsElapsed</span><span class="p">(</span><span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">,</span> <span class="nx">numEpochsElapsed</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">deal</span><span class="p">,</span> <span class="nx">dealP</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getOnChainDealAssert</span><span class="p">(</span><span class="nx">dealID</span><span class="p">)</span>
@@ -25682,7 +25567,7 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 </span><span class="c1"></span>	<span class="nx">amountSlashed</span> <span class="p">=</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">ProviderCollateral</span><span class="p">()</span>
 	<span class="nx">st</span><span class="p">.</span><span class="nf">_slashBalance</span><span class="p">(</span><span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">amountSlashed</span><span class="p">)</span>
 
-	<span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">Deals</span><span class="p">(),</span> <span class="nx">dealID</span><span class="p">)</span>
+	<span class="nx">st</span><span class="p">.</span><span class="nf">_deleteDeal</span><span class="p">(</span><span class="nx">dealID</span><span class="p">)</span>
 	<span class="k">return</span>
 <span class="p">}</span>
 
@@ -25701,7 +25586,7 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 	<span class="nx">st</span><span class="p">.</span><span class="nf">_slashBalance</span><span class="p">(</span><span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">amountSlashed</span><span class="p">)</span>
 	<span class="nx">st</span><span class="p">.</span><span class="nf">_unlockBalance</span><span class="p">(</span><span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">amountRemaining</span><span class="p">)</span>
 
-	<span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">Deals</span><span class="p">(),</span> <span class="nx">dealID</span><span class="p">)</span>
+	<span class="nx">st</span><span class="p">.</span><span class="nf">_deleteDeal</span><span class="p">(</span><span class="nx">dealID</span><span class="p">)</span>
 	<span class="k">return</span>
 <span class="p">}</span>
 
@@ -25714,7 +25599,7 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 </span><span class="c1"></span>	<span class="nx">st</span><span class="p">.</span><span class="nf">_unlockBalance</span><span class="p">(</span><span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">ProviderCollateral</span><span class="p">())</span>
 	<span class="nx">st</span><span class="p">.</span><span class="nf">_unlockBalance</span><span class="p">(</span><span class="nx">dealP</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">ClientCollateral</span><span class="p">())</span>
 
-	<span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">Deals</span><span class="p">(),</span> <span class="nx">dealID</span><span class="p">)</span>
+	<span class="nx">st</span><span class="p">.</span><span class="nf">_deleteDeal</span><span class="p">(</span><span class="nx">dealID</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_generateStorageDealID</span><span class="p">(</span><span class="nx">storageDeal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span> <span class="p">{</span>
@@ -25728,8 +25613,8 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 </span><span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1"></span>
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_addressEntryExists</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="nx">_</span><span class="p">,</span> <span class="nx">foundEscrow</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">address</span><span class="p">)</span>
-	<span class="nx">_</span><span class="p">,</span> <span class="nx">foundLocked</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">LockedReqTable</span><span class="p">(),</span> <span class="nx">address</span><span class="p">)</span>
+	<span class="nx">_</span><span class="p">,</span> <span class="nx">foundEscrow</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">address</span><span class="p">)</span>
+	<span class="nx">_</span><span class="p">,</span> <span class="nx">foundLocked</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">LockedReqTable</span><span class="p">(),</span> <span class="nx">address</span><span class="p">)</span>
 	<span class="c1">// Check that the tables are consistent (i.e. the address is found in one
 </span><span class="c1"></span>	<span class="c1">// if and only if it is found in the other).
 </span><span class="c1"></span>	<span class="nf">Assert</span><span class="p">(</span><span class="nx">foundEscrow</span> <span class="o">==</span> <span class="nx">foundLocked</span><span class="p">)</span>
@@ -25738,14 +25623,14 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_getTotalEscrowBalanceInternal</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">_addressEntryExists</span><span class="p">(</span><span class="nx">a</span><span class="p">))</span>
-	<span class="nx">ret</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">a</span><span class="p">)</span>
+	<span class="nx">ret</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">a</span><span class="p">)</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">ret</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_getLockedReqBalanceInternal</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">_addressEntryExists</span><span class="p">(</span><span class="nx">a</span><span class="p">))</span>
-	<span class="nx">ret</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">LockedReqTable</span><span class="p">(),</span> <span class="nx">a</span><span class="p">)</span>
+	<span class="nx">ret</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">LockedReqTable</span><span class="p">(),</span> <span class="nx">a</span><span class="p">)</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">ret</span>
 <span class="p">}</span>
@@ -25762,7 +25647,7 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 		<span class="k">return</span>
 	<span class="p">}</span>
 
-	<span class="nx">newLockedReqTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">LockedReqTable</span><span class="p">(),</span> <span class="nx">addr</span><span class="p">,</span> <span class="nx">amount</span><span class="p">)</span>
+	<span class="nx">newLockedReqTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">LockedReqTable</span><span class="p">(),</span> <span class="nx">addr</span><span class="p">,</span> <span class="nx">amount</span><span class="p">)</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">LockedReqTable_</span> <span class="p">=</span> <span class="nx">newLockedReqTable</span>
 
@@ -25780,21 +25665,21 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_tableWithAddBalance</span><span class="p">(</span>
-	<span class="nx">table</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">toAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amountToAdd</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span> <span class="p">{</span>
+	<span class="nx">table</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">toAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amountToAdd</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span> <span class="p">{</span>
 
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">amountToAdd</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
 
-	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">table</span><span class="p">,</span> <span class="nx">toAddr</span><span class="p">,</span> <span class="nx">amountToAdd</span><span class="p">)</span>
+	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">table</span><span class="p">,</span> <span class="nx">toAddr</span><span class="p">,</span> <span class="nx">amountToAdd</span><span class="p">)</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">newTable</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_tableWithDeductBalanceExact</span><span class="p">(</span>
-	<span class="nx">table</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">fromAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amountRequested</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span> <span class="p">{</span>
+	<span class="nx">table</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span><span class="p">,</span> <span class="nx">fromAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amountRequested</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span> <span class="p">{</span>
 
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">amountRequested</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
 
-	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountDeducted</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithSubtractPreservingNonnegative</span><span class="p">(</span>
+	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountDeducted</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithSubtractPreservingNonnegative</span><span class="p">(</span>
 		<span class="nx">table</span><span class="p">,</span> <span class="nx">fromAddr</span><span class="p">,</span> <span class="nx">amountRequested</span><span class="p">)</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">amountDeducted</span> <span class="o">==</span> <span class="nx">amountRequested</span><span class="p">)</span>
@@ -25909,6 +25794,7 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 	<span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 	<span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
+	<span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
@@ -25937,7 +25823,7 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 </span><span class="c1"></span>	<span class="nx">amountSlashedTotal</span> <span class="o">+=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_rtUpdatePendingDealStatesForParty</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">entryAddr</span><span class="p">)</span>
 
 	<span class="nx">minBalance</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getLockedReqBalanceInternal</span><span class="p">(</span><span class="nx">entryAddr</span><span class="p">)</span>
-	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountExtracted</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithExtractPartial</span><span class="p">(</span>
+	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountExtracted</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithExtractPartial</span><span class="p">(</span>
 		<span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">entryAddr</span><span class="p">,</span> <span class="nx">amountRequested</span><span class="p">,</span> <span class="nx">minBalance</span><span class="p">)</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">EscrowTable_</span> <span class="p">=</span> <span class="nx">newTable</span>
@@ -25955,10 +25841,10 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 	<span class="nx">st</span><span class="p">.</span><span class="nf">_rtAbortIfAddressEntryDoesNotExist</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">entryAddr</span><span class="p">)</span>
 
 	<span class="nx">msgValue</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReceived</span><span class="p">()</span>
-	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">entryAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
+	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">entryAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 		<span class="c1">// Entry not found; create implicitly.
-</span><span class="c1"></span>		<span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithNewAddressEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">entryAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
+</span><span class="c1"></span>		<span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="p">=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithNewAddressEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">entryAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
 		<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="p">}</span>
 	<span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">EscrowTable_</span> <span class="p">=</span> <span class="nx">newTable</span>
@@ -25999,8 +25885,16 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 			<span class="nx">Deal_</span><span class="p">:</span>             <span class="nx">newDeal</span><span class="p">,</span>
 			<span class="nx">SectorStartEpoch_</span><span class="p">:</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch_None</span><span class="p">,</span>
 		<span class="p">}</span>
+
 		<span class="nx">st</span><span class="p">.</span><span class="nf">Deals</span><span class="p">()[</span><span class="nx">id</span><span class="p">]</span> <span class="p">=</span> <span class="nx">onchainDeal</span>
+
+		<span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">CachedExpirationsPending</span><span class="p">()[</span><span class="nx">p</span><span class="p">.</span><span class="nf">EndEpoch</span><span class="p">()];</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+			<span class="nx">st</span><span class="p">.</span><span class="nf">CachedExpirationsPending</span><span class="p">()[</span><span class="nx">p</span><span class="p">.</span><span class="nf">EndEpoch</span><span class="p">()]</span> <span class="p">=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">DealIDQueue_Empty</span><span class="p">()</span>
+		<span class="p">}</span>
+		<span class="nx">st</span><span class="p">.</span><span class="nf">CachedExpirationsPending</span><span class="p">()[</span><span class="nx">p</span><span class="p">.</span><span class="nf">EndEpoch</span><span class="p">()].</span><span class="nf">Enqueue</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span>
 	<span class="p">}</span>
+
+	<span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">CurrEpochNumDealsPublished_</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">newStorageDeals</span><span class="p">)</span>
 
 	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
@@ -26055,7 +25949,7 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PieceInfos_I</span><span class="p">{</span><span class="nx">Items_</span><span class="p">:</span> <span class="nx">ret</span><span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">GetWeightForDealSet</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealIDs</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">GetWeightForDealSet</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealIDs</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealWeight</span> <span class="p">{</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_StorageMiner</span><span class="p">)</span>
 	<span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
 
@@ -26074,7 +25968,7 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 
 	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-	<span class="k">return</span> <span class="nx">ret</span>
+	<span class="k">return</span> <span class="nx">deal</span><span class="p">.</span><span class="nf">DealWeight</span><span class="p">(</span><span class="nx">ret</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">TerminateDealsOnSlashProviderSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealIDs</span><span class="p">)</span> <span class="p">{</span>
@@ -26105,13 +25999,64 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 </span><span class="c1"></span>	<span class="c1">// the StorageMarketActor state to grow without bound.
 </span><span class="c1"></span>	<span class="c1">// To prevent this, we amortize the cost of this cleanup by processing a relatively
 </span><span class="c1"></span>	<span class="c1">// small number of deals every epoch, independent of the calls above.
-</span><span class="c1"></span>	<span class="kd">var</span> <span class="nx">cleanupDealIDs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
-	<span class="c1">// Populate with the N oldest deals (e.g., by a priority queue on EndEpoch).
-</span><span class="c1"></span>	<span class="c1">// N is a system parameter TBD, which may be a function of the global statistics
-</span><span class="c1"></span>	<span class="c1">// (including the number of deals in each prior epoch).
-</span><span class="c1"></span>	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
+</span><span class="c1"></span>	<span class="c1">//
+</span><span class="c1"></span>	<span class="c1">// More specifically, we process deals:
+</span><span class="c1"></span>	<span class="c1">//   (a) In priority order of expiration epoch, up until the current epoch
+</span><span class="c1"></span>	<span class="c1">//   (b) Within a given expiration epoch, in order of original publishing.
+</span><span class="c1"></span>	<span class="c1">//
+</span><span class="c1"></span>	<span class="c1">// We stop once we have exhausted this valid set, or when we have hit a certain target
+</span><span class="c1"></span>	<span class="c1">// (DEAL_PROC_AMORTIZED_SCALE_FACTOR times the number of deals freshly published in the
+</span><span class="c1"></span>	<span class="c1">// current epoch) of deals dequeued, whichever comes first.
+</span><span class="c1"></span>
+	<span class="kd">const</span> <span class="nx">DEAL_PROC_AMORTIZED_SCALE_FACTOR</span> <span class="p">=</span> <span class="mi">2</span>
+	<span class="nx">numDequeuedTarget</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">CurrEpochNumDealsPublished</span><span class="p">()</span> <span class="o">*</span> <span class="nx">DEAL_PROC_AMORTIZED_SCALE_FACTOR</span>
 
-	<span class="nx">amountSlashedTotal</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_updatePendingDealStates</span><span class="p">(</span><span class="nx">cleanupDealIDs</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">())</span>
+	<span class="nx">numDequeued</span> <span class="o">:=</span> <span class="mi">0</span>
+	<span class="nx">extractedDealIDs</span> <span class="o">:=</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">{}</span>
+
+	<span class="k">for</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="nx">st</span><span class="p">.</span><span class="nf">CachedExpirationsNextProcEpoch</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="p">{</span>
+			<span class="k">break</span>
+		<span class="p">}</span>
+
+		<span class="k">if</span> <span class="nx">numDequeued</span> <span class="o">&gt;=</span> <span class="nx">numDequeuedTarget</span> <span class="p">{</span>
+			<span class="k">break</span>
+		<span class="p">}</span>
+
+		<span class="nx">queue</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">CachedExpirationsPending</span><span class="p">()[</span><span class="nx">st</span><span class="p">.</span><span class="nf">CachedExpirationsNextProcEpoch</span><span class="p">()]</span>
+		<span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+			<span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">CachedExpirationsNextProcEpoch_</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="k">continue</span>
+		<span class="p">}</span>
+
+		<span class="nx">queueDepleted</span> <span class="o">:=</span> <span class="kc">false</span>
+		<span class="k">for</span> <span class="p">{</span>
+			<span class="nx">dealID</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">queue</span><span class="p">.</span><span class="nf">Dequeue</span><span class="p">()</span>
+			<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+				<span class="nx">queueDepleted</span> <span class="p">=</span> <span class="kc">true</span>
+				<span class="k">break</span>
+			<span class="p">}</span>
+			<span class="nx">numDequeued</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Deals</span><span class="p">()[</span><span class="nx">dealID</span><span class="p">];</span> <span class="nx">found</span> <span class="p">{</span>
+				<span class="c1">// May have already processed expiration, independently, via _rtUpdatePendingDealStatesForParty.
+</span><span class="c1"></span>				<span class="c1">// If not, add it to the list to be processed.
+</span><span class="c1"></span>				<span class="nx">extractedDealIDs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">extractedDealIDs</span><span class="p">,</span> <span class="nx">dealID</span><span class="p">)</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+
+		<span class="k">if</span> <span class="p">!</span><span class="nx">queueDepleted</span> <span class="p">{</span>
+			<span class="nf">Assert</span><span class="p">(</span><span class="nx">numDequeued</span> <span class="o">&gt;=</span> <span class="nx">numDequeuedTarget</span><span class="p">)</span>
+			<span class="k">break</span>
+		<span class="p">}</span>
+
+		<span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">CachedExpirationsPending</span><span class="p">(),</span> <span class="nx">st</span><span class="p">.</span><span class="nf">CachedExpirationsNextProcEpoch</span><span class="p">())</span>
+		<span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">CachedExpirationsNextProcEpoch_</span> <span class="o">+=</span> <span class="mi">1</span>
+	<span class="p">}</span>
+
+	<span class="nx">amountSlashedTotal</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_updatePendingDealStates</span><span class="p">(</span><span class="nx">extractedDealIDs</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">())</span>
+
+	<span class="c1">// Reset for next epoch.
+</span><span class="c1"></span>	<span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">CurrEpochNumDealsPublished_</span> <span class="p">=</span> <span class="mi">0</span>
 
 	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
@@ -26121,16 +26066,16 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
 
-	<span class="nf">IMPL_FINISH</span><span class="p">()</span> <span class="c1">// Initialize these structures
-</span><span class="c1"></span>	<span class="kd">var</span> <span class="nx">dealsAMTEmpty</span> <span class="nx">DealsAMT</span>
-	<span class="kd">var</span> <span class="nx">balanceTableEmpty</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span>
-
 	<span class="nx">st</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">StorageMarketActorState_I</span><span class="p">{</span>
-		<span class="nx">Deals_</span><span class="p">:</span>          <span class="nx">dealsAMTEmpty</span><span class="p">,</span>
-		<span class="nx">EscrowTable_</span><span class="p">:</span>    <span class="nx">balanceTableEmpty</span><span class="p">,</span>
-		<span class="nx">LockedReqTable_</span><span class="p">:</span> <span class="nx">balanceTableEmpty</span><span class="p">,</span>
-		<span class="nx">NextID_</span><span class="p">:</span>         <span class="nx">deal</span><span class="p">.</span><span class="nf">DealID</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+		<span class="nx">Deals_</span><span class="p">:</span>                          <span class="nf">DealsAMT_Empty</span><span class="p">(),</span>
+		<span class="nx">EscrowTable_</span><span class="p">:</span>                    <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTableHAMT_Empty</span><span class="p">(),</span>
+		<span class="nx">LockedReqTable_</span><span class="p">:</span>                 <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTableHAMT_Empty</span><span class="p">(),</span>
+		<span class="nx">NextID_</span><span class="p">:</span>                         <span class="nx">deal</span><span class="p">.</span><span class="nf">DealID</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+		<span class="nx">CachedDealIDsByParty_</span><span class="p">:</span>           <span class="nf">CachedDealIDsByPartyHAMT_Empty</span><span class="p">(),</span>
+		<span class="nx">CachedExpirationsPending_</span><span class="p">:</span>       <span class="nf">CachedExpirationsPendingHAMT_Empty</span><span class="p">(),</span>
+		<span class="nx">CachedExpirationsNextProcEpoch_</span><span class="p">:</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
 	<span class="p">}</span>
+
 	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -26144,15 +26089,14 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 	<span class="c1">// For consistency with OnEpochTickEnd, only process updates up to the end of the _previous_ epoch.
 </span><span class="c1"></span>	<span class="nx">epoch</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
 
-	<span class="kd">var</span> <span class="nx">relevantDealIDs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
-	<span class="c1">// Populate with the set of all elements in st.Deals() in which addr is one of the parties
-</span><span class="c1"></span>	<span class="c1">// (either client or provider).
-</span><span class="c1"></span>	<span class="c1">//
-</span><span class="c1"></span>	<span class="c1">// Note: as an optimization, implementations may cache efficient data structures to maintain
-</span><span class="c1"></span>	<span class="c1">// this index.
-</span><span class="c1"></span>	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="nx">cachedRes</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">CachedDealIDsByParty</span><span class="p">()[</span><span class="nx">addr</span><span class="p">]</span>
+	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+	<span class="nx">extractedDealIDs</span> <span class="o">:=</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">{}</span>
+	<span class="k">for</span> <span class="nx">cachedDealID</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">cachedRes</span> <span class="p">{</span>
+		<span class="nx">extractedDealIDs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">extractedDealIDs</span><span class="p">,</span> <span class="nx">cachedDealID</span><span class="p">)</span>
+	<span class="p">}</span>
 
-	<span class="nx">amountSlashedTotal</span> <span class="p">=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_updatePendingDealStates</span><span class="p">(</span><span class="nx">relevantDealIDs</span><span class="p">,</span> <span class="nx">epoch</span><span class="p">)</span>
+	<span class="nx">amountSlashedTotal</span> <span class="p">=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_updatePendingDealStates</span><span class="p">(</span><span class="nx">extractedDealIDs</span><span class="p">,</span> <span class="nx">epoch</span><span class="p">)</span>
 	<span class="k">return</span>
 <span class="p">}</span>
 

@@ -4657,7 +4657,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
@@ -4678,7 +4679,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>
 <span class="kd">type</span> <span class="nx">StoragePowerActorState</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">PowerTable</span>            <span class="nx">PowerTableHAMT</span>
-    <span class="nx">EscrowTable</span>           <span class="nx">actor</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span>
+    <span class="nx">EscrowTable</span>           <span class="nx">actor_util</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span>
     <span class="nx">_minersLargerThanMin</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
 
     <span class="nf">ActivePowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">minPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="kt">bool</span>
@@ -4768,6 +4769,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
     <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+    <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&#34;</span>
     <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
@@ -4822,7 +4824,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;_slashPledgeCollateral: error: negative amount specified&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountSlashed</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithSubtractPreservingNonnegative</span><span class="p">(</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountSlashed</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithSubtractPreservingNonnegative</span><span class="p">(</span>
         <span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">slashAmountRequested</span><span class="p">)</span>
     <span class="c1">// TODO: extra handling of not having enough pledge collateral to be slashed?
 </span><span class="c1"></span>    <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
@@ -4974,6 +4976,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
     <span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
+    <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&#34;</span>
     <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
@@ -4988,7 +4991,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">msgValue</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReceived</span><span class="p">()</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;spa.AddBalance: Escrow operation failed.&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -5014,7 +5017,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
 
     <span class="nx">minBalance</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPledgeCollateralReq</span><span class="p">(</span><span class="nx">minerPowerTotal</span><span class="p">)</span>
-    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountExtracted</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithExtractPartial</span><span class="p">(</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountExtracted</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithExtractPartial</span><span class="p">(</span>
         <span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">amountRequested</span><span class="p">,</span> <span class="nx">minBalance</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;spa.WithdrawBalance: Escrow operation failed.&#34;</span><span class="p">)</span>
@@ -5046,7 +5049,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithNewAddressEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">newMinerAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithNewAddressEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">newMinerAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
         <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Internal error: newMinerAddr (result of InitActor::Exec) already exists in escrow table&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -5074,7 +5077,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;spa.RemoveStorageMiner: power still remains.&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="nx">minerPledgeBalance</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nx">minerPledgeBalance</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa.RemoveStorageMiner: miner entry not found in escrow.&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -5085,7 +5088,7 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
 
-    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_WithDeletedAddressEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithDeletedAddressEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
         <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Internal error: miner entry in escrow table does not exist&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -5105,7 +5108,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">pledgeReq</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPledgeCollateralReqForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-    <span class="nx">balanceSufficient</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">BalanceTable_IsEntrySufficient</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">pledgeReq</span><span class="p">)</span>
+    <span class="nx">balanceSufficient</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_IsEntrySufficient</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">pledgeReq</span><span class="p">)</span>
     <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">balanceSufficient</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortFundsMsg</span><span class="p">(</span><span class="s">&#34;exitcode.InsufficientPledgeCollateral&#34;</span><span class="p">)</span>
