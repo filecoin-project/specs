@@ -162,7 +162,7 @@ func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, dealIDs d
 	return &sector.PieceInfos_I{Items_: ret}
 }
 
-func (a *StorageMarketActorCode_I) GetWeightForDealSet(rt Runtime, dealIDs deal.DealIDs) int {
+func (a *StorageMarketActorCode_I) GetWeightForDealSet(rt Runtime, dealIDs deal.DealIDs) deal.DealWeight {
 	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
 	minerAddr := rt.ImmediateCaller()
 
@@ -181,7 +181,7 @@ func (a *StorageMarketActorCode_I) GetWeightForDealSet(rt Runtime, dealIDs deal.
 
 	UpdateRelease(rt, h, st)
 
-	return ret
+	return deal.DealWeight(ret)
 }
 
 func (a *StorageMarketActorCode_I) TerminateDealsOnSlashProviderSector(rt Runtime, dealIDs deal.DealIDs) {
