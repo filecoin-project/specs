@@ -1,13 +1,9 @@
-/*
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
 // MessageSyncer is a component of the MessagePool. It is in charge of receiving and
 // propagating Messages. It a libp2p pubsub protocol.
 type MessageSyncer struct {
-	/*
-	// PropagateMessages is called to send out a set of messages to the rest of the
-	// network. This is used for messages added locally.
-	PropagateMessages(msgs [Message]) struct{}
-
+    /*
 	// NewMessageReceived is a channel that returns message objects as they arrive.
 	// It is a notification for MessageSyncer's client (usually the MessagePool).
 	NewMessageReceived() MessageChan
@@ -16,48 +12,8 @@ type MessageSyncer struct {
 	sub    *pubsub.Subscription
 	mchan  MessageChan
 	*/
+
+    // SubmitMessage is called to send out a set of messages to the rest of the
+    // network. This is used for messages added locally.
+    SubmitMessage(m msg.SignedMessage) error
 }
-
-var FilecoinVMMessageTopic = "/filecoin.org/messages"
-
-func NewMessageSyncer(ps libp2p.PubSub) (mg *MessageSyncer) error {
-	/*
-	// TODO: address validation + bad message suppression.
-	val := nil
-	sub, err := ps.Subscribe(FilecoinVMMessageTopic, val)
-	if err != nil {
-		return nil, err
-	}
-
-	mch := new(MessageChan)
-	mg := &MessageSyncer{ps, sub, mch}
-
-	// TODO: how will he handle things like this in the spec?
-	// this is an idiomatic thing, BUT we do need to address asynchrony in the spec somehow.
-	go mg.handleIncoming()
-
-	return mg
-	*/
-}
-
-func (mg *MessageSyncer) PropagateMessages(msgs [Message]) {
-	/*
-	// msgs is most likely to be completely new messages that nobody has.
-	// sometimes not. if we think it's really a problem, deal with it then.
-	buf := serialize(msgs)
-	mg.pubsub.Publish(FilecoinVMMessageTopic, buf)
-	*/
-}
-
-func (mg *MessageSyncer) handleIncoming() {
-	/*
-	for {
-		m, err := mg.sub.Next()
-		if err != nil {
-			return // done
-		}
-		m.NewMessageReceived <- m
-	}
-	*/
-}
-*/
