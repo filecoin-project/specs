@@ -234,3 +234,9 @@ func (st *StorageMinerActorState_I) _getPreCommitDepositReq() actor.TokenAmount 
 
 	return depositReq
 }
+
+// TODO: define how target is calculated
+func (st *StorageMinerActorState_I) _verifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool {
+	util.TODO()
+	return false
+}
