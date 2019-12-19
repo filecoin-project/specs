@@ -1,12 +1,15 @@
 package sysactors
 
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import (
+	"math"
 
-const (
-	Method_RewardActor_AwardBlockReward = actor.MethodPlaceholder + iota
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
+	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
+	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+	util "github.com/filecoin-project/specs/util"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -74,12 +77,55 @@ func (a *RewardActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 	panic("TODO")
 }
 
-func (a *RewardActorCode_I) AwardBlockReward(rt vmr.Runtime, miner addr.Address, penalty actor.TokenAmount) {
+func (a *RewardActorCode_I) AwardBlockReward(
+	rt vmr.Runtime,
+	miner addr.Address,
+	penalty actor.TokenAmount,
+	minerActivePower block.StoragePower,
+	minerInactivePower block.StoragePower,
+	currPledge actor.TokenAmount,
+) {
 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
-	// block reward function should live here
-	// handle penalty greater than reward
-	// put Reward into RewardMap
-	panic("TODO")
+
+	inds := rt.CurrIndices()
+	pledgeReq := inds.BlockReward_PledgeCollateralReq(minerActivePower, minerInactivePower, currPledge)
+	currReward := inds.BlockReward_GetCurrRewardForMiner(minerActivePower, currPledge)
+	underPledge := math.Max(float64(actor.TokenAmount(0)), float64(pledgeReq-currPledge)) // 0 if over collateralized
+	rewardToGarnish := math.Min(float64(currReward), float64(underPledge))
+
+	util.TODO()
+	// handle penalty here
+	// also handle penalty greater than reward
+	actualReward := currReward - actor.TokenAmount(rewardToGarnish)
+	if rewardToGarnish > 0 {
+		// Send fund to SPA for collateral
+		rt.Send(
+			addr.StoragePowerActorAddr,
+			ai.Method_StoragePowerActor_AddBalance,
+			[]util.Serialization{
+				addr.Serialize_Address(miner),
+			},
+			actor.TokenAmount(rewardToGarnish),
+		)
+	}
+
+	h, st := a.State(rt)
+	if actualReward > 0 {
+		// put Reward into RewardMap
+		newReward := &Reward_I{
+			StartEpoch_:      rt.CurrEpoch(),
+			Value_:           actualReward,
+			ReleaseRate_:     actualReward,
+			AmountWithdrawn_: actor.TokenAmount(0),
+		}
+		rewards, found := st.RewardMap()[miner]
+		if !found {
+			rewards = make([]Reward, 0)
+		}
+		rewards = append(rewards, newReward)
+		st.Impl().RewardMap_[miner] = rewards
+	}
+	UpdateReleaseRewardActorState(rt, h, st)
 }
 
 // called by ownerAddress

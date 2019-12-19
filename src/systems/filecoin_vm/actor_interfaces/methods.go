@@ -5,6 +5,10 @@ import (
 )
 
 const (
+	Method_RewardActor_AwardBlockReward = actor.MethodPlaceholder + iota
+)
+
+const (
 	Method_StorageMinerActor_ProcessVerifiedSurprisePoSt = actor.MethodPlaceholder + iota
 	Method_StorageMinerActor_ProcessVerifiedElectionPoSt
 	Method_StorageMinerActor_NotifyOfSurprisePoStChallenge
@@ -27,6 +31,7 @@ const (
 
 const (
 	Method_StoragePowerActor_EpochTickEnd = actor.MethodPlaceholder + iota
+	Method_StoragePowerActor_AddBalance
 	Method_StoragePowerActor_ProcessPowerReport
 	Method_StoragePowerActor_ProcessFaultReport
 	Method_StoragePowerActor_SlashPledgeForStorageFault
