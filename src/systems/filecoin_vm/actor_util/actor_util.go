@@ -137,6 +137,16 @@ func DealIDQueue_Empty() DealIDQueue {
 	}
 }
 
+func AddrSetHAMT_Empty() AddrSetHAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
+func GlobalSectorDescSetHAMT_Empty() GlobalSectorDescSetHAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
 func (x *DealIDQueue_I) Enqueue(dealID deal.DealID) {
 	nextIndex := x.EndIndex()
 	x.Values()[nextIndex] = dealID

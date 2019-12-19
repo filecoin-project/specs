@@ -32,20 +32,10 @@ func (a *StorageMinerActorCode_I) GetWorkerKey(rt Runtime) filcrypto.VRFPublicKe
 	return ret
 }
 
-// Called by the cron actor at every tick.
-func (a *StorageMinerActorCode_I) OnCronTickEnd(rt Runtime) InvocOutput {
-	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
-
-	a._checkSurprisePoStSubmissionHappened(rt)
-
-	return rt.SuccessReturn()
-
-}
-
 // Surprise PoSt
 
-// called by StoragePowerActor to notify StorageMiner of PoSt Challenge (triggered by Cron)
-func (a *StorageMinerActorCode_I) NotifyOfSurprisePoStChallenge(rt Runtime) InvocOutput {
+// called by StoragePowerActor to notify StorageMiner of PoSt Challenge
+func (a *StorageMinerActorCode_I) SurprisePoStChallenge(rt Runtime) InvocOutput {
 	rt.ValidateImmediateCallerIs(addr.StoragePowerActorAddr)
 
 	// check that this is a valid challenge
@@ -65,10 +55,13 @@ func (a *StorageMinerActorCode_I) NotifyOfSurprisePoStChallenge(rt Runtime) Invo
 	return rt.SuccessReturn()
 }
 
-// called by verifier to update miner state on successful surprise post
-// after it has been verified in the storage_mining_subsystem
-func (a *StorageMinerActorCode_I) ProcessSurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
-	TODO() // TODO: validate caller
+// Invoked by miner's worker address to submit a response to a pending Surprise PoSt challenge.
+func (a *StorageMinerActorCode_I) SurprisePoStSubmitResponse(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) {
+	h, st := a.State(rt)
+
+	rt.ValidateImmediateCallerIs(st.Info().Worker())
+
+	Release(rt, h, st)
 
 	if !a._rtVerifySurprisePoSt(rt, onChainInfo) {
 		rt.Abort(
@@ -77,11 +70,10 @@ func (a *StorageMinerActorCode_I) ProcessSurprisePoSt(rt Runtime, onChainInfo se
 	}
 
 	// Ensure pledge collateral satisfied
-	// otherwise, abort ProcessVerifiedSurprisePoSt
+	// otherwise, abort
 	rt.Send(addr.StoragePowerActorAddr, ai.Method_StoragePowerActor_EnsurePledgeCollateralSatisfied, []util.Serialization{}, actor.TokenAmount(0))
 
-	return a._onSuccessfulPoSt(rt)
-
+	a._rtOnSuccessfulPoSt(rt)
 }
 
 // Commit Sector
@@ -249,7 +241,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 // Assume ElectionPoSt has already been successfully verified (both proof and partial ticket
 // value) when the function gets called.
 // Likewise assume that the rewards have already been granted to the storage miner actor. This only handles sector management.
-func (a *StorageMinerActorCode_I) ProcessVerifiedElectionPoSt(rt Runtime) InvocOutput {
+func (a *StorageMinerActorCode_I) ProcessVerifiedElectionPoSt(rt Runtime) {
 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
 	// The receiver must be the miner who produced the block for which this message is created.
 	Assert(rt.ToplevelBlockWinner() == rt.CurrReceiver())
@@ -261,7 +253,7 @@ func (a *StorageMinerActorCode_I) ProcessVerifiedElectionPoSt(rt Runtime) InvocO
 	// notneeded := a._verifyPoStSubmission(rt)
 
 	// the following will update last challenge response time
-	return a._onSuccessfulPoSt(rt)
+	a._rtOnSuccessfulPoSt(rt)
 }
 
 // Faults
@@ -486,7 +478,7 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime) {
 //       - Failing / Recovering / Active / Committed -> Cleared
 //     - Remove SectorNumber from Sectors, ProvingSet
 // - Update ChallengeEndEpoch
-func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime) InvocOutput {
+func (a *StorageMinerActorCode_I) _rtOnSuccessfulPoSt(rt Runtime) {
 	h, st := a.State(rt)
 
 	// The proof is verified, process ProvingSet.SectorsOn():
@@ -547,8 +539,6 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime) InvocOutput {
 	st.ChallengeStatus().Impl().OnPoStSuccess(rt.CurrEpoch())
 	st._processStagedCommittedSectors()
 	UpdateRelease(rt, h, st)
-
-	return rt.SuccessReturn()
 }
 
 func (a *StorageMinerActorCode_I) _rtVerifySurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) bool {

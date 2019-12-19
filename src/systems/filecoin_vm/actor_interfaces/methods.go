@@ -9,9 +9,15 @@ const (
 )
 
 const (
-	Method_StorageMinerActor_ProcessVerifiedSurprisePoSt = actor.MethodPlaceholder + iota
-	Method_StorageMinerActor_ProcessVerifiedElectionPoSt
-	Method_StorageMinerActor_NotifyOfSurprisePoStChallenge
+	Method_StorageMinerActor_ProcessVerifiedElectionPoSt = actor.MethodPlaceholder + iota
+	Method_StorageMinerActor_SurprisePoStChallenge
+	Method_StorageMinerActor_SurprisePoStSubmitResponse
+	Method_StorageMinerActor_UpdateMinerSurprisePoStState
+	Method_StorageMinerActor_UpdateSectorState
+	Method_StorageMinerActor_PreCommitSector
+	Method_StorageMinerActor_ProveCommitSector
+	Method_StorageMinerActor_DeclareFaults
+	Method_StorageMinerActor_RecoverFaults
 	Method_StorageMinerActor_GetOwnerAddr
 	Method_StorageMinerActor_GetWorkerAddr
 	Method_StorageMinerActor_GetWorkerKey
@@ -30,8 +36,9 @@ const (
 )
 
 const (
-	Method_StoragePowerActor_EpochTickEnd = actor.MethodPlaceholder + iota
+	Method_StoragePowerActor_OnEpochTickEnd = actor.MethodPlaceholder + iota
 	Method_StoragePowerActor_AddBalance
+	Method_StoragePowerActor_RegisterSectorExpiryCheck
 	Method_StoragePowerActor_ProcessPowerReport
 	Method_StoragePowerActor_ProcessFaultReport
 	Method_StoragePowerActor_SlashPledgeForStorageFault

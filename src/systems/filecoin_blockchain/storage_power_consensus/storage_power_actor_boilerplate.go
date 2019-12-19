@@ -24,6 +24,7 @@ type Bytes = util.Bytes
 
 var Assert = util.Assert
 var IMPL_FINISH = util.IMPL_FINISH
+var IMPL_TODO = util.IMPL_TODO
 var PARAM_FINISH = util.PARAM_FINISH
 var TODO = util.TODO
 

@@ -124,6 +124,22 @@ func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime) {
 	UpdateRelease(rt, h, st)
 }
 
+func (a *StoragePowerActorCode_I) RegisterSectorExpiryCheck(
+	rt Runtime, sector sector.SectorNumber, checkEpoch block.ChainEpoch) {
+
+	minerAddr := rt.ImmediateCaller()
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+
+	h, st := a.State(rt)
+
+	if _, found := st.CachedSectorExpiryEvents()[checkEpoch]; !found {
+		st.CachedPoStChallengeExpiryEvents()[checkEpoch] = actor_util.AddrSetHAMT_Empty()
+	}
+	st.CachedPoStChallengeExpiryEvents()[checkEpoch][minerAddr] = true
+
+	UpdateRelease(rt, h, st)
+}
+
 func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) {
 
 	minerAddr := rt.ImmediateCaller()
@@ -216,38 +232,105 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr a
 
 }
 
-// Surprise is in the storage power actor because it is a singleton actor and surprise helps miners maintain power
-// TODO: add Surprise to the cron actor
-func (a *StoragePowerActorCode_I) Surprise(rt Runtime) {
-
-	PROVING_PERIOD := 0 // defined in storage_mining, TODO: move constants somewhere else
-
-	// sample the actor addresses
-	h, st := a.State(rt)
-
-	randomness := rt.Randomness(rt.CurrEpoch(), 0)
-	challengeCount := math.Ceil(float64(len(st.PowerTable())) / float64(PROVING_PERIOD))
-	surprisedMiners := st._selectMinersToSurprise(int(challengeCount), randomness)
-
-	UpdateRelease(rt, h, st)
-
-	// now send the messages
-	for _, addr := range surprisedMiners {
-		// For each miner here send message
-		rt.Send(addr, ai.Method_StorageMinerActor_NotifyOfSurprisePoStChallenge, []util.Serialization{}, actor.TokenAmount(0))
-	}
+// Called by Cron.
+func (a *StoragePowerActorCode_I) OnEpochTickEnd(rt Runtime) {
+	a._rtInitiateNewSurprisePoStChallenges(rt)
+	a._rtProcessSurprisePoStChallengeExpiryEvents(rt)
+	a._rtProcessSectorExpiryEvents(rt)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Method utility functions
 ////////////////////////////////////////////////////////////////////////////////
 
+func (a *StoragePowerActorCode_I) _rtInitiateNewSurprisePoStChallenges(rt Runtime) {
+	PROVING_PERIOD := 0 // defined in storage_mining, TODO: move constants somewhere else
+
+	h, st := a.State(rt)
+
+	// sample the actor addresses
+	IMPL_TODO() // use randomness APIs
+	randomness := rt.Randomness(rt.CurrEpoch(), 0)
+	IMPL_FINISH() // BigInt arithmetic (not floating-point)
+	challengeCount := math.Ceil(float64(len(st.PowerTable())) / float64(PROVING_PERIOD))
+	surprisedMiners := st._selectMinersToSurprise(int(challengeCount), randomness)
+
+	IMPL_TODO()
+	var expiryEpoch block.ChainEpoch
+
+	for _, surprisedMiner := range surprisedMiners {
+		if _, found := st.CachedPoStChallengeExpiryEvents()[expiryEpoch]; !found {
+			st.CachedPoStChallengeExpiryEvents()[expiryEpoch] = actor_util.AddrSetHAMT_Empty()
+		}
+		st.CachedPoStChallengeExpiryEvents()[expiryEpoch][surprisedMiner] = true
+	}
+
+	UpdateRelease(rt, h, st)
+
+	for _, addr := range surprisedMiners {
+		rt.Send(
+			addr,
+			ai.Method_StorageMinerActor_SurprisePoStChallenge,
+			[]util.Serialization{},
+			actor.TokenAmount(0))
+	}
+}
+
+func (a *StoragePowerActorCode_I) _rtProcessSurprisePoStChallengeExpiryEvents(rt Runtime) {
+	epoch := rt.CurrEpoch()
+
+	h, st := a.State(rt)
+
+	checkMiners, found := st.CachedPoStChallengeExpiryEvents()[epoch]
+	if !found {
+		return
+	}
+
+	for checkMiner := range checkMiners {
+		rt.Send(
+			checkMiner,
+			ai.Method_StorageMinerActor_UpdateMinerSurprisePoStState,
+			[]util.Serialization{},
+			actor.TokenAmount(0))
+	}
+
+	delete(st.CachedPoStChallengeExpiryEvents(), epoch)
+
+	UpdateRelease(rt, h, st)
+}
+
+func (a *StoragePowerActorCode_I) _rtProcessSectorExpiryEvents(rt Runtime) {
+	epoch := rt.CurrEpoch()
+
+	h, st := a.State(rt)
+
+	sectorDescs, found := st.CachedSectorExpiryEvents()[epoch]
+	if !found {
+		Release(rt, h, st)
+		return
+	}
+
+	delete(st.CachedSectorExpiryEvents(), epoch)
+
+	UpdateRelease(rt, h, st)
+
+	for sectorDesc := range sectorDescs {
+		rt.Send(
+			sectorDesc.MinerAddr(),
+			ai.Method_StorageMinerActor_UpdateSectorState,
+			[]util.Serialization{
+				sector.Serialize_SectorNumber(sectorDesc.SectorNumber()),
+			},
+			actor.TokenAmount(0))
+	}
+}
+
 func (a *StoragePowerActorCode_I) _rtGetPowerEntryOrAbort(rt Runtime, minerAddr addr.Address) PowerTableEntry {
 	h, st := a.State(rt)
 	powerEntry, found := st.PowerTable()[minerAddr]
 
 	if !found {
-		rt.AbortStateMsg("spa._rtGetPowerEntryOrAbort: miner not found in power table.")
+		rt.AbortStateMsg("Miner not found in power table.")
 	}
 
 	Release(rt, h, st)

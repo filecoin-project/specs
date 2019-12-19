@@ -18,10 +18,17 @@ type PowerReport struct {
 // type PowerTableHAMT {actor.ActorID: PowerTableEntry}
 type PowerTableHAMT {addr.Address: PowerTableEntry}  // TODO: convert address to ActorID
 
+type MinerEventsHAMT {block.ChainEpoch: actor_util.AddrSetHAMT}
+type SectorEventsHAMT {block.ChainEpoch: actor_util.GlobalSectorDescSetHAMT}
+
 type StoragePowerActorState struct {
     PowerTable            PowerTableHAMT
     EscrowTable           actor_util.BalanceTableHAMT
     _minersLargerThanMin  util.UVarint
+
+    // Metadata cached for efficient processing of sector/challenge expirations.
+    CachedPoStChallengeExpiryEvents MinerEventsHAMT
+    CachedSectorExpiryEvents SectorEventsHAMT
 
     ActivePowerMeetsConsensusMinimum(minPower block.StoragePower) bool
     _getActivePowerForConsensus() block.StoragePower
@@ -67,8 +74,8 @@ type StoragePowerActorCode struct {
         proof      [block.Block]
     )
 
-    Surprise(rt Runtime, ticket block.Ticket) [addr.Address]
-
     _rtGetPowerEntryOrAbort(rt Runtime, minerID addr.Address) PowerTableEntry
     _rtGetPledgeCollateralReqForMinerOrAbort(rt Runtime, minerAddr addr.Address) actor.TokenAmount
+
+    OnEpochTickEnd(rt Runtime)
 }
