@@ -99,7 +99,7 @@ func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 		sPoSt := sms._trySurprisePoSt(chainHead.StateTree(), sma)
 		// TODO: how to set these?
 		var gasLimit msg.GasLimit
-		var gasPrice := util.UVarint(0)
+		var gasPrice = util.UVarint(0)
 		sms._submitSurprisePoStMessage(sPoSt, gasPrice, gasLimit)
 	}
 }

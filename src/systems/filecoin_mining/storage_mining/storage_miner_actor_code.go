@@ -18,20 +18,6 @@ import (
 // Actor methods
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *StorageMinerActorCode_I) GetOwnerKey(rt Runtime) filcrypto.VRFPublicKey {
-	h, st := a.State(rt)
-	ret := st.Info().OwnerKey()
-	Release(rt, h, st)
-	return ret
-}
-
-func (a *StorageMinerActorCode_I) GetWorkerKey(rt Runtime) filcrypto.VRFPublicKey {
-	h, st := a.State(rt)
-	ret := st.Info().WorkerKey()
-	Release(rt, h, st)
-	return ret
-}
-
 // Called by the cron actor at every tick.
 func (a *StorageMinerActorCode_I) OnCronTickEnd(rt Runtime) InvocOutput {
 	rt.ValidateImmediateCallerIs(addr.CronActorAddr)

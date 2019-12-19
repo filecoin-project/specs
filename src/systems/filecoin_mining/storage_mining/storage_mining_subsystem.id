@@ -70,8 +70,8 @@ type StorageMiningSubsystem struct {
     OnNewRound()
 
     _runMiningCycle()
-    _tryLeaderElection(st.StateTree, StorageMinerActorState) OnChainPoStVerifyInfo
-    _trySurprisePoSt(st.StateTree, StorageMinerActorState) error
+    _tryLeaderElection(st stateTree.StateTree, sma StorageMinerActorState) OnChainPoStVerifyInfo
+    _trySurprisePoSt(st stateTree.StateTree, sma StorageMinerActorState) error
 
     VerifyElectionPoSt(
         header       block.BlockHeader

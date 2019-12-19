@@ -27,6 +27,7 @@ const (
 
 func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block block.Block_I) error {
 	util.IMPL_FINISH()
+	return nil
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket block.Ticket, pk filcrypto.VRFPublicKey, minerActorAddr addr.Address) bool {
@@ -92,13 +93,6 @@ func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallengeRand(chain chain.Ch
 	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_POST)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetFinality() block.ChainEpoch {
-	util.IMPL_FINISH()
-	// return FINALITY
-}
-
-func (spc *StoragePowerConsensusSubsystem_I) FinalizedEpoch() block.ChainEpoch {
-	util.IMPL_FINISH()
-	// currentEpoch := rt.HeadEpoch()
-	// return currentEpoch - spc.GetFinality()
+func (spc *StoragePowerConsensusSubsystem_I) GetFinalizedEpoch(currentEpoch block.ChainEpoch) block.ChainEpoch {
+	return currentEpoch - FINALITY
 }

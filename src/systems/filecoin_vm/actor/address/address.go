@@ -71,7 +71,7 @@ func (a *Address_I) IsIDType() bool {
 }
 
 func (a *Address_I) IsKeyType() bool {
-	
+
 	panic("TODO")
 }
 
@@ -84,15 +84,14 @@ func (a *Address_I) GetID() (ActorID, error) {
 
 func (a *Address_I) GetKey() (KeyHash, error) {
 	if !a.IsKeyType() {
-		return KeyHash(0), errors.New("not a key address")
+		return KeyHash(nil), errors.New("not a key address")
 	}
 	if a.Data_.Which() == Address_Data_Case_PublicKey_BLS {
 		return a.Data_.As_PublicKey_BLS(), nil
 	} else if a.Data_.Which() == Address_Data_Case_PublicKey_Secp256k1 {
 		return a.Data_.As_PublicKey_Secp256k1(), nil
-	}
-	else {
-		return KeyHash(0), errors.New("not a recognized key type")
+	} else {
+		return KeyHash(nil), errors.New("not a recognized key type")
 	}
 }
 
@@ -104,11 +103,11 @@ func Address_Make_ID(net Address_NetworkID, x ActorID) Address {
 }
 
 func Address_Make_Key(net Address_NetworkID, x KeyHash) (Address, error) {
+	var d Address_Data
 	if util.IsBLS(x) {
-		d := Address_Data_Make_PublicKey_BLS(x)
-	}
-	else if util.IsSECP(x) {
-		d := Address_Data_Make_PublicKey_Secp256k1(x)
+		d = Address_Data_Make_PublicKey_BLS(x)
+	} else if util.IsSECP(x) {
+		d = Address_Data_Make_PublicKey_Secp256k1(x)
 	} else {
 		return nil, errors.New("Not a recognized key type")
 	}
