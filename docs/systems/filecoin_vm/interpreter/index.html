@@ -5100,12 +5100,14 @@ it will be created as an account actor.</p>
 	<span class="nx">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Serialize_Address</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
 	<span class="nx">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">Serialize_TokenAmount</span><span class="p">(</span><span class="nx">penalty</span><span class="p">)</span>
 
+	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// serialize other inputs to BlockRewardMessage or get this from query in RewardActor
+</span><span class="c1"></span>
 	<span class="nx">sysActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
 		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">,</span>
 		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">RewardActorAddr</span><span class="p">,</span>
-		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">sysactors</span><span class="p">.</span><span class="nx">Method_RewardActor_AwardBlockReward</span><span class="p">,</span>
+		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_RewardActor_AwardBlockReward</span><span class="p">,</span>
 		<span class="nx">Params_</span><span class="p">:</span>     <span class="nx">params</span><span class="p">,</span>
 		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">sysActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
 		<span class="nx">Value_</span><span class="p">:</span>      <span class="mi">0</span><span class="p">,</span>

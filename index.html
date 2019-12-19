@@ -4811,9 +4811,9 @@ https://github.com/alex-shpak/hugo-book
   <img id="spec-logo" src="./docs/filspeclogo.png" />
   <div id="spec-version">
     protocol version: <span id="protocol-version-number">v0.1.0</span><br />
-    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">cc555b28</span>
+    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">863e2ae0</span>
     <br />
-    last published: <span id="spec-version-date">2019-12-19_12:21:19Z</span>
+    last published: <span id="spec-version-date">2019-12-19_14:54:48Z</span>
   </div>
 </div>
 
@@ -14197,11 +14197,23 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 
+<span class="kd">type</span> <span class="nx">VestingFunction</span> <span class="nx">enum</span> <span class="p">{</span>
+    <span class="nx">None</span>
+    <span class="nx">Linear</span>
+    <span class="c1">// TODO: potential options
+</span><span class="c1"></span>    <span class="c1">// PieceWise
+</span><span class="c1"></span>    <span class="c1">// Quadratic
+</span><span class="c1"></span>    <span class="c1">// Exponential
+</span><span class="c1"></span><span class="p">}</span>
+
 <span class="kd">type</span> <span class="nx">Reward</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">VestingFunction</span>
     <span class="nx">StartEpoch</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">EndEpoch</span>         <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="nx">Value</span>            <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nx">ReleaseRate</span>      <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// linear slope, unit: FIL per Epoch
-</span><span class="c1"></span>    <span class="nx">AmountWithdrawn</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">AmountWithdrawn</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+
+    <span class="nf">AmountVested</span><span class="p">(</span><span class="nx">elapsedEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
 <span class="p">}</span>
 
 <span class="c1">// ownerAddr to a collection of Reward
@@ -14252,13 +14264,16 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">sysactors</span>
 
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
-<span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="s">&#34;math&#34;</span>
 
-<span class="kd">const</span> <span class="p">(</span>
-	<span class="nx">Method_RewardActor_AwardBlockReward</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodPlaceholder</span> <span class="o">+</span> <span class="kc">iota</span>
+	<span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+	<span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
+	<span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+	<span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
+	<span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
+	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
@@ -14288,6 +14303,18 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1"></span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">Reward_I</span><span class="p">)</span> <span class="nf">AmountVested</span><span class="p">(</span><span class="nx">elapsedEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+	<span class="k">switch</span> <span class="nx">r</span><span class="p">.</span><span class="nf">VestingFunction</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">case</span> <span class="nx">VestingFunction_None</span><span class="p">:</span>
+		<span class="k">return</span> <span class="nx">r</span><span class="p">.</span><span class="nf">Value</span><span class="p">()</span>
+	<span class="k">case</span> <span class="nx">VestingFunction_Linear</span><span class="p">:</span>
+		<span class="nx">vestedProportion</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Max</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">elapsedEpoch</span><span class="p">)</span><span class="o">/</span><span class="nb">float64</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nf">StartEpoch</span><span class="p">()</span><span class="o">-</span><span class="nx">r</span><span class="p">.</span><span class="nf">EndEpoch</span><span class="p">()))</span>
+		<span class="k">return</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nf">Value</span><span class="p">())</span> <span class="o">*</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">vestedProportion</span><span class="p">))</span>
+	<span class="k">default</span><span class="p">:</span>
+		<span class="k">return</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">RewardActorState_I</span><span class="p">)</span> <span class="nf">_withdrawReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">ownerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 
 	<span class="nx">rewards</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">RewardMap</span><span class="p">()[</span><span class="nx">ownerAddr</span><span class="p">]</span>
@@ -14300,7 +14327,7 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 
 	<span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">r</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">rewards</span> <span class="p">{</span>
 		<span class="nx">elapsedEpoch</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="o">-</span> <span class="nx">r</span><span class="p">.</span><span class="nf">StartEpoch</span><span class="p">()</span>
-		<span class="nx">unlockedReward</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nf">ReleaseRate</span><span class="p">())</span> <span class="o">*</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">elapsedEpoch</span><span class="p">))</span>
+		<span class="nx">unlockedReward</span> <span class="o">:=</span> <span class="nx">r</span><span class="p">.</span><span class="nf">AmountVested</span><span class="p">(</span><span class="nx">elapsedEpoch</span><span class="p">)</span>
 		<span class="nx">withdrawableReward</span> <span class="o">:=</span> <span class="nx">unlockedReward</span> <span class="o">-</span> <span class="nx">r</span><span class="p">.</span><span class="nf">AmountWithdrawn</span><span class="p">()</span>
 
 		<span class="k">if</span> <span class="nx">withdrawableReward</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>
@@ -14326,12 +14353,56 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 </span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActorCode_I</span><span class="p">)</span> <span class="nf">AwardBlockReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">miner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">penalty</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActorCode_I</span><span class="p">)</span> <span class="nf">AwardBlockReward</span><span class="p">(</span>
+	<span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span>
+	<span class="nx">miner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
+	<span class="nx">penalty</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span>
+	<span class="nx">minerActivePower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span>
+	<span class="nx">minerInactivePower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span>
+	<span class="nx">currPledge</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span>
+<span class="p">)</span> <span class="p">{</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
-	<span class="c1">// block reward function should live here
-</span><span class="c1"></span>	<span class="c1">// handle penalty greater than reward
-</span><span class="c1"></span>	<span class="c1">// put Reward into RewardMap
-</span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+
+	<span class="nx">inds</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrIndices</span><span class="p">()</span>
+	<span class="nx">pledgeReq</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">BlockReward_PledgeCollateralReq</span><span class="p">(</span><span class="nx">minerActivePower</span><span class="p">,</span> <span class="nx">minerInactivePower</span><span class="p">,</span> <span class="nx">currPledge</span><span class="p">)</span>
+	<span class="nx">currReward</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">BlockReward_GetCurrRewardForMiner</span><span class="p">(</span><span class="nx">minerActivePower</span><span class="p">,</span> <span class="nx">currPledge</span><span class="p">)</span>
+	<span class="nx">underPledge</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Max</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)),</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">pledgeReq</span><span class="o">-</span><span class="nx">currPledge</span><span class="p">))</span> <span class="c1">// 0 if over collateralized
+</span><span class="c1"></span>	<span class="nx">rewardToGarnish</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Min</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">currReward</span><span class="p">),</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">underPledge</span><span class="p">))</span>
+
+	<span class="nx">util</span><span class="p">.</span><span class="nf">TODO</span><span class="p">()</span>
+	<span class="c1">// handle penalty here
+</span><span class="c1"></span>	<span class="c1">// also handle penalty greater than reward
+</span><span class="c1"></span>	<span class="nx">actualReward</span> <span class="o">:=</span> <span class="nx">currReward</span> <span class="o">-</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">rewardToGarnish</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">rewardToGarnish</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="c1">// Send fund to SPA for collateral
+</span><span class="c1"></span>		<span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
+			<span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
+			<span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_AddBalance</span><span class="p">,</span>
+			<span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span>
+				<span class="nx">addr</span><span class="p">.</span><span class="nf">Serialize_Address</span><span class="p">(</span><span class="nx">miner</span><span class="p">),</span>
+			<span class="p">},</span>
+			<span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">rewardToGarnish</span><span class="p">),</span>
+		<span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">actualReward</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="c1">// put Reward into RewardMap
+</span><span class="c1"></span>		<span class="nx">newReward</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">Reward_I</span><span class="p">{</span>
+			<span class="nx">StartEpoch_</span><span class="p">:</span>      <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(),</span>
+			<span class="nx">EndEpoch_</span><span class="p">:</span>        <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(),</span>
+			<span class="nx">Value_</span><span class="p">:</span>           <span class="nx">actualReward</span><span class="p">,</span>
+			<span class="nx">AmountWithdrawn_</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+			<span class="nx">VestingFunction_</span><span class="p">:</span> <span class="nx">VestingFunction_None</span><span class="p">,</span>
+		<span class="p">}</span>
+		<span class="nx">rewards</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">RewardMap</span><span class="p">()[</span><span class="nx">miner</span><span class="p">]</span>
+		<span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+			<span class="nx">rewards</span> <span class="p">=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">Reward</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+		<span class="p">}</span>
+		<span class="nx">rewards</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">rewards</span><span class="p">,</span> <span class="nx">newReward</span><span class="p">)</span>
+		<span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">RewardMap_</span><span class="p">[</span><span class="nx">miner</span><span class="p">]</span> <span class="p">=</span> <span class="nx">rewards</span>
+	<span class="p">}</span>
+	<span class="nf">UpdateReleaseRewardActorState</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">// called by ownerAddress
@@ -14894,12 +14965,14 @@ it will be created as an account actor.</p>
 	<span class="nx">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Serialize_Address</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
 	<span class="nx">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">Serialize_TokenAmount</span><span class="p">(</span><span class="nx">penalty</span><span class="p">)</span>
 
+	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// serialize other inputs to BlockRewardMessage or get this from query in RewardActor
+</span><span class="c1"></span>
 	<span class="nx">sysActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
 		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">,</span>
 		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">RewardActorAddr</span><span class="p">,</span>
-		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">sysactors</span><span class="p">.</span><span class="nx">Method_RewardActor_AwardBlockReward</span><span class="p">,</span>
+		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_RewardActor_AwardBlockReward</span><span class="p">,</span>
 		<span class="nx">Params_</span><span class="p">:</span>     <span class="nx">params</span><span class="p">,</span>
 		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">sysActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
 		<span class="nx">Value_</span><span class="p">:</span>      <span class="mi">0</span><span class="p">,</span>
@@ -18798,22 +18871,19 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
     <span class="nf">_getActivePowerForConsensus</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
     <span class="nf">_slashPledgeCollateral</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
-    <span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">power</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
+    <span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
+        <span class="nx">activePower</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+        <span class="nx">inactivePower</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+        <span class="nx">ok</span>             <span class="kt">bool</span>
+    <span class="p">)</span>
+    <span class="nf">_getCurrPledgeForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">currPledge</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
     <span class="nf">_getTotalPower</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-    <span class="nf">_getPledgeCollateralReq</span><span class="p">(</span><span class="nx">power</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nf">_getPledgeCollateralReqForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="nf">_selectMinersToSurprise</span><span class="p">(</span><span class="nx">challengeCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
-    <span class="nf">_getAffectedPledge</span><span class="p">(</span>
-        <span class="nx">minerID</span>        <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">affectedPower</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-    <span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-
     <span class="nf">_getStorageFaultSlashPledgePercent</span><span class="p">(</span><span class="nx">faultType</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">StorageFaultType</span><span class="p">)</span> <span class="kt">int</span>
-    <span class="nf">_rtGetPowerEntryOrAbort</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerID</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">PowerTableEntry</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">AddBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
+    <span class="nf">AddBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
     <span class="nf">WithdrawBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
 
     <span class="c1">// call by StorageMiningSubsytem on miner creation
@@ -18842,6 +18912,9 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
     <span class="p">)</span>
 
     <span class="nf">Surprise</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">ticket</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
+
+    <span class="nf">_rtGetPowerEntryOrAbort</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerID</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">PowerTableEntry</span>
+    <span class="nf">_rtGetPledgeCollateralReqForMinerOrAbort</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -18948,20 +19021,6 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 	<span class="k">return</span> <span class="nx">amountSlashed</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getPledgeCollateralReq</span><span class="p">(</span><span class="nx">power</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
-	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getPledgeCollateralReqForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
-	<span class="nx">minerPowerTotal</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
-	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
-		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Power entry not found for miner&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
-
-	<span class="k">return</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPledgeCollateralReq</span><span class="p">(</span><span class="nx">minerPowerTotal</span><span class="p">)</span>
-<span class="p">}</span>
-
 <span class="kd">func</span> <span class="nf">addrInArray</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">list</span> <span class="p">[]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">b</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">list</span> <span class="p">{</span>
 		<span class="k">if</span> <span class="nx">b</span> <span class="o">==</span> <span class="nx">a</span> <span class="p">{</span>
@@ -19014,22 +19073,19 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">power</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">activePower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">inactivePower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
 
-	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+	<span class="nx">powerEntry</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()[</span><span class="nx">minerAddr</span><span class="p">]</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nx">found</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="nx">powerEntry</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">(),</span> <span class="nx">powerEntry</span><span class="p">.</span><span class="nf">InactivePower</span><span class="p">(),</span> <span class="kc">true</span>
+
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getAffectedPledge</span><span class="p">(</span>
-	<span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">affectedPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
-
-	<span class="c1">// TODO: revisit this calculation
-</span><span class="c1"></span>	<span class="nx">minerPowerTotal</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
-	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
-	<span class="nx">pledgeRequired</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPledgeCollateralReq</span><span class="p">(</span><span class="nx">minerPowerTotal</span><span class="p">)</span>
-	<span class="nx">affectedPledge</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">pledgeRequired</span><span class="p">)</span> <span class="o">*</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">affectedPower</span><span class="p">)</span> <span class="o">/</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">minerPowerTotal</span><span class="p">))</span>
-
-	<span class="k">return</span> <span class="nx">affectedPledge</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getCurrPledgeForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">currPledge</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_getStorageFaultSlashPledgePercent</span><span class="p">(</span><span class="nx">faultType</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">StorageFaultType</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
@@ -19120,15 +19176,9 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 	<span class="c1">// caller verification
 </span><span class="c1"></span>	<span class="nf">TODO</span><span class="p">()</span>
 	<span class="nx">msgSender</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+	<span class="nx">minBalance</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_rtGetPledgeCollateralReqForMinerOrAbort</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
 
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-
-	<span class="nx">minerPowerTotal</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
-	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa.WithdrawBalance: Miner not found.&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
-
-	<span class="nx">minBalance</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPledgeCollateralReq</span><span class="p">(</span><span class="nx">minerPowerTotal</span><span class="p">)</span>
 	<span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountExtracted</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithExtractPartial</span><span class="p">(</span>
 		<span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">amountRequested</span><span class="p">,</span> <span class="nx">minBalance</span><span class="p">)</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
@@ -19181,11 +19231,11 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-	<span class="nx">minerPowerTotal</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+	<span class="nx">activePower</span><span class="p">,</span> <span class="nx">inactivePower</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa.RemoveStorageMiner: miner entry not found in PowerTable.&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
-	<span class="k">if</span> <span class="nx">minerPowerTotal</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">activePower</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="nx">inactivePower</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;spa.RemoveStorageMiner: power still remains.&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 
@@ -19216,9 +19266,9 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 	<span class="c1">// caller verification
 </span><span class="c1"></span>	<span class="nf">TODO</span><span class="p">()</span>
 
+	<span class="nx">pledgeReq</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_rtGetPledgeCollateralReqForMinerOrAbort</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
+
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-	<span class="nx">pledgeReq</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPledgeCollateralReqForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
-	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
 	<span class="nx">balanceSufficient</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_IsEntrySufficient</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">pledgeReq</span><span class="p">)</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
@@ -19226,19 +19276,27 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortFundsMsg</span><span class="p">(</span><span class="s">&#34;exitcode.InsufficientPledgeCollateral&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 
+	<span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+
 <span class="p">}</span>
 
 <span class="c1">// slash pledge collateral for Declared, Detected and Terminated faults
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">SlashPledgeForStorageFault</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">affectedPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">faultType</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">StorageFaultType</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+	<span class="nx">inds</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrIndices</span><span class="p">()</span>
 
 	<span class="c1">// caller verification
 </span><span class="c1"></span>	<span class="nf">TODO</span><span class="p">()</span>
 
 	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-	<span class="nx">affectedPledge</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getAffectedPledge</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">affectedPower</span><span class="p">)</span>
+	<span class="c1">// getAffectedPledge
+</span><span class="c1"></span>	<span class="nx">activePower</span><span class="p">,</span> <span class="nx">inactivePower</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+	<span class="nx">currPledge</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getCurrPledgeForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+	<span class="nx">affectedPledge</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">BlockReward_GetPledgeSlashForStorageFault</span><span class="p">(</span><span class="nx">affectedPower</span><span class="p">,</span> <span class="nx">activePower</span><span class="p">,</span> <span class="nx">inactivePower</span><span class="p">,</span> <span class="nx">currPledge</span><span class="p">)</span>
 
 	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// BigInt arithmetic
 </span><span class="c1"></span>	<span class="nx">amountToSlash</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span>
@@ -19260,9 +19318,9 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 	<span class="c1">// caller verification
 </span><span class="c1"></span>	<span class="nf">TODO</span><span class="p">()</span>
 
-	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+	<span class="nx">powerEntry</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_rtGetPowerEntryOrAbort</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
 
-	<span class="nx">powerEntry</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_rtGetPowerEntryOrAbort</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
+	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
 	<span class="c1">// keep track of miners larger than minimum miner size before updating the PT
 </span><span class="c1"></span>	<span class="nx">MIN_MINER_SIZE_STOR</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// TODO: pull in from consts
@@ -19319,14 +19377,36 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 </span><span class="c1">// Method utility functions
 </span><span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1"></span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_rtGetPowerEntryOrAbort</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">PowerTableEntry</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">_rtGetPowerEntryOrAbort</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">PowerTableEntry</span> <span class="p">{</span>
+	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 	<span class="nx">powerEntry</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()[</span><span class="nx">minerAddr</span><span class="p">]</span>
 
 	<span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;sm._rtGetPowerEntryOrAbort: miner not found in power table.&#34;</span><span class="p">)</span>
+		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;spa._rtGetPowerEntryOrAbort: miner not found in power table.&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 
+	<span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">powerEntry</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">_rtGetPledgeCollateralReqForMinerOrAbort</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+	<span class="nx">inds</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrIndices</span><span class="p">()</span>
+	<span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+
+	<span class="nx">activePower</span><span class="p">,</span> <span class="nx">inactivePower</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa._rtGetPledgeCollateralReqForMinerOrAbort: miner not in PowerTable.&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="nx">currPledge</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getCurrPledgeForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa._rtGetPledgeCollateralReqForMinerOrAbort: miner not in EscrowTable.&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="nx">minBalance</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">BlockReward_PledgeCollateralReq</span><span class="p">(</span><span class="nx">activePower</span><span class="p">,</span> <span class="nx">inactivePower</span><span class="p">,</span> <span class="nx">currPledge</span><span class="p">)</span>
+
+	<span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">minBalance</span>
 <span class="p">}</span>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
