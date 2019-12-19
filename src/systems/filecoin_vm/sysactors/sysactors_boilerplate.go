@@ -1,4 +1,4 @@
-package storage_power_consensus
+package sysactors
 
 import (
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
@@ -8,10 +8,8 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
-type BalanceTableHAMT = actor_util.BalanceTableHAMT
-
 ////////////////////////////////////////////////////////////////////////////////
-// Boilerplate
+// Boilerplate: System singleton actors
 //
 // This boilerplate should be essentially identical for all actors, and
 // conceptually belongs in the runtime/VM. It is only duplicated here as a
@@ -21,33 +19,40 @@ type BalanceTableHAMT = actor_util.BalanceTableHAMT
 type InvocOutput = vmr.InvocOutput
 type Runtime = vmr.Runtime
 type Bytes = util.Bytes
+type Serialization = util.Serialization
 
-var Assert = util.Assert
-var IMPL_FINISH = util.IMPL_FINISH
-var PARAM_FINISH = util.PARAM_FINISH
-var TODO = util.TODO
+var CheckArgs = actor_util.CheckArgs
+var ArgPop = actor_util.ArgPop
+var ArgEnd = actor_util.ArgEnd
 
-func (a *StoragePowerActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, StoragePowerActorState) {
+////////////////////////////////////////////////////////////////////////////////
+// -- InitActor
+////////////////////////////////////////////////////////////////////////////////
+
+func _loadState(rt Runtime) (vmr.ActorStateHandle, InitActorState) {
 	h := rt.AcquireState()
-	stateCID := h.Take()
+	stateCID := ipld.CID(h.Take())
+	if ipld.CID_Equals(stateCID, ipld.EmptyCID()) {
+		rt.AbortAPI("Actor state not initialized")
+	}
 	stateBytes := rt.IpldGet(ipld.CID(stateCID))
 	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
 		rt.AbortAPI("IPLD lookup error")
 	}
-	state := DeserializeState(stateBytes.As_Bytes())
+	state, err := Deserialize_InitActorState(Serialization(stateBytes.As_Bytes()))
+	if err != nil {
+		rt.AbortAPI("State deserialization error")
+	}
 	return h, state
 }
-func Release(rt Runtime, h vmr.ActorStateHandle, st StoragePowerActorState) {
+func Release(rt Runtime, h vmr.ActorStateHandle, st InitActorState) {
 	checkCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
 	h.Release(checkCID)
 }
-func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st StoragePowerActorState) {
+func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st InitActorState) {
 	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
 	h.UpdateRelease(newCID)
 }
-func (st *StoragePowerActorState_I) CID() ipld.CID {
-	panic("TODO")
-}
-func DeserializeState(x Bytes) StoragePowerActorState {
+func (st *InitActorState_I) CID() ipld.CID {
 	panic("TODO")
 }

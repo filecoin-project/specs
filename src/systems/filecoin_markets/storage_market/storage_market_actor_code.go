@@ -7,6 +7,7 @@ import (
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
+	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -35,7 +36,7 @@ func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, entryAddr addr.Ad
 	amountSlashedTotal += st._rtUpdatePendingDealStatesForParty(rt, entryAddr)
 
 	minBalance := st._getLockedReqBalanceInternal(entryAddr)
-	newTable, amountExtracted, ok := actor.BalanceTable_WithExtractPartial(
+	newTable, amountExtracted, ok := actor_util.BalanceTable_WithExtractPartial(
 		st.EscrowTable(), entryAddr, amountRequested, minBalance)
 	Assert(ok)
 	st.Impl().EscrowTable_ = newTable
@@ -53,10 +54,10 @@ func (a *StorageMarketActorCode_I) AddBalance(rt Runtime, entryAddr addr.Address
 	st._rtAbortIfAddressEntryDoesNotExist(rt, entryAddr)
 
 	msgValue := rt.ValueReceived()
-	newTable, ok := actor.BalanceTable_WithAdd(st.EscrowTable(), entryAddr, msgValue)
+	newTable, ok := actor_util.BalanceTable_WithAdd(st.EscrowTable(), entryAddr, msgValue)
 	if !ok {
 		// Entry not found; create implicitly.
-		newTable, ok = actor.BalanceTable_WithNewAddressEntry(st.EscrowTable(), entryAddr, msgValue)
+		newTable, ok = actor_util.BalanceTable_WithNewAddressEntry(st.EscrowTable(), entryAddr, msgValue)
 		Assert(ok)
 	}
 	st.Impl().EscrowTable_ = newTable
@@ -97,8 +98,16 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 			Deal_:             newDeal,
 			SectorStartEpoch_: block.ChainEpoch_None,
 		}
+
 		st.Deals()[id] = onchainDeal
+
+		if _, found := st.CachedExpirationsPending()[p.EndEpoch()]; !found {
+			st.CachedExpirationsPending()[p.EndEpoch()] = actor_util.DealIDQueue_Empty()
+		}
+		st.CachedExpirationsPending()[p.EndEpoch()].Enqueue(id)
 	}
+
+	st.Impl().CurrEpochNumDealsPublished_ += len(newStorageDeals)
 
 	UpdateRelease(rt, h, st)
 
@@ -203,13 +212,64 @@ func (a *StorageMarketActorCode_I) OnEpochTickEnd(rt Runtime) {
 	// the StorageMarketActor state to grow without bound.
 	// To prevent this, we amortize the cost of this cleanup by processing a relatively
 	// small number of deals every epoch, independent of the calls above.
-	var cleanupDealIDs []deal.DealID
-	// Populate with the N oldest deals (e.g., by a priority queue on EndEpoch).
-	// N is a system parameter TBD, which may be a function of the global statistics
-	// (including the number of deals in each prior epoch).
-	IMPL_TODO()
+	//
+	// More specifically, we process deals:
+	//   (a) In priority order of expiration epoch, up until the current epoch
+	//   (b) Within a given expiration epoch, in order of original publishing.
+	//
+	// We stop once we have exhausted this valid set, or when we have hit a certain target
+	// (DEAL_PROC_AMORTIZED_SCALE_FACTOR times the number of deals freshly published in the
+	// current epoch) of deals dequeued, whichever comes first.
 
-	amountSlashedTotal := st._updatePendingDealStates(cleanupDealIDs, rt.CurrEpoch())
+	const DEAL_PROC_AMORTIZED_SCALE_FACTOR = 2
+	numDequeuedTarget := st.CurrEpochNumDealsPublished() * DEAL_PROC_AMORTIZED_SCALE_FACTOR
+
+	numDequeued := 0
+	extractedDealIDs := []deal.DealID{}
+
+	for {
+		if st.CachedExpirationsNextProcEpoch() > rt.CurrEpoch() {
+			break
+		}
+
+		if numDequeued >= numDequeuedTarget {
+			break
+		}
+
+		queue, found := st.CachedExpirationsPending()[st.CachedExpirationsNextProcEpoch()]
+		if !found {
+			st.Impl().CachedExpirationsNextProcEpoch_ += 1
+			continue
+		}
+
+		queueDepleted := false
+		for {
+			dealID, ok := queue.Dequeue()
+			if !ok {
+				queueDepleted = true
+				break
+			}
+			numDequeued += 1
+			if _, found := st.Deals()[dealID]; found {
+				// May have already processed expiration, independently, via _rtUpdatePendingDealStatesForParty.
+				// If not, add it to the list to be processed.
+				extractedDealIDs = append(extractedDealIDs, dealID)
+			}
+		}
+
+		if !queueDepleted {
+			Assert(numDequeued >= numDequeuedTarget)
+			break
+		}
+
+		delete(st.CachedExpirationsPending(), st.CachedExpirationsNextProcEpoch())
+		st.Impl().CachedExpirationsNextProcEpoch_ += 1
+	}
+
+	amountSlashedTotal := st._updatePendingDealStates(extractedDealIDs, rt.CurrEpoch())
+
+	// Reset for next epoch.
+	st.Impl().CurrEpochNumDealsPublished_ = 0
 
 	UpdateRelease(rt, h, st)
 
@@ -219,16 +279,16 @@ func (a *StorageMarketActorCode_I) OnEpochTickEnd(rt Runtime) {
 func (a *StorageMarketActorCode_I) Constructor(rt Runtime) {
 	h := rt.AcquireState()
 
-	IMPL_FINISH() // Initialize these structures
-	var dealsAMTEmpty DealsAMT
-	var balanceTableEmpty actor.BalanceTableHAMT
-
 	st := &StorageMarketActorState_I{
-		Deals_:          dealsAMTEmpty,
-		EscrowTable_:    balanceTableEmpty,
-		LockedReqTable_: balanceTableEmpty,
-		NextID_:         deal.DealID(0),
+		Deals_:                          DealsAMT_Empty(),
+		EscrowTable_:                    actor_util.BalanceTableHAMT_Empty(),
+		LockedReqTable_:                 actor_util.BalanceTableHAMT_Empty(),
+		NextID_:                         deal.DealID(0),
+		CachedDealIDsByParty_:           CachedDealIDsByPartyHAMT_Empty(),
+		CachedExpirationsPending_:       CachedExpirationsPendingHAMT_Empty(),
+		CachedExpirationsNextProcEpoch_: block.ChainEpoch(0),
 	}
+
 	UpdateRelease(rt, h, st)
 }
 
@@ -242,15 +302,14 @@ func (st *StorageMarketActorState_I) _rtUpdatePendingDealStatesForParty(rt Runti
 	// For consistency with OnEpochTickEnd, only process updates up to the end of the _previous_ epoch.
 	epoch := rt.CurrEpoch() - 1
 
-	var relevantDealIDs []deal.DealID
-	// Populate with the set of all elements in st.Deals() in which addr is one of the parties
-	// (either client or provider).
-	//
-	// Note: as an optimization, implementations may cache efficient data structures to maintain
-	// this index.
-	IMPL_TODO()
+	cachedRes, ok := st.CachedDealIDsByParty()[addr]
+	Assert(ok)
+	extractedDealIDs := []deal.DealID{}
+	for cachedDealID := range cachedRes {
+		extractedDealIDs = append(extractedDealIDs, cachedDealID)
+	}
 
-	amountSlashedTotal = st._updatePendingDealStates(relevantDealIDs, epoch)
+	amountSlashedTotal = st._updatePendingDealStates(extractedDealIDs, epoch)
 	return
 }
 
