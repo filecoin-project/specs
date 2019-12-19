@@ -38,10 +38,6 @@ type StorageMiningSubsystem struct {
     // Need access to the key store in order to generate tickets and election proofs
     _keyStore          key_store.KeyStore
 
-    // TODO: why are these here? remove?
-    StartMining()
-    StopMining()
-
     // call by StorageMiningSubsystem itself to create miner
     CreateMiner(
         ownerPubKey   filcrypto.PublicKey
@@ -73,7 +69,9 @@ type StorageMiningSubsystem struct {
     // TODO: define clock better
     OnNewRound()
 
-    _tryLeaderElection()
+    _runMiningCycle()
+    _tryLeaderElection(st.StateTree, StorageMinerActorState) OnChainPoStVerifyInfo
+    _trySurprisePoSt(st.StateTree, StorageMinerActorState) error
 
     VerifyElectionPoSt(
         header       block.BlockHeader

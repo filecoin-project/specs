@@ -59,6 +59,7 @@ deals: [systems, filecoin_markets, deal]
 deal_states: [systems, filecoin_markets, deal, deal_states]
 
 # mining
+mining_cycle: [systems, filecoin_mining, storage_mining, mining_cycle]
 
 ### Storage Mining
 sector: [systems, filecoin_mining, sector]

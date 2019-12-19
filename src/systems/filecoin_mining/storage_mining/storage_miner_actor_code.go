@@ -65,8 +65,7 @@ func (a *StorageMinerActorCode_I) NotifyOfSurprisePoStChallenge(rt Runtime) Invo
 	return rt.SuccessReturn()
 }
 
-// called by verifier to update miner state on successful surprise post
-// after it has been verified in the storage_mining_subsystem
+// called by verifier to update miner state on surprise post submission
 func (a *StorageMinerActorCode_I) ProcessSurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
 	TODO() // TODO: validate caller
 

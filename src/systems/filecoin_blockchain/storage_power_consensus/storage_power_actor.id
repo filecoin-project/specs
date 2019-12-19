@@ -44,7 +44,6 @@ type StoragePowerActorCode struct {
 
     // call by StorageMiningSubsytem on miner creation
     CreateStorageMiner(
-        // TODO: document differences in Addr, Key and ID accross spec
         rt          Runtime
         ownerAddr   addr.Address
         workerAddr  addr.Address

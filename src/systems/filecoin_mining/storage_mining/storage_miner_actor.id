@@ -153,14 +153,12 @@ type MinerInfo struct {
     // - Income and returned collateral are paid to this address.
     // - This address is also allowed to change the worker address for the miner.
     Owner                   address.Address
-    OwnerKey                filcrypto.VRFPublicKey
 
     // Worker account for this miner.
     // This will be the key that is used to sign blocks created by this miner, and
     // sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
     // other day to day miner activities.
     Worker                  address.Address
-    WorkerKey               filcrypto.VRFPublicKey
 
     // Libp2p identity that should be used when connecting to this miner.
     PeerId                  libp2p.PeerID

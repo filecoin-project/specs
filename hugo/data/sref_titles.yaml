@@ -54,6 +54,7 @@ deals: "Deals"
 deal_states: "Deal States"
 
 # mining
+mining_cycle: "Mining Cycle"
 
 ### Storage Mining
 sector: "Sector"

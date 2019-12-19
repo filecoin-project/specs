@@ -8,47 +8,7 @@ title: Block Producer
 
 A miner registered with the storage power actor may begin generating and checking election tickets if it has proven storage meeting the {{<sref min_miner_size>}} threshold requirement. 
 
-In order to do so, the miner must be running chain validation, and be keeping track of the most recent
-blocks received. A miner's new block will be based on parents from the previous epoch.
-
-For additional details around how consensus works in Filecoin, see {{<sref expected_consensus>}}. For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner is eligible to mine a block itself, and other rules pertaining to the production of some artifacts required of valid blocks (e.g. Tickets, ElectionPoSt).
-
-## Mining Cycle
-
-After the chain has caught up to the current head using {{<sref chain_sync>}}, the mining process is as follows:
-
-- The node continuously receives and transmits messages using the {{<sref message_syncer>}}
-- At the same time it continuously {{<sref block_sync "receives blocks">}}
-    - Each block has an associated timestamp and epoch (quantized time window in which it was crafted)
-    - Blocks are validated as they come in during an epoch (provided it is their epoch, see {{<sref block "validation">}})
-- At the end of a given epoch, the miner should take all the valid blocks received for this epoch and assemble them into tipsets according to {{<sref tipset "tipset validation rules">}}
-- The miner then attempts to mine atop the heaviest tipset (as calculated with {{<sref chain_selection "EC's weight function">}}) using its smallest ticket to run leader election
-    - The miner runs an {{<sref election_post>}} on their sectors in order to generate partial tickets
-    - The miner uses these tickets in order to run {{<sref leader_election>}}
-        - if successful, the miner generates a new {{<sref tickets "randomness ticket">}} for inclusion in the block
-        - the miner then assembles a new block (see "block creation" below) and broadcasts it
-
-This process is repeated until either the {{<sref election_post>}} process yields a winning ticket (in EC) and a block published or a new valid {{<sref tipset>}} comes in from the network.
-
-At any height `H`, there are three possible situations:
-
-- The miner is eligible to mine a block: they produce their block and propagate it. They then resume mining at the next height `H+1`.
-- The miner is not eligible to mine a block but has received blocks: they form a Tipset with them and resume mining at the next height `H+1`.
-- The miner is not eligible to mine a block and has received no blocks: prompted by their clock they run leader election again, incrementing the epoch number.
-
-Anytime a miner receives new valid blocks, it should evaluate what is the heaviest Tipset it knows about and mine atop it.
-
-### Timing
-
-{{< diagram src="../../../../diagrams/timing/timing.png" title="Mining Cycle Timing" >}}
-
-The mining cycle relies on receiving and producing blocks concurrently.  The sequence of these events in time is given by the timing diagram above.  The upper row represents the conceptual consumption channel consisting of successive receiving periods `Rx` during which nodes validate and select blocks as chain heads.  The lower row is the conceptual production channel made up of a period of mining `M` followed by a period of transmission `Tx`.  The lengths of the periods are not to scale.
-
-Blocks are received and validated during `Rx` up to the end of the epoch.  At the beginning of the next epoch, the heaviest tipset is computed from the blocks received during `Rx`, used as the head to build on during `M`.  If mining is successful a block is transmitted during `Tx`.  The epoch boundaries are as shown.
-
-In a fully synchronized network most of period `Rx` does not see any network traffic, only the period lined up with `Tx`.  In practice we expect blocks from previous epochs to propagate during the remainder of `Rx`.  We also expect differences in operator mining time to cause additional variance.
-
-This sequence of events applies only when the node is in the `CHAIN_FOLLOW` syncing mode.  Nodes in other syncing modes do not mine blocks.
+In order to do so, the miner must be running chain validation, and be keeping track of the most recent blocks received. A miner's new block will be based on parents from the previous epoch.
 
 ## Block Creation
 

@@ -12,41 +12,67 @@ import (
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
 )
 
 type Serialization = util.Serialization
 
+// Note that implementations may choose to provide default generation methods for miners created
+// without miner/owner keypairs. We omit these details from the spec.
 func (sms *StorageMiningSubsystem_I) CreateMiner(
 	ownerAddr addr.Address,
 	workerAddr addr.Address,
 	sectorSize util.UInt,
 	peerId libp2p.PeerID,
 ) addr.Address {
-	// ownerAddr := sms.generateOwnerAddress(workerPubKey)
-	// var pledgeAmt actor.TokenAmount TODO: unclear how to pass the amount/pay
-	// TODO compute PledgeCollateral for 0 bytes
-	// return sms.StoragePowerActor().CreateStorageMiner(ownerAddr, workerPubKey, sectorSize, peerId)
-	// TODO: access this from runtime
-	// return sms.StoragePowerActor().CreateStorageMiner(ownerAddr, workerAddr, peerId)
-	var minerAddr addr.Address
-	return minerAddr
+
+	params := make([]util.Serialization, 4)
+	params[0] = addr.Serialize_Address(ownerAddr)
+	params[1] = addr.Serialize_Address(workerAddr)
+	params[2] = libp2p.Serialize_PeerID(peerId)
+
+	var pledgeAmt actor.TokenAmount // TODO: unclear how to pass the amount/pay
+	unsignedCreationMessage := &msg.UnsignedMessage_I{
+		From_:       ownerAddr,
+		To_:         addr.StoragePowerActorAddr,
+		Method_:     ai.Method_StoragePowerActor_CreateStorageMiner,
+		Params_:     params,
+		CallSeqNum_: sysActor.CallSeqNum(),
+		Value_:      pledgeAmt,
+		GasPrice_:   0,
+		GasLimit_:   msg.GasAmount_SentinelUnlimited(),
+	}
+
+	signedMessage, err := msg.Sign(unsignedMessage, sms._keyStore.WorkerKey())
+	if err != nil {
+		return err
+	}
+
+	err = sms.FilecoinNode().SubmitMessage(signedMessage)
+	if err != nil {
+		return err
+	}
+
+	// TODO: WAIT for block reception
+	util.IMPL_TODO()
+
+	var storageMinerAddr addr.Address
+	// and set in key store appropriately
+	return storageMinerAddr
 }
 
 func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
 	sms.SectorIndex().AddNewDeal(deal)
 	// stagedDealResponse := sms.SectorIndex().AddNewDeal(deal)
 	// TODO: way within a node to notify different components
-	// markeet.StorageProvider().NotifyStorageDealStaged(&storage_provider.StorageDealStagedNotification_I{
+	// market.StorageProvider().NotifyStorageDealStaged(&storage_provider.StorageDealStagedNotification_I{
 	// 	Deal_:     deal,
 	// 	SectorID_: stagedDealResponse.SectorID(),
 	// })
-}
-
-func (sms *StorageMiningSubsystem_I) _generateOwnerAddress(workerPubKey filcrypto.PublicKey) addr.Address {
-	panic("TODO")
 }
 
 func (sms *StorageMiningSubsystem_I) CommitSectorError() deal.StorageDeal {
@@ -55,15 +81,30 @@ func (sms *StorageMiningSubsystem_I) CommitSectorError() deal.StorageDeal {
 
 // triggered by new block reception and tipset assembly
 func (sms *StorageMiningSubsystem_I) OnNewBestChain() {
-	sms._tryLeaderElection()
+	sms._runMiningCycle()
 }
 
 // triggered by wall clock
 func (sms *StorageMiningSubsystem_I) OnNewRound() {
-	sms._tryLeaderElection()
+	sms._runMiningCycle()
 }
 
-func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
+func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
+	chainHead := sms._blockchain().BestChain().HeadTipset()
+	sma := sms._getStorageMinerActorState(chainHead.StateTree(), sms._keyStore.MinerAddress())
+
+	if sma.ChallengeStatus().CanBeElected(chainHead.Epoch() + 1) {
+		sms._tryLeaderElection(chainHead.StateTree(), sma)
+	} else if sma.ChallengeStatus().IsChallenged() {
+		sPoSt := sms._trySurprisePoSt(chainHead.StateTree(), sma)
+		// TODO: how to set these?
+		var gasLimit msg.GasLimit
+		var gasPrice := util.UVarint(0)
+		sms._submitSurprisePoStMessage(sPoSt, gasPrice, gasLimit)
+	}
+}
+
+func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.StateTree, sma StorageMinerActorState) {
 
 	// Randomness for ElectionPoSt
 	randomnessK := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), sms._blockchain().LatestEpoch())
@@ -81,16 +122,12 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 		return // fail to generate post candidates
 	}
 
-	// TODO Fix
-	util.TODO()
-	var currState stateTree.StateTree
 	winningCandidates := make([]sector.PoStCandidate, 0)
-	st := sms._getStorageMinerActorState(currState, sms._keyStore().MinerAddress())
 
-	numMinerSectors := uint64(len(st.SectorTable().Impl().ActiveSectors_.SectorsOn()))
+	numMinerSectors := uint64(len(sma.SectorTable().Impl().ActiveSectors_.SectorsOn()))
 	for _, candidate := range candidates {
 		sectorNum := candidate.SectorID().Number()
-		sectorPower, ok := st._getSectorPower(sectorNum)
+		sectorPower, ok := sma._getSectorPower(sectorNum)
 		if !ok {
 			// panic(err)
 			return
@@ -111,7 +148,15 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 	postProof := sms.StorageProving().Impl().CreateElectionPoStProof(postRandomness, winningCandidates)
 	chainHead := sms._blockchain().BestChain().HeadTipset()
 
-	sms._blockProducer().GenerateBlock(postProof, winningCandidates, newTicket, chainHead, sms._keyStore().MinerAddress())
+	var ctc ChallengeTicketsCommitment // TODO: proofs to fix when complete
+	electionPoSt := &OnChainPoStVerifyInfo_I{
+		CommT_:      ctc,
+		Candidates_: winningCandidates,
+		Randomness_: postRandomness,
+		Proof_:      postProof,
+	}
+
+	sms._blockProducer().GenerateBlock(electionPoSt, newTicket, chainHead, sms._keyStore().MinerAddress())
 }
 
 func (sms *StorageMiningSubsystem_I) PreparePoStChallengeSeed(randomness util.Randomness, minerAddr addr.Address) util.Randomness {
@@ -281,47 +326,65 @@ func (sms *StorageMiningSubsystem_I) _verifyElection(header block.BlockHeader, o
 	return true
 }
 
-// func (sms *StorageMiningSubsystem_I) submitPoStMessage(postSubmission poster.PoStSubmission) error {
-// 	var workerAddress addr.Address
-// 	var workerKeyPair filcrypto.SigKeyPair
-// 	panic("TODO") // TODO: get worker address and key pair
+func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateTree, sma StorageMinerActorState) OnChainPoStVerifyInfo {
 
-// 	// TODO: is this just workerAddress, or is there a separation here
-// 	// (worker is AccountActor, workerMiner is StorageMinerActor)?
-// 	var workerMinerActorAddress addr.Address
-// 	panic("TODO")
+	// get randomness for SurprisePoSt
+	randomnessK := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), challEpoch)
+	input := sms.PreparePoStChallengeSeed(randomnessK, sms._keyStore().MinerAddress())
+	postRandomness := sms._keyStore().WorkerKey().Impl().Generate(input).Output()
 
-// 	var gasPrice msg.GasPrice
-// 	var gasLimit msg.GasAmount
-// 	panic("TODO") // TODO: determine gas price and limit
+	// TODO: add how sectors are actually stored in the SMS proving set
+	util.TODO()
+	provingSet := make([]sector.SectorID, 0)
 
-// 	var callSeqNum actor.CallSeqNum
-// 	panic("TODO") // TODO: retrieve CallSeqNum from worker
+	candidates := sms.StorageProving().Impl().GenerateSurprisePoStCandidates(postRandomness, provingSet)
 
-// 	messageParams := actor.MethodParams([]actor.MethodParam{
-// 		actor.MethodParam(poster.Serialize_PoStSubmission(postSubmission)),
-// 	})
+	if len(candidates) <= 0 {
+		// Error. Will fail this surprise post and must then redeclare faults
+		return // fail to generate post candidates
+	}
 
-// 	unsignedMessage := msg.UnsignedMessage_Make(
-// 		workerAddress,
-// 		workerMinerActorAddress,
-// 		Method_StorageMinerActor_SubmitPoSt,
-// 		messageParams,
-// 		callSeqNum,
-// 		actor.TokenAmount(0),
-// 		gasPrice,
-// 		gasLimit,
-// 	)
+	winningCandidates := make([]sector.PoStCandidate, 0)
+	postProof := sms.StorageProving().Impl().CreateSurprisePoStProof(postRandomness, winningCandidates)
+	chainHead := sms._blockchain().BestChain().HeadTipset()
 
-// 	signedMessage, err := msg.Sign(unsignedMessage, workerKeyPair)
-// 	if err != nil {
-// 		return err
-// 	}
+	// TODO: run surprisepost target check
+	var ctc ChallengeTicketsCommitment // TODO: proofs to fix when complete
+	surprisePoSt := &OnChainPoStVerifyInfo_I{
+		CommT_:      ctc,
+		Candidates_: winningCandidates,
+		Randomness_: postRandomness,
+		Proof_:      postProof,
+	}
+	return surprisePoSt
+}
 
-// 	err = sms.FilecoinNode().SubmitMessage(signedMessage)
-// 	if err != nil {
-// 		return err
-// 	}
+func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(sPoSt OnChainPoStVerifyInfo, gasPrice util.UVarint, gasLimit msg.GasLimit) error {
 
-// 	return nil
-// }
+	params := make([]util.Serialization, 1)
+	params[0] = addr.Serialize_OnChainPoStVerifyInfo(sPoSt)
+
+	var pledgeAmt actor.TokenAmount // TODO: unclear how to pass the amount/pay
+	unsignedCreationMessage := &msg.UnsignedMessage_I{
+		From_:       sms._keyStore().MinerAddress(),
+		To_:         addr.StorageMinerActor,
+		Method_:     ai.Method_StorageMinerActor_ProcessSurprisePoSt,
+		Params_:     params,
+		CallSeqNum_: sysActor.CallSeqNum(),
+		Value_:      nil,
+		GasPrice_:   gasPrice,
+		GasLimit_:   gasLimit,
+	}
+
+	signedMessage, err := msg.Sign(unsignedMessage, sms._keyStore.WorkerKey())
+	if err != nil {
+		return err
+	}
+
+	err = sms.FilecoinNode().SubmitMessage(signedMessage)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
