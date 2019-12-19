@@ -75,20 +75,6 @@ func (st *StoragePowerActorState_I) _slashPledgeCollateral(
 	return amountSlashed
 }
 
-func (st *StoragePowerActorState_I) _getPledgeCollateralReq(power block.StoragePower) actor.TokenAmount {
-	PARAM_FINISH()
-	panic("")
-}
-
-func (st *StoragePowerActorState_I) _getPledgeCollateralReqForMiner(minerAddr addr.Address) actor.TokenAmount {
-	minerPowerTotal, ok := st._getPowerTotalForMiner(minerAddr)
-	if !ok {
-		panic("Power entry not found for miner")
-	}
-
-	return st._getPledgeCollateralReq(minerPowerTotal)
-}
-
 func addrInArray(a addr.Address, list []addr.Address) bool {
 	for _, b := range list {
 		if b == a {
@@ -141,22 +127,19 @@ func (st *StoragePowerActorState_I) _getTotalPower() block.StoragePower {
 }
 
 func (st *StoragePowerActorState_I) _getPowerTotalForMiner(minerAddr addr.Address) (
-	power block.StoragePower, ok bool) {
+	activePower block.StoragePower, inactivePower block.StoragePower, ok bool) {
 
-	IMPL_FINISH()
-	panic("")
+	powerEntry, found := st.PowerTable()[minerAddr]
+	if !found {
+		return block.StoragePower(0), block.StoragePower(0), found
+	}
+
+	return powerEntry.ActivePower(), powerEntry.InactivePower(), true
+
 }
 
-func (st *StoragePowerActorState_I) _getAffectedPledge(
-	minerAddr addr.Address, affectedPower block.StoragePower) actor.TokenAmount {
-
-	// TODO: revisit this calculation
-	minerPowerTotal, ok := st._getPowerTotalForMiner(minerAddr)
-	Assert(ok)
-	pledgeRequired := st._getPledgeCollateralReq(minerPowerTotal)
-	affectedPledge := actor.TokenAmount(uint64(pledgeRequired) * uint64(affectedPower) / uint64(minerPowerTotal))
-
-	return affectedPledge
+func (st *StoragePowerActorState_I) _getCurrPledgeForMiner(minerAddr addr.Address) (currPledge actor.TokenAmount, ok bool) {
+	return actor_util.BalanceTable_GetEntry(st.EscrowTable(), minerAddr)
 }
 
 func _getStorageFaultSlashPledgePercent(faultType sector.StorageFaultType) int {

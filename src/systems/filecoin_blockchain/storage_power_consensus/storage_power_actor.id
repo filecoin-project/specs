@@ -27,18 +27,15 @@ type StoragePowerActorState struct {
     _getActivePowerForConsensus() block.StoragePower
     _slashPledgeCollateral(address addr.Address, amount actor.TokenAmount) actor.TokenAmount
 
-    _getPowerTotalForMiner(minerAddr addr.Address) (power block.StoragePower, ok bool)
+    _getPowerTotalForMiner(minerAddr addr.Address) (
+        activePower    block.StoragePower
+        inactivePower  block.StoragePower
+        ok             bool
+    )
+    _getCurrPledgeForMiner(minerAddr addr.Address) (currPledge actor.TokenAmount, ok bool)
     _getTotalPower() block.StoragePower
-    _getPledgeCollateralReq(power block.StoragePower) actor.TokenAmount
-    _getPledgeCollateralReqForMiner(minerAddr addr.Address) actor.TokenAmount
     _selectMinersToSurprise(challengeCount int, randomness util.Randomness) [addr.Address]
-    _getAffectedPledge(
-        minerID        addr.Address
-        affectedPower  block.StoragePower
-    ) actor.TokenAmount
-
     _getStorageFaultSlashPledgePercent(faultType sector.StorageFaultType) int
-    _rtGetPowerEntryOrAbort(rt Runtime, minerID addr.Address) PowerTableEntry
 }
 
 type StoragePowerActorCode struct {
@@ -71,4 +68,7 @@ type StoragePowerActorCode struct {
     )
 
     Surprise(rt Runtime, ticket block.Ticket) [addr.Address]
+
+    _rtGetPowerEntryOrAbort(rt Runtime, minerID addr.Address) PowerTableEntry
+    _rtGetPledgeCollateralReqForMinerOrAbort(rt Runtime, minerAddr addr.Address) actor.TokenAmount
 }

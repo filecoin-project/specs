@@ -82,4 +82,11 @@ type Indices struct {
         minerActiveStoragePower  block.StoragePower
         minerPledgeCollateral    actor.TokenAmount
     ) actor.TokenAmount
+
+    BlockReward_GetPledgeSlashForStorageFault(
+        affectedPower     block.StoragePower
+        newActivePower    block.StoragePower
+        newInactivePower  block.StoragePower
+        currPledge        actor.TokenAmount
+    ) actor.TokenAmount
 }
