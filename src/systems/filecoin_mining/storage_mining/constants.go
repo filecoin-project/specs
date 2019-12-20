@@ -12,13 +12,17 @@ const POST_CHALLENGE_TIME = block.ChainEpoch(1)               // placeholder
 // sets the average frequency
 const PROVING_PERIOD = block.ChainEpoch(2) // placeholder, 2 days
 // how long after a POST challenge before a miner can get challenged again
-const SUPRISE_NO_CHALLENGE_PERIOD = block.ChainEpoch(0) // placeholder, 2 hours
+const SURPRISE_NO_CHALLENGE_PERIOD = block.ChainEpoch(0) // placeholder, 2 hours
 // how many sectors should be challenged in surprise post (if miner has fewer, will get dup challenges)
 const SURPRISE_CHALLENGE_COUNT = 200 // placeholder
 // how long miner has to respond to the challenge before it expires
 const CHALLENGE_DURATION = block.ChainEpoch(0) // placeholder, 2 hours
 // number of detected faults before a miner's sectors are all terminated
 const MAX_CONSECUTIVE_FAULTS = 3
+
+// Time between when a temporary sector fault is declared, and when it becomes
+// effective for purposes of reducing the active proving set for PoSts.
+const DECLARED_FAULT_EFFECTIVE_DELAY = block.ChainEpoch(20) // placeholder
 
 const EPOST_SAMPLE_RATE_NUM = 1    // placeholder
 const EPOST_SAMPLE_RATE_DENOM = 25 // placeholder

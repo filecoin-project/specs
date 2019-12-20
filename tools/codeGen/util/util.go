@@ -53,8 +53,39 @@ func BigFromUint64(x uint64) *BigInt {
 	return big.NewInt(0)
 }
 
-// Indirection to prevent the compiler from ignoring unreachable code
+func BigFromInt(int) BigInt {
+	IMPL_FINISH()
+	panic("")
+}
+
+func BigFromUInt(uint) BigInt {
+	IMPL_FINISH()
+	panic("")
+}
+
+func Serialize_Int(int) Serialization {
+	IMPL_FINISH()
+	panic("")
+}
+
+func Serialize_BigInt(BigInt) Serialization {
+	IMPL_FINISH()
+	panic("")
+}
+
+func Deserialize_BigInt(Serialization) (ret BigInt, ok bool) {
+	IMPL_FINISH()
+	panic("")
+}
+
+func BigInt_Add(BigInt, BigInt) BigInt {
+	IMPL_FINISH()
+	panic("")
+}
+
+// Indicating behavior not yet specified, and may require other spec changes.
 func TODO() {
+	// Indirection to prevent the compiler from ignoring unreachable code
 	panic("TODO")
 }
 

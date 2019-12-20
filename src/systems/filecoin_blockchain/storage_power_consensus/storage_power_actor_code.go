@@ -124,20 +124,21 @@ func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime) {
 	UpdateRelease(rt, h, st)
 }
 
-func (a *StoragePowerActorCode_I) RegisterSectorExpiryCheck(
-	rt Runtime, sector sector.SectorNumber, checkEpoch block.ChainEpoch) {
+func (a *StoragePowerActorCode_I) OnMinerSectorPreCommit(
+	rt Runtime, sectorNumber sector.SectorNumber, sectorExpiration block.ChainEpoch) {
 
-	minerAddr := rt.ImmediateCaller()
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
-
-	h, st := a.State(rt)
-
-	if _, found := st.CachedSectorExpiryEvents()[checkEpoch]; !found {
-		st.CachedPoStChallengeExpiryEvents()[checkEpoch] = actor_util.AddrSetHAMT_Empty()
+	expireCheckEpochs := []block.ChainEpoch{
+		rt.CurrEpoch() + sector.MAX_PROVE_COMMIT_SECTOR_EPOCH + 1,
 	}
-	st.CachedPoStChallengeExpiryEvents()[checkEpoch][minerAddr] = true
 
-	UpdateRelease(rt, h, st)
+	if sectorExpiration > rt.CurrEpoch() {
+		// Note: sector expiration may be ChainEpoch(0), in the case of committed capacity.
+		expireCheckEpochs = append(expireCheckEpochs, sectorExpiration)
+	}
+
+	for _, expireCheckEpoch := range expireCheckEpochs {
+		a._rtEnqueueSectorExpiryCheck(rt, sectorNumber, expireCheckEpoch)
+	}
 }
 
 func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) {
@@ -190,33 +191,34 @@ func (a *StoragePowerActorCode_I) SlashPledgeForStorageFault(rt Runtime, affecte
 
 }
 
-// @param PowerReport with ActivePower and InactivePower
-// update miner power based on the power report
-func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerReport) {
+func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime) {
 
-	minerAddr := rt.ImmediateCaller()
-
-	// caller verification
+	// TODO: update
 	TODO()
 
-	powerEntry := a._rtGetPowerEntryOrAbort(rt, minerAddr)
+	// minerAddr := rt.ImmediateCaller()
 
-	h, st := a.State(rt)
+	// // caller verification
+	// TODO()
 
-	// keep track of miners larger than minimum miner size before updating the PT
-	MIN_MINER_SIZE_STOR := block.StoragePower(0) // TODO: pull in from consts
-	if powerEntry.ActivePower() >= MIN_MINER_SIZE_STOR && report.ActivePower() < MIN_MINER_SIZE_STOR {
-		st.Impl()._minersLargerThanMin_ -= 1
-	}
-	if powerEntry.ActivePower() < MIN_MINER_SIZE_STOR && report.ActivePower() >= MIN_MINER_SIZE_STOR {
-		st.Impl()._minersLargerThanMin_ += 1
-	}
+	// powerEntry := a._rtGetPowerEntryOrAbort(rt, minerAddr)
 
-	powerEntry.Impl().ActivePower_ = report.ActivePower()
-	powerEntry.Impl().InactivePower_ = report.InactivePower()
-	st.Impl().PowerTable_[minerAddr] = powerEntry
+	// h, st := a.State(rt)
 
-	UpdateRelease(rt, h, st)
+	// // keep track of miners larger than minimum miner size before updating the PT
+	// MIN_MINER_SIZE_STOR := block.StoragePower(0) // TODO: pull in from consts
+	// if powerEntry.ActivePower() >= MIN_MINER_SIZE_STOR && report.ActivePower() < MIN_MINER_SIZE_STOR {
+	// 	st.Impl()._minersLargerThanMin_ -= 1
+	// }
+	// if powerEntry.ActivePower() < MIN_MINER_SIZE_STOR && report.ActivePower() >= MIN_MINER_SIZE_STOR {
+	// 	st.Impl()._minersLargerThanMin_ += 1
+	// }
+
+	// powerEntry.Impl().ActivePower_ = report.ActivePower()
+	// powerEntry.Impl().InactivePower_ = report.InactivePower()
+	// st.Impl().PowerTable_[minerAddr] = powerEntry
+
+	// UpdateRelease(rt, h, st)
 }
 
 func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr addr.Address, faultType ConsensusFaultType, proof []block.Block) {
@@ -235,16 +237,32 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr a
 // Called by Cron.
 func (a *StoragePowerActorCode_I) OnEpochTickEnd(rt Runtime) {
 	a._rtInitiateNewSurprisePoStChallenges(rt)
-	a._rtProcessSurprisePoStChallengeExpiryEvents(rt)
-	a._rtProcessSectorExpiryEvents(rt)
+	a._rtProcessSurprisePoStChallengeExpiryChecks(rt)
+	a._rtProcessSectorExpiryChecks(rt)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Method utility functions
 ////////////////////////////////////////////////////////////////////////////////
 
+func (a *StoragePowerActorCode_I) _rtEnqueueSectorExpiryCheck(
+	rt Runtime, sector sector.SectorNumber, checkEpoch block.ChainEpoch) {
+
+	minerAddr := rt.ImmediateCaller()
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+
+	h, st := a.State(rt)
+
+	if _, found := st.CachedSectorExpiryChecks()[checkEpoch]; !found {
+		st.CachedPoStChallengeExpiryChecks()[checkEpoch] = actor_util.AddrSetHAMT_Empty()
+	}
+	st.CachedPoStChallengeExpiryChecks()[checkEpoch][minerAddr] = true
+
+	UpdateRelease(rt, h, st)
+}
+
 func (a *StoragePowerActorCode_I) _rtInitiateNewSurprisePoStChallenges(rt Runtime) {
-	PROVING_PERIOD := 0 // defined in storage_mining, TODO: move constants somewhere else
+	var PROVING_PERIOD block.ChainEpoch = 0 // defined in storage_mining, TODO: move constants somewhere else
 
 	h, st := a.State(rt)
 
@@ -254,15 +272,13 @@ func (a *StoragePowerActorCode_I) _rtInitiateNewSurprisePoStChallenges(rt Runtim
 	IMPL_FINISH() // BigInt arithmetic (not floating-point)
 	challengeCount := math.Ceil(float64(len(st.PowerTable())) / float64(PROVING_PERIOD))
 	surprisedMiners := st._selectMinersToSurprise(int(challengeCount), randomness)
-
-	IMPL_TODO()
-	var expiryEpoch block.ChainEpoch
+	expiryEpoch := rt.CurrEpoch() + PROVING_PERIOD
 
 	for _, surprisedMiner := range surprisedMiners {
-		if _, found := st.CachedPoStChallengeExpiryEvents()[expiryEpoch]; !found {
-			st.CachedPoStChallengeExpiryEvents()[expiryEpoch] = actor_util.AddrSetHAMT_Empty()
+		if _, found := st.CachedPoStChallengeExpiryChecks()[expiryEpoch]; !found {
+			st.CachedPoStChallengeExpiryChecks()[expiryEpoch] = actor_util.AddrSetHAMT_Empty()
 		}
-		st.CachedPoStChallengeExpiryEvents()[expiryEpoch][surprisedMiner] = true
+		st.CachedPoStChallengeExpiryChecks()[expiryEpoch][surprisedMiner] = true
 	}
 
 	UpdateRelease(rt, h, st)
@@ -270,18 +286,18 @@ func (a *StoragePowerActorCode_I) _rtInitiateNewSurprisePoStChallenges(rt Runtim
 	for _, addr := range surprisedMiners {
 		rt.Send(
 			addr,
-			ai.Method_StorageMinerActor_SurprisePoStChallenge,
+			ai.Method_StorageMinerActor_OnSurprisePoStChallenge,
 			[]util.Serialization{},
 			actor.TokenAmount(0))
 	}
 }
 
-func (a *StoragePowerActorCode_I) _rtProcessSurprisePoStChallengeExpiryEvents(rt Runtime) {
+func (a *StoragePowerActorCode_I) _rtProcessSurprisePoStChallengeExpiryChecks(rt Runtime) {
 	epoch := rt.CurrEpoch()
 
 	h, st := a.State(rt)
 
-	checkMiners, found := st.CachedPoStChallengeExpiryEvents()[epoch]
+	checkMiners, found := st.CachedPoStChallengeExpiryChecks()[epoch]
 	if !found {
 		return
 	}
@@ -289,35 +305,35 @@ func (a *StoragePowerActorCode_I) _rtProcessSurprisePoStChallengeExpiryEvents(rt
 	for checkMiner := range checkMiners {
 		rt.Send(
 			checkMiner,
-			ai.Method_StorageMinerActor_UpdateMinerSurprisePoStState,
+			ai.Method_StorageMinerActor_OnSurprisePoStExpiryCheck,
 			[]util.Serialization{},
 			actor.TokenAmount(0))
 	}
 
-	delete(st.CachedPoStChallengeExpiryEvents(), epoch)
+	delete(st.CachedPoStChallengeExpiryChecks(), epoch)
 
 	UpdateRelease(rt, h, st)
 }
 
-func (a *StoragePowerActorCode_I) _rtProcessSectorExpiryEvents(rt Runtime) {
+func (a *StoragePowerActorCode_I) _rtProcessSectorExpiryChecks(rt Runtime) {
 	epoch := rt.CurrEpoch()
 
 	h, st := a.State(rt)
 
-	sectorDescs, found := st.CachedSectorExpiryEvents()[epoch]
+	sectorDescs, found := st.CachedSectorExpiryChecks()[epoch]
 	if !found {
 		Release(rt, h, st)
 		return
 	}
 
-	delete(st.CachedSectorExpiryEvents(), epoch)
+	delete(st.CachedSectorExpiryChecks(), epoch)
 
 	UpdateRelease(rt, h, st)
 
 	for sectorDesc := range sectorDescs {
 		rt.Send(
 			sectorDesc.MinerAddr(),
-			ai.Method_StorageMinerActor_UpdateSectorState,
+			ai.Method_StorageMinerActor_OnSectorExpiryCheck,
 			[]util.Serialization{
 				sector.Serialize_SectorNumber(sectorDesc.SectorNumber()),
 			},

@@ -1,5 +1,6 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
@@ -20,8 +21,25 @@ type DealIDQueue struct {
 type AddrSetHAMT {addr.Address: bool}
 
 type GlobalSectorDesc struct {
-    MinerAddr addr.Address
-    SectorNumber sector.SectorNumber
+    MinerAddr     addr.Address
+    SectorNumber  sector.SectorNumber
 }
 
 type GlobalSectorDescSetHAMT {GlobalSectorDesc: bool}
+
+type SectorStorageWeight struct {
+    SectorSize  sector.SectorSize
+    Duration    block.ChainEpoch
+    DealWeight  BigInt
+}
+
+type SectorTemporaryFaultEvent struct {
+    Weight    SectorStorageWeight
+    Duration  block.ChainEpoch
+}
+
+type SectorTerminationType enum {
+    NormalExpiration
+    UserTermination
+    SurprisePoStFailure
+}

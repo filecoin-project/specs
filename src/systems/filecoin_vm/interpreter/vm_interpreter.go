@@ -2,10 +2,10 @@ package interpreter
 
 import (
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
-	storage_mining "github.com/filecoin-project/specs/systems/filecoin_mining/storage_mining"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
+	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
@@ -88,7 +88,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 	inTree st.StateTree, message msg.UnsignedMessage, onChainMessageSize int, minerAddr addr.Address) (
 	retTree st.StateTree, retReceipt vmr.MessageReceipt, retMinerPenalty actor.TokenAmount) {
 
-	minerOwner := storage_mining.GetMinerOwnerAddress_Assert(inTree, minerAddr)
+	minerOwner := actor_util.GetMinerOwnerAddress_Assert(inTree, minerAddr)
 
 	vmiGasRemaining := message.GasLimit()
 	vmiGasUsed := msg.GasAmount_Zero()
@@ -301,7 +301,7 @@ func _makeElectionPoStMessage(state st.StateTree, minerActorAddr addr.Address) m
 	return &msg.UnsignedMessage_I{
 		From_:       addr.SystemActorAddr,
 		To_:         minerActorAddr,
-		Method_:     ai.Method_StorageMinerActor_ProcessVerifiedElectionPoSt,
+		Method_:     ai.Method_StorageMinerActor_OnVerifiedElectionPoSt,
 		Params_:     params,
 		CallSeqNum_: sysActor.CallSeqNum(),
 		Value_:      0,

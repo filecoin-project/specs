@@ -4,6 +4,7 @@ import (
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -167,4 +168,22 @@ func (x *DealIDQueue_I) Dequeue() (dealID deal.DealID, ok bool) {
 		ok = true
 		return
 	}
+}
+
+// Get the owner account address associated to a given miner actor.
+func GetMinerOwnerAddress(tree st.StateTree, minerAddr addr.Address) (addr.Address, error) {
+	IMPL_FINISH()
+	panic("")
+}
+
+// Get the owner account address associated to a given miner actor.
+func GetMinerOwnerAddress_Assert(tree st.StateTree, a addr.Address) addr.Address {
+	ret, err := GetMinerOwnerAddress(tree, a)
+	Assert(err == nil)
+	return ret
+}
+
+func Serialize_SectorTemporaryFaultEvent_Array(x []SectorTemporaryFaultEvent) Serialization {
+	IMPL_FINISH()
+	panic("")
 }

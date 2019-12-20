@@ -10,11 +10,6 @@ type PowerTableEntry struct {
     InactivePower  block.StoragePower
 }
 
-type PowerReport struct {
-    ActivePower    block.StoragePower  // set value
-    InactivePower  block.StoragePower  // set value
-}
-
 // type PowerTableHAMT {actor.ActorID: PowerTableEntry}
 type PowerTableHAMT {addr.Address: PowerTableEntry}  // TODO: convert address to ActorID
 
@@ -22,13 +17,13 @@ type MinerEventsHAMT {block.ChainEpoch: actor_util.AddrSetHAMT}
 type SectorEventsHAMT {block.ChainEpoch: actor_util.GlobalSectorDescSetHAMT}
 
 type StoragePowerActorState struct {
-    PowerTable            PowerTableHAMT
-    EscrowTable           actor_util.BalanceTableHAMT
-    _minersLargerThanMin  util.UVarint
+    PowerTable                       PowerTableHAMT
+    EscrowTable                      actor_util.BalanceTableHAMT
+    _minersLargerThanMin             util.UVarint
 
     // Metadata cached for efficient processing of sector/challenge expirations.
-    CachedPoStChallengeExpiryEvents MinerEventsHAMT
-    CachedSectorExpiryEvents SectorEventsHAMT
+    CachedPoStChallengeExpiryChecks  MinerEventsHAMT
+    CachedSectorExpiryChecks         SectorEventsHAMT
 
     ActivePowerMeetsConsensusMinimum(minPower block.StoragePower) bool
     _getActivePowerForConsensus() block.StoragePower
@@ -60,7 +55,6 @@ type StoragePowerActorCode struct {
 
     RemoveStorageMiner(rt Runtime, addr addr.Address)
     EnsurePledgeCollateralSatisfied(rt Runtime)
-    ProcessPowerReport(rt Runtime, report PowerReport)
     SlashPledgeForStorageFault(
         rt             Runtime
         affectedPower  block.StoragePower

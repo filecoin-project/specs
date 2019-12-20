@@ -1,5 +1,6 @@
 package storage_mining
 
+/*
 // SectorState is an enum of
 // SectorCommitted, SectorRecovering, SectorActive, SectorFailing, SectorCleared
 // FaultCount is only relevant for SectorRecovering and SectorFailing.
@@ -58,3 +59,5 @@ func SectorCleared() SectorState {
 		FaultCount:  0,
 	}
 }
+
+*/

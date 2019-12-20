@@ -131,3 +131,11 @@ func (inds *Indices_I) BlockReward_GetPledgeSlashForStorageFault(
 	PARAM_FINISH()
 	panic("")
 }
+
+func (inds *Indices_I) StorageMining_PreCommitDeposit(
+	sectorSize sector.SectorSize,
+	expirationEpoch block.ChainEpoch,
+) actor.TokenAmount {
+	PARAM_FINISH()
+	panic("")
+}

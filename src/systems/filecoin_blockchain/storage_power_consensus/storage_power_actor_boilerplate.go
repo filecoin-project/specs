@@ -9,6 +9,8 @@ import (
 )
 
 type BalanceTableHAMT = actor_util.BalanceTableHAMT
+type SectorStorageWeight = actor_util.SectorStorageWeight
+type SectorTerminationType = actor_util.SectorTerminationType
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate

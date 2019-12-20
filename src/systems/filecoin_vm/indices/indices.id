@@ -89,4 +89,9 @@ type Indices struct {
         newInactivePower  block.StoragePower
         currPledge        actor.TokenAmount
     ) actor.TokenAmount
+
+    StorageMining_PreCommitDeposit(
+        sectorSize       sector.SectorSize
+        expirationEpoch  block.ChainEpoch
+    ) actor.TokenAmount
 }

@@ -1,5 +1,6 @@
 package storage_mining
 
+/*
 import (
 	"math"
 
@@ -55,3 +56,4 @@ func (cs *ChallengeStatus_I) CanBeElected(currEpoch block.ChainEpoch) bool {
 func (cs *ChallengeStatus_I) ShouldChallenge(currEpoch block.ChainEpoch) bool {
 	return !cs.IsChallenged() && currEpoch > (cs._lastPoStSuccessEpoch()+SUPRISE_NO_CHALLENGE_PERIOD)
 }
+*/

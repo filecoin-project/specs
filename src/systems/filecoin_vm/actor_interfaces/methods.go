@@ -9,38 +9,65 @@ const (
 )
 
 const (
-	Method_StorageMinerActor_ProcessVerifiedElectionPoSt = actor.MethodPlaceholder + iota
-	Method_StorageMinerActor_SurprisePoStChallenge
-	Method_StorageMinerActor_SurprisePoStSubmitResponse
-	Method_StorageMinerActor_UpdateMinerSurprisePoStState
-	Method_StorageMinerActor_UpdateSectorState
-	Method_StorageMinerActor_PreCommitSector
+	// User-callable methods
+	Method_StorageMinerActor_PreCommitSector = actor.MethodPlaceholder + iota
 	Method_StorageMinerActor_ProveCommitSector
-	Method_StorageMinerActor_DeclareFaults
-	Method_StorageMinerActor_RecoverFaults
+	Method_StorageMinerActor_DeclareTemporaryFaults
+	Method_StorageMinerActor_RecoverTemporaryFaults
+	Method_StorageMinerActor_TerminateSector
+	Method_StorageMinerActor_SubmitSurprisePoStResponse
+
+	// Internal mechanism events
+	Method_StorageMinerActor_OnVerifiedElectionPoSt
+	Method_StorageMinerActor_OnSurprisePoStChallenge
+	Method_StorageMinerActor_OnSurprisePoStExpiryCheck
+	Method_StorageMinerActor_OnSectorExpiryCheck
+
+	// State queries
+	Method_StorageMinerActor_GetPoStState
 	Method_StorageMinerActor_GetOwnerAddr
 	Method_StorageMinerActor_GetWorkerAddr
-	Method_StorageMinerActor_GetWorkerKey
+	Method_StorageMinerActor_GetWorkerVRFKey
 )
 
 const (
+	// Cron tick method
 	Method_StorageMarketActor_OnEpochTickEnd = actor.MethodPlaceholder + iota
+
+	// User-callable methods
 	Method_StorageMarketActor_AddBalance
 	Method_StorageMarketActor_WithdrawBalance
 	Method_StorageMarketActor_PublishStorageDeals
-	Method_StorageMarketActor_VerifyDealsOnSectorPreCommit
-	Method_StorageMarketActor_UpdateDealsOnSectorProveCommit
+
+	// Internal mechanism events
+	Method_StorageMarketActor_OnMinerSectorPreCommit_VerifyDealsOrAbort
+	Method_StorageMarketActor_OnMinerSectorProveCommit_VerifyDealsOrAbort
+	Method_StorageMarketActor_OnMinerSectorsTerminate
+
+	// State queries
 	Method_StorageMarketActor_GetPieceInfosForDealIDs
 	Method_StorageMarketActor_GetWeightForDealSet
-	Method_StorageMarketActor_TerminateDealsOnSlashProviderSector
 )
 
 const (
+	// Cron tick method
 	Method_StoragePowerActor_OnEpochTickEnd = actor.MethodPlaceholder + iota
+
+	// User-callable methods
 	Method_StoragePowerActor_AddBalance
-	Method_StoragePowerActor_RegisterSectorExpiryCheck
-	Method_StoragePowerActor_ProcessPowerReport
-	Method_StoragePowerActor_ProcessFaultReport
-	Method_StoragePowerActor_SlashPledgeForStorageFault
-	Method_StoragePowerActor_EnsurePledgeCollateralSatisfied
+	Method_StoragePowerActor_WithdrawBalance
+	Method_StoragePowerActor_CreateMiner
+	Method_StoragePowerActor_DeleteMiner
+
+	// Internal mechanism events
+	Method_StoragePowerActor_OnSectorProveCommitted
+	Method_StoragePowerActor_OnSectorTerminated
+	Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveBegin
+	Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveEnd
+	Method_StoragePowerActor_OnMinerSurprisePoStSuccess
+	Method_StoragePowerActor_OnMinerSurprisePoStFailure
+
+	// State queries
+	Method_StoragePowerActor_GetMinerConsensusPower
+	Method_StoragePowerActor_GetMinerUnmetPledgeCollateralRequirement
 )
