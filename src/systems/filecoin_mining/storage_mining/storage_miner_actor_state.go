@@ -5,24 +5,10 @@ import (
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
 )
 
 var Assert = util.Assert
-
-// Get the owner account address associated to a given miner actor.
-func GetMinerOwnerAddress(tree st.StateTree, minerAddr addr.Address) (addr.Address, error) {
-	panic("TODO")
-}
-
-// Get the owner account address associated to a given miner actor.
-func GetMinerOwnerAddress_Assert(tree st.StateTree, a addr.Address) addr.Address {
-	ret, err := GetMinerOwnerAddress(tree, a)
-	Assert(err == nil)
-	return ret
-}
 
 func (st *StorageMinerActorState_I) _isChallenged() bool {
 	return st.ChallengeStatus().IsChallenged()
@@ -215,6 +201,11 @@ func (st *StorageMinerActorState_I) _getSectorWeight(sectorNo sector.SectorNumbe
 		return block.SectorWeight(0), false
 	}
 	return sectorInfo.SectorWeight(), true
+}
+
+func (st *StorageMinerActorState_I) _getSectorPower(sectorNo sector.SectorNumber) (power block.StoragePower, ok bool) {
+	TODO()
+	panic("")
 }
 
 func (st *StorageMinerActorState_I) _getSectorDealIDs(sectorNo sector.SectorNumber) (dealIDs deal.DealIDs, ok bool) {
