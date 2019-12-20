@@ -53,6 +53,16 @@ func BigFromUint64(x uint64) *BigInt {
 	return big.NewInt(0)
 }
 
+func IsBLS(x Bytes) bool {
+	IMPL_FINISH()
+	return false
+}
+
+func IsSECP(x Bytes) bool {
+	IMPL_FINISH()
+	return false
+}
+
 // Indirection to prevent the compiler from ignoring unreachable code
 func TODO() {
 	panic("TODO")

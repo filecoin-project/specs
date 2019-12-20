@@ -263,7 +263,7 @@ func _withTransferFundsAssert(tree st.StateTree, from addr.Address, to addr.Addr
 	}
 }
 
-func _gasToFIL(gas msg.GasAmount, price msg.GasPrice) actor.TokenAmount {
+func _gasToFIL(gas msg.GasAmount, price actor.TokenAmount) actor.TokenAmount {
 	IMPL_FINISH()
 	panic("") // BigInt arithmetic
 	// return actor.TokenAmount(util.UVarint(gas) * util.UVarint(price))

@@ -18,20 +18,6 @@ import (
 // Actor methods
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *StorageMinerActorCode_I) GetOwnerKey(rt Runtime) filcrypto.VRFPublicKey {
-	h, st := a.State(rt)
-	ret := st.Info().OwnerKey()
-	Release(rt, h, st)
-	return ret
-}
-
-func (a *StorageMinerActorCode_I) GetWorkerKey(rt Runtime) filcrypto.VRFPublicKey {
-	h, st := a.State(rt)
-	ret := st.Info().WorkerKey()
-	Release(rt, h, st)
-	return ret
-}
-
 // Called by the cron actor at every tick.
 func (a *StorageMinerActorCode_I) OnCronTickEnd(rt Runtime) InvocOutput {
 	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
@@ -65,8 +51,7 @@ func (a *StorageMinerActorCode_I) NotifyOfSurprisePoStChallenge(rt Runtime) Invo
 	return rt.SuccessReturn()
 }
 
-// called by verifier to update miner state on successful surprise post
-// after it has been verified in the storage_mining_subsystem
+// called by verifier to update miner state on surprise post submission
 func (a *StorageMinerActorCode_I) ProcessSurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
 	TODO() // TODO: validate caller
 
@@ -568,8 +553,10 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoSt(rt Runtime, onChainInfo 
 	}
 
 	// 3. Verify the partialTicket values
-	if !a._rtVerifySurprisePoStMeetsTargetReq(rt) {
-		rt.AbortStateMsg("Invalid Surprise PoSt. Tickets do not meet target.")
+	for _, candidate := range onChainInfo.Candidates() {
+		if !st._verifySurprisePoStMeetsTargetReq(candidate) {
+			rt.AbortStateMsg("Invalid Surprise PoSt. Tickets do not meet target.")
+		}
 	}
 
 	// verify the partialTickets themselves
@@ -626,12 +613,6 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoSt(rt Runtime, onChainInfo 
 
 	// 6. Verify the PoSt Proof
 	return sdr.VerifySurprisePoSt(&pvInfo)
-}
-
-// todo: define target
-func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStMeetsTargetReq(rt Runtime) bool {
-	util.TODO()
-	return false
 }
 
 func (a *StorageMinerActorCode_I) _slashDealsForSectorTerminatedFault(rt Runtime, sectorNumbers []sector.SectorNumber) {

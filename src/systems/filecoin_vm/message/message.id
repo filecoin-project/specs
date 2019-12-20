@@ -14,9 +14,6 @@ type GasAmount struct {
     Scale(int) GasAmount
 }
 
-// GasPrice is a Gas-to-FIL cost
-type GasPrice actor.TokenAmount
-
 type UnsignedMessage struct {
     // Address of the receiving actor.
     To          addr.Address
@@ -33,7 +30,8 @@ type UnsignedMessage struct {
     /// Serialized parameters to the method (if method is non-zero).
     Params      actor.MethodParams
 
-    GasPrice
+    // GasPrice is a Gas-to-FIL cost
+    GasPrice    actor.TokenAmount
     GasLimit    GasAmount
 }  // representation tuple
 

@@ -26,7 +26,8 @@ const (
 // Storage Power Consensus Subsystem
 
 func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block block.Block_I) error {
-	panic("")
+	util.IMPL_FINISH()
+	return nil
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket block.Ticket, pk filcrypto.VRFPublicKey, minerActorAddr addr.Address) bool {
@@ -37,10 +38,6 @@ func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket block.Ticket,
 
 func (spc *StoragePowerConsensusSubsystem_I) ComputeChainWeight(tipset chain.Tipset) block.ChainWeight {
 	return spc.ec().ComputeChainWeight(tipset)
-}
-
-func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg string) StoragePowerConsensusError {
-	panic("TODO")
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree stateTree.StateTree, partialTicket sector.PartialTicket, sectorUtilization block.StoragePower, numSectors util.UVarint) bool {
@@ -96,13 +93,6 @@ func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallengeRand(chain chain.Ch
 	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_POST)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetFinality() block.ChainEpoch {
-	panic("")
-	// return FINALITY
-}
-
-func (spc *StoragePowerConsensusSubsystem_I) FinalizedEpoch() block.ChainEpoch {
-	panic("")
-	// currentEpoch := rt.HeadEpoch()
-	// return currentEpoch - spc.GetFinality()
+func (spc *StoragePowerConsensusSubsystem_I) GetFinalizedEpoch(currentEpoch block.ChainEpoch) block.ChainEpoch {
+	return currentEpoch - FINALITY
 }

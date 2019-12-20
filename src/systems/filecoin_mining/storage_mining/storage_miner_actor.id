@@ -84,8 +84,9 @@ type StorageMinerActorState struct {
     // contains mostly static info about this miner
     Info                    &MinerInfo
 
+    _verifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool
     // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
-    _isChallenged()         bool
+    _isChallenged() bool
     _canBeElected(currEpoch block.ChainEpoch) bool
     _challengeHasExpired(currEpoch block.ChainEpoch) bool
     _shouldChallenge(
@@ -125,7 +126,6 @@ type StorageMinerActorCode struct {
 
     _checkSurprisePoStSubmissionHappened(rt Runtime)
     _rtVerifySurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) bool
-    _rtVerifySurprisePoStMeetsTargetReq(rt Runtime) bool
     _rtVerifySeal(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
     _rtAbortIfSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber)
 
@@ -153,14 +153,12 @@ type MinerInfo struct {
     // - Income and returned collateral are paid to this address.
     // - This address is also allowed to change the worker address for the miner.
     Owner                   address.Address
-    OwnerKey                filcrypto.VRFPublicKey
 
     // Worker account for this miner.
     // This will be the key that is used to sign blocks created by this miner, and
     // sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
     // other day to day miner activities.
     Worker                  address.Address
-    WorkerKey               filcrypto.VRFPublicKey
 
     // Libp2p identity that should be used when connecting to this miner.
     PeerId                  libp2p.PeerID

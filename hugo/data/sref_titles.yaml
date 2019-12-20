@@ -2,7 +2,6 @@
 crypto_signatures: "Signatures"
 randomness: "Randomness"
 data_structures: "Data Structures"
-ds_address: "Address"
 app_address: "Address"
 vrf: "VRF"
 
@@ -36,6 +35,8 @@ consensus_faults: "Consensus Faults"
 chain_sync: "Chain Sync"
 block_validation: "Block Validation"
 
+block_sync: "Block Sync"
+
 ### Message Pool
 message_pool: "Message Pool"
 message_syncer: "Message Syncer"
@@ -52,6 +53,7 @@ deals: "Deals"
 deal_states: "Deal States"
 
 # mining
+mining_cycle: "Mining Cycle"
 
 ### Storage Mining
 sector: "Sector"

@@ -58,7 +58,7 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Add
 }
 
 func (a *StoragePowerActorCode_I) CreateStorageMiner(
-	rt Runtime, workerAddr addr.Address, peerId libp2p.PeerID) addr.Address {
+	rt Runtime, ownerAddr addr.Address, workerAddr addr.Address, collateral actor.TokenAmount, peerId libp2p.PeerID) addr.Address {
 
 	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
 

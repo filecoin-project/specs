@@ -124,7 +124,7 @@ const (
 
 ### Protocol 2: Actor
 
-**Protocol 2** addresses representing an Actor. The payload field contains the [Blake2b 160](https://blake2.net/) hash of meaningful data produced as a result of creating the actor.
+**Protocol 2** addresses representing an Actor. The payload field contains the SHA256 hash of meaningful data produced as a result of creating the actor.
 
 **Bytes**
 
@@ -132,7 +132,7 @@ const (
 |----------|---------------------|
 | protocol |        payload      |
 |----------|---------------------|
-|    2     | blake2b-160(Random) |
+|    2     | 	SHA256(Random) 	 |
 ```
 
 **String**
@@ -141,7 +141,7 @@ const (
 |------------|----------|-----------------------|----------|
 |  network   | protocol |         payload       | checksum |
 |------------|----------|-----------------------|----------|
-| 'f' or 't' |    '2'   |  blake2b-160(Random)  |  4 bytes |
+| 'f' or 't' |    '2'   |  	SHA256(Random)  	|  4 bytes |
                   base32[..................................]
 ```
 
