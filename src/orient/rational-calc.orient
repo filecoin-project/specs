@@ -403,15 +403,15 @@ ProofOfReplication:
       encoding_window_time_parallel = encoding_window_time / rig_cores
 
     Fastest:
-      describe(encoding_time_fastcpu, "Time to encode with the fastest stock CPU", secs)
-      describe(encoding_time_mins_fastcpu, "Time to encode with the fastest stock CPU", mins)
-      describe(kdf_time_fastcpu, "Time to do a 32 bytes hash on the fastest stock CPU", secs)
-      encoding_time_fastcpu = windows * (window_nodes * ((1 + graph_parents) * kdf_time_fastcpu) * stacked_layers)
+      // describe(encoding_time_fastcpu, "Time to encode with the fastest stock CPU", secs)
+      // describe(encoding_time_mins_fastcpu, "Time to encode with the fastest stock CPU", mins)
+      // describe(kdf_time_fastcpu, "Time to do a 32 bytes hash on the fastest stock CPU", secs)
+      // encoding_time_fastcpu = windows * (window_nodes * ((1 + graph_parents) * kdf_time_fastcpu) * stacked_layers)
 
-      encoding_time_mins_fastcpu = encoding_time_fastcpu / secs_in_min
+      // encoding_time_mins_fastcpu = encoding_time_fastcpu / secs_in_min
 
     Asic:
-      encoding_time_asic = encoding_time_fastcpu / hashing_amax
+      encoding_time_asic = encoding_time / hashing_amax
       encoding_window_time_asic = encoding_window_time / hashing_amax
       encoding_window_time_parallel_asic = encoding_window_time_parallel / hashing_amax
 
