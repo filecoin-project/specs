@@ -29,13 +29,12 @@ var TODO = util.TODO
 
 func (a *StoragePowerActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, StoragePowerActorState) {
 	h := rt.AcquireState()
-	stateCID := h.Take()
-	stateBytes := rt.IpldGet(ipld.CID(stateCID))
-	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
-		rt.AbortAPI("IPLD lookup error")
+	stateCID := ipld.CID(h.Take())
+	var state StoragePowerActorState_I
+	if !rt.IpldGet(stateCID, &state) {
+		rt.AbortAPI("state not found")
 	}
-	state := DeserializeState(stateBytes.As_Bytes())
-	return h, state
+	return h, &state
 }
 func Release(rt Runtime, h vmr.ActorStateHandle, st StoragePowerActorState) {
 	checkCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))

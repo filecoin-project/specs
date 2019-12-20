@@ -26,7 +26,6 @@ func (a *StorageMinerActorCode_I) OnCronTickEnd(rt Runtime) InvocOutput {
 	a._checkSurprisePoStSubmissionHappened(rt)
 
 	return rt.SuccessReturn()
-
 }
 
 // Surprise PoSt

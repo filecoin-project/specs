@@ -20,22 +20,18 @@ var TODO = util.TODO
 
 func (a *RewardActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, RewardActorState) {
 	h := rt.AcquireState()
-	stateCID := h.Take()
-	stateBytes := rt.IpldGet(ipld.CID(stateCID))
-	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
-		rt.AbortAPI("IPLD lookup error")
+	stateCID := ipld.CID(h.Take())
+	var state RewardActorState_I
+	if !rt.IpldGet(stateCID, &state) {
+		rt.AbortAPI("state not found")
 	}
-	state := DeserializeState(stateBytes.As_Bytes())
-	return h, state
+	return h, &state
 }
 func UpdateReleaseRewardActorState(rt Runtime, h vmr.ActorStateHandle, st RewardActorState) {
 	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
 	h.UpdateRelease(newCID)
 }
 func (st *RewardActorState_I) CID() ipld.CID {
-	panic("TODO")
-}
-func DeserializeState(x Bytes) RewardActorState {
 	panic("TODO")
 }
 

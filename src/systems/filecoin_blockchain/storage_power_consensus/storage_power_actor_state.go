@@ -114,7 +114,7 @@ func (st *StoragePowerActorState_I) GetCurrPledgeForMiner(minerAddr addr.Address
 	return actor_util.BalanceTable_GetEntry(st.EscrowTable(), minerAddr)
 }
 
-func _getStorageFaultSlashPledgePercent(faultType sector.StorageFaultType) int {
+func (st *StoragePowerActorState_I) _getStorageFaultSlashPledgePercent(faultType sector.StorageFaultType) int {
 	PARAM_FINISH() // TODO: instantiate these placeholders
 	panic("")
 
