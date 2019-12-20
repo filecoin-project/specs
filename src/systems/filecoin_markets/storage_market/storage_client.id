@@ -57,6 +57,6 @@ type StorageClient struct {
     // GetPaymentEscrow returns the current funds available for deal payment
     GetPaymentEscrow() (StorageParticipantBalance, error)
 
-    // AddStorageCollateral adds storage collateral
+    // AddPaymentEscrow adds storage collateral
     AddPaymentEscrow(amount actor.TokenAmount) error
 }

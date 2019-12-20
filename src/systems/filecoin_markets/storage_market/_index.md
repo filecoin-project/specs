@@ -25,7 +25,7 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 
 The lifecycle for a deal within the storage market contains distinct phases:
 
-1. **Discovery** - Client identifies miners and determine their current asks
+1. **Discovery** - Client identifies miners and determines their current asks
 2. **Negotiation** - Both parties come to an agreement about the terms of the deal, each party commits funds to the deal, data is transferred
 4. **Publishing** - Deal is published on chain so that it becomes valid
 5. **Handoff** - Once the deal is published, it is handled off the Storage Mining Subsystem, so that it can be added to sector, sealed, and proved so the miner can receive payments. 
@@ -42,9 +42,9 @@ Discovery is the process where a client identifies storage providers (i.e. a min
 
 Discovery involves identifying providers and determining their current `StorageAsk`. The steps are as follows:
 1. A client queries the chain to gain a list of Storage Miner Actors who have registerd as miners with the StoragePowerActor
-2. A client may perform additional queries to each Storage Miner Actor to determine their properies -- worker addresses, sector size, libp2p Multiaddress etc
+2. A client may perform additional queries to each Storage Miner Actor to determine their properties -- worker address, sector size, libp2p Multiaddress etc
 3. Once the client identifies potentially suitable providers, it sends a direct libp2p message using the `Storage Query Protocol` to get each potential provider's current `StorageAsk`.
-4. Miner's respond on the `AskProtocol` with a signed version of their current `StorageAsk`
+4. Miners respond on the `AskProtocol` with a signed version of their current `StorageAsk`
 
 A `StorageAsk` contains all the properties that a client will need to determine if a given provider will meet its needs for storage at this moment. Providers should update their asks frequently to insure the information they are providing to clients is up to date.
 
@@ -54,7 +54,7 @@ Negotiation is how a storage client and a storage provider come to an agreement 
 
 Negotiation begins once a client has discovered a miner whose `StorageAsk` meets their desired criteria.The *recommended* order of operations for negotiating and publishing a deal is as follows:
 
-1. Before sending a proposal to the provider, the `StorageClient` adds funds for a deal, as neccesary, to the `StorageMarketActor` (by calling `AddBalance`)
+1. Before sending a proposal to the provider, the `StorageClient` adds funds for a deal, as necessary, to the `StorageMarketActor` (by calling `AddBalance`)
 2. In order to propose a storage deal, the `StorageClient` then calculates the piece commitment (`CommP`) for the data it intends to store ahead of time. This is neccesary so that the `StorageProvider` can verify the data the `StorageClient` sends to be stored matches the `CommP` in the `StorageDealProposal`. For more detail about the relationship between payloads, pieces, and `CommP` see {{<sref piece>}} and {{<sref filproofs>}}
 3. The `StorageClient` now creates a `StorageDealProposal` and sends the proposal and the CID for the root of the data to be stored to the `StorageProvider` using the `Storage Deal Protocol`
 
@@ -105,13 +105,13 @@ Details about `StorageDealProposal` and `StorageDeal` (which are used in the Sto
 # Protocols
 
 - **Name**: Storage Query Protocol
-- **Protocol ID**: `/fil/storage/ask/1.0.1`
+- **Protocol ID**: `/fil/<network-name>/storage/ask/1.0.1`
 
 Request: CBOR Encoded AskRequest Data Structure
 Response: CBOR Encoded AskResponse Data Structure
 
 - **Name**: Storage Deal Protocol
-- **Protocol ID**: `/fil/storage/mk/1.0.1`
+- **Protocol ID**: `/fil/<network-name>/storage/mk/1.0.1`
 
 Request: CBOR Encoded DealRequest Data Structure
 Response: CBOR Encoded DealResponse Data Structure
