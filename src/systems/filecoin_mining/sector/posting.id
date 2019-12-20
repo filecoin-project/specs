@@ -18,9 +18,10 @@ type PoStType enum {
 // TODO: refactor these types to get rid of the squishy optional fields.
 type PoStVerifyInfo struct {
     PoStCfg
-    Randomness  PoStRandomness
-    CommR       SealedSectorCID
-    OnChain     OnChainPoStVerifyInfo
+    Randomness       PoStRandomness
+    CommR            SealedSectorCID
+    OnChain          OnChainPoStVerifyInfo
+    EligibleSectors  {SectorID: SealedSectorCID}
 }
 
 type PoStCandidate struct {
@@ -42,12 +43,21 @@ type PoStWitness struct {
 }
 
 type PoStProof struct {//<curve, system> {
-    Type        PoStType
-    Candidates  [PoStCandidate]
-    ProofBytes  Bytes
+    Type         PoStType
+    CircuitType  PoStCircuitType
+    Candidates   [PoStCandidate]
+    ProofBytes   Bytes
 }
 
 type PrivatePoStCandidateProof struct {
     Algorithm     SealAlgorithm
     Externalized  Bytes
+}
+
+type PoStCircuitType enum {
+    // Every circuit type ever deployed needs to live here.
+    WinStackedSDRElectionPoSt
+    WinStackedSDRSurprisePoSt
+    StackedDRGElectionPoSt
+    StackedDRGSurprisePoSt
 }

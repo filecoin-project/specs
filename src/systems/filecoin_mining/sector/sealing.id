@@ -104,7 +104,14 @@ type SealProof struct {//<curve, system> {
     ProofBytes  Bytes
 }
 
+type SealCircuitType enum {
+    // Every circuit type ever deployed needs to live here.
+    WinStackedSDR
+    StackedDRG
+}
+
 type SealProofConfig struct {// TODO
+    CircuitType SealCircuitType
 }
 
 // TODO: move into proofs lib

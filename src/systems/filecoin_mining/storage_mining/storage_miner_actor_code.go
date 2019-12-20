@@ -609,6 +609,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoSt(rt Runtime, onChainInfo 
 		OnChain_:    onChainInfo,
 		PoStCfg_:    postCfg,
 		Randomness_: onChainInfo.Randomness(),
+		// EligibleSectors_: FIXME: verification needs these.
 	}
 
 	pv := filproofs.SurprisePoStVerifier(postCfg)

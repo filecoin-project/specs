@@ -755,7 +755,18 @@ func (proof *SDRColumnProof) Verify(root []byte, challenge UInt) bool {
 func (sdr *WinStackedDRG_I) CreateOfflineCircuitProof(proof PrivateOfflineProof, aux sector.ProofAuxTmp) sector.SealProof {
 	// partitions := sdr.Partitions()
 	// publicInputs := GeneratePublicInputs()
+
 	panic("TODO")
+	var bytes []byte
+
+	sealProof := sector.SealProof_I{
+		Config_: &sector.SealProofConfig_I{
+			CircuitType_: sector.SealCircuitType_WinStackedSDR,
+		},
+		ProofBytes_: bytes,
+	}
+
+	return &sealProof
 }
 
 func (sdr *WinStackedDRG_I) _generateOfflineChallenges(sealSeed sector.SealSeed, randomness sector.InteractiveSealRandomness, wrapperChallengeCount WinStackedDRGChallenges, windowChallengeCount WinStackedDRGWindowChallenges) (windowChallenges []UInt, wrapperChallenges []UInt) {
@@ -1015,7 +1026,7 @@ func computePartialTicket(randomness sector.PoStRandomness, sectorID sector.Sect
 
 type PoStCandidatesMap map[sector.SealAlgorithm][]sector.PoStCandidate
 
-func CreatePoStProof(cfg sector.PoStCfg, privateCandidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) (proof sector.PoStProof) {
+func CreatePoStProof(cfg sector.PoStCfg, privateCandidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) []sector.PoStProof {
 	var proofsMap map[sector.SealAlgorithm][]PrivatePostCandidateProof
 
 	for _, proof := range privateCandidateProofs {
@@ -1034,30 +1045,7 @@ func CreatePoStProof(cfg sector.PoStCfg, privateCandidateProofs []PrivatePostCan
 		circuitProofs = append(circuitProofs, circuitProof)
 	}
 
-	return combinePoStCircuitProofs(circuitProofs)
-}
-
-func combinePoStCircuitProofs(proofs []sector.PoStProof) sector.PoStProof {
-	var combinedCandidates []sector.PoStCandidate
-	var combinedBytes []byte
-
-	var postType sector.PoStType
-	if len(proofs) > 0 {
-		postType = proofs[0].Type()
-	}
-	for _, proof := range proofs {
-		// All provided proofs must have same type.
-		util.Assert(postType == proof.Type())
-
-		combinedCandidates = append(combinedCandidates, proof.Candidates()...)
-		combinedBytes = append(combinedBytes, proof.ProofBytes()...)
-	}
-	combinedProof := sector.PoStProof_I{
-		Type_:       postType,
-		Candidates_: combinedCandidates,
-		ProofBytes_: combinedBytes,
-	}
-	return &combinedProof
+	return circuitProofs
 }
 
 type PrivatePoStProof struct {
@@ -1066,6 +1054,7 @@ type PrivatePoStProof struct {
 }
 
 func createPrivatePoStProof(algorithm sector.SealAlgorithm, candidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) PrivatePoStProof {
+
 	return PrivatePoStProof{
 		ChallengeSeed:   challengeSeed,
 		CandidateProofs: candidateProofs,
@@ -1186,6 +1175,24 @@ func createPoStCircuitProof(postCfg sector.PoStCfg, algorithm sector.SealAlgorit
 
 func (sdr *WinStackedDRG_I) _createPoStCircuitProof(postCfg sector.PoStCfg, privateProof PrivatePoStProof) sector.PoStProof {
 	panic("TODO")
+
+	postType := postCfg.Type()
+
+	var circuitType sector.PoStCircuitType
+
+	switch postType {
+	case sector.PoStType_ElectionPoSt:
+		circuitType = sector.PoStCircuitType_WinStackedSDRElectionPoSt
+	case sector.PoStType_SurprisePoSt:
+		circuitType = sector.PoStCircuitType_WinStackedSDRSurprisePoSt
+	}
+
+	postProof := sector.PoStProof_I{
+		Type_:        postCfg.Type(),
+		CircuitType_: circuitType,
+	}
+
+	return &postProof
 }
 
 func (pv *PoStVerifier_I) _verifyPoStProof(sv sector.PoStVerifyInfo) bool {
@@ -1223,7 +1230,7 @@ func GenerateElectionPoStCandidates(cfg sector.PoStCfg, challengeSeed sector.PoS
 	return generatePoStCandidates(cfg, challengeSeed, eligibleSectors, candidateCount, sectorStore)
 }
 
-func CreateElectionPoStProof(cfg sector.PoStCfg, privateCandidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) sector.PoStProof {
+func CreateElectionPoStProof(cfg sector.PoStCfg, privateCandidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) []sector.PoStProof {
 	return CreatePoStProof(cfg, privateCandidateProofs, challengeSeed)
 }
 
@@ -1238,7 +1245,7 @@ func GenerateSurprisePoStCandidates(challengeSeed sector.PoStRandomness, eligibl
 	panic("TODO")
 }
 
-func CreateSurprisePoStProof(cfg sector.PoStCfg, privateCandidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) sector.PoStProof {
+func CreateSurprisePoStProof(cfg sector.PoStCfg, privateCandidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) []sector.PoStProof {
 	return CreatePoStProof(cfg, privateCandidateProofs, challengeSeed)
 }
 
