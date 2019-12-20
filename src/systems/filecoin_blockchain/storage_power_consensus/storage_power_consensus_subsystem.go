@@ -82,5 +82,5 @@ func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallengeRand(chain chain.Ch
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetFinalizedEpoch(currentEpoch block.ChainEpoch) block.ChainEpoch {
-	return currentEpoch - FINALITY
+	return currentEpoch - node_base.FINALITY
 }

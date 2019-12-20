@@ -14,6 +14,10 @@ type MessageSyncer struct {
 	*/
 
     // SubmitMessage is called to send out a set of messages to the rest of the
-    // network. This is used for messages added locally.
+    // network. This is used for messages added locally. All messages enter the network
+    // through one of these calls, in at least one filecoin node. They
+    // are then propagated to other filecoin nodes via the MessagePool
+    // subsystem. Other nodes receive and propagate Messages via their
+    // own MessagePools   
     SubmitMessage(m msg.SignedMessage) error
 }
