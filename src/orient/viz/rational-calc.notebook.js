@@ -120,8 +120,8 @@ md`#### Benchmarks`
 
 bench = ({
   "column_leaf_hash_time": 1.7028e-5/2,
-  "kdf_time": 1.28e-8/2, //5.4e-7,
-  "merkle_tree_datahash_time": 1.28e-8/2,
+  "kdf_time": 0.0000000256 / 2, // 2 1.28e-8/2, //5.4e-7,
+  "merkle_tree_datahash_time": 0.0000000256/2,
   "merkle_tree_hash_time": 1.7028e-5/2,
   "snark_constraint_time": 3.012e-5/2,
   "ticket_hash": 1.7028e-5/2,
@@ -647,10 +647,10 @@ md`### Orientable`
 function report_from_result(result, starting_assignments, simplify_terms) {
   const html = md`
 
-| name | val |
-| ---- | --- |
+| name | val | type | desc |
+| ---- | --- | ---- | ---- |
 ${Object.keys(result).sort()
-  .map(d => `| ${!starting_assignments[d] ? `**${d}**` : d} | ${result[d]} |\n`)}
+  .map(d => `| ${!starting_assignments[d] ? `**${d}**` : d} | ${result[d]} | ${vars[d] && vars[d].type ? vars[d].type : ''} | ${vars[d] && vars[d].description ? vars[d].description : ''} |\n`)}
 `
   html.value = result
   return html
@@ -1173,3 +1173,46 @@ function qs(variable) {
   }
   return false
 }
+
+benchmark_theory = solve_manys([benchmark_theory_query])
+
+
+benchmark_theory_query = {
+  const bench = {
+    sector_size_gib: 1,
+    porep_challenges: 700,
+    post_challenges: 30,
+    stacked_layers: 7
+  }
+
+  let query = extend_query([{}], [stackedReplicas])
+
+  query = extend_query(query, [{
+    "!StackedSDRParameters": true,
+    "!TimingAssumption": true,
+    "!ElectionWithFallbackPoSt": true,
+    "!SectorEncoding": true,
+    "!VectorR": true,
+    "!StackedReplicas": true,
+    "!StackedReplicaUnaligned": true,
+    post_mtree_layers_deleted: 0,
+    time_amax: 2,
+    hash_gb_per_second: 5,
+    graph_name: 'SDR',
+    proof_name: "stackedReplicas",
+    windows: 1,
+  }])
+
+  query = extend_query(query, [pedersen])
+  query = extend_query(query, [filecoin])
+  query = extend_query(query, [constraints])
+  query = extend_query(query, [bench])
+
+
+
+  return query
+}
+
+createJsonDownloadButton(benchmark_theory)
+
+report_from_result(benchmark_theory[0], benchmark_theory_query[0])
