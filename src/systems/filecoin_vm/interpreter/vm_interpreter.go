@@ -40,9 +40,12 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSet
 	var receipt vmr.MessageReceipt
 
 	for _, blk := range msgs.Blocks() {
+		minerAddr := blk.Miner()
+		util.Assert(minerAddr.IsIDType()) // Block syntactic validation requires this.
+
 		// Process block miner's Election PoSt.
-		epostMessage := _makeElectionPoStMessage(outTree, blk.Miner())
-		outTree = _applyMessageBuiltinAssert(outTree, epostMessage, blk.Miner())
+		epostMessage := _makeElectionPoStMessage(outTree, minerAddr)
+		outTree = _applyMessageBuiltinAssert(outTree, epostMessage, minerAddr)
 
 		minerPenaltyTotal := actor.TokenAmount(0)
 		var minerPenaltyCurr actor.TokenAmount
@@ -54,7 +57,7 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSet
 				continue
 			}
 			onChainMessageLen := len(msg.Serialize_UnsignedMessage(m))
-			outTree, receipt, minerPenaltyCurr = vmi.ApplyMessage(outTree, m, onChainMessageLen, blk.Miner())
+			outTree, receipt, minerPenaltyCurr = vmi.ApplyMessage(outTree, m, onChainMessageLen, minerAddr)
 			minerPenaltyTotal += minerPenaltyCurr
 			receipts = append(receipts, receipt)
 			seenMsgs[_msgCID(m)] = struct{}{}
@@ -68,21 +71,21 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSet
 				continue
 			}
 			onChainMessageLen := len(msg.Serialize_SignedMessage(sm))
-			outTree, receipt, minerPenaltyCurr = vmi.ApplyMessage(outTree, m, onChainMessageLen, blk.Miner())
+			outTree, receipt, minerPenaltyCurr = vmi.ApplyMessage(outTree, m, onChainMessageLen, minerAddr)
 			minerPenaltyTotal += minerPenaltyCurr
 			receipts = append(receipts, receipt)
 			seenMsgs[_msgCID(m)] = struct{}{}
 		}
 
 		// Pay block reward.
-		rewardMessage := _makeBlockRewardMessage(outTree, blk.Miner(), minerPenaltyTotal)
-		outTree = _applyMessageBuiltinAssert(outTree, rewardMessage, blk.Miner())
+		rewardMessage := _makeBlockRewardMessage(outTree, minerAddr, minerPenaltyTotal)
+		outTree = _applyMessageBuiltinAssert(outTree, rewardMessage, minerAddr)
 	}
 
-	// Invoke cron tick, attributing it to the miner of the first block.
-	firstMiner := msgs.Blocks()[0].Miner()
-	cronMessage := _makeCronTickMessage(outTree, firstMiner)
-	outTree = _applyMessageBuiltinAssert(outTree, cronMessage, firstMiner)
+	// Invoke cron tick.
+	// Since this is outside any block, the top level block winner is declared as the system actor.
+	cronMessage := _makeCronTickMessage(outTree)
+	outTree = _applyMessageBuiltinAssert(outTree, cronMessage, addr.SystemActorAddr)
 
 	return
 }
@@ -91,7 +94,9 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 	inTree st.StateTree, message msg.UnsignedMessage, onChainMessageSize int, minerAddr addr.Address) (
 	retTree st.StateTree, retReceipt vmr.MessageReceipt, retMinerPenalty actor.TokenAmount) {
 
-	minerOwner := storage_mining.GetMinerOwnerAddress_Assert(inTree, minerAddr)
+	senderAddr := _resolveSender(inTree, message.From())
+	minerOwner := _lookupMinerOwner(inTree, minerAddr)
+	Assert(minerOwner.IsIDType())
 
 	vmiGasRemaining := message.GasLimit()
 	vmiGasUsed := msg.GasAmount_Zero()
@@ -109,7 +114,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 			// sufficient for the gas limit. Thus, we may refund the unused gas funds to the sender here.
 			Assert(!message.GasLimit().LessThan(vmiGasUsed))
 			Assert(message.GasLimit().Equals(vmiGasUsed.Add(vmiGasRemaining)))
-			tree = _withTransferFundsAssert(tree, addr.BurntFundsActorAddr, message.From(), vmiGasRemainingFIL)
+			tree = _withTransferFundsAssert(tree, addr.BurntFundsActorAddr, senderAddr, vmiGasRemainingFIL)
 			tree = _withTransferFundsAssert(tree, addr.BurntFundsActorAddr, minerOwner, vmiGasUsedFIL)
 			retMinerPenalty = actor.TokenAmount(0)
 
@@ -157,8 +162,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 		return
 	}
 
-	// TODO: From() must be resolved to an ID-address via the init actor.
-	fromActor, ok := inTree.GetActor(message.From())
+	fromActor, ok := inTree.GetActor(senderAddr)
 	if !ok {
 		// Execution error; sender does not exist at time of message execution.
 		_applyError(inTree, exitcode.ActorNotFound, SenderResolveSpec_Invalid)
@@ -184,10 +188,14 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 	// the sender paying gas, and the sender's CallSeqNum being incremented;
 	// at least that much state change will be persisted even if the
 	// method invocation subsequently fails.
-	compTreePreSend := _withTransferFundsAssert(inTree, message.From(), addr.BurntFundsActorAddr, gasLimitCost)
-	compTreePreSend = compTreePreSend.Impl().WithIncrementedCallSeqNum_Assert(message.From())
+	compTreePreSend := _withTransferFundsAssert(inTree, senderAddr, addr.BurntFundsActorAddr, gasLimitCost)
+	compTreePreSend = compTreePreSend.Impl().WithIncrementedCallSeqNum_Assert(senderAddr)
 
-	sendRet, compTreePostSend := _applyMessageInternal(compTreePreSend, message, vmiGasRemaining, minerAddr)
+	// Reload sender actor state after the transfer and CallSeqNum increment.
+	sender, ok := compTreePreSend.GetActor(senderAddr)
+	Assert(ok)
+	invoc := _makeInvocInput(message)
+	sendRet, compTreePostSend := _applyMessageInternal(compTreePreSend, sender, senderAddr, invoc, vmiGasRemaining, minerAddr)
 
 	ok = _vmiBurnGas(sendRet.GasUsed())
 	if !ok {
@@ -212,15 +220,43 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 	return
 }
 
-func _applyMessageBuiltinAssert(tree st.StateTree, message msg.UnsignedMessage, topLevelBlockWinner addr.Address) st.StateTree {
-	Assert(message.From().Equals(addr.SystemActorAddr))
+// Resolves an address through the InitActor's map.
+// Returns the resolved address (which will be an ID address) if found, else the original address.
+func _resolveSender(tree st.StateTree, address addr.Address) addr.Address {
+	initState, ok := tree.GetActor(addr.InitActorAddr)
+	util.Assert(ok)
+	serialized, ok := store.Get(ipld.CID(initState.State()))
+	initSubState := sysactors.Deserialize_InitActorState_Assert(serialized)
+	return initSubState.ResolveAddress(address)
+}
+
+// Get the owner account address associated to a given miner actor.
+func _lookupMinerOwner(tree st.StateTree, minerAddr addr.Address) addr.Address {
+	initState, ok := tree.GetActor(minerAddr)
+	util.Assert(ok)
+	serialized, ok := store.Get(ipld.CID(initState.State()))
+	// This tiny coupling between the VM and the storage miner actor is unfortunate.
+	// It could be avoided by:
+	// - including the owner address in block headers (and requiring it match the block's miner as part of semantic validation)
+	// - paying rewards to the miner actor instead of owner (with some miner->owner withdrawal mechanism)
+	minerSubState := storage_mining.Deserialize_StorageMinerActorState_Assert(serialized)
+	return minerSubState.Info().Owner()
+}
+
+func _applyMessageBuiltinAssert(tree st.StateTree, message msg.UnsignedMessage, minerAddr addr.Address) st.StateTree {
+	senderAddr := message.From()
+	Assert(senderAddr.Equals(addr.SystemActorAddr))
+	Assert(senderAddr.IsIDType())
 	// Note: this message CallSeqNum is never checked (b/c it's created in this file), but probably should be.
 	// Since it changes state, we should be sure about the state transition.
 	// Alternatively we could special-case the system actor and declare that its CallSeqNumber
 	// never changes (saving us the state-change overhead).
-	tree = tree.Impl().WithIncrementedCallSeqNum_Assert(message.From())
+	tree = tree.Impl().WithIncrementedCallSeqNum_Assert(senderAddr)
 
-	retReceipt, retTree := _applyMessageInternal(tree, message, message.GasLimit(), topLevelBlockWinner)
+	sender, ok := tree.GetActor(senderAddr)
+	Assert(ok)
+	invoc := _makeInvocInput(message)
+	retReceipt, retTree := _applyMessageInternal(tree, sender, senderAddr, invoc, message.GasLimit(), minerAddr)
 	if retReceipt.ExitCode() != exitcode.OK() {
 		panic("internal message application failed")
 	}
@@ -228,33 +264,22 @@ func _applyMessageBuiltinAssert(tree st.StateTree, message msg.UnsignedMessage, 
 	return retTree
 }
 
-func _applyMessageInternal(
-	tree st.StateTree, message msg.UnsignedMessage, gasRemainingInit msg.GasAmount, topLevelBlockWinner addr.Address) (
-	vmr.MessageReceipt, st.StateTree) {
-
-	fromActor, ok := tree.GetActor(message.From())
-	Assert(ok)
+func _applyMessageInternal(tree st.StateTree, sender actor.ActorState, senderAddr addr.Address, invoc vmr.InvocInput,
+	gasRemainingInit msg.GasAmount, topLevelBlockWinner addr.Address) (vmr.MessageReceipt, st.StateTree) {
 
 	rt := vmri.VMContext_Make(
 		store,
-		message.From(),
+		senderAddr,
 		topLevelBlockWinner,
-		fromActor.CallSeqNum(),
+		sender.CallSeqNum(),
 		actor.CallSeqNum(0),
 		tree,
-		message.From(),
+		senderAddr,
 		actor.TokenAmount(0),
 		gasRemainingInit,
 	)
 
-	return rt.SendToplevelFromInterpreter(
-		vmr.InvocInput_Make(
-			message.To(),
-			message.Method(),
-			message.Params(),
-			message.Value(),
-		),
-	)
+	return rt.SendToplevelFromInterpreter(invoc)
 }
 
 func _withTransferFundsAssert(tree st.StateTree, from addr.Address, to addr.Address, amount actor.TokenAmount) st.StateTree {
@@ -271,6 +296,15 @@ func _gasToFIL(gas msg.GasAmount, price actor.TokenAmount) actor.TokenAmount {
 	IMPL_FINISH()
 	panic("") // BigInt arithmetic
 	// return actor.TokenAmount(util.UVarint(gas) * util.UVarint(price))
+}
+
+func _makeInvocInput(message msg.UnsignedMessage) vmr.InvocInput {
+	return &vmr.InvocInput_I{
+		To_:     message.To(), // Receiver address is resolved during execution.
+		Method_: message.Method(),
+		Params_: message.Params(),
+		Value_:  message.Value(),
+	}
 }
 
 // Builds a message for paying block reward to a miner's owner.
@@ -315,7 +349,7 @@ func _makeElectionPoStMessage(state st.StateTree, minerActorAddr addr.Address) m
 }
 
 // Builds a message for invoking the cron actor tick.
-func _makeCronTickMessage(state st.StateTree, minerActorAddr addr.Address) msg.UnsignedMessage {
+func _makeCronTickMessage(state st.StateTree) msg.UnsignedMessage {
 	sysActor, ok := state.GetActor(addr.SystemActorAddr)
 	Assert(ok)
 	return &msg.UnsignedMessage_I{

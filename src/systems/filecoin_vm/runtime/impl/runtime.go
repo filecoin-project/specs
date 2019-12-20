@@ -168,6 +168,9 @@ func (rt *VMContext) CreateActor(codeID actor.CodeID, address addr.Address) {
 	if !rt._actorAddress.Equals(addr.InitActorAddr) {
 		rt.AbortAPI("Only InitActor may call rt.CreateActor")
 	}
+	if !address.IsIDType() {
+		rt.AbortAPI("New actor adddress must be an ID-address")
+	}
 
 	rt._createActor(codeID, address)
 }
