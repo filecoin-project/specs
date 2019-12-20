@@ -15,15 +15,6 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
-const FINALITY = 500
-
-const (
-	SPC_LOOKBACK_RANDOMNESS = 300      // this is EC.K maybe move it there. TODO
-	SPC_LOOKBACK_TICKET     = 1        // we chain blocks together one after the other
-	SPC_LOOKBACK_POST       = 1        // cheap to generate, should be set as close to current TS as possible
-	SPC_LOOKBACK_SEAL       = FINALITY // should be set to finality
-)
-
 // Storage Power Consensus Subsystem
 
 func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block block.Block_I) error {
@@ -48,10 +39,7 @@ func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree st
 
 	networkPower := inds.TotalNetworkEffectivePower()
 
-	// TODO: pull from constants
-	EPOST_SAMPLE_RATE_NUM := util.UVarint(1)
-	EPOST_SAMPLE_RATE_DENOM := util.UVarint(25)
-	sectorsSampled := uint64(math.Ceil(float64(EPOST_SAMPLE_RATE_NUM/EPOST_SAMPLE_RATE_DENOM) * float64(numSectors)))
+	sectorsSampled := uint64(math.Ceil(float64(node_base.EPOST_SAMPLE_RATE_NUM/node_base.EPOST_SAMPLE_RATE_DENOM) * float64(numSectors)))
 
 	return spc.ec().IsWinningChallengeTicket(challengeTicket, sectorUtilization, networkPower, sectorsSampled, numSectors)
 }
@@ -82,17 +70,17 @@ func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTre
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionRand(chain chain.Chain, epoch block.ChainEpoch) util.Randomness {
-	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_TICKET)
+	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_TICKET)
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetSealRand(chain chain.Chain, epoch block.ChainEpoch) util.Randomness {
-	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_SEAL)
+	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_SEAL)
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallengeRand(chain chain.Chain, epoch block.ChainEpoch) util.Randomness {
-	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_POST)
+	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_POST)
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetFinalizedEpoch(currentEpoch block.ChainEpoch) block.ChainEpoch {
-	return currentEpoch - FINALITY
+	return currentEpoch - node_base.FINALITY
 }

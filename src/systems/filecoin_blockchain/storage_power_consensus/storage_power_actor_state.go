@@ -6,6 +6,7 @@ import (
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
@@ -13,12 +14,8 @@ import (
 )
 
 func (st *StoragePowerActorState_I) MinerPowerMeetsConsensusMinimum(minerPower block.StoragePower) bool {
-	// TODO import from consts
-	MIN_MINER_SIZE_STOR := block.StoragePower(0)
-	MIN_MINER_SIZE_TARG := 0
-
 	// if miner is larger than min power requirement, we're set
-	if minerPower >= MIN_MINER_SIZE_STOR {
+	if minerPower >= node_base.MIN_MINER_SIZE_STOR {
 		return true
 	}
 
@@ -28,7 +25,7 @@ func (st *StoragePowerActorState_I) MinerPowerMeetsConsensusMinimum(minerPower b
 	}
 
 	// else if none do, check whether in MIN_MINER_SIZE_TARG miners
-	if len(st.PowerTable()) <= MIN_MINER_SIZE_TARG {
+	if len(st.PowerTable()) <= node_base.MIN_MINER_SIZE_TARG {
 		// miner should pass
 		return true
 	}
@@ -39,7 +36,7 @@ func (st *StoragePowerActorState_I) MinerPowerMeetsConsensusMinimum(minerPower b
 		minerSizes = append(minerSizes, v.Power())
 	}
 	sort.Slice(minerSizes, func(i, j int) bool { return int(i) > int(j) })
-	return minerPower >= minerSizes[MIN_MINER_SIZE_TARG-1]
+	return minerPower >= minerSizes[node_base.MIN_MINER_SIZE_TARG-1]
 }
 
 func (st *StoragePowerActorState_I) _slashPledgeCollateral(
@@ -125,11 +122,11 @@ func (st *StoragePowerActorState_I) _getStorageFaultSlashPledgePercent(faultType
 	// given a miner's affected power and its total power
 	switch faultType {
 	case sector.DeclaredFault:
-		return 1 // placeholder
+		return node_base.FAULT_SLASH_PERC_DECLARED
 	case sector.DetectedFault:
-		return 10 // placeholder
+		return node_base.FAULT_SLASH_PERC_DETECTED
 	case sector.TerminatedFault:
-		return 100 // placeholder
+		return node_base.FAULT_SLASH_PERC_TERMINATED
 	default:
 		panic("Case not supported")
 	}

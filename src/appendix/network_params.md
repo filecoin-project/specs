@@ -1,8 +1,21 @@
 +++
 title = "Filecoin Parameters"
-author = ["Chhi'med Kunzang"]
 draft = false
 +++
+
+Some of these parameters are used around the code in the Filecoin subsystems and actors. Others are used as part of the proofs libraries. 
+
+Most are generated/finalized using the [orient framework](https://github.com/filecoin-project/orient). It is used to modelize the Filecoin network.
+
+{{% notice warning %}}
+⚠️ **WARNING:** Filecoin is not yet launched, and we are finishing protocol spec and implementations. Parameters are set here as placeholders and highly likely to change to fit product and security requirements.
+{{% /notice %}}
+
+## Code parameters
+
+{{< readfile file="../systems/filecoin_nodes/node_base/network_params.go" code="true" lang="go" >}}
+
+## Orient parameters
 
 | LAMBDA | SPACEGAP | BLOCK-SIZE-KIB | SECTOR-SIZE-GIB |
 |--------|----------|----------------|-----------------|
