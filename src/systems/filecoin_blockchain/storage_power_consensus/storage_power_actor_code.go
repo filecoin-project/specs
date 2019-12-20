@@ -192,7 +192,7 @@ func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerRep
 	currPledge, ok := st.GetCurrPledgeForMiner(minerAddr)
 	Assert(ok)
 
-	newPower := inds.BlockReward_StoragePower(report.ActiveSectorWeight(), report.InactiveSectorWeight(), currPledge)
+	newPower := inds.StoragePower(report.ActiveSectorWeight(), report.InactiveSectorWeight(), currPledge)
 
 	// keep track of miners larger than minimum miner size before updating the PT
 	MIN_MINER_SIZE_STOR := block.StoragePower(0) // TODO: pull in from consts

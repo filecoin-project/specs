@@ -275,7 +275,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds inds.Indices, heade
 		return false
 	}
 
-	pow := inds.BlockReward_StoragePower(activeSectorWeight, inactiveSectorWeight, currPledge)
+	pow := inds.StoragePower(activeSectorWeight, inactiveSectorWeight, currPledge)
 
 	if !spa.MinerPowerMeetsConsensusMinimum(pow) {
 		return false

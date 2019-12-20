@@ -95,7 +95,7 @@ func (inds *Indices_I) BlockReward_PledgeCollateralProportion(minerPledgeCollate
 	panic("")
 }
 
-func (inds *Indices_I) BlockReward_StoragePower(
+func (inds *Indices_I) StoragePower(
 	minerActiveSectorWeight block.SectorWeight,
 	minerInactiveSectorWeight block.SectorWeight,
 	minerPledgeCollateral actor.TokenAmount,

@@ -74,7 +74,7 @@ type Indices struct {
         minerPledgeCollateral actor.TokenAmount
     ) BigInt
 
-    BlockReward_StoragePower(
+    StoragePower(
         minerActiveSectorWeight    block.SectorWeight
         minerInactiveSectorWeight  block.SectorWeight
         minerPledgeCollateral      actor.TokenAmount
