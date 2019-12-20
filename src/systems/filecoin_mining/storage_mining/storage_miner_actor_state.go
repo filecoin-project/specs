@@ -4,6 +4,7 @@ import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
@@ -164,7 +165,7 @@ func (st *StorageMinerActorState_I) _updateFailSectorAssert(sectorNo sector.Sect
 		Assert(false)
 	}
 
-	if newFaultCount > MAX_CONSECUTIVE_FAULTS {
+	if newFaultCount > node_base.MAX_CONSECUTIVE_FAULTS {
 		// slashing is done at _slashCollateralForStorageFaults
 		st._updateClearSectorAssert(sectorNo)
 		st.SectorTable().Impl().TerminatedFaults_.Add(sectorNo)
@@ -230,7 +231,7 @@ func (st *StorageMinerActorState_I) _getPreCommitDepositReq() actor.TokenAmount 
 	// TODO: move this to Construct
 	minerInfo := st.Info()
 	sectorSize := minerInfo.SectorSize()
-	depositReq := actor.TokenAmount(uint64(PRECOMMIT_DEPOSIT_PER_BYTE) * uint64(sectorSize))
+	depositReq := actor.TokenAmount(uint64(node_base.PRECOMMIT_DEPOSIT_PER_BYTE) * uint64(sectorSize))
 
 	return depositReq
 }
