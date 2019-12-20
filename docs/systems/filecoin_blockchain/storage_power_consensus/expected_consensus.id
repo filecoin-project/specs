@@ -1,6 +1,5 @@
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type ExpectedConsensus struct {
     expectedLeadersPerEpoch  UVarint
@@ -15,10 +14,6 @@ type ExpectedConsensus struct {
         numSectorsSampled  util.UVarint
         numSectorsMiner    util.UVarint
     ) bool
-
-    GetBlockRewards(
-        ePoStInfo sector.OnChainPoStVerifyInfo
-    ) UVarint
 
     log2b(x UVarint) UVarint
     wParams weightFunctionParameters

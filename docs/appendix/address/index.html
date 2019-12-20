@@ -4684,6 +4684,7 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="c1">// Returns the ID from an ID address (or error otherwise).
 </span><span class="c1"></span>    <span class="nf">GetID</span><span class="p">()</span>          <span class="p">(</span><span class="nx">ActorID</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+    <span class="nf">GetKey</span><span class="p">()</span>         <span class="p">(</span><span class="nx">KeyHash</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">// ActorID is a sequential number assigned to actors in a Filecoin Chain.
@@ -4791,6 +4792,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">IsKeyType</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
+
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -4801,11 +4803,39 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Data_</span><span class="p">.</span><span class="nf">As_ID</span><span class="p">(),</span> <span class="kc">nil</span>
 <span class="p">}</span>
 
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">GetKey</span><span class="p">()</span> <span class="p">(</span><span class="nx">KeyHash</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">a</span><span class="p">.</span><span class="nf">IsKeyType</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nf">KeyHash</span><span class="p">(</span><span class="kc">nil</span><span class="p">),</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;not a key address&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Data_</span><span class="p">.</span><span class="nf">Which</span><span class="p">()</span> <span class="o">==</span> <span class="nx">Address_Data_Case_PublicKey_BLS</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Data_</span><span class="p">.</span><span class="nf">As_PublicKey_BLS</span><span class="p">(),</span> <span class="kc">nil</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Data_</span><span class="p">.</span><span class="nf">Which</span><span class="p">()</span> <span class="o">==</span> <span class="nx">Address_Data_Case_PublicKey_Secp256k1</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Data_</span><span class="p">.</span><span class="nf">As_PublicKey_Secp256k1</span><span class="p">(),</span> <span class="kc">nil</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nf">KeyHash</span><span class="p">(</span><span class="kc">nil</span><span class="p">),</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;not a recognized key type&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
 <span class="kd">func</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">net</span> <span class="nx">Address_NetworkID</span><span class="p">,</span> <span class="nx">x</span> <span class="nx">ActorID</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
     <span class="k">return</span> <span class="o">&amp;</span><span class="nx">Address_I</span><span class="p">{</span>
         <span class="nx">NetworkID_</span><span class="p">:</span> <span class="nx">net</span><span class="p">,</span>
         <span class="nx">Data_</span><span class="p">:</span>      <span class="nf">Address_Data_Make_ID</span><span class="p">(</span><span class="nx">x</span><span class="p">),</span>
     <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">Address_Make_Key</span><span class="p">(</span><span class="nx">net</span> <span class="nx">Address_NetworkID</span><span class="p">,</span> <span class="nx">x</span> <span class="nx">KeyHash</span><span class="p">)</span> <span class="p">(</span><span class="nx">Address</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">d</span> <span class="nx">Address_Data</span>
+    <span class="k">if</span> <span class="nx">util</span><span class="p">.</span><span class="nf">IsBLS</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">d</span> <span class="p">=</span> <span class="nf">Address_Data_Make_PublicKey_BLS</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">util</span><span class="p">.</span><span class="nf">IsSECP</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">d</span> <span class="p">=</span> <span class="nf">Address_Data_Make_PublicKey_Secp256k1</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;Not a recognized key type&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="o">&amp;</span><span class="nx">Address_I</span><span class="p">{</span>
+        <span class="nx">NetworkID_</span><span class="p">:</span> <span class="nx">net</span><span class="p">,</span>
+        <span class="nx">Data_</span><span class="p">:</span>      <span class="nx">d</span><span class="p">,</span>
+    <span class="p">},</span> <span class="kc">nil</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">Address_Make_ActorExec</span><span class="p">(</span><span class="nx">net</span> <span class="nx">Address_NetworkID</span><span class="p">,</span> <span class="nx">hash</span> <span class="nx">ActorExecHash</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
@@ -4944,14 +4974,14 @@ https://github.com/alex-shpak/hugo-book
 
 <h3 id="protocol-2-actor">Protocol 2: Actor</h3>
 
-<p><strong>Protocol 2</strong> addresses representing an Actor. The payload field contains the <a href="https://blake2.net/">Blake2b 160</a> hash of meaningful data produced as a result of creating the actor.</p>
+<p><strong>Protocol 2</strong> addresses representing an Actor. The payload field contains the SHA256 hash of meaningful data produced as a result of creating the actor.</p>
 
 <p><strong>Bytes</strong></p>
 
 <pre><code>|----------|---------------------|
 | protocol |        payload      |
 |----------|---------------------|
-|    2     | blake2b-160(Random) |
+|    2     |     SHA256(Random)      |
 </code></pre>
 
 <p><strong>String</strong></p>
@@ -4959,7 +4989,7 @@ https://github.com/alex-shpak/hugo-book
 <pre><code>|------------|----------|-----------------------|----------|
 |  network   | protocol |         payload       | checksum |
 |------------|----------|-----------------------|----------|
-| 'f' or 't' |    '2'   |  blake2b-160(Random)  |  4 bytes |
+| 'f' or 't' |    '2'   |      SHA256(Random)      |  4 bytes |
                   base32[..................................]
 </code></pre>
 

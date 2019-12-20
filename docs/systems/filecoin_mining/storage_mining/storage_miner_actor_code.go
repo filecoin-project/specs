@@ -18,20 +18,6 @@ import (
 // Actor methods
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *StorageMinerActorCode_I) GetOwnerKey(rt Runtime) filcrypto.VRFPublicKey {
-	h, st := a.State(rt)
-	ret := st.Info().OwnerKey()
-	Release(rt, h, st)
-	return ret
-}
-
-func (a *StorageMinerActorCode_I) GetWorkerKey(rt Runtime) filcrypto.VRFPublicKey {
-	h, st := a.State(rt)
-	ret := st.Info().WorkerKey()
-	Release(rt, h, st)
-	return ret
-}
-
 // Called by the cron actor at every tick.
 func (a *StorageMinerActorCode_I) OnCronTickEnd(rt Runtime) InvocOutput {
 	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
@@ -65,8 +51,7 @@ func (a *StorageMinerActorCode_I) NotifyOfSurprisePoStChallenge(rt Runtime) Invo
 	return rt.SuccessReturn()
 }
 
-// called by verifier to update miner state on successful surprise post
-// after it has been verified in the storage_mining_subsystem
+// called by verifier to update miner state on surprise post submission
 func (a *StorageMinerActorCode_I) ProcessSurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
 	TODO() // TODO: validate caller
 
@@ -181,7 +166,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	UpdateRelease(rt, h, st)
 
 	// Activate storage deals, abort if activation failed
-	activateDealsRet := rt.SendQuery(
+	rt.SendQuery(
 		addr.StorageMarketActorAddr,
 		ai.Method_StorageMarketActor_UpdateDealsOnSectorProveCommit,
 		[]util.Serialization{
@@ -189,15 +174,22 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 			sector.Serialize_SectorProveCommitInfo(info),
 		},
 	)
-	TODO()
-	// TODO: compute sector power from query to GetWeightForDealSet instead of this return value
 
-	h, st = a.State(rt)
-
-	sectorActivePower, err := block.Deserialize_StoragePower(activateDealsRet)
+	dealWeightRet := rt.SendQuery(
+		addr.StorageMarketActorAddr,
+		ai.Method_StorageMarketActor_GetWeightForDealSet,
+		[]util.Serialization{
+			deal.Serialize_DealIDs(onChainInfo.DealIDs()),
+		},
+	)
+	dealWeight, err := deal.Deserialize_DealWeight(dealWeightRet)
 	if err != nil {
-		rt.AbortStateMsg("Failed to deserialize sector power")
+		rt.AbortStateMsg("Failed to deserialize deal weight")
 	}
+
+	inds := rt.CurrIndices()
+	h, st = a.State(rt)
+	minerInfo := st.Info()
 
 	// add sector expiration to SectorExpirationQueue
 	st.SectorExpirationQueue().Add(&SectorExpirationQueueItem_I{
@@ -212,13 +204,15 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		DealIDs_:   onChainInfo.DealIDs(),
 	}
 
+	sectorWeight := inds.BlockReward_SectorWeight(minerInfo.SectorSize(), rt.CurrEpoch(), info.Expiration(), deal.DealWeight(dealWeight))
+
 	// add SectorNumber and SealCommitment to Sectors
 	// set Sectors.State to SectorCommitted
 	// Note that SectorNumber will only become Active at the next successful PoSt
 	sealOnChainInfo := &SectorOnChainInfo_I{
 		SealCommitment_: sealCommitment,
 		State_:          SectorCommitted(),
-		Power_:          block.StoragePower(sectorActivePower),
+		SectorWeight_:   block.SectorWeight(sectorWeight),
 		Activation_:     rt.CurrEpoch(),
 		Expiration_:     info.Expiration(),
 	}
@@ -438,19 +432,19 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 // construct PowerReport from SectorTable
 func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime) {
 	h, st := a.State(rt)
-	activePower, err := st._getActivePower()
+	activeSectorWeight, err := st._getActiveSectorWeight()
 	if err != nil {
 		rt.AbortStateMsg(err.Error())
 	}
-	inactivePower, err := st._getInactivePower()
+	inactiveSectorWeight, err := st._getInactiveSectorWeight()
 	if err != nil {
 		rt.AbortStateMsg(err.Error())
 	}
 
 	// power report in processPowerReportParam
 	powerReport := &spc.PowerReport_I{
-		ActivePower_:   activePower,
-		InactivePower_: inactivePower,
+		ActiveSectorWeight_:   activeSectorWeight,
+		InactiveSectorWeight_: inactiveSectorWeight,
 	}
 	Release(rt, h, st)
 
@@ -568,8 +562,10 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoSt(rt Runtime, onChainInfo 
 	}
 
 	// 3. Verify the partialTicket values
-	if !a._rtVerifySurprisePoStMeetsTargetReq(rt) {
-		rt.AbortStateMsg("Invalid Surprise PoSt. Tickets do not meet target.")
+	for _, candidate := range onChainInfo.Candidates() {
+		if !st._verifySurprisePoStMeetsTargetReq(candidate) {
+			rt.AbortStateMsg("Invalid Surprise PoSt. Tickets do not meet target.")
+		}
 	}
 
 	// verify the partialTickets themselves
@@ -626,12 +622,6 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoSt(rt Runtime, onChainInfo 
 
 	// 6. Verify the PoSt Proof
 	return sdr.VerifySurprisePoSt(&pvInfo)
-}
-
-// todo: define target
-func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStMeetsTargetReq(rt Runtime) bool {
-	util.TODO()
-	return false
 }
 
 func (a *StorageMinerActorCode_I) _slashDealsForSectorTerminatedFault(rt Runtime, sectorNumbers []sector.SectorNumber) {

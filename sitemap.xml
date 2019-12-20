@@ -17,11 +17,6 @@
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_mining/storage_mining/storage_miner_actor_old/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/docs/systems/filecoin_token/multisig/multisig_actor_old/</loc>
     <priority>0</priority>
   </url>

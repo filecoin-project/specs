@@ -4636,90 +4636,156 @@ https://github.com/alex-shpak/hugo-book
 <article class="markdown">
   
 
-<p>Block miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning <code>ticket</code> to propose a block at each height/in each round. Rounds are currently set to take around 30 seconds, in order to account for network propagation around the world. The details of both processes are defined here.</p>
+<div id="systems__filecoin_mining__storage_mining__mining_cycle__mining_cycle"></div>
 
-<h1 id="the-miner-actor">The Miner Actor</h1>
+<p>Block miners should constantly be performing Proofs of SpaceTime using <a href="../../../../../#algorithms__post__election_post">Election PoSt</a>, and checking the outputted partial tickets to run <a href="../../../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> and determine whether they can propose a block at each epoch. Epochs are currently set to take around X seconds, in order to account for election PoSt and network propagation around the world. The details of the mining cycle are defined here.</p>
 
-<p>After successfully calling <code>CreateStorageMiner</code>, a miner actor will be created on-chain, and registered in the storage market. This miner, like all other Filecoin State Machine actors, has a fixed set of methods that can be used to interact with or control it.</p>
+<h2 id="active-miner-mining-cycle">Active Miner Mining Cycle</h2>
 
-<h2 id="owner-worker-distinction">Owner Worker distinction</h2>
+<p>In order to mine blocks on the Filecoin blockchain a miner must be running <a href="../../../../../#systems__filecoin_blockchain__block__block_validation">Block Validation</a> at all times, keeping track of recent blocks received and the heaviest current chain (based on <a href="../../../../../#algorithms__expected_consensus___index">Expected Consensus</a>).</p>
 
-<p>The miner actor has two distinct &lsquo;controller&rsquo; addresses. One is the worker, which is the address which will be responsible for doing all of the work, submitting proofs, committing new sectors, and all other day to day activities. The owner address is the address that created the miner, paid the collateral, and has block rewards paid out to it. The reason for the distinction is to allow different parties to fulfil the different roles. One example would be for the owner to be a multisig wallet, or a cold storage key, and the worker key to be a &lsquo;hot wallet&rsquo; key.</p>
+<p>With every new tipset, the miner can use their committed power to attempt to craft a new block.</p>
 
-<h2 id="storage-mining-cycle">Storage Mining Cycle</h2>
+<p>For additional details around how consensus works in Filecoin, see <a href="../../../../../#algorithms__expected_consensus___index">Expected Consensus</a>. For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner is eligible to mine a block itself, and other rules pertaining to the production of some artifacts required of valid blocks (e.g. Tickets, ElectionPoSt).</p>
 
-<p>Storage miners must continually produce Proofs of SpaceTime over their storage to convince the network that they are actually storing the sectors that they have committed to. Each PoSt covers a miner&rsquo;s entire storage.</p>
+<h3 id="continuous-mining-cycle">Continuous Mining Cycle</h3>
 
-<h3 id="step-0-registration">Step 0: Registration</h3>
+<p>After the chain has caught up to the current head using <a href="../../../../../#systems__filecoin_blockchain__chainsync">ChainSync - synchronizing the Blockchain</a>, the mining process is as follows:</p>
+
+<ul>
+<li>The node continuously receives and transmits messages using the <a href="../../../../../#systems__filecoin_blockchain__message_pool__message_syncer">Message Syncer</a></li>
+<li>At the same time it continuously <a href="../../../../../#algorithms__block_sync">receives blocks</a>
+
+<ul>
+<li>Each block has an associated timestamp and epoch (quantized time window in which it was crafted)</li>
+<li>Blocks are validated as they come in during an epoch (provided it is their epoch, see <a href="../../../../../#systems__filecoin_blockchain__struct__block___index">validation</a>)</li>
+</ul></li>
+<li>At the end of a given epoch, the miner should take all the valid blocks received for this epoch and assemble them into tipsets according to <a href="../../../../../#systems__filecoin_blockchain__struct__tipset___index">tipset validation rules</a></li>
+<li>The miner then attempts to mine atop the heaviest tipset (as calculated with <a href="../../../../../#algorithms__expected_consensus__chain_selection">EC&#39;s weight function</a>) using its smallest ticket to run leader election
+
+<ul>
+<li>The miner runs an <a href="../../../../../#algorithms__post__election_post">Election PoSt</a> on their sectors in order to generate partial tickets</li>
+<li>The miner uses these tickets in order to run <a href="../../../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a>
+
+<ul>
+<li>if successful, the miner generates a new <a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">randomness ticket</a> for inclusion in the block</li>
+<li>the miner then assembles a new block (see &ldquo;block creation&rdquo; below) and broadcasts it</li>
+</ul></li>
+</ul></li>
+</ul>
+
+<p>This process is repeated until either the <a href="../../../../../#algorithms__post__election_post">Election PoSt</a> process yields a winning ticket (in EC) and a block published or a new valid <a href="../../../../../#systems__filecoin_blockchain__struct__tipset___index"></a> comes in from the network.</p>
+
+<p>At any height <code>H</code>, there are three possible situations:</p>
+
+<ul>
+<li>The miner is eligible to mine a block: they produce their block and propagate it. They then resume mining at the next height <code>H+1</code>.</li>
+<li>The miner is not eligible to mine a block but has received blocks: they form a Tipset with them and resume mining at the next height <code>H+1</code>.</li>
+<li>The miner is not eligible to mine a block and has received no blocks: prompted by their clock they run leader election again, incrementing the epoch number.</li>
+</ul>
+
+<p>Anytime a miner receives new valid blocks, it should evaluate what is the heaviest Tipset it knows about and mine atop it.</p>
+
+<h3 id="timing">Timing</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Mining Cycle Timing</span>
+
+
+
+
+<br />
+<p style="color: #D74848"><b><i>Something's not right. The <code>./diagrams/timing/timing.png</code> file was not found.</i></b></p>
+
+
+
+</div>
+
+
+<p>The mining cycle relies on receiving and producing blocks concurrently.  The sequence of these events in time is given by the timing diagram above.  The upper row represents the conceptual consumption channel consisting of successive receiving periods <code>Rx</code> during which nodes validate and select blocks as chain heads.  The lower row is the conceptual production channel made up of a period of mining <code>M</code> followed by a period of transmission <code>Tx</code>.  The lengths of the periods are not to scale.</p>
+
+<p>Blocks are received and validated during <code>Rx</code> up to the end of the epoch.  At the beginning of the next epoch, the heaviest tipset is computed from the blocks received during <code>Rx</code>, used as the head to build on during <code>M</code>.  If mining is successful a block is transmitted during <code>Tx</code>.  The epoch boundaries are as shown.</p>
+
+<p>In a fully synchronized network most of period <code>Rx</code> does not see any network traffic, only the period lined up with <code>Tx</code>.  In practice we expect blocks from previous epochs to propagate during the remainder of <code>Rx</code>.  We also expect differences in operator mining time to cause additional variance.</p>
+
+<p>This sequence of events applies only when the node is in the <code>CHAIN_FOLLOW</code> syncing mode.  Nodes in other syncing modes do not mine blocks.</p>
+
+<h2 id="full-miner-lifecycle">Full Miner Lifecycle</h2>
+
+<h3 id="step-0-registration-and-market-participation">Step 0: Registration and Market participation</h3>
 
 <p>To initially become a miner, a miner first register a new miner actor on-chain. This is done through the storage power actor&rsquo;s <code>CreateStorageMiner</code> method. The call will then create a new miner actor instance and return its address.</p>
 
-<p>The next step is to place one or more storage market asks on the market. This is done off-chain as part of storagee market functions. A miner may create a single ask for their entire storage, or partition their storage up in some way with multiple asks (at potentially different prices).</p>
+<p>The next step is to place one or more storage market asks on the market. This is done off-chain as part of storage market functions. A miner may create a single ask for their entire storage, or partition their storage up in some way with multiple asks (at potentially different prices).</p>
 
-<p>After that, they need to make deals with clients and begin filling up sectors with data. For more information on making deals, see the <a href="../../../../../#systems__filecoin_markets__storage_market___index">Storage Market</a>.</p>
+<p>After that, they need to make deals with clients and begin filling up sectors with data. For more information on making deals, see the <a href="../../../../../#systems__filecoin_markets__storage_market___index">Storage Market</a>. The miner will need to put up storage deal collateral for the deals they have entered into.</p>
 
 <p>When they have a full sector, they should seal it. This is done by invoking the <a href="../../../../../#systems__filecoin_mining__storage_proving__sector_sealer">Sector Sealer</a>.</p>
+
+<h4 id="owner-worker-distinction">Owner/Worker distinction</h4>
+
+<p>The miner actor has two distinct &lsquo;controller&rsquo; <a href="../../../../../#appendix__address">addresses</a>. One is the worker, which is the address which will be responsible for doing all of the work, submitting proofs, committing new sectors, and all other day to day activities. The owner address is the address that created the miner, paid the collateral, and has block rewards paid out to it. The reason for the distinction is to allow different parties to fulfil the different roles. One example would be for the owner to be a multisig wallet, or a cold storage key, and the worker key to be a &lsquo;hot wallet&rsquo; key.</p>
 
 <h4 id="changing-worker-addresses">Changing Worker Addresses</h4>
 
 <p>Note that any change to worker keys after registration (TODO: spec how this works) must be appropriately delayed in relation to randomness lookback for SEALing data (see <a href="https://github.com/filecoin-project/specs/issues/415">this issue</a>).</p>
 
-<h3 id="step-1-commit">Step 1: Commit</h3>
+<h3 id="step-1-committing-sectors">Step 1: Committing Sectors</h3>
 
-<p>When the miner has completed their first seal, they should post it on-chain using the <a href="../../../../../#systems__filecoin_mining__storage_mining__storage_miner_actor">Storage Miner Actor</a>&rsquo;s <code>ProveCommitSector</code> function. If the miner had zero committed sectors prior to this call, this begins their proving period.</p>
+<p>When the miner has completed their first seal, they should post it on-chain using the <a href="../../../../../#systems__filecoin_mining__storage_mining__storage_miner_actor">Storage Miner Actor</a>&rsquo;s <code>ProveCommitSector</code> function. The miner will need to put up pledge collateral in proportion to the amount of storage they commit on chain. If the miner had zero committed sectors prior to this call, this begins their proving period.</p>
 
-<p>The proving period is a fixed amount of time in which the miner must submit a Proof of Space Time to the network.</p>
+<p>You can read more about sectors <a href="../../../../../#systems__filecoin_mining__sector___index">here</a>.</p>
 
-<p>During this period, the miner may also commit to new sectors, but they will not be included in proofs of space time until the next proving period starts.
-For example, if a miner currently PoSts for 10 sectors, and commits to 20 more sectors. The next PoSt they submit (i.e. the one they&rsquo;re currently proving) will be for 10 sectors again, the subsequent one will be for 30.</p>
+<h3 id="step-2-getting-power">Step 2: Getting Power</h3>
 
-<p>TODO: sectors need to be globally unique. This can be done either by having the seal proof prove the sector is unique to this miner in some way, or by having a giant global map on-chain is checked against on each submission. As the system moves towards sector aggregation, the latter option will become unworkable, so more thought needs to go into how that proof statement could work.</p>
+<p>As part of the $<a href="../../../../../#algorithms__post__election_post">Election PoSt</a> process. A miner will be challenged by the blockchain with a surprise PoSt once per proving period on expectation.</p>
 
-<h3 id="step-2-proving-storage-post-creation">Step 2: Proving Storage (PoSt creation)</h3>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ProveStorage</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">BytesAmount</span><span class="p">,</span> <span class="nx">sectors</span> <span class="p">[]</span><span class="nx">commR</span><span class="p">)</span> <span class="nx">PoStProof</span> <span class="p">{</span>
-    <span class="nx">challengeBlockHeight</span> <span class="o">:=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span> <span class="o">-</span> <span class="nx">POST_CHALLENGE_TIME</span>
+<p>The miner&rsquo;s committed sectors will turn into <a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power">Storage Power</a> enabling them to run <a href="../../../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> after the first successful PoSt submission on these committed sectors. If the miner is committing sectors for the first time, a SurprisePoSt will move the sectors from the miner&rsquo;s <code>ProvingSet</code> into the active state, otherwise an ElectionPoSt could also do this.</p>
 
-    <span class="c1">// Faults to be used are the currentFaultSet for the miner.
-</span><span class="c1"></span>    <span class="nx">faults</span> <span class="o">:=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">currentFaultSet</span>
-    <span class="nx">seed</span> <span class="o">:=</span> <span class="nf">GetRandFromBlock</span><span class="p">(</span><span class="nx">challengeBlockHeight</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nf">GeneratePoSt</span><span class="p">(</span><span class="nx">sectorSize</span><span class="p">,</span> <span class="nx">sectors</span><span class="p">,</span> <span class="nx">seed</span><span class="p">,</span> <span class="nx">faults</span><span class="p">)</span>
-<span class="p">}</span></code></pre></div>
-<p>Note: See <a href="../proof-of-spacetime">&lsquo;Proof of Space Time&rsquo;</a> for more details.</p>
+<p>During this period, the miner may also commit to new sectors, but they will not be included in proofs of space time until the next successful PoSt they submit to the chain.</p>
 
-<p>The proving set remains consistent during the proving period. Any sectors added in the meantime will be included in the next proving set, at the beginning of the next proving period.</p>
+<h3 id="step-3-running-elections">Step 3: Running Elections</h3>
 
-<h3 id="step-3-post-submission">Step 3: PoSt Submission</h3>
+<p>Once the miner has power on the network, they can begin to submit <code>ElectionPoSts</code>. To do so, the miner must run a PoSt on a subset of their sectors in every round, using the outputted partial tickets to run leader election.</p>
 
-<p>When the miner has completed their PoSt, they must submit it to the network by calling <a href="../actors#submitpost">SubmitPoSt</a>. There are two different times that this <em>could</em> be done.</p>
+<p>If the miner finds winning tickets, they are eligible to generate a new block and earn block rewards using the <a href="../../../../../#systems__filecoin_blockchain__struct__block_producer___index">Block Producer</a>.</p>
 
-<ol>
-<li><strong>Standard Submission</strong>: A standard submission is one that makes it on-chain before the end of the proving period. The length of time it takes to compute the PoSts is set such that there is a grace period between then and the actual end of the proving period, so that the effects of network congestion on typical miner actions is minimized.</li>
-<li><strong>Penalized Submission</strong>: A penalized submission is one that makes it on-chain after the end of the proving period, but before the generation attack threshold. These submissions count as valid PoSt submissions, but the miner must pay a penalty for their late submission. (See &lsquo;<a href="../faults">Faults</a>&rsquo; for more information)
+<p>Every successful PoSt submission will delay the next SurprisePoSt challenge the miner will receive.</p>
+
+<p>In this period, the miner can still:</p>
 
 <ul>
-<li>Note: In this case, the next PoSt should still be started at the beginning of the proving period, even if the current one is not yet complete. Miners must submit one PoSt per proving period.</li>
-</ul></li>
-</ol>
+<li>commit new sectors</li>
+<li>be challenged with a SurprisePoSt</li>
+<li>declare faults</li>
+</ul>
 
-<p>Along with the PoSt submission, miners may also submit a set of sectors that they wish to remove from their proving set. This is done by selecting the sectors in the &lsquo;done&rsquo; bitfield passed to <code>SubmitPoSt</code>.</p>
+<h3 id="faults">Faults</h3>
 
-<h1 id="stop-mining">Stop Mining</h1>
+<p>If a miner detects <a href="../../../../../#systems__filecoin_markets__storage_market__faults">Faults</a> among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the <code>DeclareFaults()</code> method of the Storage Miner Actor.</p>
 
-<p>In order to stop mining, a miner must complete all of its storage contracts, and remove them from their proving set during a PoSt submission. A miner may then call <a href="../actors#depledge"><code>DePledge()</code></a> to retrieve their collateral. <code>DePledge</code> must be called twice, once to start the cooldown, and once again after the cooldown to reclaim the funds. The cooldown period is to allow clients whose files have been dropped by a miner to slash them before they get their money back and get away with it.</p>
+<p>The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of winning Election and SurprisePoSts. By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can reverse the fault by calling <code>RecoverFaults()</code> to add the sector back into the <code>ProvingSet</code> and regain power.</p>
 
-<h1 id="faults">Faults</h1>
+<p>A miner will no longer be able to declare faults after being challenged for a SurprisePoSt.</p>
 
-<p>Faults are described in the <a href="../faults">faults document</a>.</p>
+<h3 id="step-4-deal-sector-expiration">Step 4: Deal/Sector Expiration</h3>
 
-<h2 id="on-being-slashed-wip-needs-discussion">On Being Slashed (WIP, needs discussion)</h2>
+<p>In order to stop mining, a miner must complete all of its storage deals. Once all deals in a sector have expired, the sector itself will expire thereby enabling the miner to remove the associated collateral from their account.</p>
 
-<p>If a miner is slashed for failing to submit their PoSt on time, they currently lose all their pledge collateral. They do not necessarily lose their storage collateral. Storage collateral is lost when a miner&rsquo;s clients slash them for no longer having the data. Missing a PoSt does not necessarily imply that a miner no longer has the data. There should be an additional timeout here where the miner can submit a PoSt, along with &lsquo;refilling&rsquo; their pledge collateral. If a miner does this, they can continue mining, their mining power will be reinstated, and clients can be assured that their data is still there.</p>
-
-<p>TODO: disambiguate the two collaterals across the entire spec</p>
-
-<p>Review Discussion Note: Taking all of a miners collateral for going over the deadline for PoSt submission is really really painful, and is likely to dissuade people from even mining filecoin in the first place (If my internet going out could cause me to lose a very large amount of money, that leads to some pretty hard decisions around profitability). One potential strategy could be to only penalize miners for the amount of sectors they could have generated in that timeframe.</p>
-
-<h1 id="future-work">Future Work</h1>
+<h3 id="future-work">Future Work</h3>
 
 <p>There are many ideas for improving upon the storage miner, here are ideas that may be potentially implemented in the future.</p>
 
@@ -4741,26 +4807,28 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
 <ul>
-<li><a href="#the-miner-actor">The Miner Actor</a>
+<li>
 <ul>
-<li><a href="#owner-worker-distinction">Owner Worker distinction</a></li>
-<li><a href="#storage-mining-cycle">Storage Mining Cycle</a>
+<li><a href="#active-miner-mining-cycle">Active Miner Mining Cycle</a>
 <ul>
-<li><a href="#step-0-registration">Step 0: Registration</a>
+<li><a href="#continuous-mining-cycle">Continuous Mining Cycle</a></li>
+<li><a href="#timing">Timing</a></li>
+</ul></li>
+<li><a href="#full-miner-lifecycle">Full Miner Lifecycle</a>
 <ul>
+<li><a href="#step-0-registration-and-market-participation">Step 0: Registration and Market participation</a>
+<ul>
+<li><a href="#owner-worker-distinction">Owner/Worker distinction</a></li>
 <li><a href="#changing-worker-addresses">Changing Worker Addresses</a></li>
 </ul></li>
-<li><a href="#step-1-commit">Step 1: Commit</a></li>
-<li><a href="#step-2-proving-storage-post-creation">Step 2: Proving Storage (PoSt creation)</a></li>
-<li><a href="#step-3-post-submission">Step 3: PoSt Submission</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#stop-mining">Stop Mining</a></li>
-<li><a href="#faults">Faults</a>
-<ul>
-<li><a href="#on-being-slashed-wip-needs-discussion">On Being Slashed (WIP, needs discussion)</a></li>
-</ul></li>
+<li><a href="#step-1-committing-sectors">Step 1: Committing Sectors</a></li>
+<li><a href="#step-2-getting-power">Step 2: Getting Power</a></li>
+<li><a href="#step-3-running-elections">Step 3: Running Elections</a></li>
+<li><a href="#faults">Faults</a></li>
+<li><a href="#step-4-deal-sector-expiration">Step 4: Deal/Sector Expiration</a></li>
 <li><a href="#future-work">Future Work</a></li>
+</ul></li>
+</ul></li>
 </ul>
 </nav>
   </aside>

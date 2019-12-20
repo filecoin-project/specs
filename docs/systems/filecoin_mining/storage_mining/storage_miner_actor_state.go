@@ -51,22 +51,22 @@ func (st *StorageMinerActorState_I) _processStagedCommittedSectors() {
 	st.Impl().StagedCommittedSectors_ = make(map[sector.SectorNumber]SectorOnChainInfo)
 }
 
-func (st *StorageMinerActorState_I) _getActivePower() (block.StoragePower, error) {
-	activePower := block.StoragePower(0)
+func (st *StorageMinerActorState_I) _getActiveSectorWeight() (block.SectorWeight, error) {
+	activeSectorWeight := block.SectorWeight(0)
 
 	for _, sectorNo := range st.SectorTable().Impl().ActiveSectors_.SectorsOn() {
-		sectorPower, found := st._getSectorPower(sectorNo)
+		sectorWeight, found := st._getSectorWeight(sectorNo)
 		if !found {
 			panic("")
 		}
-		activePower += sectorPower
+		activeSectorWeight += sectorWeight
 	}
 
-	return activePower, nil
+	return activeSectorWeight, nil
 }
 
-func (st *StorageMinerActorState_I) _getInactivePower() (block.StoragePower, error) {
-	var inactivePower = block.StoragePower(0)
+func (st *StorageMinerActorState_I) _getInactiveSectorWeight() (block.SectorWeight, error) {
+	var inactiveSectorWeight = block.SectorWeight(0)
 
 	// iterate over sectorNo in CommittedSectors, RecoveringSectors, and FailingSectors
 	inactiveProvingSet := st.SectorTable().Impl().CommittedSectors_.Extend(st.SectorTable().RecoveringSectors())
@@ -74,14 +74,14 @@ func (st *StorageMinerActorState_I) _getInactivePower() (block.StoragePower, err
 
 	for _, sectorNo := range inactiveSectorSet.SectorsOn() {
 
-		sectorPower, found := st._getSectorPower(sectorNo)
+		sectorWeight, found := st._getSectorWeight(sectorNo)
 		if !found {
 			panic("")
 		}
-		inactivePower += sectorPower
+		inactiveSectorWeight += sectorWeight
 	}
 
-	return inactivePower, nil
+	return inactiveSectorWeight, nil
 }
 
 // move Sector from Active/Failing
@@ -209,12 +209,12 @@ func (st *StorageMinerActorState_I) _getSectorOnChainInfo(sectorNo sector.Sector
 	return sectorInfo, true
 }
 
-func (st *StorageMinerActorState_I) _getSectorPower(sectorNo sector.SectorNumber) (power block.StoragePower, ok bool) {
+func (st *StorageMinerActorState_I) _getSectorWeight(sectorNo sector.SectorNumber) (power block.SectorWeight, ok bool) {
 	sectorInfo, found := st._getSectorOnChainInfo(sectorNo)
 	if !found {
-		return block.StoragePower(0), false
+		return block.SectorWeight(0), false
 	}
-	return sectorInfo.Power(), true
+	return sectorInfo.SectorWeight(), true
 }
 
 func (st *StorageMinerActorState_I) _getSectorDealIDs(sectorNo sector.SectorNumber) (dealIDs deal.DealIDs, ok bool) {
@@ -233,4 +233,10 @@ func (st *StorageMinerActorState_I) _getPreCommitDepositReq() actor.TokenAmount 
 	depositReq := actor.TokenAmount(uint64(PRECOMMIT_DEPOSIT_PER_BYTE) * uint64(sectorSize))
 
 	return depositReq
+}
+
+// TODO: define how target is calculated
+func (st *StorageMinerActorState_I) _verifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool {
+	util.TODO()
+	return false
 }

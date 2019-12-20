@@ -4665,13 +4665,14 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 
 <span class="kd">type</span> <span class="nx">PowerTableEntry</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ActivePower</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-    <span class="nx">InactivePower</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nx">ActiveSectorWeight</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span>
+    <span class="nx">InactiveSectorWeight</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span>
+    <span class="nx">Power</span>                 <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">PowerReport</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ActivePower</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>  <span class="c1">// set value
-</span><span class="c1"></span>    <span class="nx">InactivePower</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>  <span class="c1">// set value
+    <span class="nx">ActiveSectorWeight</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span>  <span class="c1">// set value
+</span><span class="c1"></span>    <span class="nx">InactiveSectorWeight</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span>  <span class="c1">// set value
 </span><span class="c1"></span><span class="p">}</span>
 
 <span class="c1">// type PowerTableHAMT {actor.ActorID: PowerTableEntry}
@@ -4682,17 +4683,15 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">EscrowTable</span>           <span class="nx">actor_util</span><span class="p">.</span><span class="nx">BalanceTableHAMT</span>
     <span class="nx">_minersLargerThanMin</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
 
-    <span class="nf">ActivePowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">minPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="kt">bool</span>
-    <span class="nf">_getActivePowerForConsensus</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nf">MinerPowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">minPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_slashPledgeCollateral</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
-    <span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
-        <span class="nx">activePower</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-        <span class="nx">inactivePower</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-        <span class="nx">ok</span>             <span class="kt">bool</span>
+    <span class="nf">GetSectorWeightForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
+        <span class="nx">activeSectorWeight</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span>
+        <span class="nx">inactiveSectorWeight</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span>
+        <span class="nx">ok</span>                    <span class="kt">bool</span>
     <span class="p">)</span>
-    <span class="nf">_getCurrPledgeForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">currPledge</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
-    <span class="nf">_getTotalPower</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nf">GetCurrPledgeForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">currPledge</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
     <span class="nf">_selectMinersToSurprise</span><span class="p">(</span><span class="nx">challengeCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
     <span class="nf">_getStorageFaultSlashPledgePercent</span><span class="p">(</span><span class="nx">faultType</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">StorageFaultType</span><span class="p">)</span> <span class="kt">int</span>
 <span class="p">}</span>
@@ -4703,8 +4702,7 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="c1">// call by StorageMiningSubsytem on miner creation
 </span><span class="c1"></span>    <span class="nf">CreateStorageMiner</span><span class="p">(</span>
-        <span class="c1">// TODO: document differences in Addr, Key and ID accross spec
-</span><span class="c1"></span>        <span class="nx">rt</span>          <span class="nx">Runtime</span>
+        <span class="nx">rt</span>          <span class="nx">Runtime</span>
         <span class="nx">ownerAddr</span>   <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
         <span class="nx">workerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
         <span class="nx">peerId</span>      <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>  <span class="c1">// TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)
@@ -4773,7 +4771,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">ActivePowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">minerPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">MinerPowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">minerPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="c1">// TODO import from consts
 </span><span class="c1"></span>    <span class="nx">MIN_MINER_SIZE_STOR</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="nx">MIN_MINER_SIZE_TARG</span> <span class="o">:=</span> <span class="mi">0</span>
@@ -4797,24 +4795,10 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// get size of MIN_MINER_SIZE_TARGth largest miner
 </span><span class="c1"></span>    <span class="nx">minerSizes</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()))</span>
     <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()</span> <span class="p">{</span>
-        <span class="nx">minerSizes</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">minerSizes</span><span class="p">,</span> <span class="nx">v</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">())</span>
+        <span class="nx">minerSizes</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">minerSizes</span><span class="p">,</span> <span class="nx">v</span><span class="p">.</span><span class="nf">Power</span><span class="p">())</span>
     <span class="p">}</span>
     <span class="nx">sort</span><span class="p">.</span><span class="nf">Slice</span><span class="p">(</span><span class="nx">minerSizes</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span> <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="nx">j</span><span class="p">)</span> <span class="p">})</span>
     <span class="k">return</span> <span class="nx">minerPower</span> <span class="o">&gt;=</span> <span class="nx">minerSizes</span><span class="p">[</span><span class="nx">MIN_MINER_SIZE_TARG</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getActivePowerForConsensus</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span> <span class="p">{</span>
-    <span class="nx">activePower</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">miner</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()</span> <span class="p">{</span>
-        <span class="c1">// only count miner power if they are larger than MIN_MINER_SIZE
-</span><span class="c1"></span>        <span class="c1">// (need to use either condition) in case no one meets MIN_MINER_SIZE_STOR
-</span><span class="c1"></span>        <span class="k">if</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ActivePowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">())</span> <span class="p">{</span>
-            <span class="nx">activePower</span> <span class="p">=</span> <span class="nx">activePower</span> <span class="o">+</span> <span class="nx">miner</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">()</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="nx">activePower</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_slashPledgeCollateral</span><span class="p">(</span>
@@ -4876,30 +4860,19 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">selectedMiners</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getTotalPower</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span> <span class="p">{</span>
-    <span class="c1">// TODO (optimization): cache this as a counter in the actor state,
-</span><span class="c1"></span>    <span class="c1">// and update it for relevant operations.
-</span><span class="c1"></span>
-    <span class="nx">totalPower</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">minerEntry</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()</span> <span class="p">{</span>
-        <span class="nx">totalPower</span> <span class="p">=</span> <span class="nx">totalPower</span> <span class="o">+</span> <span class="nx">minerEntry</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">()</span> <span class="o">+</span> <span class="nx">minerEntry</span><span class="p">.</span><span class="nf">InactivePower</span><span class="p">()</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="nx">totalPower</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
-    <span class="nx">activePower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">inactivePower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">GetSectorWeightForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
+    <span class="nx">activeSectorWeight</span> <span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span><span class="p">,</span> <span class="nx">inactiveSectorWeight</span> <span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
 
     <span class="nx">powerEntry</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()[</span><span class="nx">minerAddr</span><span class="p">]</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nx">found</span>
+        <span class="k">return</span> <span class="nx">block</span><span class="p">.</span><span class="nf">SectorWeight</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nx">block</span><span class="p">.</span><span class="nf">SectorWeight</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nx">found</span>
     <span class="p">}</span>
 
-    <span class="k">return</span> <span class="nx">powerEntry</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">(),</span> <span class="nx">powerEntry</span><span class="p">.</span><span class="nf">InactivePower</span><span class="p">(),</span> <span class="kc">true</span>
+    <span class="k">return</span> <span class="nx">powerEntry</span><span class="p">.</span><span class="nf">ActiveSectorWeight</span><span class="p">(),</span> <span class="nx">powerEntry</span><span class="p">.</span><span class="nf">InactiveSectorWeight</span><span class="p">(),</span> <span class="kc">true</span>
 
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getCurrPledgeForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">currPledge</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">GetCurrPledgeForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">currPledge</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5008,7 +4981,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">CreateStorageMiner</span><span class="p">(</span>
-    <span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">workerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">peerId</span> <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
+    <span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">ownerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">workerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">collateral</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">peerId</span> <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
 
     <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_Account</span><span class="p">)</span>
 
@@ -5021,8 +4994,9 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="c1">// TODO: anything to check here?
 </span><span class="c1"></span>    <span class="nx">newMinerEntry</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">PowerTableEntry_I</span><span class="p">{</span>
-        <span class="nx">ActivePower_</span><span class="p">:</span>   <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
-        <span class="nx">InactivePower_</span><span class="p">:</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">ActiveSectorWeight_</span><span class="p">:</span>   <span class="nx">block</span><span class="p">.</span><span class="nf">SectorWeight</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">InactiveSectorWeight_</span><span class="p">:</span> <span class="nx">block</span><span class="p">.</span><span class="nf">SectorWeight</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">Power_</span><span class="p">:</span>                <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="p">}</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
@@ -5046,11 +5020,11 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-    <span class="nx">activePower</span><span class="p">,</span> <span class="nx">inactivePower</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nx">activeSectorWeight</span><span class="p">,</span> <span class="nx">inactiveSectorWeight</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">GetSectorWeightForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa.RemoveStorageMiner: miner entry not found in PowerTable.&#34;</span><span class="p">)</span>
     <span class="p">}</span>
-    <span class="k">if</span> <span class="nx">activePower</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="nx">inactivePower</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">activeSectorWeight</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="nx">inactiveSectorWeight</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;spa.RemoveStorageMiner: power still remains.&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
@@ -5107,11 +5081,11 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
     <span class="c1">// getAffectedPledge
-</span><span class="c1"></span>    <span class="nx">activePower</span><span class="p">,</span> <span class="nx">inactivePower</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nx">activeSectorWeight</span><span class="p">,</span> <span class="nx">inactiveSectorWeight</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">GetSectorWeightForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
     <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
-    <span class="nx">currPledge</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getCurrPledgeForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nx">currPledge</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">GetCurrPledgeForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
     <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
-    <span class="nx">affectedPledge</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">BlockReward_GetPledgeSlashForStorageFault</span><span class="p">(</span><span class="nx">affectedPower</span><span class="p">,</span> <span class="nx">activePower</span><span class="p">,</span> <span class="nx">inactivePower</span><span class="p">,</span> <span class="nx">currPledge</span><span class="p">)</span>
+    <span class="nx">affectedPledge</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">BlockReward_GetPledgeSlashForStorageFault</span><span class="p">(</span><span class="nx">affectedPower</span><span class="p">,</span> <span class="nx">activeSectorWeight</span><span class="p">,</span> <span class="nx">inactiveSectorWeight</span><span class="p">,</span> <span class="nx">currPledge</span><span class="p">)</span>
 
     <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// BigInt arithmetic
 </span><span class="c1"></span>    <span class="nx">amountToSlash</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span>
@@ -5124,7 +5098,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="p">}</span>
 
-<span class="c1">// @param PowerReport with ActivePower and InactivePower
+<span class="c1">// @param PowerReport with ActiveSectorWeight and InactiveSectorWeight
 </span><span class="c1">// update miner power based on the power report
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">ProcessPowerReport</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">report</span> <span class="nx">PowerReport</span><span class="p">)</span> <span class="p">{</span>
 
@@ -5133,21 +5107,28 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// caller verification
 </span><span class="c1"></span>    <span class="nf">TODO</span><span class="p">()</span>
 
+    <span class="nx">inds</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrIndices</span><span class="p">()</span>
     <span class="nx">powerEntry</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_rtGetPowerEntryOrAbort</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
+    <span class="nx">currPledge</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">GetCurrPledgeForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+
+    <span class="nx">newPower</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="nx">report</span><span class="p">.</span><span class="nf">ActiveSectorWeight</span><span class="p">(),</span> <span class="nx">report</span><span class="p">.</span><span class="nf">InactiveSectorWeight</span><span class="p">(),</span> <span class="nx">currPledge</span><span class="p">)</span>
+
     <span class="c1">// keep track of miners larger than minimum miner size before updating the PT
 </span><span class="c1"></span>    <span class="nx">MIN_MINER_SIZE_STOR</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// TODO: pull in from consts
-</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">powerEntry</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="nx">MIN_MINER_SIZE_STOR</span> <span class="o">&amp;&amp;</span> <span class="nx">report</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">MIN_MINER_SIZE_STOR</span> <span class="p">{</span>
+</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">powerEntry</span><span class="p">.</span><span class="nf">Power</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="nx">MIN_MINER_SIZE_STOR</span> <span class="o">&amp;&amp;</span> <span class="nx">newPower</span> <span class="p">&lt;</span> <span class="nx">MIN_MINER_SIZE_STOR</span> <span class="p">{</span>
         <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">_minersLargerThanMin_</span> <span class="o">-=</span> <span class="mi">1</span>
     <span class="p">}</span>
-    <span class="k">if</span> <span class="nx">powerEntry</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">MIN_MINER_SIZE_STOR</span> <span class="o">&amp;&amp;</span> <span class="nx">report</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="nx">MIN_MINER_SIZE_STOR</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">powerEntry</span><span class="p">.</span><span class="nf">Power</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">MIN_MINER_SIZE_STOR</span> <span class="o">&amp;&amp;</span> <span class="nx">newPower</span> <span class="o">&gt;=</span> <span class="nx">MIN_MINER_SIZE_STOR</span> <span class="p">{</span>
         <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">_minersLargerThanMin_</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="p">}</span>
 
-    <span class="nx">powerEntry</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">ActivePower_</span> <span class="p">=</span> <span class="nx">report</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">()</span>
-    <span class="nx">powerEntry</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">InactivePower_</span> <span class="p">=</span> <span class="nx">report</span><span class="p">.</span><span class="nf">InactivePower</span><span class="p">()</span>
+    <span class="nx">powerEntry</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">ActiveSectorWeight_</span> <span class="p">=</span> <span class="nx">report</span><span class="p">.</span><span class="nf">ActiveSectorWeight</span><span class="p">()</span>
+    <span class="nx">powerEntry</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">InactiveSectorWeight_</span> <span class="p">=</span> <span class="nx">report</span><span class="p">.</span><span class="nf">InactiveSectorWeight</span><span class="p">()</span>
+    <span class="nx">powerEntry</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Power_</span> <span class="p">=</span> <span class="nx">newPower</span>
     <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">PowerTable_</span><span class="p">[</span><span class="nx">minerAddr</span><span class="p">]</span> <span class="p">=</span> <span class="nx">powerEntry</span>
 
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
@@ -5208,17 +5189,17 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">inds</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrIndices</span><span class="p">()</span>
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-    <span class="nx">activePower</span><span class="p">,</span> <span class="nx">inactivePower</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPowerTotalForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nx">activeSectorWeight</span><span class="p">,</span> <span class="nx">inactiveSectorWeight</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">GetSectorWeightForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa._rtGetPledgeCollateralReqForMinerOrAbort: miner not in PowerTable.&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="nx">currPledge</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getCurrPledgeForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nx">currPledge</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">GetCurrPledgeForMiner</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa._rtGetPledgeCollateralReqForMinerOrAbort: miner not in EscrowTable.&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="nx">minBalance</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">BlockReward_PledgeCollateralReq</span><span class="p">(</span><span class="nx">activePower</span><span class="p">,</span> <span class="nx">inactivePower</span><span class="p">,</span> <span class="nx">currPledge</span><span class="p">)</span>
+    <span class="nx">minBalance</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">BlockReward_PledgeCollateralReq</span><span class="p">(</span><span class="nx">activeSectorWeight</span><span class="p">,</span> <span class="nx">inactiveSectorWeight</span><span class="p">,</span> <span class="nx">currPledge</span><span class="p">)</span>
 
     <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
     <span class="k">return</span> <span class="nx">minBalance</span>

@@ -4,23 +4,26 @@ import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
-type CollateralPower block.BytesAmount
-type EarningPower block.BytesAmount
-
 // Data in Indices are populated at instantiation with data from the state tree
 // Indices itself has no state tree or access to the runtime
 // it is a passive data structure that allows for convenience access to network indices
 // and pure functions in implementing economic policies given states
 type Indices struct {
-    Epoch                    block.ChainEpoch
-    NetworkKPI               BigInt
-    TotalNetworkActivePower  BigInt
-    TotalPledgeCollateral    BigInt
-    TotalEarningPower        BigInt
-    TotalMinedFIL            BigInt
-    TotalUnminedFIL          BigInt
-    TotalBurnedFIL           BigInt
+    // these fields are computed from StateTree upon construction
+    // they are treated as globally available states
+    Epoch                       block.ChainEpoch
+    NetworkKPI                  BigInt
+    TotalNetworkSectorWeight    block.SectorWeight
+    TotalPledgeCollateral       actor.TokenAmount
+    TotalNetworkEffectivePower  block.StoragePower  // power above minimum miner size
+    TotalNetworkPower           block.StoragePower
 
+    TotalMinedFIL               actor.TokenAmount
+    TotalUnminedFIL             actor.TokenAmount
+    TotalBurnedFIL              actor.TokenAmount
+    LastEpochReward             actor.TokenAmount
+
+    // these methods produce policy output based on user state/action
     StorageDeal_DurationBounds(
         pieceSize   piece.PieceSize
         startEpoch  block.ChainEpoch
@@ -50,43 +53,49 @@ type Indices struct {
         maxClientCollateral  actor.TokenAmount
     )
 
-    BlockReward_SectorPower(
+    BlockReward_SectorWeight(
         sectorSize  sector.SectorSize
         startEpoch  block.ChainEpoch
         endEpoch    block.ChainEpoch
         dealWeight  deal.DealWeight
-    ) block.StoragePower
+    ) block.SectorWeight
 
     BlockReward_PledgeCollateralReq(
-        minerActiveStoragePower    block.StoragePower
-        minerInactiveStoragePower  block.StoragePower
+        minerActiveSectorWeight    block.SectorWeight
+        minerInactiveSectorWeight  block.SectorWeight
         minerPledgeCollateral      actor.TokenAmount
     ) actor.TokenAmount
 
-    BlockReward_StoragePowerProportion(
-        minerActiveStoragePower block.StoragePower
+    BlockReward_SectorWeightProportion(
+        minerActiveSectorWeight block.SectorWeight
     ) BigInt
 
-    BlockReward_CollateralPowerProportion(
+    BlockReward_PledgeCollateralProportion(
         minerPledgeCollateral actor.TokenAmount
     ) BigInt
 
-    BlockReward_EarningPowerProportion(
-        minerActiveStoragePower  block.StoragePower
-        minerPledgeCollateral    actor.TokenAmount
-    ) EarningPower
+    StoragePower(
+        minerActiveSectorWeight    block.SectorWeight
+        minerInactiveSectorWeight  block.SectorWeight
+        minerPledgeCollateral      actor.TokenAmount
+    ) block.StoragePower
+
+    BlockReward_StoragePowerProportion(
+        minerStoragePower      block.StoragePower
+        minerPledgeCollateral  actor.TokenAmount
+    ) BigInt
 
     BlockReward_CurrEpochReward() actor.TokenAmount
 
     BlockReward_GetCurrRewardForMiner(
-        minerActiveStoragePower  block.StoragePower
-        minerPledgeCollateral    actor.TokenAmount
+        minerStoragePower      block.StoragePower
+        minerPledgeCollateral  actor.TokenAmount
     ) actor.TokenAmount
 
     BlockReward_GetPledgeSlashForStorageFault(
-        affectedPower     block.StoragePower
-        newActivePower    block.StoragePower
-        newInactivePower  block.StoragePower
-        currPledge        actor.TokenAmount
+        affectedPower            block.StoragePower
+        newActiveSectorWeight    block.SectorWeight
+        newInactiveSectorWeight  block.SectorWeight
+        currPledge               actor.TokenAmount
     ) actor.TokenAmount
 }

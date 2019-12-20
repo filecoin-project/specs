@@ -16,6 +16,8 @@ import (
 // Boilerplate
 ////////////////////////////////////////////////////////////////////////////////
 
+var TODO = util.TODO
+
 func (a *RewardActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, RewardActorState) {
 	h := rt.AcquireState()
 	stateCID := h.Take()
@@ -44,6 +46,7 @@ func (r *Reward_I) AmountVested(elapsedEpoch block.ChainEpoch) actor.TokenAmount
 	case VestingFunction_None:
 		return r.Value()
 	case VestingFunction_Linear:
+		TODO() // BigInt
 		vestedProportion := math.Max(1.0, float64(elapsedEpoch)/float64(r.StartEpoch()-r.EndEpoch()))
 		return actor.TokenAmount(uint64(r.Value()) * uint64(vestedProportion))
 	default:
@@ -93,19 +96,21 @@ func (a *RewardActorCode_I) AwardBlockReward(
 	rt vmr.Runtime,
 	miner addr.Address,
 	penalty actor.TokenAmount,
-	minerActivePower block.StoragePower,
-	minerInactivePower block.StoragePower,
+	minerStoragePower block.StoragePower,
+	minerActiveSectorWeight block.SectorWeight,
+	minerInactiveSectorWeight block.SectorWeight,
 	currPledge actor.TokenAmount,
 ) {
 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
 
 	inds := rt.CurrIndices()
-	pledgeReq := inds.BlockReward_PledgeCollateralReq(minerActivePower, minerInactivePower, currPledge)
-	currReward := inds.BlockReward_GetCurrRewardForMiner(minerActivePower, currPledge)
+	pledgeReq := inds.BlockReward_PledgeCollateralReq(minerActiveSectorWeight, minerInactiveSectorWeight, currPledge)
+	currReward := inds.BlockReward_GetCurrRewardForMiner(minerStoragePower, currPledge)
+	TODO()                                                                                // BigInt
 	underPledge := math.Max(float64(actor.TokenAmount(0)), float64(pledgeReq-currPledge)) // 0 if over collateralized
 	rewardToGarnish := math.Min(float64(currReward), float64(underPledge))
 
-	util.TODO()
+	TODO()
 	// handle penalty here
 	// also handle penalty greater than reward
 	actualReward := currReward - actor.TokenAmount(rewardToGarnish)

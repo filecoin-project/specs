@@ -4657,7 +4657,7 @@ https://github.com/alex-shpak/hugo-book
 
 <h2 id="storage-states">Storage States</h2>
 
-<p>When managing their storage <a href="../../../../#systems__filecoin_mining__sector___index">sectors</a>  as part of Filecoin mining, storage providers will account for where in the mining cycle their sectors are. For instance, has a sector been committed? Does it need a new PoSt? Most of these operations happen as part of cycles of chain epochs called <code>Proving Period</code>s each of which yield high confidence that every miner in the chain has proven their power (see <a href="../../../../#algorithms__post__election_post">Election PoSt</a>).</p>
+<p>When managing their storage <a href="../../../../#systems__filecoin_mining__sector___index">sectors</a>  as part of Filecoin mining, storage providers will account for where in the <a href="../../../../#systems__filecoin_mining__storage_mining__mining_cycle">Storage Mining Cycle</a> their sectors are. For instance, has a sector been committed? Does it need a new PoSt? Most of these operations happen as part of cycles of chain epochs called <code>Proving Period</code>s each of which yield high confidence that every miner in the chain has proven their power (see <a href="../../../../#algorithms__post__election_post">Election PoSt</a>).</p>
 
 <p>Through most of this cycle, sectors will be part of the miner&rsquo;s <code>Proving Set</code>. This is the set of sectors that the miners are supposed to generate proofs against. It includes:
 - <code>Committed Sectors</code> which have an associated PoRep but have but yet to generate a PoSt,
@@ -4693,7 +4693,6 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sectoridx</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector_index&#34;</span>
 <span class="kn">import</span> <span class="nx">spc</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus&#34;</span>
-<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
@@ -4705,6 +4704,8 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">stateTree</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
+<span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
+<span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StorageMiningSubsystem</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">FilecoinNode</span>       <span class="nx">node_base</span><span class="p">.</span><span class="nx">FilecoinNode</span>
@@ -4731,15 +4732,14 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// Need access to the key store in order to generate tickets and election proofs
 </span><span class="c1"></span>    <span class="nx">_keyStore</span>          <span class="nx">key_store</span><span class="p">.</span><span class="nx">KeyStore</span>
 
-    <span class="c1">// TODO: why are these here? remove?
-</span><span class="c1"></span>    <span class="nf">StartMining</span><span class="p">()</span>
-    <span class="nf">StopMining</span><span class="p">()</span>
-
     <span class="c1">// call by StorageMiningSubsystem itself to create miner
 </span><span class="c1"></span>    <span class="nf">CreateMiner</span><span class="p">(</span>
-        <span class="nx">ownerPubKey</span>   <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span>
-        <span class="nx">workerPubKey</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span>
-        <span class="nx">pledgeAmt</span>     <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">state</span>       <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span>
+        <span class="nx">ownerAddr</span>   <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+        <span class="nx">workerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+        <span class="nx">sectorSize</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">UInt</span>
+        <span class="nx">peerId</span>      <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+        <span class="nx">pledgeAmt</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="p">)</span>
 
     <span class="c1">// call by StorageMarket.StorageProvider at the start of a deal.
@@ -4766,7 +4766,15 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// TODO: define clock better
 </span><span class="c1"></span>    <span class="nf">OnNewRound</span><span class="p">()</span>
 
-    <span class="nf">_tryLeaderElection</span><span class="p">()</span>
+    <span class="nf">_runMiningCycle</span><span class="p">()</span>
+    <span class="nf">_tryLeaderElection</span><span class="p">(</span><span class="nx">st</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">sma</span> <span class="nx">StorageMinerActorState</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
+    <span class="nf">_trySurprisePoSt</span><span class="p">(</span><span class="nx">st</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">sma</span> <span class="nx">StorageMinerActorState</span><span class="p">)</span> <span class="kt">error</span>
+    <span class="nf">_submitSurprisePoStMessage</span><span class="p">(</span>
+        <span class="nx">state</span>     <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span>
+        <span class="nx">sPoSt</span>     <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
+        <span class="nx">gasPrice</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">gasLimit</span>  <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span>
+    <span class="p">)</span> <span class="kt">error</span>
 
     <span class="nf">VerifyElectionPoSt</span><span class="p">(</span>
         <span class="nx">header</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span>

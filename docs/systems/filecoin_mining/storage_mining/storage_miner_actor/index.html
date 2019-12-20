@@ -4698,7 +4698,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">SectorOnChainInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SealCommitment</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCommitment</span>
     <span class="nx">State</span>           <span class="nx">SectorState</span>
-    <span class="nx">Power</span>           <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nx">SectorWeight</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span>
     <span class="nx">Activation</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="nx">Expiration</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 <span class="p">}</span>
@@ -4747,8 +4747,9 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// contains mostly static info about this miner
 </span><span class="c1"></span>    <span class="nx">Info</span>                    <span class="o">&amp;</span><span class="nx">MinerInfo</span>
 
+    <span class="nf">_verifySurprisePoStMeetsTargetReq</span><span class="p">(</span><span class="nx">candidate</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="c1">// No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
-</span><span class="c1"></span>    <span class="nf">_isChallenged</span><span class="p">()</span>         <span class="kt">bool</span>
+</span><span class="c1"></span>    <span class="nf">_isChallenged</span><span class="p">()</span> <span class="kt">bool</span>
     <span class="nf">_canBeElected</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_challengeHasExpired</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_shouldChallenge</span><span class="p">(</span>
@@ -4764,9 +4765,9 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">_updateClearSectorAssert</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
     <span class="nf">_updateActivateSectorAssert</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
 
-    <span class="nf">_getActivePower</span><span class="p">()</span>          <span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
-    <span class="nf">_getInactivePower</span><span class="p">()</span>        <span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
-    <span class="nf">_getPreCommitDepositReq</span><span class="p">()</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">_getActiveSectorWeight</span><span class="p">()</span>    <span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+    <span class="nf">_getInactiveSectorWeight</span><span class="p">()</span>  <span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+    <span class="nf">_getPreCommitDepositReq</span><span class="p">()</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
     <span class="nf">_getSectorOnChainInfo</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">info</span> <span class="nx">SectorOnChainInfo</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
     <span class="nf">_getSectorPower</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">power</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
@@ -4788,7 +4789,6 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nf">_checkSurprisePoStSubmissionHappened</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
     <span class="nf">_rtVerifySurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
-    <span class="nf">_rtVerifySurprisePoStMeetsTargetReq</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_rtVerifySeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_rtAbortIfSectorDidNotExist</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
 
@@ -4816,14 +4816,12 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// - Income and returned collateral are paid to this address.
 </span><span class="c1"></span>    <span class="c1">// - This address is also allowed to change the worker address for the miner.
 </span><span class="c1"></span>    <span class="nx">Owner</span>                   <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">OwnerKey</span>                <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span>
 
     <span class="c1">// Worker account for this miner.
 </span><span class="c1"></span>    <span class="c1">// This will be the key that is used to sign blocks created by this miner, and
 </span><span class="c1"></span>    <span class="c1">// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
 </span><span class="c1"></span>    <span class="c1">// other day to day miner activities.
 </span><span class="c1"></span>    <span class="nx">Worker</span>                  <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">WorkerKey</span>               <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span>
 
     <span class="c1">// Libp2p identity that should be used when connecting to this miner.
 </span><span class="c1"></span>    <span class="nx">PeerId</span>                  <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
@@ -4916,22 +4914,22 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">StagedCommittedSectors_</span> <span class="p">=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">]</span><span class="nx">SectorOnChainInfo</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getActivePower</span><span class="p">()</span> <span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">activePower</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getActiveSectorWeight</span><span class="p">()</span> <span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">activeSectorWeight</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">SectorWeight</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">st</span><span class="p">.</span><span class="nf">SectorTable</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">ActiveSectors_</span><span class="p">.</span><span class="nf">SectorsOn</span><span class="p">()</span> <span class="p">{</span>
-        <span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorPower</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
+        <span class="nx">sectorWeight</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorWeight</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
             <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
         <span class="p">}</span>
-        <span class="nx">activePower</span> <span class="o">+=</span> <span class="nx">sectorPower</span>
+        <span class="nx">activeSectorWeight</span> <span class="o">+=</span> <span class="nx">sectorWeight</span>
     <span class="p">}</span>
 
-    <span class="k">return</span> <span class="nx">activePower</span><span class="p">,</span> <span class="kc">nil</span>
+    <span class="k">return</span> <span class="nx">activeSectorWeight</span><span class="p">,</span> <span class="kc">nil</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getInactivePower</span><span class="p">()</span> <span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">inactivePower</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getInactiveSectorWeight</span><span class="p">()</span> <span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">inactiveSectorWeight</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">SectorWeight</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="c1">// iterate over sectorNo in CommittedSectors, RecoveringSectors, and FailingSectors
 </span><span class="c1"></span>    <span class="nx">inactiveProvingSet</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">SectorTable</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">CommittedSectors_</span><span class="p">.</span><span class="nf">Extend</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">SectorTable</span><span class="p">().</span><span class="nf">RecoveringSectors</span><span class="p">())</span>
@@ -4939,14 +4937,14 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">inactiveSectorSet</span><span class="p">.</span><span class="nf">SectorsOn</span><span class="p">()</span> <span class="p">{</span>
 
-        <span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorPower</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
+        <span class="nx">sectorWeight</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorWeight</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
             <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
         <span class="p">}</span>
-        <span class="nx">inactivePower</span> <span class="o">+=</span> <span class="nx">sectorPower</span>
+        <span class="nx">inactiveSectorWeight</span> <span class="o">+=</span> <span class="nx">sectorWeight</span>
     <span class="p">}</span>
 
-    <span class="k">return</span> <span class="nx">inactivePower</span><span class="p">,</span> <span class="kc">nil</span>
+    <span class="k">return</span> <span class="nx">inactiveSectorWeight</span><span class="p">,</span> <span class="kc">nil</span>
 <span class="p">}</span>
 
 <span class="c1">// move Sector from Active/Failing
@@ -5074,12 +5072,12 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">sectorInfo</span><span class="p">,</span> <span class="kc">true</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getSectorPower</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">power</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getSectorWeight</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">power</span> <span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">sectorInfo</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorOnChainInfo</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="kc">false</span>
+        <span class="k">return</span> <span class="nx">block</span><span class="p">.</span><span class="nf">SectorWeight</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="kc">false</span>
     <span class="p">}</span>
-    <span class="k">return</span> <span class="nx">sectorInfo</span><span class="p">.</span><span class="nf">Power</span><span class="p">(),</span> <span class="kc">true</span>
+    <span class="k">return</span> <span class="nx">sectorInfo</span><span class="p">.</span><span class="nf">SectorWeight</span><span class="p">(),</span> <span class="kc">true</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getSectorDealIDs</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">dealIDs</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealIDs</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
@@ -5098,6 +5096,12 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">depositReq</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">PRECOMMIT_DEPOSIT_PER_BYTE</span><span class="p">)</span> <span class="o">*</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">sectorSize</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="nx">depositReq</span>
+<span class="p">}</span>
+
+<span class="c1">// TODO: define how target is calculated
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_verifySurprisePoStMeetsTargetReq</span><span class="p">(</span><span class="nx">candidate</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="nx">util</span><span class="p">.</span><span class="nf">TODO</span><span class="p">()</span>
+    <span class="k">return</span> <span class="kc">false</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -5147,20 +5151,6 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// Actor methods
 </span><span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1"></span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">GetOwnerKey</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span> <span class="p">{</span>
-    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-    <span class="nx">ret</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Info</span><span class="p">().</span><span class="nf">OwnerKey</span><span class="p">()</span>
-    <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nx">ret</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">GetWorkerKey</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span> <span class="p">{</span>
-    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-    <span class="nx">ret</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Info</span><span class="p">().</span><span class="nf">WorkerKey</span><span class="p">()</span>
-    <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nx">ret</span>
-<span class="p">}</span>
-
 <span class="c1">// Called by the cron actor at every tick.
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">OnCronTickEnd</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
     <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">CronActorAddr</span><span class="p">)</span>
@@ -5194,8 +5184,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SuccessReturn</span><span class="p">()</span>
 <span class="p">}</span>
 
-<span class="c1">// called by verifier to update miner state on successful surprise post
-</span><span class="c1">// after it has been verified in the storage_mining_subsystem
+<span class="c1">// called by verifier to update miner state on surprise post submission
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">ProcessSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
     <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// TODO: validate caller
 </span><span class="c1"></span>
@@ -5310,7 +5299,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
     <span class="c1">// Activate storage deals, abort if activation failed
-</span><span class="c1"></span>    <span class="nx">activateDealsRet</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SendQuery</span><span class="p">(</span>
+</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendQuery</span><span class="p">(</span>
         <span class="nx">addr</span><span class="p">.</span><span class="nx">StorageMarketActorAddr</span><span class="p">,</span>
         <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StorageMarketActor_UpdateDealsOnSectorProveCommit</span><span class="p">,</span>
         <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span>
@@ -5318,15 +5307,22 @@ https://github.com/alex-shpak/hugo-book
             <span class="nx">sector</span><span class="p">.</span><span class="nf">Serialize_SectorProveCommitInfo</span><span class="p">(</span><span class="nx">info</span><span class="p">),</span>
         <span class="p">},</span>
     <span class="p">)</span>
-    <span class="nf">TODO</span><span class="p">()</span>
-    <span class="c1">// TODO: compute sector power from query to GetWeightForDealSet instead of this return value
-</span><span class="c1"></span>
-    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="p">=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-    <span class="nx">sectorActivePower</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">Deserialize_StoragePower</span><span class="p">(</span><span class="nx">activateDealsRet</span><span class="p">)</span>
+    <span class="nx">dealWeightRet</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SendQuery</span><span class="p">(</span>
+        <span class="nx">addr</span><span class="p">.</span><span class="nx">StorageMarketActorAddr</span><span class="p">,</span>
+        <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StorageMarketActor_GetWeightForDealSet</span><span class="p">,</span>
+        <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span>
+            <span class="nx">deal</span><span class="p">.</span><span class="nf">Serialize_DealIDs</span><span class="p">(</span><span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">DealIDs</span><span class="p">()),</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+    <span class="nx">dealWeight</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">deal</span><span class="p">.</span><span class="nf">Deserialize_DealWeight</span><span class="p">(</span><span class="nx">dealWeightRet</span><span class="p">)</span>
     <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Failed to deserialize sector power&#34;</span><span class="p">)</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Failed to deserialize deal weight&#34;</span><span class="p">)</span>
     <span class="p">}</span>
+
+    <span class="nx">inds</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrIndices</span><span class="p">()</span>
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="p">=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">minerInfo</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Info</span><span class="p">()</span>
 
     <span class="c1">// add sector expiration to SectorExpirationQueue
 </span><span class="c1"></span>    <span class="nx">st</span><span class="p">.</span><span class="nf">SectorExpirationQueue</span><span class="p">().</span><span class="nf">Add</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">SectorExpirationQueueItem_I</span><span class="p">{</span>
@@ -5341,13 +5337,15 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">DealIDs_</span><span class="p">:</span>   <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">DealIDs</span><span class="p">(),</span>
     <span class="p">}</span>
 
+    <span class="nx">sectorWeight</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">BlockReward_SectorWeight</span><span class="p">(</span><span class="nx">minerInfo</span><span class="p">.</span><span class="nf">SectorSize</span><span class="p">(),</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(),</span> <span class="nx">info</span><span class="p">.</span><span class="nf">Expiration</span><span class="p">(),</span> <span class="nx">deal</span><span class="p">.</span><span class="nf">DealWeight</span><span class="p">(</span><span class="nx">dealWeight</span><span class="p">))</span>
+
     <span class="c1">// add SectorNumber and SealCommitment to Sectors
 </span><span class="c1"></span>    <span class="c1">// set Sectors.State to SectorCommitted
 </span><span class="c1"></span>    <span class="c1">// Note that SectorNumber will only become Active at the next successful PoSt
 </span><span class="c1"></span>    <span class="nx">sealOnChainInfo</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">SectorOnChainInfo_I</span><span class="p">{</span>
         <span class="nx">SealCommitment_</span><span class="p">:</span> <span class="nx">sealCommitment</span><span class="p">,</span>
         <span class="nx">State_</span><span class="p">:</span>          <span class="nf">SectorCommitted</span><span class="p">(),</span>
-        <span class="nx">Power_</span><span class="p">:</span>          <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="nx">sectorActivePower</span><span class="p">),</span>
+        <span class="nx">SectorWeight_</span><span class="p">:</span>   <span class="nx">block</span><span class="p">.</span><span class="nf">SectorWeight</span><span class="p">(</span><span class="nx">sectorWeight</span><span class="p">),</span>
         <span class="nx">Activation_</span><span class="p">:</span>     <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(),</span>
         <span class="nx">Expiration_</span><span class="p">:</span>     <span class="nx">info</span><span class="p">.</span><span class="nf">Expiration</span><span class="p">(),</span>
     <span class="p">}</span>
@@ -5567,19 +5565,19 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">// construct PowerReport from SectorTable
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_submitPowerReport</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-    <span class="nx">activePower</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getActivePower</span><span class="p">()</span>
+    <span class="nx">activeSectorWeight</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getActiveSectorWeight</span><span class="p">()</span>
     <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">())</span>
     <span class="p">}</span>
-    <span class="nx">inactivePower</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getInactivePower</span><span class="p">()</span>
+    <span class="nx">inactiveSectorWeight</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getInactiveSectorWeight</span><span class="p">()</span>
     <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">())</span>
     <span class="p">}</span>
 
     <span class="c1">// power report in processPowerReportParam
 </span><span class="c1"></span>    <span class="nx">powerReport</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">spc</span><span class="p">.</span><span class="nx">PowerReport_I</span><span class="p">{</span>
-        <span class="nx">ActivePower_</span><span class="p">:</span>   <span class="nx">activePower</span><span class="p">,</span>
-        <span class="nx">InactivePower_</span><span class="p">:</span> <span class="nx">inactivePower</span><span class="p">,</span>
+        <span class="nx">ActiveSectorWeight_</span><span class="p">:</span>   <span class="nx">activeSectorWeight</span><span class="p">,</span>
+        <span class="nx">InactiveSectorWeight_</span><span class="p">:</span> <span class="nx">inactiveSectorWeight</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
@@ -5697,8 +5695,10 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
 
     <span class="c1">// 3. Verify the partialTicket values
-</span><span class="c1"></span>    <span class="k">if</span> <span class="p">!</span><span class="nx">a</span><span class="p">.</span><span class="nf">_rtVerifySurprisePoStMeetsTargetReq</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Invalid Surprise PoSt. Tickets do not meet target.&#34;</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">candidate</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">Candidates</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">!</span><span class="nx">st</span><span class="p">.</span><span class="nf">_verifySurprisePoStMeetsTargetReq</span><span class="p">(</span><span class="nx">candidate</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Invalid Surprise PoSt. Tickets do not meet target.&#34;</span><span class="p">)</span>
+        <span class="p">}</span>
     <span class="p">}</span>
 
     <span class="c1">// verify the partialTickets themselves
@@ -5755,12 +5755,6 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="c1">// 6. Verify the PoSt Proof
 </span><span class="c1"></span>    <span class="k">return</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">VerifySurprisePoSt</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">pvInfo</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// todo: define target
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_rtVerifySurprisePoStMeetsTargetReq</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="nx">util</span><span class="p">.</span><span class="nf">TODO</span><span class="p">()</span>
-    <span class="k">return</span> <span class="kc">false</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_slashDealsForSectorTerminatedFault</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNumbers</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">{</span>

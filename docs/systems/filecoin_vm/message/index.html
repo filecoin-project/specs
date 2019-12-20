@@ -4741,9 +4741,6 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
     <span class="nf">Scale</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="nx">GasAmount</span>
 <span class="p">}</span>
 
-<span class="c1">// GasPrice is a Gas-to-FIL cost
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">GasPrice</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-
 <span class="kd">type</span> <span class="nx">UnsignedMessage</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// Address of the receiving actor.
 </span><span class="c1"></span>    <span class="nx">To</span>          <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
@@ -4760,7 +4757,8 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
     <span class="c1">/// Serialized parameters to the method (if method is non-zero).
 </span><span class="c1"></span>    <span class="nx">Params</span>      <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span>
 
-    <span class="nx">GasPrice</span>
+    <span class="c1">// GasPrice is a Gas-to-FIL cost
+</span><span class="c1"></span>    <span class="nx">GasPrice</span>    <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="nx">GasLimit</span>    <span class="nx">GasAmount</span>
 <span class="p">}</span>  <span class="c1">// representation tuple
 </span><span class="c1"></span>
@@ -4796,10 +4794,10 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">message</span>
 
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
-<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
+	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="p">)</span>
 
 <span class="kd">var</span> <span class="nx">IMPL_FINISH</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">IMPL_FINISH</span>
 
@@ -4807,28 +4805,6 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 
 <span class="c1">// The maximum serialized size of a SignedMessage.
 </span><span class="c1"></span><span class="kd">const</span> <span class="nx">MessageMaxSize</span> <span class="p">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">1024</span>
-
-<span class="kd">func</span> <span class="nf">UnsignedMessage_Make</span><span class="p">(</span>
-	<span class="nx">from</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
-	<span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
-	<span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span>
-	<span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">,</span>
-	<span class="nx">callSeqNum</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span><span class="p">,</span>
-	<span class="nx">value</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span>
-	<span class="nx">gasPrice</span> <span class="nx">GasPrice</span><span class="p">,</span>
-	<span class="nx">gasLimit</span> <span class="nx">GasAmount</span><span class="p">,</span>
-<span class="p">)</span> <span class="nx">UnsignedMessage</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
-		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">from</span><span class="p">,</span>
-		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">to</span><span class="p">,</span>
-		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">method</span><span class="p">,</span>
-		<span class="nx">Params_</span><span class="p">:</span>     <span class="nx">params</span><span class="p">,</span>
-		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">callSeqNum</span><span class="p">,</span>
-		<span class="nx">Value_</span><span class="p">:</span>      <span class="nx">value</span><span class="p">,</span>
-		<span class="nx">GasPrice_</span><span class="p">:</span>   <span class="nx">gasPrice</span><span class="p">,</span>
-		<span class="nx">GasLimit_</span><span class="p">:</span>   <span class="nx">gasLimit</span><span class="p">,</span>
-	<span class="p">}</span>
-<span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">SignedMessage_Make</span><span class="p">(</span><span class="nx">message</span> <span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">signature</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span><span class="p">)</span> <span class="nx">SignedMessage</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">SignedMessage_I</span><span class="p">{</span>

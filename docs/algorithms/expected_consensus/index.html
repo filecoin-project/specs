@@ -4674,7 +4674,6 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 <span class="kn">import</span> <span class="nx">chain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain&#34;</span>
-<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 
 <span class="kd">type</span> <span class="nx">ExpectedConsensus</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">expectedLeadersPerEpoch</span>  <span class="nx">UVarint</span>
@@ -4689,10 +4688,6 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">numSectorsSampled</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
         <span class="nx">numSectorsMiner</span>    <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
     <span class="p">)</span> <span class="kt">bool</span>
-
-    <span class="nf">GetBlockRewards</span><span class="p">(</span>
-        <span class="nx">ePoStInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
-    <span class="p">)</span> <span class="nx">UVarint</span>
 
     <span class="nf">log2b</span><span class="p">(</span><span class="nx">x</span> <span class="nx">UVarint</span><span class="p">)</span> <span class="nx">UVarint</span>
     <span class="nx">wParams</span> <span class="nx">weightFunctionParameters</span>
@@ -4735,7 +4730,6 @@ https://github.com/alex-shpak/hugo-book
 
 	<span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 	<span class="nx">chain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain&#34;</span>
-	<span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
@@ -4789,10 +4783,6 @@ https://github.com/alex-shpak/hugo-book
 
 	<span class="c1">// lhs &lt; rhs?
 </span><span class="c1"></span>	<span class="k">return</span> <span class="nx">lhs</span><span class="p">.</span><span class="nf">Cmp</span><span class="p">(</span><span class="nx">rhs</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">ExpectedConsensus_I</span><span class="p">)</span> <span class="nf">GetBlockRewards</span><span class="p">(</span><span class="nx">ePoStInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4856,6 +4846,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">BytesAmount</span> <span class="nx">UVarint</span>
 <span class="kd">type</span> <span class="nx">StoragePower</span> <span class="nx">BytesAmount</span>
+<span class="kd">type</span> <span class="nx">SectorWeight</span> <span class="nx">BytesAmount</span>
 
 <span class="kd">type</span> <span class="nx">TicketProductionSeedInput</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">PastTicket</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>

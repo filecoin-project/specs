@@ -32,16 +32,6 @@ type StorageMarketActorState struct { miners {Address:Null}&amp;lt;Hamt&amp;gt; 
     
     <item>
       <title></title>
-      <link>/docs/systems/filecoin_mining/storage_mining/storage_miner_actor_old/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_mining/storage_mining/storage_miner_actor_old/</guid>
-      <description>Storage Miner Actor (DEPRECATED)  Code Cid: &amp;lt;codec:raw&amp;gt;&amp;lt;mhType:identity&amp;gt;&amp;lt;&amp;quot;sminer&amp;quot;&amp;gt;
-type StorageMinerActorState struct { ## contains mostly static info about this miner info &amp;amp;MinerInfo ## Collateral that is waiting to be withdrawn. dePledgedCollateral TokenAmount ## Time at which the depledged collateral may be withdrawn. dePledgeTime BlockHeight ## All sectors this miner has committed. sectors &amp;amp;SectorSet ## Sectors this miner is currently mining. It is only updated ## when a PoSt is submitted (not as each new sector commitment is added).</description>
-    </item>
-    
-    <item>
-      <title></title>
       <link>/docs/systems/filecoin_token/multisig/multisig_actor_old/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
@@ -793,8 +783,8 @@ StorageMinerActor interface import libp2p &amp;#34;github.com/filecoin-project/s
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/storage_mining/mining_cycle/</guid>
-      <description>Block miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning ticket to propose a block at each height/in each round. Rounds are currently set to take around 30 seconds, in order to account for network propagation around the world. The details of both processes are defined here.
-The Miner Actor After successfully calling CreateStorageMiner, a miner actor will be created on-chain, and registered in the storage market.</description>
+      <description>Block miners should constantly be performing Proofs of SpaceTime using Election PoSt, and checking the outputted partial tickets to run Secret Leader Election and determine whether they can propose a block at each epoch. Epochs are currently set to take around X seconds, in order to account for election PoSt and network propagation around the world. The details of the mining cycle are defined here.
+Active Miner Mining Cycle In order to mine blocks on the Filecoin blockchain a miner must be running Block Validation at all times, keeping track of recent blocks received and the heaviest current chain (based on Expected Consensus).</description>
     </item>
     
     <item>
@@ -803,7 +793,7 @@ The Miner Actor After successfully calling CreateStorageMiner, a miner actor wil
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_blockchain/storage_power_consensus/storage_power_actor/</guid>
-      <description>StoragePowerActor interface import actor_util &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; type PowerTableEntry struct { ActivePower block.StoragePower InactivePower block.StoragePower } type PowerReport struct { ActivePower block.StoragePower // set value  InactivePower block.StoragePower // set value } // type PowerTableHAMT {actor.ActorID: PowerTableEntry} type PowerTableHAMT {addr.Address: PowerTableEntry} // TODO: convert address to ActorID  type StoragePowerActorState struct { PowerTable PowerTableHAMT EscrowTable actor_util.BalanceTableHAMT _minersLargerThanMin util.</description>
+      <description>StoragePowerActor interface import actor_util &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; type PowerTableEntry struct { ActiveSectorWeight block.SectorWeight InactiveSectorWeight block.SectorWeight Power block.StoragePower } type PowerReport struct { ActiveSectorWeight block.SectorWeight // set value  InactiveSectorWeight block.SectorWeight // set value } // type PowerTableHAMT {actor.ActorID: PowerTableEntry} type PowerTableHAMT {addr.Address: PowerTableEntry} // TODO: convert address to ActorID  type StoragePowerActorState struct { PowerTable PowerTableHAMT EscrowTable actor_util.</description>
     </item>
     
     <item>

@@ -45,8 +45,7 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     // call by StorageMiningSubsystem after sealing
     GetPoStChallengeRand(chain chain.Chain, epoch block.ChainEpoch) util.Randomness
 
-    GetFinality()     block.ChainEpoch
-    FinalizedEpoch()  block.ChainEpoch
+    GetFinalizedEpoch(currentEpoch block.ChainEpoch) block.ChainEpoch
 }
 
 type StoragePowerConsensusError struct {}

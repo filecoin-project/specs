@@ -9,7 +9,7 @@ const (
 )
 
 const (
-	Method_StorageMinerActor_ProcessVerifiedSurprisePoSt = actor.MethodPlaceholder + iota
+	Method_StorageMinerActor_ProcessSurprisePoSt = actor.MethodPlaceholder + iota
 	Method_StorageMinerActor_ProcessVerifiedElectionPoSt
 	Method_StorageMinerActor_NotifyOfSurprisePoStChallenge
 	Method_StorageMinerActor_GetOwnerAddr
@@ -36,4 +36,5 @@ const (
 	Method_StoragePowerActor_ProcessFaultReport
 	Method_StoragePowerActor_SlashPledgeForStorageFault
 	Method_StoragePowerActor_EnsurePledgeCollateralSatisfied
+	Method_StoragePowerActor_CreateStorageMiner
 )
