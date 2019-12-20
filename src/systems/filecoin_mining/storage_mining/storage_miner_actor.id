@@ -35,7 +35,7 @@ type SectorStateTable struct {
 type SectorOnChainInfo struct {
     SealCommitment  sector.SealCommitment
     State           SectorState
-    Power           block.StoragePower
+    SectorWeight    block.SectorWeight
     Activation      block.ChainEpoch
     Expiration      block.ChainEpoch
 }
@@ -102,9 +102,9 @@ type StorageMinerActorState struct {
     _updateClearSectorAssert(sectorNo sector.SectorNumber)
     _updateActivateSectorAssert(sectorNo sector.SectorNumber)
 
-    _getActivePower()          (block.StoragePower, error)
-    _getInactivePower()        (block.StoragePower, error)
-    _getPreCommitDepositReq()  actor.TokenAmount
+    _getActiveSectorWeight()    (block.SectorWeight, error)
+    _getInactiveSectorWeight()  (block.SectorWeight, error)
+    _getPreCommitDepositReq()   actor.TokenAmount
 
     _getSectorOnChainInfo(sectorNo sector.SectorNumber) (info SectorOnChainInfo, ok bool)
     _getSectorPower(sectorNo sector.SectorNumber) (power block.StoragePower, ok bool)

@@ -166,7 +166,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	UpdateRelease(rt, h, st)
 
 	// Activate storage deals, abort if activation failed
-	activateDealsRet := rt.SendQuery(
+	rt.SendQuery(
 		addr.StorageMarketActorAddr,
 		ai.Method_StorageMarketActor_UpdateDealsOnSectorProveCommit,
 		[]util.Serialization{
@@ -174,15 +174,22 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 			sector.Serialize_SectorProveCommitInfo(info),
 		},
 	)
-	TODO()
-	// TODO: compute sector power from query to GetWeightForDealSet instead of this return value
 
-	h, st = a.State(rt)
-
-	sectorActivePower, err := block.Deserialize_StoragePower(activateDealsRet)
+	dealWeightRet := rt.SendQuery(
+		addr.StorageMarketActorAddr,
+		ai.Method_StorageMarketActor_GetWeightForDealSet,
+		[]util.Serialization{
+			deal.Serialize_DealIDs(onChainInfo.DealIDs()),
+		},
+	)
+	dealWeight, err := deal.Deserialize_DealWeight(dealWeightRet)
 	if err != nil {
-		rt.AbortStateMsg("Failed to deserialize sector power")
+		rt.AbortStateMsg("Failed to deserialize deal weight")
 	}
+
+	inds := rt.CurrIndices()
+	h, st = a.State(rt)
+	minerInfo := st.Info()
 
 	// add sector expiration to SectorExpirationQueue
 	st.SectorExpirationQueue().Add(&SectorExpirationQueueItem_I{
@@ -197,13 +204,15 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		DealIDs_:   onChainInfo.DealIDs(),
 	}
 
+	sectorWeight := inds.BlockReward_SectorWeight(minerInfo.SectorSize(), rt.CurrEpoch(), info.Expiration(), deal.DealWeight(dealWeight))
+
 	// add SectorNumber and SealCommitment to Sectors
 	// set Sectors.State to SectorCommitted
 	// Note that SectorNumber will only become Active at the next successful PoSt
 	sealOnChainInfo := &SectorOnChainInfo_I{
 		SealCommitment_: sealCommitment,
 		State_:          SectorCommitted(),
-		Power_:          block.StoragePower(sectorActivePower),
+		SectorWeight_:   block.SectorWeight(sectorWeight),
 		Activation_:     rt.CurrEpoch(),
 		Expiration_:     info.Expiration(),
 	}
@@ -423,19 +432,19 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 // construct PowerReport from SectorTable
 func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime) {
 	h, st := a.State(rt)
-	activePower, err := st._getActivePower()
+	activeSectorWeight, err := st._getActiveSectorWeight()
 	if err != nil {
 		rt.AbortStateMsg(err.Error())
 	}
-	inactivePower, err := st._getInactivePower()
+	inactiveSectorWeight, err := st._getInactiveSectorWeight()
 	if err != nil {
 		rt.AbortStateMsg(err.Error())
 	}
 
 	// power report in processPowerReportParam
 	powerReport := &spc.PowerReport_I{
-		ActivePower_:   activePower,
-		InactivePower_: inactivePower,
+		ActiveSectorWeight_:   activeSectorWeight,
+		InactiveSectorWeight_: inactiveSectorWeight,
 	}
 	Release(rt, h, st)
 

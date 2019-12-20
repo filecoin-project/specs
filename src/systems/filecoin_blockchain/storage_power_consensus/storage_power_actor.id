@@ -6,13 +6,14 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type PowerTableEntry struct {
-    ActivePower    block.StoragePower
-    InactivePower  block.StoragePower
+    ActiveSectorWeight    block.SectorWeight
+    InactiveSectorWeight  block.SectorWeight
+    Power                 block.StoragePower
 }
 
 type PowerReport struct {
-    ActivePower    block.StoragePower  // set value
-    InactivePower  block.StoragePower  // set value
+    ActiveSectorWeight    block.SectorWeight  // set value
+    InactiveSectorWeight  block.SectorWeight  // set value
 }
 
 // type PowerTableHAMT {actor.ActorID: PowerTableEntry}
@@ -23,17 +24,15 @@ type StoragePowerActorState struct {
     EscrowTable           actor_util.BalanceTableHAMT
     _minersLargerThanMin  util.UVarint
 
-    ActivePowerMeetsConsensusMinimum(minPower block.StoragePower) bool
-    _getActivePowerForConsensus() block.StoragePower
+    MinerPowerMeetsConsensusMinimum(minPower block.StoragePower) bool
     _slashPledgeCollateral(address addr.Address, amount actor.TokenAmount) actor.TokenAmount
 
-    _getPowerTotalForMiner(minerAddr addr.Address) (
-        activePower    block.StoragePower
-        inactivePower  block.StoragePower
-        ok             bool
+    GetSectorWeightForMiner(minerAddr addr.Address) (
+        activeSectorWeight    block.SectorWeight
+        inactiveSectorWeight  block.SectorWeight
+        ok                    bool
     )
-    _getCurrPledgeForMiner(minerAddr addr.Address) (currPledge actor.TokenAmount, ok bool)
-    _getTotalPower() block.StoragePower
+    GetCurrPledgeForMiner(minerAddr addr.Address) (currPledge actor.TokenAmount, ok bool)
     _selectMinersToSurprise(challengeCount int, randomness util.Randomness) [addr.Address]
     _getStorageFaultSlashPledgePercent(faultType sector.StorageFaultType) int
 }

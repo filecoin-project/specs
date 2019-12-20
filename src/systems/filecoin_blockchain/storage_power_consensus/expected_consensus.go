@@ -5,7 +5,6 @@ import (
 
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -59,8 +58,4 @@ func (self *ExpectedConsensus_I) IsWinningChallengeTicket(challengeTicket util.B
 
 	// lhs < rhs?
 	return lhs.Cmp(rhs) == -1
-}
-
-func (self *ExpectedConsensus_I) GetBlockRewards(ePoStInfo sector.OnChainPoStVerifyInfo) util.UVarint {
-	panic("TODO")
 }

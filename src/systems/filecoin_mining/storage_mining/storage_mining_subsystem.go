@@ -15,6 +15,7 @@ import (
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
+	inds "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
@@ -248,7 +249,7 @@ func (sms *StorageMiningSubsystem_I) _getStoragePowerActorState(stateTree stateT
 	return st
 }
 
-func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
+func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds inds.Indices, header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
 
 	sma := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
 	spa := sms._getStoragePowerActorState(header.ParentState())
@@ -262,13 +263,21 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 		return false
 	}
 
-	pow, err := sma._getActivePower()
-	if err != nil {
+	activeSectorWeight, inactiveSectorWeight, ok := spa.GetSectorWeightForMiner(header.Miner())
+	if !ok {
 		// TODO: better error handling
 		return false
 	}
 
-	if !spa.ActivePowerMeetsConsensusMinimum(pow) {
+	currPledge, ok := spa.GetCurrPledgeForMiner(header.Miner())
+	if !ok {
+		// TODO: better error handling
+		return false
+	}
+
+	pow := inds.StoragePower(activeSectorWeight, inactiveSectorWeight, currPledge)
+
+	if !spa.MinerPowerMeetsConsensusMinimum(pow) {
 		return false
 	}
 
