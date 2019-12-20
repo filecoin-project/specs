@@ -120,12 +120,11 @@ md`#### Benchmarks`
 
 bench = ({
   "column_leaf_hash_time": 1.7028e-5/2,
-  "kdf_time": 5.4e-7,
+  "kdf_time": 1.28e-8/2, //5.4e-7,
   "merkle_tree_datahash_time": 1.28e-8/2,
   "merkle_tree_hash_time": 1.7028e-5/2,
   "snark_constraint_time": 3.012e-5/2,
   "ticket_hash": 1.7028e-5/2,
-  "kdf_time_fastcpu": 0.0000000128 // TODO check if this should be divided by 2
 })
 
 md`### SNARKs`
@@ -217,19 +216,6 @@ bar_chart(solved_many, 'encoding_time', [
   yrule: Math.pow(10, encoding_time_ruler)
 })
 
-md`### Encoding time (estimated from fastest CPU)`
-
-viewof encoding_time_fastcpu_ruler = chooser(solved_many, 'encoding_time_fastcpu', 3*60*60)
-
-bar_chart(solved_many, 'encoding_time_fastcpu', [
-  'encoding_time_fastcpu',
-], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
-  filter: d => d < Math.pow(10, encoding_time_fastcpu_ruler),
-  yrule: Math.pow(10, encoding_time_fastcpu_ruler)
-})
-
-
-
 md`### Retrieval`
 
 viewof decoding_time_parallel_ruler = chooser(solved_many, 'decoding_time_parallel', 2)
@@ -308,12 +294,15 @@ table_constraints(solved_many, [
   'graph_name',
   'window_size_mib',
   'mtree_hash_name',
+  'porep_snark_constraints',
+  'porep_challenges',
+  'stacked_layers',
   'porep_commc_leaves_constraints',
   'porep_commc_inclusions_constraints',
   'porep_commr_inclusions_constraints',
   'porep_commd_inclusions_constraints',
-  'porep_labeling_proofs'
-], [])
+  'porep_labeling_proofs_constraints'
+], [], 'porep_snark_constraints')
 
 
 
@@ -498,6 +487,12 @@ combos = {
   query = extend_query(query, [stackedReplicas])
   query = extend_query(query, [stackedSDRParams])
   query = extend_query(query, [poseidon, pedersen])
+  query = extend_query(query, [
+    {sdr_delta: 0.04, spacegap: 0.19, proof_name: "d=0.04"},
+    {sdr_delta: 0.03, spacegap: 0.19, proof_name: "d=0.03"},
+    {sdr_delta: 0.02, spacegap: 0.19, proof_name: "d=0.02"},
+    {sdr_delta: 0.01, spacegap: 0.19, proof_name: "d=0.01"},
+  ])
   return query
 }
 
