@@ -10,6 +10,7 @@ import (
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
+	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -243,7 +244,7 @@ func (a *StoragePowerActorCode_I) _rtdeductClaimedPowerForSectorAssert(rt Runtim
 }
 
 func (a *StoragePowerActorCode_I) _rtInitiateNewSurprisePoStChallenges(rt Runtime) {
-	var PROVING_PERIOD block.ChainEpoch = 0 // defined in storage_mining, TODO: move constants somewhere else
+	provingPeriod := indices.StorageMining_SurprisePoStProvingPeriod()
 
 	h, st := a.State(rt)
 
@@ -251,7 +252,7 @@ func (a *StoragePowerActorCode_I) _rtInitiateNewSurprisePoStChallenges(rt Runtim
 	IMPL_TODO() // use randomness APIs
 	randomness := rt.Randomness(rt.CurrEpoch(), 0)
 	IMPL_FINISH() // BigInt arithmetic (not floating-point)
-	challengeCount := math.Ceil(float64(len(st.PowerTable())) / float64(PROVING_PERIOD))
+	challengeCount := math.Ceil(float64(len(st.PowerTable())) / float64(provingPeriod))
 	surprisedMiners := st._selectMinersToSurprise(int(challengeCount), randomness)
 
 	UpdateRelease(rt, h, st)
@@ -307,5 +308,5 @@ func (a *StoragePowerActorCode_I) _rtGetPledgeCollateralReqForMinerOrAbort(rt Ru
 
 func (a *StoragePowerActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
 	IMPL_FINISH()
-	panic("TODO")
+	panic("")
 }

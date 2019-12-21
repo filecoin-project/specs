@@ -13,7 +13,7 @@ import (
 )
 
 func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(minerPower block.StoragePower) bool {
-	// TODO import from consts
+	IMPL_TODO() // import from consts
 	MIN_MINER_SIZE_STOR := block.StoragePower(0)
 	MIN_MINER_SIZE_TARG := 0
 
@@ -52,7 +52,9 @@ func (st *StoragePowerActorState_I) _slashPledgeCollateral(
 	Assert(ok)
 	st.Impl().EscrowTable_ = newTable
 
-	// TODO: extra handling of not having enough pledge collateral to be slashed?
+	TODO()
+	// Decide whether we can take any additional action if there is not enough
+	// pledge collateral to be slashed.
 
 	return amountSlashed
 }
@@ -157,7 +159,7 @@ func (st *StoragePowerActorState_I) _updatePowerEntriesFromClaimedPower(minerAdd
 		power = 0
 	}
 
-	TODO() // TODO: determine effect of undercollateralization on adjusted power
+	TODO() // TODO: Decide effect of undercollateralization on (adjusted) power.
 
 	st._setPowerEntryInternal(minerAddr, power)
 }

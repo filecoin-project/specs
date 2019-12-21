@@ -116,8 +116,7 @@ func MinerInfo_New(
 	return ret
 }
 
-// todo: define target
 func (st *StorageMinerActorState_I) _verifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool {
-	util.TODO()
-	return false
+	TODO()
+	panic("")
 }
