@@ -4573,7 +4573,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#appendix__orient" class="menu-item depth-2">
+<a href="../../../../../#appendix__network_params" class="menu-item depth-2">
     
     
         Filecoin Parameters
@@ -4749,22 +4749,18 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActorCode_I</span><span class="p">)</span> <span class="nf">State</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">RewardActorState</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
-    <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">()</span>
-    <span class="nx">stateBytes</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">stateCID</span><span class="p">))</span>
-    <span class="k">if</span> <span class="nx">stateBytes</span><span class="p">.</span><span class="nf">Which</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime_IpldGet_FunRet_Case_Bytes</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;IPLD lookup error&#34;</span><span class="p">)</span>
+    <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">())</span>
+    <span class="kd">var</span> <span class="nx">state</span> <span class="nx">RewardActorState_I</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nx">stateCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">state</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;state not found&#34;</span><span class="p">)</span>
     <span class="p">}</span>
-    <span class="nx">state</span> <span class="o">:=</span> <span class="nf">DeserializeState</span><span class="p">(</span><span class="nx">stateBytes</span><span class="p">.</span><span class="nf">As_Bytes</span><span class="p">())</span>
-    <span class="k">return</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">state</span>
+    <span class="k">return</span> <span class="nx">h</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">state</span>
 <span class="p">}</span>
 <span class="kd">func</span> <span class="nf">UpdateReleaseRewardActorState</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">h</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">st</span> <span class="nx">RewardActorState</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">newCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">()))</span>
     <span class="nx">h</span><span class="p">.</span><span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">newCID</span><span class="p">)</span>
 <span class="p">}</span>
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">RewardActorState_I</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-<span class="kd">func</span> <span class="nf">DeserializeState</span><span class="p">(</span><span class="nx">x</span> <span class="nx">Bytes</span><span class="p">)</span> <span class="nx">RewardActorState</span> <span class="p">{</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 

@@ -4574,7 +4574,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#appendix__orient" class="menu-item depth-2">
+<a href="../../../../#appendix__network_params" class="menu-item depth-2">
     
     
         Filecoin Parameters
@@ -4961,7 +4961,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">err</span>
 	<span class="p">}</span>
 
-	<span class="nx">err</span> <span class="p">=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">FilecoinNode</span><span class="p">().</span><span class="nf">SubmitMessage</span><span class="p">(</span><span class="nx">signedMessage</span><span class="p">)</span>
+	<span class="nx">err</span> <span class="p">=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">FilecoinNode</span><span class="p">().</span><span class="nf">MessagePool</span><span class="p">().</span><span class="nf">Syncer</span><span class="p">().</span><span class="nf">SubmitMessage</span><span class="p">(</span><span class="nx">signedMessage</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">err</span>
 	<span class="p">}</span>
@@ -5311,7 +5311,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 		<span class="k">return</span> <span class="nx">err</span>
 	<span class="p">}</span>
 
-	<span class="nx">err</span> <span class="p">=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">FilecoinNode</span><span class="p">().</span><span class="nf">SubmitMessage</span><span class="p">(</span><span class="nx">signedMessage</span><span class="p">)</span>
+	<span class="nx">err</span> <span class="p">=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">FilecoinNode</span><span class="p">().</span><span class="nf">MessagePool</span><span class="p">().</span><span class="nf">Syncer</span><span class="p">().</span><span class="nf">SubmitMessage</span><span class="p">(</span><span class="nx">signedMessage</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="nx">err</span>
 	<span class="p">}</span>
@@ -5441,15 +5441,6 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
-<span class="kd">const</span> <span class="nx">FINALITY</span> <span class="p">=</span> <span class="mi">500</span>
-
-<span class="kd">const</span> <span class="p">(</span>
-	<span class="nx">SPC_LOOKBACK_RANDOMNESS</span> <span class="p">=</span> <span class="mi">300</span>      <span class="c1">// this is EC.K maybe move it there. TODO
-</span><span class="c1"></span>	<span class="nx">SPC_LOOKBACK_TICKET</span>     <span class="p">=</span> <span class="mi">1</span>        <span class="c1">// we chain blocks together one after the other
-</span><span class="c1"></span>	<span class="nx">SPC_LOOKBACK_POST</span>       <span class="p">=</span> <span class="mi">1</span>        <span class="c1">// cheap to generate, should be set as close to current TS as possible
-</span><span class="c1"></span>	<span class="nx">SPC_LOOKBACK_SEAL</span>       <span class="p">=</span> <span class="nx">FINALITY</span> <span class="c1">// should be set to finality
-</span><span class="c1"></span><span class="p">)</span>
-
 <span class="c1">// Storage Power Consensus Subsystem
 </span><span class="c1"></span>
 <span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Block_I</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
@@ -5474,10 +5465,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 	<span class="nx">networkPower</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">TotalNetworkEffectivePower</span><span class="p">()</span>
 
-	<span class="c1">// TODO: pull from constants
-</span><span class="c1"></span>	<span class="nx">EPOST_SAMPLE_RATE_NUM</span> <span class="o">:=</span> <span class="nx">util</span><span class="p">.</span><span class="nf">UVarint</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-	<span class="nx">EPOST_SAMPLE_RATE_DENOM</span> <span class="o">:=</span> <span class="nx">util</span><span class="p">.</span><span class="nf">UVarint</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
-	<span class="nx">sectorsSampled</span> <span class="o">:=</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">math</span><span class="p">.</span><span class="nf">Ceil</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">EPOST_SAMPLE_RATE_NUM</span><span class="o">/</span><span class="nx">EPOST_SAMPLE_RATE_DENOM</span><span class="p">)</span> <span class="o">*</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">numSectors</span><span class="p">)))</span>
+	<span class="nx">sectorsSampled</span> <span class="o">:=</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">math</span><span class="p">.</span><span class="nf">Ceil</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">node_base</span><span class="p">.</span><span class="nx">EPOST_SAMPLE_RATE_NUM</span><span class="o">/</span><span class="nx">node_base</span><span class="p">.</span><span class="nx">EPOST_SAMPLE_RATE_DENOM</span><span class="p">)</span> <span class="o">*</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">numSectors</span><span class="p">)))</span>
 
 	<span class="k">return</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">ec</span><span class="p">().</span><span class="nf">IsWinningChallengeTicket</span><span class="p">(</span><span class="nx">challengeTicket</span><span class="p">,</span> <span class="nx">sectorUtilization</span><span class="p">,</span> <span class="nx">networkPower</span><span class="p">,</span> <span class="nx">sectorsSampled</span><span class="p">,</span> <span class="nx">numSectors</span><span class="p">)</span>
 <span class="p">}</span>
@@ -5508,19 +5496,19 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetTicketProductionRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">SPC_LOOKBACK_TICKET</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">SPC_LOOKBACK_TICKET</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetSealRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">SPC_LOOKBACK_SEAL</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">SPC_LOOKBACK_SEAL</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetPoStChallengeRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">SPC_LOOKBACK_POST</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">SPC_LOOKBACK_POST</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetFinalizedEpoch</span><span class="p">(</span><span class="nx">currentEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">currentEpoch</span> <span class="o">-</span> <span class="nx">FINALITY</span>
+	<span class="k">return</span> <span class="nx">currentEpoch</span> <span class="o">-</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">FINALITY</span>
 <span class="p">}</span>
 </code></pre></div>
 

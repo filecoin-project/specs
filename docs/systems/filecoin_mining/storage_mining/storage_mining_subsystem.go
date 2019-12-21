@@ -61,7 +61,7 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 		return nil, err
 	}
 
-	err = sms.FilecoinNode().SubmitMessage(signedMessage)
+	err = sms.FilecoinNode().MessagePool().Syncer().SubmitMessage(signedMessage)
 	if err != nil {
 		return nil, err
 	}
@@ -411,7 +411,7 @@ func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.
 		return err
 	}
 
-	err = sms.FilecoinNode().SubmitMessage(signedMessage)
+	err = sms.FilecoinNode().MessagePool().Syncer().SubmitMessage(signedMessage)
 	if err != nil {
 		return err
 	}

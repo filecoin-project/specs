@@ -4573,7 +4573,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#appendix__orient" class="menu-item depth-2">
+<a href="../../../../../#appendix__network_params" class="menu-item depth-2">
     
     
         Filecoin Parameters
@@ -4815,13 +4815,15 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// Account that owns this miner.
 </span><span class="c1"></span>    <span class="c1">// - Income and returned collateral are paid to this address.
 </span><span class="c1"></span>    <span class="c1">// - This address is also allowed to change the worker address for the miner.
-</span><span class="c1"></span>    <span class="nx">Owner</span>                   <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">Owner</span>                   <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>  <span class="c1">// Must be an ID-address.
+</span><span class="c1"></span>    <span class="nx">OwnerKey</span>                <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span>
 
     <span class="c1">// Worker account for this miner.
 </span><span class="c1"></span>    <span class="c1">// This will be the key that is used to sign blocks created by this miner, and
 </span><span class="c1"></span>    <span class="c1">// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
 </span><span class="c1"></span>    <span class="c1">// other day to day miner activities.
-</span><span class="c1"></span>    <span class="nx">Worker</span>                  <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">Worker</span>                  <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>  <span class="c1">// Must be an ID-address.
+</span><span class="c1"></span>    <span class="nx">WorkerKey</span>               <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span>
 
     <span class="c1">// Libp2p identity that should be used when connecting to this miner.
 </span><span class="c1"></span>    <span class="nx">PeerId</span>                  <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
@@ -4867,25 +4869,12 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
     <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
     <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+    <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
     <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-    <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
     <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
 <span class="kd">var</span> <span class="nx">Assert</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Assert</span>
-
-<span class="c1">// Get the owner account address associated to a given miner actor.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">GetMinerOwnerAddress</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Get the owner account address associated to a given miner actor.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">GetMinerOwnerAddress_Assert</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
-    <span class="nx">ret</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">GetMinerOwnerAddress</span><span class="p">(</span><span class="nx">tree</span><span class="p">,</span> <span class="nx">a</span><span class="p">)</span>
-    <span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nx">ret</span>
-<span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_isChallenged</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ChallengeStatus</span><span class="p">().</span><span class="nf">IsChallenged</span><span class="p">()</span>
@@ -5027,7 +5016,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>        <span class="nf">Assert</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="nx">newFaultCount</span> <span class="p">&gt;</span> <span class="nx">MAX_CONSECUTIVE_FAULTS</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">newFaultCount</span> <span class="p">&gt;</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">MAX_CONSECUTIVE_FAULTS</span> <span class="p">{</span>
         <span class="c1">// slashing is done at _slashCollateralForStorageFaults
 </span><span class="c1"></span>        <span class="nx">st</span><span class="p">.</span><span class="nf">_updateClearSectorAssert</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
         <span class="nx">st</span><span class="p">.</span><span class="nf">SectorTable</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">TerminatedFaults_</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
@@ -5080,6 +5069,11 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">sectorInfo</span><span class="p">.</span><span class="nf">SectorWeight</span><span class="p">(),</span> <span class="kc">true</span>
 <span class="p">}</span>
 
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getSectorPower</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">power</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">TODO</span><span class="p">()</span>
+    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getSectorDealIDs</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">dealIDs</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealIDs</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">sectorInfo</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getSectorOnChainInfo</span><span class="p">(</span><span class="nx">sectorNo</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
@@ -5093,7 +5087,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// TODO: move this to Construct
 </span><span class="c1"></span>    <span class="nx">minerInfo</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Info</span><span class="p">()</span>
     <span class="nx">sectorSize</span> <span class="o">:=</span> <span class="nx">minerInfo</span><span class="p">.</span><span class="nf">SectorSize</span><span class="p">()</span>
-    <span class="nx">depositReq</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">PRECOMMIT_DEPOSIT_PER_BYTE</span><span class="p">)</span> <span class="o">*</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">sectorSize</span><span class="p">))</span>
+    <span class="nx">depositReq</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">node_base</span><span class="p">.</span><span class="nx">PRECOMMIT_DEPOSIT_PER_BYTE</span><span class="p">)</span> <span class="o">*</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">sectorSize</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="nx">depositReq</span>
 <span class="p">}</span>
@@ -5140,6 +5134,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
     <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
     <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+    <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
     <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
     <span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
@@ -5158,7 +5153,6 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">a</span><span class="p">.</span><span class="nf">_checkSurprisePoStSubmissionHappened</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SuccessReturn</span><span class="p">()</span>
-
 <span class="p">}</span>
 
 <span class="c1">// Surprise PoSt
@@ -5703,11 +5697,8 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="c1">// verify the partialTickets themselves
 </span><span class="c1"></span>    <span class="c1">// 4. Verify appropriate randomness
-</span><span class="c1"></span>
-    <span class="c1">// pull from consts
-</span><span class="c1"></span>    <span class="nx">SPC_LOOKBACK_POST</span> <span class="o">:=</span> <span class="nb">uint64</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="nx">randomnessEpoch</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ChallengeStatus</span><span class="p">().</span><span class="nf">LastChallengeEpoch</span><span class="p">()</span>
-    <span class="nx">randomness</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(</span><span class="nx">randomnessEpoch</span><span class="p">,</span> <span class="nx">SPC_LOOKBACK_POST</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nx">randomnessEpoch</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ChallengeStatus</span><span class="p">().</span><span class="nf">LastChallengeEpoch</span><span class="p">()</span>
+    <span class="nx">randomness</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(</span><span class="nx">randomnessEpoch</span><span class="p">,</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">SPC_LOOKBACK_POST</span><span class="p">)</span>
     <span class="nb">panic</span><span class="p">(</span><span class="nx">randomness</span><span class="p">)</span>                       <span class="c1">// ignore circular dependency
 </span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">postRandomnessInput</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="c1">// sms.PreparePoStChallengeSeed(randomness, actorAddr)
 </span><span class="c1"></span>

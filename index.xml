@@ -278,6 +278,17 @@ Any misbehavior may result in more than one fault thus lead to slashing on both 
     
     <item>
       <title>Filecoin Parameters</title>
+      <link>/docs/appendix/network_params/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/appendix/network_params/</guid>
+      <description>Some of these parameters are used around the code in the Filecoin subsystems and actors. Others are used as part of the proofs libraries.
+Most are generated/finalized using the orient framework. It is used to modelize the Filecoin network.
+⚠️ WARNING: Filecoin is not yet launched, and we are finishing protocol spec and implementations. Parameters are set here as placeholders and highly likely to change to fit product and security requirements.</description>
+    </item>
+    
+    <item>
+      <title>Filecoin Parameters</title>
       <link>/docs/appendix/orient/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
@@ -465,7 +476,7 @@ import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/ac
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_nodes/node_types/node/</guid>
-      <description> import repo &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/repository&amp;#34; import filestore &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import msg &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&amp;#34; import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; import key_store &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/key_store&amp;#34; type FilecoinNode struct { Node libp2p.Node Repository repo.Repository FileStore filestore.FileStore Clock clock.UTCClock LocalGraph ipld.GraphStore KeyStore key_store.KeyStore SubmitMessage(m msg.SignedMessage) error }  </description>
+      <description> import repo &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/repository&amp;#34; import filestore &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import message_pool &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/message_pool&amp;#34; import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; import key_store &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/key_store&amp;#34; type FilecoinNode struct { Node libp2p.Node Repository repo.Repository FileStore filestore.FileStore Clock clock.UTCClock LocalGraph ipld.GraphStore KeyStore key_store.KeyStore MessagePool message_pool.MessagePoolSubsystem }  </description>
     </item>
     
     <item>

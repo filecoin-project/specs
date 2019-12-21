@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Storage Mining System - proving storage for producing blocks | Filecoin Spec</title>
+<title>Filecoin Parameters | Filecoin Spec</title>
 
 
 
@@ -15,7 +15,6 @@
 <link rel="icon" href="../../../favicon.png" type="image/x-icon">
 
 
-<link rel="alternate" type="application/rss+xml" href="../../../docs/systems/filecoin_mining/index.xml" title="Filecoin Spec" />
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <script type="text/javascript" src="./gumshoe.polyfills.min.js"></script>
@@ -60,7 +59,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   <style>
-  nav ul a[href$="\2f docs\2fsystems\2f filecoin_mining\2f "] {
+  nav ul a[href$="\2f docs\2f appendix\2fnetwork_params\2f "] {
       color: #0b3a53;
   }
   </style>
@@ -4630,52 +4629,24 @@ https://github.com/alex-shpak/hugo-book
   <label for="menu-control">
     <img src="../../../svg/menu.svg" alt="Menu" />
   </label>
-  <strong>Storage Mining System - proving storage for producing blocks</strong>
+  <strong>Filecoin Parameters</strong>
 </header>
 
       
 <article class="markdown">
-<div class="tocMap ">
-
-
-  
-  
-    
-
-
-
-
-
-
-
-
-
-
-
   
 
+<p>Some of these parameters are used around the code in the Filecoin subsystems and actors. Others are used as part of the proofs libraries.</p>
 
+<p>Most are generated/finalized using the <a href="https://github.com/filecoin-project/orient">orient framework</a>. It is used to modelize the Filecoin network.</p>
 
+<div class="notices warning" >⚠️ <strong>WARNING:</strong> Filecoin is not yet launched, and we are finishing protocol spec and implementations. Parameters are set here as placeholders and highly likely to change to fit product and security requirements.</div>
 
+<h2 id="code-parameters">Code parameters</h2>
 
-<div class="tocMap-item expanded">
-    <div class="tocMap-item-label">
-        <a href="../../../#systems__filecoin_mining">
-        
 
-        <strong>Storage Mining</strong>
 
-        
-            <br /><br /><i class="menuIcon">⛏</i>
-        
-        </a>
-    </div>
 
-    <div class="tocMap-children">
-        
-            
-                
-                  
 
 
 
@@ -4687,479 +4658,762 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-  
 
 
 
 
 
-<div class="tocMap-item expanded">
-    <div class="tocMap-item-label">
-        <a href="../../../#systems__filecoin_mining__storage_mining">
-        
-            <i class="statusIcon">🔁</i>
-        
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">node_base</span>
 
-        Storage Miner
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
+    <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="p">)</span>
 
-        
-        </a>
-    </div>
+<span class="c1">/////////////////////////////////////////////////////////////
+</span><span class="c1">// Commitment
+</span><span class="c1">/////////////////////////////////////////////////////////////
+</span><span class="c1"></span>
+<span class="c1">// TODO: placeholder epoch value -- this will be set later
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">MAX_PROVE_COMMIT_SECTOR_PERIOD</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="c1">// placeholder
+</span><span class="c1"></span>
+<span class="c1">/////////////////////////////////////////////////////////////
+</span><span class="c1">// PoSt
+</span><span class="c1">/////////////////////////////////////////////////////////////
+</span><span class="c1"></span>
+<span class="kd">const</span> <span class="nx">MAX_SURPRISE_POST_RESPONSE_PERIOD</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">POST_CHALLENGE_TIME</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>               <span class="c1">// placeholder
+</span><span class="c1">// sets the average frequency
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">PROVING_PERIOD</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="c1">// placeholder, 2 days
+</span><span class="c1">// how long after a POST challenge before a miner can get challenged again
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">SUPRISE_NO_CHALLENGE_PERIOD</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// placeholder, 2 hours
+</span><span class="c1">// how many sectors should be challenged in surprise post (if miner has fewer, will get dup challenges)
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">SURPRISE_CHALLENGE_COUNT</span> <span class="p">=</span> <span class="mi">200</span> <span class="c1">// placeholder
+</span><span class="c1">// how long miner has to respond to the challenge before it expires
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">CHALLENGE_DURATION</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// placeholder, 2 hours
+</span><span class="c1">// number of detected faults before a miner&#39;s sectors are all terminated
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">MAX_CONSECUTIVE_FAULTS</span> <span class="p">=</span> <span class="mi">3</span>
+<span class="kd">const</span> <span class="nx">EPOST_SAMPLE_RATE_NUM</span> <span class="p">=</span> <span class="mi">1</span>    <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">EPOST_SAMPLE_RATE_DENOM</span> <span class="p">=</span> <span class="mi">25</span> <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">SPOST_SAMPLE_RATE_NUM</span> <span class="p">=</span> <span class="mi">1</span>    <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">SPOST_SAMPLE_RATE_DENOM</span> <span class="p">=</span> <span class="mi">50</span> <span class="c1">// placeholder
+</span><span class="c1"></span>
+<span class="c1">/////////////////////////////////////////////////////////////
+</span><span class="c1">// Consensus
+</span><span class="c1">/////////////////////////////////////////////////////////////
+</span><span class="c1"></span>
+<span class="kd">const</span> <span class="nx">MIN_MINER_SIZE_STOR</span> <span class="p">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">40</span> <span class="c1">// placeholder, 100 TB
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">MIN_MINER_SIZE_TARG</span> <span class="p">=</span> <span class="mi">3</span>       <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">FINALITY</span> <span class="p">=</span> <span class="mi">500</span>                <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">SPC_LOOKBACK_RANDOMNESS</span> <span class="p">=</span> <span class="mi">300</span> <span class="c1">// this is EC.K maybe move it there. TODO
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">SPC_LOOKBACK_TICKET</span> <span class="p">=</span> <span class="mi">1</span>       <span class="c1">// we chain blocks together one after the other
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">SPC_LOOKBACK_POST</span> <span class="p">=</span> <span class="mi">1</span>         <span class="c1">// cheap to generate, should be set as close to current TS as possible
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">SPC_LOOKBACK_SEAL</span> <span class="p">=</span> <span class="nx">FINALITY</span>  <span class="c1">// should be set to finality
+</span><span class="c1"></span>
+<span class="c1">/////////////////////////////////////////////////////////////
+</span><span class="c1">// Cryptoecon
+</span><span class="c1">/////////////////////////////////////////////////////////////
+</span><span class="c1"></span>
+<span class="c1">// FIL deposit per sector precommit in Interactive PoRep
+</span><span class="c1">// refunded after ProveCommit but burned if PreCommit expires
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">PRECOMMIT_DEPOSIT_PER_BYTE</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">FAULT_SLASH_PERC_DECLARED</span> <span class="p">=</span> <span class="mi">1</span>                     <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">FAULT_SLASH_PERC_DETECTED</span> <span class="p">=</span> <span class="mi">10</span>                    <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">FAULT_SLASH_PERC_TERMINATED</span> <span class="p">=</span> <span class="mi">100</span>                 <span class="c1">// placeholder
+</span></code></pre></div>
+
+
+
+
+
+
+<h2 id="orient-parameters">Orient parameters</h2>
+
+<table>
+<thead>
+<tr>
+<th>LAMBDA</th>
+<th>SPACEGAP</th>
+<th>BLOCK-SIZE-KIB</th>
+<th>SECTOR-SIZE-GIB</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>2.6084006</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>2.9687543</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>4.60544</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>6.9628344</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>7.195217</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>12.142387</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>15.2998495</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>22.186821</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>42.125595</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>55.240646</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>107.03619</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>406.86823</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>2.3094485</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>2.37085</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>3.4674127</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>4.686779</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>4.9769444</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>7.705842</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>9.3208065</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>13.775977</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>25.303907</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>32.48009</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>62.670723</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>238.65137</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>2.1490319</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>2.1985393</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>3.0452213</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>3.8423958</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>4.1540065</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>6.059966</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>7.102623</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>10.6557865</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>19.063526</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>24.036263</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>46.211964</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>176.24756</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>1.9889219</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>2.1184843</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>2.7405148</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>3.2329829</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>3.5601068</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>4.8721666</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>5.501524</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>8.404295</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>14.560543</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>17.942131</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>34.33397</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>131.21773</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>6.5753794</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>10.902712</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>19.707468</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>36.63338</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>37.16689</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>71.018715</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>94.63942</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>133.81236</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>265.37668</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>357.2812</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>695.79944</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>2639.3792</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>4.183762</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>6.1194773</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>10.603248</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>18.887196</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>18.958448</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>35.526344</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>46.80707</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>66.525635</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>130.80322</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>175.19678</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>340.8757</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>1293.6443</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>3.2964888</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>4.3449306</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>7.2257156</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>12.203384</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>12.303692</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>22.359337</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>29.061607</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>41.564106</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>80.880165</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>107.64613</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>209.20566</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>794.4138</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>2.6560488</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>3.0640512</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>4.7880635</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>7.32808</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>7.552495</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>12.856943</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>16.252815</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>23.55217</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>44.856293</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>58.89311</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>114.18173</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>434.17523</td>
+<td>32</td>
+</tr>
+</tbody>
+</table>
 
-    <div class="tocMap-children">
-        
-            
-                
-                  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-<div class="tocMap-item ">
-    <div class="tocMap-item-label">
-        <a href="../../../#systems__filecoin_mining__storage_mining__mining_cycle">
-        
-
-        Storage Mining Cycle
-
-        
-        </a>
-    </div>
-
-    <div class="tocMap-children">
-        
-    </div>
-</div>
-
-                
-            
-                
-                  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-<div class="tocMap-item ">
-    <div class="tocMap-item-label">
-        <a href="../../../#systems__filecoin_mining__storage_mining__storage_miner_actor">
-        
-
-        Storage Miner Actor
-
-        
-        </a>
-    </div>
-
-    <div class="tocMap-children">
-        
-    </div>
-</div>
-
-                
-            
-        
-    </div>
-</div>
-
-                
-            
-                
-                  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="tocMap-item expanded">
-    <div class="tocMap-item-label">
-        <a href="../../../#systems__filecoin_mining__sector">
-        
-            <i class="statusIcon">✅</i>
-        
-
-        Sector
-
-        
-        </a>
-    </div>
-
-    <div class="tocMap-children">
-        
-            
-                
-                  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-<div class="tocMap-item ">
-    <div class="tocMap-item-label">
-        <a href="../../../#systems__filecoin_mining__sector__sectorset">
-        
-
-        Sector Set
-
-        
-        </a>
-    </div>
-
-    <div class="tocMap-children">
-        
-    </div>
-</div>
-
-                
-            
-                
-                  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-<div class="tocMap-item ">
-    <div class="tocMap-item-label">
-        <a href="../../../#systems__filecoin_mining__sector__sealing">
-        
-
-        Sector Sealing
-
-        
-        </a>
-    </div>
-
-    <div class="tocMap-children">
-        
-    </div>
-</div>
-
-                
-            
-        
-    </div>
-</div>
-
-                
-            
-                
-                  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="tocMap-item expanded">
-    <div class="tocMap-item-label">
-        <a href="../../../#systems__filecoin_mining__sector_index">
-        
-            <i class="statusIcon">✅</i>
-        
-
-        Sector Index
-
-        
-        </a>
-    </div>
-
-    <div class="tocMap-children">
-        
-            
-                
-            
-                
-            
-                
-                  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-<div class="tocMap-item ">
-    <div class="tocMap-item-label">
-        <a href="../../../#systems__filecoin_mining__sector_index__sector_builder">
-        
-
-        Sector Builder
-
-        
-        </a>
-    </div>
-
-    <div class="tocMap-children">
-        
-    </div>
-</div>
-
-                
-            
-                
-                  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-<div class="tocMap-item ">
-    <div class="tocMap-item-label">
-        <a href="../../../#systems__filecoin_mining__sector_index__sector_store">
-        
-
-        SectorStore
-
-        
-        </a>
-    </div>
-
-    <div class="tocMap-children">
-        
-    </div>
-</div>
-
-                
-            
-        
-    </div>
-</div>
-
-                
-            
-                
-                  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="tocMap-item expanded">
-    <div class="tocMap-item-label">
-        <a href="../../../#systems__filecoin_mining__storage_proving">
-        
-            <i class="statusIcon">🔁</i>
-        
-
-        Storage Proving
-
-        
-        </a>
-    </div>
-
-    <div class="tocMap-children">
-        
-            
-                
-                  
-
-
-
-
-
-
-
-
-
-
-
-  
-
-
-
-
-    
-
-
-<div class="tocMap-item ">
-    <div class="tocMap-item-label">
-        <a href="../../../#systems__filecoin_mining__storage_proving__sealer">
-        
-
-        Sector Sealer
-
-        
-        </a>
-    </div>
-
-    <div class="tocMap-children">
-        
-    </div>
-</div>
-
-                
-            
-                
-                  
-
-
-
-
-
-
-
-
-
-
-
-  
-
-
-
-
-    
-
-
-<div class="tocMap-item ">
-    <div class="tocMap-item-label">
-        <a href="../../../#systems__filecoin_mining__storage_proving__poster">
-        
-
-        Sector Poster
-
-        
-        </a>
-    </div>
-
-    <div class="tocMap-children">
-        
-    </div>
-</div>
-
-                
-            
-        
-    </div>
-</div>
-
-                
-            
-        
-    </div>
-</div>
-
-  
-
-</div>
-
-
-<p>The Storage Mining System is the part of the Filecoin Protocol that deals with storing Client&rsquo;s
-data, producing proof artifacts that demonstrate correct storage behavior, and managing the work
-involved.</p>
-
-<p>Storing data and producing proofs is a complex, highly optimizable process, with lots of tunable
-choices. Miners should explore the design space to arrive at something that (a) satisfies protocol
-and network-wide constraints, (b) satisfies clients&rsquo; requests and expectations (as expressed in
-<code>Deals</code>), and (c) gives them the most cost-effective operation. This part of the Filecoin Spec
-primarily describes in detail what MUST and SHOULD happen here, and leaves ample room for
-various optimizations for implementers, miners, and users to make. In some parts, we describe
-algorithms that could be replaced by other, more optimized versions, but in those cases it is
-important that the <strong>protocol constraints</strong> are satisfied. The <strong>protocol constraints</strong> are
-spelled out in clear detail (an unclear, unmentioned constraint is a &ldquo;spec error&rdquo;).  It is up
-to implementers who deviate from the algorithms presented here to ensure their modifications
-satisfy those constraints, especially those relating to protocol security.</p>
 </article>
 
       
@@ -5169,6 +5423,18 @@ satisfy those constraints, especially those relating to protocol security.</p>
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#code-parameters">Code parameters</a></li>
+<li><a href="#orient-parameters">Orient parameters</a></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
 
 
 

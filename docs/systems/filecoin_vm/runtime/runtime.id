@@ -14,8 +14,9 @@ type Runtime interface {
     // Randomness returns a (pseudo)random stream (indexed by offset) for the current epoch.
     Randomness(e block.ChainEpoch, offset UInt) util.Randomness
 
-    // Note: This is the _immediate_ caller.
+    // The address of the immediate calling actor.
     // Not necessarily the actor in the From field of the initial on-chain Message.
+    // Always an ID-address.
     ImmediateCaller() addr.Address
     ValidateImmediateCallerIs(caller addr.Address)
     ValidateImmediateCallerInSet(callers [addr.Address])
@@ -24,10 +25,11 @@ type Runtime interface {
     ValidateImmediateCallerAcceptAny()
     ValidateImmediateCallerMatches(CallerPattern)
 
-    // The address of the actor receiving the message.
+    // The address of the actor receiving the message. Always an ID-address.
     CurrReceiver()         addr.Address
 
     // The actor who mined the block in which the initial on-chain message appears.
+    // Always an ID-address.
     ToplevelBlockWinner()  addr.Address
 
     AcquireState()         ActorStateHandle
@@ -95,17 +97,20 @@ type Runtime interface {
     // Computes an address for a new actor. The returned address is intended to uniquely refer to
     // the actor even in the event of a chain re-org (whereas an ID-address might refer to a
     // different actor after messages are re-ordered).
+    // Always an ActorExec address.
     NewActorAddress() addr.Address
 
     // Creates an actor in the state tree, with empty state. May only be called by InitActor.
     CreateActor(
         // The new actor's code identifier.
         codeId   actor.CodeID
-        // Address under which the new actor's state will be stored.
+        // Address under which the new actor's state will be stored. Must be an ID-address.
         address  addr.Address
     )
 
-    IpldGet(c ipld.CID) union {Bytes, error}
+    // Retrieves and deserializes an object from the store into o. Returns whether successful.
+    IpldGet(c ipld.CID, o ipld.Object) bool
+    // Serializes and stores an object, returning its CID.
     IpldPut(x ipld.Object) ipld.CID
 }
 

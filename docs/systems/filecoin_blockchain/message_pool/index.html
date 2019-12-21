@@ -4574,7 +4574,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#appendix__orient" class="menu-item depth-2">
+<a href="../../../../#appendix__network_params" class="menu-item depth-2">
     
     
         Filecoin Parameters
@@ -4674,14 +4674,6 @@ The Message Pool is a subsystem in the Filecoin blockchain system. The message p
 </span><span class="c1"></span>    <span class="c1">//   - how are they cleared from the mempool
 </span><span class="c1"></span>    <span class="c1">// - do we need to have some sort of purge?
 </span><span class="c1"></span>
-    <span class="c1">// AddNewMessage is called to add messages created at this node,
-</span><span class="c1"></span>    <span class="c1">// or to be propagated by this node. All messages enter the network
-</span><span class="c1"></span>    <span class="c1">// through one of these calls, in at least one filecoin node. They
-</span><span class="c1"></span>    <span class="c1">// are then propagated to other filecoin nodes via the MessagePool
-</span><span class="c1"></span>    <span class="c1">// subsystem. Other nodes receive and propagate Messages via their
-</span><span class="c1"></span>    <span class="c1">// own MessagePools.
-</span><span class="c1"></span>    <span class="nf">AddNewMessage</span><span class="p">(</span><span class="nx">m</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span><span class="p">)</span>
-
     <span class="c1">// Stats returns information about the MessagePool contents.
 </span><span class="c1"></span>    <span class="nf">Stats</span><span class="p">()</span> <span class="nx">MessagePoolStats</span>
 
@@ -4699,6 +4691,9 @@ The Message Pool is a subsystem in the Filecoin blockchain system. The message p
 </span><span class="c1"></span>    <span class="c1">// Note: This is where algorithms about chosing best messages given
 </span><span class="c1"></span>    <span class="c1">//       many leaders should go.
 </span><span class="c1"></span>    <span class="nf">GetMostProfitableMessages</span><span class="p">(</span><span class="nx">miner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span><span class="p">]</span>
+
+    <span class="c1">// messageSyncer to manager incoming and outgoing messages
+</span><span class="c1"></span>    <span class="nx">Syncer</span> <span class="nx">MessageSyncer</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">MessagePoolStats</span> <span class="kd">struct</span> <span class="p">{</span>

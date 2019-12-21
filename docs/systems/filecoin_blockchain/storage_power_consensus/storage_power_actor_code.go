@@ -11,6 +11,8 @@ import (
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	util "github.com/filecoin-project/specs/util"
+
+	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -195,11 +197,10 @@ func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerRep
 	newPower := inds.StoragePower(report.ActiveSectorWeight(), report.InactiveSectorWeight(), currPledge)
 
 	// keep track of miners larger than minimum miner size before updating the PT
-	MIN_MINER_SIZE_STOR := block.StoragePower(0) // TODO: pull in from consts
-	if powerEntry.Power() >= MIN_MINER_SIZE_STOR && newPower < MIN_MINER_SIZE_STOR {
+	if powerEntry.Power() >= node_base.MIN_MINER_SIZE_STOR && newPower < node_base.MIN_MINER_SIZE_STOR {
 		st.Impl()._minersLargerThanMin_ -= 1
 	}
-	if powerEntry.Power() < MIN_MINER_SIZE_STOR && newPower >= MIN_MINER_SIZE_STOR {
+	if powerEntry.Power() < node_base.MIN_MINER_SIZE_STOR && newPower >= node_base.MIN_MINER_SIZE_STOR {
 		st.Impl()._minersLargerThanMin_ += 1
 	}
 
@@ -228,13 +229,11 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr a
 // TODO: add Surprise to the cron actor
 func (a *StoragePowerActorCode_I) Surprise(rt Runtime) {
 
-	PROVING_PERIOD := 0 // defined in storage_mining, TODO: move constants somewhere else
-
 	// sample the actor addresses
 	h, st := a.State(rt)
 
 	randomness := rt.Randomness(rt.CurrEpoch(), 0)
-	challengeCount := math.Ceil(float64(len(st.PowerTable())) / float64(PROVING_PERIOD))
+	challengeCount := math.Ceil(float64(len(st.PowerTable())) / float64(node_base.PROVING_PERIOD))
 	surprisedMiners := st._selectMinersToSurprise(int(challengeCount), randomness)
 
 	UpdateRelease(rt, h, st)

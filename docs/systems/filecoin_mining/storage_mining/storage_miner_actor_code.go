@@ -7,6 +7,7 @@ import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
@@ -25,7 +26,6 @@ func (a *StorageMinerActorCode_I) OnCronTickEnd(rt Runtime) InvocOutput {
 	a._checkSurprisePoStSubmissionHappened(rt)
 
 	return rt.SuccessReturn()
-
 }
 
 // Surprise PoSt
@@ -570,11 +570,8 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoSt(rt Runtime, onChainInfo 
 
 	// verify the partialTickets themselves
 	// 4. Verify appropriate randomness
-
-	// pull from consts
-	SPC_LOOKBACK_POST := uint64(0)
 	randomnessEpoch := st.ChallengeStatus().LastChallengeEpoch()
-	randomness := rt.Randomness(randomnessEpoch, SPC_LOOKBACK_POST)
+	randomness := rt.Randomness(randomnessEpoch, node_base.SPC_LOOKBACK_POST)
 	panic(randomness)                       // ignore circular dependency
 	var postRandomnessInput util.Randomness // sms.PreparePoStChallengeSeed(randomness, actorAddr)
 
