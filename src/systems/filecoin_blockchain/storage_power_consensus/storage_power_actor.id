@@ -15,7 +15,7 @@ type StoragePowerActorState struct {
 
     // Metadata cached for efficient processing of sector/challenge events.
     CachedDeferredCronEvents  MinerEventsHAMT
-    PoStFailingMiners         actor_util.MinerSetHAMT
+    PoStDetectedFaultMiners   actor_util.MinerSetHAMT
     ClaimedPower              PowerTableHAMT
     NominalPower              PowerTableHAMT
     NumMinersMeetingMinPower  int

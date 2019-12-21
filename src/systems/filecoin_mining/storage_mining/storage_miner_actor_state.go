@@ -76,8 +76,8 @@ func MinerPoStState_New_Challenged(surpriseChallengeEpoch block.ChainEpoch, numC
 	})
 }
 
-func MinerPoStState_New_Failing(numConsecutiveFailures int) MinerPoStState {
-	return MinerPoStState_Make_Failing(&MinerPoStState_Failing_I{
+func MinerPoStState_New_DetectedFault(numConsecutiveFailures int) MinerPoStState {
+	return MinerPoStState_Make_DetectedFault(&MinerPoStState_DetectedFault_I{
 		NumConsecutiveFailures_: numConsecutiveFailures,
 	})
 }

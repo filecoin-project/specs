@@ -147,7 +147,7 @@ func (st *StoragePowerActorState_I) _updatePowerEntriesFromClaimedPower(minerAdd
 	Assert(ok)
 
 	nominalPower := claimedPower
-	if st.PoStFailingMiners()[minerAddr] {
+	if st.PoStDetectedFaultMiners()[minerAddr] {
 		nominalPower = 0
 	}
 	st._setNominalPowerEntryInternal(minerAddr, nominalPower)

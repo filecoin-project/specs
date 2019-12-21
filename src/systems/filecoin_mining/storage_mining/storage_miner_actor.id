@@ -9,16 +9,24 @@ import sealing "github.com/filecoin-project/specs/systems/filecoin_mining/sector
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type MinerPoStState union {
+    // Normal operation: The miner has passed either an ElectionPoSt or a SurprisePoSt
+    // sufficiently recently.
     OK struct {
         LastSuccessfulPoSt block.ChainEpoch
     }
 
+    // SurprisePoSt challenge state: The miner has not submitted timely ElectionPoSts,
+    // and as a result, the system has fallen back to proving storage via SurprisePoSt.
     Challenged struct {
         SurpriseChallengeEpoch  block.ChainEpoch
         NumConsecutiveFailures  int
     }
 
-    Failing struct {
+    // SurprisePoSt faulted state: The miner has failed a SurprisePoSt, indicating that
+    // the claimed storage power may not actually be proven. Recovery can proceed by
+    // submitting a correct response to a subsequent SurprisePoSt challenge, up until
+    // the limit of number of consecutive failures.
+    DetectedFault struct {
         NumConsecutiveFailures int
     }
 }

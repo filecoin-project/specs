@@ -154,7 +154,7 @@ func (a *StoragePowerActorCode_I) OnMinerSurprisePoStSuccess(rt Runtime) {
 	minerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
-	delete(st.Impl().PoStFailingMiners_, minerAddr)
+	delete(st.Impl().PoStDetectedFaultMiners_, minerAddr)
 	st._updatePowerEntriesFromClaimedPower(minerAddr)
 	UpdateRelease(rt, h, st)
 }
@@ -164,7 +164,7 @@ func (a *StoragePowerActorCode_I) OnMinerSurprisePoStFailure(rt Runtime) {
 	minerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
-	st.Impl().PoStFailingMiners_[minerAddr] = true
+	st.Impl().PoStDetectedFaultMiners_[minerAddr] = true
 	st._updatePowerEntriesFromClaimedPower(minerAddr)
 	UpdateRelease(rt, h, st)
 }

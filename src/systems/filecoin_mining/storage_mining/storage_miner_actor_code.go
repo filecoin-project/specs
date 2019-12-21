@@ -50,8 +50,8 @@ func (a *StorageMinerActorCode_I) OnSurprisePoStChallenge(rt Runtime) {
 	}
 
 	numConsecutiveFailures := 0
-	if st.PoStState().Is_Failing() {
-		numConsecutiveFailures = st.PoStState().As_Failing().NumConsecutiveFailures()
+	if st.PoStState().Is_DetectedFault() {
+		numConsecutiveFailures = st.PoStState().As_DetectedFault().NumConsecutiveFailures()
 	}
 
 	st.Impl().PoStState_ = MinerPoStState_New_Challenged(rt.CurrEpoch(), numConsecutiveFailures)
@@ -429,7 +429,7 @@ func (a *StorageMinerActorCode_I) _rtCheckSurprisePoStExpiry(rt Runtime) {
 	} else {
 		// Increment count of consecutive failures, and continue.
 		h, st = a.State(rt)
-		st.Impl().PoStState_ = MinerPoStState_New_Failing(numConsecutiveFailures)
+		st.Impl().PoStState_ = MinerPoStState_New_DetectedFault(numConsecutiveFailures)
 		UpdateRelease(rt, h, st)
 	}
 }
