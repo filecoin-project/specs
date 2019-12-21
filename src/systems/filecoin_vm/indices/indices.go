@@ -148,3 +148,10 @@ func (inds *Indices_I) StorageMining_TemporaryFaultFee(
 	PARAM_FINISH()
 	panic("")
 }
+
+func ConsensusPowerForStorageWeight(
+	storageWeightDesc actor_util.SectorStorageWeightDesc,
+) block.StoragePower {
+	PARAM_FINISH()
+	panic("")
+}

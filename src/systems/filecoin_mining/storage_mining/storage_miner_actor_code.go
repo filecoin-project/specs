@@ -162,7 +162,6 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 
 func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo) {
 	h, st := a.State(rt)
-	sectorSize := st.Info().SectorSize()
 	workerAddr := st.Info().Worker()
 	rt.ValidateImmediateCallerIs(workerAddr)
 
@@ -221,15 +220,16 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	UpdateRelease(rt, h, st)
 
 	// Request deferred Cron check for sector expiry.
-	a._rtEnrollCronEvent(rt, preCommitSector.Info().Expiration(), []sector.SectorNumber{})
+	a._rtEnrollCronEvent(
+		rt, preCommitSector.Info().Expiration(), []sector.SectorNumber{info.SectorNumber()})
 
 	// Notify SPA to update power associated to newly activated sector.
+	storageWeightDesc := a._rtGetStorageWeightDescForSector(rt, info.SectorNumber())
 	rt.Send(
 		addr.StoragePowerActorAddr,
 		ai.Method_StoragePowerActor_OnSectorProveCommit,
 		[]util.Serialization{
-			sector.Serialize_SectorSize(sectorSize),
-			util.Serialize_BigInt(dealWeight),
+			actor_util.Serialize_SectorStorageWeightDesc(storageWeightDesc),
 		},
 		actor.TokenAmount(0),
 	)

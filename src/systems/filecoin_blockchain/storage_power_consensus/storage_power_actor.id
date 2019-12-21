@@ -29,6 +29,8 @@ type StoragePowerActorState struct {
     _getTotalPower() block.StoragePower
     _selectMinersToSurprise(challengeCount int, randomness util.Randomness) [addr.Address]
     _getStorageFaultSlashPledgePercent(faultType sector.StorageFaultType) int
+    _addPowerForMiner(minerAddr addr.Address, power block.StoragePower)
+    _deductPowerForMinerAssert(minerAddr addr.Address, power block.StoragePower)
 }
 
 type StoragePowerActorCode struct {

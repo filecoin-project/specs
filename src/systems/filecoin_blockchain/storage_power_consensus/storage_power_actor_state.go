@@ -147,3 +147,16 @@ func _getStorageFaultSlashPledgePercent(faultType sector.StorageFaultType) int {
 		panic("Case not supported")
 	}
 }
+
+func (st *StoragePowerActorState_I) _addPowerForMiner(minerAddr addr.Address, power block.StoragePower) {
+	currentPower, ok := st.PowerTable()[minerAddr]
+	Assert(ok)
+	st.Impl().PowerTable_[minerAddr] = currentPower + power
+}
+
+func (st *StoragePowerActorState_I) _deductPowerForMinerAssert(minerAddr addr.Address, power block.StoragePower) {
+	currentPower, ok := st.PowerTable()[minerAddr]
+	Assert(ok)
+	Assert(currentPower >= power)
+	st.Impl().PowerTable_[minerAddr] = currentPower - power
+}

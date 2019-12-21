@@ -10,6 +10,7 @@ import (
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
+	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -26,7 +27,7 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime, minerAddr addr.Address)
 	h, st := a.State(rt)
 	newTable, ok := actor_util.BalanceTable_WithAdd(st.EscrowTable(), minerAddr, msgValue)
 	if !ok {
-		rt.AbortStateMsg("spa.AddBalance: Escrow operation failed.")
+		rt.AbortStateMsg("Escrow operation failed")
 	}
 	st.Impl().EscrowTable_ = newTable
 	UpdateRelease(rt, h, st)
@@ -34,7 +35,7 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime, minerAddr addr.Address)
 
 func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Address, amountRequested actor.TokenAmount) {
 	if amountRequested < 0 {
-		rt.AbortArgMsg("spa.WithdrawBalance: negative amount.")
+		rt.AbortArgMsg("Amount to withdraw must be nonnegative")
 	}
 
 	recipientAddr := RT_MinerEntry_ValidateCaller_DetermineFundsLocation(rt, minerAddr, vmr.MinerEntrySpec_MinerOnly)
@@ -45,7 +46,7 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Add
 	newTable, amountExtracted, ok := actor_util.BalanceTable_WithExtractPartial(
 		st.EscrowTable(), minerAddr, amountRequested, minBalanceMaintainRequired)
 	if !ok {
-		rt.AbortStateMsg("spa.WithdrawBalance: Escrow operation failed.")
+		rt.AbortStateMsg("Escrow operation failed")
 	}
 	st.Impl().EscrowTable_ = newTable
 	UpdateRelease(rt, h, st)
@@ -74,9 +75,7 @@ func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Addres
 
 	h, st := a.State(rt)
 	newTable, ok := actor_util.BalanceTable_WithNewAddressEntry(st.EscrowTable(), newMinerAddr, rt.ValueReceived())
-	if !ok {
-		panic("Internal error: newMinerAddr (result of InitActor::Exec) already exists in escrow table")
-	}
+	Assert(ok)
 	st.Impl().EscrowTable_ = newTable
 	st.PowerTable()[newMinerAddr] = block.StoragePower(0)
 	UpdateRelease(rt, h, st)
@@ -118,8 +117,24 @@ func (a *StoragePowerActorCode_I) DeleteMiner(rt Runtime, minerAddr addr.Address
 	UpdateRelease(rt, h, st)
 }
 
-// slash pledge collateral for Declared, Detected and Terminated faults
-func (a *StoragePowerActorCode_I) SlashPledgeForStorageFault(rt Runtime, affectedPower block.StoragePower, faultType sector.StorageFaultType) {
+func (a *StoragePowerActorCode_I) OnSectorProveCommit(rt Runtime, storageWeightDesc SectorStorageWeightDesc) {
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	minerAddr := rt.ImmediateCaller()
+
+	// Note: The following computation does not use any of the dynamic information from CurrIndices();
+	// it depends only on storageWeightDesc. This means that the power of a given storageWeightDesc
+	// does not vary over time, so we can avoid continually updating it for each sector every epoch.
+	//
+	// The function is located in the indices module temporarily, until we find a better place for
+	// global parameterization functions.
+	sectorPower := indices.ConsensusPowerForStorageWeight(storageWeightDesc)
+
+	h, st := a.State(rt)
+	st._addPowerForMiner(minerAddr, sectorPower)
+	UpdateRelease(rt, h, st)
+}
+
+func (a *StoragePowerActorCode_I) OnSectorTerminate(rt Runtime, affectedPower block.StoragePower, faultType sector.StorageFaultType) {
 	TODO() // update
 
 	// minerAddr := rt.ImmediateCaller()
