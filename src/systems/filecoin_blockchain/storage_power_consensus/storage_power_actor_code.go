@@ -170,16 +170,26 @@ func (a *StoragePowerActorCode_I) OnMinerSurprisePoStFailure(rt Runtime) {
 }
 
 func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr addr.Address, faultType ConsensusFaultType, proof []block.Block) {
-	panic("TODO")
-
+	TODO()
+	panic("")
+	// TODO: The semantics here are quite delicate:
+	//
+	// - (proof []block.Block) can't be validated in isolation; we must query the runtime to confirm
+	//   that at least one of the blocks provided actually appeared in the current chain.
+	// - We must prevent duplicate slashes on the same offense, taking into account that the blocks
+	//   may appear in different orders.
+	// - We must determine how to reward multiple reporters of the same fault within a single epoch.
+	//
+	// Deferring to followup after these security/mechanism design questions have been resolved.
+	// Previous notes:
+	//
 	// Use EC's IsValidConsensusFault method to validate the proof
 	// slash block miner's pledge collateral
 	// reward slasher
-
+	//
 	// include ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors util.UVarint) as case
 	// Quite a bit more straightforward since only called by the cron actor (ie publicly verified)
 	// slash cheater pledge collateral accordingly based on num sectors faulted
-
 }
 
 // Called by Cron.
