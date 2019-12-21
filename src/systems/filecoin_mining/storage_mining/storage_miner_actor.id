@@ -57,9 +57,12 @@ type StorageMinerActorState struct {
     Info       MinerInfo
 
     _getStorageWeightDescForSector(sectorNumber sector.SectorNumber) actor_util.SectorStorageWeightDesc
+    _getStorageWeightDescForSectorMaybe(sectorNumber sector.SectorNumber) (ret actor_util.SectorStorageWeightDesc, ok bool)
     _getStorageWeightDescsForSectors(sectorNumbers [sector.SectorNumber]) [actor_util.SectorStorageWeightDesc]
 
     _getSectorDealIDsAssert(sectorNumber sector.SectorNumber) deal.DealIDs
+
+    _verifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool
 }
 
 type StorageMinerActorCode struct {}

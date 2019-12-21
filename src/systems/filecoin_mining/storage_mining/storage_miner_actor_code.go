@@ -525,9 +525,10 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 	info := st.Info()
 
 	// Verify the partialTicket values
-	if !a._rtVerifySurprisePoStMeetsTargetReq(rt) {
-		rt.AbortStateMsg("Invalid Surprise PoSt. Tickets do not meet target.")
-	}
+	TODO() // update
+	// if !a._rtVerifySurprisePoStMeetsTargetReq(rt) {
+	// 	rt.AbortStateMsg("Invalid Surprise PoSt. Tickets do not meet target.")
+	// }
 
 	// verify the partialTickets themselves
 	// Verify appropriate randomness
@@ -575,12 +576,6 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 	if !isVerified {
 		rt.AbortStateMsg("Surprise PoSt failed to verify")
 	}
-}
-
-// todo: define target
-func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStMeetsTargetReq(rt Runtime) bool {
-	util.TODO()
-	return false
 }
 
 func (a *StorageMinerActorCode_I) _rtVerifySealOrAbort(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) {

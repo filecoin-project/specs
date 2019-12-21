@@ -33,14 +33,26 @@ func SectorsAMT_Empty() SectorsAMT {
 }
 
 func (st *StorageMinerActorState_I) _getStorageWeightDescForSector(sectorNumber sector.SectorNumber) SectorStorageWeightDesc {
-	sectorInfo, found := st.Sectors()[sectorNumber]
+	ret, found := st._getStorageWeightDescForSectorMaybe(sectorNumber)
 	Assert(found)
+	return ret
+}
 
-	return &actor_util.SectorStorageWeightDesc_I{
+func (st *StorageMinerActorState_I) _getStorageWeightDescForSectorMaybe(sectorNumber sector.SectorNumber) (ret SectorStorageWeightDesc, ok bool) {
+	sectorInfo, found := st.Sectors()[sectorNumber]
+	if !found {
+		ret = nil
+		ok = false
+		return
+	}
+
+	ret = &actor_util.SectorStorageWeightDesc_I{
 		SectorSize_: st.Info().SectorSize(),
 		DealWeight_: sectorInfo.DealWeight(),
 		Duration_:   sectorInfo.Info().Expiration() - sectorInfo.ProveCommitEpoch(),
 	}
+	ok = true
+	return
 }
 
 func (st *StorageMinerActorState_I) _getStorageWeightDescsForSectors(sectorNumbers []sector.SectorNumber) []SectorStorageWeightDesc {
@@ -102,4 +114,10 @@ func MinerInfo_New(
 	TODO() // TODO: determine how to generate/validate VRF key and initialize other fields
 
 	return ret
+}
+
+// todo: define target
+func (st *StorageMinerActorState_I) _verifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool {
+	util.TODO()
+	return false
 }

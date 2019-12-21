@@ -156,6 +156,9 @@ func (st *StoragePowerActorState_I) _updatePowerEntriesFromClaimedPower(minerAdd
 	if !st._minerNominalPowerMeetsConsensusMinimum(nominalPower) {
 		power = 0
 	}
+
+	TODO() // TODO: determine effect of undercollateralization on adjusted power
+
 	st._setPowerEntryInternal(minerAddr, power)
 }
 
