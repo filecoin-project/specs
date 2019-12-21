@@ -126,7 +126,7 @@ func (a *StoragePowerActorCode_I) OnSectorTerminate(
 
 	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
 	minerAddr := rt.ImmediateCaller()
-	a._rtDeductPowerForSectorAssert(rt, minerAddr, storageWeightDesc)
+	a._rtdeductClaimedPowerForSectorAssert(rt, minerAddr, storageWeightDesc)
 
 	if terminationType != SectorTerminationType_NormalExpiration {
 		amountToSlash := rt.CurrIndices().StoragePower_PledgeSlashForSectorTermination(storageWeightDesc, terminationType)
@@ -141,12 +141,32 @@ func (a *StoragePowerActorCode_I) OnSectorTerminate(
 
 func (a *StoragePowerActorCode_I) OnSectorTemporaryFaultEffectiveBegin(rt Runtime, storageWeightDesc SectorStorageWeightDesc) {
 	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
-	a._rtDeductPowerForSectorAssert(rt, rt.ImmediateCaller(), storageWeightDesc)
+	a._rtdeductClaimedPowerForSectorAssert(rt, rt.ImmediateCaller(), storageWeightDesc)
 }
 
 func (a *StoragePowerActorCode_I) OnSectorTemporaryFaultEffectiveEnd(rt Runtime, storageWeightDesc SectorStorageWeightDesc) {
 	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
 	a._rtAddPowerForSector(rt, rt.ImmediateCaller(), storageWeightDesc)
+}
+
+func (a *StoragePowerActorCode_I) OnMinerSurprisePoStSuccess(rt Runtime) {
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	minerAddr := rt.ImmediateCaller()
+
+	h, st := a.State(rt)
+	delete(st.Impl().PoStFailingMiners_, minerAddr)
+	st._updatePowerEntriesFromClaimedPower(minerAddr)
+	UpdateRelease(rt, h, st)
+}
+
+func (a *StoragePowerActorCode_I) OnMinerSurprisePoStFailure(rt Runtime) {
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	minerAddr := rt.ImmediateCaller()
+
+	h, st := a.State(rt)
+	st.Impl().PoStFailingMiners_[minerAddr] = true
+	st._updatePowerEntriesFromClaimedPower(minerAddr)
+	UpdateRelease(rt, h, st)
 }
 
 func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr addr.Address, faultType ConsensusFaultType, proof []block.Block) {
@@ -174,13 +194,13 @@ func (a *StoragePowerActorCode_I) OnEpochTickEnd(rt Runtime) {
 
 func (a *StoragePowerActorCode_I) _rtAddPowerForSector(rt Runtime, minerAddr addr.Address, storageWeightDesc SectorStorageWeightDesc) {
 	h, st := a.State(rt)
-	st._addPowerForSector(minerAddr, storageWeightDesc)
+	st._addClaimedPowerForSector(minerAddr, storageWeightDesc)
 	UpdateRelease(rt, h, st)
 }
 
-func (a *StoragePowerActorCode_I) _rtDeductPowerForSectorAssert(rt Runtime, minerAddr addr.Address, storageWeightDesc SectorStorageWeightDesc) {
+func (a *StoragePowerActorCode_I) _rtdeductClaimedPowerForSectorAssert(rt Runtime, minerAddr addr.Address, storageWeightDesc SectorStorageWeightDesc) {
 	h, st := a.State(rt)
-	st._deductPowerForSectorAssert(minerAddr, storageWeightDesc)
+	st._deductClaimedPowerForSectorAssert(minerAddr, storageWeightDesc)
 	UpdateRelease(rt, h, st)
 }
 

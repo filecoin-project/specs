@@ -99,5 +99,5 @@ type Indices struct {
         terminationType    actor_util.SectorTerminationType
     ) actor.TokenAmount
 
-    StoragePower_MinMinerPower() block.StoragePower
+    StoragePower_ConsensusMinMinerPower() block.StoragePower
 }

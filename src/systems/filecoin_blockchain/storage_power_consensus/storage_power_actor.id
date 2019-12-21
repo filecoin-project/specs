@@ -10,16 +10,17 @@ type PowerTableHAMT {addr.Address: block.StoragePower}  // TODO: convert address
 type MinerEventsHAMT {block.ChainEpoch: actor_util.MinerEventSetHAMT}
 
 type StoragePowerActorState struct {
+    TotalNetworkPower         block.StoragePower
+
     PowerTable                PowerTableHAMT
     EscrowTable               actor_util.BalanceTableHAMT
 
-    TotalNetworkPower         block.StoragePower
-    NumMinersMeetingMinPower  int
-
     // Metadata cached for efficient processing of sector/challenge events.
     CachedDeferredCronEvents  MinerEventsHAMT
-    NominalPower              PowerTableHAMT
     PoStFailingMiners         actor_util.MinerSetHAMT
+    ClaimedPower              PowerTableHAMT
+    NominalPower              PowerTableHAMT
+    NumMinersMeetingMinPower  int
 
     ActivePowerMeetsConsensusMinimum(minPower block.StoragePower) bool
     _getActivePowerForConsensus() block.StoragePower
@@ -29,18 +30,21 @@ type StoragePowerActorState struct {
         powerEntry  block.StoragePower
         ok          bool
     )
+
     _getCurrPledgeForMiner(minerAddr addr.Address) (currPledge actor.TokenAmount, ok bool)
     _getTotalPower() block.StoragePower
     _selectMinersToSurprise(challengeCount int, randomness util.Randomness) [addr.Address]
-    _getStorageFaultSlashPledgePercent(faultType sector.StorageFaultType) int
-    _addPowerForSector(
+
+    _addClaimedPowerForSector(
         minerAddr          addr.Address
         storageWeightDesc  SectorStorageWeightDesc
     )
-    _deductPowerForSectorAssert(
+    _deductClaimedPowerForSectorAssert(
         minerAddr          addr.Address
         storageWeightDesc  SectorStorageWeightDesc
     )
+
+    _updatePowerEntriesFromClaimedPower(minerAddr addr.Address)
 }
 
 type StoragePowerActorCode struct {

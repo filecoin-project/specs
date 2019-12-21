@@ -12,7 +12,7 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
-func (st *StoragePowerActorState_I) ActivePowerMeetsConsensusMinimum(minerPower block.StoragePower) bool {
+func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(minerPower block.StoragePower) bool {
 	// TODO import from consts
 	MIN_MINER_SIZE_STOR := block.StoragePower(0)
 	MIN_MINER_SIZE_TARG := 0
@@ -40,20 +40,6 @@ func (st *StoragePowerActorState_I) ActivePowerMeetsConsensusMinimum(minerPower 
 	}
 	sort.Slice(minerSizes, func(i, j int) bool { return int(i) > int(j) })
 	return minerPower >= minerSizes[MIN_MINER_SIZE_TARG-1]
-}
-
-func (st *StoragePowerActorState_I) _getActivePowerForConsensus() block.StoragePower {
-	activePower := block.StoragePower(0)
-
-	for _, minerPower := range st.PowerTable() {
-		// only count miner power if they are larger than MIN_MINER_SIZE
-		// (need to use either condition) in case no one meets MIN_MINER_SIZE_STOR
-		if st.ActivePowerMeetsConsensusMinimum(minerPower) {
-			activePower = activePower + minerPower
-		}
-	}
-
-	return activePower
 }
 
 func (st *StoragePowerActorState_I) _slashPledgeCollateral(
@@ -126,7 +112,7 @@ func (st *StoragePowerActorState_I) _getCurrPledgeForMiner(minerAddr addr.Addres
 	return actor_util.BalanceTable_GetEntry(st.EscrowTable(), minerAddr)
 }
 
-func (st *StoragePowerActorState_I) _addPowerForSector(minerAddr addr.Address, storageWeightDesc SectorStorageWeightDesc) {
+func (st *StoragePowerActorState_I) _addClaimedPowerForSector(minerAddr addr.Address, storageWeightDesc SectorStorageWeightDesc) {
 	// Note: The following computation does not use any of the dynamic information from CurrIndices();
 	// it depends only on storageWeightDesc. This means that the power of a given storageWeightDesc
 	// does not vary over time, so we can avoid continually updating it for each sector every epoch.
@@ -135,14 +121,13 @@ func (st *StoragePowerActorState_I) _addPowerForSector(minerAddr addr.Address, s
 	// global parameterization functions.
 	sectorPower := indices.ConsensusPowerForStorageWeight(storageWeightDesc)
 
-	currEntry, ok := st.NominalPower()[minerAddr]
+	currentPower, ok := st.ClaimedPower()[minerAddr]
 	Assert(ok)
-	st.Impl().NominalPower_[minerAddr] = currEntry + sectorPower
-
-	st._updatePowerFromNominalPower(minerAddr)
+	st._setClaimedPowerEntryInternal(minerAddr, currentPower+sectorPower)
+	st._updatePowerEntriesFromClaimedPower(minerAddr)
 }
 
-func (st *StoragePowerActorState_I) _deductPowerForSectorAssert(minerAddr addr.Address, storageWeightDesc SectorStorageWeightDesc) {
+func (st *StoragePowerActorState_I) _deductClaimedPowerForSectorAssert(minerAddr addr.Address, storageWeightDesc SectorStorageWeightDesc) {
 	// Note: The following computation does not use any of the dynamic information from CurrIndices();
 	// it depends only on storageWeightDesc. This means that the power of a given storageWeightDesc
 	// does not vary over time, so we can avoid continually updating it for each sector every epoch.
@@ -151,42 +136,52 @@ func (st *StoragePowerActorState_I) _deductPowerForSectorAssert(minerAddr addr.A
 	// global parameterization functions.
 	sectorPower := indices.ConsensusPowerForStorageWeight(storageWeightDesc)
 
-	currentPower, ok := st.NominalPower()[minerAddr]
+	currentPower, ok := st.ClaimedPower()[minerAddr]
 	Assert(ok)
-	Assert(currentPower >= sectorPower)
-	st.Impl().NominalPower_[minerAddr] = currentPower - sectorPower
-
-	st._updatePowerFromNominalPower(minerAddr)
+	st._setClaimedPowerEntryInternal(minerAddr, currentPower-sectorPower)
+	st._updatePowerEntriesFromClaimedPower(minerAddr)
 }
 
-func (st *StoragePowerActorState_I) _updatePowerFromNominalPower(minerAddr addr.Address) {
-	nominalPower, ok := st.NominalPower()[minerAddr]
+func (st *StoragePowerActorState_I) _updatePowerEntriesFromClaimedPower(minerAddr addr.Address) {
+	claimedPower, ok := st.ClaimedPower()[minerAddr]
 	Assert(ok)
+
+	nominalPower := claimedPower
+	if st.PoStFailingMiners()[minerAddr] {
+		nominalPower = 0
+	}
+	st._setNominalPowerEntryInternal(minerAddr, nominalPower)
 
 	power := nominalPower
-
-	if nominalPower < indices.StoragePower_MinMinerPower() {
+	if !st._minerNominalPowerMeetsConsensusMinimum(nominalPower) {
 		power = 0
 	}
-
-	isPoStFailing, ok := st.PoStFailingMiners()[minerAddr]
-	if isPoStFailing {
-		power = 0
-	}
-
-	st._updatePowerEntryInternal(minerAddr, power)
+	st._setPowerEntryInternal(minerAddr, power)
 }
 
-func (st *StoragePowerActorState_I) _updatePowerEntryInternal(minerAddr addr.Address, updatedMinerPower block.StoragePower) {
+func (st *StoragePowerActorState_I) _setClaimedPowerEntryInternal(minerAddr addr.Address, updatedMinerClaimedPower block.StoragePower) {
+	Assert(updatedMinerClaimedPower >= 0)
+	st.Impl().ClaimedPower_[minerAddr] = updatedMinerClaimedPower
+}
+
+func (st *StoragePowerActorState_I) _setNominalPowerEntryInternal(minerAddr addr.Address, updatedMinerNominalPower block.StoragePower) {
+	Assert(updatedMinerNominalPower >= 0)
+	prevMinerNominalPower, ok := st.NominalPower()[minerAddr]
+	Assert(ok)
+	st.Impl().NominalPower_[minerAddr] = updatedMinerNominalPower
+
+	consensusMinPower := indices.StoragePower_ConsensusMinMinerPower()
+	if updatedMinerNominalPower >= consensusMinPower && prevMinerNominalPower < consensusMinPower {
+		st.Impl().NumMinersMeetingMinPower_ += 1
+	} else if updatedMinerNominalPower < consensusMinPower && prevMinerNominalPower >= consensusMinPower {
+		st.Impl().NumMinersMeetingMinPower_ -= 1
+	}
+}
+
+func (st *StoragePowerActorState_I) _setPowerEntryInternal(minerAddr addr.Address, updatedMinerPower block.StoragePower) {
+	Assert(updatedMinerPower >= 0)
 	prevMinerPower, ok := st.PowerTable()[minerAddr]
 	Assert(ok)
 	st.Impl().PowerTable_[minerAddr] = updatedMinerPower
 	st.Impl().TotalNetworkPower_ += (updatedMinerPower - prevMinerPower)
-
-	consensusMinMinerPower := indices.StoragePower_MinMinerPower()
-	if updatedMinerPower >= consensusMinMinerPower && prevMinerPower < consensusMinMinerPower {
-		st.Impl().NumMinersMeetingMinPower_ += 1
-	} else if updatedMinerPower < consensusMinMinerPower && prevMinerPower >= consensusMinMinerPower {
-		st.Impl().NumMinersMeetingMinPower_ -= 1
-	}
 }
