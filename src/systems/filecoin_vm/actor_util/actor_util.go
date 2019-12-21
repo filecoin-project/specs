@@ -1,7 +1,7 @@
 package actor_util
 
 import (
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"

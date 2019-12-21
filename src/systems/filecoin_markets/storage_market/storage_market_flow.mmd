@@ -1,0 +1,92 @@
+sequenceDiagram
+  participant StorageClient
+  participant DT as Data Transfer
+  participant StorageProvider
+  participant Node
+  participant SMA as StorageMarketActor
+  participant SMS as Storage Mining Subsystem
+
+  rect rgb(240, 250, 190)
+    Note over StorageClient, SMS: Discovery
+    rect rgb(210, 145, 188)
+      Note over StorageClient, Node: Discovering Miners
+      StorageClient ->>+ Node: List Miner Actors from chain state
+      Node -->>- StorageClient: List of Miner Actors
+      loop Each Miner Actor
+      StorageClient ->>+ Node: Query actor properties from chain state
+      Node -->>- StorageClient: Miner actor properties from chain state
+      end
+    end
+
+    rect rgb(254, 200, 216)
+      Note over StorageClient, StorageProvider: Querying For Asks
+      loop each StorageProvider
+      StorageClient ->>+ StorageProvider: Send Query For Current Ask
+      StorageProvider -->>- StorageClient: Current Storage Ask
+      end
+    end
+  end
+  rect rgb(250, 240, 190)
+    Note over StorageClient, SMS: Negotiation
+  rect rgb(224, 187, 228)
+    Note over StorageClient, SMA: Proposing a deal
+    StorageClient ->>+ SMA: Add funds for a deal as neccesary
+    SMA -->>- StorageClient: Funds added
+    StorageClient ->> StorageClient: Calculate piece commitment
+    StorageClient ->>+ StorageProvider: Propose a deal
+  end
+
+  rect rgb(255, 223, 211)
+    Note over StorageClient, SMA: Verifying a deal
+    activate StorageProvider
+    StorageProvider ->> StorageProvider: Verify deal parameters (price, size, etc)
+    StorageProvider ->>+ SMA: Check StorageClient balance
+    SMA -->>- StorageProvider: Client balance
+    StorageProvider ->> StorageProvider: Verify balance greater that total storage price
+    StorageProvider -->>- StorageClient: Indicate Intent To Accept Deal
+  end
+
+  rect rgb(210, 145, 188)
+    Note over StorageClient, StorageProvider: Transferring Data
+    StorageClient ->>+ DT: Open push request to client
+    DT ->>+ StorageProvider: Send push request to provider
+    StorageProvider -->> DT: Accept and request data
+    DT -->>+ StorageClient: Send request for data
+    StorageClient -->> StorageProvider: Send Data
+    StorageClient ->>- DT: Finished Sending Data
+    DT ->>- StorageProvider: Notify data transfer complete
+    StorageProvider ->> StorageProvider: Verify data matches piece commitment
+  end
+
+  rect rgb(254, 200, 216)
+    Note over StorageProvider, SMA: Ensuring Collateral
+    StorageProvider ->>+ SMA: Add collateral for deal as needed
+    SMA -->>- StorageProvider: Collateral added
+  end
+  end
+  rect rgb(240, 250, 190)
+    Note over StorageClient, SMS: Publishing
+  rect rgb(224, 187, 228)
+    Note over StorageClient, SMA: Putting Deal On Chain
+    StorageProvider ->> StorageProvider: Sign Deal Proposal
+    StorageProvider ->>+ SMA: Publish Deal On Chain
+    StorageProvider -->> StorageClient: Deal Accepted (w/ Publish Message CID)
+    SMA -->>- StorageProvider: Deal Published
+    deactivate StorageProvider
+  end
+
+  rect rgb(210, 145, 188)
+    Note over StorageClient, SMA: Verify Deal Published
+    StorageClient ->>+ Node: Verify Publish Message Appears On Chain
+    Node -->>- StorageClient: Deal Published
+  end
+  end
+
+  rect rgb(250, 240, 190)
+    Note over StorageClient, SMS: Handoff
+  rect rgb(210, 145, 188)
+    Note over StorageProvider, SMS: StorageMiner Handoff And Sealing
+    StorageProvider ->>+ SMS: Add Piece
+    Note left of SMS: Storage Miner <br/> adds piece to sector <br/> precommits,<br/> seals sector, <br/> activates deal <br/> See Storage Mining <br/> Subsystem <br>for more detail
+  end
+  end

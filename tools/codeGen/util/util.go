@@ -84,6 +84,17 @@ func BigInt_Add(BigInt, BigInt) BigInt {
 }
 
 // Indicating behavior not yet specified, and may require other spec changes.
+func IsBLS(x Bytes) bool {
+	IMPL_FINISH()
+	return false
+}
+
+func IsSECP(x Bytes) bool {
+	IMPL_FINISH()
+	return false
+}
+
+// Indicating behavior not yet specified, and may require other spec changes.
 func TODO() {
 	// Indirection to prevent the compiler from ignoring unreachable code
 	panic("TODO")

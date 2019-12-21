@@ -25,6 +25,7 @@ type Address struct {
 
     // Returns the ID from an ID address (or error otherwise).
     GetID()          (ActorID, error)
+    GetKey()         (KeyHash, error)
 }
 
 // ActorID is a sequential number assigned to actors in a Filecoin Chain.

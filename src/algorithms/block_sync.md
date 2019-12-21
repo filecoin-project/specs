@@ -2,6 +2,8 @@
 title: "BlockSync"
 ---
 
+{{<label block_sync>}}
+
 - **Name**: Block Sync
 - **Protocol ID**: `/fil/sync/blk/0.0.1`
 

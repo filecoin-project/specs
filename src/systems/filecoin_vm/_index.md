@@ -5,6 +5,7 @@ title: VM - Virtual Machine
 entries:
 - actor
 - state_tree
+- indices
 - message
 - runtime
 - sysactors

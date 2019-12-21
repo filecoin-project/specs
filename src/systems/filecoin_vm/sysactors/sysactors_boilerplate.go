@@ -34,18 +34,11 @@ var ArgEnd = actor_util.ArgEnd
 func _loadState(rt Runtime) (vmr.ActorStateHandle, InitActorState) {
 	h := rt.AcquireState()
 	stateCID := ipld.CID(h.Take())
-	if ipld.CID_Equals(stateCID, ipld.EmptyCID()) {
-		rt.AbortAPI("Actor state not initialized")
+	var state InitActorState_I
+	if !rt.IpldGet(stateCID, &state) {
+		rt.AbortAPI("state not found")
 	}
-	stateBytes := rt.IpldGet(ipld.CID(stateCID))
-	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
-		rt.AbortAPI("IPLD lookup error")
-	}
-	state, err := Deserialize_InitActorState(Serialization(stateBytes.As_Bytes()))
-	if err != nil {
-		rt.AbortAPI("State deserialization error")
-	}
-	return h, state
+	return h, &state
 }
 func Release(rt Runtime, h vmr.ActorStateHandle, st InitActorState) {
 	checkCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))

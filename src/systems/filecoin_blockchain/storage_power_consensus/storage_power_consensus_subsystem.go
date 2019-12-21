@@ -10,23 +10,16 @@ import (
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	inds "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
-)
-
-const FINALITY = 500
-
-const (
-	SPC_LOOKBACK_RANDOMNESS = 300      // this is EC.K maybe move it there. TODO
-	SPC_LOOKBACK_TICKET     = 1        // we chain blocks together one after the other
-	SPC_LOOKBACK_POST       = 1        // cheap to generate, should be set as close to current TS as possible
-	SPC_LOOKBACK_SEAL       = FINALITY // should be set to finality
 )
 
 // Storage Power Consensus Subsystem
 
 func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block block.Block_I) error {
-	panic("")
+	util.IMPL_FINISH()
+	return nil
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket block.Ticket, pk filcrypto.VRFPublicKey, minerActorAddr addr.Address) bool {
@@ -39,22 +32,14 @@ func (spc *StoragePowerConsensusSubsystem_I) ComputeChainWeight(tipset chain.Tip
 	return spc.ec().ComputeChainWeight(tipset)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg string) StoragePowerConsensusError {
-	panic("TODO")
-}
-
-func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree stateTree.StateTree, partialTicket sector.PartialTicket, sectorUtilization block.StoragePower, numSectors util.UVarint) bool {
+func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree stateTree.StateTree, inds inds.Indices, partialTicket sector.PartialTicket, sectorUtilization block.StoragePower, numSectors util.UVarint) bool {
 
 	// finalize the partial ticket
 	challengeTicket := filcrypto.SHA256(partialTicket)
 
-	st := spc._getStoragePowerActorState(stateTree)
-	networkPower := st._getActivePowerForConsensus()
+	networkPower := inds.TotalNetworkEffectivePower()
 
-	// TODO: pull from constants
-	EPOST_SAMPLE_RATE_NUM := util.UVarint(1)
-	EPOST_SAMPLE_RATE_DENOM := util.UVarint(25)
-	sectorsSampled := uint64(math.Ceil(float64(EPOST_SAMPLE_RATE_NUM/EPOST_SAMPLE_RATE_DENOM) * float64(numSectors)))
+	sectorsSampled := uint64(math.Ceil(float64(node_base.EPOST_SAMPLE_RATE_NUM/node_base.EPOST_SAMPLE_RATE_DENOM) * float64(numSectors)))
 
 	return spc.ec().IsWinningChallengeTicket(challengeTicket, sectorUtilization, networkPower, sectorsSampled, numSectors)
 }
@@ -85,24 +70,17 @@ func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTre
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionRand(chain chain.Chain, epoch block.ChainEpoch) util.Randomness {
-	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_TICKET)
+	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_TICKET)
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetSealRand(chain chain.Chain, epoch block.ChainEpoch) util.Randomness {
-	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_SEAL)
+	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_SEAL)
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallengeRand(chain chain.Chain, epoch block.ChainEpoch) util.Randomness {
-	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_POST)
+	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_POST)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetFinality() block.ChainEpoch {
-	panic("")
-	// return FINALITY
-}
-
-func (spc *StoragePowerConsensusSubsystem_I) FinalizedEpoch() block.ChainEpoch {
-	panic("")
-	// currentEpoch := rt.HeadEpoch()
-	// return currentEpoch - spc.GetFinality()
+func (spc *StoragePowerConsensusSubsystem_I) GetFinalizedEpoch(currentEpoch block.ChainEpoch) block.ChainEpoch {
+	return currentEpoch - node_base.FINALITY
 }

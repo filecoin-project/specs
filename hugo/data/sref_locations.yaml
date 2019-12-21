@@ -2,7 +2,6 @@
 crypto_signatures: [algorithms, crypto, signatures]
 randomness: [algorithms, crypto, randomness]
 data_structures: [data_structures]
-ds_address: [data_structures, address]
 app_address: [appendix, address]
 vrf: [algorithms, crypto, vrf]
 
@@ -14,9 +13,11 @@ vm_interpreter: [systems, filecoin_vm, interpreter]
 
 ### blockchain
 block_producer: [systems, filecoin_blockchain, struct]
-chainsync: [systems, filecoin_blockchain, chainsync]
+chain_sync: [systems, filecoin_blockchain, chainsync]
 block: [systems, filecoin_blockchain, block]
 block_validation: [systems, filecoin_blockchain, block, block_validation]
+block_sync: [algorithms, block_sync]
+
 
 ### SPC
 storage_power_consensus: [systems, filecoin_blockchain, storage_power_consensus]
@@ -57,6 +58,7 @@ deals: [systems, filecoin_markets, deal]
 deal_states: [systems, filecoin_markets, deal, deal_states]
 
 # mining
+mining_cycle: [systems, filecoin_mining, storage_mining, mining_cycle]
 
 ### Storage Mining
 sector: [systems, filecoin_mining, sector]
