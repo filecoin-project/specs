@@ -53,18 +53,27 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Add
 	rt.SendFunds(recipientAddr, amountExtracted)
 }
 
-func (a *StoragePowerActorCode_I) CreateStorageMiner(rt Runtime, workerAddr addr.Address, peerId libp2p.PeerID) addr.Address {
+func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Address, sectorSize sector.SectorSize, peerId libp2p.PeerID) addr.Address {
 	vmr.RT_ValidateImmediateCallerIsSignable(rt)
+	ownerAddr := rt.ImmediateCaller()
 
-	// ownerAddr := rt.ImmediateCaller()
-	msgValue := rt.ValueReceived()
-
-	var newMinerAddr addr.Address
-	TODO() // TODO: call InitActor::Exec to create the StorageMinerActor
-	panic("")
+	newMinerAddr := addr.Deserialize_Address_Compact_Assert(
+		rt.Send(
+			addr.InitActorAddr,
+			ai.Method_InitActor_Exec,
+			[]util.Serialization{
+				actor.Serialize_CodeID(actor.CodeID_Make_Builtin(actor.BuiltinActorID_StorageMiner)),
+				addr.Serialize_Address_Compact(ownerAddr),
+				addr.Serialize_Address_Compact(workerAddr),
+				sector.Serialize_SectorSize(sectorSize),
+				libp2p.Serialize_PeerID(peerId),
+			},
+			actor.TokenAmount(0),
+		).ReturnValue(),
+	)
 
 	h, st := a.State(rt)
-	newTable, ok := actor_util.BalanceTable_WithNewAddressEntry(st.EscrowTable(), newMinerAddr, msgValue)
+	newTable, ok := actor_util.BalanceTable_WithNewAddressEntry(st.EscrowTable(), newMinerAddr, rt.ValueReceived())
 	if !ok {
 		panic("Internal error: newMinerAddr (result of InitActor::Exec) already exists in escrow table")
 	}
@@ -75,7 +84,7 @@ func (a *StoragePowerActorCode_I) CreateStorageMiner(rt Runtime, workerAddr addr
 	return newMinerAddr
 }
 
-func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime, minerAddr addr.Address) {
+func (a *StoragePowerActorCode_I) DeleteMiner(rt Runtime, minerAddr addr.Address) {
 	h, st := a.State(rt)
 
 	minerPledgeBalance, ok := actor_util.BalanceTable_GetEntry(st.EscrowTable(), minerAddr)

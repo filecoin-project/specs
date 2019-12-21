@@ -1,14 +1,11 @@
 package sysactors
 
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
-import util "github.com/filecoin-project/specs/util"
-
-const (
-	Method_InitActor_Exec = actor.MethodPlaceholder + iota
-	Method_InitActor_GetActorIDForAddress
+import (
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
+	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 )
 
 func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
@@ -22,9 +19,12 @@ func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
 	return rt.ValueReturn(nil)
 }
 
-func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParams actor.MethodParams) InvocOutput {
-	if !_codeIDSupportsExec(codeID) {
-		rt.AbortArgMsg("cannot exec an actor of this type")
+func (a *InitActorCode_I) Exec(rt Runtime, execCodeID actor.CodeID, constructorParams actor.MethodParams) InvocOutput {
+	rt.ValidateImmediateCallerAcceptAny()
+	callerCodeID, ok := rt.GetActorCodeID(rt.ImmediateCaller())
+	Assert(ok)
+	if !_codeIDSupportsExec(callerCodeID, execCodeID) {
+		rt.AbortArgMsg("Caller type cannot create an actor of requested type")
 	}
 
 	// Compute a re-org-stable address.
@@ -40,7 +40,7 @@ func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParam
 	UpdateRelease(rt, h, st)
 
 	// Create an empty actor.
-	rt.CreateActor(codeID, idAddr)
+	rt.CreateActor(execCodeID, idAddr)
 
 	// Invoke constructor. If construction fails, the error should propagate and cause
 	// Exec to fail too.
@@ -78,24 +78,28 @@ func (s *InitActorState_I) MapAddressToNewID(address addr.Address) addr.Address 
 	return addr.Address_Make_ID(addr.Address_NetworkID_Testnet, actorID)
 }
 
-func _codeIDSupportsExec(codeID actor.CodeID) bool {
-	if !codeID.IsBuiltin() || codeID.IsSingleton() {
+func _codeIDSupportsExec(callerCodeID actor.CodeID, execCodeID actor.CodeID) bool {
+	if !execCodeID.IsBuiltin() || execCodeID.IsSingleton() {
 		return false
 	}
 
-	which := codeID.As_Builtin()
-
-	if which == actor.BuiltinActorID_Account {
+	if execCodeID.As_Builtin() == actor.BuiltinActorID_Account {
 		// Special case: account actors must be created implicitly by sending value;
 		// cannot be created via exec.
 		return false
 	}
 
-	util.Assert(
-		which == actor.BuiltinActorID_PaymentChannel ||
-			which == actor.BuiltinActorID_StorageMiner)
+	if execCodeID.As_Builtin() == actor.BuiltinActorID_PaymentChannel {
+		return true
+	}
 
-	return true
+	if execCodeID.As_Builtin() == actor.BuiltinActorID_StorageMiner {
+		if callerCodeID.Is_Builtin() && callerCodeID.As_Builtin() == actor.BuiltinActorID_StoragePower {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (a *InitActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
@@ -104,7 +108,7 @@ func (a *InitActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, param
 		ArgEnd(&params, rt)
 		return a.Constructor(rt)
 
-	case Method_InitActor_Exec:
+	case ai.Method_InitActor_Exec:
 		codeId, err := actor.Deserialize_CodeID(ArgPop(&params, rt))
 		CheckArgs(&params, rt, err == nil)
 		// Note: do not call ArgEnd (params is forwarded to Exec)

@@ -21,6 +21,8 @@ type Runtime = vmr.Runtime
 type Bytes = util.Bytes
 type Serialization = util.Serialization
 
+var Assert = util.Assert
+
 var CheckArgs = actor_util.CheckArgs
 var ArgPop = actor_util.ArgPop
 var ArgEnd = actor_util.ArgEnd

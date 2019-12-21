@@ -1,9 +1,11 @@
 package storage_mining
 
 import (
+	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -84,4 +86,19 @@ func (x *SectorOnChainInfo_I) EffectiveFaultBeginEpoch() block.ChainEpoch {
 func (x *SectorOnChainInfo_I) EffectiveFaultEndEpoch() block.ChainEpoch {
 	Assert(x.Is_TemporaryFault())
 	return x.EffectiveFaultBeginEpoch() + x.DeclaredFaultDuration()
+}
+
+func MinerInfo_New(
+	ownerAddr addr.Address, workerAddr addr.Address, sectorSize sector.SectorSize, peerId libp2p.PeerID) MinerInfo {
+
+	ret := &MinerInfo_I{
+		Owner_:      ownerAddr,
+		Worker_:     workerAddr,
+		PeerId_:     peerId,
+		SectorSize_: sectorSize,
+	}
+
+	TODO() // TODO: determine how to generate/validate VRF key and initialize other fields
+
+	return ret
 }

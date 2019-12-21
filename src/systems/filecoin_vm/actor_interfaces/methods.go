@@ -5,6 +5,11 @@ import (
 )
 
 const (
+	Method_InitActor_Exec = actor.MethodPlaceholder + iota
+	Method_InitActor_GetActorIDForAddress
+)
+
+const (
 	Method_RewardActor_AwardBlockReward = actor.MethodPlaceholder + iota
 )
 
