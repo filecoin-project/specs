@@ -1,9 +1,7 @@
 package storage_market
 
-type StorageDealStatus int
-
 const (
-	StorageDealProposalNotFound StorageDealStatus = 1 + iota
+	StorageDealProposalNotFound StorageDealStatus = iota
 	StorageDealProposalRejected
 	StorageDealProposalAccepted
 	StorageDealProposalSigned

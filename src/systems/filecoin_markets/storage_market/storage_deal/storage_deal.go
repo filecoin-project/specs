@@ -1,4 +1,4 @@
-package deal
+package storage_deal
 
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
@@ -10,11 +10,6 @@ var TODO = util.TODO
 
 func (d *StorageDeal_I) Proposal() StorageDealProposal {
 	// extract from d.ProposalMessage
-	TODO()
-	panic("")
-}
-
-func (d *StorageDeal_I) CID() DealCID {
 	TODO()
 	panic("")
 }
@@ -33,9 +28,4 @@ func (p *StorageDealProposal_I) ClientBalanceRequirement() actor.TokenAmount {
 
 func (p *StorageDealProposal_I) ProviderBalanceRequirement() actor.TokenAmount {
 	return p.ProviderCollateral()
-}
-
-func (p *StorageDealProposal_I) CID() ProposalCID {
-	var cid ProposalCID
-	return cid
 }
