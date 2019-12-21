@@ -164,7 +164,7 @@ func (a *StoragePowerActorCode_I) SlashPledgeForStorageFault(rt Runtime, affecte
 	Assert(ok)
 	currPledge, ok := st.GetCurrPledgeForMiner(minerAddr)
 	Assert(ok)
-	affectedPledge := inds.BlockReward_GetPledgeSlashForStorageFault(affectedPower, activeSectorWeight, inactiveSectorWeight, currPledge)
+	affectedPledge := inds.GetPledgeSlashForStorageFault(affectedPower, activeSectorWeight, inactiveSectorWeight, currPledge)
 
 	TODO() // BigInt arithmetic
 	amountToSlash := actor.TokenAmount(
@@ -275,7 +275,7 @@ func (a *StoragePowerActorCode_I) _rtGetPledgeCollateralReqForMinerOrAbort(rt Ru
 		rt.AbortArgMsg("spa._rtGetPledgeCollateralReqForMinerOrAbort: miner not in EscrowTable.")
 	}
 
-	minBalance := inds.BlockReward_PledgeCollateralReq(activeSectorWeight, inactiveSectorWeight, currPledge)
+	minBalance := inds.PledgeCollateralReq(activeSectorWeight, inactiveSectorWeight, currPledge)
 
 	Release(rt, h, st)
 	return minBalance

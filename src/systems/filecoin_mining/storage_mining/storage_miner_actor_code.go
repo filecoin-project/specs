@@ -204,7 +204,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		DealIDs_:   onChainInfo.DealIDs(),
 	}
 
-	sectorWeight := inds.BlockReward_SectorWeight(minerInfo.SectorSize(), rt.CurrEpoch(), info.Expiration(), deal.DealWeight(dealWeight))
+	sectorWeight := inds.SectorWeight(minerInfo.SectorSize(), rt.CurrEpoch(), info.Expiration(), deal.DealWeight(dealWeight))
 
 	// add SectorNumber and SealCommitment to Sectors
 	// set Sectors.State to SectorCommitted
