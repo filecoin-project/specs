@@ -208,6 +208,24 @@ func (a *StoragePowerActorCode_I) OnEpochTickEnd(rt Runtime) {
 	a._rtProcessDeferredCronEvents(rt)
 }
 
+func (a *StoragePowerActorCode_I) Constructor(rt Runtime) {
+	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
+	h := rt.AcquireState()
+
+	st := &StoragePowerActorState_I{
+		TotalNetworkPower_:        block.StoragePower(0),
+		PowerTable_:               PowerTableHAMT_Empty(),
+		EscrowTable_:              actor_util.BalanceTableHAMT_Empty(),
+		CachedDeferredCronEvents_: MinerEventsHAMT_Empty(),
+		PoStDetectedFaultMiners_:  actor_util.MinerSetHAMT_Empty(),
+		ClaimedPower_:             PowerTableHAMT_Empty(),
+		NominalPower_:             PowerTableHAMT_Empty(),
+		NumMinersMeetingMinPower_: 0,
+	}
+
+	UpdateRelease(rt, h, st)
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Method utility functions
 ////////////////////////////////////////////////////////////////////////////////

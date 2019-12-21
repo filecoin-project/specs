@@ -188,3 +188,13 @@ func (st *StoragePowerActorState_I) _setPowerEntryInternal(minerAddr addr.Addres
 	st.Impl().PowerTable_[minerAddr] = updatedMinerPower
 	st.Impl().TotalNetworkPower_ += (updatedMinerPower - prevMinerPower)
 }
+
+func PowerTableHAMT_Empty() PowerTableHAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
+func MinerEventsHAMT_Empty() MinerEventsHAMT {
+	IMPL_FINISH()
+	panic("")
+}

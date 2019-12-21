@@ -12,6 +12,7 @@ type BalanceTableHAMT = actor_util.BalanceTableHAMT
 type DealIDQueue = actor_util.DealIDQueue
 
 var RT_MinerEntry_ValidateCaller_DetermineFundsLocation = vmr.RT_MinerEntry_ValidateCaller_DetermineFundsLocation
+var RT_ValidateImmediateCallerIsSignable = vmr.RT_ValidateImmediateCallerIsSignable
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate

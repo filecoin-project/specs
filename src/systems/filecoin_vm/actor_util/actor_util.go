@@ -160,6 +160,11 @@ func (x *DealIDQueue_I) Dequeue() (dealID deal.DealID, ok bool) {
 	}
 }
 
+func MinerSetHAMT_Empty() MinerSetHAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
 // Get the owner account address associated to a given miner actor.
 func GetMinerOwnerAddress(tree st.StateTree, minerAddr addr.Address) (addr.Address, error) {
 	IMPL_FINISH()

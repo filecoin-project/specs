@@ -3,6 +3,7 @@ package storage_mining
 import (
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
+	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -319,6 +320,10 @@ func (a *StorageMinerActorCode_I) DeclareTemporaryFaults(rt Runtime, sectorNumbe
 	a._rtEnrollCronEvent(rt, effectiveEndEpoch, sectorNumbers)
 }
 
+//////////
+// Cron //
+//////////
+
 func (a *StorageMinerActorCode_I) OnDeferredCronEvent(rt Runtime, sectorNumbers []sector.SectorNumber) {
 	rt.ValidateImmediateCallerIs(addr.StoragePowerActorAddr)
 
@@ -328,6 +333,25 @@ func (a *StorageMinerActorCode_I) OnDeferredCronEvent(rt Runtime, sectorNumbers 
 	}
 
 	a._rtCheckSurprisePoStExpiry(rt)
+}
+
+/////////////////
+// Constructor //
+/////////////////
+
+func (a *StorageMinerActorCode_I) Constructor(
+	rt Runtime, ownerAddr addr.Address, workerAddr addr.Address, sectorSize sector.SectorSize, peerId libp2p.PeerID) {
+
+	rt.ValidateImmediateCallerIs(addr.StoragePowerActorAddr)
+	h := rt.AcquireState()
+
+	st := &StorageMinerActorState_I{
+		Sectors_:   SectorsAMT_Empty(),
+		PoStState_: MinerPoStState_New_OK(rt.CurrEpoch()),
+		Info_:      MinerInfo_New(ownerAddr, workerAddr, sectorSize, peerId),
+	}
+
+	UpdateRelease(rt, h, st)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
