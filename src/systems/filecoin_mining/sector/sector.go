@@ -22,8 +22,3 @@ const (
 	DetectedFault
 	TerminatedFault
 )
-
-func Serialize_SectorNumber_Array([]SectorNumber) Serialization {
-	IMPL_FINISH()
-	panic("")
-}

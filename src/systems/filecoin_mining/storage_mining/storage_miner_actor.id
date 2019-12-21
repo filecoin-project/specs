@@ -57,7 +57,7 @@ type StorageMinerActorState struct {
     Info       MinerInfo
 
     _getStorageWeightDescForSector(sectorNumber sector.SectorNumber) actor_util.SectorStorageWeightDesc
-    _getStorageWeightDescsForSectors(sectorNumbers [sector.SectorNumber]) actor_util.SectorStorageWeightDesc
+    _getStorageWeightDescsForSectors(sectorNumbers [sector.SectorNumber]) [actor_util.SectorStorageWeightDesc]
 
     _getSectorOnChainInfo(sectorNumber sector.SectorNumber) (info SectorOnChainInfo, ok bool)
     _getSectorPower(sectorNumber sector.SectorNumber) (power block.StoragePower, ok bool)

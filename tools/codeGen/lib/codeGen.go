@@ -226,6 +226,23 @@ func GenGoTypeSerializers(ctx GoGenContext, name string, interfaceID GoNode) {
 		funBody: GenGoPanicTodoBody(),
 	}
 
+	serializeArrayDecl := GoFunDecl{
+		receiverVar:  nil,
+		receiverType: nil,
+		funName:      "Serialize_" + name + "_Array",
+		funType: GoFunType{
+			args: []GoField{
+				GoField{
+					fieldName: nil,
+					fieldType: GoArrayType{elementType: GoIdent{name: name}},
+				},
+			},
+			retType: GoNode_Ref(TranslateGoIdent("Serialization", ctx)),
+		},
+		funArgs: []GoNode{GoIdent{name: "x"}},
+		funBody: GenGoPanicTodoBody(),
+	}
+
 	deserializeDecl := GoFunDecl{
 		receiverVar:  nil,
 		receiverType: nil,
@@ -266,6 +283,7 @@ func GenGoTypeSerializers(ctx GoGenContext, name string, interfaceID GoNode) {
 	}
 
 	*ctx.retDecls = append(*ctx.retDecls, serializeDecl)
+	*ctx.retDecls = append(*ctx.retDecls, serializeArrayDecl)
 	*ctx.retDecls = append(*ctx.retDecls, deserializeDecl)
 	*ctx.retDecls = append(*ctx.retDecls, deserializeAssertDecl)
 }

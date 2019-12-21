@@ -132,3 +132,13 @@ func RT_MinerEntry_ValidateCaller_DetermineFundsLocation(rt Runtime, entryAddr a
 		return entryAddr
 	}
 }
+
+func RT_ConfirmFundsReceiptOrAbort_RefundRemainder(rt Runtime, fundsRequired actor.TokenAmount) {
+	if rt.ValueReceived() < fundsRequired {
+		rt.AbortFundsMsg("Insufficient funds received accompanying message")
+	}
+
+	if rt.ValueReceived() > fundsRequired {
+		rt.SendFunds(rt.ImmediateCaller(), rt.ValueReceived()-fundsRequired)
+	}
+}

@@ -11,6 +11,8 @@ import (
 type SectorStorageWeightDesc = actor_util.SectorStorageWeightDesc
 type SectorTerminationType = actor_util.SectorTerminationType
 
+var RT_ConfirmFundsReceiptOrAbort_RefundRemainder = vmr.RT_ConfirmFundsReceiptOrAbort_RefundRemainder
+
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
 //

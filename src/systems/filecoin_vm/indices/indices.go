@@ -6,6 +6,7 @@ import (
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -135,6 +136,14 @@ func (inds *Indices_I) BlockReward_GetPledgeSlashForStorageFault(
 func (inds *Indices_I) StorageMining_PreCommitDeposit(
 	sectorSize sector.SectorSize,
 	expirationEpoch block.ChainEpoch,
+) actor.TokenAmount {
+	PARAM_FINISH()
+	panic("")
+}
+
+func (inds *Indices_I) StorageMining_TemporaryFaultFee(
+	storageWeightDescs []actor_util.SectorStorageWeightDesc,
+	duration block.ChainEpoch,
 ) actor.TokenAmount {
 	PARAM_FINISH()
 	panic("")

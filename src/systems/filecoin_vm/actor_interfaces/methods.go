@@ -28,8 +28,6 @@ const (
 	// Internal mechanism events
 	Method_StorageMinerActor_OnVerifiedElectionPoSt
 	Method_StorageMinerActor_OnSurprisePoStChallenge
-	Method_StorageMinerActor_OnSurprisePoStExpiryCheck
-	Method_StorageMinerActor_OnSectorExpiryCheck
 
 	// State queries
 	Method_StorageMinerActor_GetPoStState
@@ -66,6 +64,7 @@ const (
 	Method_StoragePowerActor_WithdrawBalance
 	Method_StoragePowerActor_CreateMiner
 	Method_StoragePowerActor_DeleteMiner
+	Method_StoragePowerActor_ReportConsensusFault
 
 	// Internal mechanism events
 	Method_StoragePowerActor_OnSectorProveCommit

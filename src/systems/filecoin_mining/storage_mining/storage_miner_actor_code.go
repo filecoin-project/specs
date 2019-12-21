@@ -116,20 +116,14 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 	h, st := a.State(rt)
 	rt.ValidateImmediateCallerIs(st.Info().Worker())
 
-	depositReq := rt.CurrIndices().StorageMining_PreCommitDeposit(st.Info().SectorSize(), info.Expiration())
-
-	if rt.ValueReceived() < depositReq {
-		rt.AbortFundsMsg("Insufficient sector precommit deposit")
-	}
-
-	// Refund excess deposit immediately.
-	rt.SendFunds(st.Info().Worker(), rt.ValueReceived()-depositReq)
-
 	if _, found := st.Sectors()[info.SectorNumber()]; found {
 		rt.AbortStateMsg("Sector number already exists in table")
 	}
 
 	Release(rt, h, st)
+
+	depositReq := rt.CurrIndices().StorageMining_PreCommitDeposit(st.Info().SectorSize(), info.Expiration())
+	RT_ConfirmFundsReceiptOrAbort_RefundRemainder(rt, depositReq)
 
 	// Verify deals with StorageMarketActor; abort if this fails.
 	rt.Send(
@@ -249,16 +243,15 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 ////////////
 
 func (a *StorageMinerActorCode_I) DeclareTemporaryFaults(rt Runtime, sectorNumbers []sector.SectorNumber, duration block.ChainEpoch) {
-
-	TODO() // check value received covers duration
-
-	TODO()
-	// error (or truncate) if duration exceeds sector expiration?
-	// (may not be necessary)
-
 	if duration <= block.ChainEpoch(0) {
 		rt.AbortArgMsg("Temporary fault duration must be positive")
 	}
+
+	storageWeightDescs := a._rtGetStorageWeightDescsForSectors(rt, sectorNumbers)
+	requiredFee := rt.CurrIndices().StorageMining_TemporaryFaultFee(storageWeightDescs, duration)
+
+	RT_ConfirmFundsReceiptOrAbort_RefundRemainder(rt, requiredFee)
+	rt.SendFunds(addr.BurntFundsActorAddr, requiredFee)
 
 	effectiveBeginEpoch := rt.CurrEpoch() + DECLARED_FAULT_EFFECTIVE_DELAY
 	effectiveEndEpoch := effectiveBeginEpoch + duration
@@ -329,7 +322,7 @@ func (a *StorageMinerActorCode_I) _rtCheckTemporaryFaultEvents(rt Runtime, secto
 
 		rt.Send(
 			addr.StoragePowerActorAddr,
-			ai.Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveBegin,
+			ai.Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveEnd,
 			[]util.Serialization{actor_util.Serialize_SectorStorageWeightDesc(storageWeightDesc)},
 			actor.TokenAmount(0),
 		)
@@ -357,10 +350,21 @@ func (a *StorageMinerActorCode_I) _rtCheckSectorExpiry(rt Runtime, sectorNumber 
 		return
 	}
 
-	// Note: the following test may be false, if sector expiration has been extended by the worker.
+	// Note: the following test may be false, if sector expiration has been extended by the worker
+	// in the interim after the Cron request was enrolled.
 	if rt.CurrEpoch() >= checkSector.Info().Expiration() {
 		storageWeightDesc := a._rtGetStorageWeightDescForSector(rt, sectorNumber)
-		a._rtDeleteSectorEntry(rt, sectorNumber)
+
+		if checkSector.State() == SectorState_TemporaryFault {
+			// To avoid boundary-case errors in power accounting, make sure we explicitly end
+			// the temporary fault state first, before terminating the sector.
+			rt.Send(
+				addr.StoragePowerActorAddr,
+				ai.Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveEnd,
+				[]util.Serialization{actor_util.Serialize_SectorStorageWeightDesc(storageWeightDesc)},
+				actor.TokenAmount(0),
+			)
+		}
 
 		rt.Send(
 			addr.StoragePowerActorAddr,
@@ -368,6 +372,8 @@ func (a *StorageMinerActorCode_I) _rtCheckSectorExpiry(rt Runtime, sectorNumber 
 			[]util.Serialization{actor_util.Serialize_SectorStorageWeightDesc(storageWeightDesc)},
 			actor.TokenAmount(0),
 		)
+
+		a._rtDeleteSectorEntry(rt, sectorNumber)
 	}
 }
 
@@ -460,6 +466,15 @@ func (a *StorageMinerActorCode_I) _rtGetStorageWeightDescForSector(
 	return ret
 }
 
+func (a *StorageMinerActorCode_I) _rtGetStorageWeightDescsForSectors(
+	rt Runtime, sectorNumbers []sector.SectorNumber) []actor_util.SectorStorageWeightDesc {
+
+	h, st := a.State(rt)
+	ret := st._getStorageWeightDescsForSectors(sectorNumbers)
+	Release(rt, h, st)
+	return ret
+}
+
 func (a *StorageMinerActorCode_I) _rtProcessTemporaryFaultEnd(rt Runtime, sectorNumber sector.SectorNumber) {
 	TODO()
 }
@@ -468,15 +483,13 @@ func (a *StorageMinerActorCode_I) _rtNotifyForTerminatedSectors(
 	rt Runtime, sectorNumbers []sector.SectorNumber, terminationType SectorTerminationType) {
 
 	// Notify StoragePowerActor to adjust power.
-	h, st := a.State(rt)
-	storageWeightTotal := st._getStorageWeightDescsForSectors(sectorNumbers)
-	Release(rt, h, st)
+	storageWeightDescs := a._rtGetStorageWeightDescsForSectors(rt, sectorNumbers)
 
 	rt.Send(
 		addr.StoragePowerActorAddr,
 		ai.Method_StoragePowerActor_OnSectorTerminate,
 		[]util.Serialization{
-			actor_util.Serialize_SectorStorageWeightDesc(storageWeightTotal),
+			actor_util.Serialize_SectorStorageWeightDesc_Array(storageWeightDescs),
 		},
 		actor.TokenAmount(0),
 	)
