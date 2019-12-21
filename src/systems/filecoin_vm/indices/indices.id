@@ -16,7 +16,7 @@ type Indices struct {
     TotalNetworkSectorWeight    block.SectorWeight
     TotalPledgeCollateral       actor.TokenAmount
     TotalNetworkEffectivePower  block.StoragePower  // power above minimum miner size
-    TotalNetworkPower           block.StoragePower
+    TotalNetworkPower           block.StoragePower  // total network power irrespective of meeting minimum miner size
 
     TotalMinedFIL               actor.TokenAmount
     TotalUnminedFIL             actor.TokenAmount
@@ -24,6 +24,8 @@ type Indices struct {
     LastEpochReward             actor.TokenAmount
 
     // these methods produce policy output based on user state/action
+    StorageDeal_ProviderInitTimedOutSlashAmount(deal deal.OnChainDeal) actor.TokenAmount
+
     StorageDeal_DurationBounds(
         pieceSize   piece.PieceSize
         startEpoch  block.ChainEpoch
@@ -53,24 +55,24 @@ type Indices struct {
         maxClientCollateral  actor.TokenAmount
     )
 
-    BlockReward_SectorWeight(
+    SectorWeight(
         sectorSize  sector.SectorSize
         startEpoch  block.ChainEpoch
         endEpoch    block.ChainEpoch
         dealWeight  deal.DealWeight
     ) block.SectorWeight
 
-    BlockReward_PledgeCollateralReq(
+    PledgeCollateralReq(
         minerActiveSectorWeight    block.SectorWeight
         minerInactiveSectorWeight  block.SectorWeight
         minerPledgeCollateral      actor.TokenAmount
     ) actor.TokenAmount
 
-    BlockReward_SectorWeightProportion(
+    SectorWeightProportion(
         minerActiveSectorWeight block.SectorWeight
     ) BigInt
 
-    BlockReward_PledgeCollateralProportion(
+    PledgeCollateralProportion(
         minerPledgeCollateral actor.TokenAmount
     ) BigInt
 
@@ -80,19 +82,19 @@ type Indices struct {
         minerPledgeCollateral      actor.TokenAmount
     ) block.StoragePower
 
-    BlockReward_StoragePowerProportion(
+    StoragePowerProportion(
         minerStoragePower      block.StoragePower
         minerPledgeCollateral  actor.TokenAmount
     ) BigInt
 
-    BlockReward_CurrEpochReward() actor.TokenAmount
+    CurrEpochBlockReward() actor.TokenAmount
 
-    BlockReward_GetCurrRewardForMiner(
+    GetCurrBlockRewardForMiner(
         minerStoragePower      block.StoragePower
         minerPledgeCollateral  actor.TokenAmount
     ) actor.TokenAmount
 
-    BlockReward_GetPledgeSlashForStorageFault(
+    GetPledgeSlashForStorageFault(
         affectedPower            block.StoragePower
         newActiveSectorWeight    block.SectorWeight
         newInactiveSectorWeight  block.SectorWeight

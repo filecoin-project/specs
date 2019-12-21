@@ -62,7 +62,7 @@ func (inds *Indices_I) StorageDeal_ClientCollateralBounds(
 	panic("")
 }
 
-func (inds *Indices_I) BlockReward_SectorWeight(
+func (inds *Indices_I) SectorWeight(
 	sectorSize sector.SectorSize,
 	startEpoch block.ChainEpoch,
 	endEpoch block.ChainEpoch,
@@ -74,7 +74,7 @@ func (inds *Indices_I) BlockReward_SectorWeight(
 	panic("")
 }
 
-func (inds *Indices_I) BlockReward_PledgeCollateralReq(
+func (inds *Indices_I) PledgeCollateralReq(
 	minerActiveSectorWeight block.SectorWeight,
 	minerInactiveSectorWeight block.SectorWeight,
 	minerPledgeCollateral actor.TokenAmount,
@@ -83,13 +83,13 @@ func (inds *Indices_I) BlockReward_PledgeCollateralReq(
 	panic("")
 }
 
-func (inds *Indices_I) BlockReward_SectorWeightProportion(minerActiveSectorWeight block.SectorWeight) util.BigInt {
+func (inds *Indices_I) SectorWeightProportion(minerActiveSectorWeight block.SectorWeight) util.BigInt {
 	// return proportion of SectorWeight for miner
 	PARAM_FINISH()
 	panic("")
 }
 
-func (inds *Indices_I) BlockReward_PledgeCollateralProportion(minerPledgeCollateral actor.TokenAmount) util.BigInt {
+func (inds *Indices_I) PledgeCollateralProportion(minerPledgeCollateral actor.TokenAmount) util.BigInt {
 	// return proportion of Pledge Collateral for miner
 	PARAM_FINISH()
 	panic("")
@@ -106,14 +106,14 @@ func (inds *Indices_I) StoragePower(
 	panic("")
 }
 
-func (inds *Indices_I) BlockReward_StoragePowerProportion(
+func (inds *Indices_I) StoragePowerProportion(
 	minerStoragePower block.StoragePower,
 ) util.BigInt {
 	PARAM_FINISH()
 	panic("")
 }
 
-func (inds *Indices_I) BlockReward_CurrEpochReward() actor.TokenAmount {
+func (inds *Indices_I) CurrEpochBlockReward() actor.TokenAmount {
 	// total block reward allocated for CurrEpoch
 	// each expected winner get an equal share of this reward
 	// computed as a function of NetworkKPI, LastEpochReward, TotalUnmminedFIL, etc
@@ -121,7 +121,7 @@ func (inds *Indices_I) BlockReward_CurrEpochReward() actor.TokenAmount {
 	panic("")
 }
 
-func (inds *Indices_I) BlockReward_GetCurrRewardForMiner(
+func (inds *Indices_I) GetCurrBlockRewardRewardForMiner(
 	minerStoragePower block.StoragePower,
 	minerPledgeCollateral actor.TokenAmount,
 	// TODO extend or eliminate
@@ -130,7 +130,7 @@ func (inds *Indices_I) BlockReward_GetCurrRewardForMiner(
 	panic("")
 }
 
-func (inds *Indices_I) BlockReward_GetPledgeSlashForStorageFault(
+func (inds *Indices_I) GetPledgeSlashForStorageFault(
 	affectedPower block.StoragePower,
 	newActiveSectorWeight block.SectorWeight,
 	newInactiveSectorWeight block.SectorWeight,
