@@ -47,7 +47,7 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 	unsignedCreationMessage := &msg.UnsignedMessage_I{
 		From_:       ownerAddr,
 		To_:         addr.StoragePowerActorAddr,
-		Method_:     ai.Method_StoragePowerActor_CreateStorageMiner,
+		Method_:     ai.Method_StoragePowerActor_CreateMiner,
 		Params_:     params,
 		CallSeqNum_: sysActor.CallSeqNum(),
 		Value_:      pledgeAmt,
@@ -100,78 +100,86 @@ func (sms *StorageMiningSubsystem_I) OnNewRound() {
 }
 
 func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
-	chainHead := sms._blockchain().BestChain().HeadTipset()
-	sma := sms._getStorageMinerActorState(chainHead.StateTree(), sms._keyStore().MinerAddress())
+	TODO() // TODO: update
 
-	if sma.ChallengeStatus().CanBeElected(chainHead.Epoch() + 1) {
-		ePoSt := sms._tryLeaderElection(chainHead.StateTree(), sma)
-		if ePoSt != nil {
-			// Randomness for ticket generation in block production
-			randomness1 := sms._consensus().GetTicketProductionRand(sms._blockchain().BestChain(), sms._blockchain().LatestEpoch())
-			newTicket := sms.PrepareNewTicket(randomness1, sms._keyStore().MinerAddress())
+	/*
+		chainHead := sms._blockchain().BestChain().HeadTipset()
+		sma := sms._getStorageMinerActorState(chainHead.StateTree(), sms._keyStore().MinerAddress())
 
-			sms._blockProducer().GenerateBlock(ePoSt, newTicket, chainHead, sms._keyStore().MinerAddress())
+		if sma.ChallengeStatus().CanBeElected(chainHead.Epoch() + 1) {
+			ePoSt := sms._tryLeaderElection(chainHead.StateTree(), sma)
+			if ePoSt != nil {
+				// Randomness for ticket generation in block production
+				randomness1 := sms._consensus().GetTicketProductionRand(sms._blockchain().BestChain(), sms._blockchain().LatestEpoch())
+				newTicket := sms.PrepareNewTicket(randomness1, sms._keyStore().MinerAddress())
+
+				sms._blockProducer().GenerateBlock(ePoSt, newTicket, chainHead, sms._keyStore().MinerAddress())
+			}
+		} else if sma.ChallengeStatus().IsChallenged() {
+			sPoSt := sms._trySurprisePoSt(chainHead.StateTree(), sma)
+			// TODO: read from consts (in this case user set param)
+			var gasLimit msg.GasAmount
+			var gasPrice = actor.TokenAmount(0)
+			sms._submitSurprisePoStMessage(chainHead.StateTree(), sPoSt, gasPrice, gasLimit)
 		}
-	} else if sma.ChallengeStatus().IsChallenged() {
-		sPoSt := sms._trySurprisePoSt(chainHead.StateTree(), sma)
-		// TODO: read from consts (in this case user set param)
-		var gasLimit msg.GasAmount
-		var gasPrice = actor.TokenAmount(0)
-		sms._submitSurprisePoStMessage(chainHead.StateTree(), sPoSt, gasPrice, gasLimit)
-	}
+	*/
 }
 
 func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.StateTree, sma StorageMinerActorState) sector.OnChainPoStVerifyInfo {
+	TODO() // TODO: update
+	panic("")
 
-	// Randomness for ElectionPoSt
-	randomnessK := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), sms._blockchain().LatestEpoch())
+	/*
+		// Randomness for ElectionPoSt
+		randomnessK := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), sms._blockchain().LatestEpoch())
 
-	input := sms.PreparePoStChallengeSeed(randomnessK, sms._keyStore().MinerAddress())
-	postRandomness := sms._keyStore().WorkerKey().Impl().Generate(input).Output()
+		input := sms.PreparePoStChallengeSeed(randomnessK, sms._keyStore().MinerAddress())
+		postRandomness := sms._keyStore().WorkerKey().Impl().Generate(input).Output()
 
-	// TODO: add how sectors are actually stored in the SMS proving set
-	util.TODO()
-	provingSet := make([]sector.SectorID, 0)
+		// TODO: add how sectors are actually stored in the SMS proving set
+		util.TODO()
+		provingSet := make([]sector.SectorID, 0)
 
-	candidates := sms.StorageProving().Impl().GenerateElectionPoStCandidates(postRandomness, provingSet)
+		candidates := sms.StorageProving().Impl().GenerateElectionPoStCandidates(postRandomness, provingSet)
 
-	if len(candidates) <= 0 {
-		return nil // fail to generate post candidates
-	}
+		if len(candidates) <= 0 {
+			return nil // fail to generate post candidates
+		}
 
-	winningCandidates := make([]sector.PoStCandidate, 0)
+		winningCandidates := make([]sector.PoStCandidate, 0)
 
-	var numMinerSectors uint64
-	TODO() // update
-	// numMinerSectors := uint64(len(sma.SectorTable().Impl().ActiveSectors_.SectorsOn()))
+		var numMinerSectors uint64
+		TODO() // update
+		// numMinerSectors := uint64(len(sma.SectorTable().Impl().ActiveSectors_.SectorsOn()))
 
-	for _, candidate := range candidates {
-		sectorNum := candidate.SectorID().Number()
-		sectorPower, ok := sma._getSectorPower(sectorNum)
-		if !ok {
-			// panic(err)
+		for _, candidate := range candidates {
+			sectorNum := candidate.SectorID().Number()
+			sectorPower, ok := sma._getSectorPower(sectorNum)
+			if !ok {
+				// panic(err)
+				return nil
+			}
+			if sms._consensus().IsWinningPartialTicket(currState, candidate.PartialTicket(), sectorPower, numMinerSectors) {
+				winningCandidates = append(winningCandidates, candidate)
+			}
+		}
+
+		if len(winningCandidates) <= 0 {
 			return nil
 		}
-		if sms._consensus().IsWinningPartialTicket(currState, candidate.PartialTicket(), sectorPower, numMinerSectors) {
-			winningCandidates = append(winningCandidates, candidate)
+
+		postProof := sms.StorageProving().Impl().CreateElectionPoStProof(postRandomness, winningCandidates)
+
+		var ctc sector.ChallengeTicketsCommitment // TODO: proofs to fix when complete
+		electionPoSt := &sector.OnChainPoStVerifyInfo_I{
+			CommT_:      ctc,
+			Candidates_: winningCandidates,
+			Randomness_: postRandomness,
+			Proof_:      postProof,
 		}
-	}
 
-	if len(winningCandidates) <= 0 {
-		return nil
-	}
-
-	postProof := sms.StorageProving().Impl().CreateElectionPoStProof(postRandomness, winningCandidates)
-
-	var ctc sector.ChallengeTicketsCommitment // TODO: proofs to fix when complete
-	electionPoSt := &sector.OnChainPoStVerifyInfo_I{
-		CommT_:      ctc,
-		Candidates_: winningCandidates,
-		Randomness_: postRandomness,
-		Proof_:      postProof,
-	}
-
-	return electionPoSt
+		return electionPoSt
+	*/
 }
 
 func (sms *StorageMiningSubsystem_I) PreparePoStChallengeSeed(randomness util.Randomness, minerAddr addr.Address) util.Randomness {
@@ -253,174 +261,191 @@ func (sms *StorageMiningSubsystem_I) _getStoragePowerActorState(stateTree stateT
 }
 
 func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds inds.Indices, header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
+	TODO() // TODO: update
+	panic("")
 
-	sma := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
-	spa := sms._getStoragePowerActorState(header.ParentState())
+	/*
+		sma := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
+		spa := sms._getStoragePowerActorState(header.ParentState())
 
-	// 1. Check that the miner in question is currently allowed to run election
-	// Note that this is two checks, namely:
-	// On SMA --> can the miner be elected per electionPoSt rules?
-	// On SPA --> Does the miner's power meet the consensus minimum requirement?
-	// we could bundle into a single call here for convenience
-	if !sma._canBeElected(header.Epoch()) {
-		return false
-	}
+		// 1. Check that the miner in question is currently allowed to run election
+		// Note that this is two checks, namely:
+		// On SMA --> can the miner be elected per electionPoSt rules?
+		// On SPA --> Does the miner's power meet the consensus minimum requirement?
+		// we could bundle into a single call here for convenience
+		if !sma._canBeElected(header.Epoch()) {
+			return false
+		}
 
-	activeSectorWeight, inactiveSectorWeight, ok := spa.GetSectorWeightForMiner(header.Miner())
-	if !ok {
-		// TODO: better error handling
-		return false
-	}
+		activeSectorWeight, inactiveSectorWeight, ok := spa.GetSectorWeightForMiner(header.Miner())
+		if !ok {
+			// TODO: better error handling
+			return false
+		}
 
-	currPledge, ok := spa.GetCurrPledgeForMiner(header.Miner())
-	if !ok {
-		// TODO: better error handling
-		return false
-	}
+		currPledge, ok := spa.GetCurrPledgeForMiner(header.Miner())
+		if !ok {
+			// TODO: better error handling
+			return false
+		}
 
-	pow := inds.StoragePower(activeSectorWeight, inactiveSectorWeight, currPledge)
+		pow := inds.StoragePower(activeSectorWeight, inactiveSectorWeight, currPledge)
 
-	if !spa.MinerPowerMeetsConsensusMinimum(pow) {
-		return false
-	}
+		if !spa.MinerPowerMeetsConsensusMinimum(pow) {
+			return false
+		}
 
-	// 2. Verify partialTicket values are appropriate
-	if !sms._verifyElection(header, onChainInfo) {
-		return false
-	}
+		// 2. Verify partialTicket values are appropriate
+		if !sms._verifyElection(header, onChainInfo) {
+			return false
+		}
 
-	// verify the partialTickets themselves
-	// 3. Verify appropriate randomness
-	// TODO: fix away from BestChain()... every block should track its own chain up to its own production.
-	randomness := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), header.Epoch())
-	postRandomnessInput := sector.PoStRandomness(sms.PreparePoStChallengeSeed(randomness, header.Miner()))
+		// verify the partialTickets themselves
+		// 3. Verify appropriate randomness
+		// TODO: fix away from BestChain()... every block should track its own chain up to its own production.
+		randomness := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), header.Epoch())
+		postRandomnessInput := sector.PoStRandomness(sms.PreparePoStChallengeSeed(randomness, header.Miner()))
 
-	postRand := &filcrypto.VRFResult_I{
-		Output_: onChainInfo.Randomness(),
-	}
+		postRand := &filcrypto.VRFResult_I{
+			Output_: onChainInfo.Randomness(),
+		}
 
-	// get worker key from minerAddr
-	workerKey, err := sma.Info().Worker().GetKey()
-	if err != nil {
-		return false
-	}
+		// get worker key from minerAddr
+		workerKey, err := sma.Info().Worker().GetKey()
+		if err != nil {
+			return false
+		}
 
-	if !postRand.Verify(postRandomnessInput, filcrypto.VRFPublicKey(workerKey)) {
-		return false
-	}
+		if !postRand.Verify(postRandomnessInput, filcrypto.VRFPublicKey(workerKey)) {
+			return false
+		}
 
-	// A proof must be a valid snark proof with the correct public inputs
-	// 4. Get public inputs
-	info := sma.Info()
-	sectorSize := info.SectorSize()
+		// A proof must be a valid snark proof with the correct public inputs
+		// 4. Get public inputs
+		info := sma.Info()
+		sectorSize := info.SectorSize()
 
-	postCfg := sector.PoStCfg_I{
-		Type_:        sector.PoStType_ElectionPoSt,
-		SectorSize_:  sectorSize,
-		WindowCount_: info.WindowCount(),
-		Partitions_:  info.ElectionPoStPartitions(),
-	}
+		postCfg := sector.PoStCfg_I{
+			Type_:        sector.PoStType_ElectionPoSt,
+			SectorSize_:  sectorSize,
+			WindowCount_: info.WindowCount(),
+			Partitions_:  info.ElectionPoStPartitions(),
+		}
 
-	pvInfo := sector.PoStVerifyInfo_I{
-		OnChain_:    onChainInfo,
-		PoStCfg_:    &postCfg,
-		Randomness_: onChainInfo.Randomness(),
-	}
+		pvInfo := sector.PoStVerifyInfo_I{
+			OnChain_:    onChainInfo,
+			PoStCfg_:    &postCfg,
+			Randomness_: onChainInfo.Randomness(),
+		}
 
-	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{ElectionPoStCfg_: &postCfg})
+		sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{ElectionPoStCfg_: &postCfg})
 
-	// 5. Verify the PoSt Proof
-	isPoStVerified := sdr.VerifyElectionPoSt(&pvInfo)
-	return isPoStVerified
+		// 5. Verify the PoSt Proof
+		isPoStVerified := sdr.VerifyElectionPoSt(&pvInfo)
+		return isPoStVerified
+	*/
 }
 
 func (sms *StorageMiningSubsystem_I) _verifyElection(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
-	st := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
+	TODO() // TODO: update
+	panic("")
 
-	var numMinerSectors uint64
-	TODO() // update
-	// numMinerSectors := uint64(len(st.SectorTable().Impl().ActiveSectors_.SectorsOn()))
+	/*
+		st := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
 
-	for _, info := range onChainInfo.Candidates() {
-		sectorNum := info.SectorID().Number()
-		sectorPower, ok := st._getSectorPower(sectorNum)
-		if !ok {
-			// panic(err)
-			return false
+		var numMinerSectors uint64
+		TODO() // update
+		// numMinerSectors := uint64(len(st.SectorTable().Impl().ActiveSectors_.SectorsOn()))
+
+		for _, info := range onChainInfo.Candidates() {
+			sectorNum := info.SectorID().Number()
+			sectorPower, ok := st._getSectorPower(sectorNum)
+			if !ok {
+				// panic(err)
+				return false
+			}
+			if !sms._consensus().IsWinningPartialTicket(header.ParentState(), info.PartialTicket(), sectorPower, numMinerSectors) {
+				return false
+			}
 		}
-		if !sms._consensus().IsWinningPartialTicket(header.ParentState(), info.PartialTicket(), sectorPower, numMinerSectors) {
-			return false
-		}
-	}
-	return true
+		return true
+	*/
 }
 
 func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateTree, sma StorageMinerActorState) sector.OnChainPoStVerifyInfo {
+	TODO() // TODO: update
+	panic("")
 
-	// get randomness for SurprisePoSt
-	challEpoch := sma.ChallengeStatus().LastChallengeEpoch()
-	randomnessK := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), challEpoch)
-	input := sms.PreparePoStChallengeSeed(randomnessK, sms._keyStore().MinerAddress())
-	postRandomness := sms._keyStore().WorkerKey().Impl().Generate(input).Output()
+	/*
+		// get randomness for SurprisePoSt
+		challEpoch := sma.ChallengeStatus().LastChallengeEpoch()
+		randomnessK := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), challEpoch)
+		input := sms.PreparePoStChallengeSeed(randomnessK, sms._keyStore().MinerAddress())
+		postRandomness := sms._keyStore().WorkerKey().Impl().Generate(input).Output()
 
-	// TODO: add how sectors are actually stored in the SMS proving set
-	util.TODO()
-	provingSet := make([]sector.SectorID, 0)
+		// TODO: add how sectors are actually stored in the SMS proving set
+		util.TODO()
+		provingSet := make([]sector.SectorID, 0)
 
-	candidates := sms.StorageProving().Impl().GenerateSurprisePoStCandidates(postRandomness, provingSet)
+		candidates := sms.StorageProving().Impl().GenerateSurprisePoStCandidates(postRandomness, provingSet)
 
-	if len(candidates) <= 0 {
-		// Error. Will fail this surprise post and must then redeclare faults
-		return nil // fail to generate post candidates
-	}
-
-	winningCandidates := make([]sector.PoStCandidate, 0)
-	for _, candidate := range candidates {
-		if sma._verifySurprisePoStMeetsTargetReq(candidate) {
-			winningCandidates = append(winningCandidates, candidate)
+		if len(candidates) <= 0 {
+			// Error. Will fail this surprise post and must then redeclare faults
+			return nil // fail to generate post candidates
 		}
-	}
 
-	postProof := sms.StorageProving().Impl().CreateSurprisePoStProof(postRandomness, winningCandidates)
+		winningCandidates := make([]sector.PoStCandidate, 0)
+		for _, candidate := range candidates {
+			if sma._verifySurprisePoStMeetsTargetReq(candidate) {
+				winningCandidates = append(winningCandidates, candidate)
+			}
+		}
 
-	var ctc sector.ChallengeTicketsCommitment // TODO: proofs to fix when complete
-	surprisePoSt := &sector.OnChainPoStVerifyInfo_I{
-		CommT_:      ctc,
-		Candidates_: winningCandidates,
-		Randomness_: postRandomness,
-		Proof_:      postProof,
-	}
-	return surprisePoSt
+		postProof := sms.StorageProving().Impl().CreateSurprisePoStProof(postRandomness, winningCandidates)
+
+		var ctc sector.ChallengeTicketsCommitment // TODO: proofs to fix when complete
+		surprisePoSt := &sector.OnChainPoStVerifyInfo_I{
+			CommT_:      ctc,
+			Candidates_: winningCandidates,
+			Randomness_: postRandomness,
+			Proof_:      postProof,
+		}
+		return surprisePoSt
+	*/
 }
 
 func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.StateTree, sPoSt sector.OnChainPoStVerifyInfo, gasPrice actor.TokenAmount, gasLimit msg.GasAmount) error {
+	TODO() // TODO: update
+	panic("")
 
-	params := make([]util.Serialization, 1)
-	params[0] = sector.Serialize_OnChainPoStVerifyInfo(sPoSt)
+	/*
+		params := make([]util.Serialization, 1)
+		params[0] = sector.Serialize_OnChainPoStVerifyInfo(sPoSt)
 
-	sysActor, ok := state.GetActor(addr.SystemActorAddr)
-	Assert(ok)
-	unsignedCreationMessage := &msg.UnsignedMessage_I{
-		From_:       sms._keyStore().MinerAddress(),
-		To_:         sms._keyStore().MinerAddress(),
-		Method_:     ai.Method_StorageMinerActor_ProcessSurprisePoSt,
-		Params_:     params,
-		CallSeqNum_: sysActor.CallSeqNum(),
-		Value_:      actor.TokenAmount(0),
-		GasPrice_:   gasPrice,
-		GasLimit_:   gasLimit,
-	}
+		sysActor, ok := state.GetActor(addr.SystemActorAddr)
+		Assert(ok)
+		unsignedCreationMessage := &msg.UnsignedMessage_I{
+			From_:       sms._keyStore().MinerAddress(),
+			To_:         sms._keyStore().MinerAddress(),
+			Method_:     ai.Method_StorageMinerActor_ProcessSurprisePoSt,
+			Params_:     params,
+			CallSeqNum_: sysActor.CallSeqNum(),
+			Value_:      actor.TokenAmount(0),
+			GasPrice_:   gasPrice,
+			GasLimit_:   gasLimit,
+		}
 
-	var workerKey filcrypto.SigKeyPair // sms._keyStore().WorkerKey()
-	signedMessage, err := msg.Sign(unsignedCreationMessage, workerKey)
-	if err != nil {
-		return err
-	}
+		var workerKey filcrypto.SigKeyPair // sms._keyStore().WorkerKey()
+		signedMessage, err := msg.Sign(unsignedCreationMessage, workerKey)
+		if err != nil {
+			return err
+		}
 
-	err = sms.FilecoinNode().MessagePool().Syncer().SubmitMessage(signedMessage)
-	if err != nil {
-		return err
-	}
+		err = sms.FilecoinNode().MessagePool().Syncer().SubmitMessage(signedMessage)
+		if err != nil {
+			return err
+		}
 
-	return nil
+		return nil
+	*/
 }

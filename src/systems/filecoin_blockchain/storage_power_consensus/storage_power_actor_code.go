@@ -94,9 +94,9 @@ func (a *StoragePowerActorCode_I) DeleteMiner(rt Runtime, minerAddr addr.Address
 		rt.AbortStateMsg("Deletion requested for miner with pledge balance still remaining")
 	}
 
-	powerEntry, ok := st._getPowerTotalForMiner(minerAddr)
+	minerPower, ok := st.PowerTable()[minerAddr]
 	Assert(ok)
-	if powerEntry > 0 {
+	if minerPower > 0 {
 		rt.AbortStateMsg("Deletion requested for miner with power still remaining")
 	}
 

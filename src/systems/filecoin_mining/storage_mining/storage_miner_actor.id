@@ -2,7 +2,7 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import sealing "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -59,47 +59,10 @@ type StorageMinerActorState struct {
     _getStorageWeightDescForSector(sectorNumber sector.SectorNumber) actor_util.SectorStorageWeightDesc
     _getStorageWeightDescsForSectors(sectorNumbers [sector.SectorNumber]) [actor_util.SectorStorageWeightDesc]
 
-    _getSectorOnChainInfo(sectorNumber sector.SectorNumber) (info SectorOnChainInfo, ok bool)
-    _getSectorPower(sectorNumber sector.SectorNumber) (power block.StoragePower, ok bool)
     _getSectorDealIDsAssert(sectorNumber sector.SectorNumber) deal.DealIDs
 }
 
-type StorageMinerActorCode struct {
-    GetWorkerKey(rt Runtime) filcrypto.VRFPublicKey
-    OnCronTickEnd(rt Runtime)
-    NotifyOfSurprisePoStChallenge(rt Runtime)
-    ProcessSurprisePoSt(rt Runtime)
-
-    PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo)  // TODO: check with Magik on sizes
-    ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo)
-    ProcessVerifiedElectionPoSt(rt Runtime)
-    DeclareFaults(rt Runtime, failingSet sector.CompactSectorSet)
-    RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet)
-
-    _checkSurprisePoStSubmissionHappened(rt Runtime)
-    _rtVerifySurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) bool
-    _rtVerifySurprisePoStMeetsTargetReq(rt Runtime) bool
-    _rtVerifySeal(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
-    _rtAbortIfSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber)
-
-    _onMissedSurprisePoSt(rt Runtime)
-    _onSuccessfulPoSt(rt Runtime)
-
-    _slashCollateralForStorageFaults(
-        rt          Runtime
-        declared    sector.CompactSectorSet  // diff value
-        detected    sector.CompactSectorSet  // diff value
-        terminated  sector.CompactSectorSet  // diff value
-    )
-    _slashDealsForStorageFault(
-        rt             Runtime
-        sectorNumbers  [sector.SectorNumber]
-        faultType      sector.StorageFaultType
-    )
-
-    _submitPowerReport(rt Runtime, lastPoSt block.ChainEpoch)
-    _expirePreCommittedSectors(rt Runtime)
-}
+type StorageMinerActorCode struct {}
 
 type MinerInfo struct {
     // Account that owns this miner.

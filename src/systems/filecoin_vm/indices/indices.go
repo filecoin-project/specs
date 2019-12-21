@@ -168,3 +168,18 @@ func StoragePower_ConsensusMinMinerPower() block.StoragePower {
 	PARAM_FINISH()
 	panic("")
 }
+
+func StorageMining_PoStNoChallengePeriod() block.ChainEpoch {
+	PARAM_FINISH()
+	panic("")
+}
+
+func StorageMining_SurprisePoStProvingPeriod() block.ChainEpoch {
+	PARAM_FINISH()
+	panic("")
+}
+
+func StorageMining_DeclaredFaultEffectiveDelay() block.ChainEpoch {
+	PARAM_FINISH()
+	panic("")
+}

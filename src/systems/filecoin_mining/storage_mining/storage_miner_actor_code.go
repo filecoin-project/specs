@@ -4,12 +4,13 @@ import (
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
+	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -42,7 +43,8 @@ func (a *StorageMinerActorCode_I) OnSurprisePoStChallenge(rt Runtime) {
 	}
 
 	// Do not challenge if the last successful PoSt was recent enough.
-	if st.PoStState().Is_OK() && st.PoStState().As_OK().LastSuccessfulPoSt() >= rt.CurrEpoch()-SURPRISE_NO_CHALLENGE_PERIOD {
+	noChallengePeriod := indices.StorageMining_PoStNoChallengePeriod()
+	if st.PoStState().Is_OK() && st.PoStState().As_OK().LastSuccessfulPoSt() >= rt.CurrEpoch()-noChallengePeriod {
 		Release(rt, h, st)
 		return
 	}
@@ -57,7 +59,8 @@ func (a *StorageMinerActorCode_I) OnSurprisePoStChallenge(rt Runtime) {
 	UpdateRelease(rt, h, st)
 
 	// Request deferred Cron check for SurprisePoSt challenge expiry.
-	a._rtEnrollCronEvent(rt, rt.CurrEpoch()+PROVING_PERIOD, []sector.SectorNumber{})
+	provingPeriod := indices.StorageMining_SurprisePoStProvingPeriod()
+	a._rtEnrollCronEvent(rt, rt.CurrEpoch()+provingPeriod, []sector.SectorNumber{})
 }
 
 // Invoked by miner's worker address to submit a response to a pending Surprise PoSt challenge.
@@ -253,7 +256,7 @@ func (a *StorageMinerActorCode_I) DeclareTemporaryFaults(rt Runtime, sectorNumbe
 	RT_ConfirmFundsReceiptOrAbort_RefundRemainder(rt, requiredFee)
 	rt.SendFunds(addr.BurntFundsActorAddr, requiredFee)
 
-	effectiveBeginEpoch := rt.CurrEpoch() + DECLARED_FAULT_EFFECTIVE_DELAY
+	effectiveBeginEpoch := rt.CurrEpoch() + indices.StorageMining_DeclaredFaultEffectiveDelay()
 	effectiveEndEpoch := effectiveBeginEpoch + duration
 
 	h, st := a.State(rt)

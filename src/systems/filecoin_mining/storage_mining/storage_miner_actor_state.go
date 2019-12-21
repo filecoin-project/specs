@@ -3,10 +3,11 @@ package storage_mining
 import (
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
+	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -80,7 +81,7 @@ func (x *SectorOnChainInfo_I) Is_TemporaryFault() bool {
 
 func (x *SectorOnChainInfo_I) EffectiveFaultBeginEpoch() block.ChainEpoch {
 	Assert(x.Is_TemporaryFault())
-	return x.DeclaredFaultEpoch() + DECLARED_FAULT_EFFECTIVE_DELAY
+	return x.DeclaredFaultEpoch() + indices.StorageMining_DeclaredFaultEffectiveDelay()
 }
 
 func (x *SectorOnChainInfo_I) EffectiveFaultEndEpoch() block.ChainEpoch {
