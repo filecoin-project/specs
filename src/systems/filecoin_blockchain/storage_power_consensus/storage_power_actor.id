@@ -22,9 +22,8 @@ type StoragePowerActorState struct {
     _slashPledgeCollateral(address addr.Address, amount actor.TokenAmount) actor.TokenAmount
 
     _getPowerTotalForMiner(minerAddr addr.Address) (
-        activePower    block.StoragePower
-        inactivePower  block.StoragePower
-        ok             bool
+        powerEntry  block.StoragePower
+        ok          bool
     )
     _getCurrPledgeForMiner(minerAddr addr.Address) (currPledge actor.TokenAmount, ok bool)
     _getTotalPower() block.StoragePower

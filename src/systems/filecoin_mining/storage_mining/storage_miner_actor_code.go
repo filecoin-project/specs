@@ -248,12 +248,13 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 // Faults //
 ////////////
 
-func (a *StorageMinerActorCode_I) DeclareTemporaryFaults(
-	rt Runtime, sectorNumbers []sector.SectorNumber, duration block.ChainEpoch) {
+func (a *StorageMinerActorCode_I) DeclareTemporaryFaults(rt Runtime, sectorNumbers []sector.SectorNumber, duration block.ChainEpoch) {
 
 	TODO() // check value received covers duration
 
-	TODO() // error (or truncate) if duration exceeds sector expiration
+	TODO()
+	// error (or truncate) if duration exceeds sector expiration?
+	// (may not be necessary)
 
 	if duration <= block.ChainEpoch(0) {
 		rt.AbortArgMsg("Temporary fault duration must be positive")

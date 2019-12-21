@@ -40,7 +40,7 @@ type SectorOnChainInfo struct {
     DealWeight                  BigInt  // -1 if not yet validated with StorageMarketActor.
 
     // Must be significantly larger than DeclaredFaultEpoch, since otherwise it may be possible
-    // to declare faults adaptively to avoid challenged sectors.
+    // to declare faults adaptively in order to exempt challenged sectors.
     EffectiveFaultBeginEpoch()  block.ChainEpoch
     EffectiveFaultEndEpoch()    block.ChainEpoch
 
