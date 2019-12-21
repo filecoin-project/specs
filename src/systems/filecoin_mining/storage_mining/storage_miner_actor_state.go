@@ -67,19 +67,21 @@ func MinerPoStState_New_Failing(numConsecutiveFailures int) MinerPoStState {
 	})
 }
 
-func (x *SectorOnChainInfo_I) Is_DeclaredFault() bool {
+func (x *SectorOnChainInfo_I) Is_TemporaryFault() bool {
 	ret := (x.State() == SectorState_TemporaryFault)
-	Assert(ret == (x.DeclaredFaultEpoch() == block.ChainEpoch_None))
-	Assert(ret == (x.DeclaredFaultDuration() == block.ChainEpoch_None))
+	if ret {
+		Assert(x.DeclaredFaultEpoch() != block.ChainEpoch_None)
+		Assert(x.DeclaredFaultDuration() != block.ChainEpoch_None)
+	}
 	return ret
 }
 
 func (x *SectorOnChainInfo_I) EffectiveFaultBeginEpoch() block.ChainEpoch {
-	Assert(x.Is_DeclaredFault())
+	Assert(x.Is_TemporaryFault())
 	return x.DeclaredFaultEpoch() + DECLARED_FAULT_EFFECTIVE_DELAY
 }
 
 func (x *SectorOnChainInfo_I) EffectiveFaultEndEpoch() block.ChainEpoch {
-	Assert(x.Is_DeclaredFault())
+	Assert(x.Is_TemporaryFault())
 	return x.EffectiveFaultBeginEpoch() + x.DeclaredFaultDuration()
 }

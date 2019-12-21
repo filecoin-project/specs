@@ -248,7 +248,20 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 // Faults //
 ////////////
 
-func (a *StorageMinerActorCode_I) DeclareTemporaryFaults(rt Runtime, sectorNumbers []sector.SectorNumber) {
+func (a *StorageMinerActorCode_I) DeclareTemporaryFaults(
+	rt Runtime, sectorNumbers []sector.SectorNumber, duration block.ChainEpoch) {
+
+	TODO() // check value received covers duration
+
+	TODO() // error (or truncate) if duration exceeds sector expiration
+
+	if duration <= block.ChainEpoch(0) {
+		rt.AbortArgMsg("Temporary fault duration must be positive")
+	}
+
+	effectiveBeginEpoch := rt.CurrEpoch() + DECLARED_FAULT_EFFECTIVE_DELAY
+	effectiveEndEpoch := effectiveBeginEpoch + duration
+
 	h, st := a.State(rt)
 	rt.ValidateImmediateCallerIs(st.Info().Worker())
 
@@ -260,54 +273,22 @@ func (a *StorageMinerActorCode_I) DeclareTemporaryFaults(rt Runtime, sectorNumbe
 
 		sectorInfo.Impl().State_ = SectorState_TemporaryFault
 		sectorInfo.Impl().DeclaredFaultEpoch_ = rt.CurrEpoch()
+		sectorInfo.Impl().DeclaredFaultDuration_ = duration
 		st.Sectors()[sectorNumber] = sectorInfo
 	}
 
 	UpdateRelease(rt, h, st)
+
+	// Request deferred Cron invocation to update temporary fault state.
+	a._rtEnrollCronEvent(rt, effectiveBeginEpoch, sectorNumbers)
+	a._rtEnrollCronEvent(rt, effectiveEndEpoch, sectorNumbers)
 }
-
-// func (a *StorageMinerActorCode_I) RecoverTemporaryFaults(rt Runtime, sectorNumbers []sector.SectorNumber) {
-// 	h, st := a.State(rt)
-// 	rt.ValidateImmediateCallerIs(st.Info().Worker())
-
-// 	faultEvents := []actor_util.SectorTemporaryFaultEvent{}
-
-// 	for _, sectorNumber := range sectorNumbers {
-// 		sectorInfo, found := st.Sectors()[sectorNumber]
-// 		if !found || sectorInfo.State() != SectorState_TemporaryFault {
-// 			continue
-// 		}
-
-// 		faultDuration := rt.CurrEpoch() - sectorInfo.EffectiveFaultBeginEpoch()
-// 		if faultDuration > block.ChainEpoch(0) {
-// 			faultEvents = append(faultEvents, &actor_util.SectorTemporaryFaultEvent_I{
-// 				WeightDesc_:   st._getStorageWeightDescForSector(sectorNumber),
-// 				Duration_: faultDuration,
-// 			})
-// 		}
-
-// 		sectorInfo.Impl().State_ = SectorState_Active
-// 		sectorInfo.Impl().DeclaredFaultEpoch_ = block.ChainEpoch_None
-// 		st.Sectors()[sectorNumber] = sectorInfo
-// 	}
-
-// 	UpdateRelease(rt, h, st)
-
-// 	rt.Send(
-// 		addr.StoragePowerActorAddr,
-// 		ai.Method_StoragePowerActor_OnMinerSectorTemporaryFault,
-// 		[]util.Serialization{
-// 			actor_util.Serialize_SectorTemporaryFaultEvent_Array(faultEvents),
-// 		},
-// 		actor.TokenAmount(0),
-// 	)
-// }
 
 func (a *StorageMinerActorCode_I) OnDeferredCronEvent(rt Runtime, sectorNumbers []sector.SectorNumber) {
 	rt.ValidateImmediateCallerIs(addr.StoragePowerActorAddr)
 
 	for _, sectorNumber := range sectorNumbers {
-		a._rtCheckDeclaredFaultEvents(rt, sectorNumber)
+		a._rtCheckTemporaryFaultEvents(rt, sectorNumber)
 		a._rtCheckSectorExpiry(rt, sectorNumber)
 	}
 
@@ -318,9 +299,44 @@ func (a *StorageMinerActorCode_I) OnDeferredCronEvent(rt Runtime, sectorNumbers 
 // Method utility functions
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *StorageMinerActorCode_I) _rtCheckDeclaredFaultEvents(rt Runtime, sectorNumber sector.SectorNumber) {
-	TODO()
-	panic("")
+func (a *StorageMinerActorCode_I) _rtCheckTemporaryFaultEvents(rt Runtime, sectorNumber sector.SectorNumber) {
+	h, st := a.State(rt)
+	checkSector, found := st.Sectors()[sectorNumber]
+	Release(rt, h, st)
+
+	if !found {
+		return
+	}
+
+	storageWeightDesc := a._rtGetStorageWeightDescForSector(rt, sectorNumber)
+
+	if checkSector.State() == SectorState_Active && rt.CurrEpoch() == checkSector.EffectiveFaultBeginEpoch() {
+		checkSector.Impl().State_ = SectorState_TemporaryFault
+
+		rt.Send(
+			addr.StoragePowerActorAddr,
+			ai.Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveBegin,
+			[]util.Serialization{actor_util.Serialize_SectorStorageWeightDesc(storageWeightDesc)},
+			actor.TokenAmount(0),
+		)
+	}
+
+	if checkSector.Is_TemporaryFault() && rt.CurrEpoch() == checkSector.EffectiveFaultEndEpoch() {
+		checkSector.Impl().State_ = SectorState_Active
+		checkSector.Impl().DeclaredFaultEpoch_ = block.ChainEpoch_None
+		checkSector.Impl().DeclaredFaultDuration_ = block.ChainEpoch_None
+
+		rt.Send(
+			addr.StoragePowerActorAddr,
+			ai.Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveBegin,
+			[]util.Serialization{actor_util.Serialize_SectorStorageWeightDesc(storageWeightDesc)},
+			actor.TokenAmount(0),
+		)
+	}
+
+	h, st = a.State(rt)
+	st.Sectors()[sectorNumber] = checkSector
+	UpdateRelease(rt, h, st)
 }
 
 func (a *StorageMinerActorCode_I) _rtCheckSectorExpiry(rt Runtime, sectorNumber sector.SectorNumber) {
@@ -342,15 +358,13 @@ func (a *StorageMinerActorCode_I) _rtCheckSectorExpiry(rt Runtime, sectorNumber 
 
 	// Note: the following test may be false, if sector expiration has been extended by the worker.
 	if rt.CurrEpoch() >= checkSector.Info().Expiration() {
-		storageWeight := a._rtGetStorageWeightForSector(rt, sectorNumber)
+		storageWeightDesc := a._rtGetStorageWeightDescForSector(rt, sectorNumber)
 		a._rtDeleteSectorEntry(rt, sectorNumber)
 
 		rt.Send(
 			addr.StoragePowerActorAddr,
 			ai.Method_StoragePowerActor_OnSectorTerminate,
-			[]util.Serialization{
-				actor_util.Serialize_SectorStorageWeightDesc(storageWeight),
-			},
+			[]util.Serialization{actor_util.Serialize_SectorStorageWeightDesc(storageWeightDesc)},
 			actor.TokenAmount(0),
 		)
 	}
@@ -436,7 +450,7 @@ func (a *StorageMinerActorCode_I) _rtUpdatePoStState(rt Runtime, state MinerPoSt
 	UpdateRelease(rt, h, st)
 }
 
-func (a *StorageMinerActorCode_I) _rtGetStorageWeightForSector(
+func (a *StorageMinerActorCode_I) _rtGetStorageWeightDescForSector(
 	rt Runtime, sectorNumber sector.SectorNumber) actor_util.SectorStorageWeightDesc {
 
 	h, st := a.State(rt)

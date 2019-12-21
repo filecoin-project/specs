@@ -43,6 +43,8 @@ type SectorOnChainInfo struct {
     // to declare faults adaptively to avoid challenged sectors.
     EffectiveFaultBeginEpoch()  block.ChainEpoch
     EffectiveFaultEndEpoch()    block.ChainEpoch
+
+    Is_TemporaryFault()         bool
 }
 
 type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
