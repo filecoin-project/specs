@@ -264,26 +264,13 @@ func (a *StoragePowerActorCode_I) _rtProcessDeferredCronEvents(rt Runtime) {
 }
 
 func (a *StoragePowerActorCode_I) _rtGetPledgeCollateralReqForMinerOrAbort(rt Runtime, minerAddr addr.Address) actor.TokenAmount {
-	TODO() // TODO: update
-	panic("")
-
-	// inds := rt.CurrIndices()
-	// h, st := a.State(rt)
-
-	// powerEntry, ok := st._getPowerTotalForMiner(minerAddr)
-	// if !ok {
-	// 	rt.AbortArgMsg("spa._rtGetPledgeCollateralReqForMinerOrAbort: miner not in PowerTable.")
-	// }
-
-	// currPledge, ok := st._getCurrPledgeForMiner(minerAddr)
-	// if !ok {
-	// 	rt.AbortArgMsg("spa._rtGetPledgeCollateralReqForMinerOrAbort: miner not in EscrowTable.")
-	// }
-
-	// minBalance := inds.BlockReward_PledgeCollateralReq(powerEntry, currPledge)
-
-	// Release(rt, h, st)
-	// return minBalance
+	h, st := a.State(rt)
+	minerNominalPower, found := st.NominalPower()[minerAddr]
+	if !found {
+		rt.AbortArgMsg("Miner not found")
+	}
+	Release(rt, h, st)
+	return rt.CurrIndices().PledgeCollateralReq(minerNominalPower)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

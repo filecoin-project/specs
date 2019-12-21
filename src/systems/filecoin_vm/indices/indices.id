@@ -64,9 +64,7 @@ type Indices struct {
     ) block.SectorWeight
 
     PledgeCollateralReq(
-        minerActiveSectorWeight    block.SectorWeight
-        minerInactiveSectorWeight  block.SectorWeight
-        minerPledgeCollateral      actor.TokenAmount
+        minerNominalPower block.StoragePower
     ) actor.TokenAmount
 
     SectorWeightProportion(
@@ -84,8 +82,7 @@ type Indices struct {
     ) block.StoragePower
 
     StoragePowerProportion(
-        minerStoragePower      block.StoragePower
-        minerPledgeCollateral  actor.TokenAmount
+        minerStoragePower block.StoragePower
     ) BigInt
 
     CurrEpochBlockReward() actor.TokenAmount

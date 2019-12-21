@@ -75,11 +75,7 @@ func (inds *Indices_I) SectorWeight(
 	panic("")
 }
 
-func (inds *Indices_I) PledgeCollateralReq(
-	minerActiveSectorWeight block.SectorWeight,
-	minerInactiveSectorWeight block.SectorWeight,
-	minerPledgeCollateral actor.TokenAmount,
-) actor.TokenAmount {
+func (inds *Indices_I) PledgeCollateralReq(minerNominalPower block.StoragePower) actor.TokenAmount {
 	PARAM_FINISH()
 	panic("")
 }
