@@ -9,8 +9,11 @@ const (
 )
 
 const (
+	// Proxy cron tick method (via StoragePowerActor)
+	Method_StorageMinerActor_OnDeferredCronEvent = actor.MethodPlaceholder + iota
+
 	// User-callable methods
-	Method_StorageMinerActor_PreCommitSector = actor.MethodPlaceholder + iota
+	Method_StorageMinerActor_PreCommitSector
 	Method_StorageMinerActor_ProveCommitSector
 	Method_StorageMinerActor_DeclareTemporaryFaults
 	Method_StorageMinerActor_RecoverTemporaryFaults
@@ -60,12 +63,13 @@ const (
 	Method_StoragePowerActor_DeleteMiner
 
 	// Internal mechanism events
-	Method_StoragePowerActor_OnSectorProveCommitted
-	Method_StoragePowerActor_OnSectorTerminated
+	Method_StoragePowerActor_OnSectorProveCommit
+	Method_StoragePowerActor_OnSectorTerminate
 	Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveBegin
 	Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveEnd
 	Method_StoragePowerActor_OnMinerSurprisePoStSuccess
 	Method_StoragePowerActor_OnMinerSurprisePoStFailure
+	Method_StoragePowerActor_OnMinerEnrollCronEvent
 
 	// State queries
 	Method_StoragePowerActor_GetMinerConsensusPower

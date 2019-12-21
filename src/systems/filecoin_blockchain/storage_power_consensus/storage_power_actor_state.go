@@ -36,7 +36,7 @@ func (st *StoragePowerActorState_I) ActivePowerMeetsConsensusMinimum(minerPower 
 	// get size of MIN_MINER_SIZE_TARGth largest miner
 	minerSizes := make([]block.StoragePower, 0, len(st.PowerTable()))
 	for _, v := range st.PowerTable() {
-		minerSizes = append(minerSizes, v.ActivePower())
+		minerSizes = append(minerSizes, v)
 	}
 	sort.Slice(minerSizes, func(i, j int) bool { return int(i) > int(j) })
 	return minerPower >= minerSizes[MIN_MINER_SIZE_TARG-1]
@@ -45,11 +45,11 @@ func (st *StoragePowerActorState_I) ActivePowerMeetsConsensusMinimum(minerPower 
 func (st *StoragePowerActorState_I) _getActivePowerForConsensus() block.StoragePower {
 	activePower := block.StoragePower(0)
 
-	for _, miner := range st.PowerTable() {
+	for _, minerPower := range st.PowerTable() {
 		// only count miner power if they are larger than MIN_MINER_SIZE
 		// (need to use either condition) in case no one meets MIN_MINER_SIZE_STOR
-		if st.ActivePowerMeetsConsensusMinimum(miner.ActivePower()) {
-			activePower = activePower + miner.ActivePower()
+		if st.ActivePowerMeetsConsensusMinimum(minerPower) {
+			activePower = activePower + minerPower
 		}
 	}
 
@@ -115,27 +115,15 @@ func (st *StoragePowerActorState_I) _selectMinersToSurprise(challengeCount int, 
 	return selectedMiners
 }
 
-func (st *StoragePowerActorState_I) _getTotalPower() block.StoragePower {
-	// TODO (optimization): cache this as a counter in the actor state,
-	// and update it for relevant operations.
-
-	totalPower := block.StoragePower(0)
-	for _, minerEntry := range st.PowerTable() {
-		totalPower = totalPower + minerEntry.ActivePower() + minerEntry.InactivePower()
-	}
-	return totalPower
-}
-
 func (st *StoragePowerActorState_I) _getPowerTotalForMiner(minerAddr addr.Address) (
-	activePower block.StoragePower, inactivePower block.StoragePower, ok bool) {
+	power block.StoragePower, ok bool) {
 
-	powerEntry, found := st.PowerTable()[minerAddr]
+	minerPower, found := st.PowerTable()[minerAddr]
 	if !found {
-		return block.StoragePower(0), block.StoragePower(0), found
+		return block.StoragePower(0), found
 	}
 
-	return powerEntry.ActivePower(), powerEntry.InactivePower(), true
-
+	return minerPower, true
 }
 
 func (st *StoragePowerActorState_I) _getCurrPledgeForMiner(minerAddr addr.Address) (currPledge actor.TokenAmount, ok bool) {

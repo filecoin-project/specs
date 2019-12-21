@@ -29,21 +29,21 @@ func SectorsAMT_Empty() SectorsAMT {
 	panic("")
 }
 
-func (st *StorageMinerActorState_I) _getStorageWeightForSector(sectorNumber sector.SectorNumber) SectorStorageWeight {
+func (st *StorageMinerActorState_I) _getStorageWeightDescForSector(sectorNumber sector.SectorNumber) SectorStorageWeightDesc {
 	sectorInfo, found := st.Sectors()[sectorNumber]
 	Assert(found)
 
-	return &actor_util.SectorStorageWeight_I{
+	return &actor_util.SectorStorageWeightDesc_I{
 		SectorSize_: st.Info().SectorSize(),
 		DealWeight_: sectorInfo.DealWeight(),
 		Duration_:   sectorInfo.Info().Expiration() - sectorInfo.ProveCommitEpoch(),
 	}
 }
 
-func (st *StorageMinerActorState_I) _getStorageWeightsForSectors(sectorNumbers []sector.SectorNumber) []SectorStorageWeight {
-	ret := []SectorStorageWeight{}
+func (st *StorageMinerActorState_I) _getStorageWeightDescsForSectors(sectorNumbers []sector.SectorNumber) []SectorStorageWeightDesc {
+	ret := []SectorStorageWeightDesc{}
 	for _, sectorNumber := range sectorNumbers {
-		ret = append(ret, st._getStorageWeightForSector(sectorNumber))
+		ret = append(ret, st._getStorageWeightDescForSector(sectorNumber))
 	}
 	return ret
 }
@@ -68,7 +68,7 @@ func MinerPoStState_New_Failing(numConsecutiveFailures int) MinerPoStState {
 }
 
 func (x *SectorOnChainInfo_I) Is_DeclaredFault() bool {
-	ret := (x.State() == SectorState_DeclaredFault)
+	ret := (x.State() == SectorState_TemporaryFault)
 	Assert(ret == (x.DeclaredFaultEpoch() == block.ChainEpoch_None))
 	Assert(ret == (x.DeclaredFaultDuration() == block.ChainEpoch_None))
 	return ret

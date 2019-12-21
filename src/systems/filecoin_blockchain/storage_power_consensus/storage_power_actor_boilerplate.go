@@ -9,7 +9,7 @@ import (
 )
 
 type BalanceTableHAMT = actor_util.BalanceTableHAMT
-type SectorStorageWeight = actor_util.SectorStorageWeight
+type SectorStorageWeightDesc = actor_util.SectorStorageWeightDesc
 type SectorTerminationType = actor_util.SectorTerminationType
 
 ////////////////////////////////////////////////////////////////////////////////

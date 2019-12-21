@@ -30,19 +30,19 @@ type SectorState enum {
 }
 
 type SectorOnChainInfo struct {
-    State                  SectorState
-    Info                   sealing.SectorPreCommitInfo
-    PreCommitDeposit       actor.TokenAmount
-    PreCommitEpoch         block.ChainEpoch
-    ProveCommitEpoch       block.ChainEpoch  // -1 if still in PreCommit state.
-    DeclaredFaultEpoch     block.ChainEpoch  // -1 if not currently declared faulted.
-    DeclaredFaultDuration block.ChainEpoch  // -1 if not currently declared faulted.
-    DealWeight             BigInt  // -1 if not yet validated with StorageMarketActor.
+    State                       SectorState
+    Info                        sealing.SectorPreCommitInfo
+    PreCommitDeposit            actor.TokenAmount
+    PreCommitEpoch              block.ChainEpoch
+    ProveCommitEpoch            block.ChainEpoch  // -1 if still in PreCommit state.
+    DeclaredFaultEpoch          block.ChainEpoch  // -1 if not currently declared faulted.
+    DeclaredFaultDuration       block.ChainEpoch  // -1 if not currently declared faulted.
+    DealWeight                  BigInt  // -1 if not yet validated with StorageMarketActor.
 
     // Must be significantly larger than DeclaredFaultEpoch, since otherwise it may be possible
     // to declare faults adaptively to avoid challenged sectors.
     EffectiveFaultBeginEpoch()  block.ChainEpoch
-    EffectiveFaultEndEpoch() block.ChainEpoch
+    EffectiveFaultEndEpoch()    block.ChainEpoch
 }
 
 type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
@@ -54,8 +54,8 @@ type StorageMinerActorState struct {
     PoStState  MinerPoStState
     Info       MinerInfo
 
-    _getStorageWeightForSector(sectorNumber sector.SectorNumber) actor_util.SectorStorageWeight
-    _getStorageWeightForSectors(sectorNumbers [sector.SectorNumber]) actor_util.SectorStorageWeight
+    _getStorageWeightDescForSector(sectorNumber sector.SectorNumber) actor_util.SectorStorageWeightDesc
+    _getStorageWeightDescsForSectors(sectorNumbers [sector.SectorNumber]) actor_util.SectorStorageWeightDesc
 
     _getSectorOnChainInfo(sectorNumber sector.SectorNumber) (info SectorOnChainInfo, ok bool)
     _getSectorPower(sectorNumber sector.SectorNumber) (power block.StoragePower, ok bool)

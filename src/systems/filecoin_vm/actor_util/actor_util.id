@@ -18,24 +18,17 @@ type DealIDQueue struct {
     Dequeue() (dealID deal.DealID, ok bool)
 }
 
-type AddrSetHAMT {addr.Address: bool}
-
-type GlobalSectorDesc struct {
-    MinerAddr     addr.Address
-    SectorNumber  sector.SectorNumber
+type MinerEvent struct {
+    MinerAddr  addr.Address
+    Sectors    [sector.SectorNumber]  // Empty for global events, such as SurprisePoSt expiration.
 }
 
-type GlobalSectorDescSetHAMT {GlobalSectorDesc: bool}
+type MinerEventSetHAMT {MinerEvent: bool}
 
-type SectorStorageWeight struct {
+type SectorStorageWeightDesc struct {
     SectorSize  sector.SectorSize
     Duration    block.ChainEpoch
     DealWeight  BigInt
-}
-
-type SectorTemporaryFaultEvent struct {
-    Weight    SectorStorageWeight
-    Duration  block.ChainEpoch
 }
 
 type SectorTerminationType enum {

@@ -5,25 +5,17 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
-type PowerTableEntry struct {
-    ActivePower    block.StoragePower
-    InactivePower  block.StoragePower
-}
+type PowerTableHAMT {addr.Address: block.StoragePower}  // TODO: convert address to ActorID
 
-// type PowerTableHAMT {actor.ActorID: PowerTableEntry}
-type PowerTableHAMT {addr.Address: PowerTableEntry}  // TODO: convert address to ActorID
-
-type MinerEventsHAMT {block.ChainEpoch: actor_util.AddrSetHAMT}
-type SectorEventsHAMT {block.ChainEpoch: actor_util.GlobalSectorDescSetHAMT}
+type MinerEventsHAMT {block.ChainEpoch: actor_util.MinerEventSetHAMT}
 
 type StoragePowerActorState struct {
-    PowerTable                       PowerTableHAMT
-    EscrowTable                      actor_util.BalanceTableHAMT
-    _minersLargerThanMin             util.UVarint
+    PowerTable                PowerTableHAMT
+    EscrowTable               actor_util.BalanceTableHAMT
+    _minersLargerThanMin      util.UVarint
 
     // Metadata cached for efficient processing of sector/challenge expirations.
-    CachedPoStChallengeExpiryChecks  MinerEventsHAMT
-    CachedSectorExpiryChecks         SectorEventsHAMT
+    CachedDeferredCronEvents  MinerEventsHAMT
 
     ActivePowerMeetsConsensusMinimum(minPower block.StoragePower) bool
     _getActivePowerForConsensus() block.StoragePower
@@ -68,7 +60,6 @@ type StoragePowerActorCode struct {
         proof      [block.Block]
     )
 
-    _rtGetPowerEntryOrAbort(rt Runtime, minerID addr.Address) PowerTableEntry
     _rtGetPledgeCollateralReqForMinerOrAbort(rt Runtime, minerAddr addr.Address) actor.TokenAmount
 
     OnEpochTickEnd(rt Runtime)

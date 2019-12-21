@@ -138,16 +138,6 @@ func DealIDQueue_Empty() DealIDQueue {
 	}
 }
 
-func AddrSetHAMT_Empty() AddrSetHAMT {
-	IMPL_FINISH()
-	panic("")
-}
-
-func GlobalSectorDescSetHAMT_Empty() GlobalSectorDescSetHAMT {
-	IMPL_FINISH()
-	panic("")
-}
-
 func (x *DealIDQueue_I) Enqueue(dealID deal.DealID) {
 	nextIndex := x.EndIndex()
 	x.Values()[nextIndex] = dealID
@@ -181,9 +171,4 @@ func GetMinerOwnerAddress_Assert(tree st.StateTree, a addr.Address) addr.Address
 	ret, err := GetMinerOwnerAddress(tree, a)
 	Assert(err == nil)
 	return ret
-}
-
-func Serialize_SectorTemporaryFaultEvent_Array(x []SectorTemporaryFaultEvent) Serialization {
-	IMPL_FINISH()
-	panic("")
 }

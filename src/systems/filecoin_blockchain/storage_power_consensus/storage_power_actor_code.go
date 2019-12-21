@@ -18,6 +18,8 @@ import (
 ////////////////////////////////////////////////////////////////////////////////
 
 func (a *StoragePowerActorCode_I) AddBalance(rt Runtime, minerAddr addr.Address) {
+	TODO() // update
+
 	// caller verification
 	TODO()
 
@@ -33,6 +35,7 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime, minerAddr addr.Address)
 }
 
 func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Address, amountRequested actor.TokenAmount) {
+	TODO() // update
 
 	if amountRequested < 0 {
 		rt.AbortArgMsg("spa.WithdrawBalance: negative amount.")
@@ -60,6 +63,8 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Add
 func (a *StoragePowerActorCode_I) CreateStorageMiner(
 	rt Runtime, workerAddr addr.Address, peerId libp2p.PeerID) addr.Address {
 
+	TODO() // update
+
 	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
 
 	// ownerAddr := rt.ImmediateCaller()
@@ -69,25 +74,20 @@ func (a *StoragePowerActorCode_I) CreateStorageMiner(
 	TODO() // TODO: call InitActor::Exec to create the StorageMinerActor
 	panic("")
 
-	// TODO: anything to check here?
-	newMinerEntry := &PowerTableEntry_I{
-		ActivePower_:   block.StoragePower(0),
-		InactivePower_: block.StoragePower(0),
-	}
-
 	h, st := a.State(rt)
 	newTable, ok := actor_util.BalanceTable_WithNewAddressEntry(st.EscrowTable(), newMinerAddr, msgValue)
 	if !ok {
 		panic("Internal error: newMinerAddr (result of InitActor::Exec) already exists in escrow table")
 	}
 	st.Impl().EscrowTable_ = newTable
-	st.PowerTable()[newMinerAddr] = newMinerEntry
+	st.PowerTable()[newMinerAddr] = block.StoragePower(0)
 	UpdateRelease(rt, h, st)
 
 	return newMinerAddr
 }
 
 func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime) {
+	TODO() // update
 
 	minerAddr := rt.ImmediateCaller()
 
@@ -124,46 +124,9 @@ func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime) {
 	UpdateRelease(rt, h, st)
 }
 
-func (a *StoragePowerActorCode_I) OnMinerSectorPreCommit(
-	rt Runtime, sectorNumber sector.SectorNumber, sectorExpiration block.ChainEpoch) {
-
-	expireCheckEpochs := []block.ChainEpoch{
-		rt.CurrEpoch() + sector.MAX_PROVE_COMMIT_SECTOR_EPOCH + 1,
-	}
-
-	if sectorExpiration > rt.CurrEpoch() {
-		// Note: sector expiration may be ChainEpoch(0), in the case of committed capacity.
-		expireCheckEpochs = append(expireCheckEpochs, sectorExpiration)
-	}
-
-	for _, expireCheckEpoch := range expireCheckEpochs {
-		a._rtEnqueueSectorExpiryCheck(rt, sectorNumber, expireCheckEpoch)
-	}
-}
-
-func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) {
-
-	minerAddr := rt.ImmediateCaller()
-
-	// caller verification
-	TODO()
-
-	pledgeReq := a._rtGetPledgeCollateralReqForMinerOrAbort(rt, minerAddr)
-
-	h, st := a.State(rt)
-
-	balanceSufficient, ok := actor_util.BalanceTable_IsEntrySufficient(st.EscrowTable(), minerAddr, pledgeReq)
-	Assert(ok)
-	if !balanceSufficient {
-		rt.AbortFundsMsg("exitcode.InsufficientPledgeCollateral")
-	}
-
-	Release(rt, h, st)
-
-}
-
 // slash pledge collateral for Declared, Detected and Terminated faults
 func (a *StoragePowerActorCode_I) SlashPledgeForStorageFault(rt Runtime, affectedPower block.StoragePower, faultType sector.StorageFaultType) {
+	TODO() // update
 
 	minerAddr := rt.ImmediateCaller()
 	inds := rt.CurrIndices()
@@ -237,29 +200,12 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr a
 // Called by Cron.
 func (a *StoragePowerActorCode_I) OnEpochTickEnd(rt Runtime) {
 	a._rtInitiateNewSurprisePoStChallenges(rt)
-	a._rtProcessSurprisePoStChallengeExpiryChecks(rt)
-	a._rtProcessSectorExpiryChecks(rt)
+	a._rtProcessDeferredCronEvents(rt)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Method utility functions
 ////////////////////////////////////////////////////////////////////////////////
-
-func (a *StoragePowerActorCode_I) _rtEnqueueSectorExpiryCheck(
-	rt Runtime, sector sector.SectorNumber, checkEpoch block.ChainEpoch) {
-
-	minerAddr := rt.ImmediateCaller()
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
-
-	h, st := a.State(rt)
-
-	if _, found := st.CachedSectorExpiryChecks()[checkEpoch]; !found {
-		st.CachedPoStChallengeExpiryChecks()[checkEpoch] = actor_util.AddrSetHAMT_Empty()
-	}
-	st.CachedPoStChallengeExpiryChecks()[checkEpoch][minerAddr] = true
-
-	UpdateRelease(rt, h, st)
-}
 
 func (a *StoragePowerActorCode_I) _rtInitiateNewSurprisePoStChallenges(rt Runtime) {
 	var PROVING_PERIOD block.ChainEpoch = 0 // defined in storage_mining, TODO: move constants somewhere else
@@ -272,14 +218,6 @@ func (a *StoragePowerActorCode_I) _rtInitiateNewSurprisePoStChallenges(rt Runtim
 	IMPL_FINISH() // BigInt arithmetic (not floating-point)
 	challengeCount := math.Ceil(float64(len(st.PowerTable())) / float64(PROVING_PERIOD))
 	surprisedMiners := st._selectMinersToSurprise(int(challengeCount), randomness)
-	expiryEpoch := rt.CurrEpoch() + PROVING_PERIOD
-
-	for _, surprisedMiner := range surprisedMiners {
-		if _, found := st.CachedPoStChallengeExpiryChecks()[expiryEpoch]; !found {
-			st.CachedPoStChallengeExpiryChecks()[expiryEpoch] = actor_util.AddrSetHAMT_Empty()
-		}
-		st.CachedPoStChallengeExpiryChecks()[expiryEpoch][surprisedMiner] = true
-	}
 
 	UpdateRelease(rt, h, st)
 
@@ -292,65 +230,30 @@ func (a *StoragePowerActorCode_I) _rtInitiateNewSurprisePoStChallenges(rt Runtim
 	}
 }
 
-func (a *StoragePowerActorCode_I) _rtProcessSurprisePoStChallengeExpiryChecks(rt Runtime) {
+func (a *StoragePowerActorCode_I) _rtProcessDeferredCronEvents(rt Runtime) {
 	epoch := rt.CurrEpoch()
 
 	h, st := a.State(rt)
 
-	checkMiners, found := st.CachedPoStChallengeExpiryChecks()[epoch]
+	minerEvents, found := st.CachedDeferredCronEvents()[epoch]
 	if !found {
 		return
 	}
 
-	for checkMiner := range checkMiners {
+	for minerEvent := range minerEvents {
 		rt.Send(
-			checkMiner,
-			ai.Method_StorageMinerActor_OnSurprisePoStExpiryCheck,
-			[]util.Serialization{},
-			actor.TokenAmount(0))
-	}
-
-	delete(st.CachedPoStChallengeExpiryChecks(), epoch)
-
-	UpdateRelease(rt, h, st)
-}
-
-func (a *StoragePowerActorCode_I) _rtProcessSectorExpiryChecks(rt Runtime) {
-	epoch := rt.CurrEpoch()
-
-	h, st := a.State(rt)
-
-	sectorDescs, found := st.CachedSectorExpiryChecks()[epoch]
-	if !found {
-		Release(rt, h, st)
-		return
-	}
-
-	delete(st.CachedSectorExpiryChecks(), epoch)
-
-	UpdateRelease(rt, h, st)
-
-	for sectorDesc := range sectorDescs {
-		rt.Send(
-			sectorDesc.MinerAddr(),
-			ai.Method_StorageMinerActor_OnSectorExpiryCheck,
+			minerEvent.MinerAddr(),
+			ai.Method_StorageMinerActor_OnDeferredCronEvent,
 			[]util.Serialization{
-				sector.Serialize_SectorNumber(sectorDesc.SectorNumber()),
+				sector.Serialize_SectorNumber_Array(minerEvent.Sectors()),
 			},
-			actor.TokenAmount(0))
-	}
-}
-
-func (a *StoragePowerActorCode_I) _rtGetPowerEntryOrAbort(rt Runtime, minerAddr addr.Address) PowerTableEntry {
-	h, st := a.State(rt)
-	powerEntry, found := st.PowerTable()[minerAddr]
-
-	if !found {
-		rt.AbortStateMsg("Miner not found in power table.")
+			actor.TokenAmount(0),
+		)
 	}
 
-	Release(rt, h, st)
-	return powerEntry
+	delete(st.CachedDeferredCronEvents(), epoch)
+
+	UpdateRelease(rt, h, st)
 }
 
 func (a *StoragePowerActorCode_I) _rtGetPledgeCollateralReqForMinerOrAbort(rt Runtime, minerAddr addr.Address) actor.TokenAmount {

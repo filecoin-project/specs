@@ -8,7 +8,7 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
-type SectorStorageWeight = actor_util.SectorStorageWeight
+type SectorStorageWeightDesc = actor_util.SectorStorageWeightDesc
 type SectorTerminationType = actor_util.SectorTerminationType
 
 ////////////////////////////////////////////////////////////////////////////////
