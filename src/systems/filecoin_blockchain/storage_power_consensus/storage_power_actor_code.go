@@ -202,6 +202,8 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr a
 
 // Called by Cron.
 func (a *StoragePowerActorCode_I) OnEpochTickEnd(rt Runtime) {
+	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
+
 	a._rtInitiateNewSurprisePoStChallenges(rt)
 	a._rtProcessDeferredCronEvents(rt)
 }

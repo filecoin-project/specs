@@ -70,7 +70,7 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 	amountSlashedTotal := actor.TokenAmount(0)
 
 	// Deals may be submitted by any party (but are signed by their client and provider).
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
+	RT_ValidateImmediateCallerIsSignable(rt)
 
 	h, st := a.State(rt)
 
@@ -145,6 +145,8 @@ func (a *StorageMarketActorCode_I) UpdateDealsOnSectorProveCommit(rt Runtime, de
 }
 
 func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, dealIDs deal.DealIDs) sector.PieceInfos {
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+
 	ret := []sector.PieceInfo{}
 
 	h, st := a.State(rt)
@@ -204,6 +206,8 @@ func (a *StorageMarketActorCode_I) TerminateDealsOnSlashProviderSector(rt Runtim
 }
 
 func (a *StorageMarketActorCode_I) OnEpochTickEnd(rt Runtime) {
+	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
+
 	h, st := a.State(rt)
 
 	// Some deals may never be affected by the normal calls to _rtUpdatePendingDealStatesForParty
@@ -277,6 +281,7 @@ func (a *StorageMarketActorCode_I) OnEpochTickEnd(rt Runtime) {
 }
 
 func (a *StorageMarketActorCode_I) Constructor(rt Runtime) {
+	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
 	h := rt.AcquireState()
 
 	st := &StorageMarketActorState_I{

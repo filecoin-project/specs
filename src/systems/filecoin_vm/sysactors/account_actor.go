@@ -7,6 +7,7 @@ import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
 func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 	// Nothing. intentionally left blank.
+	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
 	return rt.SuccessReturn()
 }
 

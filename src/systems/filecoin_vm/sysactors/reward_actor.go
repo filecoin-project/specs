@@ -84,6 +84,8 @@ func (st *RewardActorState_I) _withdrawReward(rt vmr.Runtime, ownerAddr addr.Add
 }
 
 func (a *RewardActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
+	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
+
 	// initialize Reward Map with investor accounts
 	panic("TODO")
 }
@@ -140,20 +142,17 @@ func (a *RewardActorCode_I) AwardBlockReward(
 	UpdateReleaseRewardActorState(rt, h, st)
 }
 
-// called by ownerAddress
 func (a *RewardActorCode_I) WithdrawReward(rt vmr.Runtime) {
-	// withdraw available funds from RewardMap
+	RT_ValidateImmediateCallerIsSignable(rt)
+	ownerAddr := rt.ImmediateCaller()
+
 	h, st := a.State(rt)
 
-	ownerAddr := rt.ImmediateCaller()
+	// withdraw available funds from RewardMap
 	withdrawableReward := st._withdrawReward(rt, ownerAddr)
 	UpdateReleaseRewardActorState(rt, h, st)
 
-	// send funds to owner
-	rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:    ownerAddr,
-		Value_: withdrawableReward,
-	})
+	rt.SendFunds(ownerAddr, withdrawableReward)
 }
 
 func removeIndices(rewards []Reward, indices []int) []Reward {

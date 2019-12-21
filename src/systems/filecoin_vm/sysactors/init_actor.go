@@ -9,6 +9,7 @@ import (
 )
 
 func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
+	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
 	h := rt.AcquireState()
 	st := &InitActorState_I{
 		AddressMap_:  map[addr.Address]addr.ActorID{}, // TODO: HAMT
