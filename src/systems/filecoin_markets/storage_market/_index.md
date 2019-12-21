@@ -26,9 +26,10 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 The lifecycle for a deal within the storage market contains distinct phases:
 
 1. **Discovery** - Client identifies miners and determines their current asks
-2. **Negotiation** - Both parties come to an agreement about the terms of the deal, each party commits funds to the deal, data is transferred
-4. **Publishing** - Deal is published on chain so that it becomes valid
-5. **Handoff** - Once the deal is published, it is handled off the Storage Mining Subsystem, so that it can be added to sector, sealed, and proved so the miner can receive payments. 
+2. **Negotiation** (out of band) - Both parties come to an agreement about the terms of the deal, each party commits funds to the deal, data is transferred
+4. **Publishing** - Deal is published on chain, making the storage provider publicly accountable for the deal
+5. **Handoff** - Once the deal is published, it is handled off the Storage Mining Subsystem. The Storage Mining Subsystem will add the deal to a sector,
+seal the sector, and tell the Storage Market Actor that the deal is in a sector, thereby making the deal active.
 
 The remaining parts of the deal lifecycle are handled by the Storage Mining Subsystem, which communicates with the Storage Market Actor in order to process deal payments. See {{<sref storage_mining_subsystem>}} for more details.
 
@@ -50,25 +51,26 @@ A `StorageAsk` contains all the properties that a client will need to determine 
 
 # Negotiation
 
-Negotiation is how a storage client and a storage provider come to an agreement about a storage deal and reach the point where a deal is published on chain.
+Negotiation is the out of band process where a storage client and a storage provider come to an agreement about a storage deal and reach the point where a deal is published on chain.
 
 Negotiation begins once a client has discovered a miner whose `StorageAsk` meets their desired criteria.The *recommended* order of operations for negotiating and publishing a deal is as follows:
 
 1. Before sending a proposal to the provider, the `StorageClient` adds funds for a deal, as necessary, to the `StorageMarketActor` (by calling `AddBalance`)
 2. In order to propose a storage deal, the `StorageClient` then calculates the piece commitment (`CommP`) for the data it intends to store ahead of time. This is neccesary so that the `StorageProvider` can verify the data the `StorageClient` sends to be stored matches the `CommP` in the `StorageDealProposal`. For more detail about the relationship between payloads, pieces, and `CommP` see {{<sref piece>}} and {{<sref filproofs>}}
-3. The `StorageClient` now creates a `StorageDealProposal` and sends the proposal and the CID for the root of the data to be stored to the `StorageProvider` using the `Storage Deal Protocol`
+3. The `StorageClient` now creates a `StorageDealProposal` and sends the proposal and the CID for the root of the data payload to be stored to the `StorageProvider` using the `Storage Deal Protocol`
 
 Execution now moves to the `StorageProvider`
 
-4. The `StorageProvider` inspects the deal to verify that its parameters match it's own internal criteria (such as price, piece size, deal duration, etc) -- and rejects the proposal if it doesn't
+4. The `StorageProvider` inspects the deal to verify that its parameters match it own internal criteria (such as price, piece size, deal duration, etc) -- and rejects the proposal if it doesn't (it sends a rejection to the client over the
+`Storage Deal Protocol`)
 5. The `StorageProvider` queries the `StorageMarketActor` to verify the `StorageClient` has deposited enough funds to make the deal (i.e. balance > total storage price) and rejects the proposal if it hasn't.
-6. If all criteria are met, the `StorageProvider` responds on the `Storage Deal Protocol` indicate an intent to accept the deal.
+6. If all criteria are met, the `StorageProvider` responds using the `Storage Deal Protocol` indicate an intent to accept the deal.
 
 Execution now moves back to the `StorageClient`
 
-7. The `StorageClient` opens a push request using the `Data Transfer Module`, and sends the request to the provider along with a voucher containing the CID for the `StorageDealProposal` 
-8. The `StorageProvider` checks the voucher and verifies the CID matches an open proposal, and, if so, accepts the data transfer request from the `StorageClient`.
-9. The `Data Transfer Module` now transfers for the data to be stored from the  `StorageClient` to the `StorageProvider` using `GraphSync`.
+7. The `StorageClient` opens a push request for the payload data using the `Data Transfer Module`, and sends the request to the provider along with a voucher containing the CID for the `StorageDealProposal` 
+8. The `StorageProvider` checks the voucher and verifies the CID matches a storage deal proposal it has received and verified but not put on chain already. If so, it accepts the data transfer request from the `StorageClient`.
+9. The `Data Transfer Module` now transfers for the payload data to be stored from the  `StorageClient` to the `StorageProvider` using `GraphSync`.
 10. Once complete, the `Data Transfer Module` notifies the `StorageProvider`
 11. The `StorageProvider` recalculates the piece commitment (`CommP`) from the data that was transferred and verifies it matches the piece commitment in the the `StorageDealProposal`
 
@@ -76,21 +78,23 @@ Execution now moves back to the `StorageClient`
 
 Data is now transferred, both parties have agreed, and it's time for the `StorageProvider` to publish the deal.
 
-12. First, the `StorageProvider` add collateral for the deal as needed to the `StorageMarketActor` (using `AddBalance`)
+12. First, the `StorageProvider` adds collateral for the deal as needed to the `StorageMarketActor` (using `AddBalance`)
 13. Now, the `StorageProvider` calls `PublishStorageDeals` on the `StorageMarketActor` to publish the deal. It sends the StorageDealProposal signed by the client as well as its own signature in the message to publish the storage deal.
-14. If all goes well, the `StorageMarketActor` responds with an on chain `DealID` for the published deal.
-15. The `StorageProvider` responds sends a message to the `StorageClient` on the `Storage Deal Protocol` with the on chain `DealID` to indicate the deal has been accepted and published.
+14. For convenience, the `StorageProvider` responds sends a message to the `StorageClient` on the `Storage Deal Protocol` with the CID of the message it is
+putting on chain
+15. If all goes well, the `StorageMarketActor` responds with an on chain `DealID` for the published deal.
+
 
 Finally, the client verifies the deal.
 
-16. The `StorageClient` should query the `StorageMarketActor` with the `DealID` returned by the `StorageProvider` to get the published `StorageDeal` signed by the `StorageProvider`
+16. The `StorageClient` queries the node for the CID of the message published on chain (sent by the provider). It then inspects message parameters to make sure they match the expected deal
 
 # Handoff
 
-Now that a deal is published, it needs to be stored, sealed, and proven in order for the provider to be paid. However, these components are handled by the {{<sref storage_mining_subsystem>}}. So the final task for the Storage Market is to handoff to the Storage Mining Subsystem
+Now that a deal is published, it needs to be stored, sealed, and proven in order for the provider to be paid. (see {{<sref storage_deal>}} for more information about how deal payments are made) These later stages of a deal are handled by the {{<sref storage_mining_subsystem>}}. So the final task for the Storage Market is to handoff to the Storage Mining Subsystem
 
-17. The `StorageProvider` writes the serialized, padded piece that a shared {{<sref filestore>}}. 
-18. The `StorageProvider` calls `HandleStorageDeal` on the `StorageMiner` with the published `StorageDeal`.
+17. The `StorageProvider` writes the serialized, padded piece to a shared {{<sref filestore>}}. 
+18. The `StorageProvider` calls `HandleStorageDeal` on the `StorageMiner` with the published `StorageDeal` and filestore path.
 
 A note order of operations: the only requirement to publish a storage deal with the `StorageMarketActor` is that the `StorageDealProposal` is signed by the `StorageClient`, the publish message is signed by the `StorageProvider`, and both parties have deposited adequate funds/collateral in the `StorageMarketActor`. As such, it's not required that the steps listed above happen in exactly the order listed above. However, the above order is *recommended* because it generally minimizes the ability of either party to act maliciously.
 
@@ -99,6 +103,7 @@ A note order of operations: the only requirement to publish a storage deal with 
 The following data types unique to the Storage Market:
 
 {{< readfile file="storage_market.id" code="true" lang="go" >}}
+{{< readfile file="storage_market.go" code="true" lang="go" >}}
 
 Details about `StorageDealProposal` and `StorageDeal` (which are used in the Storage Market and elsewhere) specifically can be found in {{<sref storage_deal>}}.
 
@@ -107,11 +112,11 @@ Details about `StorageDealProposal` and `StorageDeal` (which are used in the Sto
 - **Name**: Storage Query Protocol
 - **Protocol ID**: `/fil/<network-name>/storage/ask/1.0.1`
 
-Request: CBOR Encoded AskRequest Data Structure
-Response: CBOR Encoded AskResponse Data Structure
+Request: CBOR Encoded AskProtocolRequest Data Structure
+Response: CBOR Encoded AskProtocolResponse Data Structure
 
 - **Name**: Storage Deal Protocol
 - **Protocol ID**: `/fil/<network-name>/storage/mk/1.0.1`
 
-Request: CBOR Encoded DealRequest Data Structure
-Response: CBOR Encoded DealResponse Data Structure
+Request: CBOR Encoded DealProtocolRequest Data Structure
+Response: CBOR Encoded DealProtocolResponse Data Structure

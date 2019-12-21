@@ -31,7 +31,7 @@ title: Storage Deal Flow
 
 - 7. Declared faults are penalized to a smaller degree than detected faults by `CronActor`. Miners declare failing sectors by invoking `StorageMinerActor.DeclareFaults` and X of the `StorageDealCollateral` will be slashed and power corresponding to these sectors will be tempororily lost. However, miners can only declare faults when they are not in `Challenged` status.
 - 8. Miners can then recover faults by invoking `StorageMinerActor.RecoverFaults` and have sufficient `StorageDealCollateral` in their available balances. FaultySectors are recommitted and power is only restored at the next PoSt submission. Miners will not be able to invoke `RecoverFaults` when they are in the `Challenged` status.
-- 9. Sectors that are failing for `storagemining.MaxFaults` consecutive ChainEpochs will be cleared and result in `StoragePowerActor.SlashPledgeCollateral`.
+- 9. Sectors that are failing for `storagemining.MAX_CONSECUTIVE_FAULTS` consecutive ChainEpochs will be cleared and result in `StoragePowerActor.SlashPledgeCollateral`.
   - TODO: set `X` parameter
 
 # Submit PoSt
@@ -39,7 +39,7 @@ title: Storage Deal Flow
 On every PoSt Submission, the following steps happen.
 
 - 10. `StorageMinerActor` first verifies the PoSt Submission. If PoSt is done correctly, all `Committed` and `Recovering` sectors will be marked as `Active` and power is credited to these sectors. Payments will be processed for deals that are `Active` by invoking `StorageMarketActor.ProcessStorageDealsPayment`.
-- 11. For all sectors that are off from the `ProvingSet`, these sectors are failing. Increment `FaultCount` on these sectors and if any of these sectors are failing for `MaxFaultCount` consecutive `ChainEpoch`, these sectors are terminated and cleared from the network.
+- 11. For all sectors that are off from the `ProvingSet`, these sectors are failing. Increment `FaultCount` on these sectors and if any of these sectors are failing for `MAX_CONSECUTIVE_FAULTS` consecutive `ChainEpoch`, these sectors are terminated and cleared from the network.
 - 13. Process sector expiration. Sectors expire when all deals in that sector have expired. Expired sectors will be cleared and `StorageDealCollateral` for both miners and users returned depending on the state that the sectors are in.
 - 14. Submit `FaultReport` and `PowerReport` to `StoragePowerActor` for slashing and power accounting.
 - 15. Check and ensure that Pledge Collateral is statisfied. TODO: some details are missing here, also related to ProvingPeriod depending on PoSt construction.
@@ -52,4 +52,4 @@ On every PoSt Submission, the following steps happen.
   - If no PoSt is submitted by the end of the `ProvingPeriod`, `onMissedSurprisePoSt` detects the missing PoSt, and sets all sectors to `Failing`.
     - TODO: reword in terms of a conditional in the mining cycle
   - When there are sector faults are detected, some of `StorageDealCollateral` and `PledgeCollateral` are slashed, and power is lost.
-    - If the faults persist for `storagemining.MaxFaultCount` then sectors are removed/cleared from `StorageMinerActor`.
+    - If the faults persist for `storagemining.MAX_CONSECUTIVE_FAULTS` then sectors are removed/cleared from `StorageMinerActor`.

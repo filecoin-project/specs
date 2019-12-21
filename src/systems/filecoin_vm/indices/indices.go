@@ -3,7 +3,7 @@ package indices
 import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	util "github.com/filecoin-project/specs/util"

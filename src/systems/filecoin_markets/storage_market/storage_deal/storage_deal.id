@@ -1,4 +1,3 @@
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
@@ -11,9 +10,6 @@ type DealIDs struct {
 }
 type DealWeight int  // should be BigInt
 
-type DealCID ipld.CID
-type ProposalCID ipld.CID
-type PayloadCID ipld.CID
 type Signature struct {}  // TODO
 
 // Note: Deal Collateral is only released and returned to clients and miners
@@ -42,12 +38,12 @@ type StorageDealProposal struct {
     ProviderCollateral            actor.TokenAmount
     ClientCollateral              actor.TokenAmount
 
-    Duration()                    block.ChainEpoch   @(cached)  // EndEpoch - StartEpoch
+    Duration()                    block.ChainEpoch      @(cached)  // EndEpoch - StartEpoch
     TotalStorageFee()             actor.TokenAmount  // StoragePricePerEpoch * Duration
     ClientBalanceRequirement()    actor.TokenAmount  // ClientCollateral + TotalStorageFee
     ProviderBalanceRequirement()  actor.TokenAmount  // ProviderCollateral
 
-    CID()                         ProposalCID
+    CID()                         &StorageDealProposal
 }
 
 // Everything in this struct will go on chain
@@ -57,7 +53,7 @@ type StorageDeal struct {
     Proposal()      StorageDealProposal  // can extract proposal from the message
     PublishMessage  msg.SignedMessage  // counter signature is implicit in the message
 
-    CID()           DealCID
+    CID()           &StorageDeal
 }
 
 type OnChainDeal struct {

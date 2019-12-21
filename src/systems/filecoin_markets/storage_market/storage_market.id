@@ -4,76 +4,73 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import message "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
-type StorageDealProposalNotFound struct {}
-type StorageDealProposalRejected struct {}
-type StorageDealProposalAccepted struct {}
-type StorageDealProposalSigned struct {}
-type StorageDealPublished struct {}
-type StorageDealCommitted struct {}
-type StorageDealActive struct {}
-type StorageDealFailing struct {}
-type StorageDealRecovering struct {}
-type StorageDealExpired struct {}
-type StorageDealNotFound struct {}
-
-type StorageDealStatus union {
-    StorageDealProposalNotFound
-    StorageDealProposalRejected
-    StorageDealProposalAccepted
-    StorageDealProposalSigned
-    StorageDealPublished
-    StorageDealCommitted
-    StorageDealActive
-    StorageDealFailing
-    StorageDealRecovering
-    StorageDealExpired
-    StorageDealNotFound
-}
-
+type StorageDealStatus uint64
 type Signature struct {}
 
+// StorageAsk is the current price and parameters a miner is currently offering for storage
+// (analogous to an Ask in a financial market)
 type StorageAsk struct {
-    Price         actor.TokenAmount  // attoFIL per GiB per epoch
-    Collateral    actor.TokenAmount  // attoFIL per GiB per epoch
+    Price             actor.TokenAmount  // attoFIL per GiB per epoch
+    Collateral        actor.TokenAmount  // attoFIL per GiB per epoch
 
-    MinPieceSize  piece.PieceSize
-    Miner         addr.Address
-    Timestamp     block.ChainEpoch
-    MaxDuration   block.ChainEpoch
-    MinDuration   block.ChainEpoch
-    SeqNo         UVarint
+    MinPieceSize      piece.PieceSize
+    // address of miner actor for deals
+    Miner             addr.Address
+    // the epoch at the time this ask was published
+    PublicationEpoch  block.ChainEpoch
+    MaxDuration       block.ChainEpoch
+    MinDuration       block.ChainEpoch
+    // a miner should update sequence number each time it publishes an ask
+    // so that anyone with two asks from the same miner can determine which is
+    // more current
+    SeqNo             UVarint
 }
 
+// A SignedStorageAsk is an ask signed by the miner that is making the offer
 type SignedStorageAsk struct {
     Ask StorageAsk
     Signature
 }
 
-type AskRequest struct {
+// AskProtocolRequest is a request sent over the storage ask protocol to a miner 
+// to determine their current ask
+type AskProtocolRequest struct {
     Miner addr.Address
 }
 
-type AskResponse struct {
+// AskProtocolResponse is the response a miner sends over the ask protocol with
+// a signed version of their most recent storage ask
+type AskProtocolResponse struct {
     Ask SignedStorageAsk
 }
 
-type DealRequest struct {
+// DealProtocolRequest is a request sent by a storage client to 
+// a storage provider on the storage deal protocol to propose a storage deal
+type DealProtocolRequest struct {
+    // The deal being proposed
     DealProposal  deal.StorageDealProposal
-    Payload       ipld.CID  // root of the data to be transferred
+    // root of the data to be transferred
+    Payload       ipld.CID
 }
 
-type DealResponse struct {
+// DealProtocolResponse is a response sent by a storage miner 
+// on the storage deal protocol with the current status of a storage
+// deal proposal
+type DealProtocolResponse struct {
+    // The CID of the storage deal proposal 
+    Proposal        &deal.StorageDealProposal
+
+    // Status of deal
     State           StorageDealStatus
-
+    // any additional information about status
     Message         string
-    Proposal        ipld.CID
 
-    // when published
-    StorageDeal     deal.StorageDeal
-    PublishMessage  ipld.CID
+    // CID of message published on chain, once it is published
+    PublishMessage  &message.SignedMessage
 }
 
 type StorageDataTransferVoucher struct {
-    Proposal ipld.CID
+    Proposal &deal.StorageDealProposal
 }

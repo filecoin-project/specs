@@ -4,19 +4,23 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import dt "github.com/filecoin-project/specs/systems/filecoin_files/data_transfer"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
-// Duplicated from deals package for now
+// MinerDeal is the information that a storage provider tracks locally about
+// a deal. It contains not only the storage proposal but the state of the deal
+// as it moves throught the system. It is persisted to local storage and updated 
+// as the deal goes through stages leading up to its being published (and afterward)
 type MinerDeal struct {
-    ProposalCid  ipld.CID
-    Proposal     deal.StorageDealProposal
-    Miner        libp2p.PeerID
-    Client       libp2p.PeerID
-    State        deal.StorageDealProposal
+    ProposalCid   &deal.StorageDealProposal
+    Proposal      deal.StorageDealProposal
+    MinerPeerID   libp2p.PeerID
+    ClientPeerID  libp2p.PeerID
+    Status        StorageDealStatus
 
-    Payload      ipld.CID
+    PayloadID     ipld.CID
 
-    DealID       deal.DealID
-    SectorID     uint64  // Set when State >= DealStaged
+    DealID        deal.DealID
+    SectorID      sector.SectorID  // Set when State >= DealStaged
 }
 
 // The interface provided for storage providers
@@ -36,7 +40,7 @@ type StorageProvider struct {
     AddStorageCollateral(amount actor.TokenAmount) error
 
     // GetStorageCollateral returns the current collateral balance
-    GetStorageCollateral() (StorageParticipantBalance, error)
+    GetStorageCollateral() (actor.TokenAmount, error)
 
     // DataTransferValidator methods
     ValidatePush(
@@ -56,6 +60,6 @@ type StorageProvider struct {
     OnDataTransferEvent(event dt.DataTransferEvent, channelState dt.DataTransferState)
 
     // libp2p listener on storage deal query
-    OnStorageQueryAsk(request AskRequest)
-    OnStorageDealProposal(response DealRequest)
+    OnStorageQueryAsk(request AskProtocolRequest)
+    OnStorageDealProposal(response DealProtocolRequest)
 }

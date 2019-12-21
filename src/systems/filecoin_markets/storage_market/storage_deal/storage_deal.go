@@ -14,11 +14,6 @@ func (d *StorageDeal_I) Proposal() StorageDealProposal {
 	panic("")
 }
 
-func (d *StorageDeal_I) CID() DealCID {
-	TODO()
-	panic("")
-}
-
 func (p *StorageDealProposal_I) Duration() block.ChainEpoch {
 	return (p.EndEpoch() - p.StartEpoch())
 }
@@ -33,9 +28,4 @@ func (p *StorageDealProposal_I) ClientBalanceRequirement() actor.TokenAmount {
 
 func (p *StorageDealProposal_I) ProviderBalanceRequirement() actor.TokenAmount {
 	return p.ProviderCollateral()
-}
-
-func (p *StorageDealProposal_I) CID() ProposalCID {
-	var cid ProposalCID
-	return cid
 }

@@ -70,14 +70,15 @@ sequenceDiagram
     Note over StorageClient, SMA: Putting Deal On Chain
     StorageProvider ->> StorageProvider: Sign Deal Proposal
     StorageProvider ->>+ SMA: Publish Deal On Chain
+    StorageProvider -->> StorageClient: Deal Accepted (w/ Publish Message CID)
     SMA -->>- StorageProvider: Deal Published
-    StorageProvider -->>- StorageClient: Deal Accepted
+    deactivate StorageProvider
   end
 
   rect rgb(210, 145, 188)
     Note over StorageClient, SMA: Verify Deal Published
-    StorageClient ->>+ SMA: Verify deal published
-    SMA -->>- StorageClient: Deal Published
+    StorageClient ->>+ Node: Verify Publish Message Appears On Chain
+    Node -->>- StorageClient: Deal Published
   end
   end
 
