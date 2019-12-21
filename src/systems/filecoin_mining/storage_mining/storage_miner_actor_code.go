@@ -241,6 +241,44 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	rt.SendFunds(workerAddr, preCommitSector.PreCommitDeposit())
 }
 
+/////////////////////////
+// Sector Modification //
+/////////////////////////
+
+func (a *StorageMinerActorCode_I) ExtendSectorExpiration(rt Runtime, sectorNumber sector.SectorNumber, newExpiration block.ChainEpoch) {
+	storageWeightDescPrev := a._rtGetStorageWeightDescForSector(rt, sectorNumber)
+
+	h, st := a.State(rt)
+	rt.ValidateImmediateCallerIs(st.Info().Worker())
+
+	sectorInfo, found := st.Sectors()[sectorNumber]
+	if !found {
+		rt.AbortStateMsg("Sector not found")
+	}
+
+	extensionLength := newExpiration - sectorInfo.Info().Expiration()
+	if extensionLength < 0 {
+		rt.AbortStateMsg("Cannot reduce sector expiration")
+	}
+
+	sectorInfo.Info().Impl().Expiration_ = newExpiration
+	st.Sectors()[sectorNumber] = sectorInfo
+	UpdateRelease(rt, h, st)
+
+	storageWeightDescNew := storageWeightDescPrev
+	storageWeightDescNew.Impl().Duration_ = storageWeightDescPrev.Duration() + extensionLength
+
+	rt.Send(
+		addr.StoragePowerActorAddr,
+		ai.Method_StoragePowerActor_OnSectorModifyWeightDesc,
+		[]util.Serialization{
+			actor_util.Serialize_SectorStorageWeightDesc(storageWeightDescPrev),
+			actor_util.Serialize_SectorStorageWeightDesc(storageWeightDescNew),
+		},
+		actor.TokenAmount(0),
+	)
+}
+
 ////////////
 // Faults //
 ////////////

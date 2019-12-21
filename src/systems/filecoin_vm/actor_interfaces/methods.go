@@ -22,6 +22,7 @@ const (
 	Method_StorageMinerActor_ProveCommitSector
 	Method_StorageMinerActor_DeclareTemporaryFaults
 	Method_StorageMinerActor_RecoverTemporaryFaults
+	Method_StorageMinerActor_ExtendSectorExpiration
 	Method_StorageMinerActor_TerminateSector
 	Method_StorageMinerActor_SubmitSurprisePoStResponse
 
@@ -68,9 +69,10 @@ const (
 
 	// Internal mechanism events
 	Method_StoragePowerActor_OnSectorProveCommit
-	Method_StoragePowerActor_OnSectorTerminate
 	Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveBegin
 	Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveEnd
+	Method_StoragePowerActor_OnSectorModifyWeightDesc
+	Method_StoragePowerActor_OnSectorTerminate
 	Method_StoragePowerActor_OnMinerSurprisePoStSuccess
 	Method_StoragePowerActor_OnMinerSurprisePoStFailure
 	Method_StoragePowerActor_OnMinerEnrollCronEvent

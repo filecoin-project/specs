@@ -149,6 +149,14 @@ func (a *StoragePowerActorCode_I) OnSectorTemporaryFaultEffectiveEnd(rt Runtime,
 	a._rtAddPowerForSector(rt, rt.ImmediateCaller(), storageWeightDesc)
 }
 
+func (a *StoragePowerActorCode_I) OnSectorModifyWeightDesc(
+	rt Runtime, storageWeightDescPrev SectorStorageWeightDesc, storageWeightDescNew SectorStorageWeightDesc) {
+
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	a._rtdeductClaimedPowerForSectorAssert(rt, rt.ImmediateCaller(), storageWeightDescPrev)
+	a._rtAddPowerForSector(rt, rt.ImmediateCaller(), storageWeightDescNew)
+}
+
 func (a *StoragePowerActorCode_I) OnMinerSurprisePoStSuccess(rt Runtime) {
 	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
 	minerAddr := rt.ImmediateCaller()
