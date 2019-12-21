@@ -84,13 +84,6 @@ type Indices struct {
         minerPledgeCollateral    actor.TokenAmount
     ) actor.TokenAmount
 
-    BlockReward_GetPledgeSlashForStorageFault(
-        affectedPower     block.StoragePower
-        newActivePower    block.StoragePower
-        newInactivePower  block.StoragePower
-        currPledge        actor.TokenAmount
-    ) actor.TokenAmount
-
     StorageMining_PreCommitDeposit(
         sectorSize       sector.SectorSize
         expirationEpoch  block.ChainEpoch
@@ -100,4 +93,11 @@ type Indices struct {
         storageWeightDescs  [actor_util.SectorStorageWeightDesc]
         duration            block.ChainEpoch
     ) actor.TokenAmount
+
+    StoragePower_PledgeSlashForSectorTermination(
+        storageWeightDesc  actor_util.SectorStorageWeightDesc
+        terminationType    actor_util.SectorTerminationType
+    ) actor.TokenAmount
+
+    StoragePower_MinMinerPower() block.StoragePower
 }

@@ -155,3 +155,8 @@ func ConsensusPowerForStorageWeight(
 	PARAM_FINISH()
 	panic("")
 }
+
+func StoragePower_MinMinerPower() block.StoragePower {
+	PARAM_FINISH()
+	panic("")
+}

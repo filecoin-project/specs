@@ -10,7 +10,6 @@ import (
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
-	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -119,78 +118,35 @@ func (a *StoragePowerActorCode_I) DeleteMiner(rt Runtime, minerAddr addr.Address
 
 func (a *StoragePowerActorCode_I) OnSectorProveCommit(rt Runtime, storageWeightDesc SectorStorageWeightDesc) {
 	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	a._rtAddPowerForSector(rt, rt.ImmediateCaller(), storageWeightDesc)
+}
+
+func (a *StoragePowerActorCode_I) OnSectorTerminate(
+	rt Runtime, storageWeightDesc SectorStorageWeightDesc, terminationType SectorTerminationType) {
+
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
 	minerAddr := rt.ImmediateCaller()
+	a._rtDeductPowerForSectorAssert(rt, minerAddr, storageWeightDesc)
 
-	// Note: The following computation does not use any of the dynamic information from CurrIndices();
-	// it depends only on storageWeightDesc. This means that the power of a given storageWeightDesc
-	// does not vary over time, so we can avoid continually updating it for each sector every epoch.
-	//
-	// The function is located in the indices module temporarily, until we find a better place for
-	// global parameterization functions.
-	sectorPower := indices.ConsensusPowerForStorageWeight(storageWeightDesc)
+	if terminationType != SectorTerminationType_NormalExpiration {
+		amountToSlash := rt.CurrIndices().StoragePower_PledgeSlashForSectorTermination(storageWeightDesc, terminationType)
 
-	h, st := a.State(rt)
-	st._addPowerForMiner(minerAddr, sectorPower)
-	UpdateRelease(rt, h, st)
+		h, st := a.State(rt)
+		amountSlashed := st._slashPledgeCollateral(minerAddr, amountToSlash)
+		UpdateRelease(rt, h, st)
+
+		rt.SendFunds(addr.BurntFundsActorAddr, amountSlashed)
+	}
 }
 
-func (a *StoragePowerActorCode_I) OnSectorTerminate(rt Runtime, affectedPower block.StoragePower, faultType sector.StorageFaultType) {
-	TODO() // update
-
-	// minerAddr := rt.ImmediateCaller()
-	// inds := rt.CurrIndices()
-
-	// // caller verification
-	// TODO()
-
-	// h, st := a.State(rt)
-
-	// // getAffectedPledge
-	// powerEntry, ok := st._getPowerTotalForMiner(minerAddr)
-	// Assert(ok)
-	// currPledge, ok := st._getCurrPledgeForMiner(minerAddr)
-	// Assert(ok)
-	// affectedPledge := inds.BlockReward_GetPledgeSlashForStorageFault(affectedPower, activePower, inactivePower, currPledge)
-
-	// TODO() // BigInt arithmetic
-	// amountToSlash := actor.TokenAmount(
-	// 	st._getStorageFaultSlashPledgePercent(faultType) * int(affectedPledge) / 100)
-
-	// amountSlashed := st._slashPledgeCollateral(minerAddr, amountToSlash)
-	// UpdateRelease(rt, h, st)
-
-	// rt.SendFunds(addr.BurntFundsActorAddr, amountSlashed)
-
+func (a *StoragePowerActorCode_I) OnSectorTemporaryFaultEffectiveBegin(rt Runtime, storageWeightDesc SectorStorageWeightDesc) {
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	a._rtDeductPowerForSectorAssert(rt, rt.ImmediateCaller(), storageWeightDesc)
 }
 
-func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime) {
-
-	// TODO: update
-	TODO()
-
-	// minerAddr := rt.ImmediateCaller()
-
-	// // caller verification
-	// TODO()
-
-	// powerEntry := a._rtGetPowerEntryOrAbort(rt, minerAddr)
-
-	// h, st := a.State(rt)
-
-	// // keep track of miners larger than minimum miner size before updating the PT
-	// MIN_MINER_SIZE_STOR := block.StoragePower(0) // TODO: pull in from consts
-	// if powerEntry.ActivePower() >= MIN_MINER_SIZE_STOR && report.ActivePower() < MIN_MINER_SIZE_STOR {
-	// 	st.Impl()._minersLargerThanMin_ -= 1
-	// }
-	// if powerEntry.ActivePower() < MIN_MINER_SIZE_STOR && report.ActivePower() >= MIN_MINER_SIZE_STOR {
-	// 	st.Impl()._minersLargerThanMin_ += 1
-	// }
-
-	// powerEntry.Impl().ActivePower_ = report.ActivePower()
-	// powerEntry.Impl().InactivePower_ = report.InactivePower()
-	// st.Impl().PowerTable_[minerAddr] = powerEntry
-
-	// UpdateRelease(rt, h, st)
+func (a *StoragePowerActorCode_I) OnSectorTemporaryFaultEffectiveEnd(rt Runtime, storageWeightDesc SectorStorageWeightDesc) {
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	a._rtAddPowerForSector(rt, rt.ImmediateCaller(), storageWeightDesc)
 }
 
 func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr addr.Address, faultType ConsensusFaultType, proof []block.Block) {
@@ -215,6 +171,18 @@ func (a *StoragePowerActorCode_I) OnEpochTickEnd(rt Runtime) {
 ////////////////////////////////////////////////////////////////////////////////
 // Method utility functions
 ////////////////////////////////////////////////////////////////////////////////
+
+func (a *StoragePowerActorCode_I) _rtAddPowerForSector(rt Runtime, minerAddr addr.Address, storageWeightDesc SectorStorageWeightDesc) {
+	h, st := a.State(rt)
+	st._addPowerForSector(minerAddr, storageWeightDesc)
+	UpdateRelease(rt, h, st)
+}
+
+func (a *StoragePowerActorCode_I) _rtDeductPowerForSectorAssert(rt Runtime, minerAddr addr.Address, storageWeightDesc SectorStorageWeightDesc) {
+	h, st := a.State(rt)
+	st._deductPowerForSectorAssert(minerAddr, storageWeightDesc)
+	UpdateRelease(rt, h, st)
+}
 
 func (a *StoragePowerActorCode_I) _rtInitiateNewSurprisePoStChallenges(rt Runtime) {
 	var PROVING_PERIOD block.ChainEpoch = 0 // defined in storage_mining, TODO: move constants somewhere else

@@ -12,6 +12,8 @@ type BalanceTableHAMT = actor_util.BalanceTableHAMT
 type SectorStorageWeightDesc = actor_util.SectorStorageWeightDesc
 type SectorTerminationType = actor_util.SectorTerminationType
 
+var SectorTerminationType_NormalExpiration = actor_util.SectorTerminationType_NormalExpiration
+
 var RT_MinerEntry_ValidateCaller_DetermineFundsLocation = vmr.RT_MinerEntry_ValidateCaller_DetermineFundsLocation
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -18,6 +18,8 @@ type DealIDQueue struct {
     Dequeue() (dealID deal.DealID, ok bool)
 }
 
+type MinerSetHAMT {addr.Address: bool}
+
 type MinerEvent struct {
     MinerAddr  addr.Address
     Sectors    [sector.SectorNumber]  // Empty for global events, such as SurprisePoSt expiration.

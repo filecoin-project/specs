@@ -12,10 +12,14 @@ type MinerEventsHAMT {block.ChainEpoch: actor_util.MinerEventSetHAMT}
 type StoragePowerActorState struct {
     PowerTable                PowerTableHAMT
     EscrowTable               actor_util.BalanceTableHAMT
-    _minersLargerThanMin      util.UVarint
 
-    // Metadata cached for efficient processing of sector/challenge expirations.
+    TotalNetworkPower         block.StoragePower
+    NumMinersMeetingMinPower  int
+
+    // Metadata cached for efficient processing of sector/challenge events.
     CachedDeferredCronEvents  MinerEventsHAMT
+    NominalPower              PowerTableHAMT
+    PoStFailingMiners         actor_util.MinerSetHAMT
 
     ActivePowerMeetsConsensusMinimum(minPower block.StoragePower) bool
     _getActivePowerForConsensus() block.StoragePower
@@ -29,8 +33,14 @@ type StoragePowerActorState struct {
     _getTotalPower() block.StoragePower
     _selectMinersToSurprise(challengeCount int, randomness util.Randomness) [addr.Address]
     _getStorageFaultSlashPledgePercent(faultType sector.StorageFaultType) int
-    _addPowerForMiner(minerAddr addr.Address, power block.StoragePower)
-    _deductPowerForMinerAssert(minerAddr addr.Address, power block.StoragePower)
+    _addPowerForSector(
+        minerAddr          addr.Address
+        storageWeightDesc  SectorStorageWeightDesc
+    )
+    _deductPowerForSectorAssert(
+        minerAddr          addr.Address
+        storageWeightDesc  SectorStorageWeightDesc
+    )
 }
 
 type StoragePowerActorCode struct {
