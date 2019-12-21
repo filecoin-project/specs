@@ -163,9 +163,9 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.Stat
 
 	postProof := sms.StorageProving().Impl().CreateElectionPoStProof(postRandomness, winningCandidates)
 
-	var ctc sector.ChallengeTicketsCommitment // TODO: proofs to fix when complete
+	// var ctc sector.ChallengeTicketsCommitment // TODO: proofs to fix when complete
 	electionPoSt := &sector.OnChainPoStVerifyInfo_I{
-		CommT_:      ctc,
+		// CommT_:      ctc,
 		Candidates_: winningCandidates,
 		Randomness_: postRandomness,
 		Proof_:      postProof,
@@ -372,9 +372,9 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 
 	postProof := sms.StorageProving().Impl().CreateSurprisePoStProof(postRandomness, winningCandidates)
 
-	var ctc sector.ChallengeTicketsCommitment // TODO: proofs to fix when complete
+	// var ctc sector.ChallengeTicketsCommitment // TODO: proofs to fix when complete
 	surprisePoSt := &sector.OnChainPoStVerifyInfo_I{
-		CommT_:      ctc,
+		// CommT_:      ctc,
 		Candidates_: winningCandidates,
 		Randomness_: postRandomness,
 		Proof_:      postProof,
