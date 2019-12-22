@@ -21,6 +21,12 @@ func (st *StateTree_I) GetActor(a addr.Address) (actor.ActorState, bool) {
 	return as, found
 }
 
+func (st *StateTree_I) GetActorCodeID_Assert(a addr.Address) actor.CodeID {
+	ret, found := st.GetActor(a)
+	Assert(found)
+	return ret.CodeID()
+}
+
 func (st *StateTree_I) WithActorSubstate(a addr.Address, actorState actor.ActorSubstateCID) (StateTree, error) {
 	IMPL_FINISH()
 	panic("")

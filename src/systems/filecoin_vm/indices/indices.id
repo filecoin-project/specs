@@ -113,4 +113,9 @@ type Indices struct {
     ) actor.TokenAmount
 
     StoragePower_ConsensusMinMinerPower() block.StoragePower
+
+    NetworkTransactionFee(
+        toActorCodeID  actor.CodeID
+        methodNum      actor.MethodNum
+    ) actor.TokenAmount
 }

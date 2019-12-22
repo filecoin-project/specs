@@ -6,6 +6,7 @@ import (
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
+	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
@@ -177,7 +178,9 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 
 	// Check sender balance.
 	gasLimitCost := _gasToFIL(message.GasLimit(), message.GasPrice())
-	totalCost := message.Value() + actor.TokenAmount(gasLimitCost)
+	networkTxnFee := indices.Indices_FromStateTree(inTree).NetworkTransactionFee(
+		inTree.GetActorCodeID_Assert(message.To()), message.Method())
+	totalCost := message.Value() + gasLimitCost + networkTxnFee
 	if fromActor.Balance() < totalCost {
 		// Execution error; sender does not have sufficient funds to pay for the gas limit.
 		_applyError(inTree, exitcode.InsufficientFunds_System, SenderResolveSpec_Invalid)
@@ -188,7 +191,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 	// the sender paying gas, and the sender's CallSeqNum being incremented;
 	// at least that much state change will be persisted even if the
 	// method invocation subsequently fails.
-	compTreePreSend := _withTransferFundsAssert(inTree, senderAddr, addr.BurntFundsActorAddr, gasLimitCost)
+	compTreePreSend := _withTransferFundsAssert(inTree, senderAddr, addr.BurntFundsActorAddr, gasLimitCost+networkTxnFee)
 	compTreePreSend = compTreePreSend.Impl().WithIncrementedCallSeqNum_Assert(senderAddr)
 
 	// Reload sender actor state after the transfer and CallSeqNum increment.
