@@ -4,6 +4,7 @@ import (
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -96,6 +97,14 @@ func BalanceTable_WithExtractPartial(
 	panic("")
 }
 
+// Extract all available from the given address's balance table entry.
+func BalanceTable_WithExtractAll(table BalanceTableHAMT, address addr.Address) (
+	ret BalanceTableHAMT, amountExtracted TokenAmount, ok bool) {
+
+	IMPL_FINISH()
+	panic("")
+}
+
 // Determine whether the given address's entry in the balance table meets the required minimum
 // `minBalanceMaintain`.
 func BalanceTable_IsEntrySufficient(
@@ -157,4 +166,27 @@ func (x *DealIDQueue_I) Dequeue() (dealID deal.DealID, ok bool) {
 		ok = true
 		return
 	}
+}
+
+func MinerSetHAMT_Empty() MinerSetHAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
+func ActorIDSetHAMT_Empty() ActorIDSetHAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
+// Get the owner account address associated to a given miner actor.
+func GetMinerOwnerAddress(tree st.StateTree, minerAddr addr.Address) (addr.Address, error) {
+	IMPL_FINISH()
+	panic("")
+}
+
+// Get the owner account address associated to a given miner actor.
+func GetMinerOwnerAddress_Assert(tree st.StateTree, a addr.Address) addr.Address {
+	ret, err := GetMinerOwnerAddress(tree, a)
+	Assert(err == nil)
+	return ret
 }

@@ -6,6 +6,7 @@ import (
 )
 
 var IMPL_FINISH = util.IMPL_FINISH
+var IMPL_TODO = util.IMPL_TODO
 var TODO = util.TODO
 
 type Serialization = util.Serialization
@@ -59,6 +60,28 @@ func (id *CodeID_I) IsSingleton() bool {
 	}
 
 	panic("Actor code ID case not supported")
+}
+
+func BuiltinActorID_SignableTypes() []BuiltinActorID {
+	IMPL_TODO() // TODO: Update for MultiSig actors
+
+	return []BuiltinActorID{
+		BuiltinActorID_Account,
+	}
+}
+
+func (id *CodeID_I) IsSignable() bool {
+	if !id.IsBuiltin() {
+		return false
+	}
+
+	for _, a := range BuiltinActorID_SignableTypes() {
+		if id.As_Builtin() == a {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (x ActorSubstateCID) Ref() *ActorSubstateCID {

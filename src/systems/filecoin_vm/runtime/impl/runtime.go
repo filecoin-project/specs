@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 
+	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
@@ -35,6 +36,7 @@ type Bytes = util.Bytes
 
 var Assert = util.Assert
 var IMPL_FINISH = util.IMPL_FINISH
+var IMPL_TODO = util.IMPL_TODO
 var TODO = util.TODO
 
 func ActorSubstateCID_Equals(x, y ActorSubstateCID) bool {
@@ -189,6 +191,35 @@ func (rt *VMContext) _createActor(codeID actor.CodeID, address addr.Address) {
 	rt._updateActorSystemStateInternal(address, actorStateCID)
 
 	rt._rtAllocGas(gascost.ExecNewActor)
+}
+
+func (rt *VMContext) DeleteActor(address addr.Address) {
+	ok := false
+
+	// An actor may delete itself.
+	if rt._actorAddress.Equals(address) {
+		ok = true
+	}
+
+	// Special case: StoragePowerActor may delete a StorageMinerActor.
+	addrCodeID, found := rt.GetActorCodeID(address)
+	if found &&
+		rt._actorAddress.Equals(addr.StoragePowerActorAddr) &&
+		addrCodeID.Is_Builtin() && addrCodeID.As_Builtin() == actor.BuiltinActorID_StorageMiner {
+
+		ok = true
+	}
+
+	if !ok {
+		rt.AbortAPI("Invalid actor deletion request")
+	}
+
+	rt._deleteActor(address)
+}
+
+func (rt *VMContext) _deleteActor(address addr.Address) {
+	rt._globalStatePending = rt._globalStatePending.Impl().WithDeleteActorSystemState(address)
+	rt._rtAllocGas(gascost.DeleteActor)
 }
 
 func (rt *VMContext) _updateActorSystemStateInternal(actorAddress addr.Address, newStateCID actor.ActorSystemStateCID) {
@@ -612,10 +643,15 @@ func (rt *VMContext) ValueReceived() actor.TokenAmount {
 	return rt._valueReceived
 }
 
-func (rt *VMContext) Randomness(e block.ChainEpoch, offset uint64) util.Randomness {
-	// TODO: validate CurrEpoch() - K <= e <= CurrEpoch()?
-	// TODO: finish
-	TODO()
+func (rt *VMContext) Randomness(tag filcrypto.DomainSeparationTag, epoch block.ChainEpoch) util.Randomness {
+	IMPL_TODO()
+	panic("")
+}
+
+func (rt *VMContext) RandomnessWithAuxSeed(
+	tag filcrypto.DomainSeparationTag, epoch block.ChainEpoch, auxSeed util.Serialization) util.Randomness {
+
+	IMPL_TODO()
 	panic("")
 }
 

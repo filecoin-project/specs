@@ -9,6 +9,12 @@ import (
 )
 
 type BalanceTableHAMT = actor_util.BalanceTableHAMT
+type SectorStorageWeightDesc = actor_util.SectorStorageWeightDesc
+type SectorTerminationType = actor_util.SectorTerminationType
+
+var SectorTerminationType_NormalExpiration = actor_util.SectorTerminationType_NormalExpiration
+
+var RT_MinerEntry_ValidateCaller_DetermineFundsLocation = vmr.RT_MinerEntry_ValidateCaller_DetermineFundsLocation
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
@@ -24,6 +30,7 @@ type Bytes = util.Bytes
 
 var Assert = util.Assert
 var IMPL_FINISH = util.IMPL_FINISH
+var IMPL_TODO = util.IMPL_TODO
 var PARAM_FINISH = util.PARAM_FINISH
 var TODO = util.TODO
 

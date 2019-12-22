@@ -6,10 +6,17 @@ import (
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
+	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
 )
 
 var PARAM_FINISH = util.PARAM_FINISH
+
+func Indices_FromStateTree(tree st.StateTree) Indices {
+	PARAM_FINISH()
+	panic("")
+}
 
 func StorageDeal_ProviderInitTimedOutSlashAmount(deal deal.OnChainDeal) actor.TokenAmount {
 	// placeholder
@@ -74,11 +81,7 @@ func (inds *Indices_I) SectorWeight(
 	panic("")
 }
 
-func (inds *Indices_I) PledgeCollateralReq(
-	minerActiveSectorWeight block.SectorWeight,
-	minerInactiveSectorWeight block.SectorWeight,
-	minerPledgeCollateral actor.TokenAmount,
-) actor.TokenAmount {
+func (inds *Indices_I) PledgeCollateralReq(minerNominalPower block.StoragePower) actor.TokenAmount {
 	PARAM_FINISH()
 	panic("")
 }
@@ -136,6 +139,62 @@ func (inds *Indices_I) GetPledgeSlashForStorageFault(
 	newInactiveSectorWeight block.SectorWeight,
 	currPledge actor.TokenAmount,
 ) actor.TokenAmount {
+	PARAM_FINISH()
+	panic("")
+}
+
+func (inds *Indices_I) StorageMining_PreCommitDeposit(
+	sectorSize sector.SectorSize,
+	expirationEpoch block.ChainEpoch,
+) actor.TokenAmount {
+	PARAM_FINISH()
+	panic("")
+}
+
+func (inds *Indices_I) StorageMining_TemporaryFaultFee(
+	storageWeightDescs []actor_util.SectorStorageWeightDesc,
+	duration block.ChainEpoch,
+) actor.TokenAmount {
+	PARAM_FINISH()
+	panic("")
+}
+
+func (inds *Indices_I) NetworkTransactionFee(
+	toActorCodeID actor.CodeID,
+	methodNum actor.MethodNum,
+) actor.TokenAmount {
+	PARAM_FINISH()
+	panic("")
+}
+
+func ConsensusPowerForStorageWeight(
+	storageWeightDesc actor_util.SectorStorageWeightDesc,
+) block.StoragePower {
+	PARAM_FINISH()
+	panic("")
+}
+
+func StoragePower_ConsensusMinMinerPower() block.StoragePower {
+	PARAM_FINISH()
+	panic("")
+}
+
+func StorageMining_PoStNoChallengePeriod() block.ChainEpoch {
+	PARAM_FINISH()
+	panic("")
+}
+
+func StorageMining_SurprisePoStProvingPeriod() block.ChainEpoch {
+	PARAM_FINISH()
+	panic("")
+}
+
+func StoragePower_SurprisePoStMaxConsecutiveFailures() int {
+	PARAM_FINISH()
+	panic("")
+}
+
+func StorageMining_DeclaredFaultEffectiveDelay() block.ChainEpoch {
 	PARAM_FINISH()
 	panic("")
 }

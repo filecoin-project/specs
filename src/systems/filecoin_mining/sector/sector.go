@@ -1,7 +1,14 @@
 package sector
 
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
+import (
+	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
+	util "github.com/filecoin-project/specs/util"
+)
+
+var IMPL_FINISH = util.IMPL_FINISH
+
+type Serialization = util.Serialization
 
 // If a sector PreCommit appear at epoch T, then the corresponding ProveCommit
 // must appear between epochs

@@ -1,12 +1,16 @@
 package sysactors
 
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
-import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+import (
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+)
 
 func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 	// Nothing. intentionally left blank.
+	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
 	return rt.SuccessReturn()
 }
 

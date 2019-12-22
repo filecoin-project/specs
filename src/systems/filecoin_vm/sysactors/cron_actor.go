@@ -12,6 +12,7 @@ const (
 
 func (a *CronActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 	// Nothing. intentionally left blank.
+	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
 	return rt.SuccessReturn()
 }
 

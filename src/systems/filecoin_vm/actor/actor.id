@@ -57,6 +57,11 @@ type CodeID union {
 
     IsBuiltin()    bool
     IsSingleton()  bool
+
+    // Indicates whether an in-VM message Send operation (with a given actor as sender)
+    // can be triggered by a signed on-chain message from this actor's corresponding
+    // party/parties.
+    IsSignable()   bool
 }
 
 type BuiltinActorID enum {

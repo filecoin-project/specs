@@ -10,13 +10,6 @@ type Any = util.Any
 type Int = util.Int
 type ComputeFunctionID = vmr.ComputeFunctionID
 
-const (
-	// TODO: remove once canonical IDs are assigned
-	ComputeFunctionID_Placeholder ComputeFunctionID = (-(1 << 30)) + iota
-
-	ComputeFunctionID_VerifySignature
-)
-
 type ComputeFunctionBody = func([]Any) Any
 type ComputeFunctionGasCostFn = func([]Any) msg.GasAmount
 
@@ -29,7 +22,7 @@ var _computeFunctionDefs = map[ComputeFunctionID]ComputeFunctionDef{}
 
 func init() {
 	// VerifySignature
-	_computeFunctionDefs[ComputeFunctionID_VerifySignature] = ComputeFunctionDef{
+	_computeFunctionDefs[vmr.ComputeFunctionID_VerifySignature] = ComputeFunctionDef{
 		Body: func(args []Any) Any {
 			if len(args) != 3 {
 				return nil

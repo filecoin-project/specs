@@ -1,4 +1,5 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -63,9 +64,7 @@ type Indices struct {
     ) block.SectorWeight
 
     PledgeCollateralReq(
-        minerActiveSectorWeight    block.SectorWeight
-        minerInactiveSectorWeight  block.SectorWeight
-        minerPledgeCollateral      actor.TokenAmount
+        minerNominalPower block.StoragePower
     ) actor.TokenAmount
 
     SectorWeightProportion(
@@ -83,8 +82,7 @@ type Indices struct {
     ) block.StoragePower
 
     StoragePowerProportion(
-        minerStoragePower      block.StoragePower
-        minerPledgeCollateral  actor.TokenAmount
+        minerStoragePower block.StoragePower
     ) BigInt
 
     CurrEpochBlockReward() actor.TokenAmount
@@ -94,10 +92,30 @@ type Indices struct {
         minerPledgeCollateral  actor.TokenAmount
     ) actor.TokenAmount
 
-    GetPledgeSlashForStorageFault(
-        affectedPower            block.StoragePower
-        newActiveSectorWeight    block.SectorWeight
-        newInactiveSectorWeight  block.SectorWeight
-        currPledge               actor.TokenAmount
+    StorageMining_PreCommitDeposit(
+        sectorSize       sector.SectorSize
+        expirationEpoch  block.ChainEpoch
+    ) actor.TokenAmount
+
+    StorageMining_TemporaryFaultFee(
+        storageWeightDescs  [actor_util.SectorStorageWeightDesc]
+        duration            block.ChainEpoch
+    ) actor.TokenAmount
+
+    StoragePower_PledgeSlashForSectorTermination(
+        storageWeightDesc  actor_util.SectorStorageWeightDesc
+        terminationType    actor_util.SectorTerminationType
+    ) actor.TokenAmount
+
+    StoragePower_PledgeSlashForSurprisePoStFailure(
+        minerClaimedPower       block.StoragePower
+        numConsecutiveFailures  int
+    ) actor.TokenAmount
+
+    StoragePower_ConsensusMinMinerPower() block.StoragePower
+
+    NetworkTransactionFee(
+        toActorCodeID  actor.CodeID
+        methodNum      actor.MethodNum
     ) actor.TokenAmount
 }

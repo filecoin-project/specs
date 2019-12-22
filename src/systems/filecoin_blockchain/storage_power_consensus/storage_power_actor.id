@@ -1,72 +1,40 @@
 import actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
-type PowerTableEntry struct {
-    ActiveSectorWeight    block.SectorWeight
-    InactiveSectorWeight  block.SectorWeight
-    Power                 block.StoragePower
-}
+type PowerTableHAMT {addr.Address: block.StoragePower}  // TODO: convert address to ActorID
 
-type PowerReport struct {
-    ActiveSectorWeight    block.SectorWeight  // set value
-    InactiveSectorWeight  block.SectorWeight  // set value
-}
-
-// type PowerTableHAMT {actor.ActorID: PowerTableEntry}
-type PowerTableHAMT {addr.Address: PowerTableEntry}  // TODO: convert address to ActorID
+type MinerEventsHAMT {block.ChainEpoch: actor_util.MinerEventSetHAMT}
 
 type StoragePowerActorState struct {
-    PowerTable            PowerTableHAMT
-    EscrowTable           actor_util.BalanceTableHAMT
-    _minersLargerThanMin  util.UVarint
+    TotalNetworkPower         block.StoragePower
 
-    MinerPowerMeetsConsensusMinimum(minPower block.StoragePower) bool
+    PowerTable                PowerTableHAMT
+    EscrowTable               actor_util.BalanceTableHAMT
+
+    // Metadata cached for efficient processing of sector/challenge events.
+    CachedDeferredCronEvents  MinerEventsHAMT
+    PoStDetectedFaultMiners   actor_util.MinerSetHAMT
+    ClaimedPower              PowerTableHAMT
+    NominalPower              PowerTableHAMT
+    NumMinersMeetingMinPower  int
+
     _slashPledgeCollateral(address addr.Address, amount actor.TokenAmount) actor.TokenAmount
-
-    GetSectorWeightForMiner(minerAddr addr.Address) (
-        activeSectorWeight    block.SectorWeight
-        inactiveSectorWeight  block.SectorWeight
-        ok                    bool
-    )
-    GetCurrPledgeForMiner(minerAddr addr.Address) (currPledge actor.TokenAmount, ok bool)
     _selectMinersToSurprise(challengeCount int, randomness util.Randomness) [addr.Address]
-    _getStorageFaultSlashPledgePercent(faultType sector.StorageFaultType) int
+
+    _addClaimedPowerForSector(
+        minerAddr          addr.Address
+        storageWeightDesc  SectorStorageWeightDesc
+    )
+    _deductClaimedPowerForSectorAssert(
+        minerAddr          addr.Address
+        storageWeightDesc  SectorStorageWeightDesc
+    )
+    _updatePowerEntriesFromClaimedPower(minerAddr addr.Address)
 }
 
 type StoragePowerActorCode struct {
-    AddBalance(rt Runtime, minerAddr addr.Address)
-    WithdrawBalance(rt Runtime, amount actor.TokenAmount)
-
-    // call by StorageMiningSubsytem on miner creation
-    CreateStorageMiner(
-        rt          Runtime
-        ownerAddr   addr.Address
-        workerAddr  addr.Address
-        peerId      libp2p.PeerID  // TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)
-    ) addr.Address
-
-    RemoveStorageMiner(rt Runtime, addr addr.Address)
-    EnsurePledgeCollateralSatisfied(rt Runtime)
-    ProcessPowerReport(rt Runtime, report PowerReport)
-    SlashPledgeForStorageFault(
-        rt             Runtime
-        affectedPower  block.StoragePower
-        faultType      sector.StorageFaultType
-    )
-
-    ReportConsensusFault(
-        // slasherAddr  addr.Address TODO: fromActor
-        rt         Runtime
-        faultType  ConsensusFaultType
-        proof      [block.Block]
-    )
-
-    Surprise(rt Runtime, ticket block.Ticket) [addr.Address]
-
-    _rtGetPowerEntryOrAbort(rt Runtime, minerID addr.Address) PowerTableEntry
-    _rtGetPledgeCollateralReqForMinerOrAbort(rt Runtime, minerAddr addr.Address) actor.TokenAmount
+    // Intentionally left blank (VM methods do not require Golang prototypes).
+    // Can be filled in once InvokeMethod is implemented for this actor.
 }
