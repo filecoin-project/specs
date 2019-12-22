@@ -1,12 +1,14 @@
 package storage_market
 
 import (
+	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
+	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -267,15 +269,30 @@ func (st *StorageMarketActorState_I) _slashBalance(addr addr.Address, slashAmoun
 // State utility functions
 ////////////////////////////////////////////////////////////////////////////////
 
-func _dealProposalIsInternallyValid(dealP deal.StorageDealProposal) bool {
+func _rtDealProposalIsInternallyValid(rt Runtime, dealP deal.StorageDealProposal) bool {
 	if dealP.EndEpoch() <= dealP.StartEpoch() {
 		return false
 	}
+
 	if dealP.Duration() != dealP.EndEpoch()-dealP.StartEpoch() {
 		return false
 	}
 
-	IMPL_FINISH() // Verify client and provider signatures.
+	IMPL_FINISH()
+	// Get signature public key of client account actor.
+	var pk filcrypto.PublicKey
+
+	IMPL_FINISH()
+	// Determine which subset of DealProposal to use as the message to be signed by the client.
+	var m filcrypto.Message
+
+	// Note: we do not verify the provider signature here, since this is implicit in the
+	// authenticity of the on-chain message publishing the deal.
+	sig := dealP.ClientSignature()
+	sigVerified := vmr.RT_VerifySignature(rt, pk, sig, m)
+	if !sigVerified {
+		return false
+	}
 
 	return true
 }

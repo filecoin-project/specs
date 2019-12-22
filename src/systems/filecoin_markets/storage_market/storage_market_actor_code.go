@@ -69,14 +69,20 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 	IMPL_FINISH() // BigInt arithmetic
 	amountSlashedTotal := actor.TokenAmount(0)
 
-	// Deals may be submitted by any party (but are signed by their client and provider).
+	// Deal message must have a From field identical to the provider of all the deals.
+	// This allows us to retain and verify only the client's signature in each deal proposal itself.
 	RT_ValidateImmediateCallerIsSignable(rt)
+	providerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
 
 	// All storage deals will be added in an atomic transaction; this operation will be unrolled if any of them fails.
 	for _, newDeal := range newStorageDeals {
 		p := newDeal.Proposal()
+
+		if !p.Provider().Equals(providerAddr) {
+			rt.AbortArgMsg("Incorrect provider listed in deal")
+		}
 
 		_rtAbortIfNewDealInvalid(rt, newDeal)
 
@@ -368,7 +374,7 @@ func _rtAbortIfDealInvalidForNewSectorSeal(
 func _rtAbortIfNewDealInvalid(rt Runtime, deal deal.StorageDeal) {
 	dealP := deal.Proposal()
 
-	if !_dealProposalIsInternallyValid(dealP) {
+	if !_rtDealProposalIsInternallyValid(rt, dealP) {
 		rt.AbortStateMsg("Invalid deal proposal.")
 	}
 

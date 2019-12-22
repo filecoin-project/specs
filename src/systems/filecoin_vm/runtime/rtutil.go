@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
@@ -11,6 +12,8 @@ import (
 
 var Assert = util.Assert
 var IMPL_TODO = util.IMPL_TODO
+
+type Any = util.Any
 
 // Name should be set per unique filecoin network
 var Name = "mainnet"
@@ -141,4 +144,9 @@ func RT_ConfirmFundsReceiptOrAbort_RefundRemainder(rt Runtime, fundsRequired act
 	if rt.ValueReceived() > fundsRequired {
 		rt.SendFunds(rt.ImmediateCaller(), rt.ValueReceived()-fundsRequired)
 	}
+}
+
+func RT_VerifySignature(rt Runtime, pk filcrypto.PublicKey, sig filcrypto.Signature, m filcrypto.Message) bool {
+	ret := rt.Compute(ComputeFunctionID_VerifySignature, []Any{pk, sig, m})
+	return ret.(bool)
 }

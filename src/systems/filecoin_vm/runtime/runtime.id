@@ -141,4 +141,6 @@ type ActorStateHandle interface {
     Take() actor.ActorSubstateCID
 }
 
-type ComputeFunctionID Int
+type ComputeFunctionID enum {
+    VerifySignature
+}

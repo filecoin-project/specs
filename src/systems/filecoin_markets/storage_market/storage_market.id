@@ -1,13 +1,13 @@
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import message "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 
 type StorageDealStatus uint64
-type Signature struct {}
 
 // StorageAsk is the current price and parameters a miner is currently offering for storage
 // (analogous to an Ask in a financial market)
@@ -30,8 +30,8 @@ type StorageAsk struct {
 
 // A SignedStorageAsk is an ask signed by the miner that is making the offer
 type SignedStorageAsk struct {
-    Ask StorageAsk
-    Signature
+    Ask        StorageAsk
+    Signature  filcrypto.Signature
 }
 
 // AskProtocolRequest is a request sent over the storage ask protocol to a miner 
