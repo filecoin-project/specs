@@ -171,10 +171,11 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 	expiryBound := rt.CurrEpoch() + sector.MAX_PROVE_COMMIT_SECTOR_EPOCH + 1
 	a._rtEnrollCronEvent(rt, expiryBound, []sector.SectorNumber{info.SectorNumber()})
 
-	if info.Expiration() > rt.CurrEpoch() {
-		// Note: sector expiration may be in the past, in the case of committed capacity.
-		a._rtEnrollCronEvent(rt, info.Expiration(), []sector.SectorNumber{info.SectorNumber()})
+	if info.Expiration() <= rt.CurrEpoch() {
+		rt.AbortArgMsg("PreCommit sector must have positive lifetime")
 	}
+
+	a._rtEnrollCronEvent(rt, info.Expiration(), []sector.SectorNumber{info.SectorNumber()})
 }
 
 func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo) {
