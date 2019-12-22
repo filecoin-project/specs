@@ -607,12 +607,6 @@ func (rt *VMContext) _sendInternalOutputs(input InvocInput, errSpec ErrorHandlin
 	return vmr.InvocOutput_Make(ret.ReturnValue()), ret.ExitCode()
 }
 
-func (rt *VMContext) SendRelay(message msg.UnsignedMessageBase, value actor.TokenAmount) InvocOutput {
-	TODO() // Decide how to validate and/or increment receiver's CallSeqNum.
-
-	return rt.SendPropagatingErrors(vmr.InvocInput_Make(message.To(), message.Method(), message.Params(), value))
-}
-
 func (rt *VMContext) Send(
 	toAddr addr.Address, methodNum actor.MethodNum, params actor.MethodParams, value actor.TokenAmount) InvocOutput {
 

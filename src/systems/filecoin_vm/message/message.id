@@ -39,17 +39,3 @@ type SignedMessage struct {
     Message    UnsignedMessage
     Signature  filcrypto.Signature
 }  // representation tuple
-
-type UnsignedMessageBase struct {
-    // Address of the receiving actor.
-    To          addr.Address
-
-    // Expected CallSeqNum of the sending actor (only for top-level messages).
-    CallSeqNum  actor.CallSeqNum
-
-    // Optional method to invoke on receiver, zero for a plain value send.
-    Method      actor.MethodNum
-
-    // Serialized parameters to the method (if method is non-zero).
-    Params      actor.MethodParams
-}

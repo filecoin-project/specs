@@ -14,7 +14,12 @@ const (
 )
 
 const (
-	Method_MultiSigActor_EndorseMessage = actor.MethodPlaceholder + iota
+	Method_MultiSigActor_Propose = actor.MethodPlaceholder + iota
+	Method_MultiSigActor_Approve
+	Method_MultiSigActor_AddAuthorizedParty
+	Method_MultiSigActor_RemoveAuthorizedParty
+	Method_MultiSigActor_SwapAuthorizedParty
+	Method_MultiSigActor_ChangeNumApprovalsThreshold
 )
 
 const (

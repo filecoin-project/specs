@@ -1,17 +1,31 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
-type EndorsementSetHAMT {addr.Address: bool}
+type TxnID int
 
-type MultiSigPendingMessageHAMT {msg.UnsignedMessageBase: EndorsementSetHAMT}
-type MultiSigPendingMessageValueHAMT {msg.UnsignedMessageBase: actor.TokenAmount}
+type MultiSigTransaction struct {
+    Proposer    addr.Address
+    Expiration  block.ChainEpoch
+
+    To          addr.Address
+    Method      actor.MethodNum
+    Params      actor.MethodParams
+    Value       actor.TokenAmount
+
+    Equals(MultiSigTransaction) bool
+}
+
+type MultiSigTransactionHAMT {TxnID: MultiSigTransaction}
+type MultiSigApprovalSetHAMT {TxnID: actor_util.ActorIDSetHAMT}
 
 type MultiSigActorState struct {
-    AuthorizedParties         [addr.Address]
-    NumEndorsementsThreshold  int
-    PendingMessages           MultiSigPendingMessageHAMT
-    PendingMessagesValue      MultiSigPendingMessageValueHAMT
+    AuthorizedParties      actor_util.ActorIDSetHAMT
+    NumApprovalsThreshold  int
+    NextTxnID              TxnID
+    PendingTxns            MultiSigTransactionHAMT
+    PendingApprovals       MultiSigApprovalSetHAMT
 }
 
 type MultiSigActorCode struct {

@@ -95,7 +95,6 @@ type Runtime interface {
         params     [util.Serialization]
     ) util.Serialization
     SendFunds(toAddr addr.Address, value actor.TokenAmount)
-    SendRelay(message msg.UnsignedMessageBase, value actor.TokenAmount) InvocOutput
 
     // Sends a message to another actor, trapping an unsuccessful execution.
     // This may only be invoked by the singleton Cron actor.
