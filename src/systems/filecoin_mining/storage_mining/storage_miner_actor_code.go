@@ -31,7 +31,7 @@ func (a *StorageMinerActorCode_I) GetWorkerVRFKey(rt Runtime) filcrypto.VRFPubli
 // SurprisePoSt //
 //////////////////
 
-// Called by StoragePowerActor to notify StorageMiner of PoSt Challenge.
+// Called by StoragePowerActor to notify StorageMiner of SurprisePoSt Challenge.
 func (a *StorageMinerActorCode_I) OnSurprisePoStChallenge(rt Runtime) {
 	rt.ValidateImmediateCallerIs(addr.StoragePowerActorAddr)
 
@@ -77,7 +77,7 @@ func (a *StorageMinerActorCode_I) OnSurprisePoStChallenge(rt Runtime) {
 	a._rtEnrollCronEvent(rt, rt.CurrEpoch()+provingPeriod, []sector.SectorNumber{})
 }
 
-// Invoked by miner's worker address to submit a response to a pending Surprise PoSt challenge.
+// Invoked by miner's worker address to submit a response to a pending SurprisePoSt challenge.
 func (a *StorageMinerActorCode_I) SubmitSurprisePoStResponse(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) {
 	h, st := a.State(rt)
 	rt.ValidateImmediateCallerIs(st.Info().Worker())

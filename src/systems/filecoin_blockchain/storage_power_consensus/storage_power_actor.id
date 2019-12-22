@@ -34,4 +34,7 @@ type StoragePowerActorState struct {
     _updatePowerEntriesFromClaimedPower(minerAddr addr.Address)
 }
 
-type StoragePowerActorCode struct {}
+type StoragePowerActorCode struct {
+    // Intentionally left blank (VM methods do not require Golang prototypes).
+    // Can be filled in once InvokeMethod is implemented for this actor.
+}
