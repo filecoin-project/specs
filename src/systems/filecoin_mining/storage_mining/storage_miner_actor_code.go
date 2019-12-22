@@ -143,6 +143,7 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 	RT_ConfirmFundsReceiptOrAbort_RefundRemainder(rt, depositReq)
 
 	// Verify deals with StorageMarketActor; abort if this fails.
+	// (Note: committed-capacity sectors contain no deals, so in that case verification will pass trivially.)
 	rt.Send(
 		addr.StorageMarketActorAddr,
 		ai.Method_StorageMarketActor_OnMinerSectorPreCommit_VerifyDealsOrAbort,
@@ -160,7 +161,7 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 		Info_:             info,
 		PreCommitDeposit_: depositReq,
 		PreCommitEpoch_:   rt.CurrEpoch(),
-		ProveCommitEpoch_: block.ChainEpoch(-1),
+		ActivationEpoch_:  block.ChainEpoch_None,
 		DealWeight_:       util.BigFromInt(-1),
 	}
 	st.Sectors()[info.SectorNumber()] = newSectorInfo
@@ -230,11 +231,11 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	h, st = a.State(rt)
 
 	st.Sectors()[info.SectorNumber()] = &SectorOnChainInfo_I{
-		State_:            SectorState_Active,
-		Info_:             preCommitSector.Info(),
-		PreCommitEpoch_:   preCommitSector.PreCommitEpoch(),
-		ProveCommitEpoch_: rt.CurrEpoch(),
-		DealWeight_:       dealWeight,
+		State_:           SectorState_Active,
+		Info_:            preCommitSector.Info(),
+		PreCommitEpoch_:  preCommitSector.PreCommitEpoch(),
+		ActivationEpoch_: rt.CurrEpoch(),
+		DealWeight_:      dealWeight,
 	}
 
 	st.ProvingSet()[info.SectorNumber()] = true

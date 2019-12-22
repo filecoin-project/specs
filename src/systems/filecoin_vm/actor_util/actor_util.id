@@ -38,4 +38,8 @@ type SectorStorageWeightDesc struct {
 type SectorTerminationType enum {
     NormalExpiration
     UserTermination
+
+    // Note: Detected fault termination (due to exceeding the limit of consecutive
+    // SurprisePoSt failures) is not listed here, since this does not terminate all
+    // sectors individually, but rather the miner as a whole.
 }

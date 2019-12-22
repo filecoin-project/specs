@@ -48,7 +48,7 @@ type OnChainSealVerifyInfo struct {
 type SealCommitment struct {
     SealedCID   SealedSectorCID  // CommR
     DealIDs     deal.DealIDs
-    Expiration  block.ChainEpoch  // Note: may be zero, for pure capacity commitment with no guaranteed lifetime
+    Expiration  block.ChainEpoch
 }
 
 type SectorPreCommitInfo struct {
@@ -56,14 +56,14 @@ type SectorPreCommitInfo struct {
     SealedCID     SealedSectorCID  // CommR
     SealEpoch     block.ChainEpoch
     DealIDs       deal.DealIDs
-    Expiration    block.ChainEpoch  // Note: may be zero, for pure capacity commitment with no guaranteed lifetime
+    Expiration    block.ChainEpoch
 }
 
 type SectorProveCommitInfo struct {
     SectorNumber
     Proof             SealProof
     InteractiveEpoch  block.ChainEpoch
-    Expiration        block.ChainEpoch  // Note: may be zero, for pure capacity commitment with no guaranteed lifetime
+    Expiration        block.ChainEpoch
 }
 
 // PersistentProofAux is meta data required to generate certain proofs

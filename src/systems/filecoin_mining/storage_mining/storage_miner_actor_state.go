@@ -54,7 +54,7 @@ func (st *StorageMinerActorState_I) _getStorageWeightDescForSectorMaybe(sectorNu
 	ret = &actor_util.SectorStorageWeightDesc_I{
 		SectorSize_: st.Info().SectorSize(),
 		DealWeight_: sectorInfo.DealWeight(),
-		Duration_:   sectorInfo.Info().Expiration() - sectorInfo.ProveCommitEpoch(),
+		Duration_:   sectorInfo.Info().Expiration() - sectorInfo.ActivationEpoch(),
 	}
 	ok = true
 	return

@@ -148,18 +148,23 @@ func (st *StoragePowerActorState_I) _updatePowerEntriesFromClaimedPower(minerAdd
 	claimedPower, ok := st.ClaimedPower()[minerAddr]
 	Assert(ok)
 
+	// Compute nominal power: i.e., the power we infer the miner to have (based on the network's
+	// PoSt queries), which may not be the same as the claimed power.
+	// Currently, the only reason for these to differ is if the miner is in DetectedFault state
+	// from a SurprisePoSt challenge.
 	nominalPower := claimedPower
 	if st.PoStDetectedFaultMiners()[minerAddr] {
 		nominalPower = 0
 	}
 	st._setNominalPowerEntryInternal(minerAddr, nominalPower)
 
+	// Compute actual (consensus) power, i.e., votes in leader election.
 	power := nominalPower
 	if !st._minerNominalPowerMeetsConsensusMinimum(nominalPower) {
 		power = 0
 	}
 
-	TODO() // TODO: Decide effect of undercollateralization on (adjusted) power.
+	TODO() // TODO: Decide effect of undercollateralization on (consensus) power.
 
 	st._setPowerEntryInternal(minerAddr, power)
 }
