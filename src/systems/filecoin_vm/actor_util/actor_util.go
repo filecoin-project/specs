@@ -97,6 +97,14 @@ func BalanceTable_WithExtractPartial(
 	panic("")
 }
 
+// Extract all available from the given address's balance table entry.
+func BalanceTable_WithExtractAll(table BalanceTableHAMT, address addr.Address) (
+	ret BalanceTableHAMT, amountExtracted TokenAmount, ok bool) {
+
+	IMPL_FINISH()
+	panic("")
+}
+
 // Determine whether the given address's entry in the balance table meets the required minimum
 // `minBalanceMaintain`.
 func BalanceTable_IsEntrySufficient(

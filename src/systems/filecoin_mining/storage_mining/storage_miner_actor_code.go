@@ -280,6 +280,14 @@ func (a *StorageMinerActorCode_I) ExtendSectorExpiration(rt Runtime, sectorNumbe
 	)
 }
 
+func (a *StorageMinerActorCode_I) TerminateSector(rt Runtime, sectorNumber sector.SectorNumber) {
+	h, st := a.State(rt)
+	rt.ValidateImmediateCallerIs(st.Info().Worker())
+	Release(rt, h, st)
+
+	a._rtTerminateSector(rt, sectorNumber, actor_util.SectorTerminationType_UserTermination)
+}
+
 ////////////
 // Faults //
 ////////////
@@ -418,35 +426,43 @@ func (a *StorageMinerActorCode_I) _rtCheckSectorExpiry(rt Runtime, sectorNumber 
 	// Note: the following test may be false, if sector expiration has been extended by the worker
 	// in the interim after the Cron request was enrolled.
 	if rt.CurrEpoch() >= checkSector.Info().Expiration() {
-		storageWeightDesc := a._rtGetStorageWeightDescForSector(rt, sectorNumber)
-
-		if checkSector.State() == SectorState_TemporaryFault {
-			// To avoid boundary-case errors in power accounting, make sure we explicitly end
-			// the temporary fault state first, before terminating the sector.
-			rt.Send(
-				addr.StoragePowerActorAddr,
-				ai.Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveEnd,
-				[]util.Serialization{actor_util.Serialize_SectorStorageWeightDesc(storageWeightDesc)},
-				actor.TokenAmount(0),
-			)
-		}
-
-		rt.Send(
-			addr.StoragePowerActorAddr,
-			ai.Method_StoragePowerActor_OnSectorTerminate,
-			[]util.Serialization{actor_util.Serialize_SectorStorageWeightDesc(storageWeightDesc)},
-			actor.TokenAmount(0),
-		)
-
-		a._rtDeleteSectorEntry(rt, sectorNumber)
+		a._rtTerminateSector(rt, sectorNumber, actor_util.SectorTerminationType_NormalExpiration)
 	}
 }
 
-func (a *StorageMinerActorCode_I) _rtCheckSurprisePoStExpiry(rt Runtime) {
-	TODO() // Fill in from constants
-	PROVING_PERIOD := block.ChainEpoch(0)
-	MAX_SURPRISE_CONSECUTIVE_FAILURES := 5
+func (a *StorageMinerActorCode_I) _rtTerminateSector(rt Runtime, sectorNumber sector.SectorNumber, terminationType SectorTerminationType) {
+	h, st := a.State(rt)
+	checkSector, found := st.Sectors()[sectorNumber]
+	Assert(found)
+	Release(rt, h, st)
 
+	storageWeightDesc := a._rtGetStorageWeightDescForSector(rt, sectorNumber)
+
+	if checkSector.State() == SectorState_TemporaryFault {
+		// To avoid boundary-case errors in power accounting, make sure we explicitly end
+		// the temporary fault state first, before terminating the sector.
+		rt.Send(
+			addr.StoragePowerActorAddr,
+			ai.Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveEnd,
+			[]util.Serialization{actor_util.Serialize_SectorStorageWeightDesc(storageWeightDesc)},
+			actor.TokenAmount(0),
+		)
+	}
+
+	rt.Send(
+		addr.StoragePowerActorAddr,
+		ai.Method_StoragePowerActor_OnSectorTerminate,
+		[]util.Serialization{
+			actor_util.Serialize_SectorStorageWeightDesc(storageWeightDesc),
+			actor_util.Serialize_SectorTerminationType(terminationType),
+		},
+		actor.TokenAmount(0),
+	)
+
+	a._rtDeleteSectorEntry(rt, sectorNumber)
+}
+
+func (a *StorageMinerActorCode_I) _rtCheckSurprisePoStExpiry(rt Runtime) {
 	rt.ValidateImmediateCallerIs(addr.StoragePowerActorAddr)
 
 	h, st := a.State(rt)
@@ -457,7 +473,8 @@ func (a *StorageMinerActorCode_I) _rtCheckSurprisePoStExpiry(rt Runtime) {
 		return
 	}
 
-	if rt.CurrEpoch() < st.PoStState().As_Challenged().SurpriseChallengeEpoch()+PROVING_PERIOD {
+	provingPeriod := indices.StorageMining_SurprisePoStProvingPeriod()
+	if rt.CurrEpoch() < st.PoStState().As_Challenged().SurpriseChallengeEpoch()+provingPeriod {
 		// Challenge not yet expired.
 		Release(rt, h, st)
 		return
@@ -467,6 +484,21 @@ func (a *StorageMinerActorCode_I) _rtCheckSurprisePoStExpiry(rt Runtime) {
 
 	Release(rt, h, st)
 
+	if numConsecutiveFailures > indices.StoragePower_SurprisePoStMaxConsecutiveFailures() {
+		// Terminate all sectors, notify power and market actors to terminate
+		// associated storage deals, and reset miner's PoSt state to OK.
+		terminatedSectors := []sector.SectorNumber{}
+		for sectorNumber := range st.Sectors() {
+			terminatedSectors = append(terminatedSectors, sectorNumber)
+		}
+		a._rtNotifyMarketForTerminatedSectors(rt, terminatedSectors)
+	} else {
+		// Increment count of consecutive failures, and continue.
+		h, st = a.State(rt)
+		st.Impl().PoStState_ = MinerPoStState_New_DetectedFault(numConsecutiveFailures)
+		UpdateRelease(rt, h, st)
+	}
+
 	rt.Send(
 		addr.StoragePowerActorAddr,
 		ai.Method_StoragePowerActor_OnMinerSurprisePoStFailure,
@@ -474,26 +506,6 @@ func (a *StorageMinerActorCode_I) _rtCheckSurprisePoStExpiry(rt Runtime) {
 			util.Serialize_Int(numConsecutiveFailures),
 		},
 		actor.TokenAmount(0))
-
-	if numConsecutiveFailures > MAX_SURPRISE_CONSECUTIVE_FAILURES {
-		// Terminate all sectors, notify power and market actors to terminate
-		// associated storage deals, and reset miner's PoSt state to OK.
-		terminatedSectors := []sector.SectorNumber{}
-		for sectorNumber := range st.Sectors() {
-			terminatedSectors = append(terminatedSectors, sectorNumber)
-		}
-		a._rtNotifyForTerminatedSectors(rt, terminatedSectors, actor_util.SectorTerminationType_SurprisePoStFailure)
-
-		h, st := a.State(rt)
-		st.Impl().Sectors_ = SectorsAMT_Empty()
-		st.Impl().PoStState_ = MinerPoStState_New_OK(rt.CurrEpoch())
-		UpdateRelease(rt, h, st)
-	} else {
-		// Increment count of consecutive failures, and continue.
-		h, st = a.State(rt)
-		st.Impl().PoStState_ = MinerPoStState_New_DetectedFault(numConsecutiveFailures)
-		UpdateRelease(rt, h, st)
-	}
 }
 
 func (a *StorageMinerActorCode_I) _rtEnrollCronEvent(
@@ -544,42 +556,24 @@ func (a *StorageMinerActorCode_I) _rtProcessTemporaryFaultEnd(rt Runtime, sector
 	TODO()
 }
 
-func (a *StorageMinerActorCode_I) _rtNotifyForTerminatedSectors(
-	rt Runtime, sectorNumbers []sector.SectorNumber, terminationType SectorTerminationType) {
+func (a *StorageMinerActorCode_I) _rtNotifyMarketForTerminatedSectors(rt Runtime, sectorNumbers []sector.SectorNumber) {
+	h, st := a.State(rt)
+	dealIDItems := []deal.DealID{}
+	for _, sectorNo := range sectorNumbers {
+		dealIDItems = append(dealIDItems, st._getSectorDealIDsAssert(sectorNo).Items()...)
+	}
+	dealIDs := &deal.DealIDs_I{Items_: dealIDItems}
 
-	// Notify StoragePowerActor to adjust power.
-	storageWeightDescs := a._rtGetStorageWeightDescsForSectors(rt, sectorNumbers)
+	Release(rt, h, st)
 
 	rt.Send(
-		addr.StoragePowerActorAddr,
-		ai.Method_StoragePowerActor_OnSectorTerminate,
+		addr.StorageMarketActorAddr,
+		ai.Method_StorageMarketActor_OnMinerSectorsTerminate,
 		[]util.Serialization{
-			actor_util.Serialize_SectorStorageWeightDesc_Array(storageWeightDescs),
+			deal.Serialize_DealIDs(dealIDs),
 		},
 		actor.TokenAmount(0),
 	)
-
-	// If termination is not via normal expiration, then must also notify StorageMarketActor
-	// to terminate associated storage deals.
-	if terminationType != actor_util.SectorTerminationType_NormalExpiration {
-		h, st := a.State(rt)
-		dealIDItems := []deal.DealID{}
-		for _, sectorNo := range sectorNumbers {
-			dealIDItems = append(dealIDItems, st._getSectorDealIDsAssert(sectorNo).Items()...)
-		}
-		dealIDs := &deal.DealIDs_I{Items_: dealIDItems}
-
-		Release(rt, h, st)
-
-		rt.Send(
-			addr.StorageMarketActorAddr,
-			ai.Method_StorageMarketActor_OnMinerSectorsTerminate,
-			[]util.Serialization{
-				deal.Serialize_DealIDs(dealIDs),
-			},
-			actor.TokenAmount(0),
-		)
-	}
 }
 
 func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) {

@@ -191,6 +191,35 @@ func (rt *VMContext) _createActor(codeID actor.CodeID, address addr.Address) {
 	rt._rtAllocGas(gascost.ExecNewActor)
 }
 
+func (rt *VMContext) DeleteActor(address addr.Address) {
+	ok := false
+
+	// An actor may delete itself.
+	if rt._actorAddress.Equals(address) {
+		ok = true
+	}
+
+	// Special case: StoragePowerActor may delete a StorageMinerActor.
+	addrCodeID, found := rt.GetActorCodeID(address)
+	if found &&
+		rt._actorAddress.Equals(addr.StoragePowerActorAddr) &&
+		addrCodeID.Is_Builtin() && addrCodeID.As_Builtin() == actor.BuiltinActorID_StorageMiner {
+
+		ok = true
+	}
+
+	if !ok {
+		rt.AbortAPI("Invalid actor deletion request")
+	}
+
+	rt._deleteActor(address)
+}
+
+func (rt *VMContext) _deleteActor(address addr.Address) {
+	rt._globalStatePending = rt._globalStatePending.Impl().WithDeleteActorSystemState(address)
+	rt._rtAllocGas(gascost.DeleteActor)
+}
+
 func (rt *VMContext) _updateActorSystemStateInternal(actorAddress addr.Address, newStateCID actor.ActorSystemStateCID) {
 	newGlobalStatePending, err := rt._globalStatePending.Impl().WithActorSystemState(rt._actorAddress, newStateCID)
 	if err != nil {

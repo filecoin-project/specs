@@ -8,10 +8,12 @@ import (
 )
 
 var Assert = util.Assert
+var IMPL_FINISH = util.IMPL_FINISH
 var IMPL_TODO = util.IMPL_TODO
 
 func (st *StateTree_I) RootCID() ipld.CID {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 
 func (st *StateTree_I) GetActor(a addr.Address) (actor.ActorState, bool) {
@@ -20,23 +22,33 @@ func (st *StateTree_I) GetActor(a addr.Address) (actor.ActorState, bool) {
 }
 
 func (st *StateTree_I) WithActorSubstate(a addr.Address, actorState actor.ActorSubstateCID) (StateTree, error) {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
+}
+
+func (st *StateTree_I) WithDeleteActorSystemState(a addr.Address) StateTree {
+	IMPL_FINISH()
+	panic("")
 }
 
 func (st *StateTree_I) WithActorSystemState(a addr.Address, actorState actor.ActorSystemStateCID) (StateTree, error) {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 
 func (st *StateTree_I) WithFundsTransfer(from addr.Address, to addr.Address, amount actor.TokenAmount) (StateTree, error) {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 
 func (st *StateTree_I) WithNewAccountActor(a addr.Address) (StateTree, actor.ActorState, error) {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 
 func (st *StateTree_I) WithIncrementedCallSeqNum(a addr.Address) (StateTree, error) {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 
 func (st *StateTree_I) WithIncrementedCallSeqNum_Assert(a addr.Address) StateTree {

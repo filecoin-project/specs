@@ -36,5 +36,4 @@ type SectorStorageWeightDesc struct {
 type SectorTerminationType enum {
     NormalExpiration
     UserTermination
-    SurprisePoStFailure
 }

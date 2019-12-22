@@ -175,6 +175,11 @@ func StorageMining_SurprisePoStProvingPeriod() block.ChainEpoch {
 	panic("")
 }
 
+func StoragePower_SurprisePoStMaxConsecutiveFailures() int {
+	PARAM_FINISH()
+	panic("")
+}
+
 func StorageMining_DeclaredFaultEffectiveDelay() block.ChainEpoch {
 	PARAM_FINISH()
 	panic("")

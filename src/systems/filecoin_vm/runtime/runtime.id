@@ -108,6 +108,10 @@ type Runtime interface {
         address  addr.Address
     )
 
+    // Deletes an actor in the state tree. May only be called by the actor itself,
+    // or by StoragePowerActor in the case of StorageMinerActors.
+    DeleteActor(address addr.Address)
+
     // Retrieves and deserializes an object from the store into o. Returns whether successful.
     IpldGet(c ipld.CID, o ipld.Object) bool
     // Serializes and stores an object, returning its CID.
