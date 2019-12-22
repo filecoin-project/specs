@@ -57,11 +57,14 @@ type SectorOnChainInfo struct {
 
 type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
 
+type SectorNumberSetHAMT {sector.SectorNumber: bool}
+
 // Balance of a StorageMinerActor should equal exactly the sum of PreCommit deposits
 // that are not yet returned or burned.
 type StorageMinerActorState struct {
     Sectors    SectorsAMT
     PoStState  MinerPoStState
+    ProvingSet SectorNumberSetHAMT
     Info       MinerInfo
 
     _getStorageWeightDescForSector(sectorNumber sector.SectorNumber) actor_util.SectorStorageWeightDesc

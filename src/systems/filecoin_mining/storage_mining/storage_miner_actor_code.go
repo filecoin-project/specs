@@ -12,6 +12,7 @@ import (
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
+	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -178,7 +179,9 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		rt.AbortStateMsg("Deadline exceeded for ProveCommitSector")
 	}
 
-	TODO() // How are SealEpoch, InteractiveEpoch determined?
+	TODO()
+	// TODO: How are SealEpoch, InteractiveEpoch determined (and intended to be used)?
+	// Presumably they cannot be derived from the SectorProveCommitInfo provided by an untrusted party.
 
 	a._rtVerifySealOrAbort(rt, &sector.OnChainSealVerifyInfo_I{
 		SealedCID_:        preCommitSector.Info().SealedCID(),
@@ -552,10 +555,6 @@ func (a *StorageMinerActorCode_I) _rtGetStorageWeightDescsForSectors(
 	return ret
 }
 
-func (a *StorageMinerActorCode_I) _rtProcessTemporaryFaultEnd(rt Runtime, sectorNumber sector.SectorNumber) {
-	TODO()
-}
-
 func (a *StorageMinerActorCode_I) _rtNotifyMarketForTerminatedSectors(rt Runtime, sectorNumbers []sector.SectorNumber) {
 	h, st := a.State(rt)
 	dealIDItems := []deal.DealID{}
@@ -580,23 +579,21 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 	h, st := a.State(rt)
 	info := st.Info()
 
+	TODO()
+	// TODO: Determine what should be the criterion for challenge sectors in SurprisePoSt proofs.
+	//
 	// Verify the partialTicket values
-	TODO() // update
 	// if !a._rtVerifySurprisePoStMeetsTargetReq(rt) {
 	// 	rt.AbortStateMsg("Invalid Surprise PoSt. Tickets do not meet target.")
 	// }
 
 	// verify the partialTickets themselves
 	// Verify appropriate randomness
-
-	TODO() // pull from consts
-	SPC_LOOKBACK_POST := block.ChainEpoch(0)
-
 	Assert(st.PoStState().Is_Challenged())
 	challengeEpoch := st.PoStState().As_Challenged().SurpriseChallengeEpoch()
-	randomnessEpoch := challengeEpoch - SPC_LOOKBACK_POST
+	randomnessEpoch := challengeEpoch - node_base.SPC_LOOKBACK_POST
 
-	TODO() // extract randomness
+	IMPL_TODO() // Invoke randomness APIs.
 	util.PARAM_FINISH(randomnessEpoch)
 	var postRandomnessInput util.Randomness // sms.PreparePoStChallengeSeed(randomness, actorAddr)
 
