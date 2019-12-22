@@ -16,7 +16,7 @@ func (tix *Ticket_I) Verify(randomness util.Bytes, pk filcrypto.VRFPublicKey, mi
 		PastTicket_: randomness,
 		MinerAddr_:  minerActorAddr,
 	})
-	input := filcrypto.DomainSeparationTag_TicketProduction.DeriveRand(inputRand)
+	input := filcrypto.DeriveRand(filcrypto.DomainSeparationTag_TicketProduction, inputRand)
 
 	return tix.VRFResult_.Verify(input, pk)
 }
@@ -26,5 +26,5 @@ func (tix *Ticket_I) DrawRandomness(epoch ChainEpoch) util.Bytes {
 		PastTicket_: tix.Output(),
 		Epoch_:      epoch,
 	})
-	return filcrypto.DomainSeparationTag_TicketDrawing.DeriveRand(input)
+	return filcrypto.DeriveRand(filcrypto.DomainSeparationTag_TicketDrawing, input)
 }

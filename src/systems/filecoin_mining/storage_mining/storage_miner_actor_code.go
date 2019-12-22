@@ -7,12 +7,12 @@ import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
-	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -56,7 +56,19 @@ func (a *StorageMinerActorCode_I) OnSurprisePoStChallenge(rt Runtime) {
 		numConsecutiveFailures = st.PoStState().As_DetectedFault().NumConsecutiveFailures()
 	}
 
-	st.Impl().PoStState_ = MinerPoStState_New_Challenged(rt.CurrEpoch(), numConsecutiveFailures)
+	IMPL_TODO() // Determine auxiliary seed input to ensure uniqueness
+	challengedSectorsRandomness := rt.RandomnessWithAuxSeed(
+		filcrypto.DomainSeparationTag_SurprisePoStSampleSectors,
+		rt.CurrEpoch()-node_base.SPC_LOOKBACK_POST,
+		addr.Serialize_Address_Compact(rt.CurrReceiver()),
+	)
+
+	challengedSectors := _surprisePoStSampleChallengedSectors(
+		challengedSectorsRandomness,
+		SectorNumberSetHAMT_Items(st.ProvingSet()),
+	)
+
+	st.Impl().PoStState_ = MinerPoStState_New_Challenged(rt.CurrEpoch(), challengedSectors, numConsecutiveFailures)
 
 	UpdateRelease(rt, h, st)
 
@@ -224,6 +236,8 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		DealWeight_:       dealWeight,
 	}
 
+	st.ProvingSet()[info.SectorNumber()] = true
+
 	UpdateRelease(rt, h, st)
 
 	// Request deferred Cron check for sector expiry.
@@ -357,9 +371,10 @@ func (a *StorageMinerActorCode_I) Constructor(
 	h := rt.AcquireState()
 
 	st := &StorageMinerActorState_I{
-		Sectors_:   SectorsAMT_Empty(),
-		PoStState_: MinerPoStState_New_OK(rt.CurrEpoch()),
-		Info_:      MinerInfo_New(ownerAddr, workerAddr, sectorSize, peerId),
+		Sectors_:    SectorsAMT_Empty(),
+		PoStState_:  MinerPoStState_New_OK(rt.CurrEpoch()),
+		ProvingSet_: SectorNumberSetHAMT_Empty(),
+		Info_:       MinerInfo_New(ownerAddr, workerAddr, sectorSize, peerId),
 	}
 
 	UpdateRelease(rt, h, st)
@@ -389,6 +404,8 @@ func (a *StorageMinerActorCode_I) _rtCheckTemporaryFaultEvents(rt Runtime, secto
 			[]util.Serialization{actor_util.Serialize_SectorStorageWeightDesc(storageWeightDesc)},
 			actor.TokenAmount(0),
 		)
+
+		delete(st.ProvingSet(), sectorNumber)
 	}
 
 	if checkSector.Is_TemporaryFault() && rt.CurrEpoch() == checkSector.EffectiveFaultEndEpoch() {
@@ -402,6 +419,8 @@ func (a *StorageMinerActorCode_I) _rtCheckTemporaryFaultEvents(rt Runtime, secto
 			[]util.Serialization{actor_util.Serialize_SectorStorageWeightDesc(storageWeightDesc)},
 			actor.TokenAmount(0),
 		)
+
+		st.ProvingSet()[sectorNumber] = true
 	}
 
 	h, st = a.State(rt)
@@ -421,8 +440,8 @@ func (a *StorageMinerActorCode_I) _rtCheckSectorExpiry(rt Runtime, sectorNumber 
 	if checkSector.State() == SectorState_PreCommit {
 		if rt.CurrEpoch()-checkSector.PreCommitEpoch() > sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
 			a._rtDeleteSectorEntry(rt, sectorNumber)
+			rt.SendFunds(addr.BurntFundsActorAddr, checkSector.PreCommitDeposit())
 		}
-		rt.SendFunds(addr.BurntFundsActorAddr, checkSector.PreCommitDeposit())
 		return
 	}
 
@@ -463,6 +482,7 @@ func (a *StorageMinerActorCode_I) _rtTerminateSector(rt Runtime, sectorNumber se
 	)
 
 	a._rtDeleteSectorEntry(rt, sectorNumber)
+	delete(st.ProvingSet(), sectorNumber)
 }
 
 func (a *StorageMinerActorCode_I) _rtCheckSurprisePoStExpiry(rt Runtime) {
@@ -579,27 +599,30 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 	h, st := a.State(rt)
 	info := st.Info()
 
-	TODO()
-	// TODO: Determine what should be the criterion for challenge sectors in SurprisePoSt proofs.
+	Assert(st.PoStState().Is_Challenged())
+	challengeEpoch := st.PoStState().As_Challenged().SurpriseChallengeEpoch()
+	challengedSectors := st.PoStState().As_Challenged().ChallengedSectors()
+
+	TODO(challengedSectors)
+	// TODO: Determine what should be the acceptance criterion for sector numbers
+	// proven in SurprisePoSt proofs.
 	//
+	// Previous note:
 	// Verify the partialTicket values
 	// if !a._rtVerifySurprisePoStMeetsTargetReq(rt) {
 	// 	rt.AbortStateMsg("Invalid Surprise PoSt. Tickets do not meet target.")
 	// }
 
-	// verify the partialTickets themselves
-	// Verify appropriate randomness
-	Assert(st.PoStState().Is_Challenged())
-	challengeEpoch := st.PoStState().As_Challenged().SurpriseChallengeEpoch()
-	randomnessEpoch := challengeEpoch - node_base.SPC_LOOKBACK_POST
-
-	IMPL_TODO() // Invoke randomness APIs.
-	util.PARAM_FINISH(randomnessEpoch)
-	var postRandomnessInput util.Randomness // sms.PreparePoStChallengeSeed(randomness, actorAddr)
-
 	postRand := &filcrypto.VRFResult_I{
 		Output_: onChainInfo.Randomness(),
 	}
+
+	IMPL_TODO() // Determine auxiliary seed input to ensure uniqueness
+	postRandomnessInput := rt.RandomnessWithAuxSeed(
+		filcrypto.DomainSeparationTag_SurprisePoStVRFRandomnessInput,
+		challengeEpoch-node_base.SPC_LOOKBACK_POST,
+		addr.Serialize_Address_Compact(rt.CurrReceiver()),
+	)
 
 	if !postRand.Verify(postRandomnessInput, info.WorkerVRFKey()) {
 		rt.AbortStateMsg("Invalid Surprise PoSt. Invalid randomness.")
@@ -668,6 +691,10 @@ func (a *StorageMinerActorCode_I) _rtVerifySealOrAbort(rt Runtime, onChainInfo s
 		rt.AbortStateMsg("receiver must be ID address")
 	}
 
+	IMPL_TODO() // Use randomness APIs
+	var svInfoRandomness util.Randomness
+	var svInfoInteractiveRandomness util.Randomness
+
 	svInfo := sector.SealVerifyInfo_I{
 		SectorID_: &sector.SectorID_I{
 			Miner_:  minerActorID,
@@ -678,8 +705,8 @@ func (a *StorageMinerActorCode_I) _rtVerifySealOrAbort(rt Runtime, onChainInfo s
 		// TODO: Make SealCfg sector.SealCfg from miner configuration (where is that?)
 		SealCfg_: &sealCfg,
 
-		Randomness_:            sector.SealRandomness(rt.Randomness(onChainInfo.SealEpoch(), 0)),
-		InteractiveRandomness_: sector.InteractiveSealRandomness(rt.Randomness(onChainInfo.InteractiveEpoch(), 0)),
+		Randomness_:            sector.SealRandomness(svInfoRandomness),
+		InteractiveRandomness_: sector.InteractiveSealRandomness(svInfoInteractiveRandomness),
 		UnsealedCID_:           unsealedCID,
 	}
 
@@ -698,4 +725,11 @@ func getSectorNums(m map[sector.SectorNumber]SectorOnChainInfo) []sector.SectorN
 		l = append(l, i)
 	}
 	return l
+}
+
+func _surprisePoStSampleChallengedSectors(
+	sampleRandomness util.Randomness, provingSet []sector.SectorNumber) []sector.SectorNumber {
+
+	IMPL_TODO()
+	panic("")
 }

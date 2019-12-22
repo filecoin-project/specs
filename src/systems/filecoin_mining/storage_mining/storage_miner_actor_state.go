@@ -32,6 +32,11 @@ func SectorsAMT_Empty() SectorsAMT {
 	panic("")
 }
 
+func SectorNumberSetHAMT_Empty() SectorNumberSetHAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
 func (st *StorageMinerActorState_I) _getStorageWeightDescForSector(sectorNumber sector.SectorNumber) SectorStorageWeightDesc {
 	ret, found := st._getStorageWeightDescForSectorMaybe(sectorNumber)
 	Assert(found)
@@ -69,9 +74,14 @@ func MinerPoStState_New_OK(lastSuccessfulPoSt block.ChainEpoch) MinerPoStState {
 	})
 }
 
-func MinerPoStState_New_Challenged(surpriseChallengeEpoch block.ChainEpoch, numConsecutiveFailures int) MinerPoStState {
+func MinerPoStState_New_Challenged(
+	surpriseChallengeEpoch block.ChainEpoch,
+	challengedSectors []sector.SectorNumber,
+	numConsecutiveFailures int,
+) MinerPoStState {
 	return MinerPoStState_Make_Challenged(&MinerPoStState_Challenged_I{
 		SurpriseChallengeEpoch_: surpriseChallengeEpoch,
+		ChallengedSectors_:      challengedSectors,
 		NumConsecutiveFailures_: numConsecutiveFailures,
 	})
 }
@@ -117,6 +127,12 @@ func MinerInfo_New(
 }
 
 func (st *StorageMinerActorState_I) _verifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool {
+	// TODO: Determine what should be the acceptance criterion for sector numbers proven in SurprisePoSt proofs.
 	TODO()
+	panic("")
+}
+
+func SectorNumberSetHAMT_Items(x SectorNumberSetHAMT) []sector.SectorNumber {
+	IMPL_FINISH()
 	panic("")
 }

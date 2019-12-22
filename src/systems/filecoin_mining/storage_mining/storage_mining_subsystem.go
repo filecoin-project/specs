@@ -179,7 +179,7 @@ func (sms *StorageMiningSubsystem_I) PreparePoStChallengeSeed(randomness util.Ra
 		ticket_:    randomness,
 		minerAddr_: minerAddr,
 	})
-	input := filcrypto.DomainSeparationTag_PoSt.DeriveRand(randInput)
+	input := filcrypto.DeriveRand(filcrypto.DomainSeparationTag_PreparePoStChallengeSeed, randInput)
 	return input
 }
 
@@ -193,7 +193,7 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 		PastTicket_: randomness,
 		MinerAddr_:  minerActorAddr,
 	})
-	input := filcrypto.DomainSeparationTag_TicketProduction.DeriveRand(randInput)
+	input := filcrypto.DeriveRand(filcrypto.DomainSeparationTag_TicketProduction, randInput)
 
 	// run through VRF
 	vrfRes := sms._keyStore().WorkerKey().Impl().Generate(input)

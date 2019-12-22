@@ -3,6 +3,7 @@ package storage_power_consensus
 import (
 	"math"
 
+	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -250,8 +251,7 @@ func (a *StoragePowerActorCode_I) _rtInitiateNewSurprisePoStChallenges(rt Runtim
 	h, st := a.State(rt)
 
 	// sample the actor addresses
-	IMPL_TODO() // use randomness APIs
-	randomness := rt.Randomness(rt.CurrEpoch(), 0)
+	randomness := rt.Randomness(filcrypto.DomainSeparationTag_SurprisePoStSelectMiners, rt.CurrEpoch())
 	IMPL_FINISH() // BigInt arithmetic (not floating-point)
 	challengeCount := math.Ceil(float64(len(st.PowerTable())) / float64(provingPeriod))
 	surprisedMiners := st._selectMinersToSurprise(int(challengeCount), randomness)
