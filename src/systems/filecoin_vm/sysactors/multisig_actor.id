@@ -1,0 +1,19 @@
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+
+type EndorsementSetHAMT {addr.Address: bool}
+
+type MultiSigPendingMessageHAMT {msg.UnsignedMessageBase: EndorsementSetHAMT}
+type MultiSigPendingMessageValueHAMT {msg.UnsignedMessageBase: actor.TokenAmount}
+
+type MultiSigActorState struct {
+    AuthorizedParties         [addr.Address]
+    NumEndorsementsThreshold  int
+    PendingMessages           MultiSigPendingMessageHAMT
+    PendingMessagesValue      MultiSigPendingMessageValueHAMT
+}
+
+type MultiSigActorCode struct {
+    // Intentionally left blank (VM methods do not require Golang prototypes).
+}

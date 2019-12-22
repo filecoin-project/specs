@@ -53,3 +53,28 @@ func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st InitActorState) {
 func (st *InitActorState_I) CID() ipld.CID {
 	panic("TODO")
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// -- MultiSigActor
+////////////////////////////////////////////////////////////////////////////////
+
+func (a *MultiSigActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, MultiSigActorState) {
+	h := rt.AcquireState()
+	stateCID := ipld.CID(h.Take())
+	var state MultiSigActorState_I
+	if !rt.IpldGet(stateCID, &state) {
+		rt.AbortAPI("state not found")
+	}
+	return h, &state
+}
+func Release_MultiSig(rt Runtime, h vmr.ActorStateHandle, st MultiSigActorState) {
+	checkCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
+	h.Release(checkCID)
+}
+func UpdateRelease_MultiSig(rt Runtime, h vmr.ActorStateHandle, st MultiSigActorState) {
+	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
+	h.UpdateRelease(newCID)
+}
+func (st *MultiSigActorState_I) CID() ipld.CID {
+	panic("TODO")
+}

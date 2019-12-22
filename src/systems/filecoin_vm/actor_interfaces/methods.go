@@ -14,6 +14,10 @@ const (
 )
 
 const (
+	Method_MultiSigActor_EndorseMessage = actor.MethodPlaceholder + iota
+)
+
+const (
 	// Proxy cron tick method (via StoragePowerActor)
 	Method_StorageMinerActor_OnDeferredCronEvent = actor.MethodPlaceholder + iota
 
