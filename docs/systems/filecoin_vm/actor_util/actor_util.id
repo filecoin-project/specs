@@ -1,6 +1,8 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type BalanceTableHAMT {addr.Address: actor.TokenAmount}
 
@@ -14,4 +16,30 @@ type DealIDQueue struct {
 
     Enqueue(dealID deal.DealID)
     Dequeue() (dealID deal.DealID, ok bool)
+}
+
+type MinerSetHAMT {addr.Address: bool}
+
+type ActorIDSetHAMT {addr.ActorID: bool}
+
+type MinerEvent struct {
+    MinerAddr  addr.Address
+    Sectors    [sector.SectorNumber]  // Empty for global events, such as SurprisePoSt expiration.
+}
+
+type MinerEventSetHAMT {MinerEvent: bool}
+
+type SectorStorageWeightDesc struct {
+    SectorSize  sector.SectorSize
+    Duration    block.ChainEpoch
+    DealWeight  BigInt
+}
+
+type SectorTerminationType enum {
+    NormalExpiration
+    UserTermination
+
+    // Note: Detected fault termination (due to exceeding the limit of consecutive
+    // SurprisePoSt failures) is not listed here, since this does not terminate all
+    // sectors individually, but rather the miner as a whole.
 }

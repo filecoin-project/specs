@@ -16,7 +16,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/sector_index/sector_builder/</guid>
-      <description>import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; // import smkt &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&amp;#34; // SectorBuilder accumulates deals, keeping track of their // sector configuration requirements and the piece sizes. // Once there is a sector ready to be sealed, NextSector // will return a sector.  type StageDealResponse struct { SectorID sector.SectorID } type SectorBuilder struct { // DealsToSeal keeps a set of StorageDeal objects.  // These include the info for the relevant pieces.</description>
+      <description>import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; // import smkt &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&amp;#34; // SectorBuilder accumulates deals, keeping track of their // sector configuration requirements and the piece sizes. // Once there is a sector ready to be sealed, NextSector // will return a sector.  type StageDealResponse struct { SectorID sector.SectorID } type SectorBuilder struct { // DealsToSeal keeps a set of StorageDeal objects.  // These include the info for the relevant pieces.</description>
     </item>
     
     <item>

@@ -1507,6 +1507,70 @@ https://github.com/alex-shpak/hugo-book
   
 
 
+<a href="../../../#systems__filecoin_vm__indices" class="menu-item depth-3">
+    
+    
+        Indices
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#appendix__address" class="menu-item depth-2">
+    
+    
+        Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
 <a href="../../../#systems__filecoin_vm__message" class="menu-item depth-3">
     
     
@@ -2909,72 +2973,6 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../#systems__filecoin_markets__order" class="menu-item depth-3">
-    
-    
-        Orders
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../#systems__filecoin_markets__deal" class="menu-item depth-3">
-    
-    
-        Deals
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
 <a href="../../../#systems__filecoin_markets__storage_market" class="menu-item depth-3">
     
     
@@ -2985,6 +2983,136 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets__storage_market__storage_deal" class="menu-item depth-4">
+    
+    
+        Storage Deal
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_flow" class="menu-item depth-5">
+    
+    
+        Deal Flow
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_states" class="menu-item depth-5">
+    
+    
+        Deal States
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_markets__storage_market__storage_deal__faults" class="menu-item depth-5">
+    
+    
+        Faults
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -3066,37 +3194,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Storage Client
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../#systems__filecoin_markets__storage_market__faults" class="menu-item depth-4">
-    
-    
-        Faults
     
 </a>
 
@@ -4686,13 +4783,18 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// sets the average frequency
 </span><span class="c1"></span><span class="kd">const</span> <span class="nx">PROVING_PERIOD</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="c1">// placeholder, 2 days
 </span><span class="c1">// how long after a POST challenge before a miner can get challenged again
-</span><span class="c1"></span><span class="kd">const</span> <span class="nx">SUPRISE_NO_CHALLENGE_PERIOD</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// placeholder, 2 hours
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">SURPRISE_NO_CHALLENGE_PERIOD</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// placeholder, 2 hours
 </span><span class="c1">// how many sectors should be challenged in surprise post (if miner has fewer, will get dup challenges)
 </span><span class="c1"></span><span class="kd">const</span> <span class="nx">SURPRISE_CHALLENGE_COUNT</span> <span class="p">=</span> <span class="mi">200</span> <span class="c1">// placeholder
 </span><span class="c1">// how long miner has to respond to the challenge before it expires
 </span><span class="c1"></span><span class="kd">const</span> <span class="nx">CHALLENGE_DURATION</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// placeholder, 2 hours
 </span><span class="c1">// number of detected faults before a miner&#39;s sectors are all terminated
 </span><span class="c1"></span><span class="kd">const</span> <span class="nx">MAX_CONSECUTIVE_FAULTS</span> <span class="p">=</span> <span class="mi">3</span>
+
+<span class="c1">// Time between when a temporary sector fault is declared, and when it becomes
+</span><span class="c1">// effective for purposes of reducing the active proving set for PoSts.
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">DECLARED_FAULT_EFFECTIVE_DELAY</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span> <span class="c1">// placeholder
+</span><span class="c1"></span>
 <span class="kd">const</span> <span class="nx">EPOST_SAMPLE_RATE_NUM</span> <span class="p">=</span> <span class="mi">1</span>    <span class="c1">// placeholder
 </span><span class="c1"></span><span class="kd">const</span> <span class="nx">EPOST_SAMPLE_RATE_DENOM</span> <span class="p">=</span> <span class="mi">25</span> <span class="c1">// placeholder
 </span><span class="c1"></span><span class="kd">const</span> <span class="nx">SPOST_SAMPLE_RATE_NUM</span> <span class="p">=</span> <span class="mi">1</span>    <span class="c1">// placeholder

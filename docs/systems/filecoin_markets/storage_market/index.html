@@ -1508,6 +1508,70 @@ https://github.com/alex-shpak/hugo-book
   
 
 
+<a href="../../../../#systems__filecoin_vm__indices" class="menu-item depth-3">
+    
+    
+        Indices
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#appendix__address" class="menu-item depth-2">
+    
+    
+        Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
 <a href="../../../../#systems__filecoin_vm__message" class="menu-item depth-3">
     
     
@@ -2910,72 +2974,6 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_markets__order" class="menu-item depth-3">
-    
-    
-        Orders
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#systems__filecoin_markets__deal" class="menu-item depth-3">
-    
-    
-        Deals
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
 <a href="../../../../#systems__filecoin_markets__storage_market" class="menu-item depth-3">
     
     
@@ -2986,6 +2984,136 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_markets__storage_market__storage_deal" class="menu-item depth-4">
+    
+    
+        Storage Deal
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_flow" class="menu-item depth-5">
+    
+    
+        Deal Flow
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_states" class="menu-item depth-5">
+    
+    
+        Deal States
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_markets__storage_market__storage_deal__faults" class="menu-item depth-5">
+    
+    
+        Faults
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -3067,37 +3195,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Storage Client
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_markets__storage_market__faults" class="menu-item depth-4">
-    
-    
-        Faults
     
 </a>
 
@@ -4634,14 +4731,304 @@ https://github.com/alex-shpak/hugo-book
 </header>
 
       
-<article class="markdown"><p><div id="systems__filecoin_markets__storage_market__storage_market"></div>
-Storage Market subsystem is the data entry point into the network. Storage miners only earn power from data stored in a storage deal and all deals live on the Filecoin network. Specific deal negotiation process happens off chain, clients and miners enter a storage deal after an agreement has been reached and post storage deals on the Filecoin network to earn block rewards and get paid for storing the data in the storage deal. A deal is only valid when it is posted on chain with signatures from both parties and at the time of posting, there are sufficient balances for both parties in <code>StorageMarketActor</code> to honor the deal in terms of deal price and deal collateral.</p>
+<article class="markdown">
 
-<p>Both <code>StorageClient</code> and <code>StorageProvider</code> need to first deposit Filecoin token into <code>StorageMarketActor</code> before participating in the storage market. <code>StorageClient</code> can then send a <code>StorageDealProposal</code> to the <code>StorageProvider</code> along with the data. A partially signed <code>StorageDeal</code> is called a <code>StorageDealProposal</code>. <code>StorageProvider</code> can then put this storage deal in their <code>Sector</code>, countersign the <code>StorageDealProposal</code> and result in a <code>StorageDeal</code>. A <code>StorageDeal</code> is only in effect when it is submitted to and accepted by the <code>StorageMarketActor</code> on chain before the <code>ProposalExpiryEpoch</code>. <code>StorageDeal</code> does not include a <code>StartEpoch</code> as it will come into effect at the block when the deal gets accepted into the network. Hence, <code>StorageProvider</code> should publish the deal as soon as possible.</p>
+<p><div id="systems__filecoin_markets__storage_market__storage_market"></div>
+Storage Market subsystem is the data entry point into the network. Storage miners only earn power from data stored in a storage deal and all deals live on the Filecoin network. Specific deal negotiation process happens off chain, clients and miners enter a storage deal after an agreement has been reached and post storage deals on the Filecoin network to earn block rewards and get paid for storing the data in the storage deal. A deal is only valid when it is posted on chain with signatures from both parties and at the time of posting, there are sufficient balances for both parties locked up to honor the deal in terms of deal price and deal collateral.</p>
 
-<p><code>StorageDeal</code> payments are processed at every successful PoSt submission and <code>StorageMarketActor</code> will move locked funds from <code>StorageClient</code> to <code>StorageProvider</code>. <code>SlashStorageDealCollateral</code> is also triggered on PoSt submission when a Sector containing a particular <code>StorageDeal</code> is faulty or miners fail to submit PoSt related to a <code>StorageDeal</code>. Note that <code>StorageProvider</code> does not need to be the same entity as the <code>StorageMinerActor</code> as long as the deal is stored in at least one <code>Sector</code> throughout the life time of the storage deal.</p>
+<h1 id="terminology">Terminology</h1>
 
-<p>TODO: process <code>StorageDeal</code> payments are larger interval beyond every PoSt submission</p>
+<ul>
+<li><strong>StorageClient</strong> - The party that wants to make a deal to store data</li>
+<li><strong>StorageProvider</strong> - The party that will store the data in exchange for payment. A storage miner.</li>
+<li><strong>StorageMarketActor</strong> - The on-chain component of deals. The StorageMarketActor is analogous to an escrow and a ledger for all deals made.</li>
+<li><strong>StorageAsk</strong> - The current price and parameters a miner is currently offering for storage (analogous to an Ask in a financial market)</li>
+<li><strong>StorageDealProposal</strong> - A proposal for a storage deal, signed only by the - <code>Storage client</code></li>
+<li><strong>StorageDeal</strong> - A storage deal proposal with a counter signature from the Provider, which then goes on-chain.</li>
+</ul>
+
+<h1 id="deal-flow">Deal Flow</h1>
+
+<p>The lifecycle for a deal within the storage market contains distinct phases:</p>
+
+<ol>
+<li><strong>Discovery</strong> - Client identifies miners and determines their current asks</li>
+<li><strong>Negotiation</strong> (out of band) - Both parties come to an agreement about the terms of the deal, each party commits funds to the deal, data is transferred</li>
+<li><strong>Publishing</strong> - Deal is published on chain, making the storage provider publicly accountable for the deal</li>
+<li><strong>Handoff</strong> - Once the deal is published, it is handled off the Storage Mining Subsystem. The Storage Mining Subsystem will add the deal to a sector,
+seal the sector, and tell the Storage Market Actor that the deal is in a sector, thereby making the deal active.</li>
+</ol>
+
+<p>The remaining parts of the deal lifecycle are handled by the Storage Mining Subsystem, which communicates with the Storage Market Actor in order to process deal payments. See <a href="../../../../#systems__filecoin_mining__storage_mining">Storage Miner</a> for more details.</p>
+
+<p>The following diagram outlines the phases of deal flow within the storage market in detail:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Storage Market Deal Flow</span>
+
+
+
+
+(<a href="docs/systems/filecoin_markets/storage_market/storage_market_flow.mmd.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_markets/storage_market/storage_market_flow.mmd.svg" />
+
+
+
+
+</div>
+
+
+<h1 id="discovery">Discovery</h1>
+
+<p>Discovery is the process where a client identifies storage providers (i.e. a miner) who might be able to store their data. There are many ways a client might identify a provider to store their data. This outlines the minimum discovery services a filecoin implementation MUST provide. As the network evolves, third parties may build systems that supplement or enhance these services.</p>
+
+<p>Discovery involves identifying providers and determining their current <code>StorageAsk</code>. The steps are as follows:
+1. A client queries the chain to gain a list of Storage Miner Actors who have registerd as miners with the StoragePowerActor
+2. A client may perform additional queries to each Storage Miner Actor to determine their properties &ndash; worker address, sector size, libp2p Multiaddress etc
+3. Once the client identifies potentially suitable providers, it sends a direct libp2p message using the <code>Storage Query Protocol</code> to get each potential provider&rsquo;s current <code>StorageAsk</code>.
+4. Miners respond on the <code>AskProtocol</code> with a signed version of their current <code>StorageAsk</code></p>
+
+<p>A <code>StorageAsk</code> contains all the properties that a client will need to determine if a given provider will meet its needs for storage at this moment. Providers should update their asks frequently to insure the information they are providing to clients is up to date.</p>
+
+<h1 id="negotiation">Negotiation</h1>
+
+<p>Negotiation is the out of band process where a storage client and a storage provider come to an agreement about a storage deal and reach the point where a deal is published on chain.</p>
+
+<p>Negotiation begins once a client has discovered a miner whose <code>StorageAsk</code> meets their desired criteria.The <em>recommended</em> order of operations for negotiating and publishing a deal is as follows:</p>
+
+<ol>
+<li>Before sending a proposal to the provider, the <code>StorageClient</code> adds funds for a deal, as necessary, to the <code>StorageMarketActor</code> (by calling <code>AddBalance</code>)</li>
+<li>In order to propose a storage deal, the <code>StorageClient</code> then calculates the piece commitment (<code>CommP</code>) for the data it intends to store ahead of time. This is neccesary so that the <code>StorageProvider</code> can verify the data the <code>StorageClient</code> sends to be stored matches the <code>CommP</code> in the <code>StorageDealProposal</code>. For more detail about the relationship between payloads, pieces, and <code>CommP</code> see <a href="../../../../#systems__filecoin_files__piece___index"></a> and <a href="../../../../#libraries__filcrypto__filproofs___index"></a></li>
+<li>The <code>StorageClient</code> now creates a <code>StorageDealProposal</code> and sends the proposal and the CID for the root of the data payload to be stored to the <code>StorageProvider</code> using the <code>Storage Deal Protocol</code></li>
+</ol>
+
+<p>Execution now moves to the <code>StorageProvider</code></p>
+
+<ol>
+<li>The <code>StorageProvider</code> inspects the deal to verify that its parameters match it own internal criteria (such as price, piece size, deal duration, etc) &ndash; and rejects the proposal if it doesn&rsquo;t (it sends a rejection to the client over the
+<code>Storage Deal Protocol</code>)</li>
+<li>The <code>StorageProvider</code> queries the <code>StorageMarketActor</code> to verify the <code>StorageClient</code> has deposited enough funds to make the deal (i.e. balance &gt; total storage price) and rejects the proposal if it hasn&rsquo;t.</li>
+<li>If all criteria are met, the <code>StorageProvider</code> responds using the <code>Storage Deal Protocol</code> indicate an intent to accept the deal.</li>
+</ol>
+
+<p>Execution now moves back to the <code>StorageClient</code></p>
+
+<ol>
+<li>The <code>StorageClient</code> opens a push request for the payload data using the <code>Data Transfer Module</code>, and sends the request to the provider along with a voucher containing the CID for the <code>StorageDealProposal</code></li>
+<li>The <code>StorageProvider</code> checks the voucher and verifies the CID matches a storage deal proposal it has received and verified but not put on chain already. If so, it accepts the data transfer request from the <code>StorageClient</code>.</li>
+<li>The <code>Data Transfer Module</code> now transfers for the payload data to be stored from the  <code>StorageClient</code> to the <code>StorageProvider</code> using <code>GraphSync</code>.</li>
+<li>Once complete, the <code>Data Transfer Module</code> notifies the <code>StorageProvider</code></li>
+<li>The <code>StorageProvider</code> recalculates the piece commitment (<code>CommP</code>) from the data that was transferred and verifies it matches the piece commitment in the the <code>StorageDealProposal</code></li>
+</ol>
+
+<h1 id="publishing">Publishing</h1>
+
+<p>Data is now transferred, both parties have agreed, and it&rsquo;s time for the <code>StorageProvider</code> to publish the deal.</p>
+
+<ol>
+<li>First, the <code>StorageProvider</code> adds collateral for the deal as needed to the <code>StorageMarketActor</code> (using <code>AddBalance</code>)</li>
+<li>Now, the <code>StorageProvider</code> calls <code>PublishStorageDeals</code> on the <code>StorageMarketActor</code> to publish the deal. It sends the StorageDealProposal signed by the client as well as its own signature in the message to publish the storage deal.</li>
+<li>For convenience, the <code>StorageProvider</code> responds sends a message to the <code>StorageClient</code> on the <code>Storage Deal Protocol</code> with the CID of the message it is
+putting on chain</li>
+<li>If all goes well, the <code>StorageMarketActor</code> responds with an on chain <code>DealID</code> for the published deal.</li>
+</ol>
+
+<p>Finally, the client verifies the deal.</p>
+
+<ol>
+<li>The <code>StorageClient</code> queries the node for the CID of the message published on chain (sent by the provider). It then inspects message parameters to make sure they match the expected deal</li>
+</ol>
+
+<h1 id="handoff">Handoff</h1>
+
+<p>Now that a deal is published, it needs to be stored, sealed, and proven in order for the provider to be paid. (see <a href="../../../../#systems__filecoin_markets__storage_market__storage_deal___index"></a> for more information about how deal payments are made) These later stages of a deal are handled by the <a href="../../../../#systems__filecoin_mining__storage_mining">Storage Miner</a>. So the final task for the Storage Market is to handoff to the Storage Mining Subsystem</p>
+
+<ol>
+<li>The <code>StorageProvider</code> writes the serialized, padded piece to a shared <a href="../../../../#systems__filecoin_files__file__filestore">FileStore - Local Storage for Files</a>.</li>
+<li>The <code>StorageProvider</code> calls <code>HandleStorageDeal</code> on the <code>StorageMiner</code> with the published <code>StorageDeal</code> and filestore path.</li>
+</ol>
+
+<p>A note order of operations: the only requirement to publish a storage deal with the <code>StorageMarketActor</code> is that the <code>StorageDealProposal</code> is signed by the <code>StorageClient</code>, the publish message is signed by the <code>StorageProvider</code>, and both parties have deposited adequate funds/collateral in the <code>StorageMarketActor</code>. As such, it&rsquo;s not required that the steps listed above happen in exactly the order listed above. However, the above order is <em>recommended</em> because it generally minimizes the ability of either party to act maliciously.</p>
+
+<h1 id="data-types">Data Types</h1>
+
+<p>The following data types unique to the Storage Market:</p>
+
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
+<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
+<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
+<span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+<span class="kn">import</span> <span class="nx">message</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
+<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
+
+<span class="kd">type</span> <span class="nx">StorageDealStatus</span> <span class="kt">uint64</span>
+
+<span class="c1">// StorageAsk is the current price and parameters a miner is currently offering for storage
+</span><span class="c1">// (analogous to an Ask in a financial market)
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageAsk</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Price</span>             <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// attoFIL per GiB per epoch
+</span><span class="c1"></span>    <span class="nx">Collateral</span>        <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// attoFIL per GiB per epoch
+</span><span class="c1"></span>
+    <span class="nx">MinPieceSize</span>      <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceSize</span>
+    <span class="c1">// address of miner actor for deals
+</span><span class="c1"></span>    <span class="nx">Miner</span>             <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="c1">// the epoch at the time this ask was published
+</span><span class="c1"></span>    <span class="nx">PublicationEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">MaxDuration</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">MinDuration</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="c1">// a miner should update sequence number each time it publishes an ask
+</span><span class="c1"></span>    <span class="c1">// so that anyone with two asks from the same miner can determine which is
+</span><span class="c1"></span>    <span class="c1">// more current
+</span><span class="c1"></span>    <span class="nx">SeqNo</span>             <span class="nx">UVarint</span>
+<span class="p">}</span>
+
+<span class="c1">// A SignedStorageAsk is an ask signed by the miner that is making the offer
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SignedStorageAsk</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Ask</span>        <span class="nx">StorageAsk</span>
+    <span class="nx">Signature</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span>
+<span class="p">}</span>
+
+<span class="c1">// AskProtocolRequest is a request sent over the storage ask protocol to a miner 
+</span><span class="c1">// to determine their current ask
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">AskProtocolRequest</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Miner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+<span class="p">}</span>
+
+<span class="c1">// AskProtocolResponse is the response a miner sends over the ask protocol with
+</span><span class="c1">// a signed version of their most recent storage ask
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">AskProtocolResponse</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Ask</span> <span class="nx">SignedStorageAsk</span>
+<span class="p">}</span>
+
+<span class="c1">// DealProtocolRequest is a request sent by a storage client to 
+</span><span class="c1">// a storage provider on the storage deal protocol to propose a storage deal
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">DealProtocolRequest</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// The deal being proposed
+</span><span class="c1"></span>    <span class="nx">DealProposal</span>  <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
+    <span class="c1">// root of the data to be transferred
+</span><span class="c1"></span>    <span class="nx">Payload</span>       <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+<span class="p">}</span>
+
+<span class="c1">// DealProtocolResponse is a response sent by a storage miner 
+</span><span class="c1">// on the storage deal protocol with the current status of a storage
+</span><span class="c1">// deal proposal
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">DealProtocolResponse</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// The CID of the storage deal proposal 
+</span><span class="c1"></span>    <span class="nx">Proposal</span>        <span class="o">&amp;</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
+
+    <span class="c1">// Status of deal
+</span><span class="c1"></span>    <span class="nx">State</span>           <span class="nx">StorageDealStatus</span>
+    <span class="c1">// any additional information about status
+</span><span class="c1"></span>    <span class="nx">Message</span>         <span class="kt">string</span>
+
+    <span class="c1">// CID of message published on chain, once it is published
+</span><span class="c1"></span>    <span class="nx">PublishMessage</span>  <span class="o">&amp;</span><span class="nx">message</span><span class="p">.</span><span class="nx">SignedMessage</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">StorageDataTransferVoucher</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Proposal</span> <span class="o">&amp;</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_market</span>
+
+<span class="kd">const</span> <span class="p">(</span>
+	<span class="nx">StorageDealProposalNotFound</span> <span class="nx">StorageDealStatus</span> <span class="p">=</span> <span class="kc">iota</span>
+	<span class="nx">StorageDealProposalRejected</span>
+	<span class="nx">StorageDealProposalAccepted</span>
+	<span class="nx">StorageDealProposalSigned</span>
+	<span class="nx">StorageDealPublished</span>
+	<span class="nx">StorageDealCommitted</span>
+	<span class="nx">StorageDealActive</span>
+	<span class="nx">StorageDealFailing</span>
+	<span class="nx">StorageDealRecovering</span>
+	<span class="nx">StorageDealExpired</span>
+	<span class="nx">StorageDealNotFound</span>
+<span class="p">)</span>
+</code></pre></div>
+
+
+
+
+</p>
+
+<p>Details about <code>StorageDealProposal</code> and <code>StorageDeal</code> (which are used in the Storage Market and elsewhere) specifically can be found in <a href="../../../../#systems__filecoin_markets__storage_market__storage_deal___index"></a>.</p>
+
+<h1 id="protocols">Protocols</h1>
+
+<ul>
+<li><strong>Name</strong>: Storage Query Protocol</li>
+<li><strong>Protocol ID</strong>: <code>/fil/&lt;network-name&gt;/storage/ask/1.0.1</code></li>
+</ul>
+
+<p>Request: CBOR Encoded AskProtocolRequest Data Structure
+Response: CBOR Encoded AskProtocolResponse Data Structure</p>
+
+<ul>
+<li><strong>Name</strong>: Storage Deal Protocol</li>
+<li><strong>Protocol ID</strong>: <code>/fil/&lt;network-name&gt;/storage/mk/1.0.1</code></li>
+</ul>
+
+<p>Request: CBOR Encoded DealProtocolRequest Data Structure
+Response: CBOR Encoded DealProtocolResponse Data Structure</p>
 </article>
 
       
@@ -4651,6 +5038,21 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#terminology">Terminology</a></li>
+<li><a href="#deal-flow">Deal Flow</a></li>
+<li><a href="#discovery">Discovery</a></li>
+<li><a href="#negotiation">Negotiation</a></li>
+<li><a href="#publishing">Publishing</a></li>
+<li><a href="#handoff">Handoff</a></li>
+<li><a href="#data-types">Data Types</a></li>
+<li><a href="#protocols">Protocols</a></li>
+</ul>
+</nav>
+  </aside>
 
 
 

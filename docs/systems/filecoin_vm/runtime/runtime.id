@@ -2,6 +2,7 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
@@ -11,8 +12,13 @@ import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 type Runtime interface {
     CurrEpoch() block.ChainEpoch
 
-    // Randomness returns a (pseudo)random stream (indexed by offset) for the current epoch.
-    Randomness(e block.ChainEpoch, offset UInt) util.Randomness
+    // Randomness returns a (pseudo)random string for the given epoch and tag.
+    Randomness(tag filcrypto.DomainSeparationTag, epoch block.ChainEpoch) util.Randomness
+    RandomnessWithAuxSeed(
+        tag      filcrypto.DomainSeparationTag
+        epoch    block.ChainEpoch
+        auxSeed  util.Serialization
+    ) util.Randomness
 
     // The address of the immediate calling actor.
     // Not necessarily the actor in the From field of the initial on-chain Message.
@@ -108,6 +114,10 @@ type Runtime interface {
         address  addr.Address
     )
 
+    // Deletes an actor in the state tree. May only be called by the actor itself,
+    // or by StoragePowerActor in the case of StorageMinerActors.
+    DeleteActor(address addr.Address)
+
     // Retrieves and deserializes an object from the store into o. Returns whether successful.
     IpldGet(c ipld.CID, o ipld.Object) bool
     // Serializes and stores an object, returning its CID.
@@ -137,4 +147,6 @@ type ActorStateHandle interface {
     Take() actor.ActorSubstateCID
 }
 
-type ComputeFunctionID Int
+type ComputeFunctionID enum {
+    VerifySignature
+}

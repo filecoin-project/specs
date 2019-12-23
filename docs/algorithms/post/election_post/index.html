@@ -1507,6 +1507,70 @@ https://github.com/alex-shpak/hugo-book
   
 
 
+<a href="../../../../#systems__filecoin_vm__indices" class="menu-item depth-3">
+    
+    
+        Indices
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#appendix__address" class="menu-item depth-2">
+    
+    
+        Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
 <a href="../../../../#systems__filecoin_vm__message" class="menu-item depth-3">
     
     
@@ -2909,72 +2973,6 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_markets__order" class="menu-item depth-3">
-    
-    
-        Orders
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#systems__filecoin_markets__deal" class="menu-item depth-3">
-    
-    
-        Deals
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
 <a href="../../../../#systems__filecoin_markets__storage_market" class="menu-item depth-3">
     
     
@@ -2985,6 +2983,136 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_markets__storage_market__storage_deal" class="menu-item depth-4">
+    
+    
+        Storage Deal
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_flow" class="menu-item depth-5">
+    
+    
+        Deal Flow
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_states" class="menu-item depth-5">
+    
+    
+        Deal States
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_markets__storage_market__storage_deal__faults" class="menu-item depth-5">
+    
+    
+        Faults
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -3066,37 +3194,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Storage Client
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_markets__storage_market__faults" class="menu-item depth-4">
-    
-    
-        Faults
     
 </a>
 
@@ -4878,7 +4975,7 @@ Only faults which have been reported at challenge time, will be accounted for. I
 <li>Faults cannot be recovered during a ChallengePeriod</li>
 </ul>
 
-<p>Accordingly, if the miner does not respond to the challenge, they will lose all their Power and a portion of their pledge collateral. This is considered a <code>DetectedFault</code> and all sectors in the <code>ProvingSet</code> will be marked as <code>Failing</code>. The miner will get challenged again in the next proving period. If the miner does not provide a valid response to <code>MAX_CONSECUTIVE_FAULTS</code> challenges in a row, their pledge collateral is slashed and their sectors are permanently terminated. Their storage deal collateral is slashed accordingly (see <a href="../../../../#systems__filecoin_markets__deal__deal_states">Deal States</a> for more).</p>
+<p>Accordingly, if the miner does not respond to the challenge, they will lose all their Power and a portion of their pledge collateral. This is considered a <code>DetectedFault</code> and all sectors in the <code>ProvingSet</code> will be marked as <code>Failing</code>. The miner will get challenged again in the next proving period. If the miner does not provide a valid response to <code>MAX_CONSECUTIVE_FAULTS</code> challenges in a row, their pledge collateral is slashed and their sectors are permanently terminated. Their storage deal collateral is slashed accordingly (see <a href="../../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_states">Storage Deal States</a> for more).</p>
 
 <p>Any faulted sectors will not count toward miner power in <a href="../../../../#algorithms__expected_consensus___index">Expected Consensus</a>. Through these <code>Detected</code> and <code>Declared</code> faults, the power table should closely track power in the network.</p>
 

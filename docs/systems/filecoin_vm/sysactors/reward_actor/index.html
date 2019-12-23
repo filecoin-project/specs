@@ -1507,6 +1507,70 @@ https://github.com/alex-shpak/hugo-book
   
 
 
+<a href="../../../../../#systems__filecoin_vm__indices" class="menu-item depth-3">
+    
+    
+        Indices
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#appendix__address" class="menu-item depth-2">
+    
+    
+        Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
 <a href="../../../../../#systems__filecoin_vm__message" class="menu-item depth-3">
     
     
@@ -2909,72 +2973,6 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../../#systems__filecoin_markets__order" class="menu-item depth-3">
-    
-    
-        Orders
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#systems__filecoin_markets__deal" class="menu-item depth-3">
-    
-    
-        Deals
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
 <a href="../../../../../#systems__filecoin_markets__storage_market" class="menu-item depth-3">
     
     
@@ -2985,6 +2983,136 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal" class="menu-item depth-4">
+    
+    
+        Storage Deal
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_flow" class="menu-item depth-5">
+    
+    
+        Deal Flow
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_states" class="menu-item depth-5">
+    
+    
+        Deal States
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal__faults" class="menu-item depth-5">
+    
+    
+        Faults
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -3066,37 +3194,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Storage Client
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_markets__storage_market__faults" class="menu-item depth-4">
-    
-    
-        Faults
     
 </a>
 
@@ -4813,6 +4910,8 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActorCode_I</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+
     <span class="c1">// initialize Reward Map with investor accounts
 </span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
@@ -4821,16 +4920,14 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span>
     <span class="nx">miner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
     <span class="nx">penalty</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span>
-    <span class="nx">minerStoragePower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span>
-    <span class="nx">minerActiveSectorWeight</span> <span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span><span class="p">,</span>
-    <span class="nx">minerInactiveSectorWeight</span> <span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span><span class="p">,</span>
+    <span class="nx">minerNominalPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span>
     <span class="nx">currPledge</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span>
 <span class="p">)</span> <span class="p">{</span>
     <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
 
     <span class="nx">inds</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrIndices</span><span class="p">()</span>
-    <span class="nx">pledgeReq</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">BlockReward_PledgeCollateralReq</span><span class="p">(</span><span class="nx">minerActiveSectorWeight</span><span class="p">,</span> <span class="nx">minerInactiveSectorWeight</span><span class="p">,</span> <span class="nx">currPledge</span><span class="p">)</span>
-    <span class="nx">currReward</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">BlockReward_GetCurrRewardForMiner</span><span class="p">(</span><span class="nx">minerStoragePower</span><span class="p">,</span> <span class="nx">currPledge</span><span class="p">)</span>
+    <span class="nx">pledgeReq</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">PledgeCollateralReq</span><span class="p">(</span><span class="nx">minerNominalPower</span><span class="p">)</span>
+    <span class="nx">currReward</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">GetCurrBlockRewardForMiner</span><span class="p">(</span><span class="nx">minerNominalPower</span><span class="p">,</span> <span class="nx">currPledge</span><span class="p">)</span>
     <span class="nf">TODO</span><span class="p">()</span>                                                                                <span class="c1">// BigInt
 </span><span class="c1"></span>    <span class="nx">underPledge</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Max</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)),</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">pledgeReq</span><span class="o">-</span><span class="nx">currPledge</span><span class="p">))</span> <span class="c1">// 0 if over collateralized
 </span><span class="c1"></span>    <span class="nx">rewardToGarnish</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Min</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">currReward</span><span class="p">),</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">underPledge</span><span class="p">))</span>
@@ -4871,20 +4968,17 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">UpdateReleaseRewardActorState</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="c1">// called by ownerAddress
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActorCode_I</span><span class="p">)</span> <span class="nf">WithdrawReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// withdraw available funds from RewardMap
-</span><span class="c1"></span>    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActorCode_I</span><span class="p">)</span> <span class="nf">WithdrawReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">RT_ValidateImmediateCallerIsSignable</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
     <span class="nx">ownerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
-    <span class="nx">withdrawableReward</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_withdrawReward</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">ownerAddr</span><span class="p">)</span>
+
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+
+    <span class="c1">// withdraw available funds from RewardMap
+</span><span class="c1"></span>    <span class="nx">withdrawableReward</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_withdrawReward</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">ownerAddr</span><span class="p">)</span>
     <span class="nf">UpdateReleaseRewardActorState</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-    <span class="c1">// send funds to owner
-</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
-        <span class="nx">To_</span><span class="p">:</span>    <span class="nx">ownerAddr</span><span class="p">,</span>
-        <span class="nx">Value_</span><span class="p">:</span> <span class="nx">withdrawableReward</span><span class="p">,</span>
-    <span class="p">})</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">ownerAddr</span><span class="p">,</span> <span class="nx">withdrawableReward</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">removeIndices</span><span class="p">(</span><span class="nx">rewards</span> <span class="p">[]</span><span class="nx">Reward</span><span class="p">,</span> <span class="nx">indices</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="nx">Reward</span> <span class="p">{</span>

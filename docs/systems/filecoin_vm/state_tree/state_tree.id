@@ -12,4 +12,7 @@ type StateTree struct {
 
     // Looks up an actor state by address.
     GetActor(a addr.Address) (state actor.ActorState, ok bool)
+
+    // Looks up an actor CodeID by address.
+    GetActorCodeID_Assert(a addr.Address) actor.CodeID
 }

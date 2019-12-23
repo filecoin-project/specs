@@ -72,10 +72,10 @@ func _registerBuiltinActors() {
 	RegisterActor(StorageMarketActorCodeID, &market.StorageMarketActorCode_I{})
 
 	// wire in CRON actions.
-	// TODO: there's probably a better place to put this, but for now, do it here.
+	// TODO: move this to CronActor's constructor method
 	cron.Entries_ = append(cron.Entries_, &sysactors.CronTableEntry_I{
 		ToAddr_:    addr.StoragePowerActorAddr,
-		MethodNum_: ai.Method_StoragePowerActor_EpochTickEnd,
+		MethodNum_: ai.Method_StoragePowerActor_OnEpochTickEnd,
 	})
 
 	cron.Entries_ = append(cron.Entries_, &sysactors.CronTableEntry_I{

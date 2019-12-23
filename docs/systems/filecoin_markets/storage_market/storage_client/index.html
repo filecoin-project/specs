@@ -1507,6 +1507,70 @@ https://github.com/alex-shpak/hugo-book
   
 
 
+<a href="../../../../../#systems__filecoin_vm__indices" class="menu-item depth-3">
+    
+    
+        Indices
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#appendix__address" class="menu-item depth-2">
+    
+    
+        Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
 <a href="../../../../../#systems__filecoin_vm__message" class="menu-item depth-3">
     
     
@@ -2909,72 +2973,6 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../../#systems__filecoin_markets__order" class="menu-item depth-3">
-    
-    
-        Orders
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#systems__filecoin_markets__deal" class="menu-item depth-3">
-    
-    
-        Deals
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
 <a href="../../../../../#systems__filecoin_markets__storage_market" class="menu-item depth-3">
     
     
@@ -2985,6 +2983,136 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal" class="menu-item depth-4">
+    
+    
+        Storage Deal
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_flow" class="menu-item depth-5">
+    
+    
+        Deal Flow
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_states" class="menu-item depth-5">
+    
+    
+        Deal States
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal__faults" class="menu-item depth-5">
+    
+    
+        Faults
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -3066,37 +3194,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Storage Client
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_markets__storage_market__faults" class="menu-item depth-4">
-    
-    
-        Faults
     
 </a>
 
@@ -4634,7 +4731,9 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  <p>Both <code>StorageProvider</code> and <code>StorageClient</code> are <code>StorageMarketParticipant</code>. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain. <code>StorageClient</code> will initiate the storage deal protocol by submitting a <code>StorageDealProposal</code> to the <code>StorageProvider</code> who will then add the deal data to a <code>Sector</code> and commit the sector onto the blockchain.</p>
+  <p>The <code>StorageClient</code> is a module that discovers miners, determines their asks, and proposes deals to <code>StorageProviders</code>. It also tracks deals as they move through the deal flow. Note that any address registered as a <code>StorageMarketParticipant</code> with the <code>StorageMarketActor</code> can be used with the <code>StorageClient</code>. A single participant can be a client, provider, or both at the same time.</p>
+
+<p>&ndash;</p>
 
 
 
@@ -4656,73 +4755,70 @@ https://github.com/alex-shpak/hugo-book
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
-<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
-<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
+<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
+<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
+<span class="kn">import</span> <span class="nx">message</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
+
+<span class="c1">// ClientDeal is the information about a storage deal that storage client tracks
+</span><span class="c1">// locally about a deal until it goes on chain. It is persisted to local storage
+</span><span class="c1">// and updated as the deal goes through stages leading up to its being published
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">ClientDeal</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ProposalCid</span>     <span class="o">&amp;</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
+    <span class="nx">Proposal</span>        <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
+    <span class="nx">State</span>           <span class="nx">StorageDealStatus</span>
+    <span class="nx">MinerPeerID</span>     <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+    <span class="nx">MinerWorker</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">DealID</span>          <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
+    <span class="nx">PublishMessage</span>  <span class="o">&amp;</span><span class="nx">message</span><span class="p">.</span><span class="nx">SignedMessage</span>
+<span class="p">}</span>
+
+<span class="c1">// ProposeStorageDealResult is the returned data when ProposeStorageDeal
+</span><span class="c1">// is called on a storage client
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">ProposeStorageDealResult</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ProposalCid</span> <span class="o">&amp;</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">StorageProviderInfo</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Address</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>  <span class="c1">// actor address
+</span><span class="c1"></span>    <span class="nx">SectorSize</span>  <span class="kt">uint64</span>
+    <span class="nx">PeerID</span>      <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+<span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageClient</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// generate PieceCID(CommP) from payload
-</span><span class="c1"></span>    <span class="c1">// so that client can identify their deal
-</span><span class="c1"></span>    <span class="nf">generatePieceCID</span><span class="p">(</span><span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>
+    <span class="c1">// ListProviders queries chain state and returns active storage providers
+</span><span class="c1"></span>    <span class="nf">ListProviders</span><span class="p">()</span>   <span class="p">(</span><span class="nx">providers</span> <span class="p">[</span><span class="nx">StorageProviderInfo</span><span class="p">],</span> <span class="kt">error</span><span class="p">)</span>
 
-    <span class="c1">// Call by StorageProvider to pull data with GraphSync
-</span><span class="c1"></span>    <span class="nf">PullPayload</span><span class="p">(</span><span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span>
+    <span class="c1">// ListDeals lists on-chain deals associated with this client
+</span><span class="c1"></span>    <span class="nf">ListDeals</span><span class="p">()</span>       <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">],</span> <span class="kt">error</span><span class="p">)</span>
 
-    <span class="c1">// Call by StorageProvider to inform StorageDealProposalStatus
-</span><span class="c1"></span>    <span class="nf">NotifyOfStorageDealProposalStatus</span><span class="p">(</span><span class="nx">proposalCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">ProposalCID</span><span class="p">,</span> <span class="nx">status</span> <span class="nx">StorageDealStatus</span><span class="p">)</span>
+    <span class="c1">// ListInProgressDeals lists deals that are in progress or rejected
+</span><span class="c1"></span>    <span class="c1">// - but not on chain
+</span><span class="c1"></span>    <span class="nf">ListLocalDeals</span><span class="p">()</span>  <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">ClientDeal</span><span class="p">],</span> <span class="kt">error</span><span class="p">)</span>
 
-    <span class="c1">// Call by StorageProvider to inform StorageDealStatus
-</span><span class="c1"></span>    <span class="nf">NotifyOfStorageDealStatus</span><span class="p">(</span><span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">,</span> <span class="nx">status</span> <span class="nx">StorageDealStatus</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div>
+    <span class="c1">// GetInProgressDeal looks up an in progress deal by proposal CID
+</span><span class="c1"></span>    <span class="nf">GetInProgressDeal</span><span class="p">(</span><span class="nx">proposalCID</span> <span class="o">&amp;</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="p">(</span><span class="nx">ClientDeal</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
+    <span class="c1">// GetAsk returns the current ask for a storage provider
+</span><span class="c1"></span>    <span class="nf">GetAsk</span><span class="p">(</span><span class="nx">info</span> <span class="nx">StorageProviderInfo</span><span class="p">)</span> <span class="p">(</span><span class="nx">StorageAsk</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
+    <span class="c1">// ProposeStorageDeal initiates deal negotiation with a Storage Provider
+</span><span class="c1"></span>    <span class="nf">ProposeStorageDeal</span><span class="p">(</span>
+        <span class="nx">info</span>                <span class="nx">StorageProviderInfo</span>
+        <span class="nx">payloadCid</span>          <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+        <span class="nx">proposalExpiration</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">duration</span>            <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">price</span>               <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">collateral</span>          <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="p">)</span> <span class="p">(</span><span class="nx">ProposeStorageDealResult</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
+    <span class="c1">// GetPaymentEscrow returns the current funds available for deal payment
+</span><span class="c1"></span>    <span class="nf">GetPaymentEscrow</span><span class="p">()</span> <span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_market</span>
-
-<span class="kn">import</span> <span class="p">(</span>
-    <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
-    <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
-    <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
-<span class="p">)</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">client</span> <span class="o">*</span><span class="nx">StorageClient_I</span><span class="p">)</span> <span class="nf">generatePieceCID</span><span class="p">(</span><span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-    <span class="kd">var</span> <span class="nx">pieceCID</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>
-    <span class="k">return</span> <span class="nx">pieceCID</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">client</span> <span class="o">*</span><span class="nx">StorageClient_I</span><span class="p">)</span> <span class="nf">PullPayload</span><span class="p">(</span><span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">client</span> <span class="o">*</span><span class="nx">StorageClient_I</span><span class="p">)</span> <span class="nf">NotifyOfStorageDealProposalStatus</span><span class="p">(</span><span class="nx">pieceCID</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span><span class="p">,</span> <span class="nx">status</span> <span class="nx">StorageDealStatus</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">client</span> <span class="o">*</span><span class="nx">StorageClient_I</span><span class="p">)</span> <span class="nf">NotifyOfStorageDealStatus</span><span class="p">(</span><span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">,</span> <span class="nx">status</span> <span class="nx">StorageDealStatus</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+    <span class="c1">// AddPaymentEscrow adds storage collateral
+</span><span class="c1"></span>    <span class="nf">AddPaymentEscrow</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">error</span>
 <span class="p">}</span>
 </code></pre></div>
 

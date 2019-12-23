@@ -4,18 +4,17 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Market Deals | Filecoin Spec</title>
+<title>Storage Deal Flow | Filecoin Spec</title>
 
 
 
-<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
-<link rel="icon" href="../../../../favicon.png" type="image/x-icon">
+<link rel="icon" href="../../../../../../favicon.png" type="image/x-icon">
 
 
-<link rel="alternate" type="application/rss+xml" href="../../../../docs/systems/filecoin_markets/deal/index.xml" title="Filecoin Spec" />
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <script type="text/javascript" src="./gumshoe.polyfills.min.js"></script>
@@ -25,10 +24,10 @@ Made with Book Theme
 https://github.com/alex-shpak/hugo-book
 -->
 
-  <link rel="stylesheet" href="../../../../css/syntax.css">
-<link href="../../../../mermaid/mermaid.css" type="text/css" rel="stylesheet" />
-<script src="../../../../mermaid/mermaid.js"></script>
-<script src="../../../../spec.js"></script>
+  <link rel="stylesheet" href="../../../../../../css/syntax.css">
+<link href="../../../../../../mermaid/mermaid.css" type="text/css" rel="stylesheet" />
+<script src="../../../../../../mermaid/mermaid.js"></script>
+<script src="../../../../../../spec.js"></script>
 
 </head>
 
@@ -60,7 +59,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   <style>
-  nav ul a[href$="\2f docs\2fsystems\2f filecoin_markets\2f deal\2f "] {
+  nav ul a[href$="\2f docs\2fsystems\2f filecoin_markets\2fstorage_market\2fstorage_deal\2fstorage_deal_flow\2f "] {
       color: #0b3a53;
   }
   </style>
@@ -94,7 +93,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#intro" class="menu-item depth-1">
+<a href="../../../../../../#intro" class="menu-item depth-1">
     
     
     <strong>
@@ -123,7 +122,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#intro__arch" class="menu-item depth-2">
+<a href="../../../../../../#intro__arch" class="menu-item depth-2">
     
     
         Architecture Diagrams
@@ -154,7 +153,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#intro__concepts" class="menu-item depth-2">
+<a href="../../../../../../#intro__concepts" class="menu-item depth-2">
     
     
         Key Concepts
@@ -185,7 +184,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#intro__filecoin_vm" class="menu-item depth-2">
+<a href="../../../../../../#intro__filecoin_vm" class="menu-item depth-2">
     
     
         Filecoin VM
@@ -218,7 +217,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#intro__process" class="menu-item depth-2">
+<a href="../../../../../../#intro__process" class="menu-item depth-2">
     
     
         Process
@@ -245,7 +244,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#intro__process__about" class="menu-item depth-3">
+<a href="../../../../../../#intro__process__about" class="menu-item depth-3">
     
     
         About
@@ -278,7 +277,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#intro__process__fip" class="menu-item depth-3">
+<a href="../../../../../../#intro__process__fip" class="menu-item depth-3">
     
     
         FIPs
@@ -311,7 +310,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#intro__process__contributing" class="menu-item depth-3">
+<a href="../../../../../../#intro__process__contributing" class="menu-item depth-3">
     
     
         Contributing
@@ -342,7 +341,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#intro__process__related_resources" class="menu-item depth-3">
+<a href="../../../../../../#intro__process__related_resources" class="menu-item depth-3">
     
     
         Related Resources
@@ -367,7 +366,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#intro__process__related_resources__research_portal" class="menu-item depth-4">
+<a href="../../../../../../#intro__process__related_resources__research_portal" class="menu-item depth-4">
     
     
         Research portal
@@ -398,7 +397,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#intro__process__related_resources__network_tooling" class="menu-item depth-4">
+<a href="../../../../../../#intro__process__related_resources__network_tooling" class="menu-item depth-4">
     
     
         Network tooling
@@ -429,7 +428,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#intro__process__related_resources__testing" class="menu-item depth-4">
+<a href="../../../../../../#intro__process__related_resources__testing" class="menu-item depth-4">
     
     
         Testing and implementation compliance
@@ -474,7 +473,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#intro__changelog" class="menu-item depth-2">
+<a href="../../../../../../#intro__changelog" class="menu-item depth-2">
     
     
         Change Log
@@ -507,7 +506,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#intro__system" class="menu-item depth-2">
+<a href="../../../../../../#intro__system" class="menu-item depth-2">
     
     
         System Decomposition
@@ -534,7 +533,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#intro__system__why_systems" class="menu-item depth-3">
+<a href="../../../../../../#intro__system__why_systems" class="menu-item depth-3">
     
     
         What are Systems?
@@ -567,7 +566,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#intro__system__impl_systems" class="menu-item depth-3">
+<a href="../../../../../../#intro__system__impl_systems" class="menu-item depth-3">
     
     
         Implementing Systems
@@ -610,7 +609,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems" class="menu-item depth-1">
+<a href="../../../../../../#systems" class="menu-item depth-1">
     
     
     <strong>
@@ -639,7 +638,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes" class="menu-item depth-2">
+<a href="../../../../../../#systems__filecoin_nodes" class="menu-item depth-2">
     ⚙️
     
         <strong>Filecoin Nodes</strong>
@@ -664,7 +663,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__node_types" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_nodes__node_types" class="menu-item depth-3">
     
     
         Node Types
@@ -689,7 +688,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__node_types__node" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_nodes__node_types__node" class="menu-item depth-4">
     
     
         Node Interface
@@ -720,7 +719,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__node_types__node_types" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_nodes__node_types__node_types" class="menu-item depth-4">
     
     
         Examples
@@ -751,7 +750,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__node_types__verifier_node" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_nodes__node_types__verifier_node" class="menu-item depth-4">
     
     
         Chain Verifier Node
@@ -782,7 +781,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__node_types__client_node" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_nodes__node_types__client_node" class="menu-item depth-4">
     
     
         Client Node
@@ -813,7 +812,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__node_types__storage_miner_node" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_nodes__node_types__storage_miner_node" class="menu-item depth-4">
     
     
         Storage Miner Node
@@ -844,7 +843,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__node_types__retrieval_miner_node" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_nodes__node_types__retrieval_miner_node" class="menu-item depth-4">
     
     
         Retrieval Miner Node
@@ -875,7 +874,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__node_types__relayer_node" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_nodes__node_types__relayer_node" class="menu-item depth-4">
     
     
         Relayer Node
@@ -914,7 +913,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_nodes__repository" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_nodes__repository" class="menu-item depth-3">
     
     
         Repository
@@ -941,7 +940,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_nodes__repository__config" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_nodes__repository__config" class="menu-item depth-4">
     
     
         Config
@@ -972,7 +971,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
     
     
         KeyStore &amp; user keys
@@ -1021,7 +1020,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_nodes__repository__ipldstore" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_nodes__repository__ipldstore" class="menu-item depth-4">
     
     
         IpldStore
@@ -1052,7 +1051,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
     
     
         Usage in Systems
@@ -1089,7 +1088,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__network" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_nodes__network" class="menu-item depth-3">
     
     
         Network Interface
@@ -1120,7 +1119,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__clock" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_nodes__clock" class="menu-item depth-3">
     
     
         Clock
@@ -1151,7 +1150,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
     
     
         Key Store
@@ -1190,7 +1189,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_files" class="menu-item depth-2">
+<a href="../../../../../../#systems__filecoin_files" class="menu-item depth-2">
     📑
     
         <strong>Files &amp; Data</strong>
@@ -1215,7 +1214,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_files__file" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_files__file" class="menu-item depth-3">
     
     
         File
@@ -1242,7 +1241,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_files__file__filestore" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_files__file__filestore" class="menu-item depth-4">
     
     
         FileStore
@@ -1281,7 +1280,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_files__piece" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_files__piece" class="menu-item depth-3">
     
     
         Piece
@@ -1308,7 +1307,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_files__piece__piece_store" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_files__piece__piece_store" class="menu-item depth-4">
     
     
         PieceStore
@@ -1347,7 +1346,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_files__data_transfer" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_files__data_transfer" class="menu-item depth-3">
     
     
         Data Transfer
@@ -1386,7 +1385,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_vm" class="menu-item depth-2">
+<a href="../../../../../../#systems__filecoin_vm" class="menu-item depth-2">
     💻
     
         <strong>Virtual Machine</strong>
@@ -1413,7 +1412,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_vm__actor" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_vm__actor" class="menu-item depth-3">
     
     
         Actor
@@ -1438,7 +1437,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_vm__actor__address" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_vm__actor__address" class="menu-item depth-4">
     
     
         Address
@@ -1475,7 +1474,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_vm__state_tree" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_vm__state_tree" class="menu-item depth-3">
     
     
         State Tree
@@ -1508,7 +1507,71 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_vm__message" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_vm__indices" class="menu-item depth-3">
+    
+    
+        Indices
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../../#appendix__address" class="menu-item depth-2">
+    
+    
+        Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../../#systems__filecoin_vm__message" class="menu-item depth-3">
     
     
         Message
@@ -1541,7 +1604,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_vm__runtime" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_vm__runtime" class="menu-item depth-3">
     
     
         Runtime
@@ -1568,7 +1631,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_vm__runtime__exitcode" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_vm__runtime__exitcode" class="menu-item depth-4">
     
     
         Exit Codes
@@ -1601,7 +1664,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_vm__runtime__gascost" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_vm__runtime__gascost" class="menu-item depth-4">
     
     
         Gas Costs
@@ -1638,7 +1701,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_vm__sysactors" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_vm__sysactors" class="menu-item depth-3">
     
     
         System Actors
@@ -1663,7 +1726,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_vm__sysactors__init_actor" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_vm__sysactors__init_actor" class="menu-item depth-4">
     
     
         InitActor
@@ -1694,7 +1757,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_vm__sysactors__cron_actor" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_vm__sysactors__cron_actor" class="menu-item depth-4">
     
     
         CronActor
@@ -1725,7 +1788,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_vm__sysactors__account_actor" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_vm__sysactors__account_actor" class="menu-item depth-4">
     
     
         AccountActor
@@ -1756,7 +1819,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_vm__sysactors__reward_actor" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_vm__sysactors__reward_actor" class="menu-item depth-4">
     
     
         RewardActor
@@ -1795,7 +1858,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_vm__interpreter" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_vm__interpreter" class="menu-item depth-3">
     
     
         Interpreter
@@ -1832,7 +1895,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain" class="menu-item depth-2">
+<a href="../../../../../../#systems__filecoin_blockchain" class="menu-item depth-2">
     📦
     
         <strong>Blockchain</strong>
@@ -1857,7 +1920,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__struct" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_blockchain__struct" class="menu-item depth-3">
     
     
         Blocks
@@ -1882,7 +1945,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__struct__block" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_blockchain__struct__block" class="menu-item depth-4">
     
     
         Block
@@ -1913,7 +1976,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__struct__tipset" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_blockchain__struct__tipset" class="menu-item depth-4">
     
     
         Tipset
@@ -1944,7 +2007,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__struct__chain" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_blockchain__struct__chain" class="menu-item depth-4">
     
     
         Chain
@@ -1975,7 +2038,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__struct__chain_manager" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_blockchain__struct__chain_manager" class="menu-item depth-4">
     
     
         Chain Manager
@@ -2006,7 +2069,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__struct__block_producer" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_blockchain__struct__block_producer" class="menu-item depth-4">
     
     
         Block Producer
@@ -2043,7 +2106,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__message_pool" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_blockchain__message_pool" class="menu-item depth-3">
     
     
         Message Pool
@@ -2068,7 +2131,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__message_pool__message_syncer" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_blockchain__message_pool__message_syncer" class="menu-item depth-4">
     
     
         Message Syncer
@@ -2099,7 +2162,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__message_pool__message_storage" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_blockchain__message_pool__message_storage" class="menu-item depth-4">
     
     
         Message Storage
@@ -2138,7 +2201,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_blockchain__chainsync" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_blockchain__chainsync" class="menu-item depth-3">
     
     
         ChainSync
@@ -2169,7 +2232,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__storage_power_consensus" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_blockchain__storage_power_consensus" class="menu-item depth-3">
     
     
         Storage Power Consensus
@@ -2194,7 +2257,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
     
     
         Storage Power Actor
@@ -2237,7 +2300,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_token" class="menu-item depth-2">
+<a href="../../../../../../#systems__filecoin_token" class="menu-item depth-2">
     📀
     
         <strong>Token</strong>
@@ -2264,7 +2327,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_token__wallets" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_token__wallets" class="menu-item depth-3">
     
     
         Wallet
@@ -2297,7 +2360,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_token__payments" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_token__payments" class="menu-item depth-3">
     
     
         Payments
@@ -2330,7 +2393,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_token__payment_channels" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_token__payment_channels" class="menu-item depth-3">
     
     
         Payment Channels
@@ -2355,7 +2418,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_token__payment_channels__payment_channel_actor" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_token__payment_channels__payment_channel_actor" class="menu-item depth-4">
     
     
         Payment Channel Actor
@@ -2394,7 +2457,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_token__multisig" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_token__multisig" class="menu-item depth-3">
     
     
         Multisig Wallet
@@ -2419,7 +2482,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_token__multisig__multisig_actor" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_token__multisig__multisig_actor" class="menu-item depth-4">
     
     
         Multisig Actor
@@ -2464,7 +2527,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_mining" class="menu-item depth-2">
+<a href="../../../../../../#systems__filecoin_mining" class="menu-item depth-2">
     ⛏
     
         <strong>Storage Mining</strong>
@@ -2491,7 +2554,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_mining__storage_mining" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_mining__storage_mining" class="menu-item depth-3">
     
     
         Storage Miner
@@ -2516,7 +2579,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_mining__storage_mining__mining_cycle" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_mining__storage_mining__mining_cycle" class="menu-item depth-4">
     
     
         Storage Mining Cycle
@@ -2547,7 +2610,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_mining__storage_mining__storage_miner_actor" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_mining__storage_mining__storage_miner_actor" class="menu-item depth-4">
     
     
         Storage Miner Actor
@@ -2584,7 +2647,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_mining__sector" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_mining__sector" class="menu-item depth-3">
     
     
         Sector
@@ -2609,7 +2672,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_mining__sector__sectorset" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_mining__sector__sectorset" class="menu-item depth-4">
     
     
         Sector Set
@@ -2640,7 +2703,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
     
     
         Sector Sealing
@@ -2677,7 +2740,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_mining__sector_index" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_mining__sector_index" class="menu-item depth-3">
     
     
         Sector Index
@@ -2710,7 +2773,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_mining__sector_index__sector_builder" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_mining__sector_index__sector_builder" class="menu-item depth-4">
     
     
         Sector Builder
@@ -2741,7 +2804,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_mining__sector_index__sector_store" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_mining__sector_index__sector_store" class="menu-item depth-4">
     
     
         SectorStore
@@ -2778,7 +2841,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_mining__storage_proving" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_mining__storage_proving" class="menu-item depth-3">
     
     
         Storage Proving
@@ -2805,7 +2868,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_mining__storage_proving__sealer" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_mining__storage_proving__sealer" class="menu-item depth-4">
     
     
         Sector Sealer
@@ -2838,7 +2901,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_mining__storage_proving__poster" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_mining__storage_proving__poster" class="menu-item depth-4">
     
     
         Sector Poster
@@ -2883,7 +2946,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_markets" class="menu-item depth-2">
+<a href="../../../../../../#systems__filecoin_markets" class="menu-item depth-2">
     ⚖️
     
         <strong>Market</strong>
@@ -2910,73 +2973,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_markets__order" class="menu-item depth-3">
-    
-    
-        Orders
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#systems__filecoin_markets__deal" class="menu-item depth-3">
-    
-    
-        Deals
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#systems__filecoin_markets__storage_market" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_markets__storage_market" class="menu-item depth-3">
     
     
         Storage Market
@@ -3000,8 +2997,138 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
 
-<a href="../../../../#systems__filecoin_markets__storage_market__storage_market_actor" class="menu-item depth-4">
+
+<a href="../../../../../../#systems__filecoin_markets__storage_market__storage_deal" class="menu-item depth-4">
+    
+    
+        Storage Deal
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_flow" class="menu-item depth-5">
+    
+    
+        Deal Flow
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_states" class="menu-item depth-5">
+    
+    
+        Deal States
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../../#systems__filecoin_markets__storage_market__storage_deal__faults" class="menu-item depth-5">
+    
+    
+        Faults
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../../#systems__filecoin_markets__storage_market__storage_market_actor" class="menu-item depth-4">
     
     
         Storage Market Actor
@@ -3032,7 +3159,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_markets__storage_market__storage_provider" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_markets__storage_market__storage_provider" class="menu-item depth-4">
     
     
         Storage Provider
@@ -3063,41 +3190,10 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_markets__storage_market__storage_client" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_markets__storage_market__storage_client" class="menu-item depth-4">
     
     
         Storage Client
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_markets__storage_market__faults" class="menu-item depth-4">
-    
-    
-        Faults
     
 </a>
 
@@ -3133,7 +3229,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_markets__retrieval_market" class="menu-item depth-3">
+<a href="../../../../../../#systems__filecoin_markets__retrieval_market" class="menu-item depth-3">
     
     
         Retrieval Market
@@ -3158,7 +3254,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_markets__retrieval_market__retrieval_peer_resolver" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_markets__retrieval_market__retrieval_peer_resolver" class="menu-item depth-4">
     
     
         Retrieval Peer Resolver
@@ -3189,7 +3285,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_markets__retrieval_market__retrieval_protocols" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_markets__retrieval_market__retrieval_protocols" class="menu-item depth-4">
     
     
         Retrieval Protocols
@@ -3220,7 +3316,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_markets__retrieval_market__retrieval_client" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_markets__retrieval_market__retrieval_client" class="menu-item depth-4">
     
     
         Retrieval Client
@@ -3251,7 +3347,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_markets__retrieval_market__retrieval_provider" class="menu-item depth-4">
+<a href="../../../../../../#systems__filecoin_markets__retrieval_market__retrieval_provider" class="menu-item depth-4">
     
     
         Retrieval Provider (Miner)
@@ -3302,7 +3398,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#libraries" class="menu-item depth-1">
+<a href="../../../../../../#libraries" class="menu-item depth-1">
     
     
     <strong>
@@ -3335,7 +3431,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#libraries__fcs" class="menu-item depth-2">
+<a href="../../../../../../#libraries__fcs" class="menu-item depth-2">
     
     
         FCS
@@ -3368,7 +3464,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#libraries__ipld" class="menu-item depth-2">
+<a href="../../../../../../#libraries__ipld" class="menu-item depth-2">
     
     
         IPLD
@@ -3395,7 +3491,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#libraries__ipld__cid" class="menu-item depth-3">
+<a href="../../../../../../#libraries__ipld__cid" class="menu-item depth-3">
     
     
         CID
@@ -3426,7 +3522,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#libraries__ipld__datamodel" class="menu-item depth-3">
+<a href="../../../../../../#libraries__ipld__datamodel" class="menu-item depth-3">
     
     
         Data Model
@@ -3459,7 +3555,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#libraries__ipld__selectors" class="menu-item depth-3">
+<a href="../../../../../../#libraries__ipld__selectors" class="menu-item depth-3">
     
     
         Selectors
@@ -3492,7 +3588,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#libraries__ipld__graphstore" class="menu-item depth-3">
+<a href="../../../../../../#libraries__ipld__graphstore" class="menu-item depth-3">
     
     
         GraphStore
@@ -3531,7 +3627,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#libraries__libp2p" class="menu-item depth-2">
+<a href="../../../../../../#libraries__libp2p" class="menu-item depth-2">
     
     
         libp2p
@@ -3558,7 +3654,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#libraries__libp2p__gossipsub" class="menu-item depth-3">
+<a href="../../../../../../#libraries__libp2p__gossipsub" class="menu-item depth-3">
     
     
         gossipsub
@@ -3591,7 +3687,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#libraries__libp2p__kad_dht" class="menu-item depth-3">
+<a href="../../../../../../#libraries__libp2p__kad_dht" class="menu-item depth-3">
     
     
         kad-dht
@@ -3624,7 +3720,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#libraries__libp2p__fil_libp2p_nodes" class="menu-item depth-3">
+<a href="../../../../../../#libraries__libp2p__fil_libp2p_nodes" class="menu-item depth-3">
     
     
         fil-libp2p Nodes
@@ -3663,7 +3759,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#libraries__ipfs" class="menu-item depth-2">
+<a href="../../../../../../#libraries__ipfs" class="menu-item depth-2">
     
     
         IPFS
@@ -3688,7 +3784,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#libraries__ipfs__bitswap" class="menu-item depth-3">
+<a href="../../../../../../#libraries__ipfs__bitswap" class="menu-item depth-3">
     
     
         BitSwap
@@ -3719,7 +3815,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#libraries__ipfs__graphsync" class="menu-item depth-3">
+<a href="../../../../../../#libraries__ipfs__graphsync" class="menu-item depth-3">
     
     
         GraphSync
@@ -3750,7 +3846,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#libraries__ipfs__unixfs" class="menu-item depth-3">
+<a href="../../../../../../#libraries__ipfs__unixfs" class="menu-item depth-3">
     
     
         UnixFS
@@ -3789,7 +3885,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#libraries__multiformats" class="menu-item depth-2">
+<a href="../../../../../../#libraries__multiformats" class="menu-item depth-2">
     
     
         Multiformats
@@ -3826,7 +3922,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms" class="menu-item depth-1">
+<a href="../../../../../../#algorithms" class="menu-item depth-1">
     
     
     <strong>
@@ -3855,7 +3951,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__expected_consensus" class="menu-item depth-2">
+<a href="../../../../../../#algorithms__expected_consensus" class="menu-item depth-2">
     
     
         Expected Consensus
@@ -3886,7 +3982,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__porep" class="menu-item depth-2">
+<a href="../../../../../../#algorithms__porep" class="menu-item depth-2">
     
     
         Proof-of-Replication
@@ -3911,7 +4007,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__porep__stacked_drg" class="menu-item depth-3">
+<a href="../../../../../../#algorithms__porep__stacked_drg" class="menu-item depth-3">
     
     
         Stacked DRG PoRep
@@ -3942,7 +4038,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__porep__porep_commitments" class="menu-item depth-3">
+<a href="../../../../../../#algorithms__porep__porep_commitments" class="menu-item depth-3">
     
     
         PoRep Commitments
@@ -3969,7 +4065,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__porep__stacked_drg_circuit" class="menu-item depth-3">
+<a href="../../../../../../#algorithms__porep__stacked_drg_circuit" class="menu-item depth-3">
     
     
         
@@ -4006,7 +4102,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__post" class="menu-item depth-2">
+<a href="../../../../../../#algorithms__post" class="menu-item depth-2">
     
     
         Proof-of-Spacetime
@@ -4031,7 +4127,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__post__election_post" class="menu-item depth-3">
+<a href="../../../../../../#algorithms__post__election_post" class="menu-item depth-3">
     
     
         Election PoSt
@@ -4062,7 +4158,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
+<a href="../../../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4099,7 +4195,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__payment_channels" class="menu-item depth-2">
+<a href="../../../../../../#algorithms__payment_channels" class="menu-item depth-2">
     
     
         Payment Channels
@@ -4130,7 +4226,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__block_sync" class="menu-item depth-2">
+<a href="../../../../../../#algorithms__block_sync" class="menu-item depth-2">
     
     
         BlockSync
@@ -4161,7 +4257,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__gossip_sub" class="menu-item depth-2">
+<a href="../../../../../../#algorithms__gossip_sub" class="menu-item depth-2">
     
     
         GossipSub
@@ -4192,7 +4288,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__crypto" class="menu-item depth-2">
+<a href="../../../../../../#algorithms__crypto" class="menu-item depth-2">
     
     
         Cryptographic Primitives
@@ -4221,7 +4317,7 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#algorithms__cryptoecon" class="menu-item depth-2">
+<a href="../../../../../../#algorithms__cryptoecon" class="menu-item depth-2">
     
     
         Cryptoecon
@@ -4258,7 +4354,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#listings" class="menu-item depth-1">
+<a href="../../../../../../#listings" class="menu-item depth-1">
     
     
     <strong>
@@ -4287,7 +4383,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#listings__actors" class="menu-item depth-2">
+<a href="../../../../../../#listings__actors" class="menu-item depth-2">
     
     
         Filecoin VM Actors
@@ -4318,7 +4414,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#listings__data_structures" class="menu-item depth-2">
+<a href="../../../../../../#listings__data_structures" class="menu-item depth-2">
     
     
         Data Structures
@@ -4349,7 +4445,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#listings__system_map" class="menu-item depth-2">
+<a href="../../../../../../#listings__system_map" class="menu-item depth-2">
     
     
         Components
@@ -4380,7 +4476,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#listings__libp2p_protocols" class="menu-item depth-2">
+<a href="../../../../../../#listings__libp2p_protocols" class="menu-item depth-2">
     
     
         libp2p Protocols
@@ -4405,7 +4501,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#listings__libp2p_protocols__data_transfer_protocol" class="menu-item depth-3">
+<a href="../../../../../../#listings__libp2p_protocols__data_transfer_protocol" class="menu-item depth-3">
     
     
         Data Transfer Protocol
@@ -4448,7 +4544,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#glossary" class="menu-item depth-1">
+<a href="../../../../../../#glossary" class="menu-item depth-1">
     
     
     <strong>
@@ -4483,7 +4579,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#appendix" class="menu-item depth-1">
+<a href="../../../../../../#appendix" class="menu-item depth-1">
     
     
     <strong>
@@ -4512,7 +4608,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#appendix__sharray" class="menu-item depth-2">
+<a href="../../../../../../#appendix__sharray" class="menu-item depth-2">
     
     
         Sharded IPLD Array
@@ -4543,7 +4639,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#appendix__address" class="menu-item depth-2">
+<a href="../../../../../../#appendix__address" class="menu-item depth-2">
     
     
         Address
@@ -4574,7 +4670,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#appendix__network_params" class="menu-item depth-2">
+<a href="../../../../../../#appendix__network_params" class="menu-item depth-2">
     
     
         Filecoin Parameters
@@ -4628,17 +4724,43 @@ https://github.com/alex-shpak/hugo-book
     <div class="book-page">
       <header class="flex align-center justify-between book-header">
   <label for="menu-control">
-    <img src="../../../../svg/menu.svg" alt="Menu" />
+    <img src="../../../../../../svg/menu.svg" alt="Menu" />
   </label>
-  <strong>Market Deals</strong>
+  <strong>Storage Deal Flow</strong>
 </header>
 
       
 <article class="markdown">
+  
 
-<p>There are two types of deals in Filecoin markets, storage deals and retrieval deals. Storage deals are recorded on the blockchain and enforced by the protocol. Retrieval deals are off chain and enabled by micropayment channel by transacting parties. All deal negotiation happen off chain and a request-response style storage deal protocol is in place to submit agreed-upon storage deals onto the network with <code>PublishStorageDeal</code> and <code>CommitSector</code> to gain storage power on chain. Hence, there is a <code>StorageDealProposal</code> and a <code>RetrievalDealProposal</code> that are half-signed contracts submitted by clients to be counter-signed and posted on-chain by the miners.</p>
 
-<p>Filecoin Storage Market Deal Flow</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Deal Flow Sequence Diagram</span>
+
+
+
+
+(<a href="docs/systems/filecoin_markets/storage_market/storage_deal/diagrams/deal-flow.mmd.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_markets/storage_market/storage_deal/diagrams/deal-flow.mmd.svg" />
+
+
+
+
+</div>
+
 
 <h1 id="add-storage-deal-and-power">Add Storage Deal and Power</h1>
 
@@ -4664,6 +4786,11 @@ https://github.com/alex-shpak/hugo-book
 </ul></li>
 <li><code>StorageProvider</code> calls <code>HandleStorageDeal</code> in <code>StorageMiningSubsystem</code> which will then add the <code>StorageDeal</code> into a <code>Sector</code>.</li>
 </ul></li>
+</ul>
+
+<h1 id="sealing-sectors">Sealing sectors</h1>
+
+<ul>
 <li>4. Once the miner finishes packing a <code>Sector</code>, it generates a Sealed Sector and calls <code>StorageMinerActor.CommitSector</code> to verify the seal, store sector expiration, and record the mapping from <code>SectorNumber</code> to <code>SealCommitment</code>. It will also place this newly added <code>Sector</code> in the list of <code>CommittedSectors</code> in <code>StorageMinerActor</code>. <code>StorageMiner</code> does not earn any power for this newly added sector until its first PoSt has been submitted. Note that <code>CommitSector</code> can be called any time. However, sectors will be added to a staging buffer <code>StagedCommittedSectors</code> when miners are in the <code>Challenged</code> status (see 5 below).</li>
 </ul>
 
@@ -4688,8 +4815,6 @@ https://github.com/alex-shpak/hugo-book
 
 <h1 id="submit-post">Submit PoSt</h1>
 
-<p>(TODO: move into Storage Mining)</p>
-
 <p>On every PoSt Submission, the following steps happen.</p>
 
 <ul>
@@ -4704,8 +4829,6 @@ https://github.com/alex-shpak/hugo-book
 
 <h1 id="detect-faults">Detect Faults</h1>
 
-<p>(TODO: move into Storage Mining)</p>
-
 <ul>
 <li>18. <code>CronActor</code> calls <code>StoragePowerActor.EpochTick</code> at every block. This calls <code>StorageMinerActor.CheckSurprisePoStSubmissionHappened</code> on all the miners whose <code>ProvingPeriod</code> is up.
 
@@ -4716,208 +4839,6 @@ https://github.com/alex-shpak/hugo-book
 <li>If the faults persist for <code>storagemining.MAX_CONSECUTIVE_FAULTS</code> then sectors are removed/cleared from <code>StorageMinerActor</code>.</li>
 </ul></li>
 </ul>
-
-<h1 id="deal-code">Deal Code</h1>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
-<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
-<span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
-
-<span class="kd">type</span> <span class="nx">DealID</span> <span class="nx">Int</span>
-<span class="kd">type</span> <span class="nx">DealIDs</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Items</span> <span class="p">[</span><span class="nx">DealID</span><span class="p">]</span>
-<span class="p">}</span>
-<span class="kd">type</span> <span class="nx">DealWeight</span> <span class="kt">int</span>  <span class="c1">// should be BigInt
-</span><span class="c1"></span>
-<span class="kd">type</span> <span class="nx">DealCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
-<span class="kd">type</span> <span class="nx">ProposalCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
-<span class="kd">type</span> <span class="nx">PayloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
-<span class="kd">type</span> <span class="nx">Signature</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// TODO
-</span><span class="c1"></span>
-<span class="c1">// Note: Deal Collateral is only released and returned to clients and miners
-</span><span class="c1">// when the storage deal stops counting towards power. In the current iteration,
-</span><span class="c1">// it will be released when the sector containing the storage deals expires,
-</span><span class="c1">// even though some storage deals can expire earlier than the sector does.
-</span><span class="c1">// Collaterals are denominated in PerEpoch to incur a cost for self dealing or
-</span><span class="c1">// minimal deals that last for a long time.
-</span><span class="c1">// Note: ClientCollateralPerEpoch may not be needed and removed pending future confirmation.
-</span><span class="c1">// There will be a Minimum value for both client and provider deal collateral.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageDealProposal</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PieceCID</span>                      <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>  <span class="c1">// 35 bytes CommP
-</span><span class="c1"></span>    <span class="nx">PieceSize</span>                     <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceSize</span>
-    <span class="nx">Client</span>                        <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">Provider</span>                      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">ClientSignature</span>               <span class="nx">Signature</span>
-
-    <span class="c1">// Nominal start epoch. Deal payment is linear between StartEpoch and EndEpoch,
-</span><span class="c1"></span>    <span class="c1">// with total amount StoragePricePerEpoch * (EndEpoch - StartEpoch).
-</span><span class="c1"></span>    <span class="c1">// Storage deal must appear in a sealed (proven) sector no later than StartEpoch,
-</span><span class="c1"></span>    <span class="c1">// otherwise it is invalid.
-</span><span class="c1"></span>    <span class="nx">StartEpoch</span>                    <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">EndEpoch</span>                      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">StoragePricePerEpoch</span>          <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-
-    <span class="nx">ProviderCollateral</span>            <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nx">ClientCollateral</span>              <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-
-    <span class="nf">Duration</span><span class="p">()</span>                    <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>   <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>  <span class="c1">// EndEpoch - StartEpoch
-</span><span class="c1"></span>    <span class="nf">TotalStorageFee</span><span class="p">()</span>             <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// StoragePricePerEpoch * Duration
-</span><span class="c1"></span>    <span class="nf">ClientBalanceRequirement</span><span class="p">()</span>    <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// ClientCollateral + TotalStorageFee
-</span><span class="c1"></span>    <span class="nf">ProviderBalanceRequirement</span><span class="p">()</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// ProviderCollateral
-</span><span class="c1"></span>
-    <span class="nf">CID</span><span class="p">()</span>                         <span class="nx">ProposalCID</span>
-<span class="p">}</span>
-
-<span class="c1">// Everything in this struct will go on chain
-</span><span class="c1">// We are enforcing that StorageProvider calls PublishStorageDeal to get back a StorageDeal struct
-</span><span class="c1">// Provider&#39;s signature is implicit in the onchain call
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageDeal</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">Proposal</span><span class="p">()</span>      <span class="nx">StorageDealProposal</span>  <span class="c1">// can extract proposal from the message
-</span><span class="c1"></span>    <span class="nx">PublishMessage</span>  <span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span>  <span class="c1">// counter signature is implicit in the message
-</span><span class="c1"></span>
-    <span class="nf">CID</span><span class="p">()</span>           <span class="nx">DealCID</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">OnChainDeal</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ID</span>                <span class="nx">DealID</span>
-    <span class="nx">Deal</span>              <span class="nx">StorageDeal</span>
-    <span class="nx">SectorStartEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if not yet included in proven sector
-</span><span class="c1"></span>    <span class="nx">LastUpdatedEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if deal state never updated
-</span><span class="c1"></span>    <span class="nx">SlashEpoch</span>        <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if deal never slashed
-</span><span class="c1"></span><span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">RetrievalDealProposal</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// TODO
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">RetrievalDeal</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Proposal</span>          <span class="nx">RetrievalDealProposal</span>
-    <span class="nx">CounterSignature</span>  <span class="nx">Signature</span>
-<span class="p">}</span>
-</code></pre></div>
-
-
-
-
-
-
-<h1 id="deal-flow">Deal Flow</h1>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="diagram">
-
-<span class="diagram-title">Deal Flow Sequence Diagram</span>
-
-
-
-
-(<a href="docs/systems/filecoin_markets/deal/diagrams/deal-flow.mmd.svg" target="_blank">open in new tab</a>)
-<br />
-<img src="docs/systems/filecoin_markets/deal/diagrams/deal-flow.mmd.svg" />
-
-
-
-
-</div>
-
-
-<div id="systems__filecoin_markets__deal__deal_states"></div>
-
-<h1 id="deal-states">Deal States</h1>
-
-<p>All on-chain economic activities in Filecoin start with the deal. This section aims to explain different states of a deal and their relationship with other concepts in the protocol such as Power, Payment, and Collaterals.</p>
-
-<p>A deal has the following states:</p>
-
-<ul>
-<li><code>Unpublished</code>: the deal has yet to be posted on chain.</li>
-<li><code>Published</code>: the deal has been published and accepted by the chain but is not yet active as the sector containing the deal has not been proven.</li>
-<li><code>Active</code>: the deal has been proven and not yet expired.</li>
-<li><code>Deleted</code>: the deal has expired or the sector containing the deal has been terminated because of faults.</li>
-</ul>
-
-<p>Note that <code>Unpublished</code> and <code>Deleted</code> states not tracked on chain. To reduce on-chain footprint, an <code>OnChainDeal</code> struct is created when a deal is published and it keeps track of a <code>LastPaymentEpoch</code> which defaults to -1 when a deal is in the <code>Published</code> state. A deal transitions into the <code>Active</code> state when <code>LastPaymentEpoch</code> is positive.</p>
-
-<p>The following describes how a deal transitions between its different states.</p>
-
-<ul>
-<li><code>Unpublished -&gt; Published</code>: this is triggered by <code>StorageMarketActor.PublishStorageDeals</code> which validates new storage deals, locks necessary funds, generates deal IDs, and registers the storage deals in <code>StorageMarketActor</code>.</li>
-<li><code>Published -&gt; Deleted</code>: this is triggered by <code>StorageMinerActor.ProveCommitSector</code> during InteractivePoRep when the elapsed number of epochs between PreCommit and ProveCommit messages exceeds <code>MAX_PROVE_COMMIT_SECTOR_EPOCH</code>. ProveCommitSector will also trigger garbage collection on the list of published storage deals.</li>
-<li><code>Published -&gt; Active</code>: this is triggered by <code>ActivateStorageDeals</code> after successful <code>StorageMinerActor.ProveCommitSector</code>. It is okay for the StorageDeal to have already started (i.e. for <code>StartEpoch</code> to have passed) at this point but it must not have expired.</li>
-<li><code>Active -&gt; Deleted</code>: this can happen under the following conditions:
-
-<ul>
-<li>The deal itself has expired. This is triggered by <code>StorageMinerActorCode._submitPowerReport</code> which is called whenever a PoSt is submitted. Power associated with the deal will be lost, collaterals returned, and all remaining storage fees unlocked (allowing miners to call <code>WithdrawBalance</code> successfully).</li>
-<li>The sector containing the deal has expired. This is triggered by <code>StorageMinerActorCode._submitPowerReport</code> which is called whenver a PoSt is submitted. Power associated with the deals in the sector will be lost, collaterals returned, and all remaining storage fees unlocked.</li>
-<li>The sector containing the active deal has been terminated. This is triggered by <code>StorageMinerActor._submitFaultReport</code> for <code>TerminatedFaults</code>. No storage deal collateral will be slashed on fault declaration or detection, only on termination. A terminated fault is triggered when a sector is in the <code>Failing</code> state for <code>MAX_CONSECUTIVE_FAULTS</code> consecutive proving periods.</li>
-</ul></li>
-</ul>
-
-<p>Given deal states and their transitions, the following are the relationships between deal states and other economic states and activities in the protocol.</p>
-
-<ul>
-<li><code>Power</code>: only payload data in an Active storage deal counts towards power.</li>
-<li><code>Deal Payment</code>: happens on <code>_onSuccessfulPoSt</code> and at deal/sector expiration through <code>_submitPowerReport</code>, paying out <code>StoragePricePerEpoch</code> for each epoch since the last PoSt.</li>
-<li><code>Deal Collateral</code>: no storage deal collateral will be slashed for <code>NewDeclaredFaults</code> and <code>NewDetectedFaults</code> but instead some pledge collateral will be slashed given these faults&rsquo; impact on consensus power. In the event of <code>NewTerminatedFaults</code>, all storage deal collateral and some pledge collateral will be slashed. Provider and client storage deal collaterals will be returned when a deal or a sector has expired. If a sector recovers from <code>Failing</code> within the <code>MAX_CONSECUTIVE_FAULTS</code> threshold, deals in that sector are still considered active. However, miners may need to top up pledge collateral when they try to <code>RecoverFaults</code> given the earlier slashing.</li>
-</ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="diagram">
-
-<span class="diagram-title">Deal States Sequence Diagram</span>
-
-
-
-
-(<a href="docs/systems/filecoin_markets/deal/diagrams/deal-payment.mmd.svg" target="_blank">open in new tab</a>)
-<br />
-<img src="docs/systems/filecoin_markets/deal/diagrams/deal-payment.mmd.svg" />
-
-
-
-
-</div>
 
 </article>
 
@@ -4933,13 +4854,11 @@ https://github.com/alex-shpak/hugo-book
     <nav id="TableOfContents">
 <ul>
 <li><a href="#add-storage-deal-and-power">Add Storage Deal and Power</a></li>
+<li><a href="#sealing-sectors">Sealing sectors</a></li>
 <li><a href="#receive-challenge">Receive Challenge</a></li>
 <li><a href="#declare-and-recover-faults">Declare and Recover Faults</a></li>
 <li><a href="#submit-post">Submit PoSt</a></li>
 <li><a href="#detect-faults">Detect Faults</a></li>
-<li><a href="#deal-code">Deal Code</a></li>
-<li><a href="#deal-flow">Deal Flow</a></li>
-<li><a href="#deal-states">Deal States</a></li>
 </ul>
 </nav>
   </aside>

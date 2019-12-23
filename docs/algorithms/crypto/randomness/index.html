@@ -1507,6 +1507,70 @@ https://github.com/alex-shpak/hugo-book
   
 
 
+<a href="../../../../#systems__filecoin_vm__indices" class="menu-item depth-3">
+    
+    
+        Indices
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#appendix__address" class="menu-item depth-2">
+    
+    
+        Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
 <a href="../../../../#systems__filecoin_vm__message" class="menu-item depth-3">
     
     
@@ -2909,72 +2973,6 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../#systems__filecoin_markets__order" class="menu-item depth-3">
-    
-    
-        Orders
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#systems__filecoin_markets__deal" class="menu-item depth-3">
-    
-    
-        Deals
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
 <a href="../../../../#systems__filecoin_markets__storage_market" class="menu-item depth-3">
     
     
@@ -2985,6 +2983,136 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_markets__storage_market__storage_deal" class="menu-item depth-4">
+    
+    
+        Storage Deal
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_flow" class="menu-item depth-5">
+    
+    
+        Deal Flow
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_states" class="menu-item depth-5">
+    
+    
+        Deal States
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_markets__storage_market__storage_deal__faults" class="menu-item depth-5">
+    
+    
+        Faults
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -3066,37 +3194,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Storage Client
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_markets__storage_market__faults" class="menu-item depth-4">
-    
-    
-        Faults
     
 </a>
 
@@ -4715,13 +4812,13 @@ randomness = SHA256(buffer)</code></pre></div>
 </span><span class="c1">// In order to derive randomness from a collection of objects, rather than just a single
 </span><span class="c1">// object, define a struct at the .id level that contains those objects as member fields.
 </span><span class="c1">// This will then cause a Serialize_*() method to be generated for the struct type.
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">)</span> <span class="nf">DeriveRand</span><span class="p">(</span><span class="nx">s</span> <span class="nx">Serialization</span><span class="p">)</span> <span class="nx">Randomness</span> <span class="p">{</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">DeriveRand</span><span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">,</span> <span class="nx">s</span> <span class="nx">Serialization</span><span class="p">)</span> <span class="nx">Randomness</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span><span class="p">,</span> <span class="nx">s</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">// As in DeriveRand(), but additionally accepts an index into the implicit pseudorandom stream.
 </span><span class="c1">// Index must be strictly positive.
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">)</span> <span class="nf">DeriveRandWithIndex</span><span class="p">(</span><span class="nx">s</span> <span class="nx">Serialization</span><span class="p">,</span> <span class="nx">index</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">Randomness</span> <span class="p">{</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">DeriveRandWithIndex</span><span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">,</span> <span class="nx">s</span> <span class="nx">Serialization</span><span class="p">,</span> <span class="nx">index</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">Randomness</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">index</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="p">{</span>
         <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;DeriveRandWithIndex only accepts indices &gt; 0&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -4736,15 +4833,6 @@ randomness = SHA256(buffer)</code></pre></div>
     <span class="nx">ret</span> <span class="o">:=</span> <span class="nf">SHA256</span><span class="p">(</span><span class="nx">buffer</span><span class="p">)</span>
     <span class="k">return</span> <span class="nf">Randomness</span><span class="p">(</span><span class="nx">ret</span><span class="p">)</span>
 <span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">DomainSeparationTag</span> <span class="kt">int</span>
-
-<span class="kd">const</span> <span class="p">(</span>
-    <span class="nx">DomainSeparationTag_TicketDrawing</span> <span class="nx">DomainSeparationTag</span> <span class="p">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="kc">iota</span>
-    <span class="nx">DomainSeparationTag_TicketProduction</span>
-    <span class="nx">DomainSeparationTag_PoSt</span>
-    <span class="c1">// ...
-</span><span class="c1"></span><span class="p">)</span>
 </code></pre></div>
 
 

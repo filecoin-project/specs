@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Storage Market Actor Old | Filecoin Spec</title>
+<title>Storage Deals | Filecoin Spec</title>
 
 
 
@@ -15,6 +15,7 @@
 <link rel="icon" href="../../../../../favicon.png" type="image/x-icon">
 
 
+<link rel="alternate" type="application/rss+xml" href="../../../../../docs/systems/filecoin_markets/storage_market/storage_deal/index.xml" title="Filecoin Spec" />
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <script type="text/javascript" src="./gumshoe.polyfills.min.js"></script>
@@ -59,7 +60,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   <style>
-  nav ul a[href$="\2f docs\2fsystems\2f filecoin_markets\2fstorage_market\2fstorage_market_actor_old\2f "] {
+  nav ul a[href$="\2f docs\2fsystems\2f filecoin_markets\2fstorage_market\2fstorage_deal\2f "] {
       color: #0b3a53;
   }
   </style>
@@ -1507,6 +1508,70 @@ https://github.com/alex-shpak/hugo-book
   
 
 
+<a href="../../../../../#systems__filecoin_vm__indices" class="menu-item depth-3">
+    
+    
+        Indices
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#appendix__address" class="menu-item depth-2">
+    
+    
+        Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
 <a href="../../../../../#systems__filecoin_vm__message" class="menu-item depth-3">
     
     
@@ -2909,72 +2974,6 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../../#systems__filecoin_markets__order" class="menu-item depth-3">
-    
-    
-        Orders
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#systems__filecoin_markets__deal" class="menu-item depth-3">
-    
-    
-        Deals
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
 <a href="../../../../../#systems__filecoin_markets__storage_market" class="menu-item depth-3">
     
     
@@ -2985,6 +2984,136 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal" class="menu-item depth-4">
+    
+    
+        Storage Deal
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_flow" class="menu-item depth-5">
+    
+    
+        Deal Flow
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_states" class="menu-item depth-5">
+    
+    
+        Deal States
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal__faults" class="menu-item depth-5">
+    
+    
+        Faults
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -3066,37 +3195,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Storage Client
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_markets__storage_market__faults" class="menu-item depth-4">
-    
-    
-        Faults
     
 </a>
 
@@ -4629,228 +4727,109 @@ https://github.com/alex-shpak/hugo-book
   <label for="menu-control">
     <img src="../../../../../svg/menu.svg" alt="Menu" />
   </label>
-  <strong>Storage Market Actor Old</strong>
+  <strong>Storage Deals</strong>
 </header>
 
       
 <article class="markdown">
-  
 
-<h1 id="storage-market-actor-deprecated">Storage Market Actor (DEPRECATED)</h1>
+<p>There are two types of deals in Filecoin markets, storage deals and retrieval deals. Storage deals are recorded on the blockchain and enforced by the protocol. Retrieval deals are off chain and enabled by micropayment channel by transacting parties (see <a href="../../../../../#systems__filecoin_markets__retrieval_market___index">Retrieval Market</a> for more information).</p>
 
-<ul>
-<li><strong>Code Cid</strong>: <code>&lt;codec:raw&gt;&lt;mhType:identity&gt;&lt;&quot;smarket&quot;&gt;</code></li>
-</ul>
+<p>The lifecycle of a Storage Deal touches several major subsystems, components, and protocols in Filecoin.</p>
 
-<p>The storage market actor is the central point for the Filecoin storage market. It is responsible for registering new miners to the system, and maintaining the power table. The Filecoin storage market is a singleton that lives at a specific well-known address.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> StorageMarketActorState struct <span class="o">{</span>
-    miners <span class="o">{</span>Address:Null<span class="o">}</span>&lt;Hamt&gt;
-    totalStorage BytesAmount
-<span class="o">}</span></code></pre></div>
-<h2 id="methods">Methods</h2>
+<p>This section describes the storage deal data type and a technical outline for deal flow in terms of how all the components involved and the functions they call on each other. For more detail and prose explanations, see <a href="../../../../../#systems__filecoin_markets__storage_market___index">Storage Market</a> and <a href="../../../../../#systems__filecoin_mining__storage_mining">Storage Miner</a></p>
 
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Method ID</th>
-</tr>
-</thead>
+<h1 id="data-types">Data Types</h1>
 
-<tbody>
-<tr>
-<td><code>StorageMarketConstructor</code></td>
-<td>1</td>
-</tr>
 
-<tr>
-<td><code>CreateStorageMiner</code></td>
-<td>2</td>
-</tr>
 
-<tr>
-<td><code>SlashConsensusFault</code></td>
-<td>3</td>
-</tr>
 
-<tr>
-<td><code>UpdateStorage</code></td>
-<td>4</td>
-</tr>
 
-<tr>
-<td><code>GetTotalStorage</code></td>
-<td>5</td>
-</tr>
 
-<tr>
-<td><code>PowerLookup</code></td>
-<td>6</td>
-</tr>
 
-<tr>
-<td><code>IsMiner</code></td>
-<td>7</td>
-</tr>
 
-<tr>
-<td><code>StorageCollateralForSize</code></td>
-<td>8</td>
-</tr>
-</tbody>
-</table>
 
-<h2 id="constructor"><code>Constructor</code></h2>
 
-<p><strong>Parameters</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> StorageMarketConstructor struct <span class="o">{}</span></code></pre></div>
-<p><strong>Algorithm</strong></p>
 
-<h2 id="createstorageminer"><code>CreateStorageMiner</code></h2>
 
-<p><strong>Parameters</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> CreateStorageMiner struct <span class="o">{</span>
-    worker Address
-    sectorSize BytesAmount
-    peerId PeerId
-<span class="o">}</span> representation tuple</code></pre></div>
-<p><strong>Algorithm</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">CreateStorageMiner</span><span class="p">(</span><span class="nx">worker</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">owner</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">sectorSize</span> <span class="nx">BytesAmount</span><span class="p">,</span> <span class="nx">pid</span> <span class="nx">PeerID</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
-  <span class="k">if</span> <span class="p">!</span><span class="nf">SupportedSectorSize</span><span class="p">(</span><span class="nx">sectorSize</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Unsupported sector size&#34;</span><span class="p">)</span>
-  <span class="p">}</span>
 
-  <span class="nx">newminer</span> <span class="o">:=</span> <span class="nx">InitActor</span><span class="p">.</span><span class="nf">Exec</span><span class="p">(</span><span class="nx">MinerActorCodeCid</span><span class="p">,</span> <span class="nf">EncodeParams</span><span class="p">(</span><span class="nx">worker</span><span class="p">,</span> <span class="nx">owner</span><span class="p">,</span> <span class="nx">pledge</span><span class="p">,</span> <span class="nx">sectorSize</span><span class="p">,</span> <span class="nx">pid</span><span class="p">))</span>
 
-  <span class="nx">self</span><span class="p">.</span><span class="nx">Miners</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">newminer</span><span class="p">)</span>
 
-  <span class="k">return</span> <span class="nx">newminer</span>
-<span class="p">}</span></code></pre></div>
-<h2 id="slashconsensusfault"><code>SlashConsensusFault</code></h2>
 
-<p><strong>Parameters</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> SlashConsensusFault struct <span class="o">{</span>
-    block1 <span class="p">&amp;</span>Block
-    block2 <span class="p">&amp;</span>Block
-<span class="o">}</span> representation tuple</code></pre></div>
-<p><strong>Algorithm</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">shouldSlash</span><span class="p">(</span><span class="nx">block1</span><span class="p">,</span> <span class="nx">block2</span> <span class="nx">BlockHeader</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-  <span class="c1">// First slashing condition, blocks have the same ticket round
-</span><span class="c1"></span>  <span class="k">if</span> <span class="nf">sameTicketRound</span><span class="p">(</span><span class="nx">block1</span><span class="p">,</span> <span class="nx">block2</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="kc">true</span>
-  <span class="p">}</span>
 
-  <span class="c1">// Second slashing condition, miner ignored own block when mining
-</span><span class="c1"></span>  <span class="c1">// Case A: block2 could have been in block1&#39;s parent set but is not
-</span><span class="c1"></span>  <span class="nx">block1ParentTipSet</span> <span class="o">:=</span> <span class="nf">parentOf</span><span class="p">(</span><span class="nx">block1</span><span class="p">)</span>
-  <span class="k">if</span> <span class="p">!</span><span class="nx">block1Parent</span><span class="p">.</span><span class="nf">contains</span><span class="p">(</span><span class="nx">block2</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">block1ParentTipSet</span><span class="p">.</span><span class="nx">Height</span> <span class="o">==</span> <span class="nx">block2</span><span class="p">.</span><span class="nx">Height</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">block1ParentTipSet</span><span class="p">.</span><span class="nx">ParentCids</span> <span class="o">==</span> <span class="nx">block2</span><span class="p">.</span><span class="nx">ParentCids</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="kc">true</span>
-  <span class="p">}</span>
 
-  <span class="c1">// Case B: block1 could have been in block2&#39;s parent set but is not
-</span><span class="c1"></span>  <span class="nx">block2ParentTipSet</span> <span class="o">:=</span> <span class="nf">parentOf</span><span class="p">(</span><span class="nx">block2</span><span class="p">)</span>
-  <span class="k">if</span> <span class="p">!</span><span class="nx">block2Parent</span><span class="p">.</span><span class="nf">contains</span><span class="p">(</span><span class="nx">block1</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">block2ParentTipSet</span><span class="p">.</span><span class="nx">Height</span> <span class="o">==</span> <span class="nx">block1</span><span class="p">.</span><span class="nx">Height</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">block2ParentTipSet</span><span class="p">.</span><span class="nx">ParentCids</span> <span class="o">==</span> <span class="nx">block1</span><span class="p">.</span><span class="nx">ParentCids</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="kc">true</span>
-  <span class="p">}</span>
 
-  <span class="k">return</span> <span class="kc">false</span>
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
+<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
+<span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
+<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
+
+<span class="kd">type</span> <span class="nx">DealID</span> <span class="nx">Int</span>
+<span class="kd">type</span> <span class="nx">DealIDs</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Items</span> <span class="p">[</span><span class="nx">DealID</span><span class="p">]</span>
+<span class="p">}</span>
+<span class="kd">type</span> <span class="nx">DealWeight</span> <span class="kt">int</span>  <span class="c1">// should be BigInt
+</span><span class="c1"></span>
+<span class="c1">// Note: Deal Collateral is only released and returned to clients and miners
+</span><span class="c1">// when the storage deal stops counting towards power. In the current iteration,
+</span><span class="c1">// it will be released when the sector containing the storage deals expires,
+</span><span class="c1">// even though some storage deals can expire earlier than the sector does.
+</span><span class="c1">// Collaterals are denominated in PerEpoch to incur a cost for self dealing or
+</span><span class="c1">// minimal deals that last for a long time.
+</span><span class="c1">// Note: ClientCollateralPerEpoch may not be needed and removed pending future confirmation.
+</span><span class="c1">// There will be a Minimum value for both client and provider deal collateral.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageDealProposal</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">PieceCID</span>                      <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>  <span class="c1">// 35 bytes CommP
+</span><span class="c1"></span>    <span class="nx">PieceSize</span>                     <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceSize</span>
+    <span class="nx">Client</span>                        <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">Provider</span>                      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">ClientSignature</span>               <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span>
+
+    <span class="c1">// Nominal start epoch. Deal payment is linear between StartEpoch and EndEpoch,
+</span><span class="c1"></span>    <span class="c1">// with total amount StoragePricePerEpoch * (EndEpoch - StartEpoch).
+</span><span class="c1"></span>    <span class="c1">// Storage deal must appear in a sealed (proven) sector no later than StartEpoch,
+</span><span class="c1"></span>    <span class="c1">// otherwise it is invalid.
+</span><span class="c1"></span>    <span class="nx">StartEpoch</span>                    <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">EndEpoch</span>                      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">StoragePricePerEpoch</span>          <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+
+    <span class="nx">ProviderCollateral</span>            <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">ClientCollateral</span>              <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+
+    <span class="nf">Duration</span><span class="p">()</span>                    <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>      <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>  <span class="c1">// EndEpoch - StartEpoch
+</span><span class="c1"></span>    <span class="nf">TotalStorageFee</span><span class="p">()</span>             <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// StoragePricePerEpoch * Duration
+</span><span class="c1"></span>    <span class="nf">ClientBalanceRequirement</span><span class="p">()</span>    <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// ClientCollateral + TotalStorageFee
+</span><span class="c1"></span>    <span class="nf">ProviderBalanceRequirement</span><span class="p">()</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// ProviderCollateral
+</span><span class="c1"></span>
+    <span class="nf">CID</span><span class="p">()</span>                         <span class="o">&amp;</span><span class="nx">StorageDealProposal</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">SlashConsensusFault</span><span class="p">(</span><span class="nx">block1</span><span class="p">,</span> <span class="nx">block2</span> <span class="nx">BlockHeader</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span> <span class="p">!</span><span class="nf">ValidateSignature</span><span class="p">(</span><span class="nx">block1</span><span class="p">.</span><span class="nx">Signature</span><span class="p">)</span> <span class="o">||</span> <span class="p">!</span><span class="nf">ValidSignature</span><span class="p">(</span><span class="nx">block2</span><span class="p">.</span><span class="nx">Signature</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;invalid blocks&#34;</span><span class="p">)</span>
-  <span class="p">}</span>
-
-  <span class="k">if</span> <span class="nf">AuthorOf</span><span class="p">(</span><span class="nx">block1</span><span class="p">)</span> <span class="o">!=</span> <span class="nf">AuthorOf</span><span class="p">(</span><span class="nx">block2</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;blocks must be from the same miner&#34;</span><span class="p">)</span>
-  <span class="p">}</span>
-
-  <span class="c1">// see the &#34;Consensus Faults&#34; section of the faults spec (faults.md)
-</span><span class="c1"></span>  <span class="c1">// for details on these slashing conditions.
-</span><span class="c1"></span>  <span class="k">if</span> <span class="p">!</span><span class="nf">shouldSlash</span><span class="p">(</span><span class="nx">block1</span><span class="p">,</span> <span class="nx">block2</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;blocks do not prove a slashable offense&#34;</span><span class="p">)</span>
-  <span class="p">}</span>
-
-  <span class="nx">miner</span> <span class="o">:=</span> <span class="nf">AuthorOf</span><span class="p">(</span><span class="nx">block1</span><span class="p">)</span>
-
-  <span class="c1">// TODO: Some of the slashed collateral should be paid to the slasher
+<span class="c1">// Everything in this struct will go on chain
+</span><span class="c1">// We are enforcing that StorageProvider calls PublishStorageDeal to get back a StorageDeal struct
+</span><span class="c1">// Provider&#39;s signature is implicit in the onchain call
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageDeal</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nf">Proposal</span><span class="p">()</span>      <span class="nx">StorageDealProposal</span>  <span class="c1">// can extract proposal from the message
+</span><span class="c1"></span>    <span class="nx">PublishMessage</span>  <span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span>  <span class="c1">// counter signature is implicit in the message
 </span><span class="c1"></span>
-  <span class="c1">// Burn all of the miners collateral
-</span><span class="c1"></span>  <span class="nx">miner</span><span class="p">.</span><span class="nf">BurnCollateral</span><span class="p">()</span>
+    <span class="nf">CID</span><span class="p">()</span>           <span class="o">&amp;</span><span class="nx">StorageDeal</span>
+<span class="p">}</span>
 
-  <span class="c1">// Remove the miner from the list of network miners
-</span><span class="c1"></span>  <span class="nx">self</span><span class="p">.</span><span class="nx">Miners</span><span class="p">.</span><span class="nf">Remove</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span>
-  <span class="nx">self</span><span class="p">.</span><span class="nf">UpdateStorage</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Power</span><span class="p">)</span>
+<span class="kd">type</span> <span class="nx">OnChainDeal</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ID</span>                <span class="nx">DealID</span>
+    <span class="nx">Deal</span>              <span class="nx">StorageDeal</span>
+    <span class="nx">SectorStartEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if not yet included in proven sector
+</span><span class="c1"></span>    <span class="nx">LastUpdatedEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if deal state never updated
+</span><span class="c1"></span>    <span class="nx">SlashEpoch</span>        <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if deal never slashed
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></div>
 
-  <span class="c1">// Now delete the miner (maybe this is a bit harsh, but i&#39;m okay with it for now)
-</span><span class="c1"></span>  <span class="nx">miner</span><span class="p">.</span><span class="nf">SelfDestruct</span><span class="p">()</span>
-<span class="p">}</span></code></pre></div>
-<h2 id="updatestorage"><code>UpdateStorage</code></h2>
 
-<p>UpdateStorage is used to update the global power table.</p>
 
-<p><strong>Parameters</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> UpdateStorage struct <span class="o">{</span>
-    delta BytesAmount
-<span class="o">}</span> representation tuple</code></pre></div>
-<p><strong>Algorithm</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">UpdateStorage</span><span class="p">(</span><span class="nx">delta</span> <span class="nx">BytesAmount</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span> <span class="p">!</span><span class="nx">self</span><span class="p">.</span><span class="nx">Miners</span><span class="p">.</span><span class="nf">Has</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;update storage must only be called by a miner actor&#34;</span><span class="p">)</span>
-  <span class="p">}</span>
 
-  <span class="nx">self</span><span class="p">.</span><span class="nx">TotalStorage</span> <span class="o">+=</span> <span class="nx">delta</span>
-<span class="p">}</span></code></pre></div>
-<h2 id="gettotalstorage"><code>GetTotalStorage</code></h2>
 
-<p><strong>Parameters</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> GetTotalStorage struct <span class="o">{</span>
-
-<span class="o">}</span> representation tuple</code></pre></div>
-<p><strong>Algorithm</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetTotalStorage</span><span class="p">()</span> <span class="nx">BytesAmount</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">TotalStorage</span>
-<span class="p">}</span></code></pre></div>
-<h2 id="powerlookup"><code>PowerLookup</code></h2>
-
-<p><strong>Parameters</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> PowerLookup struct <span class="o">{</span>
-    miner Address
-<span class="o">}</span> representation tuple</code></pre></div>
-<p><strong>Algorithm</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">PowerLookup</span><span class="p">(</span><span class="nx">miner</span> <span class="nx">Address</span><span class="p">)</span> <span class="nx">BytesAmount</span> <span class="p">{</span>
-  <span class="k">if</span> <span class="p">!</span><span class="nx">self</span><span class="p">.</span><span class="nx">Miners</span><span class="p">.</span><span class="nf">Has</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;miner not registered with storage market&#34;</span><span class="p">)</span>
-  <span class="p">}</span>
-
-  <span class="nx">mact</span> <span class="o">:=</span> <span class="nf">LoadMinerActor</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span>
-
-  <span class="k">return</span> <span class="nx">mact</span><span class="p">.</span><span class="nf">GetPower</span><span class="p">()</span>
-<span class="p">}</span></code></pre></div>
-<h2 id="isminer"><code>IsMiner</code></h2>
-
-<p><strong>Parameters</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> IsMiner struct <span class="o">{</span>
-    addr Address
-<span class="o">}</span> representation tuple</code></pre></div>
-<p><strong>Algorithm</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">IsMiner</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Miners</span><span class="p">.</span><span class="nf">Has</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span>
-<span class="p">}</span></code></pre></div>
-<h2 id="storagecollateralforsize"><code>StorageCollateralForSize</code></h2>
-
-<p><strong>Parameters</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> StorageCollateralForSize struct <span class="o">{</span>
-    size UInt
-<span class="o">}</span> representation tuple</code></pre></div>
-<p><strong>Algorithm</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">StorageCollateralforSize</span><span class="p">(</span><span class="nx">size</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">TokenAmount</span> <span class="p">{</span>
-  <span class="c1">// TODO:
-</span><span class="c1"></span><span class="p">}</span></code></pre></div>
 </article>
 
       
@@ -4864,18 +4843,7 @@ https://github.com/alex-shpak/hugo-book
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
 <ul>
-<li><a href="#storage-market-actor-deprecated">Storage Market Actor (DEPRECATED)</a>
-<ul>
-<li><a href="#methods">Methods</a></li>
-<li><a href="#constructor"><code>Constructor</code></a></li>
-<li><a href="#createstorageminer"><code>CreateStorageMiner</code></a></li>
-<li><a href="#slashconsensusfault"><code>SlashConsensusFault</code></a></li>
-<li><a href="#updatestorage"><code>UpdateStorage</code></a></li>
-<li><a href="#gettotalstorage"><code>GetTotalStorage</code></a></li>
-<li><a href="#powerlookup"><code>PowerLookup</code></a></li>
-<li><a href="#isminer"><code>IsMiner</code></a></li>
-<li><a href="#storagecollateralforsize"><code>StorageCollateralForSize</code></a></li>
-</ul></li>
+<li><a href="#data-types">Data Types</a></li>
 </ul>
 </nav>
   </aside>

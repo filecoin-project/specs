@@ -1507,6 +1507,70 @@ https://github.com/alex-shpak/hugo-book
   
 
 
+<a href="../../../../../#systems__filecoin_vm__indices" class="menu-item depth-3">
+    
+    
+        Indices
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#appendix__address" class="menu-item depth-2">
+    
+    
+        Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
 <a href="../../../../../#systems__filecoin_vm__message" class="menu-item depth-3">
     
     
@@ -2909,72 +2973,6 @@ https://github.com/alex-shpak/hugo-book
   
 
 
-<a href="../../../../../#systems__filecoin_markets__order" class="menu-item depth-3">
-    
-    
-        Orders
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#systems__filecoin_markets__deal" class="menu-item depth-3">
-    
-    
-        Deals
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
 <a href="../../../../../#systems__filecoin_markets__storage_market" class="menu-item depth-3">
     
     
@@ -2985,6 +2983,136 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal" class="menu-item depth-4">
+    
+    
+        Storage Deal
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_flow" class="menu-item depth-5">
+    
+    
+        Deal Flow
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal__storage_deal_states" class="menu-item depth-5">
+    
+    
+        Deal States
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal__faults" class="menu-item depth-5">
+    
+    
+        Faults
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -3066,37 +3194,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Storage Client
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_markets__storage_market__faults" class="menu-item depth-4">
-    
-    
-        Faults
     
 </a>
 
@@ -4706,18 +4803,16 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">sysactors</span>
 
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
-<span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
-<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
-
-<span class="kd">const</span> <span class="p">(</span>
-    <span class="nx">Method_InitActor_Exec</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodPlaceholder</span> <span class="o">+</span> <span class="kc">iota</span>
-    <span class="nx">Method_InitActor_GetActorIDForAddress</span>
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+    <span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
+    <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
+    <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
     <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
     <span class="nx">st</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">InitActorState_I</span><span class="p">{</span>
         <span class="nx">AddressMap_</span><span class="p">:</span>  <span class="kd">map</span><span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">{},</span> <span class="c1">// TODO: HAMT
@@ -4728,9 +4823,12 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReturn</span><span class="p">(</span><span class="kc">nil</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">Exec</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">codeID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">,</span> <span class="nx">constructorParams</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">!</span><span class="nf">_codeIDSupportsExec</span><span class="p">(</span><span class="nx">codeID</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;cannot exec an actor of this type&#34;</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">Exec</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">execCodeID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">,</span> <span class="nx">constructorParams</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAny</span><span class="p">()</span>
+    <span class="nx">callerCodeID</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">GetActorCodeID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">())</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nf">_codeIDSupportsExec</span><span class="p">(</span><span class="nx">callerCodeID</span><span class="p">,</span> <span class="nx">execCodeID</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;Caller type cannot create an actor of requested type&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="c1">// Compute a re-org-stable address.
@@ -4746,7 +4844,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
     <span class="c1">// Create an empty actor.
-</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">CreateActor</span><span class="p">(</span><span class="nx">codeID</span><span class="p">,</span> <span class="nx">idAddr</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">CreateActor</span><span class="p">(</span><span class="nx">execCodeID</span><span class="p">,</span> <span class="nx">idAddr</span><span class="p">)</span>
 
     <span class="c1">// Invoke constructor. If construction fails, the error should propagate and cause
 </span><span class="c1"></span>    <span class="c1">// Exec to fail too.
@@ -4784,24 +4882,28 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="nx">actorID</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">_codeIDSupportsExec</span><span class="p">(</span><span class="nx">codeID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">!</span><span class="nx">codeID</span><span class="p">.</span><span class="nf">IsBuiltin</span><span class="p">()</span> <span class="o">||</span> <span class="nx">codeID</span><span class="p">.</span><span class="nf">IsSingleton</span><span class="p">()</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">_codeIDSupportsExec</span><span class="p">(</span><span class="nx">callerCodeID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">,</span> <span class="nx">execCodeID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">execCodeID</span><span class="p">.</span><span class="nf">IsBuiltin</span><span class="p">()</span> <span class="o">||</span> <span class="nx">execCodeID</span><span class="p">.</span><span class="nf">IsSingleton</span><span class="p">()</span> <span class="p">{</span>
         <span class="k">return</span> <span class="kc">false</span>
     <span class="p">}</span>
 
-    <span class="nx">which</span> <span class="o">:=</span> <span class="nx">codeID</span><span class="p">.</span><span class="nf">As_Builtin</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="nx">which</span> <span class="o">==</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_Account</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">execCodeID</span><span class="p">.</span><span class="nf">As_Builtin</span><span class="p">()</span> <span class="o">==</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_Account</span> <span class="p">{</span>
         <span class="c1">// Special case: account actors must be created implicitly by sending value;
 </span><span class="c1"></span>        <span class="c1">// cannot be created via exec.
 </span><span class="c1"></span>        <span class="k">return</span> <span class="kc">false</span>
     <span class="p">}</span>
 
-    <span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span>
-        <span class="nx">which</span> <span class="o">==</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_PaymentChannel</span> <span class="o">||</span>
-            <span class="nx">which</span> <span class="o">==</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_StorageMiner</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nx">execCodeID</span><span class="p">.</span><span class="nf">As_Builtin</span><span class="p">()</span> <span class="o">==</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_PaymentChannel</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kc">true</span>
+    <span class="p">}</span>
 
-    <span class="k">return</span> <span class="kc">true</span>
+    <span class="k">if</span> <span class="nx">execCodeID</span><span class="p">.</span><span class="nf">As_Builtin</span><span class="p">()</span> <span class="o">==</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_StorageMiner</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">callerCodeID</span><span class="p">.</span><span class="nf">Is_Builtin</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="nx">callerCodeID</span><span class="p">.</span><span class="nf">As_Builtin</span><span class="p">()</span> <span class="o">==</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_StoragePower</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">true</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="kc">false</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
@@ -4810,7 +4912,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nf">ArgEnd</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">params</span><span class="p">,</span> <span class="nx">rt</span><span class="p">)</span>
         <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-    <span class="k">case</span> <span class="nx">Method_InitActor_Exec</span><span class="p">:</span>
+    <span class="k">case</span> <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_InitActor_Exec</span><span class="p">:</span>
         <span class="nx">codeId</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">Deserialize_CodeID</span><span class="p">(</span><span class="nf">ArgPop</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">params</span><span class="p">,</span> <span class="nx">rt</span><span class="p">))</span>
         <span class="nf">CheckArgs</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">params</span><span class="p">,</span> <span class="nx">rt</span><span class="p">,</span> <span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
         <span class="c1">// Note: do not call ArgEnd (params is forwarded to Exec)

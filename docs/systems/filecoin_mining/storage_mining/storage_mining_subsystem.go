@@ -9,13 +9,13 @@ import (
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
-	inds "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
+	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
@@ -47,7 +47,7 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 	unsignedCreationMessage := &msg.UnsignedMessage_I{
 		From_:       ownerAddr,
 		To_:         addr.StoragePowerActorAddr,
-		Method_:     ai.Method_StoragePowerActor_CreateStorageMiner,
+		Method_:     ai.Method_StoragePowerActor_CreateMiner,
 		Params_:     params,
 		CallSeqNum_: sysActor.CallSeqNum(),
 		Value_:      pledgeAmt,
@@ -103,7 +103,7 @@ func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 	chainHead := sms._blockchain().BestChain().HeadTipset()
 	sma := sms._getStorageMinerActorState(chainHead.StateTree(), sms._keyStore().MinerAddress())
 
-	if sma.ChallengeStatus().CanBeElected(chainHead.Epoch() + 1) {
+	if sma.PoStState().Is_OK() {
 		ePoSt := sms._tryLeaderElection(chainHead.StateTree(), sma)
 		if ePoSt != nil {
 			// Randomness for ticket generation in block production
@@ -112,7 +112,7 @@ func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 
 			sms._blockProducer().GenerateBlock(ePoSt, newTicket, chainHead, sms._keyStore().MinerAddress())
 		}
-	} else if sma.ChallengeStatus().IsChallenged() {
+	} else if sma.PoStState().Is_Challenged() {
 		sPoSt := sms._trySurprisePoSt(chainHead.StateTree(), sma)
 		// TODO: read from consts (in this case user set param)
 		var gasLimit msg.GasAmount
@@ -122,7 +122,6 @@ func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 }
 
 func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.StateTree, sma StorageMinerActorState) sector.OnChainPoStVerifyInfo {
-
 	// Randomness for ElectionPoSt
 	randomnessK := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), sms._blockchain().LatestEpoch())
 
@@ -141,14 +140,17 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.Stat
 
 	winningCandidates := make([]sector.PoStCandidate, 0)
 
-	numMinerSectors := uint64(len(sma.SectorTable().Impl().ActiveSectors_.SectorsOn()))
+	var numMinerSectors uint64
+	TODO() // update
+	// numMinerSectors := uint64(len(sma.SectorTable().Impl().ActiveSectors_.SectorsOn()))
+
 	for _, candidate := range candidates {
 		sectorNum := candidate.SectorID().Number()
-		sectorPower, ok := sma._getSectorPower(sectorNum)
+		sectorWeightDesc, ok := sma._getStorageWeightDescForSectorMaybe(sectorNum)
 		if !ok {
-			// panic(err)
 			return nil
 		}
+		sectorPower := indices.ConsensusPowerForStorageWeight(sectorWeightDesc)
 		if sms._consensus().IsWinningPartialTicket(currState, candidate.PartialTicket(), sectorPower, numMinerSectors) {
 			winningCandidates = append(winningCandidates, candidate)
 		}
@@ -177,7 +179,7 @@ func (sms *StorageMiningSubsystem_I) PreparePoStChallengeSeed(randomness util.Ra
 		ticket_:    randomness,
 		minerAddr_: minerAddr,
 	})
-	input := filcrypto.DomainSeparationTag_PoSt.DeriveRand(randInput)
+	input := filcrypto.DeriveRand(filcrypto.DomainSeparationTag_PreparePoStChallengeSeed, randInput)
 	return input
 }
 
@@ -191,7 +193,7 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 		PastTicket_: randomness,
 		MinerAddr_:  minerActorAddr,
 	})
-	input := filcrypto.DomainSeparationTag_TicketProduction.DeriveRand(randInput)
+	input := filcrypto.DeriveRand(filcrypto.DomainSeparationTag_TicketProduction, randInput)
 
 	// run through VRF
 	vrfRes := sms._keyStore().WorkerKey().Impl().Generate(input)
@@ -249,35 +251,18 @@ func (sms *StorageMiningSubsystem_I) _getStoragePowerActorState(stateTree stateT
 	return st
 }
 
-func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds inds.Indices, header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
-
+func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
 	sma := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
 	spa := sms._getStoragePowerActorState(header.ParentState())
 
-	// 1. Check that the miner in question is currently allowed to run election
-	// Note that this is two checks, namely:
-	// On SMA --> can the miner be elected per electionPoSt rules?
-	// On SPA --> Does the miner's power meet the consensus minimum requirement?
-	// we could bundle into a single call here for convenience
-	if !sma._canBeElected(header.Epoch()) {
+	pow, found := spa.PowerTable()[header.Miner()]
+	if !found {
 		return false
 	}
 
-	activeSectorWeight, inactiveSectorWeight, ok := spa.GetSectorWeightForMiner(header.Miner())
-	if !ok {
-		// TODO: better error handling
-		return false
-	}
-
-	currPledge, ok := spa.GetCurrPledgeForMiner(header.Miner())
-	if !ok {
-		// TODO: better error handling
-		return false
-	}
-
-	pow := inds.StoragePower(activeSectorWeight, inactiveSectorWeight, currPledge)
-
-	if !spa.MinerPowerMeetsConsensusMinimum(pow) {
+	// 1. Verify miner has enough power (includes implicit checks on min miner size
+	// and challenge status via SPA's power table).
+	if pow == block.StoragePower(0) {
 		return false
 	}
 
@@ -333,15 +318,19 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds inds.Indices, heade
 
 func (sms *StorageMiningSubsystem_I) _verifyElection(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
 	st := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
-	numMinerSectors := uint64(len(st.SectorTable().Impl().ActiveSectors_.SectorsOn()))
+
+	var numMinerSectors uint64
+	TODO()
+	// TODO: Decide whether to sample sectors uniformly for EPoSt (the cleanest),
+	// or to sample weighted by nominal power.
 
 	for _, info := range onChainInfo.Candidates() {
 		sectorNum := info.SectorID().Number()
-		sectorPower, ok := st._getSectorPower(sectorNum)
+		sectorWeightDesc, ok := st._getStorageWeightDescForSectorMaybe(sectorNum)
 		if !ok {
-			// panic(err)
 			return false
 		}
+		sectorPower := indices.ConsensusPowerForStorageWeight(sectorWeightDesc)
 		if !sms._consensus().IsWinningPartialTicket(header.ParentState(), info.PartialTicket(), sectorPower, numMinerSectors) {
 			return false
 		}
@@ -350,9 +339,12 @@ func (sms *StorageMiningSubsystem_I) _verifyElection(header block.BlockHeader, o
 }
 
 func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateTree, sma StorageMinerActorState) sector.OnChainPoStVerifyInfo {
+	if !sma.PoStState().Is_Challenged() {
+		return nil
+	}
 
 	// get randomness for SurprisePoSt
-	challEpoch := sma.ChallengeStatus().LastChallengeEpoch()
+	challEpoch := sma.PoStState().As_Challenged().SurpriseChallengeEpoch()
 	randomnessK := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), challEpoch)
 	input := sms.PreparePoStChallengeSeed(randomnessK, sms._keyStore().MinerAddress())
 	postRandomness := sms._keyStore().WorkerKey().Impl().Generate(input).Output()
@@ -388,7 +380,6 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 }
 
 func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.StateTree, sPoSt sector.OnChainPoStVerifyInfo, gasPrice actor.TokenAmount, gasLimit msg.GasAmount) error {
-
 	params := make([]util.Serialization, 1)
 	params[0] = sector.Serialize_OnChainPoStVerifyInfo(sPoSt)
 
@@ -397,7 +388,7 @@ func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.
 	unsignedCreationMessage := &msg.UnsignedMessage_I{
 		From_:       sms._keyStore().MinerAddress(),
 		To_:         sms._keyStore().MinerAddress(),
-		Method_:     ai.Method_StorageMinerActor_ProcessSurprisePoSt,
+		Method_:     ai.Method_StorageMinerActor_SubmitSurprisePoStResponse,
 		Params_:     params,
 		CallSeqNum_: sysActor.CallSeqNum(),
 		Value_:      actor.TokenAmount(0),

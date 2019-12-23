@@ -2,12 +2,12 @@ package storage_market
 
 import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
+	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -23,7 +23,7 @@ func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, entryAddr addr.Ad
 		rt.AbortArgMsg("Negative amount.")
 	}
 
-	recipientAddr := _rtValidateImmediateCallerDetermineRecipient(rt, entryAddr)
+	recipientAddr := RT_MinerEntry_ValidateCaller_DetermineFundsLocation(rt, entryAddr, vmr.MinerEntrySpec_MinerOrSignable)
 
 	h, st := a.State(rt)
 	st._rtAbortIfAddressEntryDoesNotExist(rt, entryAddr)
@@ -48,7 +48,7 @@ func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, entryAddr addr.Ad
 }
 
 func (a *StorageMarketActorCode_I) AddBalance(rt Runtime, entryAddr addr.Address) {
-	_rtValidateImmediateCallerDetermineRecipient(rt, entryAddr)
+	RT_MinerEntry_ValidateCaller_DetermineFundsLocation(rt, entryAddr, vmr.MinerEntrySpec_MinerOrSignable)
 
 	h, st := a.State(rt)
 	st._rtAbortIfAddressEntryDoesNotExist(rt, entryAddr)
@@ -69,14 +69,20 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 	IMPL_FINISH() // BigInt arithmetic
 	amountSlashedTotal := actor.TokenAmount(0)
 
-	// Deals may be submitted by any party (but are signed by their client and provider).
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
+	// Deal message must have a From field identical to the provider of all the deals.
+	// This allows us to retain and verify only the client's signature in each deal proposal itself.
+	RT_ValidateImmediateCallerIsSignable(rt)
+	providerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
 
 	// All storage deals will be added in an atomic transaction; this operation will be unrolled if any of them fails.
 	for _, newDeal := range newStorageDeals {
 		p := newDeal.Proposal()
+
+		if !p.Provider().Equals(providerAddr) {
+			rt.AbortArgMsg("Incorrect provider listed in deal")
+		}
 
 		_rtAbortIfNewDealInvalid(rt, newDeal)
 
@@ -145,6 +151,8 @@ func (a *StorageMarketActorCode_I) UpdateDealsOnSectorProveCommit(rt Runtime, de
 }
 
 func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, dealIDs deal.DealIDs) sector.PieceInfos {
+	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+
 	ret := []sector.PieceInfo{}
 
 	h, st := a.State(rt)
@@ -204,6 +212,8 @@ func (a *StorageMarketActorCode_I) TerminateDealsOnSlashProviderSector(rt Runtim
 }
 
 func (a *StorageMarketActorCode_I) OnEpochTickEnd(rt Runtime) {
+	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
+
 	h, st := a.State(rt)
 
 	// Some deals may never be affected by the normal calls to _rtUpdatePendingDealStatesForParty
@@ -277,6 +287,7 @@ func (a *StorageMarketActorCode_I) OnEpochTickEnd(rt Runtime) {
 }
 
 func (a *StorageMarketActorCode_I) Constructor(rt Runtime) {
+	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
 	h := rt.AcquireState()
 
 	st := &StorageMarketActorState_I{
@@ -360,42 +371,10 @@ func _rtAbortIfDealInvalidForNewSectorSeal(
 	_rtAbortIfDealExceedsSectorLifetime(rt, dealP, sectorExpiration)
 }
 
-func _rtValidateImmediateCallerDetermineRecipient(rt Runtime, entryAddr addr.Address) addr.Address {
-	if _rtIsStorageMiner(rt, entryAddr) {
-		// Storage miner actor; implied funds recipient is the associated owner address.
-		ownerAddr, workerAddr := _rtGetMinerAccountsAssert(rt, entryAddr)
-		rt.ValidateImmediateCallerInSet([]addr.Address{ownerAddr, workerAddr})
-		return ownerAddr
-	} else {
-		// Account actor (client); funds recipient is just the entry address itself.
-		rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_Account)
-		return entryAddr
-	}
-}
-
-func _rtIsStorageMiner(rt Runtime, minerAddr addr.Address) bool {
-	codeID, ok := rt.GetActorCodeID(minerAddr)
-	Assert(ok)
-	if !codeID.IsBuiltin() {
-		return false
-	}
-	return (codeID.As_Builtin() == actor.BuiltinActorID_StorageMiner)
-}
-
-func _rtGetMinerAccountsAssert(rt Runtime, minerAddr addr.Address) (ownerAddr addr.Address, workerAddr addr.Address) {
-	ownerAddr = addr.Deserialize_Address_Compact_Assert(
-		rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetOwnerAddr, []util.Serialization{}))
-
-	workerAddr = addr.Deserialize_Address_Compact_Assert(
-		rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetWorkerAddr, []util.Serialization{}))
-
-	return
-}
-
 func _rtAbortIfNewDealInvalid(rt Runtime, deal deal.StorageDeal) {
 	dealP := deal.Proposal()
 
-	if !_dealProposalIsInternallyValid(dealP) {
+	if !_rtDealProposalIsInternallyValid(rt, dealP) {
 		rt.AbortStateMsg("Invalid deal proposal.")
 	}
 

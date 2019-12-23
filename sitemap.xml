@@ -12,11 +12,6 @@
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_markets/storage_market/storage_market_actor_old/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/docs/systems/filecoin_token/multisig/multisig_actor_old/</loc>
     <priority>0</priority>
   </url>
@@ -193,7 +188,7 @@
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_markets/storage_market/faults/</loc>
+    <loc>/docs/systems/filecoin_markets/storage_market/storage_deal/faults/</loc>
   </url>
   
   <url>
@@ -345,11 +340,7 @@
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_markets/deal/</loc>
-  </url>
-  
-  <url>
-    <loc>/docs/systems/filecoin_markets/order/</loc>
+    <loc>/docs/systems/filecoin_vm/indices/</loc>
   </url>
   
   <url>
@@ -566,6 +557,18 @@
   
   <url>
     <loc>/docs/systems/filecoin_markets/storage_market/storage_client/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_markets/storage_market/storage_deal/storage_deal_flow/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_markets/storage_market/storage_deal/storage_deal_states/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_markets/storage_market/storage_deal/</loc>
   </url>
   
   <url>

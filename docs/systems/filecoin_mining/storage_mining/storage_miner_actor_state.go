@@ -1,192 +1,17 @@
 package storage_mining
 
 import (
+	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
+	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	util "github.com/filecoin-project/specs/util"
 )
 
 var Assert = util.Assert
-
-func (st *StorageMinerActorState_I) _isChallenged() bool {
-	return st.ChallengeStatus().IsChallenged()
-}
-
-func (st *StorageMinerActorState_I) _canBeElected(epoch block.ChainEpoch) bool {
-	return st.ChallengeStatus().CanBeElected(epoch)
-}
-
-func (st *StorageMinerActorState_I) _challengeHasExpired(epoch block.ChainEpoch) bool {
-	return st.ChallengeStatus().ChallengeHasExpired(epoch)
-}
-
-func (st *StorageMinerActorState_I) _shouldChallenge(currEpoch block.ChainEpoch) bool {
-	return st.ChallengeStatus().ShouldChallenge(currEpoch)
-}
-
-func (st *StorageMinerActorState_I) _processStagedCommittedSectors() {
-	for sectorNo, stagedInfo := range st.StagedCommittedSectors() {
-		st.Sectors()[sectorNo] = stagedInfo
-		st.Impl().ProvingSet_.Add(sectorNo)
-		st.SectorTable().Impl().CommittedSectors_.Add(sectorNo)
-	}
-
-	// empty StagedCommittedSectors
-	st.Impl().StagedCommittedSectors_ = make(map[sector.SectorNumber]SectorOnChainInfo)
-}
-
-func (st *StorageMinerActorState_I) _getActiveSectorWeight() (block.SectorWeight, error) {
-	activeSectorWeight := block.SectorWeight(0)
-
-	for _, sectorNo := range st.SectorTable().Impl().ActiveSectors_.SectorsOn() {
-		sectorWeight, found := st._getSectorWeight(sectorNo)
-		if !found {
-			panic("")
-		}
-		activeSectorWeight += sectorWeight
-	}
-
-	return activeSectorWeight, nil
-}
-
-func (st *StorageMinerActorState_I) _getInactiveSectorWeight() (block.SectorWeight, error) {
-	var inactiveSectorWeight = block.SectorWeight(0)
-
-	// iterate over sectorNo in CommittedSectors, RecoveringSectors, and FailingSectors
-	inactiveProvingSet := st.SectorTable().Impl().CommittedSectors_.Extend(st.SectorTable().RecoveringSectors())
-	inactiveSectorSet := inactiveProvingSet.Extend(st.SectorTable().FailingSectors())
-
-	for _, sectorNo := range inactiveSectorSet.SectorsOn() {
-
-		sectorWeight, found := st._getSectorWeight(sectorNo)
-		if !found {
-			panic("")
-		}
-		inactiveSectorWeight += sectorWeight
-	}
-
-	return inactiveSectorWeight, nil
-}
-
-// move Sector from Active/Failing
-// into Cleared State which means deleting the Sector from state
-// remove SectorNumber from all states on chain
-// update SectorTable
-func (st *StorageMinerActorState_I) _updateClearSectorAssert(sectorNo sector.SectorNumber) {
-	sectorState := st.Sectors()[sectorNo].State()
-	switch sectorState.StateNumber {
-	case SectorActiveSN:
-		// expiration case
-		st.SectorTable().Impl().ActiveSectors_.Remove(sectorNo)
-	case SectorFailingSN:
-		// expiration and termination cases
-		st.SectorTable().Impl().FailingSectors_.Remove(sectorNo)
-	default:
-		// Committed and Recovering should not go to Cleared directly
-		Assert(false)
-	}
-
-	delete(st.Sectors(), sectorNo)
-	st.ProvingSet_.Remove(sectorNo)
-	st.SectorExpirationQueue().Remove(sectorNo)
-}
-
-// move Sector from Committed/Recovering into Active State
-// reset FaultCount to zero
-// update SectorTable
-func (st *StorageMinerActorState_I) _updateActivateSectorAssert(sectorNo sector.SectorNumber) {
-	sectorState := st.Sectors()[sectorNo].State()
-	switch sectorState.StateNumber {
-	case SectorCommittedSN:
-		st.SectorTable().Impl().CommittedSectors_.Remove(sectorNo)
-	case SectorRecoveringSN:
-		st.SectorTable().Impl().RecoveringSectors_.Remove(sectorNo)
-	default:
-		// sm._updateActivateSectorAssert: invalid state in activateSector
-		Assert(false)
-	}
-
-	st.Sectors()[sectorNo].Impl().State_ = SectorActive()
-	st.SectorTable().Impl().ActiveSectors_.Add(sectorNo)
-}
-
-// failSector moves Sector from Active/Committed/Recovering into Failing State
-// and increments FaultCount if asked to do so (DeclareFaults does not increment faultCount)
-// move Sector from Failing to Cleared State if increment results in faultCount exceeds MAX_CONSECUTIVE_FAULTS
-// update SectorTable
-// remove from ProvingSet
-func (st *StorageMinerActorState_I) _updateFailSectorAssert(sectorNo sector.SectorNumber, increment bool) {
-	newFaultCount := st.Sectors()[sectorNo].State().FaultCount
-
-	if increment {
-		newFaultCount += 1
-	}
-
-	state := st.Sectors()[sectorNo].State()
-	switch state.StateNumber {
-	case SectorActiveSN:
-		// wont be terminated from Active
-		st.SectorTable().Impl().ActiveSectors_.Remove(sectorNo)
-		st.SectorTable().Impl().FailingSectors_.Add(sectorNo)
-		st.ProvingSet_.Remove(sectorNo)
-		st.Sectors()[sectorNo].Impl().State_ = SectorFailing(newFaultCount)
-	case SectorCommittedSN:
-		st.SectorTable().Impl().CommittedSectors_.Remove(sectorNo)
-		st.SectorTable().Impl().FailingSectors_.Add(sectorNo)
-		st.ProvingSet_.Remove(sectorNo)
-		st.Sectors()[sectorNo].Impl().State_ = SectorFailing(newFaultCount)
-	case SectorRecoveringSN:
-		st.SectorTable().Impl().RecoveringSectors_.Remove(sectorNo)
-		st.SectorTable().Impl().FailingSectors_.Add(sectorNo)
-		st.ProvingSet_.Remove(sectorNo)
-		st.Sectors()[sectorNo].Impl().State_ = SectorFailing(newFaultCount)
-	case SectorFailingSN:
-		// no change to SectorTable but increase in FaultCount
-		st.Sectors()[sectorNo].Impl().State_ = SectorFailing(newFaultCount)
-	default:
-		// Invalid sector state in CronAction
-		Assert(false)
-	}
-
-	if newFaultCount > node_base.MAX_CONSECUTIVE_FAULTS {
-		// slashing is done at _slashCollateralForStorageFaults
-		st._updateClearSectorAssert(sectorNo)
-		st.SectorTable().Impl().TerminatedFaults_.Add(sectorNo)
-	}
-}
-
-func (st *StorageMinerActorState_I) _updateExpireSectors(currEpoch block.ChainEpoch) []sector.SectorNumber {
-	queue := st.SectorExpirationQueue()
-	expiredSectorNos := make([]sector.SectorNumber, 0)
-
-	for queue.Peek().Expiration() <= currEpoch {
-		expiredSectorNo := queue.Pop().SectorNumber()
-
-		state := st.Sectors()[expiredSectorNo].State()
-		switch state.StateNumber {
-		case SectorActiveSN:
-			// Note: in order to verify if something was stored in the past, one must
-			// scan the chain. SectorNumber can be re-used.
-			st._updateClearSectorAssert(expiredSectorNo)
-			expiredSectorNos = append(expiredSectorNos, expiredSectorNo)
-		case SectorFailingSN:
-			// TODO: check if there is any fault that we should handle here
-
-			// a failing sector expires, no change to FaultCount
-			st._updateClearSectorAssert(expiredSectorNo)
-			expiredSectorNos = append(expiredSectorNos, expiredSectorNo)
-		default:
-			// Note: SectorCommittedSN, SectorRecoveringSN transition first to SectorFailingSN, then expire
-			// Invalid sector state in SectorExpirationQueue
-			Assert(false)
-		}
-	}
-
-	return expiredSectorNos
-}
 
 func (st *StorageMinerActorState_I) _getSectorOnChainInfo(sectorNo sector.SectorNumber) (info SectorOnChainInfo, ok bool) {
 	sectorInfo, found := st.Sectors()[sectorNo]
@@ -196,39 +21,118 @@ func (st *StorageMinerActorState_I) _getSectorOnChainInfo(sectorNo sector.Sector
 	return sectorInfo, true
 }
 
-func (st *StorageMinerActorState_I) _getSectorWeight(sectorNo sector.SectorNumber) (power block.SectorWeight, ok bool) {
+func (st *StorageMinerActorState_I) _getSectorDealIDsAssert(sectorNo sector.SectorNumber) deal.DealIDs {
 	sectorInfo, found := st._getSectorOnChainInfo(sectorNo)
-	if !found {
-		return block.SectorWeight(0), false
-	}
-	return sectorInfo.SectorWeight(), true
+	Assert(found)
+	return sectorInfo.Info().DealIDs()
 }
 
-func (st *StorageMinerActorState_I) _getSectorPower(sectorNo sector.SectorNumber) (power block.StoragePower, ok bool) {
+func SectorsAMT_Empty() SectorsAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
+func SectorNumberSetHAMT_Empty() SectorNumberSetHAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
+func (st *StorageMinerActorState_I) _getStorageWeightDescForSector(sectorNumber sector.SectorNumber) SectorStorageWeightDesc {
+	ret, found := st._getStorageWeightDescForSectorMaybe(sectorNumber)
+	Assert(found)
+	return ret
+}
+
+func (st *StorageMinerActorState_I) _getStorageWeightDescForSectorMaybe(sectorNumber sector.SectorNumber) (ret SectorStorageWeightDesc, ok bool) {
+	sectorInfo, found := st.Sectors()[sectorNumber]
+	if !found {
+		ret = nil
+		ok = false
+		return
+	}
+
+	ret = &actor_util.SectorStorageWeightDesc_I{
+		SectorSize_: st.Info().SectorSize(),
+		DealWeight_: sectorInfo.DealWeight(),
+		Duration_:   sectorInfo.Info().Expiration() - sectorInfo.ActivationEpoch(),
+	}
+	ok = true
+	return
+}
+
+func (st *StorageMinerActorState_I) _getStorageWeightDescsForSectors(sectorNumbers []sector.SectorNumber) []SectorStorageWeightDesc {
+	ret := []SectorStorageWeightDesc{}
+	for _, sectorNumber := range sectorNumbers {
+		ret = append(ret, st._getStorageWeightDescForSector(sectorNumber))
+	}
+	return ret
+}
+
+func MinerPoStState_New_OK(lastSuccessfulPoSt block.ChainEpoch) MinerPoStState {
+	return MinerPoStState_Make_OK(&MinerPoStState_OK_I{
+		LastSuccessfulPoSt_: lastSuccessfulPoSt,
+	})
+}
+
+func MinerPoStState_New_Challenged(
+	surpriseChallengeEpoch block.ChainEpoch,
+	challengedSectors []sector.SectorNumber,
+	numConsecutiveFailures int,
+) MinerPoStState {
+	return MinerPoStState_Make_Challenged(&MinerPoStState_Challenged_I{
+		SurpriseChallengeEpoch_: surpriseChallengeEpoch,
+		ChallengedSectors_:      challengedSectors,
+		NumConsecutiveFailures_: numConsecutiveFailures,
+	})
+}
+
+func MinerPoStState_New_DetectedFault(numConsecutiveFailures int) MinerPoStState {
+	return MinerPoStState_Make_DetectedFault(&MinerPoStState_DetectedFault_I{
+		NumConsecutiveFailures_: numConsecutiveFailures,
+	})
+}
+
+func (x *SectorOnChainInfo_I) Is_TemporaryFault() bool {
+	ret := (x.State() == SectorState_TemporaryFault)
+	if ret {
+		Assert(x.DeclaredFaultEpoch() != block.ChainEpoch_None)
+		Assert(x.DeclaredFaultDuration() != block.ChainEpoch_None)
+	}
+	return ret
+}
+
+func (x *SectorOnChainInfo_I) EffectiveFaultBeginEpoch() block.ChainEpoch {
+	Assert(x.Is_TemporaryFault())
+	return x.DeclaredFaultEpoch() + indices.StorageMining_DeclaredFaultEffectiveDelay()
+}
+
+func (x *SectorOnChainInfo_I) EffectiveFaultEndEpoch() block.ChainEpoch {
+	Assert(x.Is_TemporaryFault())
+	return x.EffectiveFaultBeginEpoch() + x.DeclaredFaultDuration()
+}
+
+func MinerInfo_New(
+	ownerAddr addr.Address, workerAddr addr.Address, sectorSize sector.SectorSize, peerId libp2p.PeerID) MinerInfo {
+
+	ret := &MinerInfo_I{
+		Owner_:      ownerAddr,
+		Worker_:     workerAddr,
+		PeerId_:     peerId,
+		SectorSize_: sectorSize,
+	}
+
+	TODO() // TODO: determine how to generate/validate VRF key and initialize other fields
+
+	return ret
+}
+
+func (st *StorageMinerActorState_I) _verifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool {
+	// TODO: Determine what should be the acceptance criterion for sector numbers proven in SurprisePoSt proofs.
 	TODO()
 	panic("")
 }
 
-func (st *StorageMinerActorState_I) _getSectorDealIDs(sectorNo sector.SectorNumber) (dealIDs deal.DealIDs, ok bool) {
-	sectorInfo, found := st._getSectorOnChainInfo(sectorNo)
-	if !found {
-		return nil, false
-	}
-	return sectorInfo.SealCommitment().DealIDs(), true
-}
-
-func (st *StorageMinerActorState_I) _getPreCommitDepositReq() actor.TokenAmount {
-
-	// TODO: move this to Construct
-	minerInfo := st.Info()
-	sectorSize := minerInfo.SectorSize()
-	depositReq := actor.TokenAmount(uint64(node_base.PRECOMMIT_DEPOSIT_PER_BYTE) * uint64(sectorSize))
-
-	return depositReq
-}
-
-// TODO: define how target is calculated
-func (st *StorageMinerActorState_I) _verifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool {
-	util.TODO()
-	return false
+func SectorNumberSetHAMT_Items(x SectorNumberSetHAMT) []sector.SectorNumber {
+	IMPL_FINISH()
+	panic("")
 }

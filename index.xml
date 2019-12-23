@@ -22,16 +22,6 @@
     
     <item>
       <title></title>
-      <link>/docs/systems/filecoin_markets/storage_market/storage_market_actor_old/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_markets/storage_market/storage_market_actor_old/</guid>
-      <description>Storage Market Actor (DEPRECATED)  Code Cid: &amp;lt;codec:raw&amp;gt;&amp;lt;mhType:identity&amp;gt;&amp;lt;&amp;quot;smarket&amp;quot;&amp;gt;  The storage market actor is the central point for the Filecoin storage market. It is responsible for registering new miners to the system, and maintaining the power table. The Filecoin storage market is a singleton that lives at a specific well-known address.
-type StorageMarketActorState struct { miners {Address:Null}&amp;lt;Hamt&amp;gt; totalStorage BytesAmount } Methods    Name Method ID     StorageMarketConstructor 1   CreateStorageMiner 2   SlashConsensusFault 3   UpdateStorage 4   GetTotalStorage 5   PowerLookup 6   IsMiner 7   StorageCollateralForSize 8    Constructor Parameters</description>
-    </item>
-    
-    <item>
-      <title></title>
       <link>/docs/systems/filecoin_token/multisig/multisig_actor_old/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
@@ -88,7 +78,7 @@ type InitActorState struct { addressMap {Address:ID}&amp;lt;Hamt&amp;gt; nextId 
       
       <guid>/docs/systems/filecoin_vm/sysactors/account_actor/</guid>
       <description>(You can see the old AccountActor here )
-import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; type AccountActorCode struct {} type AccountActorState struct { Address addr.Address }  package sysactors import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import exitcode &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&amp;#34; import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput { // Nothing. intentionally left blank. 	return rt.SuccessReturn() } func (a *AccountActorCode_I) InvokeMethod(rt vmr.Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput { switch method { case actor.MethodConstructor: rt.Assert(len(params) == 0) return a.</description>
+import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; type AccountActorCode struct {} type AccountActorState struct { Address addr.Address }  package sysactors import ( ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; exitcode &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&amp;#34; ) func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput { // Nothing. intentionally left blank. 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr) return rt.SuccessReturn() } func (a *AccountActorCode_I) InvokeMethod(rt vmr.Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput { switch method { case actor.</description>
     </item>
     
     <item>
@@ -248,10 +238,10 @@ This section should contain:
     
     <item>
       <title>Faults</title>
-      <link>/docs/systems/filecoin_markets/storage_market/faults/</link>
+      <link>/docs/systems/filecoin_markets/storage_market/storage_deal/faults/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/docs/systems/filecoin_markets/storage_market/faults/</guid>
+      <guid>/docs/systems/filecoin_markets/storage_market/storage_deal/faults/</guid>
       <description>There are two main categories of faults in the Filecoin network.
  ConsensusFaults StorageDealFaults  ConsensusFaults are faults that impact network consensus and StorageDealFaults are faults where data in a StorageDeal is not maintained by the providers pursuant to deal terms.
 Pledge Collateral is slashed for ConsensusFaults and Storage Deal Collateral for StorageDealFaults.
@@ -641,7 +631,7 @@ import piece &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/p
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/sector_index/sector_builder/</guid>
-      <description>import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; // import smkt &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&amp;#34; // SectorBuilder accumulates deals, keeping track of their // sector configuration requirements and the piece sizes. // Once there is a sector ready to be sealed, NextSector // will return a sector.  type StageDealResponse struct { SectorID sector.SectorID } type SectorBuilder struct { // DealsToSeal keeps a set of StorageDeal objects.  // These include the info for the relevant pieces.</description>
+      <description>import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; // import smkt &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&amp;#34; // SectorBuilder accumulates deals, keeping track of their // sector configuration requirements and the piece sizes. // Once there is a sector ready to be sealed, NextSector // will return a sector.  type StageDealResponse struct { SectorID sector.SectorID } type SectorBuilder struct { // DealsToSeal keeps a set of StorageDeal objects.  // These include the info for the relevant pieces.</description>
     </item>
     
     <item>
@@ -660,7 +650,7 @@ Something&#39;s not right. The sector_sealer.id file was not found.</description
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/sector/sealing/</guid>
-      <description>import file &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; import piece &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; type Path struct {} // TODO  type SealRandomness Bytes type InteractiveSealRandomness Bytes // SealSeed is unique to each Sector // SealSeed is: // SealSeedHash(MinerID, SectorNumber, SealRandomness, UnsealedSectorCID) type SealSeed Bytes type SealCfg struct { SectorSize WindowCount UInt Partitions UInt } // SealVerifyInfo is the structure of all the information a verifier // needs to verify a Seal.</description>
+      <description>import file &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; import piece &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; type Path struct {} // TODO  type SealRandomness Bytes type InteractiveSealRandomness Bytes // SealSeed is unique to each Sector // SealSeed is: // SealSeedHash(MinerID, SectorNumber, SealRandomness, UnsealedSectorCID) type SealSeed Bytes type SealCfg struct { SectorSize WindowCount UInt Partitions UInt } // SealVerifyInfo is the structure of all the information a verifier // needs to verify a Seal.</description>
     </item>
     
     <item>
@@ -757,7 +747,29 @@ Introduction Background on Proof-of-Replication Proof-of-Replication enables a p
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_markets/storage_market/storage_client/</guid>
-      <description>Both StorageProvider and StorageClient are StorageMarketParticipant. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain. StorageClient will initiate the storage deal protocol by submitting a StorageDealProposal to the StorageProvider who will then add the deal data to a Sector and commit the sector onto the blockchain.</description>
+      <description>The StorageClient is a module that discovers miners, determines their asks, and proposes deals to StorageProviders. It also tracks deals as they move through the deal flow. Note that any address registered as a StorageMarketParticipant with the StorageMarketActor can be used with the StorageClient. A single participant can be a client, provider, or both at the same time.
+&amp;ndash;
+import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import libp2p &amp;#34;github.</description>
+    </item>
+    
+    <item>
+      <title>Storage Deal Flow</title>
+      <link>/docs/systems/filecoin_markets/storage_market/storage_deal/storage_deal_flow/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_markets/storage_market/storage_deal/storage_deal_flow/</guid>
+      <description>Deal Flow Sequence Diagram (open in new tab)  Add Storage Deal and Power  1. StorageClient and StorageProvider call StorageMarketActor.AddBalance to deposit funds into Storage Market. There are two fund states in the Storage Market, Locked and Available.  StorageClient and StorageProvider can call WithdrawBalance before any deal is made. (move to state X)  2. StorageClient and StorageProvider negotiate a deal off chain. StorageClient sends a StorageDealProposal to a StorageProvider.</description>
+    </item>
+    
+    <item>
+      <title>Storage Deal States</title>
+      <link>/docs/systems/filecoin_markets/storage_market/storage_deal/storage_deal_states/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_markets/storage_market/storage_deal/storage_deal_states/</guid>
+      <description>All on-chain economic activities in Filecoin start with the deal. This section aims to explain different states of a deal and their relationship with other concepts in the protocol such as Power, Payment, and Collaterals.
+A deal has the following states:
+ Unpublished: the deal has yet to be posted on chain. Published: the deal has been published and accepted by the chain but is not yet active as the sector containing the deal has not been proven.</description>
     </item>
     
     <item>
@@ -776,7 +788,7 @@ Introduction Background on Proof-of-Replication Proof-of-Replication enables a p
       
       <guid>/docs/systems/filecoin_mining/storage_mining/storage_miner_actor/</guid>
       <description>(You can see the old Storage Miner Actor here )
-StorageMinerActor interface import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import sealing &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&amp;#34; import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import stateTree &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&amp;#34; import spc &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus&amp;#34; import filcrypto &amp;#34;github.com/filecoin-project/specs/algorithms/crypto&amp;#34; type SectorExpirationQueueItem struct { SectorNumber sector.SectorNumber Expiration block.ChainEpoch } type SectorExpirationQueue struct { Add(i SectorExpirationQueueItem) Pop() SectorExpirationQueueItem Peek() SectorExpirationQueueItem Remove(n sector.SectorNumber) } type SectorStateTable struct { SectorSize sector.</description>
+StorageMinerActor interface import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import actor_util &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&amp;#34; import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&amp;#34; import filcrypto &amp;#34;github.com/filecoin-project/specs/algorithms/crypto&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import sealing &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; type MinerPoStState union { // Normal operation: The miner has passed either an ElectionPoSt or a SurprisePoSt  // sufficiently recently.  OK struct { LastSuccessfulPoSt block.ChainEpoch } // SurprisePoSt challenge state: The miner has not submitted timely ElectionPoSts,  // and as a result, the system has fallen back to proving storage via SurprisePoSt.</description>
     </item>
     
     <item>
@@ -804,7 +816,7 @@ Active Miner Mining Cycle In order to mine blocks on the Filecoin blockchain a m
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_blockchain/storage_power_consensus/storage_power_actor/</guid>
-      <description>StoragePowerActor interface import actor_util &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; type PowerTableEntry struct { ActiveSectorWeight block.SectorWeight InactiveSectorWeight block.SectorWeight Power block.StoragePower } type PowerReport struct { ActiveSectorWeight block.SectorWeight // set value  InactiveSectorWeight block.SectorWeight // set value } // type PowerTableHAMT {actor.ActorID: PowerTableEntry} type PowerTableHAMT {addr.Address: PowerTableEntry} // TODO: convert address to ActorID  type StoragePowerActorState struct { PowerTable PowerTableHAMT EscrowTable actor_util.</description>
+      <description>StoragePowerActor interface import actor_util &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; type PowerTableHAMT {addr.Address: block.StoragePower} // TODO: convert address to ActorID  type MinerEventsHAMT {block.ChainEpoch: actor_util.MinerEventSetHAMT} type StoragePowerActorState struct { TotalNetworkPower block.StoragePower PowerTable PowerTableHAMT EscrowTable actor_util.BalanceTableHAMT // Metadata cached for efficient processing of sector/challenge events.  CachedDeferredCronEvents MinerEventsHAMT PoStDetectedFaultMiners actor_util.MinerSetHAMT ClaimedPower PowerTableHAMT NominalPower PowerTableHAMT NumMinersMeetingMinPower int _slashPledgeCollateral(address addr.Address, amount actor.TokenAmount) actor.TokenAmount _selectMinersToSurprise(challengeCount int, randomness util.Randomness) [addr.Address] _addClaimedPowerForSector( minerAddr addr.</description>
     </item>
     
     <item>
@@ -813,7 +825,7 @@ Active Miner Mining Cycle In order to mine blocks on the Filecoin blockchain a m
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_markets/storage_market/storage_provider/</guid>
-      <description>Both StorageProvider and StorageClient are StorageMarketParticipant. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain. StorageClient will initiate the storage deal protocol by submitting a StorageDealProposal to the StorageProvider who will then add the deal data to a Sector and commit the sector onto the blockchain.</description>
+      <description>The StorageProvider is a module that handles incoming queries for Asks and proposals for Deals from a StorageClient. It also tracks deals as they move through the deal flow, handling off chain actions during the negotiation phases of the deal and ultimately telling the StorageMarketActor to publish on chain. The StorageProvider&amp;rsquo;s last action is to handoff a published deal for storage and sealing to the Storage Mining Subsystem. Note that any address registered as a StorageMarketParticipant with the StorageMarketActor can be used with the StorageClient.</description>
     </item>
     
     <item>

@@ -17,13 +17,13 @@ type Serialization = util.Serialization
 // In order to derive randomness from a collection of objects, rather than just a single
 // object, define a struct at the .id level that contains those objects as member fields.
 // This will then cause a Serialize_*() method to be generated for the struct type.
-func (tag DomainSeparationTag) DeriveRand(s Serialization) Randomness {
+func DeriveRand(tag DomainSeparationTag, s Serialization) Randomness {
 	return _deriveRandInternal(tag, s, -1)
 }
 
 // As in DeriveRand(), but additionally accepts an index into the implicit pseudorandom stream.
 // Index must be strictly positive.
-func (tag DomainSeparationTag) DeriveRandWithIndex(s Serialization, index int) Randomness {
+func DeriveRandWithIndex(tag DomainSeparationTag, s Serialization, index int) Randomness {
 	if index <= 0 {
 		panic("DeriveRandWithIndex only accepts indices > 0")
 	}
@@ -38,12 +38,3 @@ func _deriveRandInternal(tag DomainSeparationTag, s Serialization, index int) Ra
 	ret := SHA256(buffer)
 	return Randomness(ret)
 }
-
-type DomainSeparationTag int
-
-const (
-	DomainSeparationTag_TicketDrawing DomainSeparationTag = 1 + iota
-	DomainSeparationTag_TicketProduction
-	DomainSeparationTag_PoSt
-	// ...
-)

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Storage Deals on Filecoin Spec</title>
+    <link>/docs/systems/filecoin_markets/storage_market/storage_deal/</link>
+    <description>Recent content in Storage Deals on Filecoin Spec</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="/docs/systems/filecoin_markets/storage_market/storage_deal/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Faults</title>
+      <link>/docs/systems/filecoin_markets/storage_market/storage_deal/faults/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_markets/storage_market/storage_deal/faults/</guid>
+      <description>There are two main categories of faults in the Filecoin network.
+ ConsensusFaults StorageDealFaults  ConsensusFaults are faults that impact network consensus and StorageDealFaults are faults where data in a StorageDeal is not maintained by the providers pursuant to deal terms.
+Pledge Collateral is slashed for ConsensusFaults and Storage Deal Collateral for StorageDealFaults.
+Any misbehavior may result in more than one fault thus lead to slashing on both collaterals.</description>
+    </item>
+    
+    <item>
+      <title>Storage Deal Flow</title>
+      <link>/docs/systems/filecoin_markets/storage_market/storage_deal/storage_deal_flow/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_markets/storage_market/storage_deal/storage_deal_flow/</guid>
+      <description>Deal Flow Sequence Diagram (open in new tab)  Add Storage Deal and Power  1. StorageClient and StorageProvider call StorageMarketActor.AddBalance to deposit funds into Storage Market. There are two fund states in the Storage Market, Locked and Available.  StorageClient and StorageProvider can call WithdrawBalance before any deal is made. (move to state X)  2. StorageClient and StorageProvider negotiate a deal off chain. StorageClient sends a StorageDealProposal to a StorageProvider.</description>
+    </item>
+    
+    <item>
+      <title>Storage Deal States</title>
+      <link>/docs/systems/filecoin_markets/storage_market/storage_deal/storage_deal_states/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_markets/storage_market/storage_deal/storage_deal_states/</guid>
+      <description>All on-chain economic activities in Filecoin start with the deal. This section aims to explain different states of a deal and their relationship with other concepts in the protocol such as Power, Payment, and Collaterals.
+A deal has the following states:
+ Unpublished: the deal has yet to be posted on chain. Published: the deal has been published and accepted by the chain but is not yet active as the sector containing the deal has not been proven.</description>
+    </item>
+    
+  </channel>
+</rss>
