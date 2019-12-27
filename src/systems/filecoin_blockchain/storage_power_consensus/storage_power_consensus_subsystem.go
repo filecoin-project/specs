@@ -66,18 +66,6 @@ func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTre
 	return st
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness {
-	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_TICKET)
-}
-
-func (spc *StoragePowerConsensusSubsystem_I) GetSealRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness {
-	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_SEAL)
-}
-
-func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallengeRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness {
-	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_POST)
-}
-
-func (spc *StoragePowerConsensusSubsystem_I) GetFinalizedEpoch(currentEpoch abi.ChainEpoch) abi.ChainEpoch {
+func (spc *StoragePowerConsensusSubsystem_I) GetFinalizedEpoch(currentEpoch block.ChainEpoch) block.ChainEpoch {
 	return currentEpoch - node_base.FINALITY
 }

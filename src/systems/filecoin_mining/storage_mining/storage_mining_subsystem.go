@@ -174,16 +174,6 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.Stat
 	return electionPoSt
 }
 
-func (sms *StorageMiningSubsystem_I) PreparePoStChallengeSeed(randomness util.Randomness, minerAddr addr.Address) util.Randomness {
-
-	randInput := Serialize_PoStChallengeSeedInput(&PoStChallengeSeedInput_I{
-		ticket_:    randomness,
-		minerAddr_: minerAddr,
-	})
-	input := filcrypto.DeriveRand(filcrypto.DomainSeparationTag_PreparePoStChallengeSeed, randInput)
-	return input
-}
-
 func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness, minerActorAddr addr.Address) block.Ticket {
 	// run it through the VRF and get deterministic output
 

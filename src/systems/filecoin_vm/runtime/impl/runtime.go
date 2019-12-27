@@ -10,6 +10,7 @@ import (
 	initact "github.com/filecoin-project/specs/actors/builtin/init"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
+	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
@@ -76,6 +77,7 @@ type VMContext struct {
 	_globalStateInit    st.StateTree
 	_globalStatePending st.StateTree
 	_running            bool
+	_chain              chain.Chain
 	_actorAddress       addr.Address
 	_actorStateAcquired bool
 	// Tracks whether actor substate has changed in order to charge gas just once

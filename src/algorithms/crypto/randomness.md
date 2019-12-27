@@ -46,4 +46,4 @@ buffer.append(CBOR_Serialization(randInputObj))
 randomness = SHA256(buffer)
 ```
 
-{{< readfile file="randomness.go" code="true" lang="go" >}}
+{{< readfile file="chain.go" code="true" lang="go" >}}
