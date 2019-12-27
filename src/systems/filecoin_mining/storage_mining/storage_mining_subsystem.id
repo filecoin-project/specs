@@ -61,7 +61,6 @@ type StorageMiningSubsystem struct {
         minerAddr   addr.Address
     ) block.Ticket
 
-    PreparePoStChallengeSeed(randomness util.Randomness, minerAddr addr.Address) util.Randomness
     _getStorageMinerActorState(stateTree stateTree.StateTree, minerAddr addr.Address) sminact.StorageMinerActorState
 
     // call by BlockChain when a new block is produced

@@ -11,7 +11,6 @@ import (
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
@@ -59,12 +58,8 @@ func (a *StorageMinerActorCode_I) OnSurprisePoStChallenge(rt Runtime) {
 		numConsecutiveFailures = st.PoStState().As_DetectedFault().NumConsecutiveFailures()
 	}
 
-	IMPL_TODO() // Determine auxiliary seed input to ensure uniqueness
-	challengedSectorsRandomness := rt.RandomnessWithAuxSeed(
-		filcrypto.DomainSeparationTag_SurprisePoStSampleSectors,
-		rt.CurrEpoch()-node_base.SPC_LOOKBACK_POST,
-		addr.Serialize_Address_Compact(rt.CurrReceiver()),
-	)
+	randomnessK := rt.Chain().GetPoStChallengeRand(rt.CurrEpoch())
+	challengedSectorsRandomness := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_PoStChallengeSeed, randomnessK, rt.CurrReceiver())
 
 	challengedSectors := _surprisePoStSampleChallengedSectors(
 		challengedSectorsRandomness,
@@ -630,13 +625,8 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 		Output_: onChainInfo.Randomness(),
 	}
 
-	IMPL_TODO() // Determine auxiliary seed input to ensure uniqueness
-	postRandomnessInput := rt.RandomnessWithAuxSeed(
-		filcrypto.DomainSeparationTag_SurprisePoStVRFRandomnessInput,
-		challengeEpoch-node_base.SPC_LOOKBACK_POST,
-		addr.Serialize_Address_Compact(rt.CurrReceiver()),
-	)
-
+	randomnessK := rt.Chain().GetPoStChallengeRand(challengeEpoch)
+	postRandomnessInput := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_PoStChallengeSeed, randomnessK, rt.CurrReceiver())
 	if !postRand.Verify(postRandomnessInput, info.WorkerVRFKey()) {
 		rt.AbortStateMsg("Invalid Surprise PoSt. Invalid randomness.")
 	}

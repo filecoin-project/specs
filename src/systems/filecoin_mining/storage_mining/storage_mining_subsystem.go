@@ -125,8 +125,7 @@ func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainPoStVerifyInfo {
 	// Randomness for ElectionPoSt
 	randomnessK := sms._blockchain().BestChain().GetPoStChallengeRand(sms._blockchain().LatestEpoch())
-
-	input := sms._blockchain().BestChain().PreparePoStChallengeSeed(randomnessK, sms.Node().Repository().KeyStore().MinerAddress())
+	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_PoStChallengeSeed, randomnessK, sms._keyStore().MinerAddress())
 	postRandomness := sms.Node().Repository().KeyStore().WorkerKey().Impl().Generate(input).Output()
 
 	// TODO: add how sectors are actually stored in the SMS proving set
@@ -180,11 +179,7 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 	// take the VRFResult of that ticket as input, specifying the personalization (see data structures)
 	// append the miner actor address for the miner generifying this in order to prevent miners with the same
 	// worker keys from generating the same randomness (given the VRF)
-	randInput := block.Serialize_TicketProductionSeedInput(&block.TicketProductionSeedInput_I{
-		PastTicket_: randomness,
-		MinerAddr_:  minerActorAddr,
-	})
-	input := filcrypto.DeriveRand(filcrypto.DomainSeparationTag_TicketProduction, randInput)
+	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_TicketProduction, randomness, minerActorAddr)
 
 	// run through VRF
 	vrfRes := sms.Node().Repository().KeyStore().WorkerKey().Impl().Generate(input)
@@ -263,7 +258,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 	// 3. Verify appropriate randomness
 	// TODO: fix away from BestChain()... every block should track its own chain up to its own production.
 	randomness := sms._blockchain().BestChain().GetPoStChallengeRand(header.Epoch())
-	postRandomnessInput := sector.PoStRandomness(sms._blockchain().BestChain().PreparePoStChallengeSeed(randomness, header.Miner()))
+	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_PoStChallengeSeed, randomness, header.Miner())
 
 	postRand := &filcrypto.VRFResult_I{
 		Output_: onChainInfo.Randomness(),
@@ -275,7 +270,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 		return false
 	}
 
-	if !postRand.Verify(postRandomnessInput, filcrypto.VRFPublicKey(workerKey)) {
+	if !postRand.Verify(input, filcrypto.VRFPublicKey(workerKey)) {
 		return false
 	}
 
@@ -333,8 +328,8 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 
 	// get randomness for SurprisePoSt
 	challEpoch := sma.PoStState().As_Challenged().SurpriseChallengeEpoch()
-	randomnessK := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), challEpoch)
-	input := sms._blockchain().BestChain().PreparePoStChallengeSeed(randomnessK, sms.Node().Repository().KeyStore().MinerAddress())
+	randomnessK := sms._blockchain().BestChain().GetPoStChallengeRand(challEpoch)
+	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_PoStChallengeSeed, randomnessK, sms._keyStore().MinerAddress())
 	postRandomness := sms.Node().Repository().KeyStore().WorkerKey().Impl().Generate(input).Output()
 
 	// TODO: add how sectors are actually stored in the SMS proving set

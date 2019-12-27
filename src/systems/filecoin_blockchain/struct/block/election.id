@@ -15,12 +15,6 @@ type Ticket struct {
     ) bool
 }
 
-type TicketProductionSeedInput struct {
-    PastTicket  util.Randomness
-    MinerAddr   addr.Address
-}
-
-type TicketDrawingSeedInput struct {
-    PastTicket  util.Randomness
-    Epoch       abi.ChainEpoch
-}
+type BytesAmount UVarint
+type StoragePower BytesAmount
+type SectorWeight BytesAmount

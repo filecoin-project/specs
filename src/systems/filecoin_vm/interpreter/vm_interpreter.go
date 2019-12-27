@@ -7,6 +7,8 @@ import (
 	sminact "github.com/filecoin-project/specs/actors/builtin/storage_miner"
 	serde "github.com/filecoin-project/specs/actors/serde"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
+	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
+	storage_mining "github.com/filecoin-project/specs/systems/filecoin_mining/storage_mining"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
@@ -35,18 +37,24 @@ const (
 
 // Applies all the message in a tipset, along with implicit block- and tipset-specific state
 // transitions.
-func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSetMessages) (outTree st.StateTree, receipts []vmr.MessageReceipt) {
+func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, tipset chain.Tipset, msgs TipSetMessages) (outTree st.StateTree, receipts []vmr.MessageReceipt) {
 	outTree = inTree
 	seenMsgs := make(map[ipld.CID]struct{}) // CIDs of messages already seen once.
 	var receipt vmr.MessageReceipt
 	store := vmi.Node().Repository().StateStore()
+
+	// get chain from Tipset
+	chainRand := &chain.Chain_I{
+		HeadTipset_: tipset,
+	}
+
 	for _, blk := range msgs.Blocks() {
 		minerAddr := blk.Miner()
 		util.Assert(minerAddr.IsIDType()) // Block syntactic validation requires this.
 
 		// Process block miner's Election PoSt.
 		epostMessage := _makeElectionPoStMessage(outTree, minerAddr)
-		outTree = _applyMessageBuiltinAssert(store, outTree, epostMessage, minerAddr)
+		outTree = _applyMessageBuiltinAssert(store, outTree, chainRand, epostMessage, minerAddr)
 
 		minerPenaltyTotal := abi.TokenAmount(0)
 		var minerPenaltyCurr abi.TokenAmount
@@ -58,7 +66,7 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSet
 				continue
 			}
 			onChainMessageLen := len(msg.Serialize_UnsignedMessage(m))
-			outTree, receipt, minerPenaltyCurr = vmi.ApplyMessage(outTree, m, onChainMessageLen, minerAddr)
+			outTree, receipt, minerPenaltyCurr = vmi.ApplyMessage(outTree, chainRand, m, onChainMessageLen, minerAddr)
 			minerPenaltyTotal += minerPenaltyCurr
 			receipts = append(receipts, receipt)
 			seenMsgs[_msgCID(m)] = struct{}{}
@@ -72,7 +80,7 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSet
 				continue
 			}
 			onChainMessageLen := len(msg.Serialize_SignedMessage(sm))
-			outTree, receipt, minerPenaltyCurr = vmi.ApplyMessage(outTree, m, onChainMessageLen, minerAddr)
+			outTree, receipt, minerPenaltyCurr = vmi.ApplyMessage(outTree, chainRand, m, onChainMessageLen, minerAddr)
 			minerPenaltyTotal += minerPenaltyCurr
 			receipts = append(receipts, receipt)
 			seenMsgs[_msgCID(m)] = struct{}{}
@@ -80,20 +88,20 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSet
 
 		// Pay block reward.
 		rewardMessage := _makeBlockRewardMessage(outTree, minerAddr, minerPenaltyTotal)
-		outTree = _applyMessageBuiltinAssert(store, outTree, rewardMessage, minerAddr)
+		outTree = _applyMessageBuiltinAssert(store, outTree, chainRand, rewardMessage, minerAddr)
 	}
 
 	// Invoke cron tick.
 	// Since this is outside any block, the top level block winner is declared as the system actor.
 	cronMessage := _makeCronTickMessage(outTree)
-	outTree = _applyMessageBuiltinAssert(store, outTree, cronMessage, addr.SystemActorAddr)
+	outTree = _applyMessageBuiltinAssert(store, outTree, chainRand, cronMessage, addr.SystemActorAddr)
 
 	return
 }
 
 func (vmi *VMInterpreter_I) ApplyMessage(
-	inTree st.StateTree, message msg.UnsignedMessage, onChainMessageSize int, minerAddr addr.Address) (
-	retTree st.StateTree, retReceipt vmr.MessageReceipt, retMinerPenalty abi.TokenAmount) {
+	inTree st.StateTree, chain chain.Chain, message msg.UnsignedMessage, onChainMessageSize int, minerAddr addr.Address) (
+	retTree st.StateTree, retReceipt vmr.MessageReceipt, retMinerPenalty actors.TokenAmount) {
 
 	store := vmi.Node().Repository().StateStore()
 	senderAddr := _resolveSender(store, inTree, message.From())
@@ -199,7 +207,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 	sender, ok := compTreePreSend.GetActor(senderAddr)
 	Assert(ok)
 	invoc := _makeInvocInput(message)
-	sendRet, compTreePostSend := _applyMessageInternal(store, compTreePreSend, sender, senderAddr, invoc, vmiGasRemaining, minerAddr)
+	sendRet, compTreePostSend := _applyMessageInternal(store, compTreePreSend, chain, sender, senderAddr, invoc, vmiGasRemaining, minerAddr)
 
 	ok = _vmiBurnGas(sendRet.GasUsed())
 	if !ok {
@@ -249,7 +257,7 @@ func _lookupMinerOwner(store ipld.GraphStore, tree st.StateTree, minerAddr addr.
 	return minerSubState.Info().Owner()
 }
 
-func _applyMessageBuiltinAssert(store ipld.GraphStore, tree st.StateTree, message msg.UnsignedMessage, minerAddr addr.Address) st.StateTree {
+func _applyMessageBuiltinAssert(store ipld.GraphStore, tree st.StateTree, chain chain.Chain, message msg.UnsignedMessage, minerAddr addr.Address) st.StateTree {
 	senderAddr := message.From()
 	Assert(senderAddr.Equals(addr.SystemActorAddr))
 	Assert(senderAddr.IsIDType())
@@ -262,7 +270,7 @@ func _applyMessageBuiltinAssert(store ipld.GraphStore, tree st.StateTree, messag
 	sender, ok := tree.GetActor(senderAddr)
 	Assert(ok)
 	invoc := _makeInvocInput(message)
-	retReceipt, retTree := _applyMessageInternal(store, tree, sender, senderAddr, invoc, message.GasLimit(), minerAddr)
+	retReceipt, retTree := _applyMessageInternal(store, tree, chain, sender, senderAddr, invoc, message.GasLimit(), minerAddr)
 	if retReceipt.ExitCode() != exitcode.OK() {
 		panic("internal message application failed")
 	}
@@ -270,11 +278,12 @@ func _applyMessageBuiltinAssert(store ipld.GraphStore, tree st.StateTree, messag
 	return retTree
 }
 
-func _applyMessageInternal(store ipld.GraphStore, tree st.StateTree, sender actor.ActorState, senderAddr addr.Address, invoc vmr.InvocInput,
+func _applyMessageInternal(store ipld.GraphStore, tree st.StateTree, chain chain.Chain, sender actor.ActorState, senderAddr addr.Address, invoc vmr.InvocInput,
 	gasRemainingInit msg.GasAmount, topLevelBlockWinner addr.Address) (vmr.MessageReceipt, st.StateTree) {
 
 	rt := vmri.VMContext_Make(
 		store,
+		chain,
 		senderAddr,
 		topLevelBlockWinner,
 		sender.CallSeqNum(),

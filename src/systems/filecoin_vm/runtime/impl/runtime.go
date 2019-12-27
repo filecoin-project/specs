@@ -8,7 +8,6 @@ import (
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	acctact "github.com/filecoin-project/specs/actors/builtin/account"
 	initact "github.com/filecoin-project/specs/actors/builtin/init"
-	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
@@ -103,6 +102,7 @@ type VMContext struct {
 
 func VMContext_Make(
 	store ipld.GraphStore,
+	chain chain.Chain,
 	toplevelSender addr.Address,
 	toplevelBlockWinner addr.Address,
 	toplevelSenderCallSeqNum actor.CallSeqNum,
@@ -114,6 +114,7 @@ func VMContext_Make(
 
 	return &VMContext{
 		_store:                store,
+		_chain:                chain,
 		_globalStateInit:      globalState,
 		_globalStatePending:   globalState,
 		_running:              false,
@@ -494,6 +495,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 
 	rtInner := VMContext_Make(
 		rtOuter._store,
+		rtOuter._chain,
 		rtOuter._toplevelSender,
 		rtOuter._toplevelBlockWinner,
 		rtOuter._toplevelSenderCallSeqNum,
@@ -632,16 +634,8 @@ func (rt *VMContext) ValueReceived() abi.TokenAmount {
 	return rt._valueReceived
 }
 
-func (rt *VMContext) Randomness(tag filcrypto.DomainSeparationTag, epoch abi.ChainEpoch) util.Randomness {
-	IMPL_TODO()
-	panic("")
-}
-
-func (rt *VMContext) RandomnessWithAuxSeed(
-	tag filcrypto.DomainSeparationTag, epoch abi.ChainEpoch, auxSeed util.Serialization) util.Randomness {
-
-	IMPL_TODO()
-	panic("")
+func (rt *VMContext) Chain() chain.Chain {
+	return rt._chain
 }
 
 func (rt *VMContext) NewActorAddress() addr.Address {
