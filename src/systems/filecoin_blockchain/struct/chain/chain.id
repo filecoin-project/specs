@@ -1,12 +1,15 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 
 type Chain struct {
     HeadTipset Tipset
 
-    TipsetAtEpoch(epoch abi.ChainEpoch) Tipset
-    RandomnessAtEpoch(epoch abi.ChainEpoch) Bytes
-    
+    TipsetAtEpoch(epoch block.ChainEpoch) Tipset
+    RandomnessAtEpoch(epoch block.ChainEpoch) Bytes
+
+    PreparePoStChallengeSeed(randomness util.Randomness, minerAddr addr.Address) util.Randomness
+
     // call by StorageMiningSubsystem during block production
     GetTicketProductionRand(epoch block.ChainEpoch) util.Randomness
 
@@ -15,7 +18,11 @@ type Chain struct {
 
     // call by StorageMiningSubsystem after sealing
     GetPoStChallengeRand(epoch block.ChainEpoch) util.Randomness
+}
 
+type PoStChallengeSeedInput struct {
+    ticket     util.Randomness
+    minerAddr  addr.Address
 }
 
 // Checkpoint represents a particular block to use as a trust anchor

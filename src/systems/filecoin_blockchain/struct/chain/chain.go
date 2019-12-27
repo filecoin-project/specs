@@ -1,8 +1,11 @@
 package chain
 
 import (
-	"github.com/filecoin-project/specs/actors/abi"
-	"github.com/filecoin-project/specs/util"
+	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	util "github.com/filecoin-project/specs/util"
 )
 
 type Randomness = util.Randomness
@@ -12,19 +15,11 @@ type DomainSeparationTag int
 const (
 	DomainSeparationTag_TicketDrawing DomainSeparationTag = 1 + iota
 	DomainSeparationTag_TicketProduction
-	DomainSeparationTag_PoSt
-	// ...
+	DomainSeparationTag_PoStChallengeSeed
+	// SurprisePoStSelectMiners
+	// SurprisePoStSampleSectors
+	// SurprisePoStVRFRandomnessInput
 )
-
-// type DomainSeparationTag enum {
-//     TicketDrawing
-//     TicketProduction
-//     PreparePoStChallengeSeed
-//     SurprisePoStSelectMiners
-//     SurprisePoStSampleSectors
-//     SurprisePoStVRFRandomnessInput
-// }
-
 
 // Returns the tipset at or immediately prior to `epoch`.
 func (chain *Chain_I) TipsetAtEpoch(epoch abi.ChainEpoch) Tipset {
@@ -48,20 +43,20 @@ func (chain *Chain_I) PreparePoStChallengeSeed(randomness util.Randomness, miner
 		ticket_:    randomness,
 		minerAddr_: minerAddr,
 	})
-	input := filcrypto.DomainSeparationTag_PoSt.DeriveRand(randInput)
+	input := DomainSeparationTag_PoStChallengeSeed.DeriveRand(randInput)
 	return input
 }
 
 func (chain *Chain_I) GetTicketProductionRand(epoch block.ChainEpoch) util.Randomness {
-	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_TICKET)
+	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_TICKET)
 }
 
 func (chain *Chain_I) GetSealRand(epoch block.ChainEpoch) util.Randomness {
-	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_SEAL)
+	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_SEAL)
 }
 
 func (chain *Chain_I) GetPoStChallengeRand(epoch block.ChainEpoch) util.Randomness {
-	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_POST)
+	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_POST)
 }
 
 // Derive a random byte string from a domain separation tag and an arbitrary
@@ -80,9 +75,9 @@ func (tag DomainSeparationTag) DeriveRand(s Serialization) Randomness {
 
 func _deriveRandInternal(tag DomainSeparationTag, s Serialization, index int) Randomness {
 	buffer := []byte{}
-	buffer = append(buffer, LittleEndianBytesFromInt(int(tag))...)
-	buffer = append(buffer, LittleEndianBytesFromInt(int(index))...)
+	buffer = append(buffer, filcrypto.LittleEndianBytesFromInt(int(tag))...)
+	buffer = append(buffer, filcrypto.LittleEndianBytesFromInt(int(index))...)
 	buffer = append(buffer, util.Bytes(s)...)
-	ret := SHA256(buffer)
+	ret := filcrypto.SHA256(buffer)
 	return Randomness(ret)
 }
