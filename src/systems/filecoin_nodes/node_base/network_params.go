@@ -53,13 +53,15 @@ const SPOST_SAMPLE_RATE_DENOM = 50 // placeholder
 // Consensus
 /////////////////////////////////////////////////////////////
 
-const MIN_MINER_SIZE_STOR = 1 << 40 // placeholder, 100 TB
-const MIN_MINER_SIZE_TARG = 3       // placeholder
-const FINALITY = 500                // placeholder
-const SPC_LOOKBACK_RANDOMNESS = 300 // this is EC.K maybe move it there. TODO
-const SPC_LOOKBACK_TICKET = 1       // we chain blocks together one after the other
-const SPC_LOOKBACK_POST = 1         // cheap to generate, should be set as close to current TS as possible
-const SPC_LOOKBACK_SEAL = FINALITY  // should be set to finality
+const MINER_KEY_CHANGE_FREEZE = 2 * SPC_LOOKBACK_RANDOMNESS
+
+const MIN_MINER_SIZE_STOR = 1 << 40               // placeholder, 100 TB
+const MIN_MINER_SIZE_TARG = 3                     // placeholder
+const FINALITY = 500                              // placeholder
+const SPC_LOOKBACK_RANDOMNESS = SPC_LOOKBACK_POST // this is EC.K maybe move it there. TODO
+const SPC_LOOKBACK_TICKET = 1                     // we chain blocks together one after the other
+const SPC_LOOKBACK_POST = 1                       // cheap to generate, should be set as close to current TS as possible
+const SPC_LOOKBACK_SEAL = FINALITY                // should be set to finality
 
 /////////////////////////////////////////////////////////////
 // Cryptoecon

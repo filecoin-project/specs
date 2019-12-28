@@ -289,7 +289,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 	}
 
 	// get worker key from minerAddr
-	workerKey, err := sma.Info().Worker().GetKey()
+	workerKey, err := sma.Info().GetWorker(header.Epoch()).GetKey()
 	if err != nil {
 		return false
 	}

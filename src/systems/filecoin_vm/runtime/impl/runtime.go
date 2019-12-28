@@ -10,6 +10,7 @@ import (
 	initact "github.com/filecoin-project/specs/actors/builtin/init"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
+	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
@@ -652,7 +653,7 @@ func (rt *VMContext) NewActorAddress() addr.Address {
 	util.Assert(err != nil)
 
 	hash := addr.ActorExecHash(buf.Bytes())
-	return addr.Address_Make_ActorExec(addr.Address_NetworkID_Testnet, hash)
+	return addr.Address_Make_ActorExec(node_base.NETWORK, hash)
 }
 
 func (rt *VMContext) IpldPut(x ipld.Object) ipld.CID {

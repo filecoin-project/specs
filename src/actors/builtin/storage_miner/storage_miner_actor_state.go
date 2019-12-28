@@ -112,10 +112,11 @@ func MinerInfo_New(
 	ownerAddr addr.Address, workerAddr addr.Address, sectorSize sector.SectorSize, peerId libp2p.PeerID) MinerInfo {
 
 	ret := &MinerInfo_I{
-		Owner_:      ownerAddr,
-		Worker_:     workerAddr,
-		PeerId_:     peerId,
-		SectorSize_: sectorSize,
+		Owner_:            ownerAddr,
+		_worker_:          workerAddr,
+		PeerId_:           peerId,
+		SectorSize_:       sectorSize,
+		PendingKeyChange_: nil,
 	}
 
 	TODO() // TODO: determine how to generate/validate VRF key and initialize other fields

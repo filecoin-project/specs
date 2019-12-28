@@ -34,6 +34,7 @@ const (
 	Method_StorageMinerActor_ExtendSectorExpiration
 	Method_StorageMinerActor_TerminateSector
 	Method_StorageMinerActor_SubmitSurprisePoStResponse
+	Method_StorageMinerActor_StageWorkerKeyChange
 
 	// Internal mechanism events
 	Method_StorageMinerActor_OnVerifiedElectionPoSt

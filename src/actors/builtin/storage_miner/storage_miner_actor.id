@@ -1,8 +1,8 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
 import autil "github.com/filecoin-project/specs/actors/util"
-import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import sealing "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -81,18 +81,25 @@ type StorageMinerActorCode struct {
     // Can be filled in once InvokeMethod is implemented for this actor.
 }
 
+type MinerKeyChange struct {
+    NewKey       addr.Address
+    EffectiveAt  block.ChainEpoch
+}
+
 type MinerInfo struct {
     // Account that owns this miner.
     // - Income and returned collateral are paid to this address.
     // - This address is also allowed to change the worker address for the miner.
-    Owner                   address.Address  // Must be an ID-address.
+    Owner    addr.Address  // Must be an ID-address.
 
     // Worker account for this miner.
     // This will be the key that is used to sign blocks created by this miner, and
     // sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
     // other day to day miner activities.
-    Worker                  address.Address
-    WorkerVRFKey            filcrypto.VRFPublicKey
+    _worker  addr.Address
+
+    _updateMinerPendingKeyChange(mkc MinerKeyChange)
+    GetWorker(epoch block.ChainEpoch) addr.Address
 
     // Libp2p identity that should be used when connecting to this miner.
     PeerId                  libp2p.PeerID
@@ -103,4 +110,6 @@ type MinerInfo struct {
     SealPartitions          UVarint
     ElectionPoStPartitions  UVarint
     SurprisePoStPartitions  UVarint
+
+    PendingKeyChange        MinerKeyChange
 }

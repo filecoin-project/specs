@@ -5,6 +5,7 @@ import (
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
+	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
@@ -75,7 +76,7 @@ func (a *InitActorCode_I) Exec(rt Runtime, execCodeID abi.ActorCodeID, construct
 func (s *InitActorState_I) ResolveAddress(address addr.Address) addr.Address {
 	actorID, ok := s.AddressMap()[address]
 	if ok {
-		return addr.Address_Make_ID(addr.Address_NetworkID_Testnet, actorID)
+		return addr.Address_Make_ID(node_base.NETWORK, actorID)
 	}
 	return address
 }
@@ -84,7 +85,7 @@ func (s *InitActorState_I) MapAddressToNewID(address addr.Address) addr.Address 
 	actorID := s.NextID_
 	s.NextID_++
 	s.AddressMap()[address] = actorID
-	return addr.Address_Make_ID(addr.Address_NetworkID_Testnet, actorID)
+	return addr.Address_Make_ID(node_base.NETWORK, actorID)
 }
 
 func _codeIDSupportsExec(callerCodeID abi.ActorCodeID, execCodeID abi.ActorCodeID) bool {

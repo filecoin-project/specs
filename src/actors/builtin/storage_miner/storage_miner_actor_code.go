@@ -23,11 +23,26 @@ const epochUndefined = abi.ChainEpoch(-1)
 // Actor methods
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *StorageMinerActorCode_I) GetWorkerVRFKey(rt Runtime) filcrypto.VRFPublicKey {
+func (a *StorageMinerActorCode_I) StageWorkerKeyChange(rt Runtime, key filcrypto.VRFPublicKey) (err error) {
 	h, st := a.State(rt)
-	ret := st.Info().WorkerVRFKey()
+	rt.ValidateImmediateCallerIs(st.Info().GetWorker(rt.CurrEpoch()))
+	util.IMPL_TODO() // verify public key syntax
+
+	keyAddr, err := addr.Address_Make_Key(node_base.NETWORK, addr.KeyHash(key))
+	if err != nil {
+		Release(rt, h, st)
+		return err
+	}
+
+	keyChange := &MinerKeyChange_I{
+		NewKey_:      keyAddr,
+		EffectiveAt_: rt.CurrEpoch() + node_base.MINER_KEY_CHANGE_FREEZE,
+	}
+
+	// note that this may replace another pending key change
+	st.Info()._updateMinerPendingKeyChange(keyChange)
 	Release(rt, h, st)
-	return ret
+	return nil
 }
 
 //////////////////
@@ -83,7 +98,7 @@ func (a *StorageMinerActorCode_I) OnSurprisePoStChallenge(rt Runtime) {
 // Invoked by miner's worker address to submit a response to a pending SurprisePoSt challenge.
 func (a *StorageMinerActorCode_I) SubmitSurprisePoStResponse(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) {
 	h, st := a.State(rt)
-	rt.ValidateImmediateCallerIs(st.Info().Worker())
+	rt.ValidateImmediateCallerIs(st.Info().GetWorker(rt.CurrEpoch()))
 
 	if !st.PoStState().Is_Challenged() {
 		rt.AbortStateMsg("Not currently challenged")
@@ -134,7 +149,7 @@ func (a *StorageMinerActorCode_I) OnVerifiedElectionPoSt(rt Runtime) {
 // Optimization: PreCommitSector could contain a list of deals that are not published yet.
 func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo) {
 	h, st := a.State(rt)
-	rt.ValidateImmediateCallerIs(st.Info().Worker())
+	rt.ValidateImmediateCallerIs(st.Info().GetWorker(rt.CurrEpoch()))
 
 	if _, found := st.Sectors()[info.SectorNumber()]; found {
 		rt.AbortStateMsg("Sector number already exists in table")
@@ -184,7 +199,7 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 
 func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo) {
 	h, st := a.State(rt)
-	workerAddr := st.Info().Worker()
+	workerAddr := st.Info().GetWorker(rt.CurrEpoch())
 	rt.ValidateImmediateCallerIs(workerAddr)
 
 	preCommitSector, found := st.Sectors()[info.SectorNumber()]
@@ -274,7 +289,7 @@ func (a *StorageMinerActorCode_I) ExtendSectorExpiration(rt Runtime, sectorNumbe
 	storageWeightDescPrev := a._rtGetStorageWeightDescForSector(rt, sectorNumber)
 
 	h, st := a.State(rt)
-	rt.ValidateImmediateCallerIs(st.Info().Worker())
+	rt.ValidateImmediateCallerIs(st.Info().GetWorker(rt.CurrEpoch()))
 
 	sectorInfo, found := st.Sectors()[sectorNumber]
 	if !found {
@@ -306,7 +321,7 @@ func (a *StorageMinerActorCode_I) ExtendSectorExpiration(rt Runtime, sectorNumbe
 
 func (a *StorageMinerActorCode_I) TerminateSector(rt Runtime, sectorNumber sector.SectorNumber) {
 	h, st := a.State(rt)
-	rt.ValidateImmediateCallerIs(st.Info().Worker())
+	rt.ValidateImmediateCallerIs(st.Info().GetWorker(rt.CurrEpoch()))
 	Release(rt, h, st)
 
 	a._rtTerminateSector(rt, sectorNumber, autil.SectorTerminationType_UserTermination)
@@ -331,7 +346,7 @@ func (a *StorageMinerActorCode_I) DeclareTemporaryFaults(rt Runtime, sectorNumbe
 	effectiveEndEpoch := effectiveBeginEpoch + duration
 
 	h, st := a.State(rt)
-	rt.ValidateImmediateCallerIs(st.Info().Worker())
+	rt.ValidateImmediateCallerIs(st.Info().GetWorker(rt.CurrEpoch()))
 
 	for _, sectorNumber := range sectorNumbers {
 		sectorInfo, found := st.Sectors()[sectorNumber]
@@ -646,7 +661,12 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 		addr.Serialize_Address_Compact(rt.CurrReceiver()),
 	)
 
-	if !postRand.Verify(postRandomnessInput, info.WorkerVRFKey()) {
+	minerKey, err := info.GetWorker(rt.CurrEpoch()).GetKey()
+	if err != nil {
+		rt.AbortStateMsg("Couldn't get worker key to verify surprise PoSt.")
+	}
+
+	if !postRand.Verify(postRandomnessInput, filcrypto.VRFPublicKey(minerKey)) {
 		rt.AbortStateMsg("Invalid Surprise PoSt. Invalid randomness.")
 	}
 
