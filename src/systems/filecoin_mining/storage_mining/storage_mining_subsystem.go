@@ -215,7 +215,7 @@ func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateT
 	util.Assert(ok)
 	substateCID := actorState.State()
 
-	substate, err := node.StateStore().Get(ipld.CID(substateCID))
+	substate, err := node.Repository().StateStore().Get(ipld.CID(substateCID))
 	if err != nil {
 		panic("TODO")
 	}
@@ -236,7 +236,7 @@ func (sms *StorageMiningSubsystem_I) _getStoragePowerActorState(stateTree stateT
 	util.Assert(ok)
 	substateCID := actorState.State()
 
-	substate, err := node.StateStore().Get(ipld.CID(substateCID))
+	substate, err := node.Repository().StateStore().Get(ipld.CID(substateCID))
 	if err != nil {
 		panic("TODO")
 	}

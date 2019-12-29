@@ -231,7 +231,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 func _resolveSender(tree st.StateTree, address addr.Address) addr.Address {
 	initState, ok := tree.GetActor(addr.InitActorAddr)
 	util.Assert(ok)
-	serialized, ok := node.StateStore().Get(ipld.CID(initState.State()))
+	serialized, ok := node.Repository().StateStore().Get(ipld.CID(initState.State()))
 	initSubState := sysactors.Deserialize_InitActorState_Assert(serialized)
 	return initSubState.ResolveAddress(address)
 }
@@ -240,7 +240,7 @@ func _resolveSender(tree st.StateTree, address addr.Address) addr.Address {
 func _lookupMinerOwner(tree st.StateTree, minerAddr addr.Address) addr.Address {
 	initState, ok := tree.GetActor(minerAddr)
 	util.Assert(ok)
-	serialized, ok := node.StateStore().Get(ipld.CID(initState.State()))
+	serialized, ok := store.Get(ipld.CID(initState.State()))
 	// This tiny coupling between the VM and the storage miner actor is unfortunate.
 	// It could be avoided by:
 	// - paying gas rewards via the RewardActor, which can do the miner->owner lookup
@@ -276,7 +276,7 @@ func _applyMessageInternal(tree st.StateTree, sender actor.ActorState, senderAdd
 	gasRemainingInit msg.GasAmount, topLevelBlockWinner addr.Address) (vmr.MessageReceipt, st.StateTree) {
 
 	rt := vmri.VMContext_Make(
-		node.StateStore(),
+		store,
 		senderAddr,
 		topLevelBlockWinner,
 		sender.CallSeqNum(),
