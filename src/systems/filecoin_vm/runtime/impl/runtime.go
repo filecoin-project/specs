@@ -68,21 +68,11 @@ func (h *ActorStateHandle_I) Take() ActorSubstateCID {
 	return ret
 }
 
-// Placeholder interface for IPLD state-tree storage.
-// TODO: rework the state tree to write to this store.
-// Maybe push serialization down into it.
-type IPLDStore interface {
-	// Puts a serialized value in the store, returning the CID.
-	Put(value []byte) ipld.CID
-	// Retrieves a serialized value from the store by CID. Returns the value and whether it was found.
-	Get(cid ipld.CID) ([]byte, bool)
-}
-
 // Concrete instantiation of the Runtime interface. This should be instantiated by the
 // interpreter once per actor method invocation, and responds to that method's Runtime
 // API calls.
 type VMContext struct {
-	_store              IPLDStore
+	_store              ipld.GraphStore
 	_globalStateInit    st.StateTree
 	_globalStatePending st.StateTree
 	_running            bool
@@ -110,7 +100,7 @@ type VMContext struct {
 }
 
 func VMContext_Make(
-	store IPLDStore,
+	store ipld.GraphStore,
 	toplevelSender addr.Address,
 	toplevelBlockWinner addr.Address,
 	toplevelSenderCallSeqNum actor.CallSeqNum,

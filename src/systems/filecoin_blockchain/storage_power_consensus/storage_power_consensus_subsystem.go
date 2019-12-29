@@ -54,7 +54,7 @@ func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTre
 	util.Assert(ok)
 	substateCID := actorState.State()
 
-	substate, err := node.LocalGraph().Get(ipld.CID(substateCID))
+	substate, err := node.StateStore().Get(ipld.CID(substateCID))
 	if err != nil {
 		panic("TODO")
 	}

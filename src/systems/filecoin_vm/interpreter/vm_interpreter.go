@@ -33,8 +33,8 @@ const (
 	SenderResolveSpec_Invalid
 )
 
-// Placeholder for an IPLD tree store which is provided to the interpreter.
-var store vmri.IPLDStore
+// TODO: fix linking here
+var node node_base.FilecoinNode
 
 // Applies all the message in a tipset, along with implicit block- and tipset-specific state
 // transitions.
@@ -231,8 +231,8 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 func _resolveSender(tree st.StateTree, address addr.Address) addr.Address {
 	initState, ok := tree.GetActor(addr.InitActorAddr)
 	util.Assert(ok)
-	serialized, ok := store.Get(ipld.CID(initState.State()))
-	initSubState := initact.Deserialize_InitActorState_Assert(serialized)
+	serialized, ok := node.StateStore().Get(ipld.CID(initState.State()))
+	initSubState := sysactors.Deserialize_InitActorState_Assert(serialized)
 	return initSubState.ResolveAddress(address)
 }
 
@@ -240,7 +240,7 @@ func _resolveSender(tree st.StateTree, address addr.Address) addr.Address {
 func _lookupMinerOwner(tree st.StateTree, minerAddr addr.Address) addr.Address {
 	initState, ok := tree.GetActor(minerAddr)
 	util.Assert(ok)
-	serialized, ok := store.Get(ipld.CID(initState.State()))
+	serialized, ok := node.StateStore().Get(ipld.CID(initState.State()))
 	// This tiny coupling between the VM and the storage miner actor is unfortunate.
 	// It could be avoided by:
 	// - paying gas rewards via the RewardActor, which can do the miner->owner lookup
@@ -276,7 +276,7 @@ func _applyMessageInternal(tree st.StateTree, sender actor.ActorState, senderAdd
 	gasRemainingInit msg.GasAmount, topLevelBlockWinner addr.Address) (vmr.MessageReceipt, st.StateTree) {
 
 	rt := vmri.VMContext_Make(
-		store,
+		node.StateStore(),
 		senderAddr,
 		topLevelBlockWinner,
 		sender.CallSeqNum(),

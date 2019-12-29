@@ -6,5 +6,4 @@ entries:
 - repository
 - network
 - clock
-- key_store
 ---

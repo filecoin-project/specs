@@ -4,7 +4,7 @@ statusIcon: ✅
 title: "Repository - Local Storage for Chain Data and Systems"
 entries:
   - config
-  - key
+  - key_store
   - ipldstore
   - usage
 ---
