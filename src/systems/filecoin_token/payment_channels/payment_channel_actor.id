@@ -1,8 +1,43 @@
-type Voucher struct {}
-type VouchersApprovalResponse struct {}
-type PieceInclusionProof struct {}
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 
-type PaymentChannelActor struct {
-    RedeemVoucherWithApproval(voucher Voucher)
-    RedeemVoucherWithPIP(voucher Voucher, pip PieceInclusionProof)
+type PaymentChannelActorState struct {
+    From                addr.Address
+    To                  addr.Address
+
+    ToSend              util.UVarint
+    Secret              util.Bytes
+
+    MaxLaneNonceMerged  uint64
+
+    ClosingAt           block.ChainEpoch
+    MinCloseHeight      block.ChainEpoch
+
+    LaneStates          {uint64: &LaneState}
+}
+
+type PaymentChannelActorCode struct {
+    // Intentionally left blank (VM methods do not require Golang prototypes).
+    // Can be filled in once InvokeMethod is implemented for this actor.
+}
+
+type LaneNonce uint64
+
+type LaneState struct {
+    Closed    bool
+    Redeemed  actor.TokenAmount
+    Nonce     LaneNonce
+}
+
+type SignedVoucher struct {
+    SecretPreimage  util.Bytes
+    Nonce           LaneNonce
+    Amount          actor.TokenAmount
+    MinCloseHeight  block.ChainEpoch
+
+    Merges          [LaneNonce]
+
+    Signature       filcrypto.Signature
 }

@@ -52,6 +52,9 @@ storage_faults: "Storage Faults"
 deals: "Deals"
 deal_states: "Deal States"
 
+payment_channels: "Payment Channels"
+payment_channel_actor: "Payment Channel Actor"
+
 # mining
 mining_cycle: "Mining Cycle"
 

@@ -90,3 +90,11 @@ const (
 	Method_StoragePowerActor_GetMinerConsensusPower
 	Method_StoragePowerActor_GetMinerUnmetPledgeCollateralRequirement
 )
+
+const (
+	Method_PaymentChannelActor_Create = actor.MethodPlaceholder + iota
+	Method_PaymentChannelActor_UpdateChannelState
+	Method_PaymentChannelActor_Close
+	Method_PaymentChannelActor_GetOwner
+	Method_PaymentChannelActor_GetInfo
+)
