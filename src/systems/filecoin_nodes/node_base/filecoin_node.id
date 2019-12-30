@@ -3,7 +3,6 @@ import filestore "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import message_pool "github.com/filecoin-project/specs/systems/filecoin_blockchain/message_pool"
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
 type FilecoinNode struct {
     Node         libp2p.Node
@@ -11,6 +10,6 @@ type FilecoinNode struct {
     Repository   repo.Repository
     FileStore    filestore.FileStore
     Clock        clock.UTCClock
-    
+
     MessagePool  message_pool.MessagePoolSubsystem
 }

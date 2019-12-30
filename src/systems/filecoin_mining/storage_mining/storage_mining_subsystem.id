@@ -9,7 +9,6 @@ import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain
 import blockproducer "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block_producer"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
-import repo "github.com/filecoin-project/specs/systems/filecoin_nodes/repository"
 import node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
@@ -17,7 +16,7 @@ import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
 type StorageMiningSubsystem struct {
-    FilecoinNode       node_base.FilecoinNode
+    Node               node_base.FilecoinNode
 
     // TODO: constructor
     // InitStorageMiningSubsystem(node node_base.FilecoinNode) struct{}
@@ -37,9 +36,6 @@ type StorageMiningSubsystem struct {
 
     // Need access to the blockchain system in order to query for things in the chain
     _blockchain        blockchain.BlockchainSubsystem
-
-    // Need access to the key store in order to generate tickets and election proofs
-    _keyStore          repo.KeyStore
 
     // call by StorageMiningSubsystem itself to create miner
     CreateMiner(

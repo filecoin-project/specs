@@ -7,8 +7,8 @@ type Object interface {
 
 type GraphStore struct {
     // Retrieves a serialized value from the store by CID. Returns the value and whether it was found.
-    Get(cid CID)   ([byte], bool)
+    Get(cid CID)           (util.Bytes, bool)
 
     // Puts a serialized value in the store, returning the CID.
-    Put(value [byte])  (CID)
+    Put(value util.Bytes)  (cid CID)
 }
