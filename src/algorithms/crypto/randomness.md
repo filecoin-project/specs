@@ -10,9 +10,10 @@ We describe this formatting below.
 
 ## Encoding On-chain data for randomness
 
-Any randomness derived from on-chain values uses the following encodings to represent these values as bytes
+Any randomness derived from on-chain values uses the following encodings to represent these values as bytes:
+
 - **Bytes**: Bytes
-- **Ints**: Little endian uint64 representation
+- **Ints**: Little-endian uint64 representation
 - **Strings**: ASCII
 - **Objects**: Their specified Serialization, currently CBOR-based serialization defined on algebraic datatypes
 

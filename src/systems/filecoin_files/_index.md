@@ -7,6 +7,7 @@ entries:
 - piece
 # - error_correction # TODO
 - data_transfer
+- serialization
 ---
 
 Filecoin's primary aim is to store client's Files and Data.
