@@ -2,7 +2,7 @@
 title: Listings
 entries:
   - actors
-  - listings
+  - reserved_ranges
   - data_structures
   - system_map
   - libp2p_protocols
