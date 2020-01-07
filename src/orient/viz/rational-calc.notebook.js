@@ -121,10 +121,10 @@ md`#### Benchmarks`
 
 bench = ({
   "kdf_time": 0.0000000256 / 2, // 2 1.28e-8/2, //5.4e-7,
-  "merkle_tree_datahash_time": 0.0000000256/2,
-  "merkle_tree_hash_time": 1.7028e-5/2,
-  "column_leaf_hash_time": 1.7028e-5/2,
-  "snark_constraint_time": 3.012e-5/2,
+  "merkle_tree_datahash_time": 0.3876e-6,
+  "merkle_tree_hash_time": 13.652e-6,
+  "column_leaf_hash_time": 171e-6/10,
+  "snark_constraint_time": 0.00000317488,
   "ticket_hash": 1.7028e-5/2,
 })
 
