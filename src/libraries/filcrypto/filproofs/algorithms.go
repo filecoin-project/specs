@@ -760,10 +760,8 @@ func (sdr *WinStackedDRG_I) CreateOfflineCircuitProof(proof PrivateOfflineProof,
 	var bytes []byte
 
 	sealProof := sector.SealProof_I{
-		Config_: &sector.SealProofConfig_I{
-			CircuitType_: sector.SealCircuitType_WinStackedSDR,
-		},
-		ProofBytes_: bytes,
+		CircuitType_: sector.SealCircuitType_WinStackedSDR,
+		ProofBytes_:  bytes,
 	}
 
 	return &sealProof
