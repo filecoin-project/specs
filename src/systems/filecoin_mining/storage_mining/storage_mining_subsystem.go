@@ -264,13 +264,24 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 		return false
 	}
 
-	// 2. Verify partialTicket values are appropriate
+	// 2. verify no duplicate tickets included
+	tickets := make(map[sector.SectorID][]util.UInt)
+	for _, tix := range onChainInfo.Candidates() {
+		for _, index := range tickets[tix.SectorID()] {
+			if tix.ChallengeIndex() == index {
+				return false
+			}
+		}
+		tickets[tix.SectorID()] = append(tickets[tix.SectorID()], tix.ChallengeIndex())
+	}
+
+	// 3. Verify partialTicket values are appropriate
 	if !sms._verifyElection(header, onChainInfo) {
 		return false
 	}
 
 	// verify the partialTickets themselves
-	// 3. Verify appropriate randomness
+	// 4. Verify appropriate randomness
 	// TODO: fix away from BestChain()... every block should track its own chain up to its own production.
 	randomness := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), header.Epoch())
 	postRandomnessInput := sector.PoStRandomness(sms.PreparePoStChallengeSeed(randomness, header.Miner()))
@@ -290,7 +301,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 	}
 
 	// A proof must be a valid snark proof with the correct public inputs
-	// 4. Get public inputs
+	// 5. Get public inputs
 	info := sma.Info()
 	sectorSize := info.SectorSize()
 
@@ -309,7 +320,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 
 	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{ElectionPoStCfg_: &postCfg})
 
-	// 5. Verify the PoSt Proof
+	// 6. Verify the PoSt Proof
 	isPoStVerified := sdr.VerifyElectionPoSt(&pvInfo)
 	return isPoStVerified
 }
