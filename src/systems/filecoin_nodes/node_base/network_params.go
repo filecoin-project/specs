@@ -3,7 +3,14 @@ package node_base
 import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 )
+
+/////////////////////////////////////////////////////////////
+// Global
+/////////////////////////////////////////////////////////////
+
+const NETWORK = addr.Address_NetworkID_Testnet
 
 /////////////////////////////////////////////////////////////
 // Commitment
