@@ -112,6 +112,7 @@ viewof rig = jsonToSliders({
   "rig_storage_min_tib": {value: 100, min: 0.5, max: 1024, step: 0.5},
   "rig_storage_parallelization": {value: 4, min: 1, max: 128, step: 1},
   "rig_storage_read_mbs": {value: 80, min: 80, max: 1000, step: 1},
+  "rig_storage_write_mbs": {value: 2000, min: 10, max: 5000, step: 1}, 
   "cost_gb_per_month": {value: 0.0025, min: 0.0001, max: 0.1, step: 0.0001},
   "extra_storage_time": {value: 0, min: 0, max: 10, step: 1 },
 })
@@ -119,10 +120,10 @@ viewof rig = jsonToSliders({
 md`#### Benchmarks`
 
 bench = ({
-  "column_leaf_hash_time": 1.7028e-5/2,
   "kdf_time": 0.0000000256 / 2, // 2 1.28e-8/2, //5.4e-7,
   "merkle_tree_datahash_time": 0.0000000256/2,
   "merkle_tree_hash_time": 1.7028e-5/2,
+  "column_leaf_hash_time": 1.7028e-5/2,
   "snark_constraint_time": 3.012e-5/2,
   "ticket_hash": 1.7028e-5/2,
 })
@@ -142,10 +143,10 @@ pedersen = ({
 
 
 constraints = ({
-  "merkle_tree_hash_constraints": 1376/2,
+  "merkle_tree_hash_constraints": 1376,
   "ticket_constraints": 1376/2,
-  "merkle_tree_datahash_constraints": 25000/2,
-  "kdf_constraints": 14066/2,
+  "merkle_tree_datahash_constraints": 25840,
+  "kdf_constraints": 25840/2,
   "column_leaf_hash_constraints": 1376/2,
   "snark_size": 192,
   "porep_snark_partition_constraints": 100000000,
@@ -1176,13 +1177,16 @@ function qs(variable) {
 
 benchmark_theory = solve_manys([benchmark_theory_query])
 
+createJsonDownloadButton(benchmark_theory[0])
 
 benchmark_theory_query = {
-  const bench = {
+  const settings = {
     sector_size_gib: 1,
     porep_challenges: 700,
     post_challenges: 30,
-    stacked_layers: 7
+    stacked_layers: 7,
+    rig_cores: 8,
+    rig_storage_write_mbs: 2000,
   }
 
   let query = extend_query([{}], [stackedReplicas])
@@ -1196,8 +1200,8 @@ benchmark_theory_query = {
     "!StackedReplicas": true,
     "!StackedReplicaUnaligned": true,
     post_mtree_layers_deleted: 0,
-    time_amax: 2,
-    hash_gb_per_second: 5,
+    // time_amax: 1,
+    // hash_gb_per_second: 7.5,
     graph_name: 'SDR',
     proof_name: "stackedReplicas",
     windows: 1,
@@ -1206,13 +1210,61 @@ benchmark_theory_query = {
   query = extend_query(query, [pedersen])
   query = extend_query(query, [filecoin])
   query = extend_query(query, [constraints])
-  query = extend_query(query, [bench])
-
-
+  query = extend_query(query, [settings])
+  query = extend_query(query, [{
+    "kdf_time": 1.051e-7, // 0.0000000256 / 2, // 2 1.28e-8/2, //5.4e-7,
+    "merkle_tree_datahash_time": 0.3876e-6, // 1.051e-7, // 0.0000000256/2,
+    "merkle_tree_hash_time": 13.652e-6, // 1.7028e-5/2,
+    "column_leaf_hash_time": 171e-6/10, // 1.7028e-5/2,
+    "snark_constraint_time": 0.00000317488, // 3.012e-5/2,
+    "ticket_hash": 1.7028e-5/2,
+    "rig_snark_parallelization": 1,
+    "rig_storage_latency": 0.0003,
+    "rig_storage_parallelization": 1
+  }])
 
   return query
 }
 
-createJsonDownloadButton(benchmark_theory)
+createJsonDownloadButton(benchmark_theory_query[0])
 
-report_from_result(benchmark_theory[0], benchmark_theory_query[0])
+benchmark_practice = fetch(`./bench.json?date=${(new Date()).getTime()}`)
+  .then(r => r.json())
+
+md`
+| name |
+| ---- |
+${Object.keys(benchmark_practice).filter(k => !benchmark_theory[0][k]).map(k => `| ${k}| `).join('\n')}
+`
+report_comparison(benchmark_theory[0], benchmark_practice)
+
+function report_comparison(result1, result2) {
+  const html = md`
+
+| name | val1 | val2 | type | desc |
+| ---- | ---- | ---- | ---- | ---- |
+${Object.keys(result1).sort()
+  .map(d => {
+    let name = d
+    if (result2[d] === result1[d]) name = `<font style="color: green;">**${d}**</font>`
+    if (result2[d] !== result1[d]) name = `<font style="color: red;">**${d}**</font>`
+    if (!result2[d]) name = `<font style="color: orange;">**${d}**</font>`
+
+    return `| ${name} | ${result1[d]} | ${result2[d]} | ${vars[d] && vars[d].type ? vars[d].type : ''} | ${vars[d] && vars[d].description ? vars[d].description : ''} |\n`
+})}
+`
+  return html
+}
+
+// encoding time is everything but the SNARK
+// precommmit
+
+// porep_time -> porep_precommit_time:
+// encoding_time -> dig_encoding_time: column leaves + encoding time
+// generate_tree_c_time -> commc_tree_time
+// kdf_constraints -> labeling_proof
+// tree_r_last_cpu_time_ms -> commr_time
+// porep_constraints -> porep_snark_constraints
+// post_constraints -> post_snark_constraints
+
+// TODO: make sure that lotus proofs take the same time as ubercalc
