@@ -20,3 +20,10 @@ var SealSeedHash = SHA256
 func (x PieceInfo_I) Ref() *PieceInfo_I {
 	return &x
 }
+
+func (svi *OnChainSealVerifyInfo_I) IsValidAtSealEpoch() bool {
+	// We can just hardcode logic for the range of epochs at which each circuit type is valid.
+	switch svi.Proof().CircuitType() {
+	}
+	panic("TODO")
+}

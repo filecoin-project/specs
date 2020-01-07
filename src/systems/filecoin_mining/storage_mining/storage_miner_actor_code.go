@@ -748,7 +748,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySeal(rt Runtime, onChainInfo sector.O
 	}
 
 	sdr := filproofs.WinSDRParams(&filproofs.ProofsCfg_I{SealCfg_: &sealCfg})
-	return sdr.VerifySeal(&svInfo)
+	return onChainInfo.IsValidAtSealEpoch() && sdr.VerifySeal(&svInfo)
 }
 
 func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {

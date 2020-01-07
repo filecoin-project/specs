@@ -16,8 +16,8 @@ func (sps *StorageProvingSubsystem_I) VerifySeal(sv sector.SealVerifyInfo) Stora
 
 	// TODO: Presumably this can be done with interfaces or whatever method we intend for such things,
 	// but for now this expresses intent simply enough.
-	switch sv.SealCfg().Algorithm() {
-	case sector.SealAlgorithm_WinStackedDRG:
+	switch sv.SealCfg().ProofInstance().Algorithm() {
+	case sector.ProofAlgorithm_WinStackedDRGSeal:
 		result = filproofs.WinSDRParams(&cfg).VerifySeal(sv)
 	}
 

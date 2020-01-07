@@ -36,6 +36,14 @@ const SURPRISE_POST_PARTITIONS = 1
 const POST_LEAF_CHALLENGE_COUNT = 66
 const POST_CHALLENGE_RANGE_SIZE = 1
 
+func (c *ConcreteCircuit_I) GrothParameterFileName() string {
+	return c.Name() + ".params"
+}
+
+func (c *ConcreteCircuit_I) VerifyingKeyFileName() string {
+	return c.Name() + ".vk"
+}
+
 func PoStCfg(pType sector.PoStType, sectorSize sector.SectorSize, partitions UInt) *sector.PoStCfg_I {
 	nodes := UInt(sectorSize / NODE_SIZE)
 	return &sector.PoStCfg_I{
@@ -67,7 +75,7 @@ func SurprisePoStVerifier(cfg sector.PoStCfg) *PoStVerifier_I {
 }
 
 func WinSDRParams(cfg ProofsCfg) *WinStackedDRG_I {
-	util.Assert(cfg.SealCfg().Algorithm() == sector.SealAlgorithm_WinStackedDRG)
+	util.Assert(cfg.SealCfg().ProofInstance().Algorithm() == sector.ProofAlgorithm_WinStackedDRGSeal)
 	// TODO: Bridge constants with orient model.
 	const LAYERS = 10
 	const OFFLINE_CHALLENGES = 6666
@@ -965,12 +973,12 @@ func generateLeafChallenge(randomness sector.PoStRandomness, sectorChallengeInde
 	return leafChallenge.Uint64()
 }
 
-func generateCandidate(algorithm sector.SealAlgorithm, cfg sector.PoStCfg, randomness sector.PoStRandomness, aux sector.PersistentProofAux, sectorID sector.SectorID, sectorChallengeIndex UInt) sector.PoStCandidate {
+func generateCandidate(algorithm sector.ProofAlgorithm, cfg sector.PoStCfg, randomness sector.PoStRandomness, aux sector.PersistentProofAux, sectorID sector.SectorID, sectorChallengeIndex UInt) sector.PoStCandidate {
 	var candidate sector.PoStCandidate
 	switch algorithm {
-	case sector.SealAlgorithm_StackedDRG:
+	case sector.ProofAlgorithm_StackedDRGSeal:
 		panic("TODO")
-	case sector.SealAlgorithm_WinStackedDRG:
+	case sector.ProofAlgorithm_WinStackedDRGSeal:
 		sdr := WinStackedDRG_I{}
 		candidate = sdr._generateCandidate(cfg, randomness, aux, sectorID, sectorChallengeIndex)
 	}
@@ -1005,7 +1013,7 @@ func (sdr *WinStackedDRG_I) _generateCandidate(cfg sector.PoStCfg, randomness se
 
 	candidate := sector.PoStCandidate_I{
 		PartialTicket_:  partialTicket,
-		PrivateProof_:   privateProof.externalize(sector.SealAlgorithm_WinStackedDRG),
+		PrivateProof_:   privateProof.externalize(sector.ProofAlgorithm_WinStackedDRGSeal),
 		SectorID_:       sectorID,
 		ChallengeIndex_: sectorChallengeIndex,
 	}
@@ -1022,10 +1030,10 @@ func computePartialTicket(randomness sector.PoStRandomness, sectorID sector.Sect
 	return partialTicket
 }
 
-type PoStCandidatesMap map[sector.SealAlgorithm][]sector.PoStCandidate
+type PoStCandidatesMap map[sector.ProofAlgorithm][]sector.PoStCandidate
 
 func CreatePoStProof(cfg sector.PoStCfg, privateCandidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) []sector.PoStProof {
-	var proofsMap map[sector.SealAlgorithm][]PrivatePostCandidateProof
+	var proofsMap map[sector.ProofAlgorithm][]PrivatePostCandidateProof
 
 	for _, proof := range privateCandidateProofs {
 		algorithm := proof.Algorithm()
@@ -1051,7 +1059,7 @@ type PrivatePoStProof struct {
 	CandidateProofs []PrivatePostCandidateProof
 }
 
-func createPrivatePoStProof(algorithm sector.SealAlgorithm, candidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) PrivatePoStProof {
+func createPrivatePoStProof(algorithm sector.ProofAlgorithm, candidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) PrivatePoStProof {
 
 	return PrivatePoStProof{
 		ChallengeSeed:   challengeSeed,
@@ -1065,7 +1073,7 @@ type InternalPrivateCandidateProof struct {
 
 // This exists because we need to pass private proofs out of filproofs for winner selection.
 // Actually implementing it would (will?) be tedious, since it means doing the same for InclusionProofs.
-func (p *InternalPrivateCandidateProof) externalize(algorithm sector.SealAlgorithm) sector.PrivatePoStCandidateProof {
+func (p *InternalPrivateCandidateProof) externalize(algorithm sector.ProofAlgorithm) sector.PrivatePoStCandidateProof {
 	return &sector.PrivatePoStCandidateProof_I{
 		Algorithm_:    algorithm,
 		Externalized_: []byte{}, // Unimplemented.
@@ -1162,9 +1170,9 @@ func (sdr *WinStackedDRG_I) VerifyPrivatePoStProof(cfg sector.PoStCfg, privatePr
 	return true
 }
 
-func createPoStCircuitProof(postCfg sector.PoStCfg, algorithm sector.SealAlgorithm, privateProof PrivatePoStProof) (proof sector.PoStProof) {
+func createPoStCircuitProof(postCfg sector.PoStCfg, algorithm sector.ProofAlgorithm, privateProof PrivatePoStProof) (proof sector.PoStProof) {
 	switch algorithm {
-	case sector.SealAlgorithm_WinStackedDRG:
+	case sector.ProofAlgorithm_WinStackedDRGSeal:
 		sdr := WinStackedDRG_I{}
 		proof = sdr._createPoStCircuitProof(postCfg, privateProof)
 	}
