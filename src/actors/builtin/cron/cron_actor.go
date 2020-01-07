@@ -7,13 +7,6 @@ import (
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 )
 
-const (
-	Method_CronActor_EpochTick = actor.MethodPlaceholder + iota
-)
-
-type InvocOutput = vmr.InvocOutput
-type Runtime = vmr.Runtime
-
 func (a *CronActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 	// Nothing. intentionally left blank.
 	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr)
