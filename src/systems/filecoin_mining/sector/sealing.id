@@ -15,9 +15,13 @@ type SealSeed Bytes
 
 type SealCfg struct {
     SectorSize
-    WindowCount    UInt
+    InstanceCfg    union {WinStackedDRGCfgV1}  // New proof ProofInstances can add new cfg types if needed.
     Partitions     UInt
     ProofInstance
+}
+
+type WinStackedDRGCfgV1 struct {
+    WindowCount UInt
 }
 
 // SealVerifyInfo is the structure of all the information a verifier

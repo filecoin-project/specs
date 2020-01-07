@@ -1,0 +1,174 @@
+import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+import sealing "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
+import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+
+type SectorExpirationQueueItem struct {
+    SectorNumber  sector.SectorNumber
+    Expiration    block.ChainEpoch
+}
+
+type SectorExpirationQueue struct {
+    Add(i SectorExpirationQueueItem)
+    Pop() SectorExpirationQueueItem
+    Peek() SectorExpirationQueueItem
+    Remove(n sector.SectorNumber)
+}
+
+type SectorStateTable struct {
+    SectorSize         sector.SectorSize
+    ActiveSectors      sector.CompactSectorSet
+    CommittedSectors   sector.CompactSectorSet
+    RecoveringSectors  sector.CompactSectorSet
+    FailingSectors     sector.CompactSectorSet
+
+    // transient State that get reset on every constructPowerReport
+    TerminatedFaults   sector.CompactSectorSet
+}
+
+type SectorOnChainInfo struct {
+    SealCommitment  sector.SealCommitment
+    State           SectorState
+    SectorWeight    block.SectorWeight
+    Activation      block.ChainEpoch
+    Expiration      block.ChainEpoch
+}
+
+type ChallengeStatus struct {
+    LastChallengeEpoch     block.ChainEpoch  // get updated by NotifyOfPoStSurpriseChallenge and SubmitElectionPoSt
+    _lastPoStFailureEpoch  block.ChainEpoch  // get updated upon _onMissedSurprisePoSt
+    _lastPoStSuccessEpoch  block.ChainEpoch  // get updated by successful Election or Suprise PoSt submission
+
+    _getStoragePowerActorState(stateTree stateTree.StateTree) spc.StoragePowerActorState
+
+    OnNewChallenge(currEpoch block.ChainEpoch)
+    LastPoStResponseEpoch() block.ChainEpoch
+    LastPoStSuccessEpoch() block.ChainEpoch
+    OnPoStSuccess(currEpoch block.ChainEpoch)
+    OnPoStFailure(currEpoch block.ChainEpoch)
+
+    IsChallenged() bool  // only True when proving SurprisePoSt (implicit because ElectionPoSt completes within a block)
+    ChallengeHasExpired(currEpoch block.ChainEpoch) bool
+    CanBeElected(currEpoch block.ChainEpoch) bool
+    ShouldChallenge(
+        currEpoch block.ChainEpoch
+    ) bool
+}
+
+type PreCommittedSector struct {
+    Info           sealing.SectorPreCommitInfo
+    ReceivedEpoch  block.ChainEpoch
+}
+
+type PreCommittedSectorsAMT {sector.SectorNumber: PreCommittedSector}
+type StagedCommittedSectorAMT {sector.SectorNumber: SectorOnChainInfo}
+type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
+
+// Balance of a StorageMinerActor should equal exactly the sum of PreCommit deposits that are not yet returned or burned
+type StorageMinerActorState struct {
+    PreCommittedSectors     PreCommittedSectorsAMT
+    StagedCommittedSectors  StagedCommittedSectorAMT
+    Sectors                 SectorsAMT
+    ProvingSet              sector.CompactSectorSet
+
+    SectorTable             SectorStateTable
+    SectorExpirationQueue
+    ChallengeStatus
+
+    // contains mostly static info about this miner
+    Info                    &MinerInfo
+
+    _verifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool
+    // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
+    _isChallenged() bool
+    _canBeElected(currEpoch block.ChainEpoch) bool
+    _challengeHasExpired(currEpoch block.ChainEpoch) bool
+    _shouldChallenge(
+        currEpoch block.ChainEpoch
+    ) bool
+
+    _processStagedCommittedSectors()
+    _updateFailSectorAssert(
+        sectorNo             sector.SectorNumber
+        incrementFaultCount  bool
+    )
+    _updateExpireSectors(currEpoch block.ChainEpoch) [sector.SectorNumber]
+    _updateClearSectorAssert(sectorNo sector.SectorNumber)
+    _updateActivateSectorAssert(sectorNo sector.SectorNumber)
+
+    _getActiveSectorWeight()    (block.SectorWeight, error)
+    _getInactiveSectorWeight()  (block.SectorWeight, error)
+    _getPreCommitDepositReq()   actor.TokenAmount
+
+    _getSectorOnChainInfo(sectorNo sector.SectorNumber) (info SectorOnChainInfo, ok bool)
+    _getSectorPower(sectorNo sector.SectorNumber) (power block.StoragePower, ok bool)
+    _getSectorDealIDs(sectorNo sector.SectorNumber) (dealIDs deal.DealIDs, ok bool)
+}
+
+type StorageMinerActorCode struct {
+    GetOwnerKey(rt Runtime) filcrypto.VRFPublicKey
+    GetWorkerKey(rt Runtime) filcrypto.VRFPublicKey
+    OnCronTickEnd(rt Runtime)
+    NotifyOfSurprisePoStChallenge(rt Runtime)
+    ProcessSurprisePoSt(rt Runtime)
+
+    PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo)  // TODO: check with Magik on sizes
+    ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo)
+    ProcessVerifiedElectionPoSt(rt Runtime)
+    DeclareFaults(rt Runtime, failingSet sector.CompactSectorSet)
+    RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet)
+
+    _checkSurprisePoStSubmissionHappened(rt Runtime)
+    _rtVerifySurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) bool
+    _rtVerifySeal(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
+    _rtAbortIfSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber)
+
+    _onMissedSurprisePoSt(rt Runtime)
+    _onSuccessfulPoSt(rt Runtime)
+
+    _slashCollateralForStorageFaults(
+        rt          Runtime
+        declared    sector.CompactSectorSet  // diff value
+        detected    sector.CompactSectorSet  // diff value
+        terminated  sector.CompactSectorSet  // diff value
+    )
+    _slashDealsForStorageFault(
+        rt             Runtime
+        sectorNumbers  [sector.SectorNumber]
+        faultType      sector.StorageFaultType
+    )
+
+    _submitPowerReport(rt Runtime, lastPoSt block.ChainEpoch)
+    _expirePreCommittedSectors(rt Runtime)
+}
+
+type MinerInfo struct {
+    // Account that owns this miner.
+    // - Income and returned collateral are paid to this address.
+    // - This address is also allowed to change the worker address for the miner.
+    Owner                   address.Address  // Must be an ID-address.
+    OwnerKey                filcrypto.VRFPublicKey
+
+    // Worker account for this miner.
+    // This will be the key that is used to sign blocks created by this miner, and
+    // sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
+    // other day to day miner activities.
+    Worker                  address.Address  // Must be an ID-address.
+    WorkerKey               filcrypto.VRFPublicKey
+
+    // Libp2p identity that should be used when connecting to this miner.
+    PeerId                  libp2p.PeerID
+
+    // Amount of space in each sector committed to the network by this miner.
+    SectorSize              sector.SectorSize
+    InstanceCfg             sector.SealCfg_InstanceCfg
+    SealPartitions          UVarint
+    ElectionPoStPartitions  UVarint
+    SurprisePoStPartitions  UVarint
+}

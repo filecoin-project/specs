@@ -38,12 +38,26 @@ const POST_CHALLENGE_RANGE_SIZE = 1
 
 func PoStCfg(pType sector.PoStType, sectorSize sector.SectorSize, partitions UInt) *sector.PoStCfg_I {
 	nodes := UInt(sectorSize / NODE_SIZE)
+
+	var registeredProof sector.RegisteredProof
+
+	switch pType {
+	case sector.PoStType_ElectionPoSt:
+		registeredProof = sector.RegisteredProof_WinStackedDRG32GiBPoSt
+	case sector.PoStType_SurprisePoSt:
+		registeredProof = sector.RegisteredProof_WinStackedDRG32GiBPoSt
+
+	}
+
 	return &sector.PoStCfg_I{
-		Type_:               pType,
-		Nodes_:              nodes,
-		Partitions_:         partitions,
-		LeafChallengeCount_: POST_LEAF_CHALLENGE_COUNT,
-		ChallengeRangeSize_: POST_CHALLENGE_RANGE_SIZE,
+		InstanceCfg_: sector.PoStCfg_InstanceCfg_Make_PoStCfgV1(&sector.PoStCfgV1_I{
+			Type_:               pType,
+			Nodes_:              nodes,
+			Partitions_:         partitions,
+			LeafChallengeCount_: POST_LEAF_CHALLENGE_COUNT,
+			ChallengeRangeSize_: POST_CHALLENGE_RANGE_SIZE,
+		}),
+		ProofInstance_: sector.PROOFS[UInt(registeredProof)],
 	}
 }
 func SurprisePoStCfg(sectorSize sector.SectorSize) *sector.PoStCfg_I {
@@ -978,7 +992,9 @@ func generateCandidate(algorithm sector.ProofAlgorithm, cfg sector.PoStCfg, rand
 	return candidate
 }
 
-func (sdr *WinStackedDRG_I) _generateCandidate(cfg sector.PoStCfg, randomness sector.PoStRandomness, aux sector.PersistentProofAux, sectorID sector.SectorID, sectorChallengeIndex UInt) sector.PoStCandidate {
+func (sdr *WinStackedDRG_I) _generateCandidate(postCfg sector.PoStCfg, randomness sector.PoStRandomness, aux sector.PersistentProofAux, sectorID sector.SectorID, sectorChallengeIndex UInt) sector.PoStCandidate {
+	cfg := postCfg.InstanceCfg().As_PoStCfgV1()
+
 	nodes := int(cfg.Nodes())
 	leafChallengeCount := int(cfg.LeafChallengeCount())
 	challengeRangeSize := int(cfg.ChallengeRangeSize())
@@ -1078,9 +1094,9 @@ func newInternalPrivateProof(externalPrivateProof PrivatePostCandidateProof) Int
 	return InternalPrivateCandidateProof{}
 }
 
-func (sdr *WinStackedDRG_I) VerifyInternalPrivateCandidateProof(cfg sector.PoStCfg, p *InternalPrivateCandidateProof, challengeSeed sector.PoStRandomness, candidate sector.PoStCandidate, commRLast Commitment) bool {
+func (sdr *WinStackedDRG_I) VerifyInternalPrivateCandidateProof(postCfg sector.PoStCfg, p *InternalPrivateCandidateProof, challengeSeed sector.PoStRandomness, candidate sector.PoStCandidate, commRLast Commitment) bool {
+	cfg := postCfg.InstanceCfg().As_PoStCfgV1()
 	util.Assert(candidate.PrivateProof() == nil)
-
 	nodes := int(cfg.Nodes())
 	challengeRangeSize := int(cfg.ChallengeRangeSize())
 
@@ -1175,23 +1191,11 @@ func createPoStCircuitProof(postCfg sector.PoStCfg, algorithm sector.ProofAlgori
 func (sdr *WinStackedDRG_I) _createPoStCircuitProof(postCfg sector.PoStCfg, privateProof PrivatePoStProof) sector.PoStProof {
 	panic("TODO")
 
-	postType := postCfg.Type()
-
-	var circuitType sector.ConcreteCircuit
-	switch postType {
-	case sector.PoStType_ElectionPoSt:
-		circuitType = &sector.ConcreteCircuit_I{
-			Name_: "SOMEHASHUNIQUETOTHISEXACTCIRCUIT2",
-		}
-	case sector.PoStType_SurprisePoSt:
-		circuitType = &sector.ConcreteCircuit_I{
-			Name_: "SOMEHASHUNIQUETOTHISEXACTCIRCUIT3",
-		}
-	}
+	cfg := postCfg.InstanceCfg().As_PoStCfgV1()
 
 	postProof := sector.PoStProof_I{
-		Type_:        postCfg.Type(),
-		CircuitType_: circuitType,
+		Type_:        cfg.Type(),
+		CircuitType_: postCfg.ProofInstance().CircuitType(),
 	}
 
 	return &postProof

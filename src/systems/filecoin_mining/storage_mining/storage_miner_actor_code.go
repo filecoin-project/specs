@@ -723,7 +723,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySeal(rt Runtime, onChainInfo sector.O
 
 	sealCfg := sector.SealCfg_I{
 		SectorSize_:  sectorSize,
-		WindowCount_: info.WindowCount(),
+		InstanceCfg_: info.InstanceCfg(),
 		Partitions_:  info.SealPartitions(),
 	}
 

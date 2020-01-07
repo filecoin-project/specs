@@ -3,12 +3,16 @@ type ChallengeTicketsCommitment Bytes
 type PoStRandomness Bytes
 
 type PoStCfg struct {
+    InstanceCfg union {PoStCfgV1}  // New proof ProofInstances can add new cfg types if needed.
+    ProofInstance
+}
+
+type PoStCfgV1 struct {
     Type                PoStType
     Nodes               UInt
     Partitions          UInt
     LeafChallengeCount  UInt
     ChallengeRangeSize  UInt
-    ProofInstance
 }
 
 type PoStType enum {
