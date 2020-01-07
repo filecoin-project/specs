@@ -15,7 +15,9 @@ Rig:
   describe(rig_cores, "Number of CPU cores")
   describe(rig_snark_parallelization, "Number of SNARK proofs that can be generated in parallel")
   describe(rig_storage_read_mbs, "Sequential read speed (MB/s)")
+  describe(rig_storage_write_mbs, "Sequential write speed (MB/s)")
   describe(rig_storage_read_mibs, "Sequential read speed (MiB/s)")
+  describe(rig_storage_write_mibs, "Sequential write speed (MiB/s)")
 
   describe(rig_gpu_cost, "Cost of a GPU", dollar)
   describe(rig_cpu_cost, "Cost of a CPU", dollar)
@@ -26,6 +28,7 @@ Rig:
   describe(rig_gpu_lifetime_years, "Lifetime of a GPU", years)
 
   rig_storage_read_mibs = rig_storage_read_mbs * mb_to_mib
+  rig_storage_write_mibs = rig_storage_write_mbs * mb_to_mib 
   rig_storage_min = rig_storage_min_tib * b_in_tib
   rig_sectors_min = rig_storage_min / sector_size
   rig_storage_parallelization_min = epost_data_access / block_time
@@ -287,7 +290,7 @@ ProofOfReplication:
       describe(node_size_mib, "Size of a node", mib)
       describe(node_size_gib, "Size of a node", gib)
       describe(kdf_hash_size, "Size of the input to the KDF hash", bytes)
-      describe(kdf_hash_size_gib, "Size of the input to the KDF hash", gi)
+      describe(kdf_hash_size_gib, "Size of the input to the KDF hash", gib)
 
       nodes = sector_size / node_size
       node_size_mib = node_size / b_in_mib 
@@ -297,6 +300,8 @@ ProofOfReplication:
 
   Time:
     describe(porep_time, "Time to seal a sector (PoRep proof)", secs)
+    describe(porep_precommit_time, "Time to pre-commit a sector (PoRep proof)", secs)
+    describe(porep_precommit_time_parallel, "Time to pre-commit a sector in parallel (PoRep proof)", secs)
     describe(porep_time_mins, "Time to seal a sector (PoRep proof)", mins)
     describe(porep_time_parallel, "Time to seal a sector (PoRep proof) with parallelization", secs)
     describe(porep_proof_gen, "Time to generate a PoRep proof (SNARK, witness generation, loading data from storage medium)", secs)
@@ -308,6 +313,14 @@ ProofOfReplication:
     porep_time = porep_proof_gen + porep_commit_time + encoding_time
     porep_time_mins = porep_time / secs_in_min
     porep_time_parallel = porep_proof_gen_parallel + porep_commit_time_parallel + encoding_time_parallel
+
+    porep_precommit_time = porep_commit_time + encoding_time
+    porep_precommit_time_parallel = porep_commit_time_parallel + encoding_time_parallel
+
+    describe(dig_encoding_time, "Time to encode and generate CommC leaves (Dig's benchmarks)")
+    describe(dig_encoding_time_parallel, "Time to encode and generate CommC leaves in parallel (Dig's benchmarks)")
+    dig_encoding_time = encoding_time + commc_leaves_time
+    dig_encoding_time_parallel = encoding_time_parallel + commc_leaves_time_parallel
 
   Size:
     describe(porep_proof_size, "Size of a PoRep proof")
@@ -333,8 +346,10 @@ ProofOfReplication:
     describe(porep_commit_time_parallel, "Time to generate CommC, CommR and CommQ in parallel", secs)
 
     describe(commr_time, "Time to generate CommR", secs)
+    describe(commr_time_parallel, "Time to generate CommR in parallel", secs)
     describe(commq_time, "Time to generate CommQ", secs)
     describe(commd_time, "Time to generate CommD", secs)
+    describe(commd_time_parallel, "Time to generate CommD in parallel", secs)
     describe(commc_time, "Time to generate the merkle tree of CommC (assuming leaves in memory)", secs)
 
     commit_size = cid_size
@@ -348,11 +363,14 @@ ProofOfReplication:
     // seal_commitment_time = commr_time
 
     commd_time = merkle_tree_datahash_time * (nodes - 1)
+    commd_time_parallel = commd_time / rig_cores
 
     commq_time = commr_time
     porep_commit_time = commr_time + commq_time + commc_time
     porep_commit_time_parallel = porep_commit_time / rig_cores 
     porep_commit_time_mins = porep_commit_time / 60
+
+    commr_time_parallel = commr_time / rig_cores
 
     CommR (Wrapping): // was VectorR
       commr_time = merkle_tree_hash_time * (nodes - 1)
@@ -374,10 +392,19 @@ ProofOfReplication:
 
     CommC:
       describe(commc_tree_time, "Time to generate CommC (Merkle tree only)", secs)
+      describe(commc_tree_time_parallel, "Time to generate CommC parallel (Merkle tree only)", secs)
       describe(commc_leaves_time, "Time to generate CommC (Leaves only)", secs)
+      describe(commc_leaves_time_parallel, "Time to generate CommC in parallel (Leaves only)", secs)
+      describe(commc_tree_write_time, "Time to write commc tree on disk", secs)
       commc_tree_time = window_comm_tree_time
+      commc_tree_time_parallel = commc_tree_time / rig_cores
       commc_leaves_time = window_comm_leaves_time * stacked_layers * windows
+      commc_leaves_time_parallel = commc_leaves_time / rig_cores
       commc_time = commc_tree_time + commc_leaves_time
+
+      describe(dig_commc_tree_time, "Time to compute commc and store it on disk (Dig's Benchmark)", secs)
+      dig_commc_tree_time = commc_tree_time + commc_tree_write_time
+      commc_tree_write_time = (window_size * 2) / (b_in_mib * rig_storage_write_mibs)
 
   Encoding:
     describe(encoding_time, "Time to encode a sector", secs)
@@ -401,14 +428,6 @@ ProofOfReplication:
     ParallelEncoding (StackedChungParameters):
       encoding_time_parallel = encoding_time / rig_cores
       encoding_window_time_parallel = encoding_window_time / rig_cores
-
-    Fastest:
-      // describe(encoding_time_fastcpu, "Time to encode with the fastest stock CPU", secs)
-      // describe(encoding_time_mins_fastcpu, "Time to encode with the fastest stock CPU", mins)
-      // describe(kdf_time_fastcpu, "Time to do a 32 bytes hash on the fastest stock CPU", secs)
-      // encoding_time_fastcpu = windows * (window_nodes * ((1 + graph_parents) * kdf_time_fastcpu) * stacked_layers)
-
-      // encoding_time_mins_fastcpu = encoding_time_fastcpu / secs_in_min
 
     Asic:
       encoding_time_asic = encoding_time / hashing_amax
@@ -742,7 +761,7 @@ Timing:
 
 Timing (TimingAssumption):
   RegenAttack (StackedSDRParameters):
-  malicious_regen_time = (encoding_time_asic * drg_d) / (stacked_layers)
+  malicious_regen_time = (encoding_window_time_asic * drg_d) / (stacked_layers)
   malicious_regen_time = block_time * time_amax
 
 Rationality:
