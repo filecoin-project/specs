@@ -102,7 +102,7 @@ type SealArguments struct {
 }
 
 type SealProof struct {//<curve, system> {
-    CircuitType  SealCircuitType
+    CircuitType  ConcreteCircuit
     ProofBytes   Bytes
 }
 

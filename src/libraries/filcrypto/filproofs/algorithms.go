@@ -36,14 +36,6 @@ const SURPRISE_POST_PARTITIONS = 1
 const POST_LEAF_CHALLENGE_COUNT = 66
 const POST_CHALLENGE_RANGE_SIZE = 1
 
-func (c *ConcreteCircuit_I) GrothParameterFileName() string {
-	return c.Name() + ".params"
-}
-
-func (c *ConcreteCircuit_I) VerifyingKeyFileName() string {
-	return c.Name() + ".vk"
-}
-
 func PoStCfg(pType sector.PoStType, sectorSize sector.SectorSize, partitions UInt) *sector.PoStCfg_I {
 	nodes := UInt(sectorSize / NODE_SIZE)
 	return &sector.PoStCfg_I{
@@ -75,7 +67,6 @@ func SurprisePoStVerifier(cfg sector.PoStCfg) *PoStVerifier_I {
 }
 
 func WinSDRParams(cfg ProofsCfg) *WinStackedDRG_I {
-	util.Assert(cfg.SealCfg().ProofInstance().Algorithm() == sector.ProofAlgorithm_WinStackedDRGSeal)
 	// TODO: Bridge constants with orient model.
 	const LAYERS = 10
 	const OFFLINE_CHALLENGES = 6666
@@ -768,8 +759,10 @@ func (sdr *WinStackedDRG_I) CreateOfflineCircuitProof(proof PrivateOfflineProof,
 	var bytes []byte
 
 	sealProof := sector.SealProof_I{
-		CircuitType_: sector.SealCircuitType_WinStackedSDR,
-		ProofBytes_:  bytes,
+		CircuitType_: &sector.ConcreteCircuit_I{
+			Name_: "SOMEHASHUNIQUETOTHISEXACTCIRCUIT1",
+		},
+		ProofBytes_: bytes,
 	}
 
 	return &sealProof
@@ -1184,13 +1177,16 @@ func (sdr *WinStackedDRG_I) _createPoStCircuitProof(postCfg sector.PoStCfg, priv
 
 	postType := postCfg.Type()
 
-	var circuitType sector.PoStCircuitType
-
+	var circuitType sector.ConcreteCircuit
 	switch postType {
 	case sector.PoStType_ElectionPoSt:
-		circuitType = sector.PoStCircuitType_WinStackedSDRElectionPoSt
+		circuitType = &sector.ConcreteCircuit_I{
+			Name_: "SOMEHASHUNIQUETOTHISEXACTCIRCUIT2",
+		}
 	case sector.PoStType_SurprisePoSt:
-		circuitType = sector.PoStCircuitType_WinStackedSDRSurprisePoSt
+		circuitType = &sector.ConcreteCircuit_I{
+			Name_: "SOMEHASHUNIQUETOTHISEXACTCIRCUIT3",
+		}
 	}
 
 	postProof := sector.PoStProof_I{

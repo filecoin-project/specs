@@ -96,9 +96,10 @@ type RegisteredProof enum {
 type ProofRegistry {UInt: ProofInstance}
 
 type ProofInstance struct {
-    ID         RegisteredProof
-    Type       ProofType
-    Algorithm  ProofAlgorithm
+    ID           RegisteredProof
+    Type         ProofType
+    Algorithm    ProofAlgorithm
+    CircuitType  ConcreteCircuit
 }
 
 type ProofType enum {
@@ -111,4 +112,11 @@ type ProofAlgorithm enum {
     WinStackedDRGSeal
     StackedDRGPoSt
     WinStackedDRGPoSt
+}
+
+type ConcreteCircuit struct {
+    // Name must be globally unique. It will be a hash derived from semantic content of circuit.
+    Name                      string
+    GrothParameterFileName()  string
+    VerifyingKeyFileName()    string
 }

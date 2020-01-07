@@ -31,13 +31,6 @@ type ExpanderGraphDegree UInt
 type ExpanderGraphSeed struct {}
 type DRGNodeSize UInt
 
-type ConcreteCircuit struct {
-    // Name must be globally unique. It will be a hash derived from semantic content of circuit.
-    Name                      string
-    GrothParameterFileName()  string
-    VerifyingKeyFileName()    string
-}
-
 type SealAlgorithmArtifacts struct {
     AlgorithmWideSetupArtifacts struct {
         // trusted setup output parameters go here

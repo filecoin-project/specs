@@ -35,3 +35,11 @@ var PROOFS ProofRegistry = ProofRegistry(map[util.UInt]ProofInstance{util.UInt(R
 		Algorithm_: ProofAlgorithm_StackedDRGPoSt,
 	},
 })
+
+func (c *ConcreteCircuit_I) GrothParameterFileName() string {
+	return c.Name() + ".params"
+}
+
+func (c *ConcreteCircuit_I) VerifyingKeyFileName() string {
+	return c.Name() + ".vk"
+}
