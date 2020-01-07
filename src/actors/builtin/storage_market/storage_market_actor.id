@@ -1,5 +1,5 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
+import actor_util "github.com/filecoin-project/specs/actors/util"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"

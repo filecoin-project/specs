@@ -6,15 +6,15 @@ title: Storage Market Actor
 
 # `StorageMarketActor` interface
 
-{{< readfile file="storage_market_actor.id" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/builtin/storage_market/storage_market_actor.id" code="true" lang="go" >}}
 
 # `StorageMarketActorState` implementation
 
-{{< readfile file="storage_market_actor_state.go" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/builtin/storage_market/storage_market_actor_state.go" code="true" lang="go" >}}
 
 # `StorageMarketActorCode` implementation
 
-{{< readfile file="storage_market_actor_code.go" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/builtin/storage_market/storage_market_actor_code.go" code="true" lang="go" >}}
 
 
 {{<label storage_deal_collateral>}}

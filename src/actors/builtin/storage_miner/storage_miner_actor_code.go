@@ -1,6 +1,7 @@
-package storage_mining
+package storage_miner
 
 import (
+	actor_util "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
@@ -11,7 +12,6 @@ import (
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
-	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	util "github.com/filecoin-project/specs/util"
 )

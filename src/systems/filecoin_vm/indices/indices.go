@@ -1,12 +1,12 @@
 package indices
 
 import (
+	actor_util "github.com/filecoin-project/specs/actors/util"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
 )

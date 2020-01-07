@@ -3,11 +3,12 @@ package storage_mining
 // import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 // import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import (
+	sminact "github.com/filecoin-project/specs/actors/builtin/storage_miner"
+	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
-	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -22,6 +23,9 @@ import (
 )
 
 type Serialization = util.Serialization
+
+var Assert = util.Assert
+var TODO = util.TODO
 
 // Note that implementations may choose to provide default generation methods for miners created
 // without miner/owner keypairs. We omit these details from the spec.
@@ -121,7 +125,7 @@ func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 	}
 }
 
-func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.StateTree, sma StorageMinerActorState) sector.OnChainPoStVerifyInfo {
+func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainPoStVerifyInfo {
 	// Randomness for ElectionPoSt
 	randomnessK := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), sms._blockchain().LatestEpoch())
 
@@ -146,7 +150,7 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.Stat
 
 	for _, candidate := range candidates {
 		sectorNum := candidate.SectorID().Number()
-		sectorWeightDesc, ok := sma._getStorageWeightDescForSectorMaybe(sectorNum)
+		sectorWeightDesc, ok := sma.GetStorageWeightDescForSectorMaybe(sectorNum)
 		if !ok {
 			return nil
 		}
@@ -209,7 +213,7 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 // TODO: fix linking here
 var node node_base.FilecoinNode
 
-func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateTree.StateTree, minerAddr addr.Address) StorageMinerActorState {
+func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateTree.StateTree, minerAddr addr.Address) sminact.StorageMinerActorState {
 	actorState, ok := stateTree.GetActor(minerAddr)
 	util.Assert(ok)
 	substateCID := actorState.State()
@@ -221,7 +225,7 @@ func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateT
 	// TODO fix conversion to bytes
 	panic(substate)
 	var serializedSubstate Serialization
-	st, err := Deserialize_StorageMinerActorState(serializedSubstate)
+	st, err := sminact.Deserialize_StorageMinerActorState(serializedSubstate)
 
 	if err == nil {
 		panic("Deserialization error")
@@ -229,7 +233,7 @@ func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateT
 	return st
 }
 
-func (sms *StorageMiningSubsystem_I) _getStoragePowerActorState(stateTree stateTree.StateTree) spc.StoragePowerActorState {
+func (sms *StorageMiningSubsystem_I) _getStoragePowerActorState(stateTree stateTree.StateTree) spowact.StoragePowerActorState {
 	powerAddr := addr.StoragePowerActorAddr
 	actorState, ok := stateTree.GetActor(powerAddr)
 	util.Assert(ok)
@@ -243,7 +247,7 @@ func (sms *StorageMiningSubsystem_I) _getStoragePowerActorState(stateTree stateT
 	// TODO fix conversion to bytes
 	panic(substate)
 	var serializedSubstate util.Serialization
-	st, err := spc.Deserialize_StoragePowerActorState(serializedSubstate)
+	st, err := spowact.Deserialize_StoragePowerActorState(serializedSubstate)
 
 	if err == nil {
 		panic("Deserialization error")
@@ -326,7 +330,7 @@ func (sms *StorageMiningSubsystem_I) _verifyElection(header block.BlockHeader, o
 
 	for _, info := range onChainInfo.Candidates() {
 		sectorNum := info.SectorID().Number()
-		sectorWeightDesc, ok := st._getStorageWeightDescForSectorMaybe(sectorNum)
+		sectorWeightDesc, ok := st.GetStorageWeightDescForSectorMaybe(sectorNum)
 		if !ok {
 			return false
 		}
@@ -338,7 +342,7 @@ func (sms *StorageMiningSubsystem_I) _verifyElection(header block.BlockHeader, o
 	return true
 }
 
-func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateTree, sma StorageMinerActorState) sector.OnChainPoStVerifyInfo {
+func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainPoStVerifyInfo {
 	if !sma.PoStState().Is_Challenged() {
 		return nil
 	}
@@ -362,7 +366,7 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 
 	winningCandidates := make([]sector.PoStCandidate, 0)
 	for _, candidate := range candidates {
-		if sma._verifySurprisePoStMeetsTargetReq(candidate) {
+		if sma.VerifySurprisePoStMeetsTargetReq(candidate) {
 			winningCandidates = append(winningCandidates, candidate)
 		}
 	}

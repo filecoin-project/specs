@@ -3,6 +3,7 @@ package storage_power_consensus
 import (
 	"math/big"
 
+	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 	util "github.com/filecoin-project/specs/util"
@@ -21,7 +22,7 @@ func (self *ExpectedConsensus_I) ComputeChainWeight(tipset chain.Tipset) block.C
 	// 	+(wBlocksFactor_num * self.wParams.wPrecision / wBlocksFactor_den)
 }
 
-func (self *ExpectedConsensus_I) IsValidConsensusFault(faults ConsensusFaultType, blocks []block.Block) bool {
+func (self *ExpectedConsensus_I) IsValidConsensusFault(faults spowact.ConsensusFaultType, blocks []block.Block) bool {
 	util.IMPL_FINISH()
 	return false
 	// 1. double-fork mining fault

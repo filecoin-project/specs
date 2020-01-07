@@ -1,13 +1,13 @@
-package storage_power_consensus
+package storage_power
 
 import (
 	"sort"
 
+	actor_util "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	util "github.com/filecoin-project/specs/util"
 )

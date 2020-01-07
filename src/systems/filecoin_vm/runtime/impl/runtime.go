@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/binary"
 
+	acctact "github.com/filecoin-project/specs/actors/builtin/account"
+	initact "github.com/filecoin-project/specs/actors/builtin/init"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
@@ -15,7 +17,6 @@ import (
 	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
-	sysactors "github.com/filecoin-project/specs/systems/filecoin_vm/sysactors"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -571,7 +572,7 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 	rt._createActor(actor.CodeID(actor.CodeID_Make_Builtin(actor.BuiltinActorID_Account)), newIdAddr)
 
 	// Initialize account actor substate with it's pubkey address.
-	substate := &sysactors.AccountActorState_I{
+	substate := &acctact.AccountActorState_I{
 		Address_: targetRaw,
 	}
 	rt._saveAccountActorState(newIdAddr, substate)
@@ -579,23 +580,23 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 	return act, newIdAddr
 }
 
-func (rt *VMContext) _loadInitActorState() sysactors.InitActorState {
+func (rt *VMContext) _loadInitActorState() initact.InitActorState {
 	initState, ok := rt._globalStatePending.GetActor(addr.InitActorAddr)
 	util.Assert(ok)
-	var initSubState sysactors.InitActorState_I
+	var initSubState initact.InitActorState_I
 	ok = rt.IpldGet(ipld.CID(initState.State()), &initSubState)
 	util.Assert(ok)
 	return &initSubState
 }
 
-func (rt *VMContext) _saveInitActorState(state sysactors.InitActorState) {
+func (rt *VMContext) _saveInitActorState(state initact.InitActorState) {
 	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
 	// than the receiver.
 	rt._rtAllocGas(gascost.UpdateActorSubstate)
 	rt._updateActorSubstateInternal(addr.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
 }
 
-func (rt *VMContext) _saveAccountActorState(address addr.Address, state sysactors.AccountActorState) {
+func (rt *VMContext) _saveAccountActorState(address addr.Address, state acctact.AccountActorState) {
 	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
 	// than the receiver.
 	rt._rtAllocGas(gascost.UpdateActorSubstate)
