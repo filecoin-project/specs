@@ -212,19 +212,10 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, faultType Con
 	// Quite a bit more straightforward since only called by the cron actor (ie publicly verified)
 	// slash cheater pledge collateral accordingly based on num sectors faulted
 
-	// validation checks
+	// validation checks to be done in runtime
 	// - there should be exactly two blocks in proof
-	if len(proof) != 2 {
-		rt.AbortArgMsg("spa.ReportConsensusFault: proof requires two blocks")
-	}
 	// - both blocks are mined by the same miner
-	if proof[0].Miner() != proof[1].Miner() {
-		rt.AbortArgMsg("spa.ReportConsensusFault: proof needs to come from same miner")
-	}
 	// - first block is of the same or lower block height as the second block
-	if proof[0].Epoch() > proof[1].Epoch() {
-		rt.AbortArgMsg("spa.ReportConsensusFault: first block is of a higher block height")
-	}
 
 	// return from EC's IsValidConsensusFault
 	isValidConsensusFault := false
@@ -255,9 +246,11 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, faultType Con
 		}
 
 		collateralToSlash := st._getPledgeSlashForConsensusFault(currPledge, faultType)
-		slasherShare := _getConsensusFaultSlasherShare(elapsedEpoch)
-		Assert(slasherShare <= 1 && slasherShare > 0)
-		amountToSlasher := actors.TokenAmount(slasherShare) * collateralToSlash
+		slasherReward := _getConsensusFaultSlasherReward(elapsedEpoch, collateralToSlash)
+
+		// request slasherReward to be deducted from EscrowTable
+		amountToSlasher := st._slashPledgeCollateral(slasherAddr, slasherReward)
+		Assert(slasherReward == amountToSlasher)
 
 		UpdateRelease(rt, h, st)
 

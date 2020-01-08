@@ -212,10 +212,14 @@ func (st *StoragePowerActorState_I) _getPledgeSlashForConsensusFault(currPledge 
 	}
 }
 
-func _getConsensusFaultSlasherShare(elapsedEpoch block.ChainEpoch) float64 {
-	TODO() // BigInt operation
-	panic("")
-	// return math.Min(node_base.SLASHER_INITIAL_SHARE*math.Pow(node_base.SLASHER_SHARE_GROWTH_RATE, float64(elapsedEpoch)), 1.0)
+func _getConsensusFaultSlasherReward(elapsedEpoch block.ChainEpoch, totalPledge actors.TokenAmount) actors.TokenAmount {
+	TODO()
+	// BigInt Operation
+	// var growthRate = node_base.SLASHER_SHARE_GROWTH_RATE_NUM / node_base.SLASHER_SHARE_GROWTH_RATE_DENOM
+	// var multiplier = growthRate^elapsedEpoch
+	// var slasherProportion = min(INITIAL_SLASHER_SHARE * multiplier, 1.0)
+	// return totalPledge * slasherProportion
+	return actors.TokenAmount(0)
 }
 
 func PowerTableHAMT_Empty() PowerTableHAMT {

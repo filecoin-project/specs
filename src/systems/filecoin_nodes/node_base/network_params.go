@@ -73,5 +73,7 @@ const FAULT_SLASH_PERC_TERMINATED = 100                  // placeholder
 // Slashing
 /////////////////////////////////////////////////////////////
 
-const SLASHER_INITIAL_SHARE = 0.001
-const SLASHER_SHARE_GROWTH_RATE = 1.26
+const SLASHER_INITIAL_SHARE_NUM = 1         // placeholder
+const SLASHER_INITIAL_SHARE_DENOM = 1000    // placeholder
+const SLASHER_SHARE_GROWTH_RATE_NUM = 126   // placeholder
+const SLASHER_SHARE_GROWTH_RATE_DENOM = 100 // placeholder
