@@ -4,6 +4,7 @@ import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 import node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import actors "github.com/filecoin-project/specs/actors"
 import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 
 type UInt64 UInt
@@ -38,6 +39,6 @@ type VMInterpreter struct {
     ) struct {
         outTree          st.StateTree
         ret              vmr.MessageReceipt
-        retMinerPenalty  actor.TokenAmount
+        retMinerPenalty  actors.TokenAmount
     }
 }

@@ -8,7 +8,6 @@ import (
 	serde "github.com/filecoin-project/specs/actors/serde"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
-	storage_mining "github.com/filecoin-project/specs/systems/filecoin_mining/storage_mining"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
