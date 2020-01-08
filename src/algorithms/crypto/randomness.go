@@ -10,8 +10,10 @@ type Serialization = util.Serialization
 const (
 	DomainSeparationTag_TicketDrawing DomainSeparationTag = 1 + iota
 	DomainSeparationTag_TicketProduction
-	DomainSeparationTag_PoStChallengeSeed
+	DomainSeparationTag_ElectionPoStChallengeSeed
+	DomainSeparationTag_SurprisePoStChallengeSeed
 	DomainSeparationTag_SurprisePoStSelectMiners
+	DomainSeparationTag_SurprisePoStSampleSectors
 )
 
 // Derive a random byte string from a domain separation tag and the appropriate values

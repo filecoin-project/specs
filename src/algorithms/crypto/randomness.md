@@ -21,14 +21,20 @@ Any randomness derived from on-chain values uses the following encodings to repr
 For {{<sref crypto_signatures>}} as well as {{<sref vrf>}} usage in the protocol, we define Domain Separation Tags with which we prepend random inputs.
 
 The source of truth is defined below, but the currently defined DSTs are:
+
 - for drawing randomness from an on-chain ticket:
     - `TicketDrawingDST = 1`
 - for generating a new random ticket:
     - `TicketProductionDST = 2`
-- for generating randomness for running PoSt (ElectionPoSt or SurprisePoSt):
-    - `PoStChallengeSeedDST = 3`
+- for generating randomness for running ElectionPoSt:
+    - `ElectionPoStChallengeSeedDST = 3`
+- for generating randomness for running SurprisePoSt:
+    - `SurprisePoStChallengeSeedDST = 4`
 - for selection of which miners to surprise:
-    - `SurprisePoStSelectMinersDST = 4`
+    - `SurprisePoStSelectMinersDST = 5`
+- for selection of which sectors to sample:
+	- `SurprisePoStSampleSectors = 6`
+
 
 ## Forming Randomness Seeds
 
@@ -37,6 +43,7 @@ Different uses of randomness require randomness seeds predicated on a variety of
 - `TicketProduction` -- uses ticket and miner actor addr
 - `PoStChallengeSeed` -- uses ticket and miner actor addr
 - `SurprisePoStSelectMiners` -- uses ticket and epoch number
+...
 
 In all cases, a ticket is used as the base of randomness (see {{<sref tickets>}}). In order to make randomness seed creation uniform, the protocol derives all such seeds in the same way, as follows (also see {{<sref tickets>}}):
 ```text

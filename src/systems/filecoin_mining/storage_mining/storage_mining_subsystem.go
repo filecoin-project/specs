@@ -125,7 +125,8 @@ func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainPoStVerifyInfo {
 	// Randomness for ElectionPoSt
 	randomnessK := sms._blockchain().BestChain().GetPoStChallengeRand(sms._blockchain().LatestEpoch())
-	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_PoStChallengeSeed, randomnessK, sms._keyStore().MinerAddress())
+
+	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_ElectionPoStChallengeSeed, randomnessK, sms._keyStore().MinerAddress())
 	postRandomness := sms.Node().Repository().KeyStore().WorkerKey().Impl().Generate(input).Output()
 
 	// TODO: add how sectors are actually stored in the SMS proving set
@@ -258,7 +259,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 	// 3. Verify appropriate randomness
 	// TODO: fix away from BestChain()... every block should track its own chain up to its own production.
 	randomness := sms._blockchain().BestChain().GetPoStChallengeRand(header.Epoch())
-	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_PoStChallengeSeed, randomness, header.Miner())
+	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_ElectionPoStChallengeSeed, randomness, header.Miner())
 
 	postRand := &filcrypto.VRFResult_I{
 		Output_: onChainInfo.Randomness(),
@@ -329,7 +330,7 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 	// get randomness for SurprisePoSt
 	challEpoch := sma.PoStState().As_Challenged().SurpriseChallengeEpoch()
 	randomnessK := sms._blockchain().BestChain().GetPoStChallengeRand(challEpoch)
-	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_PoStChallengeSeed, randomnessK, sms._keyStore().MinerAddress())
+	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_SurprisePoStChallengeSeed, randomnessK, sms._keyStore().MinerAddress())
 	postRandomness := sms.Node().Repository().KeyStore().WorkerKey().Impl().Generate(input).Output()
 
 	// TODO: add how sectors are actually stored in the SMS proving set
