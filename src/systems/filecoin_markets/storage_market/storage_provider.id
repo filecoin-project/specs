@@ -1,6 +1,6 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import actors "github.com/filecoin-project/specs/actors"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import dt "github.com/filecoin-project/specs/systems/filecoin_files/data_transfer"
@@ -25,7 +25,7 @@ type MinerDeal struct {
 
 // The interface provided for storage providers
 type StorageProvider struct {
-    AddAsk(price actor.TokenAmount, ttlsecs int64) error
+    AddAsk(price actors.TokenAmount, ttlsecs int64) error
 
     // ListAsks lists current asks
     ListAsks(addrress addr.Address) [StorageAsk]
@@ -37,10 +37,10 @@ type StorageProvider struct {
     ListIncompleteDeals()  (deals [MinerDeal], error)
 
     // AddStorageCollateral adds storage collateral
-    AddStorageCollateral(amount actor.TokenAmount) error
+    AddStorageCollateral(amount actors.TokenAmount) error
 
     // GetStorageCollateral returns the current collateral balance
-    GetStorageCollateral() (actor.TokenAmount, error)
+    GetStorageCollateral() (actors.TokenAmount, error)
 
     // DataTransferValidator methods
     ValidatePush(

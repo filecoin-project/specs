@@ -1,6 +1,7 @@
 package storage_market
 
 import (
+	actors "github.com/filecoin-project/specs/actors"
 	actor_util "github.com/filecoin-project/specs/actors/util"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
@@ -8,16 +9,15 @@ import (
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-	util "github.com/filecoin-project/specs/util"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
 // Actor methods
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, entryAddr addr.Address, amountRequested actor.TokenAmount) {
+func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, entryAddr addr.Address, amountRequested actors.TokenAmount) {
 	IMPL_FINISH() // BigInt arithmetic
-	amountSlashedTotal := actor.TokenAmount(0)
+	amountSlashedTotal := actors.TokenAmount(0)
 
 	if amountRequested < 0 {
 		rt.AbortArgMsg("Negative amount.")
@@ -67,7 +67,7 @@ func (a *StorageMarketActorCode_I) AddBalance(rt Runtime, entryAddr addr.Address
 
 func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDeals []deal.StorageDeal) {
 	IMPL_FINISH() // BigInt arithmetic
-	amountSlashedTotal := actor.TokenAmount(0)
+	amountSlashedTotal := actors.TokenAmount(0)
 
 	// Deal message must have a From field identical to the provider of all the deals.
 	// This allows us to retain and verify only the client's signature in each deal proposal itself.
@@ -161,7 +161,7 @@ func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, dealIDs d
 		_, dealP := st._rtGetOnChainDealOrAbort(rt, dealID)
 		ret = append(ret, sector.PieceInfo_I{
 			PieceCID_: dealP.PieceCID(),
-			Size_:     util.UInt(dealP.PieceSize().Total()),
+			Size_:     uint64(dealP.PieceSize().Total()),
 		}.Ref())
 	}
 
@@ -308,7 +308,7 @@ func (a *StorageMarketActorCode_I) Constructor(rt Runtime) {
 ////////////////////////////////////////////////////////////////////////////////
 
 func (st *StorageMarketActorState_I) _rtUpdatePendingDealStatesForParty(rt Runtime, addr addr.Address) (
-	amountSlashedTotal actor.TokenAmount) {
+	amountSlashedTotal actors.TokenAmount) {
 
 	// For consistency with OnEpochTickEnd, only process updates up to the end of the _previous_ epoch.
 	epoch := rt.CurrEpoch() - 1
@@ -417,7 +417,7 @@ func (st *StorageMarketActorState_I) _rtGetOnChainDealOrAbort(rt Runtime, dealID
 	return
 }
 
-func (st *StorageMarketActorState_I) _rtLockBalanceOrAbort(rt Runtime, addr addr.Address, amount actor.TokenAmount) {
+func (st *StorageMarketActorState_I) _rtLockBalanceOrAbort(rt Runtime, addr addr.Address, amount actors.TokenAmount) {
 	if amount < 0 {
 		rt.AbortArgMsg("Negative amount")
 	}
@@ -429,13 +429,4 @@ func (st *StorageMarketActorState_I) _rtLockBalanceOrAbort(rt Runtime, addr addr
 	if !ok {
 		rt.AbortFundsMsg("Insufficient funds available to lock.")
 	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Dispatch table
-////////////////////////////////////////////////////////////////////////////////
-
-func (a *StorageMarketActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
-	IMPL_FINISH()
-	panic("")
 }

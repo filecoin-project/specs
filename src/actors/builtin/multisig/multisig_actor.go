@@ -1,22 +1,20 @@
 package multisig
 
 import (
-	actor_util "github.com/filecoin-project/specs/actors/util"
+	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-	util "github.com/filecoin-project/specs/util"
 )
 
 type InvocOutput = vmr.InvocOutput
 type Runtime = vmr.Runtime
-type Bytes = util.Bytes
 
-var Assert = util.Assert
-var IMPL_FINISH = util.IMPL_FINISH
-var IMPL_TODO = util.IMPL_TODO
-var TODO = util.TODO
+var AssertMsg = autil.AssertMsg
+var IMPL_FINISH = autil.IMPL_FINISH
+var IMPL_TODO = autil.IMPL_TODO
+var TODO = autil.TODO
 
 ////////////////////////////////////////////////////////////////////////////////
 // Actor methods
@@ -31,7 +29,7 @@ func (a *MultiSigActorCode_I) Propose(rt vmr.Runtime, txn MultiSigTransaction) T
 	txnID := st.NextTxnID()
 	st.Impl().NextTxnID_ += 1
 	st.PendingTxns()[txnID] = txn
-	st.PendingApprovals()[txnID] = actor_util.ActorIDSetHAMT_Empty()
+	st.PendingApprovals()[txnID] = autil.ActorIDSetHAMT_Empty()
 	UpdateRelease_MultiSig(rt, h, st)
 
 	// Proposal implicitly includes approval of a transaction.
@@ -112,7 +110,7 @@ func (a *MultiSigActorCode_I) ChangeNumApprovalsThreshold(rt vmr.Runtime, newThr
 }
 
 func (a *MultiSigActorCode_I) Constructor(
-	rt vmr.Runtime, authorizedParties actor_util.ActorIDSetHAMT, numApprovalsThreshold int) {
+	rt vmr.Runtime, authorizedParties autil.ActorIDSetHAMT, numApprovalsThreshold int) {
 
 	rt.ValidateImmediateCallerIs(addr.InitActorAddr)
 	h := rt.AcquireState()
@@ -152,8 +150,7 @@ func (a *MultiSigActorCode_I) _rtApproveTransactionOrAbort(
 		// Could potentially amortize cost of cleanup via Cron.
 	}
 
-	IMPL_TODO() // Make sure we enforce this invariant in the runtime.
-	Assert(callerAddr.Data().Is_ID())
+	AssertMsg(callerAddr.Data().Is_ID(), "caller address does not have ID")
 	actorID := callerAddr.Data().As_ID()
 
 	st.PendingApprovals()[txnID][actorID] = true
@@ -181,8 +178,7 @@ func (a *MultiSigActorCode_I) _rtDeletePendingTransaction(rt Runtime, txnID TxnI
 }
 
 func (a *MultiSigActorCode_I) _rtValidateAuthorizedPartyOrAbort(rt Runtime, addr addr.Address) {
-	IMPL_TODO() // Make sure we enforce this invariant in the runtime.
-	Assert(addr.Data().Is_ID())
+	AssertMsg(addr.Data().Is_ID(), "caller address does not have ID")
 	actorID := addr.Data().As_ID()
 
 	h, st := a.State(rt)
@@ -214,11 +210,6 @@ func MultiSigApprovalSetHAMT_Empty() MultiSigApprovalSetHAMT {
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
 ////////////////////////////////////////////////////////////////////////////////
-
-func (a *MultiSigActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
-	IMPL_FINISH()
-	panic("")
-}
 
 func (a *MultiSigActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, MultiSigActorState) {
 	h := rt.AcquireState()

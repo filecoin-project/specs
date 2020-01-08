@@ -1,4 +1,4 @@
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import actors "github.com/filecoin-project/specs/actors"
 import actor_util "github.com/filecoin-project/specs/actors/util"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
@@ -31,21 +31,21 @@ type StorageMarketActorState struct {
     CurrEpochNumDealsPublished      int
 
     _rtAbortIfAddressEntryDoesNotExist(rt Runtime, entryAddr addr.Address)
-    _rtUpdatePendingDealStatesForParty(rt Runtime, addr addr.Address) (amountSlashedTotal actor.TokenAmount)
+    _rtUpdatePendingDealStatesForParty(rt Runtime, addr addr.Address) (amountSlashedTotal actors.TokenAmount)
     _rtGetOnChainDealOrAbort(rt Runtime, dealID deal.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal)
-    _rtLockBalanceOrAbort(rt Runtime, addr addr.Address, amount actor.TokenAmount)
+    _rtLockBalanceOrAbort(rt Runtime, addr addr.Address, amount actors.TokenAmount)
 
-    _updatePendingDealStates(dealIDs [deal.DealID], epoch block.ChainEpoch) (amountSlashedTotal actor.TokenAmount)
-    _updatePendingDealState(dealID deal.DealID, epoch block.ChainEpoch) (amountSlashed actor.TokenAmount)
+    _updatePendingDealStates(dealIDs [deal.DealID], epoch block.ChainEpoch) (amountSlashedTotal actors.TokenAmount)
+    _updatePendingDealState(dealID deal.DealID, epoch block.ChainEpoch) (amountSlashed actors.TokenAmount)
     _processDealPaymentEpochsElapsed(dealID deal.DealID, numEpochsElapsed block.ChainEpoch)
-    _processDealSlashed(dealID deal.DealID) (amountSlashed actor.TokenAmount)
-    _processDealInitTimedOut(dealID deal.DealID) (amountSlashed actor.TokenAmount)
+    _processDealSlashed(dealID deal.DealID) (amountSlashed actors.TokenAmount)
+    _processDealInitTimedOut(dealID deal.DealID) (amountSlashed actors.TokenAmount)
     _processDealExpired(dealID deal.DealID)
     _generateStorageDealID(storageDeal deal.StorageDeal) deal.DealID
 
-    _getLockedReqBalanceInternal(a addr.Address) actor.TokenAmount
-    _lockBalanceMaybe(addr addr.Address, amount actor.TokenAmount) (lockBalanceOK bool)
-    _unlockBalance(addr addr.Address, unlockAmountRequested actor.TokenAmount)
+    _getLockedReqBalanceInternal(a addr.Address) actors.TokenAmount
+    _lockBalanceMaybe(addr addr.Address, amount actors.TokenAmount) (lockBalanceOK bool)
+    _unlockBalance(addr addr.Address, unlockAmountRequested actors.TokenAmount)
 
     _getOnChainDeal(dealID deal.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal, ok bool)
     _getOnChainDealAssert(dealID deal.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal)
@@ -59,7 +59,7 @@ type StorageMarketActorCode struct {
 
     // Attempt to withdraw the specified amount from the balance held in escrow.
     // If less than the specified amount is available, yields the entire available balance.
-    WithdrawBalance(rt Runtime, amount actor.TokenAmount)
+    WithdrawBalance(rt Runtime, amount actors.TokenAmount)
 
     // Publish a new set of storage deals (not yet included in a sector).
     PublishStorageDeals(rt Runtime, deals [deal.StorageDeal])

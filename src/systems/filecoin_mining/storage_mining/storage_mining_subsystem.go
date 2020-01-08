@@ -3,8 +3,10 @@ package storage_mining
 // import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 // import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import (
+	actors "github.com/filecoin-project/specs/actors"
 	sminact "github.com/filecoin-project/specs/actors/builtin/storage_miner"
 	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
+	serde "github.com/filecoin-project/specs/actors/serde"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
@@ -13,7 +15,6 @@ import (
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
@@ -37,13 +38,8 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 	workerAddr addr.Address,
 	sectorSize util.UInt,
 	peerId libp2p.PeerID,
-	pledgeAmt actor.TokenAmount,
+	pledgeAmt actors.TokenAmount,
 ) (addr.Address, error) {
-
-	params := make([]util.Serialization, 4)
-	params[0] = addr.Serialize_Address(ownerAddr)
-	params[1] = addr.Serialize_Address(workerAddr)
-	params[2] = libp2p.Serialize_PeerID(peerId)
 
 	sysActor, ok := state.GetActor(addr.SystemActorAddr)
 	Assert(ok)
@@ -52,7 +48,7 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 		From_:       ownerAddr,
 		To_:         addr.StoragePowerActorAddr,
 		Method_:     ai.Method_StoragePowerActor_CreateMiner,
-		Params_:     params,
+		Params_:     serde.MustSerializeParams(ownerAddr, workerAddr, peerId),
 		CallSeqNum_: sysActor.CallSeqNum(),
 		Value_:      pledgeAmt,
 		GasPrice_:   0,
@@ -120,7 +116,7 @@ func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 		sPoSt := sms._trySurprisePoSt(chainHead.StateTree(), sma)
 		// TODO: read from consts (in this case user set param)
 		var gasLimit msg.GasAmount
-		var gasPrice = actor.TokenAmount(0)
+		var gasPrice = actors.TokenAmount(0)
 		sms._submitSurprisePoStMessage(chainHead.StateTree(), sPoSt, gasPrice, gasLimit)
 	}
 }
@@ -383,19 +379,16 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 	return surprisePoSt
 }
 
-func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.StateTree, sPoSt sector.OnChainPoStVerifyInfo, gasPrice actor.TokenAmount, gasLimit msg.GasAmount) error {
-	params := make([]util.Serialization, 1)
-	params[0] = sector.Serialize_OnChainPoStVerifyInfo(sPoSt)
-
+func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.StateTree, sPoSt sector.OnChainPoStVerifyInfo, gasPrice actors.TokenAmount, gasLimit msg.GasAmount) error {
 	sysActor, ok := state.GetActor(addr.SystemActorAddr)
 	Assert(ok)
 	unsignedCreationMessage := &msg.UnsignedMessage_I{
 		From_:       sms._keyStore().MinerAddress(),
 		To_:         sms._keyStore().MinerAddress(),
 		Method_:     ai.Method_StorageMinerActor_SubmitSurprisePoStResponse,
-		Params_:     params,
+		Params_:     serde.MustSerializeParams(sPoSt),
 		CallSeqNum_: sysActor.CallSeqNum(),
-		Value_:      actor.TokenAmount(0),
+		Value_:      actors.TokenAmount(0),
 		GasPrice_:   gasPrice,
 		GasLimit_:   gasLimit,
 	}

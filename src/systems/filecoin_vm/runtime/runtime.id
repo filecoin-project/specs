@@ -1,4 +1,5 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import actors "github.com/filecoin-project/specs/actors"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
@@ -66,8 +67,8 @@ type Runtime interface {
     // Check that the given condition is true (and call Abort if not).
     Assert(bool)
 
-    CurrentBalance()  actor.TokenAmount
-    ValueReceived()   actor.TokenAmount
+    CurrentBalance()  actors.TokenAmount
+    ValueReceived()   actors.TokenAmount
 
     // Look up the current values of several system-wide economic indices.
     CurrIndices()     indices.Indices
@@ -85,16 +86,16 @@ type Runtime interface {
     SendPropagatingErrors(input InvocInput) InvocOutput
     Send(
         toAddr     addr.Address
-        methodNum  actor.MethodNum
-        params     actor.MethodParams
-        value      actor.TokenAmount
+        methodNum  actors.MethodNum
+        params     actors.MethodParams
+        value      actors.TokenAmount
     ) InvocOutput
     SendQuery(
         toAddr     addr.Address
-        methodNum  actor.MethodNum
-        params     [util.Serialization]
+        methodNum  actors.MethodNum
+        params     actors.MethodParams
     ) util.Serialization
-    SendFunds(toAddr addr.Address, value actor.TokenAmount)
+    SendFunds(toAddr addr.Address, value actors.TokenAmount)
 
     // Sends a message to another actor, trapping an unsuccessful execution.
     // This may only be invoked by the singleton Cron actor.
@@ -126,9 +127,9 @@ type Runtime interface {
 
 type InvocInput struct {
     To      addr.Address
-    Method  actor.MethodNum
-    Params  actor.MethodParams
-    Value   actor.TokenAmount
+    Method  actors.MethodNum
+    Params  actors.MethodParams
+    Value   actors.TokenAmount
 }
 
 type InvocOutput struct {

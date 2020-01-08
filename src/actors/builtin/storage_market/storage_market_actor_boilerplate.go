@@ -1,15 +1,15 @@
 package storage_market
 
 import (
-	actor_util "github.com/filecoin-project/specs/actors/util"
+	actors "github.com/filecoin-project/specs/actors"
+	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-	util "github.com/filecoin-project/specs/util"
 )
 
-type BalanceTableHAMT = actor_util.BalanceTableHAMT
-type DealIDQueue = actor_util.DealIDQueue
+type BalanceTableHAMT = autil.BalanceTableHAMT
+type DealIDQueue = autil.DealIDQueue
 
 var RT_MinerEntry_ValidateCaller_DetermineFundsLocation = vmr.RT_MinerEntry_ValidateCaller_DetermineFundsLocation
 var RT_ValidateImmediateCallerIsSignable = vmr.RT_ValidateImmediateCallerIsSignable
@@ -24,12 +24,12 @@ var RT_ValidateImmediateCallerIsSignable = vmr.RT_ValidateImmediateCallerIsSigna
 
 type InvocOutput = vmr.InvocOutput
 type Runtime = vmr.Runtime
-type Bytes = util.Bytes
+type Bytes = actors.Bytes
 
-var Assert = util.Assert
-var IMPL_FINISH = util.IMPL_FINISH
-var IMPL_TODO = util.IMPL_TODO
-var TODO = util.TODO
+var Assert = autil.Assert
+var IMPL_FINISH = autil.IMPL_FINISH
+var IMPL_TODO = autil.IMPL_TODO
+var TODO = autil.TODO
 
 func (a *StorageMarketActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, StorageMarketActorState) {
 	h := rt.AcquireState()

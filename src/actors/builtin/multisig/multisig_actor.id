@@ -1,5 +1,5 @@
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import actor_util "github.com/filecoin-project/specs/actors/util"
+import actors "github.com/filecoin-project/specs/actors"
+import autil "github.com/filecoin-project/specs/actors/util"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
@@ -10,18 +10,18 @@ type MultiSigTransaction struct {
     Expiration  block.ChainEpoch
 
     To          addr.Address
-    Method      actor.MethodNum
-    Params      actor.MethodParams
-    Value       actor.TokenAmount
+    Method      actors.MethodNum
+    Params      actors.MethodParams
+    Value       actors.TokenAmount
 
     Equals(MultiSigTransaction) bool
 }
 
 type MultiSigTransactionHAMT {TxnID: MultiSigTransaction}
-type MultiSigApprovalSetHAMT {TxnID: actor_util.ActorIDSetHAMT}
+type MultiSigApprovalSetHAMT {TxnID: autil.ActorIDSetHAMT}
 
 type MultiSigActorState struct {
-    AuthorizedParties      actor_util.ActorIDSetHAMT
+    AuthorizedParties      autil.ActorIDSetHAMT
     NumApprovalsThreshold  int
     NextTxnID              TxnID
     PendingTxns            MultiSigTransactionHAMT

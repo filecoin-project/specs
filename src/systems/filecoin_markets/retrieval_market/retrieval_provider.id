@@ -1,4 +1,4 @@
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import actors "github.com/filecoin-project/specs/actors"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 
 type RetrievalProviderDealState struct {
@@ -6,7 +6,7 @@ type RetrievalProviderDealState struct {
     Status                 DealStatus
     Receiver               libp2p.PeerID
     TotalSent              UInt
-    FundsReceived          actor.TokenAmount
+    FundsReceived          actors.TokenAmount
 }
 
 type RetrievalProviderEvent struct {
@@ -27,11 +27,11 @@ type RetrievalProviderSubscriber struct {
 
 type RetrievalProvider struct {
     // V0
-    SetPricePerByte(price actor.TokenAmount)
+    SetPricePerByte(price actors.TokenAmount)
     SetPaymentInterval(paymentInterval UInt, paymentIntervalIncrease UInt)
     SubscribeToEvents(subscriber RetrievalProviderSubscriber)
 
     // V1
-    SetPricePerUnseal(price actor.TokenAmount)
+    SetPricePerUnseal(price actors.TokenAmount)
     ListDeals() {RetrievalProviderDealID: RetrievalProviderDealState}
 }

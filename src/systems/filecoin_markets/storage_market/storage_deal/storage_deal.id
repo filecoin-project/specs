@@ -1,4 +1,4 @@
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import actors "github.com/filecoin-project/specs/actors"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
@@ -32,15 +32,15 @@ type StorageDealProposal struct {
     // otherwise it is invalid.
     StartEpoch                    block.ChainEpoch
     EndEpoch                      block.ChainEpoch
-    StoragePricePerEpoch          actor.TokenAmount
+    StoragePricePerEpoch          actors.TokenAmount
 
-    ProviderCollateral            actor.TokenAmount
-    ClientCollateral              actor.TokenAmount
+    ProviderCollateral            actors.TokenAmount
+    ClientCollateral              actors.TokenAmount
 
     Duration()                    block.ChainEpoch      @(cached)  // EndEpoch - StartEpoch
-    TotalStorageFee()             actor.TokenAmount  // StoragePricePerEpoch * Duration
-    ClientBalanceRequirement()    actor.TokenAmount  // ClientCollateral + TotalStorageFee
-    ProviderBalanceRequirement()  actor.TokenAmount  // ProviderCollateral
+    TotalStorageFee()             actors.TokenAmount  // StoragePricePerEpoch * Duration
+    ClientBalanceRequirement()    actors.TokenAmount  // ClientCollateral + TotalStorageFee
+    ProviderBalanceRequirement()  actors.TokenAmount  // ProviderCollateral
 
     CID()                         &StorageDealProposal
 }

@@ -1,7 +1,7 @@
 import actor_util "github.com/filecoin-project/specs/actors/util"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import actors "github.com/filecoin-project/specs/actors"
 
 type PowerTableHAMT {addr.Address: block.StoragePower}  // TODO: convert address to ActorID
 
@@ -20,7 +20,7 @@ type StoragePowerActorState struct {
     NominalPower              PowerTableHAMT
     NumMinersMeetingMinPower  int
 
-    _slashPledgeCollateral(address addr.Address, amount actor.TokenAmount) actor.TokenAmount
+    _slashPledgeCollateral(address addr.Address, amount actors.TokenAmount) actors.TokenAmount
     _selectMinersToSurprise(challengeCount int, randomness util.Randomness) [addr.Address]
 
     _addClaimedPowerForSector(

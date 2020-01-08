@@ -3,7 +3,9 @@ package storage_power
 import (
 	"math"
 
-	actor_util "github.com/filecoin-project/specs/actors/util"
+	actors "github.com/filecoin-project/specs/actors"
+	serde "github.com/filecoin-project/specs/actors/serde"
+	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
@@ -13,7 +15,6 @@ import (
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-	util "github.com/filecoin-project/specs/util"
 )
 
 type ConsensusFaultType int
@@ -35,7 +36,7 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime, minerAddr addr.Address)
 	msgValue := rt.ValueReceived()
 
 	h, st := a.State(rt)
-	newTable, ok := actor_util.BalanceTable_WithAdd(st.EscrowTable(), minerAddr, msgValue)
+	newTable, ok := autil.BalanceTable_WithAdd(st.EscrowTable(), minerAddr, msgValue)
 	if !ok {
 		rt.AbortStateMsg("Escrow operation failed")
 	}
@@ -43,7 +44,7 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime, minerAddr addr.Address)
 	UpdateRelease(rt, h, st)
 }
 
-func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Address, amountRequested actor.TokenAmount) {
+func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Address, amountRequested actors.TokenAmount) {
 	if amountRequested < 0 {
 		rt.AbortArgMsg("Amount to withdraw must be nonnegative")
 	}
@@ -53,7 +54,7 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Add
 	minBalanceMaintainRequired := a._rtGetPledgeCollateralReqForMinerOrAbort(rt, minerAddr)
 
 	h, st := a.State(rt)
-	newTable, amountExtracted, ok := actor_util.BalanceTable_WithExtractPartial(
+	newTable, amountExtracted, ok := autil.BalanceTable_WithExtractPartial(
 		st.EscrowTable(), minerAddr, amountRequested, minBalanceMaintainRequired)
 	if !ok {
 		rt.AbortStateMsg("Escrow operation failed")
@@ -72,19 +73,19 @@ func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Addres
 		rt.Send(
 			addr.InitActorAddr,
 			ai.Method_InitActor_Exec,
-			[]util.Serialization{
-				actor.Serialize_CodeID(actor.CodeID_Make_Builtin(actor.BuiltinActorID_StorageMiner)),
-				addr.Serialize_Address_Compact(ownerAddr),
-				addr.Serialize_Address_Compact(workerAddr),
-				sector.Serialize_SectorSize(sectorSize),
-				libp2p.Serialize_PeerID(peerId),
-			},
-			actor.TokenAmount(0),
+			serde.MustSerializeParams(
+				actor.CodeID_Make_Builtin(actor.BuiltinActorID_StorageMiner),
+				ownerAddr,
+				workerAddr,
+				sectorSize,
+				peerId,
+			),
+			actors.TokenAmount(0),
 		).ReturnValue(),
 	)
 
 	h, st := a.State(rt)
-	newTable, ok := actor_util.BalanceTable_WithNewAddressEntry(st.EscrowTable(), newMinerAddr, rt.ValueReceived())
+	newTable, ok := autil.BalanceTable_WithNewAddressEntry(st.EscrowTable(), newMinerAddr, rt.ValueReceived())
 	Assert(ok)
 	st.Impl().EscrowTable_ = newTable
 	st.PowerTable()[newMinerAddr] = block.StoragePower(0)
@@ -98,12 +99,12 @@ func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Addres
 func (a *StoragePowerActorCode_I) DeleteMiner(rt Runtime, minerAddr addr.Address) {
 	h, st := a.State(rt)
 
-	minerPledgeBalance, ok := actor_util.BalanceTable_GetEntry(st.EscrowTable(), minerAddr)
+	minerPledgeBalance, ok := autil.BalanceTable_GetEntry(st.EscrowTable(), minerAddr)
 	if !ok {
 		rt.AbortArgMsg("Miner address not found")
 	}
 
-	if minerPledgeBalance > actor.TokenAmount(0) {
+	if minerPledgeBalance > actors.TokenAmount(0) {
 		rt.AbortStateMsg("Deletion requested for miner with pledge balance still remaining")
 	}
 
@@ -227,9 +228,9 @@ func (a *StoragePowerActorCode_I) Constructor(rt Runtime) {
 	st := &StoragePowerActorState_I{
 		TotalNetworkPower_:        block.StoragePower(0),
 		PowerTable_:               PowerTableHAMT_Empty(),
-		EscrowTable_:              actor_util.BalanceTableHAMT_Empty(),
+		EscrowTable_:              autil.BalanceTableHAMT_Empty(),
 		CachedDeferredCronEvents_: MinerEventsHAMT_Empty(),
-		PoStDetectedFaultMiners_:  actor_util.MinerSetHAMT_Empty(),
+		PoStDetectedFaultMiners_:  autil.MinerSetHAMT_Empty(),
 		ClaimedPower_:             PowerTableHAMT_Empty(),
 		NominalPower_:             PowerTableHAMT_Empty(),
 		NumMinersMeetingMinPower_: 0,
@@ -271,8 +272,8 @@ func (a *StoragePowerActorCode_I) _rtInitiateNewSurprisePoStChallenges(rt Runtim
 		rt.Send(
 			addr,
 			ai.Method_StorageMinerActor_OnSurprisePoStChallenge,
-			[]util.Serialization{},
-			actor.TokenAmount(0))
+			nil,
+			actors.TokenAmount(0))
 	}
 }
 
@@ -287,7 +288,7 @@ func (a *StoragePowerActorCode_I) _rtProcessDeferredCronEvents(rt Runtime) {
 	delete(st.CachedDeferredCronEvents(), epoch)
 	UpdateRelease(rt, h, st)
 
-	minerEventsRetain := []actor_util.MinerEvent{}
+	minerEventsRetain := []autil.MinerEvent{}
 	for minerEvent := range minerEvents {
 		if _, found := st.PowerTable()[minerEvent.MinerAddr()]; found {
 			minerEventsRetain = append(minerEventsRetain, minerEvent)
@@ -298,15 +299,15 @@ func (a *StoragePowerActorCode_I) _rtProcessDeferredCronEvents(rt Runtime) {
 		rt.Send(
 			minerEvent.MinerAddr(),
 			ai.Method_StorageMinerActor_OnDeferredCronEvent,
-			[]util.Serialization{
-				sector.Serialize_SectorNumber_Array(minerEvent.Sectors()),
-			},
-			actor.TokenAmount(0),
+			serde.MustSerializeParams(
+				minerEvent.Sectors(),
+			),
+			actors.TokenAmount(0),
 		)
 	}
 }
 
-func (a *StoragePowerActorCode_I) _rtGetPledgeCollateralReqForMinerOrAbort(rt Runtime, minerAddr addr.Address) actor.TokenAmount {
+func (a *StoragePowerActorCode_I) _rtGetPledgeCollateralReqForMinerOrAbort(rt Runtime, minerAddr addr.Address) actors.TokenAmount {
 	h, st := a.State(rt)
 	minerNominalPower, found := st.NominalPower()[minerAddr]
 	if !found {
@@ -316,7 +317,7 @@ func (a *StoragePowerActorCode_I) _rtGetPledgeCollateralReqForMinerOrAbort(rt Ru
 	return rt.CurrIndices().PledgeCollateralReq(minerNominalPower)
 }
 
-func (a *StoragePowerActorCode_I) _rtSlashPledgeCollateral(rt Runtime, minerAddr addr.Address, amountToSlash actor.TokenAmount) {
+func (a *StoragePowerActorCode_I) _rtSlashPledgeCollateral(rt Runtime, minerAddr addr.Address, amountToSlash actors.TokenAmount) {
 	h, st := a.State(rt)
 	amountSlashed := st._slashPledgeCollateral(minerAddr, amountToSlash)
 	UpdateRelease(rt, h, st)
@@ -332,9 +333,9 @@ func (a *StoragePowerActorCode_I) _rtDeleteMinerActor(rt Runtime, minerAddr addr
 	delete(st.NominalPower(), minerAddr)
 	delete(st.PoStDetectedFaultMiners(), minerAddr)
 
-	newTable, amountSlashed, ok := actor_util.BalanceTable_WithExtractAll(st.EscrowTable(), minerAddr)
+	newTable, amountSlashed, ok := autil.BalanceTable_WithExtractAll(st.EscrowTable(), minerAddr)
 	Assert(ok)
-	newTable, ok = actor_util.BalanceTable_WithDeletedAddressEntry(newTable, minerAddr)
+	newTable, ok = autil.BalanceTable_WithDeletedAddressEntry(newTable, minerAddr)
 	Assert(ok)
 	st.Impl().EscrowTable_ = newTable
 
@@ -342,13 +343,4 @@ func (a *StoragePowerActorCode_I) _rtDeleteMinerActor(rt Runtime, minerAddr addr
 
 	rt.DeleteActor(minerAddr)
 	rt.SendFunds(addr.BurntFundsActorAddr, amountSlashed)
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Dispatch table
-////////////////////////////////////////////////////////////////////////////////
-
-func (a *StoragePowerActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
-	IMPL_FINISH()
-	panic("")
 }

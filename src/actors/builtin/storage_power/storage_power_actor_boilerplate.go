@@ -1,18 +1,17 @@
 package storage_power
 
 import (
-	actor_util "github.com/filecoin-project/specs/actors/util"
+	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-	util "github.com/filecoin-project/specs/util"
 )
 
-type BalanceTableHAMT = actor_util.BalanceTableHAMT
-type SectorStorageWeightDesc = actor_util.SectorStorageWeightDesc
-type SectorTerminationType = actor_util.SectorTerminationType
+type BalanceTableHAMT = autil.BalanceTableHAMT
+type SectorStorageWeightDesc = autil.SectorStorageWeightDesc
+type SectorTerminationType = autil.SectorTerminationType
 
-var SectorTerminationType_NormalExpiration = actor_util.SectorTerminationType_NormalExpiration
+var SectorTerminationType_NormalExpiration = autil.SectorTerminationType_NormalExpiration
 
 var RT_MinerEntry_ValidateCaller_DetermineFundsLocation = vmr.RT_MinerEntry_ValidateCaller_DetermineFundsLocation
 
@@ -26,13 +25,11 @@ var RT_MinerEntry_ValidateCaller_DetermineFundsLocation = vmr.RT_MinerEntry_Vali
 
 type InvocOutput = vmr.InvocOutput
 type Runtime = vmr.Runtime
-type Bytes = util.Bytes
 
-var Assert = util.Assert
-var IMPL_FINISH = util.IMPL_FINISH
-var IMPL_TODO = util.IMPL_TODO
-var PARAM_FINISH = util.PARAM_FINISH
-var TODO = util.TODO
+var Assert = autil.Assert
+var IMPL_FINISH = autil.IMPL_FINISH
+var IMPL_TODO = autil.IMPL_TODO
+var TODO = autil.TODO
 
 func (a *StoragePowerActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, StoragePowerActorState) {
 	h := rt.AcquireState()
@@ -52,8 +49,5 @@ func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st StoragePowerActorState
 	h.UpdateRelease(newCID)
 }
 func (st *StoragePowerActorState_I) CID() ipld.CID {
-	panic("TODO")
-}
-func DeserializeState(x Bytes) StoragePowerActorState {
 	panic("TODO")
 }
