@@ -6,10 +6,12 @@ import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 import spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
+import node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 
 type StoragePowerConsensusSubsystem struct {//(@mutable)
     ChooseTipsetToMine(tipsets [chain.Tipset]) [chain.Tipset]
 
+    node        node_base.FilecoinNode
     ec          ExpectedConsensus
     blockchain  blockchain.BlockchainSubsystem
 

@@ -101,7 +101,7 @@ Aside from `libp2p`, `ChainSync` uses or relies on the following components:
 
 - Libraries:
   - `ipld` data structures, selectors, and protocols
-    - `ipld.Store` local persistent storage for `chain` datastructures
+    - `ipld.GraphStore` local persistent storage for `chain` datastructures
     - `ipld.Selector` a way to express requests for chain data structures
     - `ipfs.GraphSync` a general-purpose `ipld` datastructure syncing protocol
 - Data Structures:

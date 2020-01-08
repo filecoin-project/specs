@@ -45,22 +45,17 @@ func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree st
 	return spc.ec().IsWinningChallengeTicket(challengeTicket, sectorUtilization, networkPower, sectorsSampled, numSectors)
 }
 
-// TODO: fix linking here
-var node node_base.FilecoinNode
-
 func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTree stateTree.StateTree) spowact.StoragePowerActorState {
 	powerAddr := addr.StoragePowerActorAddr
 	actorState, ok := stateTree.GetActor(powerAddr)
 	util.Assert(ok)
 	substateCID := actorState.State()
 
-	substate, err := node.LocalGraph().Get(ipld.CID(substateCID))
-	if err != nil {
-		panic("TODO")
-	}
+	substate, ok := spc.node().Repository().StateStore().Get(ipld.CID(substateCID))
+	util.Assert(ok)
 
-	// TODO fix conversion to bytes
-	panic(substate)
+	// fix conversion to bytes
+	util.IMPL_FINISH(substate)
 	var serializedSubstate util.Serialization
 	st, err := spowact.Deserialize_StoragePowerActorState(serializedSubstate)
 

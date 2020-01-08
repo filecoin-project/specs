@@ -14,13 +14,9 @@ type ChainSync struct {
 }
 
 type ValidationGraph struct {
-    // ChainStore is the ipld Datastore through which to load and store
-    // all Chain datastructures (Blocks, Messages, StateTrees, etc.)
-    ChainStore       ipld.Store
-
     // CacheChainStore is the ipld Datastore through which to load and store
     // chain datastructures that may be temporary and may be garbage collected.
-    CacheChainStore  ipld.Store
+    CacheChainStore  ipld.GraphStore
 
     // Graph is a datastructure that provides efficient access to all
     // nodes needed for validation, and keeps both forward and back links.

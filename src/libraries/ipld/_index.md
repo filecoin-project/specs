@@ -5,7 +5,6 @@ entries:
 - cid
 - datamodel
 - selectors
-- graphstore
 ---
 
 {{< readfile file="ipld.id" code="true" lang="go" >}}

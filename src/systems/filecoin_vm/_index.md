@@ -12,6 +12,8 @@ entries:
 - interpreter
 ---
 
+{{<label sys_vm>}}
+
 {{< incTocMap "/docs/systems/filecoin_vm" 3 >}}
 
 {{< readfile file="vm.id" code="true" lang="go" >}}

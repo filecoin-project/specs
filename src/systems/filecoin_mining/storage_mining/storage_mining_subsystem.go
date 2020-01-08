@@ -55,13 +55,13 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 		GasLimit_:   msg.GasAmount_SentinelUnlimited(),
 	}
 
-	var workerKey filcrypto.SigKeyPair // sms._keyStore().WorkerKey()
+	var workerKey filcrypto.SigKeyPair // sms._keyStore().Worker()
 	signedMessage, err := msg.Sign(unsignedCreationMessage, workerKey)
 	if err != nil {
 		return nil, err
 	}
 
-	err = sms.FilecoinNode().MessagePool().Syncer().SubmitMessage(signedMessage)
+	err = sms.Node().MessagePool().Syncer().SubmitMessage(signedMessage)
 	if err != nil {
 		return nil, err
 	}
@@ -101,16 +101,16 @@ func (sms *StorageMiningSubsystem_I) OnNewRound() {
 
 func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 	chainHead := sms._blockchain().BestChain().HeadTipset()
-	sma := sms._getStorageMinerActorState(chainHead.StateTree(), sms._keyStore().MinerAddress())
+	sma := sms._getStorageMinerActorState(chainHead.StateTree(), sms.Node().Repository().KeyStore().MinerAddress())
 
 	if sma.PoStState().Is_OK() {
 		ePoSt := sms._tryLeaderElection(chainHead.StateTree(), sma)
 		if ePoSt != nil {
 			// Randomness for ticket generation in block production
 			randomness1 := sms._consensus().GetTicketProductionRand(sms._blockchain().BestChain(), sms._blockchain().LatestEpoch())
-			newTicket := sms.PrepareNewTicket(randomness1, sms._keyStore().MinerAddress())
+			newTicket := sms.PrepareNewTicket(randomness1, sms.Node().Repository().KeyStore().MinerAddress())
 
-			sms._blockProducer().GenerateBlock(ePoSt, newTicket, chainHead, sms._keyStore().MinerAddress())
+			sms._blockProducer().GenerateBlock(ePoSt, newTicket, chainHead, sms.Node().Repository().KeyStore().MinerAddress())
 		}
 	} else if sma.PoStState().Is_Challenged() {
 		sPoSt := sms._trySurprisePoSt(chainHead.StateTree(), sma)
@@ -126,8 +126,8 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.Stat
 	// Randomness for ElectionPoSt
 	randomnessK := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), sms._blockchain().LatestEpoch())
 
-	input := sms.PreparePoStChallengeSeed(randomnessK, sms._keyStore().MinerAddress())
-	postRandomness := sms._keyStore().WorkerKey().Impl().Generate(input).Output()
+	input := sms.PreparePoStChallengeSeed(randomnessK, sms.Node().Repository().KeyStore().MinerAddress())
+	postRandomness := sms.Node().Repository().KeyStore().WorkerKey().Impl().Generate(input).Output()
 
 	// TODO: add how sectors are actually stored in the SMS proving set
 	util.TODO()
@@ -197,7 +197,7 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 	input := filcrypto.DeriveRand(filcrypto.DomainSeparationTag_TicketProduction, randInput)
 
 	// run through VRF
-	vrfRes := sms._keyStore().WorkerKey().Impl().Generate(input)
+	vrfRes := sms.Node().Repository().KeyStore().WorkerKey().Impl().Generate(input)
 
 	newTicket := &block.Ticket_I{
 		VRFResult_: vrfRes,
@@ -207,20 +207,17 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 	return newTicket
 }
 
-// TODO: fix linking here
-var node node_base.FilecoinNode
-
 func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateTree.StateTree, minerAddr addr.Address) sminact.StorageMinerActorState {
 	actorState, ok := stateTree.GetActor(minerAddr)
 	util.Assert(ok)
 	substateCID := actorState.State()
 
-	substate, err := node.LocalGraph().Get(ipld.CID(substateCID))
-	if err != nil {
-		panic("TODO")
+	substate, ok := sms.Node().Repository().StateStore().Get(ipld.CID(substateCID))
+	if !ok {
+		panic("Couldn't find sma state")
 	}
-	// TODO fix conversion to bytes
-	panic(substate)
+	// fix conversion to bytes
+	util.IMPL_TODO(substate)
 	var serializedSubstate Serialization
 	st, err := sminact.Deserialize_StorageMinerActorState(serializedSubstate)
 
@@ -236,13 +233,13 @@ func (sms *StorageMiningSubsystem_I) _getStoragePowerActorState(stateTree stateT
 	util.Assert(ok)
 	substateCID := actorState.State()
 
-	substate, err := node.LocalGraph().Get(ipld.CID(substateCID))
-	if err != nil {
-		panic("TODO")
+	substate, ok := sms.Node().Repository().StateStore().Get(ipld.CID(substateCID))
+	if !ok {
+		panic("Couldn't find spa state")
 	}
 
-	// TODO fix conversion to bytes
-	panic(substate)
+	// fix conversion to bytes
+	util.IMPL_TODO(substate)
 	var serializedSubstate util.Serialization
 	st, err := spowact.Deserialize_StoragePowerActorState(serializedSubstate)
 
@@ -347,8 +344,8 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 	// get randomness for SurprisePoSt
 	challEpoch := sma.PoStState().As_Challenged().SurpriseChallengeEpoch()
 	randomnessK := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), challEpoch)
-	input := sms.PreparePoStChallengeSeed(randomnessK, sms._keyStore().MinerAddress())
-	postRandomness := sms._keyStore().WorkerKey().Impl().Generate(input).Output()
+	input := sms.PreparePoStChallengeSeed(randomnessK, sms.Node().Repository().KeyStore().MinerAddress())
+	postRandomness := sms.Node().Repository().KeyStore().WorkerKey().Impl().Generate(input).Output()
 
 	// TODO: add how sectors are actually stored in the SMS proving set
 	util.TODO()
@@ -382,15 +379,15 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 
 func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.StateTree, sPoSt sector.OnChainPoStVerifyInfo, gasPrice actors.TokenAmount, gasLimit msg.GasAmount) error {
 
-	workerAddr, err := addr.Address_Make_Key(node_base.NETWORK, addr.KeyHash(sms._keyStore().WorkerKey().VRFPublicKey()))
+	workerAddr, err := addr.Address_Make_Key(node_base.NETWORK, addr.KeyHash(sms.Node().Repository().KeyStore().WorkerKey().VRFPublicKey()))
 	if err != nil {
 		return err
 	}
 	worker, ok := state.GetActor(workerAddr)
 	Assert(ok)
 	unsignedCreationMessage := &msg.UnsignedMessage_I{
-		From_:       workerAddr,
-		To_:         sms._keyStore().MinerAddress(),
+		From_:       sms.Node().Repository().KeyStore().MinerAddress(),
+		To_:         sms.Node().Repository().KeyStore().MinerAddress(),
 		Method_:     ai.Method_StorageMinerActor_SubmitSurprisePoStResponse,
 		Params_:     serde.MustSerializeParams(sPoSt),
 		CallSeqNum_: worker.CallSeqNum(),
@@ -399,13 +396,13 @@ func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.
 		GasLimit_:   gasLimit,
 	}
 
-	var workerKey filcrypto.SigKeyPair // sms._keyStore().WorkerKey()
+	var workerKey filcrypto.SigKeyPair // sms.Node().Repository().KeyStore().Worker()
 	signedMessage, err := msg.Sign(unsignedCreationMessage, workerKey)
 	if err != nil {
 		return err
 	}
 
-	err = sms.FilecoinNode().MessagePool().Syncer().SubmitMessage(signedMessage)
+	err = sms.Node().MessagePool().Syncer().SubmitMessage(signedMessage)
 	if err != nil {
 		return err
 	}
