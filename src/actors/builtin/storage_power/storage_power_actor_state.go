@@ -3,10 +3,10 @@ package storage_power
 import (
 	"sort"
 
-	actor_util "github.com/filecoin-project/specs/actors/util"
+	actors "github.com/filecoin-project/specs/actors"
+	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	util "github.com/filecoin-project/specs/util"
@@ -43,11 +43,11 @@ func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(mine
 }
 
 func (st *StoragePowerActorState_I) _slashPledgeCollateral(
-	minerAddr addr.Address, slashAmountRequested actor.TokenAmount) actor.TokenAmount {
+	minerAddr addr.Address, slashAmountRequested actors.TokenAmount) actors.TokenAmount {
 
-	Assert(slashAmountRequested >= actor.TokenAmount(0))
+	Assert(slashAmountRequested >= actors.TokenAmount(0))
 
-	newTable, amountSlashed, ok := actor_util.BalanceTable_WithSubtractPreservingNonnegative(
+	newTable, amountSlashed, ok := autil.BalanceTable_WithSubtractPreservingNonnegative(
 		st.EscrowTable(), minerAddr, slashAmountRequested)
 	Assert(ok)
 	st.Impl().EscrowTable_ = newTable
@@ -110,8 +110,8 @@ func (st *StoragePowerActorState_I) _getPowerTotalForMiner(minerAddr addr.Addres
 	return minerPower, true
 }
 
-func (st *StoragePowerActorState_I) _getCurrPledgeForMiner(minerAddr addr.Address) (currPledge actor.TokenAmount, ok bool) {
-	return actor_util.BalanceTable_GetEntry(st.EscrowTable(), minerAddr)
+func (st *StoragePowerActorState_I) _getCurrPledgeForMiner(minerAddr addr.Address) (currPledge actors.TokenAmount, ok bool) {
+	return autil.BalanceTable_GetEntry(st.EscrowTable(), minerAddr)
 }
 
 func (st *StoragePowerActorState_I) _addClaimedPowerForSector(minerAddr addr.Address, storageWeightDesc SectorStorageWeightDesc) {

@@ -1,9 +1,11 @@
 package interpreter
 
 import (
+	actors "github.com/filecoin-project/specs/actors"
 	cronact "github.com/filecoin-project/specs/actors/builtin/cron"
 	initact "github.com/filecoin-project/specs/actors/builtin/init"
 	sminact "github.com/filecoin-project/specs/actors/builtin/storage_miner"
+	serde "github.com/filecoin-project/specs/actors/serde"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
@@ -49,8 +51,8 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSet
 		epostMessage := _makeElectionPoStMessage(outTree, minerAddr)
 		outTree = _applyMessageBuiltinAssert(outTree, epostMessage, minerAddr)
 
-		minerPenaltyTotal := actor.TokenAmount(0)
-		var minerPenaltyCurr actor.TokenAmount
+		minerPenaltyTotal := actors.TokenAmount(0)
+		var minerPenaltyCurr actors.TokenAmount
 
 		// Process BLS messages from the block.
 		for _, m := range blk.BLSMessages() {
@@ -94,7 +96,7 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSet
 
 func (vmi *VMInterpreter_I) ApplyMessage(
 	inTree st.StateTree, message msg.UnsignedMessage, onChainMessageSize int, minerAddr addr.Address) (
-	retTree st.StateTree, retReceipt vmr.MessageReceipt, retMinerPenalty actor.TokenAmount) {
+	retTree st.StateTree, retReceipt vmr.MessageReceipt, retMinerPenalty actors.TokenAmount) {
 
 	senderAddr := _resolveSender(inTree, message.From())
 	minerOwner := _lookupMinerOwner(inTree, minerAddr)
@@ -118,7 +120,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 			Assert(message.GasLimit().Equals(vmiGasUsed.Add(vmiGasRemaining)))
 			tree = _withTransferFundsAssert(tree, addr.BurntFundsActorAddr, senderAddr, vmiGasRemainingFIL)
 			tree = _withTransferFundsAssert(tree, addr.BurntFundsActorAddr, minerOwner, vmiGasUsedFIL)
-			retMinerPenalty = actor.TokenAmount(0)
+			retMinerPenalty = actors.TokenAmount(0)
 
 		case SenderResolveSpec_Invalid:
 			retMinerPenalty = vmiGasUsedFIL
@@ -281,14 +283,14 @@ func _applyMessageInternal(tree st.StateTree, sender actor.ActorState, senderAdd
 		actor.CallSeqNum(0),
 		tree,
 		senderAddr,
-		actor.TokenAmount(0),
+		actors.TokenAmount(0),
 		gasRemainingInit,
 	)
 
 	return rt.SendToplevelFromInterpreter(invoc)
 }
 
-func _withTransferFundsAssert(tree st.StateTree, from addr.Address, to addr.Address, amount actor.TokenAmount) st.StateTree {
+func _withTransferFundsAssert(tree st.StateTree, from addr.Address, to addr.Address, amount actors.TokenAmount) st.StateTree {
 	// TODO: assert amount nonnegative
 	retTree, err := tree.Impl().WithFundsTransfer(from, to, amount)
 	if err != nil {
@@ -298,10 +300,10 @@ func _withTransferFundsAssert(tree st.StateTree, from addr.Address, to addr.Addr
 	}
 }
 
-func _gasToFIL(gas msg.GasAmount, price actor.TokenAmount) actor.TokenAmount {
+func _gasToFIL(gas msg.GasAmount, price actors.TokenAmount) actors.TokenAmount {
 	IMPL_FINISH()
 	panic("") // BigInt arithmetic
-	// return actor.TokenAmount(util.UVarint(gas) * util.UVarint(price))
+	// return actors.TokenAmount(util.UVarint(gas) * util.UVarint(price))
 }
 
 func _makeInvocInput(message msg.UnsignedMessage) vmr.InvocInput {
@@ -314,11 +316,8 @@ func _makeInvocInput(message msg.UnsignedMessage) vmr.InvocInput {
 }
 
 // Builds a message for paying block reward to a miner's owner.
-func _makeBlockRewardMessage(state st.StateTree, minerAddr addr.Address, penalty actor.TokenAmount) msg.UnsignedMessage {
-	params := make([]util.Serialization, 2)
-	params[0] = addr.Serialize_Address(minerAddr)
-	params[1] = actor.Serialize_TokenAmount(penalty)
-
+func _makeBlockRewardMessage(state st.StateTree, minerAddr addr.Address, penalty actors.TokenAmount) msg.UnsignedMessage {
+	params := serde.MustSerializeParams(minerAddr, penalty)
 	TODO() // serialize other inputs to BlockRewardMessage or get this from query in RewardActor
 
 	sysActor, ok := state.GetActor(addr.SystemActorAddr)
@@ -337,16 +336,13 @@ func _makeBlockRewardMessage(state st.StateTree, minerAddr addr.Address, penalty
 
 // Builds a message for submitting ElectionPost on behalf of a miner actor.
 func _makeElectionPoStMessage(state st.StateTree, minerActorAddr addr.Address) msg.UnsignedMessage {
-	// TODO: determine parameters necessary for this message.
-	params := make([]util.Serialization, 0)
-
 	sysActor, ok := state.GetActor(addr.SystemActorAddr)
 	Assert(ok)
 	return &msg.UnsignedMessage_I{
 		From_:       addr.SystemActorAddr,
 		To_:         minerActorAddr,
 		Method_:     ai.Method_StorageMinerActor_OnVerifiedElectionPoSt,
-		Params_:     params,
+		Params_:     nil,
 		CallSeqNum_: sysActor.CallSeqNum(),
 		Value_:      0,
 		GasPrice_:   0,

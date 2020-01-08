@@ -1,6 +1,7 @@
 package actor
 
 import (
+	actors "github.com/filecoin-project/specs/actors"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -12,11 +13,11 @@ var TODO = util.TODO
 type Serialization = util.Serialization
 
 const (
-	MethodSend        = MethodNum(0)
-	MethodConstructor = MethodNum(1)
+	MethodSend        = actors.MethodNum(0)
+	MethodConstructor = actors.MethodNum(1)
 
 	// TODO: remove this once canonical method numbers are finalized
-	MethodPlaceholder = MethodNum(-(1 << 30))
+	MethodPlaceholder = actors.MethodNum(1 << 30)
 )
 
 func (st *ActorState_I) CID() ipld.CID {
@@ -86,9 +87,4 @@ func (id *CodeID_I) IsSignable() bool {
 
 func (x ActorSubstateCID) Ref() *ActorSubstateCID {
 	return &x
-}
-
-func TokenAmount_Placeholder() TokenAmount {
-	TODO()
-	panic("")
 }

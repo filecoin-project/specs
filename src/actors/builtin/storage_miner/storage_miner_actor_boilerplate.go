@@ -1,15 +1,14 @@
 package storage_miner
 
 import (
-	actor_util "github.com/filecoin-project/specs/actors/util"
+	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-	util "github.com/filecoin-project/specs/util"
 )
 
-type SectorStorageWeightDesc = actor_util.SectorStorageWeightDesc
-type SectorTerminationType = actor_util.SectorTerminationType
+type SectorStorageWeightDesc = autil.SectorStorageWeightDesc
+type SectorTerminationType = autil.SectorTerminationType
 
 var RT_ConfirmFundsReceiptOrAbort_RefundRemainder = vmr.RT_ConfirmFundsReceiptOrAbort_RefundRemainder
 
@@ -23,12 +22,11 @@ var RT_ConfirmFundsReceiptOrAbort_RefundRemainder = vmr.RT_ConfirmFundsReceiptOr
 
 type InvocOutput = vmr.InvocOutput
 type Runtime = vmr.Runtime
-type Bytes = util.Bytes
 
-var Assert = util.Assert
-var IMPL_FINISH = util.IMPL_FINISH
-var IMPL_TODO = util.IMPL_TODO
-var TODO = util.TODO
+var Assert = autil.Assert
+var IMPL_FINISH = autil.IMPL_FINISH
+var IMPL_TODO = autil.IMPL_TODO
+var TODO = autil.TODO
 
 func (a *StorageMinerActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, StorageMinerActorState) {
 	h := rt.AcquireState()
@@ -48,8 +46,5 @@ func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st StorageMinerActorState
 	h.UpdateRelease(newCID)
 }
 func (st *StorageMinerActorState_I) CID() ipld.CID {
-	panic("TODO")
-}
-func DeserializeState(x Bytes) StorageMinerActorState {
 	panic("TODO")
 }

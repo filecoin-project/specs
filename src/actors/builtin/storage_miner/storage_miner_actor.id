@@ -1,5 +1,5 @@
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import actor_util "github.com/filecoin-project/specs/actors/util"
+import actors "github.com/filecoin-project/specs/actors"
+import autil "github.com/filecoin-project/specs/actors/util"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
@@ -41,7 +41,7 @@ type SectorState enum {
 type SectorOnChainInfo struct {
     State                       SectorState
     Info                        sealing.SectorPreCommitInfo  // Also contains Expiration field.
-    PreCommitDeposit            actor.TokenAmount
+    PreCommitDeposit            actors.TokenAmount
     PreCommitEpoch              block.ChainEpoch
     ActivationEpoch             block.ChainEpoch  // -1 if still in PreCommit state.
     DeclaredFaultEpoch          block.ChainEpoch  // -1 if not currently declared faulted.
@@ -68,9 +68,9 @@ type StorageMinerActorState struct {
     ProvingSet  SectorNumberSetHAMT
     Info        MinerInfo
 
-    GetStorageWeightDescForSectorMaybe(sectorNumber sector.SectorNumber) (ret actor_util.SectorStorageWeightDesc, ok bool)
-    _getStorageWeightDescForSector(sectorNumber sector.SectorNumber) actor_util.SectorStorageWeightDesc
-    _getStorageWeightDescsForSectors(sectorNumbers [sector.SectorNumber]) [actor_util.SectorStorageWeightDesc]
+    GetStorageWeightDescForSectorMaybe(sectorNumber sector.SectorNumber) (ret autil.SectorStorageWeightDesc, ok bool)
+    _getStorageWeightDescForSector(sectorNumber sector.SectorNumber) autil.SectorStorageWeightDesc
+    _getStorageWeightDescsForSectors(sectorNumbers [sector.SectorNumber]) [autil.SectorStorageWeightDesc]
 
     _getSectorDealIDsAssert(sectorNumber sector.SectorNumber) deal.DealIDs
 

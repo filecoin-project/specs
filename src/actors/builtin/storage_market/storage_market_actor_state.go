@@ -1,11 +1,11 @@
 package storage_market
 
 import (
+	actors "github.com/filecoin-project/specs/actors"
 	actor_util "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
@@ -16,7 +16,7 @@ import (
 ////////////////////////////////////////////////////////////////////////////////
 
 func (st *StorageMarketActorState_I) _updatePendingDealStates(dealIDs []deal.DealID, epoch block.ChainEpoch) (
-	amountSlashedTotal actor.TokenAmount) {
+	amountSlashedTotal actors.TokenAmount) {
 
 	IMPL_FINISH() // BigInt arithmetic
 	amountSlashedTotal = 0
@@ -30,7 +30,7 @@ func (st *StorageMarketActorState_I) _updatePendingDealStates(dealIDs []deal.Dea
 }
 
 func (st *StorageMarketActorState_I) _updatePendingDealState(dealID deal.DealID, epoch block.ChainEpoch) (
-	amountSlashed actor.TokenAmount) {
+	amountSlashed actors.TokenAmount) {
 
 	IMPL_FINISH() // BigInt arithmetic
 	amountSlashed = 0
@@ -103,10 +103,10 @@ func (st *StorageMarketActorState_I) _processDealPaymentEpochsElapsed(dealID dea
 	// Process deal payment for the elapsed epochs.
 	IMPL_FINISH() // BigInt arithmetic
 	totalPayment := int(numEpochsElapsed) * int(dealP.StoragePricePerEpoch())
-	st._transferBalance(dealP.Client(), dealP.Provider(), actor.TokenAmount(totalPayment))
+	st._transferBalance(dealP.Client(), dealP.Provider(), actors.TokenAmount(totalPayment))
 }
 
-func (st *StorageMarketActorState_I) _processDealSlashed(dealID deal.DealID) (amountSlashed actor.TokenAmount) {
+func (st *StorageMarketActorState_I) _processDealSlashed(dealID deal.DealID) (amountSlashed actors.TokenAmount) {
 	deal, dealP := st._getOnChainDealAssert(dealID)
 	Assert(deal.SectorStartEpoch() != block.ChainEpoch_None)
 
@@ -129,7 +129,7 @@ func (st *StorageMarketActorState_I) _processDealSlashed(dealID deal.DealID) (am
 // Deal start deadline elapsed without appearing in a proven sector.
 // Delete deal, slash a portion of provider's collateral, and unlock remaining collaterals
 // for both provider and client.
-func (st *StorageMarketActorState_I) _processDealInitTimedOut(dealID deal.DealID) (amountSlashed actor.TokenAmount) {
+func (st *StorageMarketActorState_I) _processDealInitTimedOut(dealID deal.DealID) (amountSlashed actors.TokenAmount) {
 	deal, dealP := st._getOnChainDealAssert(dealID)
 	Assert(deal.SectorStartEpoch() == block.ChainEpoch_None)
 
@@ -176,21 +176,21 @@ func (st *StorageMarketActorState_I) _addressEntryExists(address addr.Address) b
 	return foundEscrow
 }
 
-func (st *StorageMarketActorState_I) _getTotalEscrowBalanceInternal(a addr.Address) actor.TokenAmount {
+func (st *StorageMarketActorState_I) _getTotalEscrowBalanceInternal(a addr.Address) actors.TokenAmount {
 	Assert(st._addressEntryExists(a))
 	ret, ok := actor_util.BalanceTable_GetEntry(st.EscrowTable(), a)
 	Assert(ok)
 	return ret
 }
 
-func (st *StorageMarketActorState_I) _getLockedReqBalanceInternal(a addr.Address) actor.TokenAmount {
+func (st *StorageMarketActorState_I) _getLockedReqBalanceInternal(a addr.Address) actors.TokenAmount {
 	Assert(st._addressEntryExists(a))
 	ret, ok := actor_util.BalanceTable_GetEntry(st.LockedReqTable(), a)
 	Assert(ok)
 	return ret
 }
 
-func (st *StorageMarketActorState_I) _lockBalanceMaybe(addr addr.Address, amount actor.TokenAmount) (
+func (st *StorageMarketActorState_I) _lockBalanceMaybe(addr addr.Address, amount actors.TokenAmount) (
 	lockBalanceOK bool) {
 
 	Assert(amount >= 0)
@@ -211,7 +211,7 @@ func (st *StorageMarketActorState_I) _lockBalanceMaybe(addr addr.Address, amount
 }
 
 func (st *StorageMarketActorState_I) _unlockBalance(
-	addr addr.Address, unlockAmountRequested actor.TokenAmount) {
+	addr addr.Address, unlockAmountRequested actors.TokenAmount) {
 
 	Assert(unlockAmountRequested >= 0)
 	Assert(st._addressEntryExists(addr))
@@ -220,7 +220,7 @@ func (st *StorageMarketActorState_I) _unlockBalance(
 }
 
 func (st *StorageMarketActorState_I) _tableWithAddBalance(
-	table actor_util.BalanceTableHAMT, toAddr addr.Address, amountToAdd actor.TokenAmount) actor_util.BalanceTableHAMT {
+	table actor_util.BalanceTableHAMT, toAddr addr.Address, amountToAdd actors.TokenAmount) actor_util.BalanceTableHAMT {
 
 	Assert(amountToAdd >= 0)
 
@@ -230,7 +230,7 @@ func (st *StorageMarketActorState_I) _tableWithAddBalance(
 }
 
 func (st *StorageMarketActorState_I) _tableWithDeductBalanceExact(
-	table actor_util.BalanceTableHAMT, fromAddr addr.Address, amountRequested actor.TokenAmount) actor_util.BalanceTableHAMT {
+	table actor_util.BalanceTableHAMT, fromAddr addr.Address, amountRequested actors.TokenAmount) actor_util.BalanceTableHAMT {
 
 	Assert(amountRequested >= 0)
 
@@ -243,7 +243,7 @@ func (st *StorageMarketActorState_I) _tableWithDeductBalanceExact(
 
 // move funds from locked in client to available in provider
 func (st *StorageMarketActorState_I) _transferBalance(
-	fromAddr addr.Address, toAddr addr.Address, transferAmountRequested actor.TokenAmount) {
+	fromAddr addr.Address, toAddr addr.Address, transferAmountRequested actors.TokenAmount) {
 
 	Assert(transferAmountRequested >= 0)
 	Assert(st._addressEntryExists(fromAddr))
@@ -254,7 +254,7 @@ func (st *StorageMarketActorState_I) _transferBalance(
 	st.Impl().EscrowTable_ = st._tableWithAddBalance(st.EscrowTable(), toAddr, transferAmountRequested)
 }
 
-func (st *StorageMarketActorState_I) _slashBalance(addr addr.Address, slashAmount actor.TokenAmount) {
+func (st *StorageMarketActorState_I) _slashBalance(addr addr.Address, slashAmount actors.TokenAmount) {
 	Assert(st._addressEntryExists(addr))
 	Assert(slashAmount >= 0)
 
@@ -294,7 +294,7 @@ func _rtDealProposalIsInternallyValid(rt Runtime, dealP deal.StorageDealProposal
 	return true
 }
 
-func _dealGetPaymentRemaining(deal deal.OnChainDeal, epoch block.ChainEpoch) actor.TokenAmount {
+func _dealGetPaymentRemaining(deal deal.OnChainDeal, epoch block.ChainEpoch) actors.TokenAmount {
 	dealP := deal.Deal().Proposal()
 	Assert(epoch <= dealP.EndEpoch())
 
@@ -302,7 +302,7 @@ func _dealGetPaymentRemaining(deal deal.OnChainDeal, epoch block.ChainEpoch) act
 	Assert(durationRemaining > 0)
 
 	IMPL_FINISH() // BigInt arithmetic
-	return actor.TokenAmount(int(durationRemaining) * int(dealP.StoragePricePerEpoch()))
+	return actors.TokenAmount(int(durationRemaining) * int(dealP.StoragePricePerEpoch()))
 }
 
 func (st *StorageMarketActorState_I) _getOnChainDeal(dealID deal.DealID) (

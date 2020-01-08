@@ -3,23 +3,23 @@ package reward
 import (
 	"math"
 
+	actors "github.com/filecoin-project/specs/actors"
+	serde "github.com/filecoin-project/specs/actors/serde"
+	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-	util "github.com/filecoin-project/specs/util"
 )
 
 type InvocOutput = vmr.InvocOutput
 type Runtime = vmr.Runtime
-type Bytes = util.Bytes
 
-var Assert = util.Assert
-var IMPL_FINISH = util.IMPL_FINISH
-var IMPL_TODO = util.IMPL_TODO
-var TODO = util.TODO
+var IMPL_FINISH = autil.IMPL_FINISH
+var IMPL_TODO = autil.IMPL_TODO
+var TODO = autil.TODO
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
@@ -44,27 +44,27 @@ func (st *RewardActorState_I) CID() ipld.CID {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (r *Reward_I) AmountVested(elapsedEpoch block.ChainEpoch) actor.TokenAmount {
+func (r *Reward_I) AmountVested(elapsedEpoch block.ChainEpoch) actors.TokenAmount {
 	switch r.VestingFunction() {
 	case VestingFunction_None:
 		return r.Value()
 	case VestingFunction_Linear:
 		TODO() // BigInt
 		vestedProportion := math.Max(1.0, float64(elapsedEpoch)/float64(r.StartEpoch()-r.EndEpoch()))
-		return actor.TokenAmount(uint64(r.Value()) * uint64(vestedProportion))
+		return actors.TokenAmount(uint64(r.Value()) * uint64(vestedProportion))
 	default:
-		return actor.TokenAmount(0)
+		return actors.TokenAmount(0)
 	}
 }
 
-func (st *RewardActorState_I) _withdrawReward(rt vmr.Runtime, ownerAddr addr.Address) actor.TokenAmount {
+func (st *RewardActorState_I) _withdrawReward(rt vmr.Runtime, ownerAddr addr.Address) actors.TokenAmount {
 
 	rewards, found := st.RewardMap()[ownerAddr]
 	if !found {
 		rt.AbortStateMsg("ra._withdrawReward: ownerAddr not found in RewardMap.")
 	}
 
-	rewardToWithdrawTotal := actor.TokenAmount(0)
+	rewardToWithdrawTotal := actors.TokenAmount(0)
 	indicesToRemove := make([]int, len(rewards))
 
 	for i, r := range rewards {
@@ -100,32 +100,30 @@ func (a *RewardActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 func (a *RewardActorCode_I) AwardBlockReward(
 	rt vmr.Runtime,
 	miner addr.Address,
-	penalty actor.TokenAmount,
+	penalty actors.TokenAmount,
 	minerNominalPower block.StoragePower,
-	currPledge actor.TokenAmount,
+	currPledge actors.TokenAmount,
 ) {
 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
 
 	inds := rt.CurrIndices()
 	pledgeReq := inds.PledgeCollateralReq(minerNominalPower)
 	currReward := inds.GetCurrBlockRewardForMiner(minerNominalPower, currPledge)
-	TODO()                                                                                // BigInt
-	underPledge := math.Max(float64(actor.TokenAmount(0)), float64(pledgeReq-currPledge)) // 0 if over collateralized
+	TODO()                                                                                 // BigInt
+	underPledge := math.Max(float64(actors.TokenAmount(0)), float64(pledgeReq-currPledge)) // 0 if over collateralized
 	rewardToGarnish := math.Min(float64(currReward), float64(underPledge))
 
 	TODO()
 	// handle penalty here
 	// also handle penalty greater than reward
-	actualReward := currReward - actor.TokenAmount(rewardToGarnish)
+	actualReward := currReward - actors.TokenAmount(rewardToGarnish)
 	if rewardToGarnish > 0 {
 		// Send fund to SPA for collateral
 		rt.Send(
 			addr.StoragePowerActorAddr,
 			ai.Method_StoragePowerActor_AddBalance,
-			[]util.Serialization{
-				addr.Serialize_Address(miner),
-			},
-			actor.TokenAmount(rewardToGarnish),
+			serde.MustSerializeParams(miner),
+			actors.TokenAmount(rewardToGarnish),
 		)
 	}
 
@@ -136,7 +134,7 @@ func (a *RewardActorCode_I) AwardBlockReward(
 			StartEpoch_:      rt.CurrEpoch(),
 			EndEpoch_:        rt.CurrEpoch(),
 			Value_:           actualReward,
-			AmountWithdrawn_: actor.TokenAmount(0),
+			AmountWithdrawn_: actors.TokenAmount(0),
 			VestingFunction_: VestingFunction_None,
 		}
 		rewards, found := st.RewardMap()[miner]

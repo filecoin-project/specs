@@ -1,10 +1,10 @@
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import actors "github.com/filecoin-project/specs/actors"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
-type BalanceTableHAMT {addr.Address: actor.TokenAmount}
+type BalanceTableHAMT {addr.Address: actors.TokenAmount}
 
 type DealIDSetHAMT {deal.DealID: bool}
 type IntToDealIDHAMT {Int: deal.DealID}

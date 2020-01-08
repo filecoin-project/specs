@@ -1,24 +1,19 @@
 package init
 
 import (
-	actor_util "github.com/filecoin-project/specs/actors/util"
+	actors "github.com/filecoin-project/specs/actors"
+	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
-	util "github.com/filecoin-project/specs/util"
 )
 
 type InvocOutput = vmr.InvocOutput
 type Runtime = vmr.Runtime
-type Bytes = util.Bytes
+type Bytes = actors.Bytes
 
-var Assert = util.Assert
-var IMPL_FINISH = util.IMPL_FINISH
-var IMPL_TODO = util.IMPL_TODO
-var TODO = util.TODO
+var AssertMsg = autil.AssertMsg
 
 func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
@@ -32,10 +27,10 @@ func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
 	return rt.ValueReturn(nil)
 }
 
-func (a *InitActorCode_I) Exec(rt Runtime, execCodeID actor.CodeID, constructorParams actor.MethodParams) InvocOutput {
+func (a *InitActorCode_I) Exec(rt Runtime, execCodeID actor.CodeID, constructorParams actors.MethodParams) InvocOutput {
 	rt.ValidateImmediateCallerAcceptAny()
 	callerCodeID, ok := rt.GetActorCodeID(rt.ImmediateCaller())
-	Assert(ok)
+	AssertMsg(ok, "no code for actor at %s", rt.ImmediateCaller())
 	if !_codeIDSupportsExec(callerCodeID, execCodeID) {
 		rt.AbortArgMsg("Caller type cannot create an actor of requested type")
 	}
@@ -116,30 +111,6 @@ func _codeIDSupportsExec(callerCodeID actor.CodeID, execCodeID actor.CodeID) boo
 }
 
 ///// Boilerplate /////
-
-func (a *InitActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
-	switch method {
-	case actor.MethodConstructor:
-		actor_util.ArgEnd(&params, rt)
-		return a.Constructor(rt)
-
-	case ai.Method_InitActor_Exec:
-		codeId, err := actor.Deserialize_CodeID(actor_util.ArgPop(&params, rt))
-		actor_util.CheckArgs(&params, rt, err == nil)
-		// Note: do not call ArgEnd (params is forwarded to Exec)
-		return a.Exec(rt, codeId, params)
-
-	//case Method_InitActor_GetActorIDForAddress:
-	//	address, err := addr.Deserialize_Address(ArgPop(&params, rt))
-	//	CheckArgs(&params, rt, err == nil)
-	//	ArgEnd(&params, rt)
-	//	return a.GetActorIDForAddress(rt, address)
-
-	default:
-		rt.Abort(exitcode.SystemError(exitcode.InvalidMethod), "Invalid method")
-		panic("")
-	}
-}
 
 func _loadState(rt Runtime) (vmr.ActorStateHandle, InitActorState) {
 	h := rt.AcquireState()
