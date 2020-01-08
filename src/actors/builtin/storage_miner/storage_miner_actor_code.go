@@ -626,7 +626,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 	}
 
 	randomnessK := rt.Chain().GetPoStChallengeRand(challengeEpoch)
-	postRandomnessInput := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_PoStChallengeSeed, randomnessK, rt.CurrReceiver())
+	postRandomnessInput := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_SurprisePoStChallengeSeed, randomnessK, rt.CurrReceiver())
 	if !postRand.Verify(postRandomnessInput, info.WorkerVRFKey()) {
 		rt.AbortStateMsg("Invalid Surprise PoSt. Invalid randomness.")
 	}
