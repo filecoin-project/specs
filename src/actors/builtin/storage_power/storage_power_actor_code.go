@@ -1,8 +1,9 @@
-package storage_power_consensus
+package storage_power
 
 import (
 	"math"
 
+	actor_util "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
@@ -10,10 +11,18 @@ import (
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
-	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
+)
+
+type ConsensusFaultType int
+
+const (
+	UncommittedPowerFault ConsensusFaultType = 0
+	DoubleForkMiningFault ConsensusFaultType = 1
+	ParentGrindingFault   ConsensusFaultType = 2
+	TimeOffsetMiningFault ConsensusFaultType = 3
 )
 
 ////////////////////////////////////////////////////////////////////////////////

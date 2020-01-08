@@ -1,15 +1,22 @@
-package sysactors
+package multisig
 
 import (
+	actor_util "github.com/filecoin-project/specs/actors/util"
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
 
+type InvocOutput = vmr.InvocOutput
+type Runtime = vmr.Runtime
+type Bytes = util.Bytes
+
+var Assert = util.Assert
 var IMPL_FINISH = util.IMPL_FINISH
 var IMPL_TODO = util.IMPL_TODO
+var TODO = util.TODO
 
 ////////////////////////////////////////////////////////////////////////////////
 // Actor methods
@@ -205,10 +212,31 @@ func MultiSigApprovalSetHAMT_Empty() MultiSigApprovalSetHAMT {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Dispatch table
+// Boilerplate
 ////////////////////////////////////////////////////////////////////////////////
 
 func (a *MultiSigActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
 	IMPL_FINISH()
 	panic("")
+}
+
+func (a *MultiSigActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, MultiSigActorState) {
+	h := rt.AcquireState()
+	stateCID := ipld.CID(h.Take())
+	var state MultiSigActorState_I
+	if !rt.IpldGet(stateCID, &state) {
+		rt.AbortAPI("state not found")
+	}
+	return h, &state
+}
+func Release_MultiSig(rt Runtime, h vmr.ActorStateHandle, st MultiSigActorState) {
+	checkCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
+	h.Release(checkCID)
+}
+func UpdateRelease_MultiSig(rt Runtime, h vmr.ActorStateHandle, st MultiSigActorState) {
+	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
+	h.UpdateRelease(newCID)
+}
+func (st *MultiSigActorState_I) CID() ipld.CID {
+	panic("TODO")
 }

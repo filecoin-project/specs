@@ -1,8 +1,10 @@
 package interpreter
 
 import (
+	cronact "github.com/filecoin-project/specs/actors/builtin/cron"
+	initact "github.com/filecoin-project/specs/actors/builtin/init"
+	sminact "github.com/filecoin-project/specs/actors/builtin/storage_miner"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
-	storage_mining "github.com/filecoin-project/specs/systems/filecoin_mining/storage_mining"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
@@ -13,7 +15,6 @@ import (
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	vmri "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/impl"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
-	sysactors "github.com/filecoin-project/specs/systems/filecoin_vm/sysactors"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -229,7 +230,7 @@ func _resolveSender(tree st.StateTree, address addr.Address) addr.Address {
 	initState, ok := tree.GetActor(addr.InitActorAddr)
 	util.Assert(ok)
 	serialized, ok := store.Get(ipld.CID(initState.State()))
-	initSubState := sysactors.Deserialize_InitActorState_Assert(serialized)
+	initSubState := initact.Deserialize_InitActorState_Assert(serialized)
 	return initSubState.ResolveAddress(address)
 }
 
@@ -240,9 +241,11 @@ func _lookupMinerOwner(tree st.StateTree, minerAddr addr.Address) addr.Address {
 	serialized, ok := store.Get(ipld.CID(initState.State()))
 	// This tiny coupling between the VM and the storage miner actor is unfortunate.
 	// It could be avoided by:
-	// - including the owner address in block headers (and requiring it match the block's miner as part of semantic validation)
+	// - paying gas rewards via the RewardActor, which can do the miner->owner lookup
 	// - paying rewards to the miner actor instead of owner (with some miner->owner withdrawal mechanism)
-	minerSubState := storage_mining.Deserialize_StorageMinerActorState_Assert(serialized)
+	// - resolving all miner->owner mappings in the state before invoking interpreter (e.g. during validation) and passing them in
+	// - including the owner address in block headers (and requiring it match the block's miner as part of semantic validation)
+	minerSubState := sminact.Deserialize_StorageMinerActorState_Assert(serialized)
 	return minerSubState.Info().Owner()
 }
 
@@ -358,7 +361,7 @@ func _makeCronTickMessage(state st.StateTree) msg.UnsignedMessage {
 	return &msg.UnsignedMessage_I{
 		From_:       addr.SystemActorAddr,
 		To_:         addr.CronActorAddr,
-		Method_:     sysactors.Method_CronActor_EpochTick,
+		Method_:     cronact.Method_CronActor_EpochTick,
 		Params_:     nil,
 		CallSeqNum_: sysActor.CallSeqNum(),
 		Value_:      0,

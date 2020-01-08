@@ -1,4 +1,4 @@
-package sysactors
+package reward
 
 import (
 	"math"
@@ -12,11 +12,18 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
+type InvocOutput = vmr.InvocOutput
+type Runtime = vmr.Runtime
+type Bytes = util.Bytes
+
+var Assert = util.Assert
+var IMPL_FINISH = util.IMPL_FINISH
+var IMPL_TODO = util.IMPL_TODO
+var TODO = util.TODO
+
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
 ////////////////////////////////////////////////////////////////////////////////
-
-var TODO = util.TODO
 
 func (a *RewardActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, RewardActorState) {
 	h := rt.AcquireState()
@@ -143,7 +150,7 @@ func (a *RewardActorCode_I) AwardBlockReward(
 }
 
 func (a *RewardActorCode_I) WithdrawReward(rt vmr.Runtime) {
-	RT_ValidateImmediateCallerIsSignable(rt)
+	vmr.RT_ValidateImmediateCallerIsSignable(rt)
 	ownerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)

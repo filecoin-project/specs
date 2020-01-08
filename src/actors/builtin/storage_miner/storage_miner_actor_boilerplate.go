@@ -1,20 +1,17 @@
-package storage_power_consensus
+package storage_miner
 
 import (
+	actor_util "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
 
-type BalanceTableHAMT = actor_util.BalanceTableHAMT
 type SectorStorageWeightDesc = actor_util.SectorStorageWeightDesc
 type SectorTerminationType = actor_util.SectorTerminationType
 
-var SectorTerminationType_NormalExpiration = actor_util.SectorTerminationType_NormalExpiration
-
-var RT_MinerEntry_ValidateCaller_DetermineFundsLocation = vmr.RT_MinerEntry_ValidateCaller_DetermineFundsLocation
+var RT_ConfirmFundsReceiptOrAbort_RefundRemainder = vmr.RT_ConfirmFundsReceiptOrAbort_RefundRemainder
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
@@ -31,29 +28,28 @@ type Bytes = util.Bytes
 var Assert = util.Assert
 var IMPL_FINISH = util.IMPL_FINISH
 var IMPL_TODO = util.IMPL_TODO
-var PARAM_FINISH = util.PARAM_FINISH
 var TODO = util.TODO
 
-func (a *StoragePowerActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, StoragePowerActorState) {
+func (a *StorageMinerActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, StorageMinerActorState) {
 	h := rt.AcquireState()
 	stateCID := ipld.CID(h.Take())
-	var state StoragePowerActorState_I
+	var state StorageMinerActorState_I
 	if !rt.IpldGet(stateCID, &state) {
 		rt.AbortAPI("state not found")
 	}
 	return h, &state
 }
-func Release(rt Runtime, h vmr.ActorStateHandle, st StoragePowerActorState) {
+func Release(rt Runtime, h vmr.ActorStateHandle, st StorageMinerActorState) {
 	checkCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
 	h.Release(checkCID)
 }
-func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st StoragePowerActorState) {
+func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st StorageMinerActorState) {
 	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
 	h.UpdateRelease(newCID)
 }
-func (st *StoragePowerActorState_I) CID() ipld.CID {
+func (st *StorageMinerActorState_I) CID() ipld.CID {
 	panic("TODO")
 }
-func DeserializeState(x Bytes) StoragePowerActorState {
+func DeserializeState(x Bytes) StorageMinerActorState {
 	panic("TODO")
 }

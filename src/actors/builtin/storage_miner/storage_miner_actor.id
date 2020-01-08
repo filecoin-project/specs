@@ -1,5 +1,5 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
+import actor_util "github.com/filecoin-project/specs/actors/util"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
@@ -68,13 +68,13 @@ type StorageMinerActorState struct {
     ProvingSet  SectorNumberSetHAMT
     Info        MinerInfo
 
+    GetStorageWeightDescForSectorMaybe(sectorNumber sector.SectorNumber) (ret actor_util.SectorStorageWeightDesc, ok bool)
     _getStorageWeightDescForSector(sectorNumber sector.SectorNumber) actor_util.SectorStorageWeightDesc
-    _getStorageWeightDescForSectorMaybe(sectorNumber sector.SectorNumber) (ret actor_util.SectorStorageWeightDesc, ok bool)
     _getStorageWeightDescsForSectors(sectorNumbers [sector.SectorNumber]) [actor_util.SectorStorageWeightDesc]
 
     _getSectorDealIDsAssert(sectorNumber sector.SectorNumber) deal.DealIDs
 
-    _verifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool
+    VerifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool
 }
 
 type StorageMinerActorCode struct {

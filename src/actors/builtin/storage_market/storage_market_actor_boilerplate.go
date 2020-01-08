@@ -1,17 +1,18 @@
-package storage_mining
+package storage_market
 
 import (
+	actor_util "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
 
-type SectorStorageWeightDesc = actor_util.SectorStorageWeightDesc
-type SectorTerminationType = actor_util.SectorTerminationType
+type BalanceTableHAMT = actor_util.BalanceTableHAMT
+type DealIDQueue = actor_util.DealIDQueue
 
-var RT_ConfirmFundsReceiptOrAbort_RefundRemainder = vmr.RT_ConfirmFundsReceiptOrAbort_RefundRemainder
+var RT_MinerEntry_ValidateCaller_DetermineFundsLocation = vmr.RT_MinerEntry_ValidateCaller_DetermineFundsLocation
+var RT_ValidateImmediateCallerIsSignable = vmr.RT_ValidateImmediateCallerIsSignable
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
@@ -21,36 +22,48 @@ var RT_ConfirmFundsReceiptOrAbort_RefundRemainder = vmr.RT_ConfirmFundsReceiptOr
 // workaround due to the lack of generics support in Go.
 ////////////////////////////////////////////////////////////////////////////////
 
-type Any = util.Any
-type Bool = util.Bool
-type Bytes = util.Bytes
 type InvocOutput = vmr.InvocOutput
 type Runtime = vmr.Runtime
+type Bytes = util.Bytes
 
-var TODO = util.TODO
+var Assert = util.Assert
 var IMPL_FINISH = util.IMPL_FINISH
 var IMPL_TODO = util.IMPL_TODO
+var TODO = util.TODO
 
-func (a *StorageMinerActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, StorageMinerActorState) {
+func (a *StorageMarketActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, StorageMarketActorState) {
 	h := rt.AcquireState()
+	var state StorageMarketActorState_I
 	stateCID := ipld.CID(h.Take())
-	var state StorageMinerActorState_I
 	if !rt.IpldGet(stateCID, &state) {
 		rt.AbortAPI("state not found")
 	}
 	return h, &state
 }
-func Release(rt Runtime, h vmr.ActorStateHandle, st StorageMinerActorState) {
+func Release(rt Runtime, h vmr.ActorStateHandle, st StorageMarketActorState) {
 	checkCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
 	h.Release(checkCID)
 }
-func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st StorageMinerActorState) {
+func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st StorageMarketActorState) {
 	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
 	h.UpdateRelease(newCID)
 }
-func (st *StorageMinerActorState_I) CID() ipld.CID {
-	panic("TODO")
+func (st *StorageMarketActorState_I) CID() ipld.CID {
+	IMPL_FINISH()
+	panic("")
 }
-func DeserializeState(x Bytes) StorageMinerActorState {
-	panic("TODO")
+
+func DealsAMT_Empty() DealsAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
+func CachedDealIDsByPartyHAMT_Empty() CachedDealIDsByPartyHAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
+func CachedExpirationsPendingHAMT_Empty() CachedExpirationsPendingHAMT {
+	IMPL_FINISH()
+	panic("")
 }

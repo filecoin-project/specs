@@ -1,4 +1,4 @@
-package actor_util
+package util
 
 import (
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
@@ -14,7 +14,9 @@ type TokenAmount = actor.TokenAmount
 type Serialization = util.Serialization
 
 var Assert = util.Assert
+var TODO = util.TODO
 var IMPL_FINISH = util.IMPL_FINISH
+var IMPL_TODO = util.IMPL_TODO
 
 // Interface for runtime/VMContext functionality (to avoid circular dependency in Go imports)
 type Has_AbortArg interface {

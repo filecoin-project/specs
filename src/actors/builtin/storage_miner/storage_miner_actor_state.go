@@ -1,17 +1,14 @@
-package storage_mining
+package storage_miner
 
 import (
+	actor_util "github.com/filecoin-project/specs/actors/util"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
-	util "github.com/filecoin-project/specs/util"
 )
-
-var Assert = util.Assert
 
 func (st *StorageMinerActorState_I) _getSectorOnChainInfo(sectorNo sector.SectorNumber) (info SectorOnChainInfo, ok bool) {
 	sectorInfo, found := st.Sectors()[sectorNo]
@@ -37,13 +34,7 @@ func SectorNumberSetHAMT_Empty() SectorNumberSetHAMT {
 	panic("")
 }
 
-func (st *StorageMinerActorState_I) _getStorageWeightDescForSector(sectorNumber sector.SectorNumber) SectorStorageWeightDesc {
-	ret, found := st._getStorageWeightDescForSectorMaybe(sectorNumber)
-	Assert(found)
-	return ret
-}
-
-func (st *StorageMinerActorState_I) _getStorageWeightDescForSectorMaybe(sectorNumber sector.SectorNumber) (ret SectorStorageWeightDesc, ok bool) {
+func (st *StorageMinerActorState_I) GetStorageWeightDescForSectorMaybe(sectorNumber sector.SectorNumber) (ret SectorStorageWeightDesc, ok bool) {
 	sectorInfo, found := st.Sectors()[sectorNumber]
 	if !found {
 		ret = nil
@@ -58,6 +49,12 @@ func (st *StorageMinerActorState_I) _getStorageWeightDescForSectorMaybe(sectorNu
 	}
 	ok = true
 	return
+}
+
+func (st *StorageMinerActorState_I) _getStorageWeightDescForSector(sectorNumber sector.SectorNumber) SectorStorageWeightDesc {
+	ret, found := st.GetStorageWeightDescForSectorMaybe(sectorNumber)
+	Assert(found)
+	return ret
 }
 
 func (st *StorageMinerActorState_I) _getStorageWeightDescsForSectors(sectorNumbers []sector.SectorNumber) []SectorStorageWeightDesc {
@@ -126,7 +123,7 @@ func MinerInfo_New(
 	return ret
 }
 
-func (st *StorageMinerActorState_I) _verifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool {
+func (st *StorageMinerActorState_I) VerifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool {
 	// TODO: Determine what should be the acceptance criterion for sector numbers proven in SurprisePoSt proofs.
 	TODO()
 	panic("")

@@ -1,12 +1,24 @@
-package sysactors
+package init
 
 import (
+	actor_util "github.com/filecoin-project/specs/actors/util"
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+	util "github.com/filecoin-project/specs/util"
 )
+
+type InvocOutput = vmr.InvocOutput
+type Runtime = vmr.Runtime
+type Bytes = util.Bytes
+
+var Assert = util.Assert
+var IMPL_FINISH = util.IMPL_FINISH
+var IMPL_TODO = util.IMPL_TODO
+var TODO = util.TODO
 
 func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
@@ -103,15 +115,17 @@ func _codeIDSupportsExec(callerCodeID actor.CodeID, execCodeID actor.CodeID) boo
 	return false
 }
 
+///// Boilerplate /////
+
 func (a *InitActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
 	switch method {
 	case actor.MethodConstructor:
-		ArgEnd(&params, rt)
+		actor_util.ArgEnd(&params, rt)
 		return a.Constructor(rt)
 
 	case ai.Method_InitActor_Exec:
-		codeId, err := actor.Deserialize_CodeID(ArgPop(&params, rt))
-		CheckArgs(&params, rt, err == nil)
+		codeId, err := actor.Deserialize_CodeID(actor_util.ArgPop(&params, rt))
+		actor_util.CheckArgs(&params, rt, err == nil)
 		// Note: do not call ArgEnd (params is forwarded to Exec)
 		return a.Exec(rt, codeId, params)
 
@@ -125,4 +139,28 @@ func (a *InitActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, param
 		rt.Abort(exitcode.SystemError(exitcode.InvalidMethod), "Invalid method")
 		panic("")
 	}
+}
+
+func _loadState(rt Runtime) (vmr.ActorStateHandle, InitActorState) {
+	h := rt.AcquireState()
+	stateCID := ipld.CID(h.Take())
+	var state InitActorState_I
+	if !rt.IpldGet(stateCID, &state) {
+		rt.AbortAPI("state not found")
+	}
+	return h, &state
+}
+
+func Release(rt Runtime, h vmr.ActorStateHandle, st InitActorState) {
+	checkCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
+	h.Release(checkCID)
+}
+
+func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st InitActorState) {
+	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
+	h.UpdateRelease(newCID)
+}
+
+func (st *InitActorState_I) CID() ipld.CID {
+	panic("TODO")
 }
