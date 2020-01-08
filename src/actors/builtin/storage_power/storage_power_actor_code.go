@@ -190,7 +190,7 @@ func (a *StoragePowerActorCode_I) OnMinerSurprisePoStFailure(rt Runtime, numCons
 	}
 }
 
-func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr addr.Address, faultType ConsensusFaultType, proof []block.Block) {
+func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, faultType ConsensusFaultType, proof []block.BlockHeader) {
 	TODO()
 	panic("")
 	// TODO: The semantics here are quite delicate:
@@ -211,6 +211,63 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr a
 	// include ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors util.UVarint) as case
 	// Quite a bit more straightforward since only called by the cron actor (ie publicly verified)
 	// slash cheater pledge collateral accordingly based on num sectors faulted
+
+	// validation checks
+	// - there should be exactly two blocks in proof
+	if len(proof) != 2 {
+		rt.AbortArgMsg("spa.ReportConsensusFault: proof requires two blocks")
+	}
+	// - both blocks are mined by the same miner
+	if proof[0].Miner() != proof[1].Miner() {
+		rt.AbortArgMsg("spa.ReportConsensusFault: proof needs to come from same miner")
+	}
+	// - first block is of the same or lower block height as the second block
+	if proof[0].Epoch() > proof[1].Epoch() {
+		rt.AbortArgMsg("spa.ReportConsensusFault: first block is of a higher block height")
+	}
+
+	// return from EC's IsValidConsensusFault
+	isValidConsensusFault := false
+
+	if !isValidConsensusFault {
+		rt.AbortArgMsg("spa.ReportConsensusFault: not valid consensus fault")
+	} else {
+		slasherAddr := rt.ImmediateCaller()
+		h, st := a.State(rt)
+		minerToSlash := proof[0].Miner()
+
+		claimedPower, powerOk := st.ClaimedPower()[minerToSlash]
+		if !powerOk {
+			rt.AbortArgMsg("spa.ReportConsensusFault: miner to slash has been slashed")
+		}
+		Assert(claimedPower > 0)
+
+		currPledge, pledgeOk := st._getCurrPledgeForMiner(minerToSlash)
+		if !pledgeOk {
+			rt.AbortArgMsg("spa.ReportConsensusFault: miner to slash has no pledge")
+		}
+		Assert(currPledge > 0)
+
+		// elapsed epoch from the latter block which committed the fault
+		elapsedEpoch := rt.CurrEpoch() - proof[1].Epoch()
+		if elapsedEpoch <= 0 {
+			rt.AbortArgMsg("spa.ReportConsensusFault: invalid block")
+		}
+
+		collateralToSlash := st._getPledgeSlashForConsensusFault(currPledge, faultType)
+		slasherShare := _getConsensusFaultSlasherShare(elapsedEpoch)
+		Assert(slasherShare <= 1 && slasherShare > 0)
+		amountToSlasher := actors.TokenAmount(slasherShare) * collateralToSlash
+
+		UpdateRelease(rt, h, st)
+
+		// reward slasher
+		rt.SendFunds(slasherAddr, amountToSlasher)
+
+		// burn the rest of pledge collateral
+		// delete miner from power table
+		a._rtDeleteMinerActor(rt, minerToSlash)
+	}
 }
 
 // Called by Cron.
