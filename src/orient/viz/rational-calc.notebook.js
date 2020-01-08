@@ -42,7 +42,7 @@ md`##### SDR params`
 viewof stackedSDRParams = jsonToSliders(
   {
     "sdr_delta": {value: 0.01, min: 0.01, max: 0.08, step: 0.01},
-    "time_amax": { value: 1, min: 1, max: 10, step: 1 },
+    "time_amax": { value: 2, min: 1, max: 10, step: 1 },
     "rig_malicious_cost_per_year": {value: 3, min: 0, max: 10000, step: 0.1},
     "hash_gb_per_second": {value: 5, min: 0, max: 10000, step: 1},
   },
@@ -208,10 +208,10 @@ bar_chart(solved_many, 'proofs_per_block_kib', [
 
 md`### Encoding time (estimated from benchmarks)`
 
-viewof encoding_time_ruler = chooser(solved_many, 'encoding_time', 3*60*60)
+viewof encoding_time_ruler = chooser(solved_many, 'encoding_time_mins', 60)
 
-bar_chart(solved_many, 'encoding_time', [
-  'encoding_time',
+bar_chart(solved_many, 'encoding_time_mins', [
+  'encoding_time_mins',
 ], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name'], {
   filter: d => d < Math.pow(10, encoding_time_ruler),
   yrule: Math.pow(10, encoding_time_ruler)
@@ -229,8 +229,8 @@ table_constraints(solved_many, [
   'porep_commc_inclusions_constraints',
   'porep_commr_inclusions_constraints',
   'porep_commd_inclusions_constraints',
-  'encoding_time'
-], [], 'encoding_time')
+  'encoding_time_mins'
+], [], 'encoding_time_mins')
 
 
 
@@ -513,7 +513,9 @@ combos = {
   ])
   query = extend_query(query, [
     {drg_parents: 6, expander_parents: 8},
-    {drg_parents: 6, expander_parents: 20},
+    {drg_parents: 6, expander_parents: 18},
+    {drg_parents: 6, expander_parents: 30},
+    {drg_parents: 6, expander_parents: 34},
     {drg_parents: 6, expander_parents: 46},
   ])
   return query
@@ -1253,7 +1255,9 @@ benchmark_theory_query = {
     "ticket_hash": 1.7028e-5/2,
     "rig_snark_parallelization": 1,
     "rig_storage_latency": 0.0003,
-    "rig_storage_parallelization": 1
+    "rig_storage_parallelization": 1,
+    "drg_parents": 6,
+    "expander_parents": 8
   }])
 
   return query

@@ -402,12 +402,15 @@ ProofOfReplication:
       commc_leaves_time_parallel = commc_leaves_time / rig_cores
       commc_time = commc_tree_time + commc_leaves_time
 
-      describe(dig_commc_tree_time, "Time to compute commc and store it on disk (Dig's Benchmark)", secs)
+      describe(dig_commc_tree_time, "Time to compute commc and store it on on storage medium (Dig's Benchmark)", secs)
+      describe(dig_commc_tree_time_parallel, "Time to compute commc and store it on on storage medium (Dig's Benchmark) in parallel", secs)
       dig_commc_tree_time = commc_tree_time + commc_tree_write_time
+      dig_commc_tree_time_parallel = commc_tree_time / rig_cores + commc_tree_write_time / rig_storage_parallelization
       commc_tree_write_time = (window_size * 2) / (b_in_mib * rig_storage_write_mibs)
 
   Encoding:
     describe(encoding_time, "Time to encode a sector", secs)
+    describe(encoding_time_mins, "Time to encode a sector", mins)
     describe(encoding_time_parallel, "Time to encode a sector in parallel", secs)
     describe(encoding_time_asic, "Time to encode a sector with an ASIC", secs)
     describe(encoding_window_time, "Time to encode a window", secs)
@@ -418,6 +421,7 @@ ProofOfReplication:
 
     // TODO: adding wrapper layer
     encoding_time = encoding_window_time * windows
+    encoding_time_mins = encoding_time / secs_in_min
 
     encoding_window_time = window_nodes * ((1 + graph_parents) * kdf_time) * stacked_layers
 
