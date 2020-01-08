@@ -65,6 +65,7 @@ A semantically valid block must have:
 - `ParentWeight` matching the weight of the chain up to and including the parent tipset,
 - `Epoch` greater than that of its parents, and 
     - not in the future according to the node's local clock reading of the current epoch,
+        - blocks with future epochs should not be rejected, but should not be evaluated (validated or included in a tipset) until the appropriate epoch
     - not farther in the past than the soft finality as defined by SPC ${{<sref finality>}},
         - this rule only applied when receiving new gossip blocks (i.e. from the current chain head), not when syncing to the chain for the first time (e.g.)
 - `Miner` that is active in the storage power table in the parent tipset state,  
