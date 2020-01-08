@@ -25,16 +25,22 @@ func (self *ExpectedConsensus_I) ComputeChainWeight(tipset chain.Tipset) block.C
 func (self *ExpectedConsensus_I) IsValidConsensusFault(faults spowact.ConsensusFaultType, blocks []block.Block) bool {
 	util.IMPL_FINISH()
 	return false
+
+	// validation checks before calling this method
+	// - there should be exactly two block headers in proof
+	// - both blocks are mined by the same miner
+	// - block1 is of the same or lower block height as block2
+
 	// 1. double-fork mining fault
-	// return block1.Miner == block2.Miner && block1.Epoch == block2.Epoch
+	// return block1.Epoch == block2.Epoch
 
 	// 2. time-offset mining fault
-	// return block1.Miner == block2.Miner
+	// return block1.Epoch != block2.Epoch
 	// && block1.Parents == block2.Parents
 
 	// 3. parent grinding fault
-	// return block1.Miner == block2.Miner
-	// && abs(block1.Epoch - block2.Epoch) == 1
+	// return block2.Epoch - block1.Epoch == 1
+	// && !block2.Parents.include(block1)
 }
 
 func (self *ExpectedConsensus_I) IsWinningChallengeTicket(challengeTicket util.Bytes, sectorPower block.StoragePower, networkPower block.StoragePower, numSectorsSampled util.UVarint, numSectorsMiner util.UVarint) bool {
