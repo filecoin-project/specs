@@ -40,7 +40,7 @@ type OnChainPoStVerifyInfo struct {
     // CommT       ChallengeTicketsCommitment  // Optional — only needed for SurprisePoSt. This is an as-yet unimplemented optimization.
     Candidates  [PoStCandidate]
     Randomness  PoStRandomness
-    Proof       PoStProof
+    Proofs      [PoStProof]
 }
 
 type PoStWitness struct {

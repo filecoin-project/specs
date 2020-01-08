@@ -28,10 +28,10 @@ type StorageProvingSubsystem struct {
     CreateElectionPoStProof(
         challengeSeed  sector.PoStRandomness
         candidates     [sector.PoStCandidate]
-    ) sector.PoStProof
+    ) [sector.PoStProof]
 
     CreateSurprisePoStProof(
         challengeSeed  sector.PoStRandomness
         candidates     [sector.PoStCandidate]
-    ) sector.PoStProof
+    ) [sector.PoStProof]
 }

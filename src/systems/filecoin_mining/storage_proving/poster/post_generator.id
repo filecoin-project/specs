@@ -26,12 +26,12 @@ type PoStGenerator struct {
     CreateElectionPoStProof(
         randomness  sector.PoStRandomness
         witness     sector.PoStWitness
-    ) sector.PoStProof
+    ) [sector.PoStProof]
 
     CreateSurprisePoStProof(
         randomness  sector.PoStRandomness
         witness     sector.PoStWitness
-    ) sector.PoStProof
+    ) [sector.PoStProof]
 
     // FIXME: Verification shouldn't require a PoStGenerator. Move this.
     VerifyPoStProof(

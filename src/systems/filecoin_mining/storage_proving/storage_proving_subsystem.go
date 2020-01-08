@@ -44,7 +44,7 @@ func (sps *StorageProvingSubsystem_I) GenerateElectionPoStCandidates(challengeSe
 	return poster.GeneratePoStCandidates(challengeSeed, numChallengeTickets, sectorIDs)
 }
 
-func (sps *StorageProvingSubsystem_I) CreateElectionPoStProof(challengeSeed sector.PoStRandomness, candidates []sector.PoStCandidate) sector.PoStProof {
+func (sps *StorageProvingSubsystem_I) CreateElectionPoStProof(challengeSeed sector.PoStRandomness, candidates []sector.PoStCandidate) []sector.PoStProof {
 	witness := &sector.PoStWitness_I{
 		Candidates_: candidates,
 	}
@@ -62,7 +62,7 @@ func (sps *StorageProvingSubsystem_I) GenerateSurprisePoStCandidates(challengeSe
 	return poster.GeneratePoStCandidates(challengeSeed, numChallengeTickets, sectorIDs)
 }
 
-func (sps *StorageProvingSubsystem_I) CreateSurprisePoStProof(challengeSeed sector.PoStRandomness, candidates []sector.PoStCandidate) sector.PoStProof {
+func (sps *StorageProvingSubsystem_I) CreateSurprisePoStProof(challengeSeed sector.PoStRandomness, candidates []sector.PoStCandidate) []sector.PoStProof {
 	witness := &sector.PoStWitness_I{
 		Candidates_: candidates,
 	}
