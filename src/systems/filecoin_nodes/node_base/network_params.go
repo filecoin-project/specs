@@ -63,7 +63,17 @@ const SPC_LOOKBACK_SEAL = FINALITY  // should be set to finality
 
 // FIL deposit per sector precommit in Interactive PoRep
 // refunded after ProveCommit but burned if PreCommit expires
+
 const PRECOMMIT_DEPOSIT_PER_BYTE = actors.TokenAmount(0) // placeholder
 const FAULT_SLASH_PERC_DECLARED = 1                      // placeholder
 const FAULT_SLASH_PERC_DETECTED = 10                     // placeholder
 const FAULT_SLASH_PERC_TERMINATED = 100                  // placeholder
+
+/////////////////////////////////////////////////////////////
+// Slashing
+/////////////////////////////////////////////////////////////
+
+const SLASHER_INITIAL_SHARE_NUM = 1            // placeholder
+const SLASHER_INITIAL_SHARE_DENOM = 1000       // placeholder
+const SLASHER_SHARE_GROWTH_RATE_NUM = 102813   // placeholder
+const SLASHER_SHARE_GROWTH_RATE_DENOM = 100000 // placeholder

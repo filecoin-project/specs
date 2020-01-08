@@ -32,6 +32,8 @@ type StoragePowerActorState struct {
         storageWeightDesc  SectorStorageWeightDesc
     )
     _updatePowerEntriesFromClaimedPower(minerAddr addr.Address)
+    _getCurrPledgeForMiner(minerAddr addr.Address) (currPledge actors.TokenAmount, ok bool)
+    _getPledgeSlashForConsensusFault(currPledge actors.TokenAmount, faultType ConsensusFaultType) actors.TokenAmount
 }
 
 type StoragePowerActorCode struct {
