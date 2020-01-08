@@ -230,7 +230,7 @@ func _resolveSender(store ipld.GraphStore, tree st.StateTree, address addr.Addre
 	initState, ok := tree.GetActor(addr.InitActorAddr)
 	util.Assert(ok)
 	serialized, ok := store.Get(ipld.CID(initState.State()))
-	initSubState := sysactors.Deserialize_InitActorState_Assert(serialized)
+	initSubState := initact.Deserialize_InitActorState_Assert(serialized)
 	return initSubState.ResolveAddress(address)
 }
 

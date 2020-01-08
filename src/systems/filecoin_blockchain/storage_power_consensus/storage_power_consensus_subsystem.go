@@ -45,14 +45,14 @@ func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree st
 	return spc.ec().IsWinningChallengeTicket(challengeTicket, sectorUtilization, networkPower, sectorsSampled, numSectors)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTree stateTree.StateTree) StoragePowerActorState {
+func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTree stateTree.StateTree) spowact.StoragePowerActorState {
 	powerAddr := addr.StoragePowerActorAddr
 	actorState, ok := stateTree.GetActor(powerAddr)
 	util.Assert(ok)
 	substateCID := actorState.State()
 
 	substate, ok := spc.node().Repository().StateStore().Get(ipld.CID(substateCID))
-	util,Assert(ok)
+	util.Assert(ok)
 
 	// fix conversion to bytes
 	util.IMPL_FINISH(substate)

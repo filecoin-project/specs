@@ -379,7 +379,7 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 
 func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.StateTree, sPoSt sector.OnChainPoStVerifyInfo, gasPrice actors.TokenAmount, gasLimit msg.GasAmount) error {
 
-	workerAddr, err := addr.Address_Make_Key(node_base.NETWORK, addr.KeyHash(sms._keyStore().WorkerKey().VRFPublicKey()))
+	workerAddr, err := addr.Address_Make_Key(node_base.NETWORK, addr.KeyHash(sms.Node().Repository().KeyStore().WorkerKey().VRFPublicKey()))
 	if err != nil {
 		return err
 	}
