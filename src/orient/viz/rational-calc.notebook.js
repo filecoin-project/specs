@@ -119,6 +119,25 @@ viewof rig = jsonToSliders({
 
 md`#### Benchmarks`
 
+hashes = ({
+  pedersen64: {
+    constraints: 1376,
+    time: 13.652e-6
+  },
+  poseidon64: {
+    constraints: 1376/8,
+    time: 13.652e-6
+  },
+  sha64: {
+    constraints: 25840,
+    time:  0.3876e-6,
+  },
+  sha32: {
+    constraints: 25840/2,
+    time:  0.3876e-6/2,
+  }
+})
+
 bench = ({
   // "kdf_time": 0.0000000128 / 2, // 2 1.28e-8/2, //5.4e-7,
   "kdf_latency_bandwidth_gb": 2.5,
@@ -126,40 +145,60 @@ bench = ({
   "merkle_tree_hash_time": 13.652e-6,
   "column_leaf_hash_time": 171e-6/10,
   "snark_constraint_time": 0.00000317488,
-  "ticket_hash": 1.7028e-5/2,
 })
 
 md`### SNARKs`
 
-poseidon = ({
-  "mtree_hash_name": "poseidon",
-  "merkle_tree_hash_constraints": 1376/8,
-  "ticket_constraints": 1376/8,
-  "column_leaf_hash_constraints": 1376/8,
+
+makeHash = (hash_name, obj) => {
+  let json = {}
+  Object.keys(obj).forEach(d => {
+    json['hash_name'] = hash_name
+    json[`${d}_hash_name`] = obj[d]
+    json[`${d}_hash_time`] = hashes[obj[d]].time
+    json[`${d}_hash_constraints`] = hashes[obj[d]].constraints
+  })
+  return json
+}
+
+pedersen = makeHash("pedersen", {
+  commc: 'pedersen64',
+  commc_column: 'pedersen64',
+  commd: 'sha64',
+  commr: 'pedersen64',
+  ticket: 'pedersen64'
 })
 
-pedersen = ({
-  "mtree_hash_name": "pedersen"
+poseidon = makeHash("poseidon", {
+  commc: 'poseidon64',
+  commc_column: 'poseidon64',
+  commd: 'sha64',
+  commr: 'poseidon64',
+  ticket: 'poseidon64'
 })
 
-sha = ({
-  "mtree_hash_name": "sha",
-  "merkle_tree_hash_constraints": 25840,
-  "column_leaf_hash_constraints": 25840,
 
-  "merkle_tree_datahash_time": 0.3876e-6,
-  "merkle_tree_hash_time": 0.3876e-6,
-  "column_leaf_hash_time": 0.3876e-6,
+sha = makeHash("sha", {
+  commc: 'pedersen64',
+  commc_column: 'sha64',
+  commd: 'sha64',
+  commr: 'pedersen64',
+  ticket: 'pedersen64'
+})
+
+sha_pure = makeHash("sha_pure", {
+  commc: 'sha64',
+  commc_column: 'sha64',
+  commd: 'sha64',
+  commr: 'pedersen64',
+  ticket: 'pedersen64'
 })
 
 
 constraints = ({
-  "commr_hash_constraints": 1376,
-  "merkle_tree_hash_constraints": 1376,
-  "ticket_constraints": 1376/2,
-  "merkle_tree_datahash_constraints": 25840,
-  "kdf_constraints": 25840/2,
-  "column_leaf_hash_constraints": 1376/2,
+  "kdf_name": "sha",
+  "kdf_latency_bandwidth_gb": 2.5,
+  "kdf_constraints": hashes.sha32.constraints,
   "snark_size": 192,
   "porep_snark_partition_constraints": 100000000,
   "post_snark_partition_constraints": 3000000,
@@ -198,7 +237,7 @@ viewof utility_cols = checkbox({
 
 table_constraints(
   solved_many,
-  ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name', 'utility'].concat(utility_cols),
+  ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name', 'utility'].concat(utility_cols),
   [],
   'utility'
 )
@@ -213,7 +252,7 @@ viewof proofs_per_block_kib_ruler = chooser(solved_many, 'proofs_per_block_kib',
 bar_chart(solved_many, 'proofs_per_block_kib', [
   'seals_size_per_block_kib',
   'posts_size_per_block_kib',
-], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name'], {
+], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
   filter: d => d < Math.pow(10, proofs_per_block_kib_ruler),
   yrule: Math.pow(10, proofs_per_block_kib_ruler)
 })
@@ -224,7 +263,7 @@ viewof encoding_time_ruler = chooser(solved_many, 'encoding_time_mins', 60)
 
 bar_chart(solved_many, 'encoding_time_mins', [
   'encoding_time_mins',
-], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name'], {
+], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
   filter: d => d < Math.pow(10, encoding_time_ruler),
   yrule: Math.pow(10, encoding_time_ruler)
 })
@@ -233,7 +272,7 @@ table_constraints(solved_many, [
   'proof_name',
   'graph_name',
   'window_size_mib',
-  'mtree_hash_name',
+  'hash_name',
   'porep_snark_constraints',
   'porep_challenges',
   'stacked_layers',
@@ -253,7 +292,7 @@ viewof decoding_time_parallel_ruler = chooser(solved_many, 'decoding_time_parall
 bar_chart(solved_many, 'decoding_time_parallel', [
   'encoding_window_time_parallel',
   'window_read_time_parallel',
-], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name'], {
+], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
   filter: d => d < Math.pow(10, decoding_time_parallel_ruler),
   yrule: Math.pow(10, decoding_time_parallel_ruler)
 })
@@ -263,7 +302,7 @@ viewof decoding_time_ruler = chooser(solved_many, 'decoding_time', 16)
 bar_chart(solved_many, 'decoding_time', [
   'encoding_window_time',
   'window_read_time',
-], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name'], {
+], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
   filter: d => d < Math.pow(10, decoding_time_ruler),
   yrule: Math.pow(10, decoding_time_ruler)
 })
@@ -286,7 +325,7 @@ bar_chart(solved_many, 'porep_time_parallel', [
   'porep_snark_time_parallel',
   'porep_commit_time_parallel',
   'encoding_time_parallel'
-], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name'], {
+], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
   filter: d => d < Math.pow(10, porep_time_parallel_ruler),
   yrule: Math.pow(10, porep_time_parallel_ruler)
 })
@@ -299,7 +338,7 @@ bar_chart(solved_many, 'porep_cost', [
   'porep_commit_cost',
   'porep_encoding_cost',
   'porep_snark_cost'
-], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name'], {
+], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
   filter: d => d < Math.pow(10, porep_cost_ruler),
   yrule: Math.pow(10, porep_cost_ruler)
 })
@@ -313,8 +352,8 @@ bar_chart(solved_many, 'porep_snark_constraints', [
   'porep_commc_inclusions_constraints',
   'porep_commr_inclusions_constraints',
   'porep_commd_inclusions_constraints',
-  'porep_labeling_proofs_constraints'
-], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name'], {
+  'porep_labelings_constraints'
+], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
   filter: d => d < Math.pow(10, porep_snark_constraints_ruler),
   yrule: Math.pow(10, porep_snark_constraints_ruler)
 })
@@ -323,7 +362,7 @@ table_constraints(solved_many, [
   'proof_name',
   'graph_name',
   'window_size_mib',
-  'mtree_hash_name',
+  'hash_name',
   'porep_snark_constraints',
   'porep_challenges',
   'stacked_layers',
@@ -331,7 +370,7 @@ table_constraints(solved_many, [
   'porep_commc_inclusions_constraints',
   'porep_commr_inclusions_constraints',
   'porep_commd_inclusions_constraints',
-  'porep_labeling_proofs_constraints'
+  'porep_labelings_constraints'
 ], [], 'porep_snark_constraints')
 
 
@@ -358,7 +397,7 @@ bar_chart(solved_many, 'epost_time_parallel', [
   'post_ticket_gen',
   'epost_inclusions_time_parallel',
   'post_snark_time_parallel'
-], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name'], {
+], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
   filter: d => d < Math.pow(10, epost_time_parallel_ruler),
   yrule: Math.pow(10, epost_time_parallel_ruler)
 })
@@ -367,7 +406,7 @@ table_constraints(solved_many, [
   'proof_name',
   'graph_name',
   'window_size_mib',
-  'mtree_hash_name',
+  'hash_name',
   'epost_time_parallel',
   'epost_data_access_parallel',
   'epost_mtree_read_parallel',
@@ -427,7 +466,7 @@ table_constraints(solved_many, [
   'proof_name',
   'graph_name',
   'window_size_mib',
-  'mtree_hash_name',
+  'hash_name',
   'decoding_time_parallel',
   'porep_time_parallel',
   'porep_proof_size_kib',
@@ -516,7 +555,7 @@ combos = {
   let query = [constants]
   query = extend_query(query, [stackedReplicas])
   query = extend_query(query, [stackedSDRParams])
-  query = extend_query(query, [poseidon, pedersen, sha])
+  query = extend_query(query, [poseidon, pedersen, sha, sha_pure])
   query = extend_query(query, [
     {sdr_delta: 0.04, spacegap: 0.19, proof_name: "d=0.04"},
     {sdr_delta: 0.03, spacegap: 0.19, proof_name: "d=0.03"},
