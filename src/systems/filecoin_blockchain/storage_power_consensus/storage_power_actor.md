@@ -4,15 +4,15 @@ title: Storage Power Actor
 
 # `StoragePowerActor` interface
 
-{{< readfile file="storage_power_actor.id" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/builtin/storage_power/storage_power_actor.id" code="true" lang="go" >}}
 
 # `StoragePowerActorState` implementation
 
-{{< readfile file="storage_power_actor_state.go" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/builtin/storage_power/storage_power_actor_state.go" code="true" lang="go" >}}
 
 # `StoragePowerActorCode` implementation
 
-{{< readfile file="storage_power_actor_code.go" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/builtin/storage_power/storage_power_actor_code.go" code="true" lang="go" >}}
 
 
 {{<label power_table>}}

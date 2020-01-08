@@ -1,6 +1,8 @@
 import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
+import sminact "github.com/filecoin-project/specs/actors/builtin/storage_miner"
+import actors "github.com/filecoin-project/specs/actors"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
@@ -22,8 +24,8 @@ type StorageMiningSubsystem struct {
 
     // Component subsystems
     // StorageProvider    storage_provider.StorageProvider
-    StoragePowerActor  spc.StoragePowerActorCode
-    MinerActor         StorageMinerActorCode
+    StoragePowerActor  spowact.StoragePowerActorCode
+    MinerActor         sminact.StorageMinerActorCode
     SectorIndex        sectoridx.SectorIndexerSubsystem
     StorageProving     storage_proving.StorageProvingSubsystem
 
@@ -46,7 +48,7 @@ type StorageMiningSubsystem struct {
         workerAddr  addr.Address
         sectorSize  util.UInt
         peerId      libp2p.PeerID
-        pledgeAmt   actor.TokenAmount
+        pledgeAmt   actors.TokenAmount
     )
 
     // call by StorageMarket.StorageProvider at the start of a deal.
@@ -64,7 +66,7 @@ type StorageMiningSubsystem struct {
     ) block.Ticket
 
     PreparePoStChallengeSeed(randomness util.Randomness, minerAddr addr.Address) util.Randomness
-    _getStorageMinerActorState(stateTree stateTree.StateTree, minerAddr addr.Address) StorageMinerActorState
+    _getStorageMinerActorState(stateTree stateTree.StateTree, minerAddr addr.Address) sminact.StorageMinerActorState
 
     // call by BlockChain when a new block is produced
     OnNewBestChain()
@@ -74,12 +76,12 @@ type StorageMiningSubsystem struct {
     OnNewRound()
 
     _runMiningCycle()
-    _tryLeaderElection(st stateTree.StateTree, sma StorageMinerActorState) sector.OnChainPoStVerifyInfo
-    _trySurprisePoSt(st stateTree.StateTree, sma StorageMinerActorState) error
+    _tryLeaderElection(st stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainPoStVerifyInfo
+    _trySurprisePoSt(st stateTree.StateTree, sma sminact.StorageMinerActorState) error
     _submitSurprisePoStMessage(
         state     stateTree.StateTree
         sPoSt     sector.OnChainPoStVerifyInfo
-        gasPrice  actor.TokenAmount
+        gasPrice  actors.TokenAmount
         gasLimit  msg.GasAmount
     ) error
 

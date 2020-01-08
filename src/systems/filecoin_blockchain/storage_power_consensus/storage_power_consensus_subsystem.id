@@ -5,6 +5,7 @@ import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+import spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 
 type StoragePowerConsensusSubsystem struct {//(@mutable)
     ChooseTipsetToMine(tipsets [chain.Tipset]) [chain.Tipset]
@@ -22,7 +23,7 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
         numSectors         util.UVarint
     ) bool
 
-    _getStoragePowerActorState(stateTree st.StateTree) StoragePowerActorState
+    _getStoragePowerActorState(stateTree st.StateTree) spowact.StoragePowerActorState
 
     validateTicket(
         tix             block.Ticket

@@ -1,4 +1,4 @@
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import actors "github.com/filecoin-project/specs/actors"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
@@ -12,8 +12,8 @@ type StorageDealStatus uint64
 // StorageAsk is the current price and parameters a miner is currently offering for storage
 // (analogous to an Ask in a financial market)
 type StorageAsk struct {
-    Price             actor.TokenAmount  // attoFIL per GiB per epoch
-    Collateral        actor.TokenAmount  // attoFIL per GiB per epoch
+    Price             actors.TokenAmount  // attoFIL per GiB per epoch
+    Collateral        actors.TokenAmount  // attoFIL per GiB per epoch
 
     MinPieceSize      piece.PieceSize
     // address of miner actor for deals

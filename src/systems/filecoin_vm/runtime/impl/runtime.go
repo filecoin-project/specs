@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"encoding/binary"
 
+	actors "github.com/filecoin-project/specs/actors"
+	acctact "github.com/filecoin-project/specs/actors/builtin/account"
+	initact "github.com/filecoin-project/specs/actors/builtin/init"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
@@ -15,7 +18,6 @@ import (
 	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
-	sysactors "github.com/filecoin-project/specs/systems/filecoin_vm/sysactors"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -101,7 +103,7 @@ type VMContext struct {
 	// during the current top-level message execution.
 	// Note: resets with every top-level message, and therefore not necessarily monotonic.
 	_internalCallSeqNum actor.CallSeqNum
-	_valueReceived      actor.TokenAmount
+	_valueReceived      actors.TokenAmount
 	_gasRemaining       msg.GasAmount
 	_numValidateCalls   int
 	_output             vmr.InvocOutput
@@ -115,7 +117,7 @@ func VMContext_Make(
 	internalCallSeqNum actor.CallSeqNum,
 	globalState st.StateTree,
 	actorAddress addr.Address,
-	valueReceived actor.TokenAmount,
+	valueReceived actors.TokenAmount,
 	gasRemaining msg.GasAmount) *VMContext {
 
 	return &VMContext{
@@ -182,7 +184,7 @@ func (rt *VMContext) _createActor(codeID actor.CodeID, address addr.Address) {
 	actorState := &actor.ActorState_I{
 		CodeID_:     codeID,
 		State_:      actor.ActorSubstateCID(ipld.EmptyCID()),
-		Balance_:    actor.TokenAmount(0),
+		Balance_:    actors.TokenAmount(0),
 		CallSeqNum_: 0,
 	}
 
@@ -399,7 +401,7 @@ func (rt *VMContext) _rtAllocGas(x msg.GasAmount) {
 	}
 }
 
-func (rt *VMContext) _transferFunds(from addr.Address, to addr.Address, amount actor.TokenAmount) error {
+func (rt *VMContext) _transferFunds(from addr.Address, to addr.Address, amount actors.TokenAmount) error {
 	rt._checkRunning()
 	rt._checkActorStateNotAcquired()
 
@@ -458,8 +460,8 @@ func _catchRuntimeErrors(f func() InvocOutput) (output InvocOutput, exitCode exi
 func _invokeMethodInternal(
 	rt *VMContext,
 	actorCode vmr.ActorCode,
-	method actor.MethodNum,
-	params actor.MethodParams) (
+	method actors.MethodNum,
+	params actors.MethodParams) (
 	ret InvocOutput, exitCode exitcode.ExitCode, internalCallSeqNumFinal actor.CallSeqNum) {
 
 	if method == actor.MethodSend {
@@ -469,7 +471,8 @@ func _invokeMethodInternal(
 
 	rt._running = true
 	ret, exitCode = _catchRuntimeErrors(func() InvocOutput {
-		methodOutput := actorCode.InvokeMethod(rt, method, params)
+		IMPL_TODO("dispatch to actor code")
+		var methodOutput vmr.InvocOutput // actorCode.InvokeMethod(rt, method, params)
 		if rt._actorSubstateUpdated {
 			rt._rtAllocGas(gascost.UpdateActorSubstate)
 		}
@@ -571,7 +574,7 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 	rt._createActor(actor.CodeID(actor.CodeID_Make_Builtin(actor.BuiltinActorID_Account)), newIdAddr)
 
 	// Initialize account actor substate with it's pubkey address.
-	substate := &sysactors.AccountActorState_I{
+	substate := &acctact.AccountActorState_I{
 		Address_: targetRaw,
 	}
 	rt._saveAccountActorState(newIdAddr, substate)
@@ -579,23 +582,23 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 	return act, newIdAddr
 }
 
-func (rt *VMContext) _loadInitActorState() sysactors.InitActorState {
+func (rt *VMContext) _loadInitActorState() initact.InitActorState {
 	initState, ok := rt._globalStatePending.GetActor(addr.InitActorAddr)
 	util.Assert(ok)
-	var initSubState sysactors.InitActorState_I
+	var initSubState initact.InitActorState_I
 	ok = rt.IpldGet(ipld.CID(initState.State()), &initSubState)
 	util.Assert(ok)
 	return &initSubState
 }
 
-func (rt *VMContext) _saveInitActorState(state sysactors.InitActorState) {
+func (rt *VMContext) _saveInitActorState(state initact.InitActorState) {
 	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
 	// than the receiver.
 	rt._rtAllocGas(gascost.UpdateActorSubstate)
 	rt._updateActorSubstateInternal(addr.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
 }
 
-func (rt *VMContext) _saveAccountActorState(address addr.Address, state sysactors.AccountActorState) {
+func (rt *VMContext) _saveAccountActorState(address addr.Address, state acctact.AccountActorState) {
 	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
 	// than the receiver.
 	rt._rtAllocGas(gascost.UpdateActorSubstate)
@@ -608,20 +611,20 @@ func (rt *VMContext) _sendInternalOutputs(input InvocInput, errSpec ErrorHandlin
 }
 
 func (rt *VMContext) Send(
-	toAddr addr.Address, methodNum actor.MethodNum, params actor.MethodParams, value actor.TokenAmount) InvocOutput {
+	toAddr addr.Address, methodNum actors.MethodNum, params actors.MethodParams, value actors.TokenAmount) InvocOutput {
 
 	return rt.SendPropagatingErrors(vmr.InvocInput_Make(toAddr, methodNum, params, value))
 }
 
-func (rt *VMContext) SendQuery(toAddr addr.Address, methodNum actor.MethodNum, params []util.Serialization) util.Serialization {
-	invocOutput := rt.Send(toAddr, methodNum, params, actor.TokenAmount(0))
+func (rt *VMContext) SendQuery(toAddr addr.Address, methodNum actors.MethodNum, params actors.MethodParams) util.Serialization {
+	invocOutput := rt.Send(toAddr, methodNum, params, actors.TokenAmount(0))
 	ret := invocOutput.ReturnValue()
 	Assert(ret != nil)
 	return ret
 }
 
-func (rt *VMContext) SendFunds(toAddr addr.Address, value actor.TokenAmount) {
-	rt.Send(toAddr, actor.MethodSend, []util.Serialization{}, value)
+func (rt *VMContext) SendFunds(toAddr addr.Address, value actors.TokenAmount) {
+	rt.Send(toAddr, actor.MethodSend, nil, value)
 }
 
 func (rt *VMContext) SendPropagatingErrors(input InvocInput) InvocOutput {
@@ -634,12 +637,12 @@ func (rt *VMContext) SendCatchingErrors(input InvocInput) (InvocOutput, exitcode
 	return rt._sendInternalOutputs(input, CatchErrors)
 }
 
-func (rt *VMContext) CurrentBalance() actor.TokenAmount {
+func (rt *VMContext) CurrentBalance() actors.TokenAmount {
 	IMPL_FINISH()
 	panic("")
 }
 
-func (rt *VMContext) ValueReceived() actor.TokenAmount {
+func (rt *VMContext) ValueReceived() actors.TokenAmount {
 	return rt._valueReceived
 }
 
