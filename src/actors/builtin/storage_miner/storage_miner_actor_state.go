@@ -133,7 +133,7 @@ func (mi *MinerInfo_I) _updateMinerKey() {
 	mi.PendingKeyChange_ = nil
 }
 
-func (st *StorageMinerActorState_I) _verifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool {
+func (st *StorageMinerActorState_I) VerifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool {
 	// TODO: Determine what should be the acceptance criterion for sector numbers proven in SurprisePoSt proofs.
 	TODO()
 	panic("")
