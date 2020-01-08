@@ -44,12 +44,16 @@ Crypto:
   describe(snark_size, "Size of a SNARK proof", bytes)
   describe(snark_constraint_time, "Time of proving a SNARK constraint", secs)
   describe(hashing_amax, "Factor of difference between stock CPU hashing and the fastest hashing")
-  describe(merkle_tree_datahash_constraints, "Constraints for hashing two nodes in CommD")
-  describe(merkle_tree_datahash_time, "Time to hash two nodes in CommD", secs)
-  describe(merkle_tree_hash_constraints, "Constraints for hashing two nodes in CommR")
-  describe(merkle_tree_hash_time, "Time to hash two nodes in CommR", secs)
-  describe(column_leaf_hash_constraints, "Constraints for hashing a single row in a column", secs)
-  describe(column_leaf_hash_time, "Time to compute the hash of a single row in a column", secs)
+
+  describe(commc_hash_time, "Time to hash 64 bytes in the CommC merkle tree", secs)
+  describe(commc_column_hash_time, "Average time to hash 32 bytes in the CommC column", secs)
+  describe(commd_hash_time, "Time to hash 64 bytes in the CommD merkle tree", secs)
+  describe(commr_hash_time, "Time to hash 64 bytes in the CommR merkle tree", secs)
+
+  describe(commc_hash_constraints, "Constraints for hashing 64 bytes in the CommC merkle tree", constraints)
+  describe(commc_column_hash_constraints, "Average constraints for hashing 32 bytes in CommC column", constraints)
+  describe(commd_hash_constraints, "Constraints for hashing 64 bytes in the CommD merkle tree", constraints)
+  describe(commr_hash_constraints, "Constraints for hashing 64 bytes in the CommR merkle tree", constraints)
 
 Utils:
   describe(cid_size, "Size of a CID", bytes)
@@ -113,8 +117,8 @@ ProofOfSpacetime:
 
     // This only accounts for generating the merkle trees
     Ticket:
-      describe(ticket_hash, "Time to compute the hash of a node for ticket generation in PoSt", secs)
-      post_ticket_gen = ticket_hash * post_challenges
+      describe(ticket_hash_time, "Time to compute the hash of a node for ticket generation in PoSt", secs)
+      post_ticket_gen = ticket_hash_time * post_challenges
 
     InclusionProofs:
       Caching:
@@ -143,16 +147,16 @@ ProofOfSpacetime:
         post_inclusions_time_parallel = post_inclusions_time / rig_cores
 
       Generation (Wrapping):
-        post_inclusion_time = (post_mtree_regen_hashnodes - 1) * merkle_tree_hash_time
+        post_inclusion_time = (post_mtree_regen_hashnodes - 1) * commr_hash_time
 
       Generation (StackedReplicas):
-        post_inclusion_time = (post_mtree_regen_hashnodes - 1) * merkle_tree_hash_time
+        post_inclusion_time = (post_mtree_regen_hashnodes - 1) * commr_hash_time
 
       Generation (WrappingVariant):
         describe(wrapper_kdf_time, "Time to generate a node on the wrapper layer", secs)
 
         wrapper_kdf_time = kdf_time * wrapper_parents_all * post_mtree_regen_nodes
-        post_inclusion_time = (post_mtree_regen_hashnodes - 1) * merkle_tree_hash_time + wrapper_kdf_time
+        post_inclusion_time = (post_mtree_regen_hashnodes - 1) * commr_hash_time + wrapper_kdf_time
 
   StorageAccess:
     describe(post_mtree_read, "Time to read Merkle tree data during PoSt", secs)
@@ -215,7 +219,7 @@ ProofOfSpacetime:
     describe(inclusion_proof, "Constraints for checking an inclusion proof in a binary merkle tree as large as the sector")
     describe(post_inclusion_proofs, "Constraints for checking all inclusion proofs (in PoSt)")
     describe(ticket_proofs, "Constraints for checking the partial ticket (in PoSt)")
-    describe(ticket_constraints, "Constraints of a partial ticket per challenged node (in PoSt)")
+    describe(ticket_hash_constraints, "Constraints of a partial ticket per challenged node (in PoSt)")
     describe(post_snark_constraints, "Constraints for a PoSt")
     describe(post_snark_partitions, "Number of partitions of a PoSt proof")
     describe(post_snark_size, "Size of a PoSt proof", bytes)
@@ -227,7 +231,7 @@ ProofOfSpacetime:
     // TODO: make sure VectorR/etc are handled correctly
     inclusion_proof = commr_hash_constraints * commr_tree_depth 
     post_inclusion_proofs = inclusion_proof * post_challenges
-    ticket_proofs = ticket_constraints * commr_column_size * post_challenges
+    ticket_proofs = ticket_hash_constraints * commr_column_size * post_challenges
     // TODO: handle different constructions
     post_snark_constraints = ticket_proofs + post_inclusion_proofs
     post_snark_partitions = post_snark_constraints / post_snark_partition_constraints
@@ -319,8 +323,8 @@ ProofOfReplication:
 
     describe(dig_encoding_time, "Time to encode and generate CommC leaves (Dig's benchmarks)")
     describe(dig_encoding_time_parallel, "Time to encode and generate CommC leaves in parallel (Dig's benchmarks)")
-    dig_encoding_time = encoding_time + commc_leaves_time
-    dig_encoding_time_parallel = encoding_time_parallel + commc_leaves_time_parallel
+    dig_encoding_time = encoding_time + commc_columns_time
+    dig_encoding_time_parallel = encoding_time_parallel + commc_columns_time_parallel
 
   Size:
     describe(porep_proof_size, "Size of a PoRep proof")
@@ -330,8 +334,8 @@ ProofOfReplication:
 
   // TODO: rename commR to commRLast
   Commitment:
-    describe(window_comm_tree_time, "Time to generate a merkle tree of stacked windows", secs)
-    describe(window_comm_leaves_time, "Time to commit columns of a window", secs)
+    describe(commc_window_tree_time, "Time to generate a merkle tree of stacked windows", secs)
+    describe(commc_window_columns_time, "Time to commit columns of a window", secs)
 
     describe(commit_size, "Size of a commitment", bytes)
     describe(commr_size, "Size of CommR", bytes)
@@ -353,8 +357,8 @@ ProofOfReplication:
     describe(commc_time, "Time to generate the merkle tree of CommC (assuming leaves in memory)", secs)
 
     commit_size = cid_size
-    window_comm_tree_time = merkle_tree_hash_time * (window_nodes - 1)
-    window_comm_leaves_time = column_leaf_hash_time * (window_nodes - 1)
+    commc_window_tree_time = commc_hash_time * (window_nodes - 1)
+    commc_window_columns_time = commc_column_hash_time * (window_nodes - 1)
     commr_size = commit_size
     commd_size = commit_size
     commrlast_size = commit_size
@@ -362,7 +366,7 @@ ProofOfReplication:
     seal_onchain_commitments_size = commd_size + commr_size
     // seal_commitment_time = commr_time
 
-    commd_time = merkle_tree_datahash_time * (nodes - 1)
+    commd_time = commd_hash_time * (nodes - 1)
     commd_time_parallel = commd_time / rig_cores
 
     commq_time = commr_time
@@ -372,35 +376,22 @@ ProofOfReplication:
 
     commr_time_parallel = commr_time / rig_cores
 
-    CommR (Wrapping): // was VectorR
-      commr_time = merkle_tree_hash_time * (nodes - 1)
+    CommR: // was VectorR
+      commr_time = commr_hash_time * (nodes - 1)
       commr_tree_depth = log2(nodes) 
       commr_column_size = 1
-
-    CommR (WrappingVariant): // was VectorR
-      commr_time = merkle_tree_hash_time * (nodes - 1)
-      commr_tree_depth = log2(nodes) 
-      commr_column_size = 1
-
-    CommR (StackedReplicas): // was ColumnR
-      commr_time = merkle_tree_hash_time * (nodes - 1)
-      commr_tree_depth = log2(nodes) 
-      commr_column_size = 1
-      // commr_time = window_comm_tree_time + window_comm_leaves_time 
-      // commr_tree_depth = log2(window_nodes)
-      // commr_column_size = windows
 
     CommC:
       describe(commc_tree_time, "Time to generate CommC (Merkle tree only)", secs)
       describe(commc_tree_time_parallel, "Time to generate CommC parallel (Merkle tree only)", secs)
-      describe(commc_leaves_time, "Time to generate CommC (Leaves only)", secs)
-      describe(commc_leaves_time_parallel, "Time to generate CommC in parallel (Leaves only)", secs)
+      describe(commc_columns_time, "Time to generate CommC (Leaves only)", secs)
+      describe(commc_columns_time_parallel, "Time to generate CommC in parallel (Leaves only)", secs)
       describe(commc_tree_write_time, "Time to write commc tree on disk", secs)
-      commc_tree_time = window_comm_tree_time
+      commc_tree_time = commc_window_tree_time
       commc_tree_time_parallel = commc_tree_time / rig_cores
-      commc_leaves_time = window_comm_leaves_time * stacked_layers * windows
-      commc_leaves_time_parallel = commc_leaves_time / rig_cores
-      commc_time = commc_tree_time + commc_leaves_time
+      commc_columns_time = commc_window_columns_time * stacked_layers * windows
+      commc_columns_time_parallel = commc_columns_time / rig_cores
+      commc_time = commc_tree_time + commc_columns_time
 
       describe(dig_commc_tree_time, "Time to compute commc and store it on on storage medium (Dig's Benchmark)", secs)
       describe(dig_commc_tree_time_parallel, "Time to compute commc and store it on on storage medium (Dig's Benchmark) in parallel", secs)
@@ -505,49 +496,51 @@ ProofOfReplication:
     describe(porep_snark_partition_constraints, "Number of constraints for a PoRep partition")
 
     describe(kdf_constraints, "Constraints of KDF per node parent")
-    describe(labeling_proof, "Constraints to check labeling of a single node")
-    describe(labeling_proofs, "Constraints to check labeling of a window")
-    describe(window_labeling_proof, "Constraints to check correct labeling for all windows")
-    describe(data_inclusion, "Constraints to check a single inclusion in CommD")
-    describe(data_inclusions, "Constraints to check all the inclusions required in a window in CommD")
+    describe(labeling_constraints, "Constraints to check labeling of a single node")
+    describe(porep_labelings_window_constraints, "Constraints to check labeling of a window")
+    describe(porep_labelings_windows_constraints, "Constraints to check correct labeling for all windows")
+    describe(commd_inclusion_constraints, "Constraints to check a single inclusion in CommD")
+    describe(porep_commd_vector_inclusions_constraints, "Constraints to check all the inclusions required in a window in CommD")
     describe(window_data_inclusions,  "Constraints to check all the inclusions required for all windows in CommD")
-    describe(replica_inclusion, "Constraints to check a single inclusion in CommR")
-    describe(replica_inclusions, "Constraints to check all the inclusions required in a window in CommR")
-    describe(window_replica_inclusions,  "Constraints to check all the inclusions required for all windows in CommR")
-    describe(window_inclusion, "Constraints to check a single inclusion proof in a window")
-    describe(window_inclusions, "Constraints to check all the required inclusion proofs in a window")
-    describe(column_leaf, "Constraints to check a single leaf generation from a column in a window")
-    describe(column_leaves, "Constraints to check all the leaves generation required in a window")
-    describe(window_column_leaves, "Constraints to check all the leaves generation required for all windows")
+    describe(commr_inclusion_constraints, "Constraints to check a single inclusion in CommR")
+    describe(porep_commr_window_inclusions_constraints, "Constraints to check all the inclusions required in a window in CommR")
+    describe(porep_commr_windows_inclusions_constraints,  "Constraints to check all the inclusions required for all windows in CommR")
+    describe(commc_inclusion_constraints, "Constraints to check a single inclusion proof in a window")
+    describe(porep_commc_window_inclusions_constraints, "Constraints to check all the required inclusion proofs in a window")
+    describe(commc_column_constraints, "Constraints to check a single leaf generation from a column in a window")
+    describe(porep_commc_window_columns_constraints, "Constraints to check all the leaves generation required in a window")
+    describe(porep_commc_windows_columns_constraints, "Constraints to check all the leaves generation required for all windows")
     describe(porep_snark_partition_time, "Time to compute a single snark partion", secs)
     describe(porep_commd_inclusions_constraints, "Constraints for CommD inclusions (PoRep)")
     describe(porep_commr_inclusions_constraints, "Constraints for CommR inclusions (PoRep)")
     describe(porep_commc_inclusions_constraints, "Constraints for CommC inclusions (PoRep)")
     describe(porep_commc_leaves_constraints, "Constraints for CommC leaves (PoRep)")
-    describe(porep_labeling_proofs_constraints, "Constraints for labeling proofs (PoRep)")
+    describe(porep_labelings_constraints, "Constraints for labeling proofs (PoRep)")
     describe(commr_hash_constraints, "Constraints of the Merkle Tree hash in CommR")
 
     // D
     // Data layer committed with merkle tree
-    data_inclusion = merkle_tree_datahash_constraints * log2(nodes)
-    data_inclusions = data_inclusion * porep_challenges
-    window_data_inclusions = data_inclusion * porep_challenges * windows
+    commd_inclusion_constraints = commd_hash_constraints * log2(nodes)
+    porep_commd_vector_inclusions_constraints = commd_inclusion_constraints * porep_challenges
 
     // C
-    window_inclusion = merkle_tree_hash_constraints * log2(window_nodes)
-    window_inclusions =  window_inclusion * porep_challenges * (graph_parents + 1)
-    column_leaf = column_leaf_hash_constraints * stacked_layers
-    column_leaves = column_leaf * porep_challenges * (graph_parents + 1)
-    window_column_leaves = column_leaves * windows
-    labeling_proof = kdf_constraints * graph_parents
-    labeling_proofs = labeling_proof * stacked_layers * porep_challenges
-    window_labeling_proof = labeling_proofs * windows
+    commc_inclusion_constraints = commc_hash_constraints * log2(window_nodes)
+    porep_commc_window_inclusions_constraints = commc_inclusion_constraints * porep_challenges * (graph_parents + 1)
+    commc_column_constraints = commc_column_hash_constraints * stacked_layers
+    porep_commc_window_columns_constraints = commc_column_constraints * porep_challenges * (graph_parents + 1)
+    porep_commc_windows_columns_constraints = porep_commc_window_columns_constraints * windows
+
+    // Labeling
+    labeling_constraints = kdf_constraints * graph_parents
+    porep_labelings_window_constraints = labeling_constraints * stacked_layers * porep_challenges
+    porep_labelings_windows_constraints = porep_labelings_window_constraints * windows
 
     // Q and R
-    replica_inclusion = commr_hash_constraints * commr_tree_depth 
-    replica_inclusions = replica_inclusion * porep_challenges
-    window_replica_inclusions = replica_inclusions * windows
+    commr_inclusion_constraints = commr_hash_constraints * commr_tree_depth 
+    porep_commr_window_inclusions_constraints = commr_inclusion_constraints * porep_challenges
+    porep_commr_windows_inclusions_constraints = porep_commr_window_inclusions_constraints * windows
 
+    // Final SNARK
     porep_snark_partitions = porep_snark_constraints / porep_snark_partition_constraints
     porep_snark_size = porep_snark_partitions * snark_size
     porep_snark_size_kib = porep_snark_size / b_in_kib
@@ -561,26 +554,26 @@ ProofOfReplication:
     porep_snark_time_parallel = porep_snark_partition_time + (porep_snark_time - porep_snark_partition_time) / (rig_snark_parallelization)
 
     // Constraints (WindowEncoding):
-    //   porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + window_data_inclusions + window_replica_inclusions*2
+    //   porep_snark_constraints = porep_commc_window_inclusions_constraints + porep_commc_windows_columns_constraints + porep_labelings_windows_constraints + window_data_inclusions + window_replica_inclusions*2
 
 
     Constraints (StackedReplicas):
-      porep_commd_inclusions_constraints = data_inclusions
-      porep_commr_inclusions_constraints = replica_inclusions
-      porep_commc_inclusions_constraints = window_inclusions
-      porep_commc_leaves_constraints = window_column_leaves
-      porep_labeling_proofs_constraints = window_labeling_proof
+      porep_commd_inclusions_constraints = porep_commd_vector_inclusions_constraints
+      porep_commr_inclusions_constraints = porep_commr_window_inclusions_constraints
+      porep_commc_inclusions_constraints = porep_commc_window_inclusions_constraints
+      porep_commc_leaves_constraints = porep_commc_windows_columns_constraints
+      porep_labelings_constraints = porep_labelings_windows_constraints
 
-      porep_snark_constraints = porep_commc_leaves_constraints + porep_commc_inclusions_constraints + porep_commr_inclusions_constraints + porep_commd_inclusions_constraints + porep_labeling_proofs_constraints
+      porep_snark_constraints = porep_commc_leaves_constraints + porep_commc_inclusions_constraints + porep_commr_inclusions_constraints + porep_commd_inclusions_constraints + porep_labelings_constraints
 
-      // porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + data_inclusions + replica_inclusions*2
+      // porep_snark_constraints = porep_commc_window_inclusions_constraints + porep_commc_windows_columns_constraints + porep_labelings_windows_constraints + porep_commd_vector_inclusions_constraints + replica_inclusions*2
 
     // TODO: add wrapper constraints
     Constraints (Wrapping):
-      porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + data_inclusions + replica_inclusions*2
+      porep_snark_constraints = porep_commc_window_inclusions_constraints + porep_commc_windows_columns_constraints + porep_labelings_windows_constraints + porep_commd_vector_inclusions_constraints + replica_inclusions*2
 
     Constraints (WrappingVariant):
-      porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + data_inclusions + replica_inclusions*2
+      porep_snark_constraints = porep_commc_window_inclusions_constraints + porep_commc_windows_columns_constraints + porep_labelings_windows_constraints + porep_commd_vector_inclusions_constraints + replica_inclusions*2
 
     // Column comitting data or replica. 
 
