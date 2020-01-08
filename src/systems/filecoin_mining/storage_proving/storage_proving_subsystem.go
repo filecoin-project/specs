@@ -3,7 +3,7 @@ package storage_proving
 import (
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-
+	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -18,7 +18,7 @@ func (sps *StorageProvingSubsystem_I) VerifySeal(sv sector.SealVerifyInfo) Stora
 	return StorageProvingSubsystem_VerifySeal_FunRet_Make_ok(StorageProvingSubsystem_VerifySeal_FunRet_ok(result)) //,
 }
 
-func (sps *StorageProvingSubsystem_I) ComputeUnsealedSectorCID(sectorSize sector.SectorSize, pieceInfos []*sector.PieceInfo_I) StorageProvingSubsystem_ComputeUnsealedSectorCID_FunRet {
+func (sps *StorageProvingSubsystem_I) ComputeUnsealedSectorCID(sectorSize sector.SectorSize, pieceInfos []sector.PieceInfo) StorageProvingSubsystem_ComputeUnsealedSectorCID_FunRet {
 	unsealedCID, err := filproofs.ComputeUnsealedSectorCIDFromPieceInfos(sectorSize, pieceInfos)
 
 	if err != nil {
@@ -29,13 +29,9 @@ func (sps *StorageProvingSubsystem_I) ComputeUnsealedSectorCID(sectorSize sector
 	}
 }
 
-// TODO: get from consts
-const EPOST_SAMPLE_NUM = 1
-const EPOST_SAMPLE_DENOM = 25
-
 // TODO also return error
 func (sps *StorageProvingSubsystem_I) GenerateElectionPoStCandidates(challengeSeed sector.PoStRandomness, sectorIDs []sector.SectorID) []sector.PoStCandidate {
-	numChallengeTickets := util.UInt(len(sectorIDs) * EPOST_SAMPLE_NUM / EPOST_SAMPLE_DENOM)
+	numChallengeTickets := util.UInt(len(sectorIDs) * node_base.EPOST_SAMPLE_RATE_NUM / node_base.EPOST_SAMPLE_RATE_DENOM)
 
 	var poster = sps.PoStGenerator()
 
@@ -54,13 +50,9 @@ func (sps *StorageProvingSubsystem_I) CreateElectionPoStProof(challengeSeed sect
 	return poster.CreateElectionPoStProof(witness)
 }
 
-// TODO: get from consts
-const SPOST_SAMPLE_NUM = 1
-const SPOST_SAMPLE_DENOM = 50
-
 // TODO also return error
 func (sps *StorageProvingSubsystem_I) GenerateSurprisePoStCandidates(challengeSeed sector.PoStRandomness, sectorIDs []sector.SectorID) []sector.PoStCandidate {
-	numChallengeTickets := util.UInt(len(sectorIDs) * SPOST_SAMPLE_NUM / SPOST_SAMPLE_DENOM)
+	numChallengeTickets := util.UInt(len(sectorIDs) * node_base.SPOST_SAMPLE_RATE_NUM / node_base.SPOST_SAMPLE_RATE_DENOM)
 
 	var poster = sps.PoStGenerator()
 

@@ -1,8 +1,11 @@
 package runtime
 
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-import util "github.com/filecoin-project/specs/util"
+import (
+	actors "github.com/filecoin-project/specs/actors"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+	util "github.com/filecoin-project/specs/util"
+)
 
 type Bytes = util.Bytes
 
@@ -22,6 +25,9 @@ var (
 	// Gas cost charged to the originator of an on-chain message (regardless of
 	// whether it succeeds or fails in application) is given by:
 	//   OnChainMessageBase + len(serialized message)*OnChainMessagePerByte
+	// Together, these account for the cost of message propagation and validation,
+	// up to but excluding any actual processing by the VM.
+	// This is the cost a block producer burns when including an invalid message.
 	OnChainMessageBase    = GasAmountPlaceholder
 	OnChainMessagePerByte = GasAmountPlaceholder
 
@@ -30,13 +36,23 @@ var (
 	//   len(return value)*OnChainReturnValuePerByte
 	OnChainReturnValuePerByte = GasAmountPlaceholder
 
-	// Gas cost for any method invocation (including the original one initiated
-	// by an on-chain message).
-	InvokeMethodBase = GasAmountPlaceholder
+	// Gas cost for any message send execution(including the top-level one
+	// initiated by an on-chain message).
+	// This accounts for the cost of loading sender and receiver actors and
+	// (for top-level messages) incrementing the sender's sequence number.
+	// Load and store of actor sub-state is charged separately.
+	SendBase = GasAmountPlaceholder
 
-	// Gas cost charged, in addition to InvokeMethodBase, if a method invocation
+	// Gas cost charged, in addition to SendBase, if a message send
 	// is accompanied by any nonzero currency amount.
-	InvokeMethodTransferFunds = GasAmountPlaceholder_UpdateStateTree
+	// Accounts for writing receiver's new balance (the sender's state is
+	// already accounted for).
+	SendTransferFunds = GasAmountPlaceholder
+
+	// Gas cost charged, in addition to SendBase, if a message invokes
+	// a method on the receiver.
+	// Accounts for the cost of loading receiver code and method dispatch.
+	SendInvokeMethod = GasAmountPlaceholder
 
 	// Gas cost (Base + len*PerByte) for any Get operation to the IPLD store
 	// in the runtime VM context.
@@ -53,10 +69,15 @@ var (
 	IpldPutPerByte = GasAmountPlaceholder
 
 	// Gas cost for updating an actor's substate (i.e., UpdateRelease).
+	// This is in addition to a per-byte fee for the state as for IPLD Get/Put.
 	UpdateActorSubstate = GasAmountPlaceholder_UpdateStateTree
 
 	// Gas cost for creating a new actor (via InitActor's Exec method).
+	// Actor sub-state is charged separately.
 	ExecNewActor = GasAmountPlaceholder
+
+	// Gas cost for deleting an actor.
+	DeleteActor = GasAmountPlaceholder
 
 	///////////////////////////////////////////////////////////////////////////
 	// Pure functions (VM ABI)
@@ -88,12 +109,13 @@ func IpldPut(dataSize int) msg.GasAmount {
 	return msg.GasAmount_Affine(IpldPutBase, dataSize, IpldPutPerByte)
 }
 
-func InvokeMethod(valueSent actor.TokenAmount) msg.GasAmount {
-	ret := InvokeMethodBase
-
-	TODO() // TODO: BigInt
-	if valueSent > actor.TokenAmount(0) {
-		ret = ret.Add(InvokeMethodTransferFunds)
+func InvokeMethod(value actors.TokenAmount, method actors.MethodNum) msg.GasAmount {
+	ret := SendBase
+	if value != actors.TokenAmount(0) {
+		ret = ret.Add(SendTransferFunds)
+	}
+	if method != actor.MethodSend {
+		ret = ret.Add(SendInvokeMethod)
 	}
 	return ret
 }

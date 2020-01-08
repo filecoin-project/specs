@@ -53,14 +53,62 @@ func BigFromUint64(x uint64) *BigInt {
 	return big.NewInt(0)
 }
 
-// Indirection to prevent the compiler from ignoring unreachable code
-func TODO() {
+func BigFromInt(int) BigInt {
+	IMPL_FINISH()
+	panic("")
+}
+
+func BigFromUInt(uint) BigInt {
+	IMPL_FINISH()
+	panic("")
+}
+
+func Serialize_Int(int) Serialization {
+	IMPL_FINISH()
+	panic("")
+}
+
+func Serialize_BigInt(BigInt) Serialization {
+	IMPL_FINISH()
+	panic("")
+}
+
+func Deserialize_BigInt(Serialization) (ret BigInt, ok bool) {
+	IMPL_FINISH()
+	panic("")
+}
+
+func BigInt_Add(BigInt, BigInt) BigInt {
+	IMPL_FINISH()
+	panic("")
+}
+
+// Indicating behavior not yet specified, and may require other spec changes.
+func IsBLS(x Bytes) bool {
+	IMPL_FINISH()
+	return false
+}
+
+func IsSECP(x Bytes) bool {
+	IMPL_FINISH()
+	return false
+}
+
+// Indicating behavior not yet specified, and may require other spec changes.
+func TODO(...interface{}) {
+	// Indirection to prevent the compiler from ignoring unreachable code
 	panic("TODO")
+}
+
+// Version of TODO() indicating that the operation is clearly implementable,
+// but some details remain to specify.
+func IMPL_TODO(...interface{}) {
+	panic("Not yet implemented in the spec")
 }
 
 // Version of TODO() indicating that the operation is believed to be unambiguous,
 // but is not yet implemented as code in the spec repository.
-func IMPL_FINISH() {
+func IMPL_FINISH(...interface{}) {
 	panic("Not yet implemented in the spec")
 }
 

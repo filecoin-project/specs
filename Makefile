@@ -176,7 +176,7 @@ org2md: $(ORG_MD_FILES)
 
 
 # building our tools
-bins: bin/codeGen
+bins: bin/codeGen bin/watcher
 
 bin/codeGen: $(shell find tools/codeGen | grep .go)
 	cd tools/codeGen && go build -o ../../bin/codeGen

@@ -5,11 +5,14 @@ title: VM - Virtual Machine
 entries:
 - actor
 - state_tree
+- indices
 - message
 - runtime
 - sysactors
 - interpreter
 ---
+
+{{<label sys_vm>}}
 
 {{< incTocMap "/docs/systems/filecoin_vm" 3 >}}
 

@@ -1,13 +1,13 @@
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 
 type ExpectedConsensus struct {
     expectedLeadersPerEpoch  UVarint
     expectedRewardPerEpoch   UVarint
 
     ComputeChainWeight(tipset chain.Tipset) block.ChainWeight
-    IsValidConsensusFault(faults ConsensusFaultType, blocks [block.Block]) bool
+    IsValidConsensusFault(faults spowact.ConsensusFaultType, blocks [block.Block]) bool
     IsWinningChallengeTicket(
         challengeTicket    util.Bytes
         sectorPower        block.StoragePower
@@ -15,10 +15,6 @@ type ExpectedConsensus struct {
         numSectorsSampled  util.UVarint
         numSectorsMiner    util.UVarint
     ) bool
-
-    GetBlockRewards(
-        ePoStInfo sector.OnChainPoStVerifyInfo
-    ) UVarint
 
     log2b(x UVarint) UVarint
     wParams weightFunctionParameters

@@ -16,6 +16,7 @@ type Ticket struct {
 
 type BytesAmount UVarint
 type StoragePower BytesAmount
+type SectorWeight BytesAmount
 
 type TicketProductionSeedInput struct {
     PastTicket  util.Randomness

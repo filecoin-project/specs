@@ -1,5 +1,0 @@
-// imported as ipld.Store
-type GraphStore struct {
-    Get(cid CID)   (Object, error)
-    Put(o Object)  (CID, error)
-}

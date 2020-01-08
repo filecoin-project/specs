@@ -6,6 +6,5 @@ RewardActor is where unminted and unvested Filecoin tokens are kept. At genesis,
 
 `RewardMap` is also used in block reward minting to preserve the flexibility of introducing block reward vesting to the protocol. `MintReward` creates a new `Reward` struct and adds it to the `RewardMap`.
 
-{{< readfile file="reward_actor.id" code="true" lang="go" >}}
-
-{{< readfile file="reward_actor.go" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/builtin/reward/reward_actor.id" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/builtin/reward/reward_actor.go" code="true" lang="go" >}}

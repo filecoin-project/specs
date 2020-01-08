@@ -24,7 +24,7 @@ The above involves a number of steps to putting on and maintaining online storag
 
 ## Storage States
 
-When managing their storage {{<sref sector "sectors">}}  as part of Filecoin mining, storage providers will account for where in the mining cycle their sectors are. For instance, has a sector been committed? Does it need a new PoSt? Most of these operations happen as part of cycles of chain epochs called `Proving Period`s each of which yield high confidence that every miner in the chain has proven their power (see {{<sref election_post>}}).
+When managing their storage {{<sref sector "sectors">}}  as part of Filecoin mining, storage providers will account for where in the {{<sref mining_cycle>}} their sectors are. For instance, has a sector been committed? Does it need a new PoSt? Most of these operations happen as part of cycles of chain epochs called `Proving Period`s each of which yield high confidence that every miner in the chain has proven their power (see {{<sref election_post>}}).
 
 Through most of this cycle, sectors will be part of the miner's `Proving Set`. This is the set of sectors that the miners are supposed to generate proofs against. It includes:
 - `Committed Sectors` which have an associated PoRep but have but yet to generate a PoSt, 

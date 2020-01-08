@@ -1,28 +1,30 @@
 import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
-import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
+import sminact "github.com/filecoin-project/specs/actors/builtin/storage_miner"
+import actors "github.com/filecoin-project/specs/actors"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 import blockproducer "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block_producer"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
-import key_store "github.com/filecoin-project/specs/systems/filecoin_nodes/key_store"
 import node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
+import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
 type StorageMiningSubsystem struct {
-    FilecoinNode       node_base.FilecoinNode
+    Node               node_base.FilecoinNode
 
     // TODO: constructor
     // InitStorageMiningSubsystem(node node_base.FilecoinNode) struct{}
 
     // Component subsystems
     // StorageProvider    storage_provider.StorageProvider
-    StoragePowerActor  spc.StoragePowerActorCode
-    MinerActor         StorageMinerActorCode
+    StoragePowerActor  spowact.StoragePowerActorCode
+    MinerActor         sminact.StorageMinerActorCode
     SectorIndex        sectoridx.SectorIndexerSubsystem
     StorageProving     storage_proving.StorageProvingSubsystem
 
@@ -35,22 +37,15 @@ type StorageMiningSubsystem struct {
     // Need access to the blockchain system in order to query for things in the chain
     _blockchain        blockchain.BlockchainSubsystem
 
-    // Need access to the key store in order to generate tickets and election proofs
-    _keyStore          key_store.KeyStore
-
-    // TODO: why are these here? remove?
-    StartMining()
-    StopMining()
-
     // call by StorageMiningSubsystem itself to create miner
     CreateMiner(
-        ownerPubKey   filcrypto.PublicKey
-        workerPubKey  filcrypto.PublicKey
-        pledgeAmt     actor.TokenAmount
+        state       stateTree.StateTree
+        ownerAddr   addr.Address
+        workerAddr  addr.Address
+        sectorSize  util.UInt
+        peerId      libp2p.PeerID
+        pledgeAmt   actors.TokenAmount
     )
-
-    // get miner key by address
-    GetWorkerKeyByMinerAddress(minerAddr addr.Address) filcrypto.PublicKey
 
     // call by StorageMarket.StorageProvider at the start of a deal.
     // Triggers AddNewDeal on SectorIndexer
@@ -66,8 +61,8 @@ type StorageMiningSubsystem struct {
         minerAddr   addr.Address
     ) block.Ticket
 
-    _preparePoStChallengeSeed(randomness util.Randomness, minerAddr addr.Address) util.Randomness
-    _getStorageMinerActorState(stateTree stateTree.StateTree, minerAddr addr.Address) StorageMinerActorState
+    PreparePoStChallengeSeed(randomness util.Randomness, minerAddr addr.Address) util.Randomness
+    _getStorageMinerActorState(stateTree stateTree.StateTree, minerAddr addr.Address) sminact.StorageMinerActorState
 
     // call by BlockChain when a new block is produced
     OnNewBestChain()
@@ -76,17 +71,25 @@ type StorageMiningSubsystem struct {
     // TODO: define clock better
     OnNewRound()
 
-    _tryLeaderElection()
+    _runMiningCycle()
+    _tryLeaderElection(st stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainPoStVerifyInfo
+    _trySurprisePoSt(st stateTree.StateTree, sma sminact.StorageMinerActorState) error
+    _submitSurprisePoStMessage(
+        state     stateTree.StateTree
+        sPoSt     sector.OnChainPoStVerifyInfo
+        gasPrice  actors.TokenAmount
+        gasLimit  msg.GasAmount
+    ) error
 
     VerifyElectionPoSt(
         header       block.BlockHeader
         onChainInfo  sector.OnChainPoStVerifyInfo
     ) bool
-    VerifySurprisePoSt(
+
+    _verifyElection(
         header       block.BlockHeader
         onChainInfo  sector.OnChainPoStVerifyInfo
     ) bool
-    IsValidElection(onChainInfo sector.OnChainPoStVerifyInfo) bool
 }
 
 type PoStChallengeSeedInput struct {

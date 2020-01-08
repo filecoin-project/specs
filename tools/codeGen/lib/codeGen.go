@@ -226,6 +226,23 @@ func GenGoTypeSerializers(ctx GoGenContext, name string, interfaceID GoNode) {
 		funBody: GenGoPanicTodoBody(),
 	}
 
+	serializeArrayDecl := GoFunDecl{
+		receiverVar:  nil,
+		receiverType: nil,
+		funName:      "Serialize_" + name + "_Array",
+		funType: GoFunType{
+			args: []GoField{
+				GoField{
+					fieldName: nil,
+					fieldType: GoArrayType{elementType: GoIdent{name: name}},
+				},
+			},
+			retType: GoNode_Ref(TranslateGoIdent("Serialization", ctx)),
+		},
+		funArgs: []GoNode{GoIdent{name: "x"}},
+		funBody: GenGoPanicTodoBody(),
+	}
+
 	deserializeDecl := GoFunDecl{
 		receiverVar:  nil,
 		receiverType: nil,
@@ -248,8 +265,27 @@ func GenGoTypeSerializers(ctx GoGenContext, name string, interfaceID GoNode) {
 		funBody: GenGoPanicTodoBody(),
 	}
 
+	deserializeAssertDecl := GoFunDecl{
+		receiverVar:  nil,
+		receiverType: nil,
+		funName:      "Deserialize_" + name + "_Assert",
+		funType: GoFunType{
+			args: []GoField{
+				GoField{
+					fieldName: nil,
+					fieldType: TranslateGoIdent("Serialization", ctx),
+				},
+			},
+			retType: GoNode_Ref(interfaceID),
+		},
+		funArgs: []GoNode{GoIdent{name: "x"}},
+		funBody: GenGoPanicTodoBody(),
+	}
+
 	*ctx.retDecls = append(*ctx.retDecls, serializeDecl)
+	*ctx.retDecls = append(*ctx.retDecls, serializeArrayDecl)
 	*ctx.retDecls = append(*ctx.retDecls, deserializeDecl)
+	*ctx.retDecls = append(*ctx.retDecls, deserializeAssertDecl)
 }
 
 func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
@@ -391,6 +427,8 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 				// caseImplType := GoIdent { IdToImpl(caseInterfaceName) }
 				// caseImplPtrType := GoPtrType { targetType: caseImplType }
 
+				// As_{Case} conversion method
+
 				interfaceFields = append(interfaceFields, GoField{
 					fieldName: RefString("As_" + fieldName),
 					fieldType: GoFunType{
@@ -432,6 +470,39 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 				}
 
 				*ctx.retDecls = append(*ctx.retDecls, caseAsDecl)
+
+				// Is_{Case} test method
+
+				interfaceFields = append(interfaceFields, GoField{
+					fieldName: RefString("Is_" + fieldName),
+					fieldType: GoFunType{
+						retType: GoNode_Ref(GoIdent{"bool"}),
+						args:    []GoField{},
+					},
+				})
+
+				caseIsDeclArg := GoTypeToIdent(name + "_" + fieldName)
+				caseIsDeclBody := []GoNode{
+					GoStmtReturn{
+						GoExprEq{
+							GenGoMethodCall(caseIsDeclArg, "Which", []GoNode{}),
+							caseWhich,
+						},
+					},
+				}
+				caseIsDecl := GoFunDecl{
+					receiverVar:  RefGoIdent(caseIsDeclArg),
+					receiverType: GoPtrType{targetType: implID},
+					funName:      "Is_" + fieldName,
+					funType: GoFunType{
+						args:    []GoField{},
+						retType: GoNode_Ref(GoIdent{"bool"}),
+					},
+					funArgs: []GoNode{},
+					funBody: caseIsDeclBody,
+				}
+
+				*ctx.retDecls = append(*ctx.retDecls, caseIsDecl)
 
 				caseNewDeclArg := GoTypeToIdent(name + "_" + fieldName)
 				caseNewDeclBody := []GoNode{

@@ -14,7 +14,7 @@ For clarity, we refer the following types of entities to describe implementation
   Depending on the choice of language and the particular component, this might
   correspond to a single software module,
   a thread or process running some main loop, a disk-backed database, or a variety of other design choices.
-  For example, the {{<sref chainsync>}} is a component: it could be implemented
+  For example, the {{<sref chain_sync>}} is a component: it could be implemented
   as a process or thread running a single specified main loop, which waits for network messages
   and responds accordingly by recording and/or forwarding block data.
 

@@ -1,7 +1,10 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import actors "github.com/filecoin-project/specs/actors"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+import indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
@@ -10,21 +13,30 @@ import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 type Runtime interface {
     CurrEpoch() block.ChainEpoch
 
-    // Randomness returns a (pseudo)random stream (indexed by offset) for the current epoch.
-    Randomness(e block.ChainEpoch, offset UInt) util.Randomness
+    // Randomness returns a (pseudo)random string for the given epoch and tag.
+    Randomness(tag filcrypto.DomainSeparationTag, epoch block.ChainEpoch) util.Randomness
+    RandomnessWithAuxSeed(
+        tag      filcrypto.DomainSeparationTag
+        epoch    block.ChainEpoch
+        auxSeed  util.Serialization
+    ) util.Randomness
 
-    // Note: This is the _immediate_ caller.
+    // The address of the immediate calling actor.
     // Not necessarily the actor in the From field of the initial on-chain Message.
+    // Always an ID-address.
     ImmediateCaller() addr.Address
     ValidateImmediateCallerIs(caller addr.Address)
+    ValidateImmediateCallerInSet(callers [addr.Address])
     ValidateImmediateCallerAcceptAnyOfType(type_ actor.BuiltinActorID)
+    ValidateImmediateCallerAcceptAnyOfTypes(types [actor.BuiltinActorID])
     ValidateImmediateCallerAcceptAny()
     ValidateImmediateCallerMatches(CallerPattern)
 
-    // The address of the actor receiving the message.
+    // The address of the actor receiving the message. Always an ID-address.
     CurrReceiver()         addr.Address
 
     // The actor who mined the block in which the initial on-chain message appears.
+    // Always an ID-address.
     ToplevelBlockWinner()  addr.Address
 
     AcquireState()         ActorStateHandle
@@ -55,17 +67,36 @@ type Runtime interface {
     // Check that the given condition is true (and call Abort if not).
     Assert(bool)
 
-    CurrentBalance()  actor.TokenAmount
-    ValueReceived()   actor.TokenAmount
+    CurrentBalance()  actors.TokenAmount
+    ValueReceived()   actors.TokenAmount
+
+    // Look up the current values of several system-wide economic indices.
+    CurrIndices()     indices.Indices
+
+    // Look up the code ID of a given actor address.
+    GetActorCodeID(addr addr.Address) (ret actor.CodeID, ok bool)
 
     // Run a (pure function) computation, consuming the gas cost associated with that function.
     // This mechanism is intended to capture the notion of an ABI between the VM and native
     // functions, and should be used for any function whose computation is expensive.
-    Compute(ComputeFunctionID, args [Any]) Any
+    Compute(ComputeFunctionID, args [util.Any]) util.Any
 
     // Sends a message to another actor.
     // If the invoked method does not return successfully, this caller will be aborted too.
     SendPropagatingErrors(input InvocInput) InvocOutput
+    Send(
+        toAddr     addr.Address
+        methodNum  actors.MethodNum
+        params     actors.MethodParams
+        value      actors.TokenAmount
+    ) InvocOutput
+    SendQuery(
+        toAddr     addr.Address
+        methodNum  actors.MethodNum
+        params     actors.MethodParams
+    ) util.Serialization
+    SendFunds(toAddr addr.Address, value actors.TokenAmount)
+
     // Sends a message to another actor, trapping an unsuccessful execution.
     // This may only be invoked by the singleton Cron actor.
     SendCatchingErrors(input InvocInput) (output InvocOutput, exitCode exitcode.ExitCode)
@@ -73,30 +104,36 @@ type Runtime interface {
     // Computes an address for a new actor. The returned address is intended to uniquely refer to
     // the actor even in the event of a chain re-org (whereas an ID-address might refer to a
     // different actor after messages are re-ordered).
+    // Always an ActorExec address.
     NewActorAddress() addr.Address
 
     // Creates an actor in the state tree, with empty state. May only be called by InitActor.
     CreateActor(
         // The new actor's code identifier.
         codeId   actor.CodeID
-        // Address under which the new actor's state will be stored.
+        // Address under which the new actor's state will be stored. Must be an ID-address.
         address  addr.Address
     )
 
-    IpldGet(c ipld.CID) union {Bytes, error}
+    // Deletes an actor in the state tree. May only be called by the actor itself,
+    // or by StoragePowerActor in the case of StorageMinerActors.
+    DeleteActor(address addr.Address)
+
+    // Retrieves and deserializes an object from the store into o. Returns whether successful.
+    IpldGet(c ipld.CID, o ipld.Object) bool
+    // Serializes and stores an object, returning its CID.
     IpldPut(x ipld.Object) ipld.CID
 }
 
 type InvocInput struct {
     To      addr.Address
-    Method  actor.MethodNum
-    Params  actor.MethodParams
-    Value   actor.TokenAmount
+    Method  actors.MethodNum
+    Params  actors.MethodParams
+    Value   actors.TokenAmount
 }
 
 type InvocOutput struct {
-    ExitCode     exitcode.ExitCode
-    ReturnValue  Bytes
+    ReturnValue Bytes
 }
 
 type MessageReceipt struct {
@@ -105,8 +142,12 @@ type MessageReceipt struct {
     GasUsed      msg.GasAmount
 }  // representation tuple
 
-type ActorExecAddressSeed struct {
-    creator             addr.Address
-    toplevelCallSeqNum  actor.CallSeqNum
-    internalCallSeqNum  actor.CallSeqNum
+type ActorStateHandle interface {
+    UpdateRelease(newStateCID actor.ActorSubstateCID)
+    Release(checkStateCID actor.ActorSubstateCID)
+    Take() actor.ActorSubstateCID
+}
+
+type ComputeFunctionID enum {
+    VerifySignature
 }

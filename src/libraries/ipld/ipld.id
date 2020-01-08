@@ -1,8 +1,14 @@
-type Store GraphStore
-
 // imported as ipld.Object
 type Object interface {
     CID() CID
 
     // Populate(v interface{}) error
+}
+
+type GraphStore struct {
+    // Retrieves a serialized value from the store by CID. Returns the value and whether it was found.
+    Get(cid CID)           (util.Bytes, bool)
+
+    // Puts a serialized value in the store, returning the CID.
+    Put(value util.Bytes)  (cid CID)
 }

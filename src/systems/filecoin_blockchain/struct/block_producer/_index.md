@@ -6,55 +6,9 @@ title: Block Producer
 
 # Mining Blocks
 
-A miner registered with the storage power actor may begin generating and checking election tickets
-if it has proven storage meeting the minimum miner size threshold requirement. 
+A miner registered with the storage power actor may begin generating and checking election tickets if it has proven storage meeting the {{<sref min_miner_size>}} threshold requirement. 
 
-In order to do so, the miner must be running chain validation, and be keeping track of the most recent
-blocks received. A miner's new block will be based on parents from a previous epoch.
-
-For additional details around how consensus works in Filecoin, see {{<sref expected_consensus>}}. For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner is eligible to mine a block itself, and other rules pertaining to the production of some artifacts required of valid blocks (e.g. Tickets, ElectionPoSt).
-
-## Mining Cycle
-
-At any height `H`, there are three possible situations:
-
-- The miner is eligible to mine a block: they produce their block and propagate it. They then resume mining at the next height `H+1`.
-- The miner is not eligible to mine a block but has received blocks: they form a Tipset with them and resume mining at the next height `H+1`.
-- The miner is not eligible to mine a block and has received no blocks: prompted by their clock they run leader election again, incrementing the epoch number.
-
-This process is repeated until either a winning ticket is found (and block published) or a new valid Tipset comes in from the network.
-
-Let's illustrate this with an example.
-
-Miner M is mining at epoch H.
-Heaviest tipset at H-1 is {B0}
-
-- New Epoch:
-    - M produces a ticket at H, from B0's ticket (the min ticket at H-1)
-    - M draws the ticket from height H-K to generate a set of ElectionPoSt partial Tickets and uses them to run leader election
-    - If M has no winning tickets
-    - M has not heard about other blocks on the network.
-- New Epoch:
-    - Height is incremented to H + 1.
-    - M generates a new ElectionProof with this new epoch number.
-    - If M has winning tickets
-    - M generates a block B1 using the new ElectionProof and the ticket drawn last epoch.
-    - M has received blocks B2, B3 from the network with the same parents and same height.
-    - M forms a tipset {B1, B2, B3}
-
-Anytime a miner receives new valid blocks, it should evaluate what is the heaviest Tipset it knows about and mine atop it.
-
-### Timing
-
-{{< diagram src="../../../../diagrams/timing/timing.png" title="Mining Cycle Timing" >}}
-
-The mining cycle relies on receiving and producing blocks concurrently.  The sequence of these events in time is given by the timing diagram above.  The upper row represents the conceptual consumption channel consisting of successive receiving periods `Rx` during which nodes validate and select blocks as chain heads.  The lower row is the conceptual production channel made up of a period of mining `M` followed by a period of transmission `Tx`.  The lengths of the periods are not to scale.
-
-Blocks are received and validated during `Rx` up to the end of the epoch.  At the beginning of the next epoch, the heaviest tipset is computed from the blocks received during `Rx`, used as the head to build on during `M`.  If mining is successful a block is transmitted during `Tx`.  The epoch boundaries are as shown.
-
-In a fully synchronized network most of period `Rx` does not see any network traffic, only the period lined up with `Tx`.  In practice we expect blocks from previous epochs to propagate during the remainder of `Rx`.  We also expect differences in operator mining time to cause additional variance.
-
-This sequence of events applies only when the node is in the `CHAIN_FOLLOW` syncing mode.  Nodes in other syncing modes do not mine blocks.
+In order to do so, the miner must be running chain validation, and be keeping track of the most recent blocks received. A miner's new block will be based on parents from the previous epoch.
 
 ## Block Creation
 

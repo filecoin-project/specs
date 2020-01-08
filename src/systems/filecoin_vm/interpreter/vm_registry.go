@@ -3,11 +3,13 @@ package interpreter
 import "errors"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
-import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
-import storage_market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
-import sysactors "github.com/filecoin-project/specs/systems/filecoin_vm/sysactors"
+import ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+import accact "github.com/filecoin-project/specs/actors/builtin/account"
+import cronact "github.com/filecoin-project/specs/actors/builtin/cron"
+import initact "github.com/filecoin-project/specs/actors/builtin/init"
+import spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
+import smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
 
 var (
 	ErrActorNotFound = errors.New("Actor Not Found")
@@ -15,6 +17,7 @@ var (
 
 // CodeIDs for system actors
 var (
+	SystemActorCodeID         = actor.CodeID_Make_Builtin(actor.BuiltinActorID_System)
 	InitActorCodeID           = actor.CodeID_Make_Builtin(actor.BuiltinActorID_Init)
 	CronActorCodeID           = actor.CodeID_Make_Builtin(actor.BuiltinActorID_Cron)
 	AccountActorCodeID        = actor.CodeID_Make_Builtin(actor.BuiltinActorID_Account)
@@ -62,23 +65,23 @@ func init() {
 func _registerBuiltinActors() {
 	// TODO
 
-	cron := &sysactors.CronActorCode_I{}
+	cron := &cronact.CronActorCode_I{}
 
-	RegisterActor(InitActorCodeID, &sysactors.InitActorCode_I{})
+	RegisterActor(InitActorCodeID, &initact.InitActorCode_I{})
 	RegisterActor(CronActorCodeID, cron)
-	RegisterActor(AccountActorCodeID, &sysactors.AccountActorCode_I{})
-	RegisterActor(StoragePowerActorCodeID, &spc.StoragePowerActorCode_I{})
-	RegisterActor(StorageMarketActorCodeID, &market.StorageMarketActorCode_I{})
+	RegisterActor(AccountActorCodeID, &accact.AccountActorCode_I{})
+	RegisterActor(StoragePowerActorCodeID, &spowact.StoragePowerActorCode_I{})
+	RegisterActor(StorageMarketActorCodeID, &smarkact.StorageMarketActorCode_I{})
 
 	// wire in CRON actions.
-	// TODO: there's probably a better place to put this, but for now, do it here.
-	cron.Entries_ = append(cron.Entries_, &sysactors.CronTableEntry_I{
+	// TODO: move this to CronActor's constructor method
+	cron.Entries_ = append(cron.Entries_, &cronact.CronTableEntry_I{
 		ToAddr_:    addr.StoragePowerActorAddr,
-		MethodNum_: spc.Method_StoragePowerActor_EpochTick,
+		MethodNum_: ai.Method_StoragePowerActor_OnEpochTickEnd,
 	})
 
-	cron.Entries_ = append(cron.Entries_, &sysactors.CronTableEntry_I{
+	cron.Entries_ = append(cron.Entries_, &cronact.CronTableEntry_I{
 		ToAddr_:    addr.StorageMarketActorAddr,
-		MethodNum_: storage_market.Method_StorageMarketActor_EpochTick,
+		MethodNum_: ai.Method_StorageMarketActor_OnEpochTickEnd,
 	})
 }

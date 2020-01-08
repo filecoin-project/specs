@@ -1,9 +1,9 @@
 package message
 
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-import util "github.com/filecoin-project/specs/util"
+import (
+	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+	util "github.com/filecoin-project/specs/util"
+)
 
 var IMPL_FINISH = util.IMPL_FINISH
 
@@ -11,28 +11,6 @@ type Serialization = util.Serialization
 
 // The maximum serialized size of a SignedMessage.
 const MessageMaxSize = 32 * 1024
-
-func UnsignedMessage_Make(
-	from addr.Address,
-	to addr.Address,
-	method actor.MethodNum,
-	params actor.MethodParams,
-	callSeqNum actor.CallSeqNum,
-	value actor.TokenAmount,
-	gasPrice GasPrice,
-	gasLimit GasAmount,
-) UnsignedMessage {
-	return &UnsignedMessage_I{
-		From_:       from,
-		To_:         to,
-		Method_:     method,
-		Params_:     params,
-		CallSeqNum_: callSeqNum,
-		Value_:      value,
-		GasPrice_:   gasPrice,
-		GasLimit_:   gasLimit,
-	}
-}
 
 func SignedMessage_Make(message UnsignedMessage, signature filcrypto.Signature) SignedMessage {
 	return &SignedMessage_I{

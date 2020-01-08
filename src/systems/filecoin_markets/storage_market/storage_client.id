@@ -1,18 +1,66 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
+import actors "github.com/filecoin-project/specs/actors"
+import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import message "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+
+// ClientDeal is the information about a storage deal that storage client tracks
+// locally about a deal until it goes on chain. It is persisted to local storage
+// and updated as the deal goes through stages leading up to its being published
+type ClientDeal struct {
+    ProposalCid     &deal.StorageDealProposal
+    Proposal        deal.StorageDealProposal
+    State           StorageDealStatus
+    MinerPeerID     libp2p.PeerID
+    MinerWorker     addr.Address
+    DealID          deal.DealID
+    PublishMessage  &message.SignedMessage
+}
+
+// ProposeStorageDealResult is the returned data when ProposeStorageDeal
+// is called on a storage client
+type ProposeStorageDealResult struct {
+    ProposalCid &deal.StorageDealProposal
+}
+
+type StorageProviderInfo struct {
+    Address     addr.Address  // actor address
+    SectorSize  uint64
+    PeerID      libp2p.PeerID
+}
 
 type StorageClient struct {
-    // generate PieceCID(CommP) from payload
-    // so that client can identify their deal
-    generatePieceCID(payloadCID ipld.CID) piece.PieceCID
+    // ListProviders queries chain state and returns active storage providers
+    ListProviders()   (providers [StorageProviderInfo], error)
 
-    // Call by StorageProvider to pull data with GraphSync
-    PullPayload(payloadCID ipld.CID)
+    // ListDeals lists on-chain deals associated with this client
+    ListDeals()       (deals [deal.StorageDeal], error)
 
-    // Call by StorageProvider to inform StorageDealProposalStatus
-    NotifyOfStorageDealProposalStatus(proposalCID deal.ProposalCID, status StorageDealStatus)
+    // ListInProgressDeals lists deals that are in progress or rejected
+    // - but not on chain
+    ListLocalDeals()  (deals [ClientDeal], error)
 
-    // Call by StorageProvider to inform StorageDealStatus
-    NotifyOfStorageDealStatus(dealCID deal.DealCID, status StorageDealStatus)
+    // GetInProgressDeal looks up an in progress deal by proposal CID
+    GetInProgressDeal(proposalCID &deal.StorageDealProposal) (ClientDeal, error)
+
+    // GetAsk returns the current ask for a storage provider
+    GetAsk(info StorageProviderInfo) (StorageAsk, error)
+
+    // ProposeStorageDeal initiates deal negotiation with a Storage Provider
+    ProposeStorageDeal(
+        info                StorageProviderInfo
+        payloadCid          ipld.CID
+        proposalExpiration  block.ChainEpoch
+        duration            block.ChainEpoch
+        price               actors.TokenAmount
+        collateral          actors.TokenAmount
+    ) (ProposeStorageDealResult, error)
+
+    // GetPaymentEscrow returns the current funds available for deal payment
+    GetPaymentEscrow() (actors.TokenAmount, error)
+
+    // AddPaymentEscrow adds storage collateral
+    AddPaymentEscrow(amount actors.TokenAmount) error
 }

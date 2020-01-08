@@ -1,33 +1,8 @@
 // This contains actor things that are _outside_ of VM exection.
 // The VM uses this to execute actors.
 
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import actors "github.com/filecoin-project/specs/actors"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
-
-// TokenAmount is an amount of Filecoin tokens. This type is used within
-// the VM in message execution, to account movement of tokens, payment
-// of VM gas, and more.
-type TokenAmount Int  // TODO: should be BigInt (attoFIL)
-
-// MethodNum is an integer that represents a particular method
-// in an actor's function table. These numbers are used to compress
-// invocation of actor code, and to decouple human language concerns
-// about method names from the ability to uniquely refer to a particular
-// method.
-//
-// Consider MethodNum numbers to be similar in concerns as for
-// offsets in function tables (in programming languages), and for
-// tags in ProtocolBuffer fields. Tags in ProtocolBuffers recommend
-// assigning a unique tag to a field and never reusing that tag.
-// If a field is no longer used, the field name may change but should
-// still remain defined in the code to ensure the tag number is not
-// reused accidentally. The same should apply to the MethodNum
-// associated with methods in Filecoin VM Actors.
-type MethodNum Int
-
-// MethodParams is an array of objects to pass into a method. This
-// is the list of arguments/parameters.
-type MethodParams [util.Serialization]
 
 // CallSeqNum is an invocation (Call) sequence (Seq) number (Num).
 // This is a value used for securing against replay attacks:
@@ -58,9 +33,19 @@ type CodeID union {
 
     IsBuiltin()    bool
     IsSingleton()  bool
+
+    // Indicates whether an in-VM message Send operation (with a given actor as sender)
+    // can be triggered by a signed on-chain message from this actor's corresponding
+    // party/parties.
+    IsSignable()   bool
 }
 
 type BuiltinActorID enum {
+    // The SystemActor has no methods and no state.
+    // It exists only to be the implicit sender of privileged messages that arise from
+    // the VM interpreter itself (e.g., cron and block reward triggers and EPoSts).
+    System
+
     Init
     Cron
     Account
@@ -81,7 +66,7 @@ type ActorState struct {
     // CID of the root of optional actor-specific sub-state.
     State       ActorSubstateCID
     // Balance of tokens held by this actor.
-    Balance     TokenAmount
+    Balance     actors.TokenAmount
     // Expected sequence number of the next message sent by this actor.
     // Initially zero, incremented when an account actor originates a top-level message.
     // Always zero for other actors.
@@ -110,5 +95,3 @@ type ActorSubstateCID ipld.CID
 //         NextID      ActorID
 //     }
 // }
-
-type BalanceTableHAMT {addr.Address: TokenAmount}

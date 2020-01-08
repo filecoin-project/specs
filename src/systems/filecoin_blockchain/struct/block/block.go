@@ -5,3 +5,5 @@ const BlockMaxSize = 512 * 1024
 
 // The maximum sum of the gas limits of the messages included in a block.
 const BlockGasLimit = 0 // Placeholder
+
+const ChainEpoch_None ChainEpoch = -1

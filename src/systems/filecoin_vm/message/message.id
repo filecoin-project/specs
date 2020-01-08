@@ -1,6 +1,7 @@
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import actors "github.com/filecoin-project/specs/actors"
 
 // GasAmount is a quantity of gas.
 type GasAmount struct {
@@ -14,9 +15,6 @@ type GasAmount struct {
     Scale(int) GasAmount
 }
 
-// GasPrice is a Gas-to-FIL cost
-type GasPrice actor.TokenAmount
-
 type UnsignedMessage struct {
     // Address of the receiving actor.
     To          addr.Address
@@ -26,14 +24,15 @@ type UnsignedMessage struct {
     CallSeqNum  actor.CallSeqNum
 
     // Amount of value to transfer from sender's to receiver's balance.
-    Value       actor.TokenAmount
+    Value       actors.TokenAmount
 
     // Optional method to invoke on receiver, zero for a plain value send.
-    Method      actor.MethodNum
+    Method      actors.MethodNum
     /// Serialized parameters to the method (if method is non-zero).
-    Params      actor.MethodParams
+    Params      actors.MethodParams
 
-    GasPrice
+    // GasPrice is a Gas-to-FIL cost
+    GasPrice    actors.TokenAmount
     GasLimit    GasAmount
 }  // representation tuple
 

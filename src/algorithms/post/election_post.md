@@ -20,15 +20,13 @@ The Election-PoSt construction includes a Surprise PoSt cleanup which will rando
 
 ## ElectionPoSt
 
-To enable short PoSt response time, miners are required submit a PoSt when they are elected to mine a block, hence PoSt on election or ElectionPoSt. When miners win a block, they need to immediately generate a PoStProof and submit that along with the winning PartialTickets. Both the PartialTickets and PoStProof are checked at Block Validation by `StoragePowerConsenusSubsystem`. When a block is included, a special message is added that calls `SubmitElectionPoSt` which will process sector updates in the same way as successful `SubmitSurprisePoSt` do.
+To enable short PoSt response time, miners are required submit a PoSt when they are elected to mine a block, hence PoSt on election or ElectionPoSt. When miners win a block, they need to immediately generate a PoStProof and submit that in the block header along with the winning PartialTickets. Both the PartialTickets and PoStProof are checked at Block Validation by `StoragePowerConsenusSubsystem`. When a block is included, a special message is added that calls `SubmitElectionPoSt` which will process sector updates in the same way as successful `SubmitSurprisePoSt` do.
 
 ## SurprisePoSt Cleanup
 
-In the absence of a posted `ElectionPoSt`, the chain randomly challenges a miner to submit a `SurprisePoSt` once per `ProvingPeriod` on expectation to ensure their storage is still accounted for.
+In the absence of a posted `ElectionPoSt`, the chain randomly challenges a miner to submit a `SurprisePoSt` once per `ProvingPeriod` on expectation to ensure their storage is still accounted for. The process is largely the same as for `ElectionPoSt` but a successful `SurprisePoSt` does not entitle a miner to generate a blocks and gains them no reward. It allows them to maintain power in the power table. 
 
 For every miner challenged, a `NotifyOfPoStSurpriseChallenge` is issued and sent as an on-chain message to the chosen `StorageMinerActor`.
-
-The ensuing `SurprisePoSt` does not entitle a miner to generate a blocks and gains them no reward but allows them to maintain power in the power table. 
 `PoStSurprise` will frequently be used by small miners who do not win blocks, and by miners as they are onboarding power to the network (since they will not be able to win ElectionPoSts to start).
 
 # In Detail
@@ -151,22 +149,22 @@ There is no requirement to persist the witnesses (list of merkle proofs) for fai
 
 But while this means a miner will never win blocks from faked power, they won’t be penalized either when storage is lost. How do we ensure that the Power Table is accurate? Likewise, how do we onboard new power since it will not win a block unless it has at least X TB or Y % of the network.
 
-This is why we need PoSt surprise: 
+This is why we need PoSt surprise. The process is largely the same as ElectionPoSt save for a few differences:
 
-Atop ElectionPost, a miner will be surprised with a PoSt challenge in every ProvingPeriod (~2 days). The ProvingPeriod resets whenever the miner publishes a PoSt (election or surprise). 
-This SurprisePoSt will use a challenge drawn from the chain at the start of this recovery period. Its PoStProof must be a proof over the PartialTickets for all sectors a miner is storing (i.e. a miner must submit a PoStProof made up of all partialTickets for all sectors in the `ProvingSet`, not just the winning ones on sampled sectors). For this reason a miner is incentivized to declare faults in order to successfully generate this PoStProof.)
+- A miner will only be surprised if they have not submitted a PoSt in some time (more than `SURPRISE_NO_CHALLENGE_PERIOD` epochs)
+- A miner will have `CHALLENGE_DURATION` epochs to reply
+- The PoSt will be submitted as a message on chain rather than part of the block header
+- After being challenged, a miner will no longer be eligible to submit an ElectionPoSt
 
-Upon receiving a PoSt surprise challenge, a miner has a given ChallengePeriod (~2 hours) past which they, they will lose all their power and a portion of their pledge collateral if they have not submitted a PoSt on chain. This is considered a `DetectedFault` and all sectors in the `ProvingSet` will be marked as `Failing`. No deal collateral will be slashed if miners can recover within the next three proving periods. Note that the exact amount of slashed pledge collateral and pledge collateral function itself are subject to change.
+If a miner fails to respond to the challenge past the `CHALLENGE_DURATION`, they will lose all their power and a portion of their pledge collateral. This is considered a `DetectedFault` and all sectors in the `ProvingSet` will be marked as `Failing`. No deal collateral will be slashed if miners can recover within the next three proving periods. Note that the exact amount of slashed pledge collateral and pledge collateral function itself are subject to change.
 
 Thereafter, the miner will have three more ProvingPeriods (specifically three challenges, so three ProvingPeriods on expectation) to recover their power by submitting a SurprisePoSt. If the miner does not do so, their sectors are permanently terminated and their storage deal collateral slashed (see the StorageMinerActor in the spec).
 
 ## PoStSurprise Challenge
 
-In the absence of an ElectionPost, a miner will be surprised with a PoSt challenge every ProvingPeriod (~2 days) on expectation. This SurprisePoSt will use a challenge drawn from the chain.
+Miners are selected at random to be challenged at every clockTick by the storage power actor (with `_selectMinersToSurprise`), with `len(PowerTable)/ProvingPeriod` miners selected per round (for one challenge per miner per proving period on expectation).
 
-Specifically, miners are selected at random to be challenged at every clockTick by the storage power actor (with `_selectMinersToSurprise`), with `len(PowerTable)/ProvingPeriod` miners selected per round (for one challenge per miner per proving period on expectation).
-If the chosen `StorageMinerActor` is already challenged (`IsChallenged` is True) or they've submitted a post (election or surprise) in the last `SURPRISE_NO_CHALLENGE_PERIOD` epochs, they will not be challenged again.
-That is if `ShouldChallenge` is False, then the PoSt surprise notification will be ignored and return success. 
+If the chosen `StorageMinerActor` is already challenged (`IsChallenged` is True) or they've submitted a post (election or surprise) in the last `SURPRISE_NO_CHALLENGE_PERIOD` epochs, they will not be challenged again. That is if `ShouldChallenge` is False, then the SurprisePoSt notification will be ignored and return success. 
 
 Sampling which miners to surprise works as follows:
 ```text
@@ -193,13 +191,26 @@ The surprise process described above is triggered by the cron actor in the `Stor
 - they are not already selected for a challenge this round,
 - their last PoSt (election or surprise) is older than `SURPRISE_NO_CHALLENGE_PERIOD` epochs.
 
+Once issued a surprise, a miner will have to challenge the sectors in their `ProvingSet`, generating a number of partial tickets determined by a sampling rate (`SPOST_SAMPLE_RATE`). In the system here, we use the same system calls as above:
+
+- `GenerateCandidates` which takes in the miner's sectors and a wanted number of Challenge Tickets and generates a number of inclusion proofs for a number of challenged sectors chosen randomly in proportion to the requested number of challenged tickets.
+- `GeneratePoSt` takes a set of ChallengeTickets and generates a __*Proof of Spacetime*__ for them, proving the miner storage as a whole.
+
 ## PoStSurprise Response
 
-Upon receiving a PoSt surprise challenge, a miner has a given `CHALLENGE_DURATION` (~2 hours) to respond.
+The miner's response must be a PoSt proof over the PartialTickets generated by the challenge which clear a given target `SURPRISE_TARGET` to be defined.
 
-The miner's response must be a PoSt proof over the PartialTickets for a  sectors that miner is storing (i.e. unlike with ElectionPoSt a miner must submit a PoStProof made up of all `PartialTickets` for a portion of their sectors in the `ProvingSet` proportional with `SPoStSampleRate` (not just the winning ones on sampled sectors).
+```
+submitSurpriseTickets(partialTickets):
+    eligibleTickets = []
+    for tix in partialTickets:
+        challTix = H(tix) // finalization
+        if challTix / 2^len(H) < surprise_target:
+            eligibleTickets += tix
+    return eligibleTickets
+```
 
-If the miner responds to the challenge with a SurprisePoSt, they will keep/recover their power.
+If the miner responds to the challenge with a SurprisePoSt within `CHALLENGE_DURATION` epochs, they will keep/recover their power.
 
 ## Faults
 
@@ -211,7 +222,7 @@ Only faults which have been reported at challenge time, will be accounted for. I
 - Faults cannot be declared during a ChallengePeriod
 - Faults cannot be recovered during a ChallengePeriod
 
-Accordingly, if the miner does not respond to the challenge, they will lose all their Power and a portion of their pledge collateral. This is considered a `DetectedFault` and all sectors in the `ProvingSet` will be marked as `Failing`. The miner will get challenged again in the next proving period. If the miner does not provide a valid response to `MAX_CONSECUTIVE_FAULTS` challenges in a row, their pledge collateral is slashed and their sectors are permanently terminated. Their storage deal collateral is slashed accordingly (see {{<sref deal_states>}} for more).
+Accordingly, if the miner does not respond to the challenge, they will lose all their Power and a portion of their pledge collateral. This is considered a `DetectedFault` and all sectors in the `ProvingSet` will be marked as `Failing`. The miner will get challenged again in the next proving period. If the miner does not provide a valid response to `MAX_CONSECUTIVE_FAULTS` challenges in a row, their pledge collateral is slashed and their sectors are permanently terminated. Their storage deal collateral is slashed accordingly (see {{<sref storage_deal_states>}} for more).
 
 Any faulted sectors will not count toward miner power in {{<sref expected_consensus>}}. Through these `Detected` and `Declared` faults, the power table should closely track power in the network.
 

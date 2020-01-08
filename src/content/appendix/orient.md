@@ -1,6 +1,5 @@
 +++
 title = "Filecoin Parameters"
-author = ["Chhi'med Kunzang"]
 draft = false
 +++
 
