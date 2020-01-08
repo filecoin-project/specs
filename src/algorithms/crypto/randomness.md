@@ -13,7 +13,7 @@ We describe this formatting below.
 Any randomness derived from on-chain values uses the following encodings to represent these values as bytes:
 
 - **Bytes**: Bytes
-- **Ints**: Little-endian uint64 representation
+- **Ints**: Big-endian uint64 representation
 - **Strings**: ASCII
 - **Objects**: Their specified Serialization, currently CBOR-based serialization defined on algebraic datatypes
 
@@ -40,7 +40,7 @@ In all cases, a ticket is used as the base of randomness (see {{<sref tickets>}}
 ```text
 For a given randomness input object randInputObject (typically containing a random ticket from the chain and other elements such as an epoch or a miner actor address):
 buffer = Bytes{}
-buffer.append(IntToLittleEndianBytes(AppropriateDST))
+buffer.append(IntToBigEndianBytes(AppropriateDST))
 buffer.append(-1) // a flag to be used in cases where FIL might need longer randomness outputs. Currently unused
 buffer.append(CBOR_Serialization(randInputObj))
 
