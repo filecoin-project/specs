@@ -212,13 +212,13 @@ func (st *StoragePowerActorState_I) _getPledgeSlashForConsensusFault(currPledge 
 	}
 }
 
-func _getConsensusFaultSlasherReward(elapsedEpoch block.ChainEpoch, totalPledge actors.TokenAmount) actors.TokenAmount {
+func _getConsensusFaultSlasherReward(elapsedEpoch block.ChainEpoch, collateralToSlash actors.TokenAmount) actors.TokenAmount {
 	TODO()
 	// BigInt Operation
 	// var growthRate = node_base.SLASHER_SHARE_GROWTH_RATE_NUM / node_base.SLASHER_SHARE_GROWTH_RATE_DENOM
 	// var multiplier = growthRate^elapsedEpoch
 	// var slasherProportion = min(INITIAL_SLASHER_SHARE * multiplier, 1.0)
-	// return totalPledge * slasherProportion
+	// return collateralToSlash * slasherProportion
 	return actors.TokenAmount(0)
 }
 

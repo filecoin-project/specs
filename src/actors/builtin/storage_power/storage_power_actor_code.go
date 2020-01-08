@@ -190,7 +190,7 @@ func (a *StoragePowerActorCode_I) OnMinerSurprisePoStFailure(rt Runtime, numCons
 	}
 }
 
-func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, faultType ConsensusFaultType, proof []block.BlockHeader) {
+func (a *StoragePowerActorCode_I) ReportVerifiedConsensusFault(rt Runtime, slasheeAddr addr.Address, faultEpoch block.ChainEpoch, faultType ConsensusFaultType) {
 	TODO()
 	panic("")
 	// TODO: The semantics here are quite delicate:
@@ -204,63 +204,50 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, faultType Con
 	// Deferring to followup after these security/mechanism design questions have been resolved.
 	// Previous notes:
 	//
-	// Use EC's IsValidConsensusFault method to validate the proof
-	// slash block miner's pledge collateral
-	// reward slasher
-	//
-	// include ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors util.UVarint) as case
-	// Quite a bit more straightforward since only called by the cron actor (ie publicly verified)
-	// slash cheater pledge collateral accordingly based on num sectors faulted
-
-	// validation checks to be done in runtime
-	// - there should be exactly two blocks in proof
+	// validation checks to be done in runtime before calling this method
+	// - there should be exactly two block headers in proof
 	// - both blocks are mined by the same miner
 	// - first block is of the same or lower block height as the second block
+	//
+	// Use EC's IsValidConsensusFault method to validate the proof
 
-	// return from EC's IsValidConsensusFault
-	isValidConsensusFault := false
+	// this method assumes that ConsensusFault has been checked in runtime
+	slasherAddr := rt.ImmediateCaller()
+	h, st := a.State(rt)
 
-	if !isValidConsensusFault {
-		rt.AbortArgMsg("spa.ReportConsensusFault: not valid consensus fault")
-	} else {
-		slasherAddr := rt.ImmediateCaller()
-		h, st := a.State(rt)
-		minerToSlash := proof[0].Miner()
-
-		claimedPower, powerOk := st.ClaimedPower()[minerToSlash]
-		if !powerOk {
-			rt.AbortArgMsg("spa.ReportConsensusFault: miner to slash has been slashed")
-		}
-		Assert(claimedPower > 0)
-
-		currPledge, pledgeOk := st._getCurrPledgeForMiner(minerToSlash)
-		if !pledgeOk {
-			rt.AbortArgMsg("spa.ReportConsensusFault: miner to slash has no pledge")
-		}
-		Assert(currPledge > 0)
-
-		// elapsed epoch from the latter block which committed the fault
-		elapsedEpoch := rt.CurrEpoch() - proof[1].Epoch()
-		if elapsedEpoch <= 0 {
-			rt.AbortArgMsg("spa.ReportConsensusFault: invalid block")
-		}
-
-		collateralToSlash := st._getPledgeSlashForConsensusFault(currPledge, faultType)
-		slasherReward := _getConsensusFaultSlasherReward(elapsedEpoch, collateralToSlash)
-
-		// request slasherReward to be deducted from EscrowTable
-		amountToSlasher := st._slashPledgeCollateral(slasherAddr, slasherReward)
-		Assert(slasherReward == amountToSlasher)
-
-		UpdateRelease(rt, h, st)
-
-		// reward slasher
-		rt.SendFunds(slasherAddr, amountToSlasher)
-
-		// burn the rest of pledge collateral
-		// delete miner from power table
-		a._rtDeleteMinerActor(rt, minerToSlash)
+	claimedPower, powerOk := st.ClaimedPower()[slasheeAddr]
+	if !powerOk {
+		rt.AbortArgMsg("spa.ReportConsensusFault: miner to slash has been slashed")
 	}
+	Assert(claimedPower > 0)
+
+	currPledge, pledgeOk := st._getCurrPledgeForMiner(slasheeAddr)
+	if !pledgeOk {
+		rt.AbortArgMsg("spa.ReportConsensusFault: miner to slash has no pledge")
+	}
+	Assert(currPledge > 0)
+
+	// elapsed epoch from the latter block which committed the fault
+	elapsedEpoch := rt.CurrEpoch() - faultEpoch
+	if elapsedEpoch <= 0 {
+		rt.AbortArgMsg("spa.ReportConsensusFault: invalid block")
+	}
+
+	collateralToSlash := st._getPledgeSlashForConsensusFault(currPledge, faultType)
+	slasherReward := _getConsensusFaultSlasherReward(elapsedEpoch, collateralToSlash)
+
+	// request slasherReward to be deducted from EscrowTable
+	amountToSlasher := st._slashPledgeCollateral(slasherAddr, slasherReward)
+	Assert(slasherReward == amountToSlasher)
+
+	UpdateRelease(rt, h, st)
+
+	// reward slasher
+	rt.SendFunds(slasherAddr, amountToSlasher)
+
+	// burn the rest of pledge collateral
+	// delete miner from power table
+	a._rtDeleteMinerActor(rt, slasheeAddr)
 }
 
 // Called by Cron.
