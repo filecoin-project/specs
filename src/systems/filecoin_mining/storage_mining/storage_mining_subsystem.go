@@ -41,11 +41,6 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 	pledgeAmt actors.TokenAmount,
 ) (addr.Address, error) {
 
-	params := make([]util.Serialization, 4)
-	params[0] = addr.Serialize_Address(ownerAddr)
-	params[1] = addr.Serialize_Address(workerAddr)
-	params[2] = libp2p.Serialize_PeerID(peerId)
-
 	ownerActor, ok := state.GetActor(ownerAddr)
 	Assert(ok)
 
@@ -53,7 +48,7 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 		From_:       ownerAddr,
 		To_:         addr.StoragePowerActorAddr,
 		Method_:     ai.Method_StoragePowerActor_CreateMiner,
-    Params_:     params,
+		Params_:     serde.MustSerializeParams(ownerAddr, workerAddr, peerId),
 		CallSeqNum_: ownerActor.CallSeqNum(),
 		Value_:      pledgeAmt,
 		GasPrice_:   0,
@@ -121,8 +116,8 @@ func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 		sPoSt := sms._trySurprisePoSt(chainHead.StateTree(), sma)
 
 		var gasLimit msg.GasAmount
-		var gasPrice = actor.TokenAmount(0)
-		IMPL_TODO("read from consts (in this case user set param)")
+		var gasPrice = actors.TokenAmount(0)
+		util.IMPL_FINISH("read from consts (in this case user set param)")
 		sms._submitSurprisePoStMessage(chainHead.StateTree(), sPoSt, gasPrice, gasLimit)
 	}
 }
@@ -385,9 +380,7 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 	return surprisePoSt
 }
 
-func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.StateTree, sPoSt sector.OnChainPoStVerifyInfo, gasPrice actor.TokenAmount, gasLimit msg.GasAmount) error {
-	params := make([]util.Serialization, 1)
-	params[0] = sector.Serialize_OnChainPoStVerifyInfo(sPoSt)
+func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.StateTree, sPoSt sector.OnChainPoStVerifyInfo, gasPrice actors.TokenAmount, gasLimit msg.GasAmount) error {
 
 	workerAddr, err := addr.Address_Make_Key(node_base.NETWORK, addr.KeyHash(sms._keyStore().WorkerKey().VRFPublicKey()))
 	if err != nil {
@@ -399,9 +392,9 @@ func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.
 		From_:       workerAddr,
 		To_:         sms._keyStore().MinerAddress(),
 		Method_:     ai.Method_StorageMinerActor_SubmitSurprisePoStResponse,
-		Params_:     params,
+		Params_:     serde.MustSerializeParams(sPoSt),
 		CallSeqNum_: worker.CallSeqNum(),
-		Value_:      actor.TokenAmount(0),
+		Value_:      actors.TokenAmount(0),
 		GasPrice_:   gasPrice,
 		GasLimit_:   gasLimit,
 	}
