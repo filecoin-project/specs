@@ -265,14 +265,12 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 	}
 
 	// 2. verify no duplicate tickets included
-	tickets := make(map[sector.SectorID][]util.UInt)
+	challengeIndices := make(map[util.UInt]bool)
 	for _, tix := range onChainInfo.Candidates() {
-		for _, index := range tickets[tix.SectorID()] {
-			if tix.ChallengeIndex() == index {
-				return false
-			}
+		if _, ok := challengeIndices[tix.ChallengeIndex()]; ok {
+			return false
 		}
-		tickets[tix.SectorID()] = append(tickets[tix.SectorID()], tix.ChallengeIndex())
+		challengeIndices[tix.ChallengeIndex()] = true
 	}
 
 	// 3. Verify partialTicket values are appropriate
