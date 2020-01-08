@@ -4,7 +4,13 @@ title: "Address"
 
 A Filecoin address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. This address encodes information about the network to which an actor belongs, the specific type of address encoding, the address payload itself, and a checksum. The goal of this format is to provide a robust address format that is both easy to use and resistant to errors.
 
-Note that each `ActorAddress` in the protocol contains a unique `ActorID` given to it by the `InitActor`. Throughout the protocol, actors are referenced by their IDs rather than full addresses for brevity. However, addresses and IDs are accessible in constant-time using the `AddressMap` (to go from ID to addr) and `IDMap` (in oppositee direction). Using the `IDMap` in conjunction with address resolvers should enable easy lookup of any actor's public keys (should they exist).
+Note that each `ActorAddress` in the protocol contains a unique `ActorID` given to it by the `InitActor`. Throughout the protocol, actors are referenced by their ID-addresses. ID-addresses are computable from IDs (using `makeIdAddress(id)`), and vice versa (using the `AddressMap` to go from addr to ID).
+
+Most actors have an alternative address which is not their key in the state tree, but is resolved to their ID-address during message processing.
+Accounts have a public key-based address (e.g. to receive funds), and non-singleton actors have a temporary reorg-proof address.
+
+An account actor's crypto-address (for signature verification) is found by looking up its actor state, keyed by the canonical ID-address. There is no map from ID-address to pubkey address.
+
 
 {{< readfile file="../systems/filecoin_vm/actor/address/address.id" code="true" lang="go" >}}
 {{< readfile file="../systems/filecoin_vm/actor/address/address.go" code="true" lang="go" >}}

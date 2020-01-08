@@ -1,6 +1,7 @@
 package storage_miner
 
 import (
+	"errors"
 	"math/big"
 
 	abi "github.com/filecoin-project/specs/actors/abi"
@@ -25,7 +26,7 @@ const epochUndefined = abi.ChainEpoch(-1)
 
 func (a *StorageMinerActorCode_I) StageWorkerKeyChange(rt Runtime, key filcrypto.VRFPublicKey) (err error) {
 	h, st := a.State(rt)
-	rt.ValidateImmediateCallerIs(st.Info().GetWorker(rt.CurrEpoch()))
+	rt.ValidateImmediateCallerIs(st.Info().Owner())
 	util.IMPL_TODO() // verify public key syntax
 
 	keyAddr, err := addr.Address_Make_Key(node_base.NETWORK, addr.KeyHash(key))
@@ -41,6 +42,23 @@ func (a *StorageMinerActorCode_I) StageWorkerKeyChange(rt Runtime, key filcrypto
 
 	// note that this may replace another pending key change
 	st.Info()._updateMinerPendingKeyChange(keyChange)
+	Release(rt, h, st)
+	return nil
+}
+
+func (a *StorageMinerActorCode_I) CommitWorkerKeyChange(rt Runtime) (err error) {
+	h, st := a.State(rt)
+
+	if st.Info().PendingKeyChange() == nil {
+		return errors.New("No pending key change.")
+	}
+
+	// lazy updates to worker keys if at effectiveness
+	if st.Info().PendingKeyChange().EffectiveAt() <= rt.CurrEpoch() {
+		st.Info()._updateMinerKey()
+		util.TODO()
+		// remains to update the key in every deal, or associate deals to minerActorID instead of workerKey
+	}
 	Release(rt, h, st)
 	return nil
 }
@@ -98,7 +116,7 @@ func (a *StorageMinerActorCode_I) OnSurprisePoStChallenge(rt Runtime) {
 // Invoked by miner's worker address to submit a response to a pending SurprisePoSt challenge.
 func (a *StorageMinerActorCode_I) SubmitSurprisePoStResponse(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) {
 	h, st := a.State(rt)
-	rt.ValidateImmediateCallerIs(st.Info().GetWorker(rt.CurrEpoch()))
+	rt.ValidateImmediateCallerIs(st.Info().Worker())
 
 	if !st.PoStState().Is_Challenged() {
 		rt.AbortStateMsg("Not currently challenged")
@@ -149,7 +167,7 @@ func (a *StorageMinerActorCode_I) OnVerifiedElectionPoSt(rt Runtime) {
 // Optimization: PreCommitSector could contain a list of deals that are not published yet.
 func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo) {
 	h, st := a.State(rt)
-	rt.ValidateImmediateCallerIs(st.Info().GetWorker(rt.CurrEpoch()))
+	rt.ValidateImmediateCallerIs(st.Info().Worker())
 
 	if _, found := st.Sectors()[info.SectorNumber()]; found {
 		rt.AbortStateMsg("Sector number already exists in table")
@@ -199,8 +217,7 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 
 func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo) {
 	h, st := a.State(rt)
-	workerAddr := st.Info().GetWorker(rt.CurrEpoch())
-	rt.ValidateImmediateCallerIs(workerAddr)
+	rt.ValidateImmediateCallerIs(st.Info().Worker())
 
 	preCommitSector, found := st.Sectors()[info.SectorNumber()]
 	if !found || preCommitSector.State() != SectorState_PreCommit {
@@ -278,7 +295,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	)
 
 	// Return PreCommit deposit to worker upon successful ProveCommit.
-	rt.SendFunds(workerAddr, preCommitSector.PreCommitDeposit())
+	rt.SendFunds(st.Info().Worker(), preCommitSector.PreCommitDeposit())
 }
 
 /////////////////////////
@@ -289,7 +306,7 @@ func (a *StorageMinerActorCode_I) ExtendSectorExpiration(rt Runtime, sectorNumbe
 	storageWeightDescPrev := a._rtGetStorageWeightDescForSector(rt, sectorNumber)
 
 	h, st := a.State(rt)
-	rt.ValidateImmediateCallerIs(st.Info().GetWorker(rt.CurrEpoch()))
+	rt.ValidateImmediateCallerIs(st.Info().Worker())
 
 	sectorInfo, found := st.Sectors()[sectorNumber]
 	if !found {
@@ -321,7 +338,7 @@ func (a *StorageMinerActorCode_I) ExtendSectorExpiration(rt Runtime, sectorNumbe
 
 func (a *StorageMinerActorCode_I) TerminateSector(rt Runtime, sectorNumber sector.SectorNumber) {
 	h, st := a.State(rt)
-	rt.ValidateImmediateCallerIs(st.Info().GetWorker(rt.CurrEpoch()))
+	rt.ValidateImmediateCallerIs(st.Info().Worker())
 	Release(rt, h, st)
 
 	a._rtTerminateSector(rt, sectorNumber, autil.SectorTerminationType_UserTermination)
@@ -346,7 +363,7 @@ func (a *StorageMinerActorCode_I) DeclareTemporaryFaults(rt Runtime, sectorNumbe
 	effectiveEndEpoch := effectiveBeginEpoch + duration
 
 	h, st := a.State(rt)
-	rt.ValidateImmediateCallerIs(st.Info().GetWorker(rt.CurrEpoch()))
+	rt.ValidateImmediateCallerIs(st.Info().Worker())
 
 	for _, sectorNumber := range sectorNumbers {
 		sectorInfo, found := st.Sectors()[sectorNumber]
@@ -661,10 +678,8 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 		addr.Serialize_Address_Compact(rt.CurrReceiver()),
 	)
 
-	minerKey, err := info.GetWorker(rt.CurrEpoch()).GetKey()
-	if err != nil {
-		rt.AbortStateMsg("Couldn't get worker key to verify surprise PoSt.")
-	}
+	minerKey, err := info.Worker().GetKey()
+	Assert(err == nil)
 
 	if !postRand.Verify(postRandomnessInput, filcrypto.VRFPublicKey(minerKey)) {
 		rt.AbortStateMsg("Invalid Surprise PoSt. Invalid randomness.")

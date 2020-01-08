@@ -113,7 +113,7 @@ func MinerInfo_New(
 
 	ret := &MinerInfo_I{
 		Owner_:            ownerAddr,
-		_worker_:          workerAddr,
+		Worker_:           workerAddr,
 		PeerId_:           peerId,
 		SectorSize_:       sectorSize,
 		PendingKeyChange_: nil,
@@ -124,7 +124,16 @@ func MinerInfo_New(
 	return ret
 }
 
-func (st *StorageMinerActorState_I) VerifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool {
+func (mi *MinerInfo_I) _updateMinerPendingKeyChange(mkc MinerKeyChange) {
+	mi.PendingKeyChange_ = mkc
+}
+
+func (mi *MinerInfo_I) _updateMinerKey() {
+	mi.Worker_ = mi.PendingKeyChange().NewKey()
+	mi.PendingKeyChange_ = nil
+}
+
+func (st *StorageMinerActorState_I) _verifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool {
 	// TODO: Determine what should be the acceptance criterion for sector numbers proven in SurprisePoSt proofs.
 	TODO()
 	panic("")

@@ -90,16 +90,16 @@ type MinerInfo struct {
     // Account that owns this miner.
     // - Income and returned collateral are paid to this address.
     // - This address is also allowed to change the worker address for the miner.
-    Owner    addr.Address  // Must be an ID-address.
+    Owner   addr.Address  // Must be an ID-address.
 
     // Worker account for this miner.
     // This will be the key that is used to sign blocks created by this miner, and
     // sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
     // other day to day miner activities.
-    _worker  addr.Address
+    Worker  addr.Address  // Must be an ID-address.
 
     _updateMinerPendingKeyChange(mkc MinerKeyChange)
-    GetWorker(epoch block.ChainEpoch) addr.Address
+    _updateMinerKey()
 
     // Libp2p identity that should be used when connecting to this miner.
     PeerId                  libp2p.PeerID
