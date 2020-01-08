@@ -88,7 +88,7 @@ viewof filecoin = jsonToSliders({
   "filecoin_storage_capacity_eib": {value: 1, min: 0.5, max: 20, step: 0.5},
   "block_time": {value: 15, min: 15, max: 60, step: 1},
   "cost_amax": {value: 1, min: 1, max: 10, step: 1},
-  "hashing_amax": {value: 2, min: 1, max: 10, step: 1},
+  "hashing_amax": {value: 3, min: 1, max: 10, step: 1},
   "spacegap": {value: 0.2, min: 0.01, max: 0.2, step: 0.01},
   "proofs_block_fraction": {value: 0.3, min: 0.01, max: 1, step: 0.01},
   "epost_challenged_sectors_fraction": {value: 0.04, min: 0.01, max: 1, step: 0.01},
@@ -120,7 +120,8 @@ viewof rig = jsonToSliders({
 md`#### Benchmarks`
 
 bench = ({
-  "kdf_time": 0.0000000256 / 2, // 2 1.28e-8/2, //5.4e-7,
+  // "kdf_time": 0.0000000128 / 2, // 2 1.28e-8/2, //5.4e-7,
+  "kdf_latency_bandwidth_gb": 2.5,
   "merkle_tree_datahash_time": 0.3876e-6,
   "merkle_tree_hash_time": 13.652e-6,
   "column_leaf_hash_time": 171e-6/10,
@@ -132,17 +133,28 @@ md`### SNARKs`
 
 poseidon = ({
   "mtree_hash_name": "poseidon",
-  "merkle_tree_hash_constraints": 1376/8/2,
-  "ticket_constraints": 1376/8/2,
-  "column_leaf_hash_constraints": 1376/8/2,
+  "merkle_tree_hash_constraints": 1376/8,
+  "ticket_constraints": 1376/8,
+  "column_leaf_hash_constraints": 1376/8,
 })
 
 pedersen = ({
   "mtree_hash_name": "pedersen"
 })
 
+sha = ({
+  "mtree_hash_name": "sha",
+  "merkle_tree_hash_constraints": 25840,
+  "column_leaf_hash_constraints": 25840,
+
+  "merkle_tree_datahash_time": 0.3876e-6,
+  "merkle_tree_hash_time": 0.3876e-6,
+  "column_leaf_hash_time": 0.3876e-6,
+})
+
 
 constraints = ({
+  "commr_hash_constraints": 1376,
   "merkle_tree_hash_constraints": 1376,
   "ticket_constraints": 1376/2,
   "merkle_tree_datahash_constraints": 25840,
@@ -504,7 +516,7 @@ combos = {
   let query = [constants]
   query = extend_query(query, [stackedReplicas])
   query = extend_query(query, [stackedSDRParams])
-  query = extend_query(query, [poseidon, pedersen])
+  query = extend_query(query, [poseidon, pedersen, sha])
   query = extend_query(query, [
     {sdr_delta: 0.04, spacegap: 0.19, proof_name: "d=0.04"},
     {sdr_delta: 0.03, spacegap: 0.19, proof_name: "d=0.03"},
@@ -827,7 +839,7 @@ chooser = (data, field, base) => {
 
 md`### Utils`
 
-_f = (d) => typeof d == 'number' || !Number.isNaN(+d) ? d3.format('0.6~f')(d) : d
+_f = (d) => typeof d == 'number' || !Number.isNaN(+d) ? d3.format('0.10~f')(d) : d
 
 jsonToSliders = (obj, assigned) => {
   const inputs = Object.keys(obj).map(d => `

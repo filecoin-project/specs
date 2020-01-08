@@ -225,7 +225,7 @@ ProofOfSpacetime:
     describe(commr_column_size, "Number of nodes in the CommR leaf")
 
     // TODO: make sure VectorR/etc are handled correctly
-    inclusion_proof = merkle_tree_hash_constraints * commr_tree_depth 
+    inclusion_proof = commr_hash_constraints * commr_tree_depth 
     post_inclusion_proofs = inclusion_proof * post_challenges
     ticket_proofs = ticket_constraints * commr_column_size * post_challenges
     // TODO: handle different constructions
@@ -417,7 +417,12 @@ ProofOfReplication:
     describe(encoding_window_time_parallel, "Time to encode a window in parallel", secs)
     describe(encoding_window_time_asic, "Time to encode a window with an ASIC", secs)
     describe(encoding_window_time_parallel_asic, "Time to encode a window in parallel with ASICs", secs)
-    describe(kdf_time, "Time to compute a KDF", secs)
+    describe(kdf_time, "Average time to hash 32 bytes during KDF computation", secs)
+    describe(kdf_latency_bandwidth, "Amount of data hashed per second (B/s)")
+    describe(kdf_latency_bandwidth_gb, "Amount of data hashed per second (GB/s)")
+
+    kdf_latency_bandwidth = ((kdf_latency_bandwidth_gb * gb_to_gib) * b_in_gib)
+    kdf_time = (32/kdf_latency_bandwidth)
 
     // TODO: adding wrapper layer
     encoding_time = encoding_window_time * windows
@@ -520,6 +525,7 @@ ProofOfReplication:
     describe(porep_commc_inclusions_constraints, "Constraints for CommC inclusions (PoRep)")
     describe(porep_commc_leaves_constraints, "Constraints for CommC leaves (PoRep)")
     describe(porep_labeling_proofs_constraints, "Constraints for labeling proofs (PoRep)")
+    describe(commr_hash_constraints, "Constraints of the Merkle Tree hash in CommR")
 
     // D
     // Data layer committed with merkle tree
@@ -538,7 +544,7 @@ ProofOfReplication:
     window_labeling_proof = labeling_proofs * windows
 
     // Q and R
-    replica_inclusion = merkle_tree_hash_constraints * commr_tree_depth 
+    replica_inclusion = commr_hash_constraints * commr_tree_depth 
     replica_inclusions = replica_inclusion * porep_challenges
     window_replica_inclusions = replica_inclusions * windows
 
