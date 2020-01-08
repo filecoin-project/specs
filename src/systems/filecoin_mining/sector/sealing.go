@@ -23,7 +23,7 @@ func (x PieceInfo_I) Ref() *PieceInfo_I {
 
 func (svi *OnChainSealVerifyInfo_I) IsValidAtSealEpoch() bool {
 	// We can just hardcode logic for the range of epochs at which each circuit type is valid.
-	switch svi.Proof().CircuitType() {
+	switch svi.Proof().ProofInstance().CircuitType() {
 	}
 	panic("TODO")
 }

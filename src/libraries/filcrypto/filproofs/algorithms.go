@@ -36,6 +36,8 @@ const SURPRISE_POST_PARTITIONS = 1
 const POST_LEAF_CHALLENGE_COUNT = 66
 const POST_CHALLENGE_RANGE_SIZE = 1
 
+const GIB_32 = 32 * 1024 * 1024 * 1024
+
 func PoStCfg(pType sector.PoStType, sectorSize sector.SectorSize, partitions UInt) *sector.PoStCfg_I {
 	nodes := UInt(sectorSize / NODE_SIZE)
 
@@ -772,11 +774,17 @@ func (sdr *WinStackedDRG_I) CreateOfflineCircuitProof(proof PrivateOfflineProof,
 	panic("TODO")
 	var bytes []byte
 
+	var registeredProof sector.RegisteredProof
+
+	switch sdr.Cfg().SealCfg().SectorSize() {
+	case GIB_32:
+		registeredProof = sector.RegisteredProof_WinStackedDRG32GiBSeal
+	}
+
 	sealProof := sector.SealProof_I{
-		CircuitType_: &sector.ConcreteCircuit_I{
-			Name_: "SOMEHASHUNIQUETOTHISEXACTCIRCUIT1",
-		},
-		ProofBytes_: bytes,
+		// TODO: This must also depend on the sector size if more than one size is in the spec.
+		ProofInstance_: sector.PROOFS[UInt(registeredProof)],
+		ProofBytes_:    bytes,
 	}
 
 	return &sealProof

@@ -58,11 +58,3 @@ type PrivatePoStCandidateProof struct {
     Algorithm     ProofAlgorithm
     Externalized  Bytes
 }
-
-type PoStCircuitType enum {
-    // Every circuit type ever deployed needs to live here.
-    WinStackedSDRElectionPoSt
-    WinStackedSDRSurprisePoSt
-    StackedDRGElectionPoSt
-    StackedDRGSurprisePoSt
-}
