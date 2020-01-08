@@ -1281,6 +1281,7 @@ function report_comparison(result1, result2) {
 | name | val1 | val2 | type | desc |
 | ---- | ---- | ---- | ---- | ---- |
 ${Object.keys(result1).sort()
+  .filter(d => result2[d] && result1[d])
   .map(d => {
     let name = d
     if (result2[d] === result1[d]) name = `<font style="color: green;">**${d}**</font>`
