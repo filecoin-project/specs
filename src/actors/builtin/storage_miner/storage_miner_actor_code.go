@@ -11,6 +11,7 @@ import (
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
@@ -58,7 +59,7 @@ func (a *StorageMinerActorCode_I) OnSurprisePoStChallenge(rt Runtime) {
 		numConsecutiveFailures = st.PoStState().As_DetectedFault().NumConsecutiveFailures()
 	}
 
-	randomnessK := rt.Chain().GetPoStChallengeRand(rt.CurrEpoch())
+	randomnessK := rt.GetRandomness(rt.CurrEpoch() - node_base.SPC_LOOKBACK_POST)
 	challengedSectorsRandomness := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_SurprisePoStSampleSectors, randomnessK, rt.CurrReceiver())
 
 	challengedSectors := _surprisePoStSampleChallengedSectors(
@@ -625,7 +626,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 		Output_: onChainInfo.Randomness(),
 	}
 
-	randomnessK := rt.Chain().GetPoStChallengeRand(challengeEpoch)
+	randomnessK := rt.GetRandomness(challengeEpoch - node_base.SPC_LOOKBACK_POST)
 	postRandomnessInput := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_SurprisePoStChallengeSeed, randomnessK, rt.CurrReceiver())
 	if !postRand.Verify(postRandomnessInput, info.WorkerVRFKey()) {
 		rt.AbortStateMsg("Invalid Surprise PoSt. Invalid randomness.")

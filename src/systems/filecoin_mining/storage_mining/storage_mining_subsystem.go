@@ -55,7 +55,7 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 		GasLimit_:   msg.GasAmount_SentinelUnlimited(),
 	}
 
-	var workerKey filcrypto.SigKeyPair // sms._keyStore().Worker()
+	var workerKey filcrypto.SigKeyPair // sms.Node().Repository().KeyStore().Worker()
 	signedMessage, err := msg.Sign(unsignedCreationMessage, workerKey)
 	if err != nil {
 		return nil, err
@@ -126,7 +126,7 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.Stat
 	// Randomness for ElectionPoSt
 	randomnessK := sms._blockchain().BestChain().GetPoStChallengeRand(sms._blockchain().LatestEpoch())
 
-	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_ElectionPoStChallengeSeed, randomnessK, sms._keyStore().MinerAddress())
+	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_ElectionPoStChallengeSeed, randomnessK, sms.Node().Repository().KeyStore().MinerAddress())
 	postRandomness := sms.Node().Repository().KeyStore().WorkerKey().Impl().Generate(input).Output()
 
 	// TODO: add how sectors are actually stored in the SMS proving set
@@ -330,7 +330,7 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 	// get randomness for SurprisePoSt
 	challEpoch := sma.PoStState().As_Challenged().SurpriseChallengeEpoch()
 	randomnessK := sms._blockchain().BestChain().GetPoStChallengeRand(challEpoch)
-	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_SurprisePoStChallengeSeed, randomnessK, sms._keyStore().MinerAddress())
+	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_SurprisePoStChallengeSeed, randomnessK, sms.Node().Repository().KeyStore().MinerAddress())
 	postRandomness := sms.Node().Repository().KeyStore().WorkerKey().Impl().Generate(input).Output()
 
 	// TODO: add how sectors are actually stored in the SMS proving set
