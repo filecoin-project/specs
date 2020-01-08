@@ -196,6 +196,32 @@ func (st *StoragePowerActorState_I) _setPowerEntryInternal(minerAddr addr.Addres
 	st.Impl().TotalNetworkPower_ += (updatedMinerPower - prevMinerPower)
 }
 
+func (st *StoragePowerActorState_I) _getPledgeSlashForConsensusFault(currPledge actors.TokenAmount, faultType ConsensusFaultType) actors.TokenAmount {
+	// default is to slash all pledge collateral for all consensus fault
+	util.PARAM_FINISH()
+	TODO()
+	switch faultType {
+	case DoubleForkMiningFault:
+		return currPledge
+	case ParentGrindingFault:
+		return currPledge
+	case TimeOffsetMiningFault:
+		return currPledge
+	default:
+		panic("Unsupported case for pledge collateral consensus fault slashing")
+	}
+}
+
+func _getConsensusFaultSlasherReward(elapsedEpoch block.ChainEpoch, collateralToSlash actors.TokenAmount) actors.TokenAmount {
+	TODO()
+	// BigInt Operation
+	// var growthRate = node_base.SLASHER_SHARE_GROWTH_RATE_NUM / node_base.SLASHER_SHARE_GROWTH_RATE_DENOM
+	// var multiplier = growthRate^elapsedEpoch
+	// var slasherProportion = min(INITIAL_SLASHER_SHARE * multiplier, 1.0)
+	// return collateralToSlash * slasherProportion
+	return actors.TokenAmount(0)
+}
+
 func PowerTableHAMT_Empty() PowerTableHAMT {
 	IMPL_FINISH()
 	panic("")

@@ -4925,11 +4925,19 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">Indices_I</span><span class="p">)</span> <span class="nf">GetPledgeSlashForStorageFault</span><span class="p">(</span>
-	<span class="nx">affectedPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span>
-	<span class="nx">newActiveSectorWeight</span> <span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span><span class="p">,</span>
-	<span class="nx">newInactiveSectorWeight</span> <span class="nx">block</span><span class="p">.</span><span class="nx">SectorWeight</span><span class="p">,</span>
-	<span class="nx">currPledge</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span>
+<span class="c1">// TerminationFault
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">Indices_I</span><span class="p">)</span> <span class="nf">StoragePower_PledgeSlashForSectorTermination</span><span class="p">(</span>
+	<span class="nx">storageWeightDesc</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">SectorStorageWeightDesc</span><span class="p">,</span>
+	<span class="nx">terminationType</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">SectorTerminationType</span><span class="p">,</span>
+<span class="p">)</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// DetectedFault
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">Indices_I</span><span class="p">)</span> <span class="nf">StoragePower_PledgeSlashForSurprisePoStFailure</span><span class="p">(</span>
+	<span class="nx">minerClaimedPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span>
+	<span class="nx">numConsecutiveFailures</span> <span class="kt">int</span><span class="p">,</span>
 <span class="p">)</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>

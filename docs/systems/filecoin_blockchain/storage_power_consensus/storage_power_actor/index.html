@@ -4676,6 +4676,8 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">storageWeightDesc</span>  <span class="nx">SectorStorageWeightDesc</span>
     <span class="p">)</span>
     <span class="nf">_updatePowerEntriesFromClaimedPower</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
+    <span class="nf">_getCurrPledgeForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">currPledge</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
+    <span class="nf">_getPledgeSlashForConsensusFault</span><span class="p">(</span><span class="nx">currPledge</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">faultType</span> <span class="nx">ConsensusFaultType</span><span class="p">)</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4907,6 +4909,32 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">TotalNetworkPower_</span> <span class="o">+=</span> <span class="p">(</span><span class="nx">updatedMinerPower</span> <span class="o">-</span> <span class="nx">prevMinerPower</span><span class="p">)</span>
 <span class="p">}</span>
 
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getPledgeSlashForConsensusFault</span><span class="p">(</span><span class="nx">currPledge</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">faultType</span> <span class="nx">ConsensusFaultType</span><span class="p">)</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+    <span class="c1">// default is to slash all pledge collateral for all consensus fault
+</span><span class="c1"></span>    <span class="nx">util</span><span class="p">.</span><span class="nf">PARAM_FINISH</span><span class="p">()</span>
+    <span class="nf">TODO</span><span class="p">()</span>
+    <span class="k">switch</span> <span class="nx">faultType</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="nx">DoubleForkMiningFault</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nx">currPledge</span>
+    <span class="k">case</span> <span class="nx">ParentGrindingFault</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nx">currPledge</span>
+    <span class="k">case</span> <span class="nx">TimeOffsetMiningFault</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nx">currPledge</span>
+    <span class="k">default</span><span class="p">:</span>
+        <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Unsupported case for pledge collateral consensus fault slashing&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">_getConsensusFaultSlasherReward</span><span class="p">(</span><span class="nx">elapsedEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">collateralToSlash</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+    <span class="nf">TODO</span><span class="p">()</span>
+    <span class="c1">// BigInt Operation
+</span><span class="c1"></span>    <span class="c1">// var growthRate = node_base.SLASHER_SHARE_GROWTH_RATE_NUM / node_base.SLASHER_SHARE_GROWTH_RATE_DENOM
+</span><span class="c1"></span>    <span class="c1">// var multiplier = growthRate^elapsedEpoch
+</span><span class="c1"></span>    <span class="c1">// var slasherProportion = min(INITIAL_SLASHER_SHARE * multiplier, 1.0)
+</span><span class="c1"></span>    <span class="c1">// return collateralToSlash * slasherProportion
+</span><span class="c1"></span>    <span class="k">return</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="p">}</span>
+
 <span class="kd">func</span> <span class="nf">PowerTableHAMT_Empty</span><span class="p">()</span> <span class="nx">PowerTableHAMT</span> <span class="p">{</span>
     <span class="nf">IMPL_FINISH</span><span class="p">()</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
@@ -5135,7 +5163,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">ReportConsensusFault</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">slasherAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">faultType</span> <span class="nx">ConsensusFaultType</span><span class="p">,</span> <span class="nx">proof</span> <span class="p">[]</span><span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">ReportVerifiedConsensusFault</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">slasheeAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">faultEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">faultType</span> <span class="nx">ConsensusFaultType</span><span class="p">)</span> <span class="p">{</span>
     <span class="nf">TODO</span><span class="p">()</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
     <span class="c1">// TODO: The semantics here are quite delicate:
@@ -5149,14 +5177,51 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// Deferring to followup after these security/mechanism design questions have been resolved.
 </span><span class="c1"></span>    <span class="c1">// Previous notes:
 </span><span class="c1"></span>    <span class="c1">//
-</span><span class="c1"></span>    <span class="c1">// Use EC&#39;s IsValidConsensusFault method to validate the proof
-</span><span class="c1"></span>    <span class="c1">// slash block miner&#39;s pledge collateral
-</span><span class="c1"></span>    <span class="c1">// reward slasher
+</span><span class="c1"></span>    <span class="c1">// validation checks to be done in runtime before calling this method
+</span><span class="c1"></span>    <span class="c1">// - there should be exactly two block headers in proof
+</span><span class="c1"></span>    <span class="c1">// - both blocks are mined by the same miner
+</span><span class="c1"></span>    <span class="c1">// - first block is of the same or lower block height as the second block
 </span><span class="c1"></span>    <span class="c1">//
-</span><span class="c1"></span>    <span class="c1">// include ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors util.UVarint) as case
-</span><span class="c1"></span>    <span class="c1">// Quite a bit more straightforward since only called by the cron actor (ie publicly verified)
-</span><span class="c1"></span>    <span class="c1">// slash cheater pledge collateral accordingly based on num sectors faulted
-</span><span class="c1"></span><span class="p">}</span>
+</span><span class="c1"></span>    <span class="c1">// Use EC&#39;s IsValidConsensusFault method to validate the proof
+</span><span class="c1"></span>
+    <span class="c1">// this method assumes that ConsensusFault has been checked in runtime
+</span><span class="c1"></span>    <span class="nx">slasherAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+
+    <span class="nx">claimedPower</span><span class="p">,</span> <span class="nx">powerOk</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ClaimedPower</span><span class="p">()[</span><span class="nx">slasheeAddr</span><span class="p">]</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">powerOk</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa.ReportConsensusFault: miner to slash has been slashed&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">claimedPower</span> <span class="p">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="nx">currPledge</span><span class="p">,</span> <span class="nx">pledgeOk</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getCurrPledgeForMiner</span><span class="p">(</span><span class="nx">slasheeAddr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">pledgeOk</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa.ReportConsensusFault: miner to slash has no pledge&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">currPledge</span> <span class="p">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1">// elapsed epoch from the latter block which committed the fault
+</span><span class="c1"></span>    <span class="nx">elapsedEpoch</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="o">-</span> <span class="nx">faultEpoch</span>
+    <span class="k">if</span> <span class="nx">elapsedEpoch</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa.ReportConsensusFault: invalid block&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="nx">collateralToSlash</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPledgeSlashForConsensusFault</span><span class="p">(</span><span class="nx">currPledge</span><span class="p">,</span> <span class="nx">faultType</span><span class="p">)</span>
+    <span class="nx">slasherReward</span> <span class="o">:=</span> <span class="nf">_getConsensusFaultSlasherReward</span><span class="p">(</span><span class="nx">elapsedEpoch</span><span class="p">,</span> <span class="nx">collateralToSlash</span><span class="p">)</span>
+
+    <span class="c1">// request slasherReward to be deducted from EscrowTable
+</span><span class="c1"></span>    <span class="nx">amountToSlasher</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_slashPledgeCollateral</span><span class="p">(</span><span class="nx">slasherAddr</span><span class="p">,</span> <span class="nx">slasherReward</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">slasherReward</span> <span class="o">==</span> <span class="nx">amountToSlasher</span><span class="p">)</span>
+
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+
+    <span class="c1">// reward slasher
+</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">slasherAddr</span><span class="p">,</span> <span class="nx">amountToSlasher</span><span class="p">)</span>
+
+    <span class="c1">// burn the rest of pledge collateral
+</span><span class="c1"></span>    <span class="c1">// delete miner from power table
+</span><span class="c1"></span>    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtDeleteMinerActor</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">slasheeAddr</span><span class="p">)</span>
+<span class="p">}</span>
 
 <span class="c1">// Called by Cron.
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">OnEpochTickEnd</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>

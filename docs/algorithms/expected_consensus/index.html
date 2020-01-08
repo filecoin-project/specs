@@ -4737,16 +4737,22 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">ExpectedConsensus_I</span><span class="p">)</span> <span class="nf">IsValidConsensusFault</span><span class="p">(</span><span class="nx">faults</span> <span class="nx">spowact</span><span class="p">.</span><span class="nx">ConsensusFaultType</span><span class="p">,</span> <span class="nx">blocks</span> <span class="p">[]</span><span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="nx">util</span><span class="p">.</span><span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="k">return</span> <span class="kc">false</span>
+
+	<span class="c1">// validation checks before calling this method
+</span><span class="c1"></span>	<span class="c1">// - there should be exactly two block headers in proof
+</span><span class="c1"></span>	<span class="c1">// - both blocks are mined by the same miner
+</span><span class="c1"></span>	<span class="c1">// - block1 is of the same or lower block height as block2
+</span><span class="c1"></span>
 	<span class="c1">// 1. double-fork mining fault
-</span><span class="c1"></span>	<span class="c1">// return block1.Miner == block2.Miner &amp;&amp; block1.Epoch == block2.Epoch
+</span><span class="c1"></span>	<span class="c1">// return block1.Epoch == block2.Epoch
 </span><span class="c1"></span>
 	<span class="c1">// 2. time-offset mining fault
-</span><span class="c1"></span>	<span class="c1">// return block1.Miner == block2.Miner
+</span><span class="c1"></span>	<span class="c1">// return block1.Epoch != block2.Epoch
 </span><span class="c1"></span>	<span class="c1">// &amp;&amp; block1.Parents == block2.Parents
 </span><span class="c1"></span>
 	<span class="c1">// 3. parent grinding fault
-</span><span class="c1"></span>	<span class="c1">// return block1.Miner == block2.Miner
-</span><span class="c1"></span>	<span class="c1">// &amp;&amp; abs(block1.Epoch - block2.Epoch) == 1
+</span><span class="c1"></span>	<span class="c1">// return block2.Epoch - block1.Epoch == 1
+</span><span class="c1"></span>	<span class="c1">// &amp;&amp; !block2.Parents.include(block1)
 </span><span class="c1"></span><span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">ExpectedConsensus_I</span><span class="p">)</span> <span class="nf">IsWinningChallengeTicket</span><span class="p">(</span><span class="nx">challengeTicket</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">sectorPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">networkPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">numSectorsSampled</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">,</span> <span class="nx">numSectorsMiner</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
@@ -5165,8 +5171,7 @@ potentially long chain scans would be required to compute a given block&rsquo;s 
 </p></li>
 </ul>
 
-<p>Any node that detects any of the above events should submit both block headers to the <code>StoragePowerActor</code>&rsquo;s <code>ReportConsensusFault</code> method. The &ldquo;slasher&rdquo; will receive a portion (TODO: define how much) of the offending miner&rsquo;s <a href="../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor__pledge_collateral">Pledge Collateral</a> as a reward for notifying the network of the fault.
-(TODO: FIP of submitting commitments to block headers to prevent miners censoring slashers in order to gain rewards).</p>
+<p>Any node that detects any of the above events should submit both block headers to the <code>StoragePowerActor</code>&rsquo;s <code>ReportConsensusFault</code> method. The &ldquo;slasher&rdquo; will receive a portion of the offending miner&rsquo;s <a href="../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor__pledge_collateral">Pledge Collateral</a> as a reward for notifying the network of the fault. Consensus faults (except for <code>uncommitted power fault</code> below which falls under storage faults with impact on consensus) will tentatively result in all pledge collateral being slashed and the miner removed from the power table. Some portion of the pledge collateral is given to the slasher as a function of some initial share (<code>SLASHER_INITIAL_SHARE</code>) and growth rate (<code>SLASHER_SHARE_GROWTH_RATE</code>). Slasher&rsquo;s share of the slashed collateral increases as block elapses since the block when the fault is committed. Default growth rate results in slasher&rsquo;s share reaches 1 after 250 blocks. However, only the first slasher gets its share of the pledge collateral and the remaining pledge collateral will be burned. The longer a slasher waits, the higher the likelihood that the slashed collateral will be claimed by another slasher.</p>
 
 <p>It is important to note that there exists a third type of consensus fault directly reported by the <code>CronActor</code> on <code>StorageDeal</code> failures via the <code>ReportUncommittedPowerFault</code> method:</p>
 

@@ -134,11 +134,19 @@ func (inds *Indices_I) GetCurrBlockRewardRewardForMiner(
 	panic("")
 }
 
-func (inds *Indices_I) GetPledgeSlashForStorageFault(
-	affectedPower block.StoragePower,
-	newActiveSectorWeight block.SectorWeight,
-	newInactiveSectorWeight block.SectorWeight,
-	currPledge actors.TokenAmount,
+// TerminationFault
+func (inds *Indices_I) StoragePower_PledgeSlashForSectorTermination(
+	storageWeightDesc actor_util.SectorStorageWeightDesc,
+	terminationType actor_util.SectorTerminationType,
+) actors.TokenAmount {
+	PARAM_FINISH()
+	panic("")
+}
+
+// DetectedFault
+func (inds *Indices_I) StoragePower_PledgeSlashForSurprisePoStFailure(
+	minerClaimedPower block.StoragePower,
+	numConsecutiveFailures int,
 ) actors.TokenAmount {
 	PARAM_FINISH()
 	panic("")
