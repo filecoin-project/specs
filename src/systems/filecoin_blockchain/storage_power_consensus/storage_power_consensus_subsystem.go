@@ -52,10 +52,7 @@ func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTre
 	substateCID := actorState.State()
 
 	substate, ok := spc.node().Repository().StateStore().Get(ipld.CID(substateCID))
-	if !ok {
-		// TODO better err?
-		panic("SPC state not found")
-	}
+	util,Assert(ok)
 
 	// fix conversion to bytes
 	util.IMPL_FINISH(substate)

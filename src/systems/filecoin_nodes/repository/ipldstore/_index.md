@@ -14,7 +14,7 @@ The Filecoin network relies primarily on two distinct IPLD GraphStores:
 
 The `ChainStore` is downloaded by nodes from their peers during the bootstrapping phase of {{<sref chain_sync>}} and stored by the node thereafter. It is updated on every new block reception, or if the node syncs to a new best chain.
 
-The `TreeStore` is computed through execution of all block messages in a given `ChainStore` and stored by the node thereafter. It is updated with every new incoming block's processing by the {{<sref vm_interpreter>}} and referenced accordingly by new blocks produced atop it in the block {{<sref block "block header">}}'s `ParentState` field.
+The `StateStore` is computed through execution of all block messages in a given `ChainStore` and stored by the node thereafter. It is updated with every new incoming block's processing by the {{<sref vm_interpreter>}} and referenced accordingly by new blocks produced atop it in the block {{<sref block "block header">}}'s `ParentState` field.
 
 TODO:
 
