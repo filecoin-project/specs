@@ -41,7 +41,7 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 	pledgeAmt actors.TokenAmount,
 ) (addr.Address, error) {
 
-	sysActor, ok := state.GetActor(addr.SystemActorAddr)
+	ownerActor, ok := state.GetActor(ownerAddr)
 	Assert(ok)
 
 	unsignedCreationMessage := &msg.UnsignedMessage_I{
@@ -49,7 +49,7 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 		To_:         addr.StoragePowerActorAddr,
 		Method_:     ai.Method_StoragePowerActor_CreateMiner,
 		Params_:     serde.MustSerializeParams(ownerAddr, workerAddr, peerId),
-		CallSeqNum_: sysActor.CallSeqNum(),
+		CallSeqNum_: ownerActor.CallSeqNum(),
 		Value_:      pledgeAmt,
 		GasPrice_:   0,
 		GasLimit_:   msg.GasAmount_SentinelUnlimited(),
@@ -114,9 +114,10 @@ func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 		}
 	} else if sma.PoStState().Is_Challenged() {
 		sPoSt := sms._trySurprisePoSt(chainHead.StateTree(), sma)
-		// TODO: read from consts (in this case user set param)
+
 		var gasLimit msg.GasAmount
 		var gasPrice = actors.TokenAmount(0)
+		util.IMPL_FINISH("read from consts (in this case user set param)")
 		sms._submitSurprisePoStMessage(chainHead.StateTree(), sPoSt, gasPrice, gasLimit)
 	}
 }
@@ -380,14 +381,19 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 }
 
 func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.StateTree, sPoSt sector.OnChainPoStVerifyInfo, gasPrice actors.TokenAmount, gasLimit msg.GasAmount) error {
-	sysActor, ok := state.GetActor(addr.SystemActorAddr)
+
+	workerAddr, err := addr.Address_Make_Key(node_base.NETWORK, addr.KeyHash(sms._keyStore().WorkerKey().VRFPublicKey()))
+	if err != nil {
+		return err
+	}
+	worker, ok := state.GetActor(workerAddr)
 	Assert(ok)
 	unsignedCreationMessage := &msg.UnsignedMessage_I{
-		From_:       sms._keyStore().MinerAddress(),
+		From_:       workerAddr,
 		To_:         sms._keyStore().MinerAddress(),
 		Method_:     ai.Method_StorageMinerActor_SubmitSurprisePoStResponse,
 		Params_:     serde.MustSerializeParams(sPoSt),
-		CallSeqNum_: sysActor.CallSeqNum(),
+		CallSeqNum_: worker.CallSeqNum(),
 		Value_:      actors.TokenAmount(0),
 		GasPrice_:   gasPrice,
 		GasLimit_:   gasLimit,
