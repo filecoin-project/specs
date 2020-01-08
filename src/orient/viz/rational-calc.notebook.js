@@ -42,7 +42,7 @@ md`##### SDR params`
 viewof stackedSDRParams = jsonToSliders(
   {
     "sdr_delta": {value: 0.01, min: 0.01, max: 0.08, step: 0.01},
-    "time_amax": { value: 2, min: 1, max: 10, step: 1 },
+    "time_amax": { value: 1, min: 1, max: 10, step: 1 },
     "rig_malicious_cost_per_year": {value: 3, min: 0, max: 10000, step: 0.1},
     "hash_gb_per_second": {value: 5, min: 0, max: 10000, step: 1},
   },
@@ -186,7 +186,7 @@ viewof utility_cols = checkbox({
 
 table_constraints(
   solved_many,
-  ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name', 'utility'].concat(utility_cols),
+  ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name', 'utility'].concat(utility_cols),
   [],
   'utility'
 )
@@ -201,7 +201,7 @@ viewof proofs_per_block_kib_ruler = chooser(solved_many, 'proofs_per_block_kib',
 bar_chart(solved_many, 'proofs_per_block_kib', [
   'seals_size_per_block_kib',
   'posts_size_per_block_kib',
-], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
+], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name'], {
   filter: d => d < Math.pow(10, proofs_per_block_kib_ruler),
   yrule: Math.pow(10, proofs_per_block_kib_ruler)
 })
@@ -212,10 +212,27 @@ viewof encoding_time_ruler = chooser(solved_many, 'encoding_time', 3*60*60)
 
 bar_chart(solved_many, 'encoding_time', [
   'encoding_time',
-], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
+], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name'], {
   filter: d => d < Math.pow(10, encoding_time_ruler),
   yrule: Math.pow(10, encoding_time_ruler)
 })
+
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'window_size_mib',
+  'mtree_hash_name',
+  'porep_snark_constraints',
+  'porep_challenges',
+  'stacked_layers',
+  'porep_commc_leaves_constraints',
+  'porep_commc_inclusions_constraints',
+  'porep_commr_inclusions_constraints',
+  'porep_commd_inclusions_constraints',
+  'encoding_time'
+], [], 'encoding_time')
+
+
 
 md`### Retrieval`
 
@@ -224,7 +241,7 @@ viewof decoding_time_parallel_ruler = chooser(solved_many, 'decoding_time_parall
 bar_chart(solved_many, 'decoding_time_parallel', [
   'encoding_window_time_parallel',
   'window_read_time_parallel',
-], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
+], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name'], {
   filter: d => d < Math.pow(10, decoding_time_parallel_ruler),
   yrule: Math.pow(10, decoding_time_parallel_ruler)
 })
@@ -234,7 +251,7 @@ viewof decoding_time_ruler = chooser(solved_many, 'decoding_time', 16)
 bar_chart(solved_many, 'decoding_time', [
   'encoding_window_time',
   'window_read_time',
-], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
+], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name'], {
   filter: d => d < Math.pow(10, decoding_time_ruler),
   yrule: Math.pow(10, decoding_time_ruler)
 })
@@ -257,7 +274,7 @@ bar_chart(solved_many, 'porep_time_parallel', [
   'porep_snark_time_parallel',
   'porep_commit_time_parallel',
   'encoding_time_parallel'
-], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
+], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name'], {
   filter: d => d < Math.pow(10, porep_time_parallel_ruler),
   yrule: Math.pow(10, porep_time_parallel_ruler)
 })
@@ -270,7 +287,7 @@ bar_chart(solved_many, 'porep_cost', [
   'porep_commit_cost',
   'porep_encoding_cost',
   'porep_snark_cost'
-], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
+], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name'], {
   filter: d => d < Math.pow(10, porep_cost_ruler),
   yrule: Math.pow(10, porep_cost_ruler)
 })
@@ -285,7 +302,7 @@ bar_chart(solved_many, 'porep_snark_constraints', [
   'porep_commr_inclusions_constraints',
   'porep_commd_inclusions_constraints',
   'porep_labeling_proofs_constraints'
-], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
+], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name'], {
   filter: d => d < Math.pow(10, porep_snark_constraints_ruler),
   yrule: Math.pow(10, porep_snark_constraints_ruler)
 })
@@ -311,12 +328,12 @@ table_constraints(solved_many, [
 //   'commr_time',
 //   'commq_time',
 //   'commc_time'
-// ], ['proof_name', 'graph_name', 'window_size_mib'])
+// ], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib'])
 
 // bar_chart(solved_many, 'commc_time', [
 //   'commc_tree_time',
 //   'commc_leaves_time',
-// ], ['proof_name', 'graph_name', 'window_size_mib'])
+// ], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib'])
 
 md`### EPoSt`
 
@@ -329,7 +346,7 @@ bar_chart(solved_many, 'epost_time_parallel', [
   'post_ticket_gen',
   'epost_inclusions_time_parallel',
   'post_snark_time_parallel'
-], ['proof_name', 'graph_name', 'window_size_mib', 'mtree_hash_name'], {
+], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'mtree_hash_name'], {
   filter: d => d < Math.pow(10, epost_time_parallel_ruler),
   yrule: Math.pow(10, epost_time_parallel_ruler)
 })
@@ -493,6 +510,11 @@ combos = {
     {sdr_delta: 0.03, spacegap: 0.19, proof_name: "d=0.03"},
     {sdr_delta: 0.02, spacegap: 0.19, proof_name: "d=0.02"},
     {sdr_delta: 0.01, spacegap: 0.19, proof_name: "d=0.01"},
+  ])
+  query = extend_query(query, [
+    {drg_parents: 6, expander_parents: 8},
+    {drg_parents: 6, expander_parents: 20},
+    {drg_parents: 6, expander_parents: 46},
   ])
   return query
 }
@@ -668,6 +690,17 @@ bar_chart = (raw, title, variables, group_by, opts) => {
         }))
       })
       .flat()
+      .reduce((acc, curr) => {
+        let exists = acc.count[`${curr.construction}_${curr.type}`]
+        if (exists) {
+          return acc
+        }
+        acc.count[`${curr.construction}_${curr.type}`] = 1
+        acc.res.push(curr)
+        return acc
+      }, {res: [], count: {}})
+      .res
+
   let discarded_data = []
   let organized_data = []
 
@@ -686,7 +719,7 @@ bar_chart = (raw, title, variables, group_by, opts) => {
           "data": { values: organized_data },
           "encoding": {
             "x": {"aggregate": "sum", "field": "value", "type": "quantitative"},
-            "y": {"field": "construction", "type": "nominal"},
+            "y": {"field": "construction", "type": "nominal", "sort": {"op": "sum", "field": "title"}},
             "color": {"field": "type", "type": "nominal"}
           }
         }]
@@ -702,7 +735,7 @@ bar_chart = (raw, title, variables, group_by, opts) => {
       "data": { values: discarded_data },
       "encoding": {
         "x": {"aggregate": "sum", "field": "value", "type": "quantitative"},
-        "y": {"field": "construction", "type": "nominal"},
+        "y": {"field": "construction", "type": "nominal", "sort": {"op": "sum", "field": "title"}},
         "color": {"field": "type", "type": "nominal"}
       }
     })
