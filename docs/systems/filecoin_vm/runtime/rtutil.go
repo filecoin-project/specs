@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	actors "github.com/filecoin-project/specs/actors"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
@@ -25,7 +26,9 @@ func NetworkName() string {
 // ActorCode is the interface that all actor code types should satisfy.
 // It is merely a method dispatch interface.
 type ActorCode interface {
-	InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput
+	//InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput
+	// IMPL_TODO: method dispatch mechanism is deferred to implementations.
+	// When the executable actor spec is complete we can re-instantiate something here.
 }
 
 type CallerPattern struct {
@@ -57,7 +60,7 @@ func CallerPattern_MakeAcceptAny() CallerPattern {
 	}
 }
 
-func InvocInput_Make(to addr.Address, method actor.MethodNum, params actor.MethodParams, value actor.TokenAmount) InvocInput {
+func InvocInput_Make(to addr.Address, method actors.MethodNum, params actors.MethodParams, value actors.TokenAmount) InvocInput {
 	return &InvocInput_I{
 		To_:     to,
 		Method_: method,
@@ -112,10 +115,10 @@ func RT_Address_Is_StorageMiner(rt Runtime, minerAddr addr.Address) bool {
 
 func RT_GetMinerAccountsAssert(rt Runtime, minerAddr addr.Address) (ownerAddr addr.Address, workerAddr addr.Address) {
 	ownerAddr = addr.Deserialize_Address_Compact_Assert(
-		rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetOwnerAddr, []util.Serialization{}))
+		rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetOwnerAddr, nil))
 
 	workerAddr = addr.Deserialize_Address_Compact_Assert(
-		rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetWorkerAddr, []util.Serialization{}))
+		rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetWorkerAddr, nil))
 
 	return
 }
@@ -136,7 +139,7 @@ func RT_MinerEntry_ValidateCaller_DetermineFundsLocation(rt Runtime, entryAddr a
 	}
 }
 
-func RT_ConfirmFundsReceiptOrAbort_RefundRemainder(rt Runtime, fundsRequired actor.TokenAmount) {
+func RT_ConfirmFundsReceiptOrAbort_RefundRemainder(rt Runtime, fundsRequired actors.TokenAmount) {
 	if rt.ValueReceived() < fundsRequired {
 		rt.AbortFundsMsg("Insufficient funds received accompanying message")
 	}

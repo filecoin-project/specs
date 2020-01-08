@@ -1,6 +1,7 @@
 package state_tree
 
 import (
+	"github.com/filecoin-project/specs/actors"
 	"github.com/filecoin-project/specs/libraries/ipld"
 	"github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
@@ -42,7 +43,7 @@ func (st *StateTree_I) WithActorSystemState(a addr.Address, actorState actor.Act
 	panic("")
 }
 
-func (st *StateTree_I) WithFundsTransfer(from addr.Address, to addr.Address, amount actor.TokenAmount) (StateTree, error) {
+func (st *StateTree_I) WithFundsTransfer(from addr.Address, to addr.Address, amount actors.TokenAmount) (StateTree, error) {
 	IMPL_FINISH()
 	panic("")
 }
@@ -73,12 +74,12 @@ func treeIncrementActorSeqNo(inTree StateTree, a actor.Actor) (outTree StateTree
 	panic("todo")
 }
 
-func treeDeductFunds(inTree StateTree, a actor.Actor, amt actor.TokenAmount) (outTree StateTree) {
+func treeDeductFunds(inTree StateTree, a actor.Actor, amt actors.TokenAmount) (outTree StateTree) {
 	// TODO: turn this into a single transfer call.
 	panic("todo")
 }
 
-func treeDepositFunds(inTree StateTree, a actor.Actor, amt actor.TokenAmount) (outTree StateTree) {
+func treeDepositFunds(inTree StateTree, a actor.Actor, amt actors.TokenAmount) (outTree StateTree) {
 	// TODO: turn this into a single transfer call.
 	panic("todo")
 }

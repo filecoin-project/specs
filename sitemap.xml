@@ -12,26 +12,6 @@
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_token/multisig/multisig_actor_old/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/docs/systems/filecoin_token/payment_channels/payment_channel_actor_old/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/docs/systems/filecoin_vm/sysactors/account_actor_old/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/docs/systems/filecoin_vm/sysactors/init_actor_old/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/docs/systems/filecoin_blockchain/</loc>
   </url>
   
@@ -276,10 +256,6 @@
   </url>
   
   <url>
-    <loc>/docs/libraries/ipld/graphstore/</loc>
-  </url>
-  
-  <url>
     <loc>/docs/libraries/ipfs/graphsync/</loc>
   </url>
   
@@ -316,11 +292,7 @@
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_nodes/key_store/</loc>
-  </url>
-  
-  <url>
-    <loc>/docs/systems/filecoin_nodes/repository/key/</loc>
+    <loc>/docs/systems/filecoin_nodes/repository/key_store/</loc>
   </url>
   
   <url>
@@ -637,10 +609,6 @@
   
   <url>
     <loc>/docs/libraries/ipfs/unixfs/</loc>
-  </url>
-  
-  <url>
-    <loc>/docs/systems/filecoin_nodes/repository/usage/</loc>
   </url>
   
   <url>

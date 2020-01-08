@@ -971,32 +971,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+<a href="../../../../../#systems__filecoin_nodes__repository__key_store" class="menu-item depth-4">
     
     
-        KeyStore &amp; user keys
+        Key Store
     
 </a>
 
 
 
 <ul class="menu-item-section depth-4">
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
 
 </ul>
 
@@ -1024,37 +1008,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         IpldStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
-    
-    
-        Usage in Systems
     
 </a>
 
@@ -1123,37 +1076,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Clock
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
-    
-    
-        Key Store
     
 </a>
 
@@ -3572,39 +3494,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#libraries__ipld__graphstore" class="menu-item depth-3">
-    
-    
-        GraphStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4759,88 +4648,6 @@ but specifying a method ID of &lsquo;0&rsquo; ensures that no other side effects
 
 <p>Message execution currently relies entirely on &lsquo;built-in&rsquo; code, with a common external interface. The method and actor to call it on are specified in the <code>Method</code> and <code>To</code> fields of a message, respectively. Method parameters are encoded and put into the <code>Params</code> field of a message. The encoding is technically actor dependent, but for all built-in Filecoin actors it is the dag-cbor ipld encoding of the parameters struct for each method defined in <a href="../actors">the actors doc</a>.</p>
 
-<p>These functions are given, as input, an <code>ExecutionContext</code> containing useful information for their execution.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">VMContext</span> <span class="kd">interface</span> <span class="p">{</span>
-    <span class="c1">// Message is the message that kicked off the current invocation
-</span><span class="c1"></span>    <span class="nf">Message</span><span class="p">()</span> <span class="nx">Message</span>
-
-    <span class="c1">// Storage provides access to the VM storage layer
-</span><span class="c1"></span>    <span class="nf">Storage</span><span class="p">()</span> <span class="nx">Storage</span>
-
-    <span class="c1">// Origin is the address of the account that initiated the top level invocation
-</span><span class="c1"></span>    <span class="nf">Origin</span><span class="p">()</span> <span class="nx">Address</span>
-
-    <span class="c1">// Send allows the current execution context to invoke methods on other actors in the system
-</span><span class="c1"></span>    <span class="nf">Send</span><span class="p">(</span><span class="nx">to</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">method</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">AttoFIL</span><span class="p">,</span> <span class="nx">params</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{})</span> <span class="p">([][]</span><span class="kt">byte</span><span class="p">,</span> <span class="kt">uint8</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
-
-    <span class="c1">// BlockHeight returns the height of the block this message was added to the chain in
-</span><span class="c1"></span>    <span class="nf">BlockHeight</span><span class="p">()</span> <span class="nx">BlockHeight</span>
-<span class="p">}</span></code></pre></div>
-<p>If the execution completes successfully, changes to the state tree are saved. Otherwise, the message is marked as failed, and any state changes are reverted.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">st</span> <span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msg</span> <span class="nx">Message</span><span class="p">)</span> <span class="nx">MessageReceipt</span> <span class="p">{</span>
-    <span class="nx">st</span><span class="p">.</span><span class="nf">Snapshot</span><span class="p">()</span>
-    <span class="nx">fromActor</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
-        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;no such from actor&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="nx">totalCost</span> <span class="o">:=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Value</span> <span class="o">+</span> <span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">GasLimit</span> <span class="o">*</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasPrice</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nx">Balance</span> <span class="p">&lt;</span> <span class="nx">totalCost</span> <span class="p">{</span>
-        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not enough funds&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">Nonce</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nx">Nonce</span><span class="o">+</span><span class="mi">1</span> <span class="p">{</span>
-        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;invalid nonce&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="nx">toActor</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">To</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
-        <span class="nx">toActor</span> <span class="p">=</span> <span class="nf">TryCreateAccountActor</span><span class="p">(</span><span class="nx">st</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">To</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="nx">st</span><span class="p">.</span><span class="nf">DeductFunds</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">,</span> <span class="nx">totalCost</span><span class="p">)</span>
-    <span class="nx">st</span><span class="p">.</span><span class="nf">DepositFunds</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">To</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Value</span><span class="p">)</span>
-
-    <span class="nx">vmctx</span> <span class="o">:=</span> <span class="nf">makeVMContext</span><span class="p">(</span><span class="nx">st</span><span class="p">,</span> <span class="nx">msg</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Method</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
-        <span class="nx">ret</span><span class="p">,</span> <span class="nx">errcode</span> <span class="o">:=</span> <span class="nx">toActor</span><span class="p">.</span><span class="nf">Invoke</span><span class="p">(</span><span class="nx">vmctx</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Method</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Params</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nx">errcode</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
-            <span class="c1">// revert all state changes since snapshot
-</span><span class="c1"></span>            <span class="nx">st</span><span class="p">.</span><span class="nf">Revert</span><span class="p">()</span>
-            <span class="nx">st</span><span class="p">.</span><span class="nf">DeductFunds</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">,</span> <span class="nx">vmctx</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">()</span><span class="o">*</span><span class="nx">msg</span><span class="p">.</span><span class="nx">GasPrice</span><span class="p">)</span>
-        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-            <span class="c1">// refund unused gas
-</span><span class="c1"></span>            <span class="nx">st</span><span class="p">.</span><span class="nf">DepositFunds</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">,</span> <span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">GasLimit</span><span class="o">-</span><span class="nx">vmctx</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">())</span><span class="o">*</span><span class="nx">msg</span><span class="p">.</span><span class="nx">GasPrice</span><span class="p">)</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-
-    <span class="c1">// reward miner gas fees
-</span><span class="c1"></span>    <span class="nx">st</span><span class="p">.</span><span class="nf">DepositFunds</span><span class="p">(</span><span class="nx">BlockMiner</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasPrice</span><span class="o">*</span><span class="nx">vmctx</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">())</span>
-
-    <span class="k">return</span> <span class="nx">MessageReceipt</span><span class="p">{</span>
-        <span class="nx">ExitCode</span><span class="p">:</span> <span class="nx">errcode</span><span class="p">,</span>
-        <span class="nx">Return</span><span class="p">:</span>   <span class="nx">ret</span><span class="p">,</span>
-        <span class="nx">GasUsed</span><span class="p">:</span>  <span class="nx">vmctx</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">(),</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">TryCreateAccountActor</span><span class="p">(</span><span class="nx">st</span> <span class="nx">StateTree</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">Address</span><span class="p">)</span> <span class="nx">Actor</span> <span class="p">{</span>
-    <span class="k">switch</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Type</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">case</span> <span class="nx">BLS</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nf">NewBLSAccountActor</span><span class="p">(</span><span class="nx">addr</span><span class="p">)</span>
-    <span class="k">case</span> <span class="nx">Secp256k1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nf">NewSecp256k1AccountActor</span><span class="p">(</span><span class="nx">addr</span><span class="p">)</span>
-    <span class="k">case</span> <span class="nx">ID</span><span class="p">:</span>
-        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;no actor with given ID&#34;</span><span class="p">)</span>
-    <span class="k">case</span> <span class="nx">Actor</span><span class="p">:</span>
-        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;no such actor&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span></code></pre></div>
-<h4 id="receipts">Receipts</h4>
-
-<p>Every message execution generates a <a href="../data-structures#message-receipt">receipt</a>. These receipts contain the encoded return value of the method invocation, and an exit code.</p>
-
 <h4 id="storage">Storage</h4>
 
 <p>Actors are given acess to a <code>Storage</code> interface to fulfil their need for persistent storage. The <code>Storage</code> interface describes a content addressed block storage system (<code>Put</code> and <code>Get</code>) and a pointer into it (<code>Head</code> and <code>Commit</code>) that points to the actor&rsquo;s current state.</p>
@@ -4870,169 +4677,6 @@ as the system has resolvers for them).</p>
 <p>The current state of a given actor can be accessed first by calling <code>Head</code> to retrieve the CID of the root of the actors state, then by using <code>Get</code> to retrieve the actual object being referenced.</p>
 
 <p>To store data, <code>Put</code> is used. Any number of objects may be <code>Put</code>, but only the object whose CID is committed, or objects that are linked to in some way by the committed object will be kept. All other objects are dropped after the method invocation returns. Objects stored via <code>Put</code> are first marshaled to CBOR-IPLD, and then stored, the returned CID is a 32 byte sha2-256 CBOR-IPLD content identifier.</p>
-
-<h3 id="burning-funds">Burning Funds</h3>
-
-<p>In the case that an actor needs to provably burn funds, the funds should be transferred to the &lsquo;Burnt Funds Actor&rsquo; (ID 99).</p>
-
-<h2 id="filecoin-state-machine-actors">Filecoin State Machine Actors</h2>
-
-<p>Any implementations of the Filecoin actors must be exactly byte for byte compatible with the go-filecoin actor implementations. The pseudocode below tries to capture the important logic, but capturing all the detail would require embedding exactly the code from go-filecoin, so for now, its simply informative pseudocode. The algorithms below are correct, and all implementations much match it (including go-filecoin), but details omitted from here should be looked for in the go-filecoin code.</p>
-
-<p>This spec describes a set of actors that operate within the <a href="../state-machine">Filecoin State Machine</a>. All types are defined in <a href="../data-structures#basic-type-encodings">the basic type encoding spec</a>.</p>
-
-<h2 id="actor-state">Actor State</h2>
-
-<p>Each actor type defines their own structure for storing their state. We
-represent each with an IPLD schema at the beginning of each actor section in
-this document.</p>
-
-<h2 id="system-actors">System Actors</h2>
-
-<p>Some state machine actors are &lsquo;system&rsquo; actors that get instantiated in the genesis block, and have their IDs allocated at that point.</p>
-
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>Actor</th>
-<th>Name</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>0</td>
-<td>InitActor</td>
-<td>Network Init</td>
-</tr>
-
-<tr>
-<td>1</td>
-<td>AccountActor</td>
-<td>Network Treasury</td>
-</tr>
-
-<tr>
-<td>2</td>
-<td>StorageMarketActor</td>
-<td>Filecoin Storage Market</td>
-</tr>
-
-<tr>
-<td>99</td>
-<td>AccountActor</td>
-<td>Burnt Funds</td>
-</tr>
-</tbody>
-</table>
-
-<h2 id="helper-methods">Helper Methods</h2>
-
-<p>The various helper methods called above are defined here.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">isSigner</span><span class="p">(</span><span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="k">for</span> <span class="nx">signer</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Signers</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="nx">a</span> <span class="o">==</span> <span class="nx">signer</span> <span class="p">{</span>
-            <span class="k">return</span> <span class="kc">true</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="kc">false</span>
-<span class="p">}</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">getTransaction</span><span class="p">(</span><span class="nx">txid</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">Transaction</span> <span class="p">{</span>
-    <span class="nx">tx</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Transactions</span><span class="p">[</span><span class="nx">txid</span><span class="p">]</span>
-    <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
-        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;no such transaction&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="nx">tx</span>
-<span class="p">}</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">AggregateBitfields</span><span class="p">(</span><span class="nx">faults</span> <span class="p">[]</span><span class="nx">FaultSet</span><span class="p">)</span> <span class="nx">Bitfield</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">out</span> <span class="nx">Bitfield</span>
-    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">f</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">faults</span> <span class="p">{</span>
-        <span class="nx">out</span> <span class="p">=</span> <span class="nx">out</span><span class="p">.</span><span class="nf">Union</span><span class="p">(</span><span class="nx">f</span><span class="p">.</span><span class="nx">bitField</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="nx">out</span>
-<span class="p">}</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">BurnFunds</span><span class="p">(</span><span class="nx">amt</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nf">TransferFunds</span><span class="p">(</span><span class="nx">BurntFundsAddress</span><span class="p">,</span> <span class="nx">amt</span><span class="p">)</span>
-<span class="p">}</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">canSpend</span><span class="p">(</span><span class="nx">amt</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="nx">self</span><span class="p">.</span><span class="nx">unlockDuration</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="kc">true</span>
-    <span class="p">}</span>
-    <span class="kd">var</span> <span class="nx">MinAllowableBalance</span> <span class="p">=</span> <span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">initialBalance</span> <span class="o">/</span> <span class="nx">self</span><span class="p">.</span><span class="nx">unlockDuration</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="nx">VM</span><span class="p">.</span><span class="nf">CurrentBlockHeight</span><span class="p">()</span> <span class="o">-</span> <span class="nx">self</span><span class="p">.</span><span class="nx">startingBlock</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nx">MinAllowableBalance</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="nx">vm</span><span class="p">.</span><span class="nf">MyBalance</span><span class="p">()</span> <span class="o">-</span> <span class="nx">amt</span><span class="p">)</span>
-<span class="p">}</span></code></pre></div>
-<h1 id="faults">Faults</h1>
-
-<p>A fault is what happens when partcipants in the protocol are behaving incorrectly and that behavior needs to be punished. There are a number of possible faults in the Filecoin protocol, their details are all recorded below.</p>
-
-<h2 id="fault-list">Fault List</h2>
-
-<h3 id="consensus-faults">Consensus Faults</h3>
-
-<ul>
-<li><strong>Duplicate Block Submission Slashing:</strong>
-
-<ul>
-<li><strong>Condition:</strong> If any miner posts two blocks satisfying the slashing conditions defined in <a href="../expected-consensus">Expected Consensus</a>.</li>
-<li><strong>Reporting:</strong> Anyone may call <code>SlashConsensusFault</code> and pass in the two offending block headers.</li>
-<li><strong>Check:</strong> The chain checks that both blocks are valid, correctly signed by the same miner, and satisfy the consensus slashing conditions.</li>
-<li><strong>Penalization:</strong> All of the miner&rsquo;s pledge collateral and all of their power is irrevocably slashed. This miner can never again produce blocks, even if they attempt to repost their collateral.</li>
-</ul></li>
-</ul>
-
-<h3 id="market-faults">Market Faults</h3>
-
-<ul>
-<li><strong>Late submission penalty:</strong>
-
-<ul>
-<li><strong>Condition</strong>: If the miner posts their PoSt after the proving period ends, but before the generation attack threshold.</li>
-<li><strong>Reporting:</strong> The miner submits their PoSt as usual, but includes the late submission fee.</li>
-<li><strong>Check:</strong> The chain checks first that the submission is within the <code>generation attack threshold</code>, and then checks that the fee provided matches the required fee for how many blocks late the submission is.</li>
-<li><strong>Penalization:</strong> The miner is penalized proportionally to the delay. Penalizations are enforced by a standard PoSt submission.</li>
-<li><em>Economic penalization</em>: To determine the penalty amount, <code>ComputeLateFee(minerPower, numLate)</code> is called.</li>
-<li><em>Power penalization</em>: The miners&rsquo; power is not reduced. Note that the current view of the power table is computed with the lookback parameter.
-
-<ul>
-<li><em>Why are we accounting the power table with a lookback parameter ?</em> If we do not use the lookback parameter then, we need to penalize late miners for the duration that they are late. This is tricky to do efficiently. For xample, if miners A, B and C each have <sup>1</sup>&frasl;<sub>3</sub> of the networks power, and C is late in submitting their proofs, then for that duration, A and B should each have effectively half of the networks power (and a 50% chance each of winning the block).</li>
-</ul></li>
-<li>TODO: write on the spec exact parameters for PoSt Deadline and Gen Attack threshold</li>
-</ul></li>
-<li><strong>Unreported storage fault slashing:</strong>
-
-<ul>
-<li><strong>Condition:</strong> If the miner does not submit their PoSt by the <code>generation attack threshold</code>.</li>
-<li><strong>Reporting:</strong> The miner can be slashed by anyone else in the network who calls <code>SlashStorageFaults</code>. We expect miners to report these faults.</li>
-<li>Future design note: moving forward, we should either compensate the caller, or require this</li>
-<li>Note: we could <em>require</em> the method be called, as part of the consensus rules (this gets complicated though). In this case, there is a DoS attack where if I make a large number of miners each with a single sector, and fail them all at the same time, the next block miner will be forced to do a very large amount of work. This would either need an extended &lsquo;gas limit&rsquo;, or some other method to avoid too long validation times.</li>
-<li><strong>Check:</strong> The chain checks that the miners last PoSt submission was before the start of their current proving period, and that the current block is after the generation attack threshold for their current proving period.</li>
-<li><strong>Penalization:</strong> Penalizations are enforced by <code>SlashStorageFault</code> on the <code>storage market</code> actor.</li>
-<li><em>Economic Penalization</em>: Miner loses all collateral.</li>
-<li><em>Power Penalization</em>: Miner loses all power.</li>
-<li>Note: If a miner is in this state, where they have failed to submit a PoST, any block they attempt to mine will be invalid, even if the election function selects them. (the election function should probably be made to never select them)</li>
-<li>Future design note: There is a way to tolerate Internet connection faults. A miner runs an Emergency PoSt which does not take challenges from the chain, if the miner gets reconnected before the VDF attack time (based on Amax), then, they can submit the Emergency PoSt and get pay a late penalization fee.</li>
-</ul></li>
-<li><strong>Reported storage fault penalty:</strong>
-
-<ul>
-<li><strong>Condition:</strong> The miner submits their PoSt with a non-empty set of &lsquo;missing sectors&rsquo;.</li>
-<li><strong>Reporting:</strong> The miner can specify some sectors that they failed to prove during the proving period.</li>
-<li>Note: These faults are output by the <code>ProveStorage</code> routine, and are posted on-chain when posting the proof. This occurs when the miner (for example) has a disk failure, or other local data corruption.</li>
-<li><strong>Check:</strong> The chain checks that the proof verifies with the missing sectors.</li>
-<li><strong>Penalization:</strong> The miner is penalized for collateral and power proportional to the number of missing sectors. The sectors are also removed from the miners proving set.</li>
-<li>TODO: should the collateral lost here be proportional to the remaining time?</li>
-<li>TODO(nicola): check if the time between posting two proofs allows for a generation attack if it does not then we might reconsider the sector not being lost</li>
-<li>Note: if a sector is missed here, and they are recovered after the fact, the miner could simple &rsquo;re-commit&rsquo; the sector. They still have to pay the collateral, but the data can be quickly re-introduced into the system to avoid clients calling them out for breach of contract (this would only work because the sector commD/commR is the same)</li>
-<li>Note: In the case where a miner is temporarily unable to prove some of their data, they can simply wait for the temporary unavailability to recover, and then continue proving, submitting the proofs a bit late if necessary (paying appropriate fees, as described above).</li>
-</ul></li>
-<li><strong>Breach of contract dispute:</strong>
-
-<ul>
-<li><strong>Condition:</strong> A client who has stored data with a miner, and the miner removes the sector containing that data before the end of the agreed upon time period.</li>
-<li><strong>Reporting:</strong> The client invokes <code>ArbitrateDeal</code> on the offending miner actor with a signed deal from that miner for the storage in question. Note: the reporting must happen within one proving period of the miner removing the storage erroneously.</li>
-<li><strong>Check:</strong> The chain checks that the deal was correctly signed by the miner in question, that the deal has not yet expired, and that the sector referenced by the deal is no longer in the miners proving set.</li>
-<li><strong>Penalization:</strong> The miner is penalized an amount proportional to the incorrectly removed sector. This penalty is taken from their pledged collateral .</li>
-<li>Note: This implies that miners cannot re-seal data into different sectors. We could come up with a protocol where the client gives the miner explicit consent to re-seal, but that is more complicated and can be done later.</li>
-</ul></li>
-</ul>
 
 <h1 id="pledge-collateral">Pledge Collateral</h1>
 
@@ -5103,22 +4747,8 @@ In such cases, the miner may continue to submit PoSts and mine blocks. When they
 <li><a href="#actor-creation">Actor Creation</a></li>
 <li><a href="#execution-calling-a-method-on-an-actor">Execution (Calling a method on an Actor)</a>
 <ul>
-<li><a href="#receipts">Receipts</a></li>
 <li><a href="#storage">Storage</a></li>
 </ul></li>
-<li><a href="#burning-funds">Burning Funds</a></li>
-</ul></li>
-<li><a href="#filecoin-state-machine-actors">Filecoin State Machine Actors</a></li>
-<li><a href="#actor-state">Actor State</a></li>
-<li><a href="#system-actors">System Actors</a></li>
-<li><a href="#helper-methods">Helper Methods</a></li>
-</ul></li>
-<li><a href="#faults">Faults</a>
-<ul>
-<li><a href="#fault-list">Fault List</a>
-<ul>
-<li><a href="#consensus-faults">Consensus Faults</a></li>
-<li><a href="#market-faults">Market Faults</a></li>
 </ul></li>
 </ul></li>
 <li><a href="#pledge-collateral">Pledge Collateral</a>

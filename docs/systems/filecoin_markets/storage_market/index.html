@@ -972,32 +972,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+<a href="../../../../#systems__filecoin_nodes__repository__key_store" class="menu-item depth-4">
     
     
-        KeyStore &amp; user keys
+        Key Store
     
 </a>
 
 
 
 <ul class="menu-item-section depth-4">
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
 
 </ul>
 
@@ -1025,37 +1009,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         IpldStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
-    
-    
-        Usage in Systems
     
 </a>
 
@@ -1124,37 +1077,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Clock
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
-    
-    
-        Key Store
     
 </a>
 
@@ -3573,39 +3495,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__ipld__graphstore" class="menu-item depth-3">
-    
-    
-        GraphStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4887,7 +4776,7 @@ putting on chain</li>
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
@@ -4901,8 +4790,8 @@ putting on chain</li>
 <span class="c1">// StorageAsk is the current price and parameters a miner is currently offering for storage
 </span><span class="c1">// (analogous to an Ask in a financial market)
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageAsk</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Price</span>             <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// attoFIL per GiB per epoch
-</span><span class="c1"></span>    <span class="nx">Collateral</span>        <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// attoFIL per GiB per epoch
+    <span class="nx">Price</span>             <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// attoFIL per GiB per epoch
+</span><span class="c1"></span>    <span class="nx">Collateral</span>        <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// attoFIL per GiB per epoch
 </span><span class="c1"></span>
     <span class="nx">MinPieceSize</span>      <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceSize</span>
     <span class="c1">// address of miner actor for deals

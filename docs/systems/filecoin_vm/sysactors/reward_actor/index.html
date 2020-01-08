@@ -971,32 +971,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+<a href="../../../../../#systems__filecoin_nodes__repository__key_store" class="menu-item depth-4">
     
     
-        KeyStore &amp; user keys
+        Key Store
     
 </a>
 
 
 
 <ul class="menu-item-section depth-4">
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
 
 </ul>
 
@@ -1024,37 +1008,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         IpldStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
-    
-    
-        Usage in Systems
     
 </a>
 
@@ -1123,37 +1076,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Clock
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
-    
-    
-        Key Store
     
 </a>
 
@@ -3572,39 +3494,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#libraries__ipld__graphstore" class="menu-item depth-3">
-    
-    
-        GraphStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4735,8 +4624,7 @@ https://github.com/alex-shpak/hugo-book
 
 <p><code>RewardMap</code> is also used in block reward minting to preserve the flexibility of introducing block reward vesting to the protocol. <code>MintReward</code> creates a new <code>Reward</code> struct and adds it to the <code>RewardMap</code>.</p>
 
-
-
+<p>
 
 
 
@@ -4755,7 +4643,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 
@@ -4772,10 +4660,10 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">VestingFunction</span>
     <span class="nx">StartEpoch</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="nx">EndEpoch</span>         <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">Value</span>            <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nx">AmountWithdrawn</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">Value</span>            <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">AmountWithdrawn</span>  <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
-    <span class="nf">AmountVested</span><span class="p">(</span><span class="nx">elapsedEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">AmountVested</span><span class="p">(</span><span class="nx">elapsedEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
 <span class="p">}</span>
 
 <span class="c1">// ownerAddr to a collection of Reward
@@ -4784,7 +4672,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">RewardActorState</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">RewardMap</span> <span class="nx">RewardBalanceAMT</span>
 
-    <span class="nf">_withdrawReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">ownerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">_withdrawReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">ownerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">RewardActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4793,7 +4681,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// Allocates a block reward to the owner of a miner, less
 </span><span class="c1"></span>    <span class="c1">// - penalty, which is burnt
 </span><span class="c1"></span>    <span class="c1">// - any amount of pledge collateral shortfall, which is transferred to storage power actor
-</span><span class="c1"></span>    <span class="nf">AwardBlockReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">miner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">penalty</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">AwardBlockReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">miner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">penalty</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
 
     <span class="c1">// withdraw available funds from RewardMap
 </span><span class="c1"></span>    <span class="nf">WithdrawReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span>
@@ -4822,28 +4710,33 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">sysactors</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">reward</span>
 
 <span class="kn">import</span> <span class="p">(</span>
     <span class="s">&#34;math&#34;</span>
 
+    <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+    <span class="nx">serde</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/serde&#34;</span>
+    <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
     <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
     <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
     <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
     <span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
     <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
-    <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
+
+<span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="p">=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span>
+<span class="kd">type</span> <span class="nx">Runtime</span> <span class="p">=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span>
+
+<span class="kd">var</span> <span class="nx">IMPL_FINISH</span> <span class="p">=</span> <span class="nx">autil</span><span class="p">.</span><span class="nx">IMPL_FINISH</span>
+<span class="kd">var</span> <span class="nx">IMPL_TODO</span> <span class="p">=</span> <span class="nx">autil</span><span class="p">.</span><span class="nx">IMPL_TODO</span>
+<span class="kd">var</span> <span class="nx">TODO</span> <span class="p">=</span> <span class="nx">autil</span><span class="p">.</span><span class="nx">TODO</span>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1">// Boilerplate
 </span><span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1"></span>
-<span class="kd">var</span> <span class="nx">TODO</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">TODO</span>
-
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActorCode_I</span><span class="p">)</span> <span class="nf">State</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">RewardActorState</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
     <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">())</span>
@@ -4863,27 +4756,27 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1"></span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">Reward_I</span><span class="p">)</span> <span class="nf">AmountVested</span><span class="p">(</span><span class="nx">elapsedEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">Reward_I</span><span class="p">)</span> <span class="nf">AmountVested</span><span class="p">(</span><span class="nx">elapsedEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
     <span class="k">switch</span> <span class="nx">r</span><span class="p">.</span><span class="nf">VestingFunction</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">case</span> <span class="nx">VestingFunction_None</span><span class="p">:</span>
         <span class="k">return</span> <span class="nx">r</span><span class="p">.</span><span class="nf">Value</span><span class="p">()</span>
     <span class="k">case</span> <span class="nx">VestingFunction_Linear</span><span class="p">:</span>
         <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// BigInt
 </span><span class="c1"></span>        <span class="nx">vestedProportion</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Max</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">elapsedEpoch</span><span class="p">)</span><span class="o">/</span><span class="nb">float64</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nf">StartEpoch</span><span class="p">()</span><span class="o">-</span><span class="nx">r</span><span class="p">.</span><span class="nf">EndEpoch</span><span class="p">()))</span>
-        <span class="k">return</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nf">Value</span><span class="p">())</span> <span class="o">*</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">vestedProportion</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nf">Value</span><span class="p">())</span> <span class="o">*</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">vestedProportion</span><span class="p">))</span>
     <span class="k">default</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">RewardActorState_I</span><span class="p">)</span> <span class="nf">_withdrawReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">ownerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">RewardActorState_I</span><span class="p">)</span> <span class="nf">_withdrawReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">ownerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 
     <span class="nx">rewards</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">RewardMap</span><span class="p">()[</span><span class="nx">ownerAddr</span><span class="p">]</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;ra._withdrawReward: ownerAddr not found in RewardMap.&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="nx">rewardToWithdrawTotal</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="nx">rewardToWithdrawTotal</span> <span class="o">:=</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="nx">indicesToRemove</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">rewards</span><span class="p">))</span>
 
     <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">r</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">rewards</span> <span class="p">{</span>
@@ -4919,32 +4812,30 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActorCode_I</span><span class="p">)</span> <span class="nf">AwardBlockReward</span><span class="p">(</span>
     <span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span>
     <span class="nx">miner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
-    <span class="nx">penalty</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span>
+    <span class="nx">penalty</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span>
     <span class="nx">minerNominalPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span>
-    <span class="nx">currPledge</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span>
+    <span class="nx">currPledge</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span>
 <span class="p">)</span> <span class="p">{</span>
     <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
 
     <span class="nx">inds</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrIndices</span><span class="p">()</span>
     <span class="nx">pledgeReq</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">PledgeCollateralReq</span><span class="p">(</span><span class="nx">minerNominalPower</span><span class="p">)</span>
     <span class="nx">currReward</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">GetCurrBlockRewardForMiner</span><span class="p">(</span><span class="nx">minerNominalPower</span><span class="p">,</span> <span class="nx">currPledge</span><span class="p">)</span>
-    <span class="nf">TODO</span><span class="p">()</span>                                                                                <span class="c1">// BigInt
-</span><span class="c1"></span>    <span class="nx">underPledge</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Max</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)),</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">pledgeReq</span><span class="o">-</span><span class="nx">currPledge</span><span class="p">))</span> <span class="c1">// 0 if over collateralized
+    <span class="nf">TODO</span><span class="p">()</span>                                                                                 <span class="c1">// BigInt
+</span><span class="c1"></span>    <span class="nx">underPledge</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Max</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)),</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">pledgeReq</span><span class="o">-</span><span class="nx">currPledge</span><span class="p">))</span> <span class="c1">// 0 if over collateralized
 </span><span class="c1"></span>    <span class="nx">rewardToGarnish</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Min</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">currReward</span><span class="p">),</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">underPledge</span><span class="p">))</span>
 
     <span class="nf">TODO</span><span class="p">()</span>
     <span class="c1">// handle penalty here
 </span><span class="c1"></span>    <span class="c1">// also handle penalty greater than reward
-</span><span class="c1"></span>    <span class="nx">actualReward</span> <span class="o">:=</span> <span class="nx">currReward</span> <span class="o">-</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">rewardToGarnish</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nx">actualReward</span> <span class="o">:=</span> <span class="nx">currReward</span> <span class="o">-</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">rewardToGarnish</span><span class="p">)</span>
     <span class="k">if</span> <span class="nx">rewardToGarnish</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
         <span class="c1">// Send fund to SPA for collateral
 </span><span class="c1"></span>        <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
             <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
             <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_AddBalance</span><span class="p">,</span>
-            <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span>
-                <span class="nx">addr</span><span class="p">.</span><span class="nf">Serialize_Address</span><span class="p">(</span><span class="nx">miner</span><span class="p">),</span>
-            <span class="p">},</span>
-            <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">rewardToGarnish</span><span class="p">),</span>
+            <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span><span class="nx">miner</span><span class="p">),</span>
+            <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">rewardToGarnish</span><span class="p">),</span>
         <span class="p">)</span>
     <span class="p">}</span>
 
@@ -4955,7 +4846,7 @@ https://github.com/alex-shpak/hugo-book
             <span class="nx">StartEpoch_</span><span class="p">:</span>      <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(),</span>
             <span class="nx">EndEpoch_</span><span class="p">:</span>        <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(),</span>
             <span class="nx">Value_</span><span class="p">:</span>           <span class="nx">actualReward</span><span class="p">,</span>
-            <span class="nx">AmountWithdrawn_</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+            <span class="nx">AmountWithdrawn_</span><span class="p">:</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
             <span class="nx">VestingFunction_</span><span class="p">:</span> <span class="nx">VestingFunction_None</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="nx">rewards</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">RewardMap</span><span class="p">()[</span><span class="nx">miner</span><span class="p">]</span>
@@ -4969,7 +4860,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActorCode_I</span><span class="p">)</span> <span class="nf">WithdrawReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nf">RT_ValidateImmediateCallerIsSignable</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">vmr</span><span class="p">.</span><span class="nf">RT_ValidateImmediateCallerIsSignable</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
     <span class="nx">ownerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
@@ -4990,7 +4881,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
+</p>
 
 </article>
 

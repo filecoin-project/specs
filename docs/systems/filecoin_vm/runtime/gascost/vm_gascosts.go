@@ -1,8 +1,11 @@
 package runtime
 
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-import util "github.com/filecoin-project/specs/util"
+import (
+	actors "github.com/filecoin-project/specs/actors"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+	util "github.com/filecoin-project/specs/util"
+)
 
 type Bytes = util.Bytes
 
@@ -106,9 +109,9 @@ func IpldPut(dataSize int) msg.GasAmount {
 	return msg.GasAmount_Affine(IpldPutBase, dataSize, IpldPutPerByte)
 }
 
-func InvokeMethod(value actor.TokenAmount, method actor.MethodNum) msg.GasAmount {
+func InvokeMethod(value actors.TokenAmount, method actors.MethodNum) msg.GasAmount {
 	ret := SendBase
-	if value != actor.TokenAmount(0) {
+	if value != actors.TokenAmount(0) {
 		ret = ret.Add(SendTransferFunds)
 	}
 	if method != actor.MethodSend {

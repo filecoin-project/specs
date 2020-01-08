@@ -971,32 +971,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+<a href="../../../#systems__filecoin_nodes__repository__key_store" class="menu-item depth-4">
     
     
-        KeyStore &amp; user keys
+        Key Store
     
 </a>
 
 
 
 <ul class="menu-item-section depth-4">
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
 
 </ul>
 
@@ -1024,37 +1008,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         IpldStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
-    
-    
-        Usage in Systems
     
 </a>
 
@@ -1123,37 +1076,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Clock
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
-    
-    
-        Key Store
     
 </a>
 
@@ -3572,39 +3494,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../#libraries__ipld__graphstore" class="menu-item depth-3">
-    
-    
-        GraphStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4763,9 +4652,16 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">node_base</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+    <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
     <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
-    <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="p">)</span>
+
+<span class="c1">/////////////////////////////////////////////////////////////
+</span><span class="c1">// Global
+</span><span class="c1">/////////////////////////////////////////////////////////////
+</span><span class="c1"></span>
+<span class="kd">const</span> <span class="nx">NETWORK</span> <span class="p">=</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address_NetworkID_Testnet</span>
 
 <span class="c1">/////////////////////////////////////////////////////////////
 </span><span class="c1">// Commitment
@@ -4818,10 +4714,10 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>
 <span class="c1">// FIL deposit per sector precommit in Interactive PoRep
 </span><span class="c1">// refunded after ProveCommit but burned if PreCommit expires
-</span><span class="c1"></span><span class="kd">const</span> <span class="nx">PRECOMMIT_DEPOSIT_PER_BYTE</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// placeholder
-</span><span class="c1"></span><span class="kd">const</span> <span class="nx">FAULT_SLASH_PERC_DECLARED</span> <span class="p">=</span> <span class="mi">1</span>                     <span class="c1">// placeholder
-</span><span class="c1"></span><span class="kd">const</span> <span class="nx">FAULT_SLASH_PERC_DETECTED</span> <span class="p">=</span> <span class="mi">10</span>                    <span class="c1">// placeholder
-</span><span class="c1"></span><span class="kd">const</span> <span class="nx">FAULT_SLASH_PERC_TERMINATED</span> <span class="p">=</span> <span class="mi">100</span>                 <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">PRECOMMIT_DEPOSIT_PER_BYTE</span> <span class="p">=</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">FAULT_SLASH_PERC_DECLARED</span> <span class="p">=</span> <span class="mi">1</span>                      <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">FAULT_SLASH_PERC_DETECTED</span> <span class="p">=</span> <span class="mi">10</span>                     <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">FAULT_SLASH_PERC_TERMINATED</span> <span class="p">=</span> <span class="mi">100</span>                  <span class="c1">// placeholder
 </span></code></pre></div>
 
 

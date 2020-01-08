@@ -1,5 +1,6 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import actor_util "github.com/filecoin-project/specs/systems/filecoin_vm/actor_util"
+import actors "github.com/filecoin-project/specs/actors"
+import actor_util "github.com/filecoin-project/specs/actors/util"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -15,17 +16,17 @@ type Indices struct {
     Epoch                       block.ChainEpoch
     NetworkKPI                  BigInt
     TotalNetworkSectorWeight    block.SectorWeight
-    TotalPledgeCollateral       actor.TokenAmount
+    TotalPledgeCollateral       actors.TokenAmount
     TotalNetworkEffectivePower  block.StoragePower  // power above minimum miner size
     TotalNetworkPower           block.StoragePower  // total network power irrespective of meeting minimum miner size
 
-    TotalMinedFIL               actor.TokenAmount
-    TotalUnminedFIL             actor.TokenAmount
-    TotalBurnedFIL              actor.TokenAmount
-    LastEpochReward             actor.TokenAmount
+    TotalMinedFIL               actors.TokenAmount
+    TotalUnminedFIL             actors.TokenAmount
+    TotalBurnedFIL              actors.TokenAmount
+    LastEpochReward             actors.TokenAmount
 
     // these methods produce policy output based on user state/action
-    StorageDeal_ProviderInitTimedOutSlashAmount(deal deal.OnChainDeal) actor.TokenAmount
+    StorageDeal_ProviderInitTimedOutSlashAmount(deal deal.OnChainDeal) actors.TokenAmount
 
     StorageDeal_DurationBounds(
         pieceSize   piece.PieceSize
@@ -36,15 +37,15 @@ type Indices struct {
         pieceSize   piece.PieceSize
         startEpoch  block.ChainEpoch
         endEpoch    block.ChainEpoch
-    ) (minPrice actor.TokenAmount, maxPrice actor.TokenAmount)
+    ) (minPrice actors.TokenAmount, maxPrice actors.TokenAmount)
 
     StorageDeal_ProviderCollateralBounds(
         pieceSize   piece.PieceSize
         startEpoch  block.ChainEpoch
         endEpoch    block.ChainEpoch
     ) (
-        minProviderCollateral  actor.TokenAmount
-        maxProviderCollateral  actor.TokenAmount
+        minProviderCollateral  actors.TokenAmount
+        maxProviderCollateral  actors.TokenAmount
     )
 
     StorageDeal_ClientCollateralBounds(
@@ -52,8 +53,8 @@ type Indices struct {
         startEpoch  block.ChainEpoch
         endEpoch    block.ChainEpoch
     ) (
-        minClientCollateral  actor.TokenAmount
-        maxClientCollateral  actor.TokenAmount
+        minClientCollateral  actors.TokenAmount
+        maxClientCollateral  actors.TokenAmount
     )
 
     SectorWeight(
@@ -65,57 +66,57 @@ type Indices struct {
 
     PledgeCollateralReq(
         minerNominalPower block.StoragePower
-    ) actor.TokenAmount
+    ) actors.TokenAmount
 
     SectorWeightProportion(
         minerActiveSectorWeight block.SectorWeight
     ) BigInt
 
     PledgeCollateralProportion(
-        minerPledgeCollateral actor.TokenAmount
+        minerPledgeCollateral actors.TokenAmount
     ) BigInt
 
     StoragePower(
         minerActiveSectorWeight    block.SectorWeight
         minerInactiveSectorWeight  block.SectorWeight
-        minerPledgeCollateral      actor.TokenAmount
+        minerPledgeCollateral      actors.TokenAmount
     ) block.StoragePower
 
     StoragePowerProportion(
         minerStoragePower block.StoragePower
     ) BigInt
 
-    CurrEpochBlockReward() actor.TokenAmount
+    CurrEpochBlockReward() actors.TokenAmount
 
     GetCurrBlockRewardForMiner(
         minerStoragePower      block.StoragePower
-        minerPledgeCollateral  actor.TokenAmount
-    ) actor.TokenAmount
+        minerPledgeCollateral  actors.TokenAmount
+    ) actors.TokenAmount
 
     StorageMining_PreCommitDeposit(
         sectorSize       sector.SectorSize
         expirationEpoch  block.ChainEpoch
-    ) actor.TokenAmount
+    ) actors.TokenAmount
 
     StorageMining_TemporaryFaultFee(
         storageWeightDescs  [actor_util.SectorStorageWeightDesc]
         duration            block.ChainEpoch
-    ) actor.TokenAmount
+    ) actors.TokenAmount
 
     StoragePower_PledgeSlashForSectorTermination(
         storageWeightDesc  actor_util.SectorStorageWeightDesc
         terminationType    actor_util.SectorTerminationType
-    ) actor.TokenAmount
+    ) actors.TokenAmount
 
     StoragePower_PledgeSlashForSurprisePoStFailure(
         minerClaimedPower       block.StoragePower
         numConsecutiveFailures  int
-    ) actor.TokenAmount
+    ) actors.TokenAmount
 
     StoragePower_ConsensusMinMinerPower() block.StoragePower
 
     NetworkTransactionFee(
         toActorCodeID  actor.CodeID
-        methodNum      actor.MethodNum
-    ) actor.TokenAmount
+        methodNum      actors.MethodNum
+    ) actors.TokenAmount
 }

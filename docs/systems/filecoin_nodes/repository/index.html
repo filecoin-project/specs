@@ -972,32 +972,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+<a href="../../../../#systems__filecoin_nodes__repository__key_store" class="menu-item depth-4">
     
     
-        KeyStore &amp; user keys
+        Key Store
     
 </a>
 
 
 
 <ul class="menu-item-section depth-4">
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
 
 </ul>
 
@@ -1025,37 +1009,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         IpldStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
-    
-    
-        Usage in Systems
     
 </a>
 
@@ -1124,37 +1077,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Clock
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
-    
-    
-        Key Store
     
 </a>
 
@@ -3573,39 +3495,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__ipld__graphstore" class="menu-item depth-3">
-    
-    
-        GraphStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4731,7 +4620,13 @@ https://github.com/alex-shpak/hugo-book
 </header>
 
       
-<article class="markdown">
+<article class="markdown"><p>The Filecoin node repository is simply an abstraction denoting that data which any functional Filecoin node needs to store locally in order to run correctly.</p>
+
+<p>The repo is accessible to the node&rsquo;s systems and subsystems and acts as local storage compartementalized from the node&rsquo;s <code>FileStore</code> (for instance).</p>
+
+<p>It stores the node&rsquo;s keys, the IPLD datastructures of stateful objects and node configs.</p>
+
+
 
 
 
@@ -4751,18 +4646,14 @@ https://github.com/alex-shpak/hugo-book
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
-<span class="kn">import</span> <span class="nx">key</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/repository/key&#34;</span>
+<span class="kn">import</span> <span class="nx">key_store</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/repository/key_store&#34;</span>
 <span class="kn">import</span> <span class="nx">config</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/repository/config&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Repository</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">config</span>          <span class="nx">config</span><span class="p">.</span><span class="nx">Config</span>
-    <span class="nx">ipldStore</span>       <span class="nx">ipld</span><span class="p">.</span><span class="nx">Store</span>
-    <span class="nx">keyStore</span>        <span class="nx">key</span><span class="p">.</span><span class="nx">Store</span>
-
-    <span class="c1">// CreateRepository(config Config, ipldStore IPLDDagStore, keyStore KeyStore) &amp;Repository
-</span><span class="c1"></span>    <span class="nf">GetIPLDStore</span><span class="p">()</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">Store</span>
-    <span class="nf">GetKeyStore</span><span class="p">()</span>   <span class="nx">key</span><span class="p">.</span><span class="nx">Store</span>
-    <span class="nf">GetConfig</span><span class="p">()</span>     <span class="nx">config</span><span class="p">.</span><span class="nx">Config</span>
+    <span class="nx">Config</span>      <span class="nx">config</span><span class="p">.</span><span class="nx">Config</span>
+    <span class="nx">KeyStore</span>    <span class="nx">key_store</span><span class="p">.</span><span class="nx">KeyStore</span>
+    <span class="nx">ChainStore</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">GraphStore</span>
+    <span class="nx">StateStore</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">GraphStore</span>
 <span class="p">}</span>
 </code></pre></div>
 

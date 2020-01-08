@@ -10,14 +10,5 @@
 	<atom:link href="/docs/systems/filecoin_nodes/repository/index.xml" rel="self" type="application/rss+xml" />
     
     
-    <item>
-      <title>Usage in Systems</title>
-      <link>/docs/systems/filecoin_nodes/repository/usage/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_nodes/repository/usage/</guid>
-      <description>TODO: - Explain how repo is used with systems and subsystems - compartmentalized local storage - store ipld datastructures of stateful objects</description>
-    </item>
-    
   </channel>
 </rss>

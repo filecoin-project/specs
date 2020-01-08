@@ -972,32 +972,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+<a href="../../../../#systems__filecoin_nodes__repository__key_store" class="menu-item depth-4">
     
     
-        KeyStore &amp; user keys
+        Key Store
     
 </a>
 
 
 
 <ul class="menu-item-section depth-4">
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
 
 </ul>
 
@@ -1025,37 +1009,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         IpldStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
-    
-    
-        Usage in Systems
     
 </a>
 
@@ -1124,37 +1077,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Clock
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
-    
-    
-        Key Store
     
 </a>
 
@@ -3573,39 +3495,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__ipld__graphstore" class="menu-item depth-3">
-    
-    
-        GraphStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4790,14 +4679,15 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sectoridx</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector_index&#34;</span>
 <span class="kn">import</span> <span class="nx">spc</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus&#34;</span>
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">spowact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_power&#34;</span>
+<span class="kn">import</span> <span class="nx">sminact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_miner&#34;</span>
+<span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 <span class="kn">import</span> <span class="nx">blockchain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&#34;</span>
 <span class="kn">import</span> <span class="nx">blockproducer</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block_producer&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
 <span class="kn">import</span> <span class="nx">storage_proving</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving&#34;</span>
-<span class="kn">import</span> <span class="nx">key_store</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/key_store&#34;</span>
 <span class="kn">import</span> <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">stateTree</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
@@ -4805,15 +4695,15 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StorageMiningSubsystem</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">FilecoinNode</span>       <span class="nx">node_base</span><span class="p">.</span><span class="nx">FilecoinNode</span>
+    <span class="nx">Node</span>               <span class="nx">node_base</span><span class="p">.</span><span class="nx">FilecoinNode</span>
 
     <span class="c1">// TODO: constructor
 </span><span class="c1"></span>    <span class="c1">// InitStorageMiningSubsystem(node node_base.FilecoinNode) struct{}
 </span><span class="c1"></span>
     <span class="c1">// Component subsystems
 </span><span class="c1"></span>    <span class="c1">// StorageProvider    storage_provider.StorageProvider
-</span><span class="c1"></span>    <span class="nx">StoragePowerActor</span>  <span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerActorCode</span>
-    <span class="nx">MinerActor</span>         <span class="nx">StorageMinerActorCode</span>
+</span><span class="c1"></span>    <span class="nx">StoragePowerActor</span>  <span class="nx">spowact</span><span class="p">.</span><span class="nx">StoragePowerActorCode</span>
+    <span class="nx">MinerActor</span>         <span class="nx">sminact</span><span class="p">.</span><span class="nx">StorageMinerActorCode</span>
     <span class="nx">SectorIndex</span>        <span class="nx">sectoridx</span><span class="p">.</span><span class="nx">SectorIndexerSubsystem</span>
     <span class="nx">StorageProving</span>     <span class="nx">storage_proving</span><span class="p">.</span><span class="nx">StorageProvingSubsystem</span>
 
@@ -4826,9 +4716,6 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// Need access to the blockchain system in order to query for things in the chain
 </span><span class="c1"></span>    <span class="nx">_blockchain</span>        <span class="nx">blockchain</span><span class="p">.</span><span class="nx">BlockchainSubsystem</span>
 
-    <span class="c1">// Need access to the key store in order to generate tickets and election proofs
-</span><span class="c1"></span>    <span class="nx">_keyStore</span>          <span class="nx">key_store</span><span class="p">.</span><span class="nx">KeyStore</span>
-
     <span class="c1">// call by StorageMiningSubsystem itself to create miner
 </span><span class="c1"></span>    <span class="nf">CreateMiner</span><span class="p">(</span>
         <span class="nx">state</span>       <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span>
@@ -4836,7 +4723,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">workerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
         <span class="nx">sectorSize</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">UInt</span>
         <span class="nx">peerId</span>      <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
-        <span class="nx">pledgeAmt</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">pledgeAmt</span>   <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="p">)</span>
 
     <span class="c1">// call by StorageMarket.StorageProvider at the start of a deal.
@@ -4854,7 +4741,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
 
     <span class="nf">PreparePoStChallengeSeed</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
-    <span class="nf">_getStorageMinerActorState</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">StorageMinerActorState</span>
+    <span class="nf">_getStorageMinerActorState</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">sminact</span><span class="p">.</span><span class="nx">StorageMinerActorState</span>
 
     <span class="c1">// call by BlockChain when a new block is produced
 </span><span class="c1"></span>    <span class="nf">OnNewBestChain</span><span class="p">()</span>
@@ -4864,12 +4751,12 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">OnNewRound</span><span class="p">()</span>
 
     <span class="nf">_runMiningCycle</span><span class="p">()</span>
-    <span class="nf">_tryLeaderElection</span><span class="p">(</span><span class="nx">st</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">sma</span> <span class="nx">StorageMinerActorState</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
-    <span class="nf">_trySurprisePoSt</span><span class="p">(</span><span class="nx">st</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">sma</span> <span class="nx">StorageMinerActorState</span><span class="p">)</span> <span class="kt">error</span>
+    <span class="nf">_tryLeaderElection</span><span class="p">(</span><span class="nx">st</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">sma</span> <span class="nx">sminact</span><span class="p">.</span><span class="nx">StorageMinerActorState</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
+    <span class="nf">_trySurprisePoSt</span><span class="p">(</span><span class="nx">st</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">sma</span> <span class="nx">sminact</span><span class="p">.</span><span class="nx">StorageMinerActorState</span><span class="p">)</span> <span class="kt">error</span>
     <span class="nf">_submitSurprisePoStMessage</span><span class="p">(</span>
         <span class="nx">state</span>     <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span>
         <span class="nx">sPoSt</span>     <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
-        <span class="nx">gasPrice</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">gasPrice</span>  <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
         <span class="nx">gasLimit</span>  <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span>
     <span class="p">)</span> <span class="kt">error</span>
 

@@ -972,32 +972,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+<a href="../../../../#systems__filecoin_nodes__repository__key_store" class="menu-item depth-4">
     
     
-        KeyStore &amp; user keys
+        Key Store
     
 </a>
 
 
 
 <ul class="menu-item-section depth-4">
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
 
 </ul>
 
@@ -1025,37 +1009,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         IpldStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
-    
-    
-        Usage in Systems
     
 </a>
 
@@ -1124,37 +1077,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Clock
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
-    
-    
-        Key Store
     
 </a>
 
@@ -3573,39 +3495,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__ipld__graphstore" class="menu-item depth-3">
-    
-    
-        GraphStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4767,6 +4656,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 <span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
@@ -4834,8 +4724,8 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// Check that the given condition is true (and call Abort if not).
 </span><span class="c1"></span>    <span class="nf">Assert</span><span class="p">(</span><span class="kt">bool</span><span class="p">)</span>
 
-    <span class="nf">CurrentBalance</span><span class="p">()</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nf">ValueReceived</span><span class="p">()</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">CurrentBalance</span><span class="p">()</span>  <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">ValueReceived</span><span class="p">()</span>   <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
     <span class="c1">// Look up the current values of several system-wide economic indices.
 </span><span class="c1"></span>    <span class="nf">CurrIndices</span><span class="p">()</span>     <span class="nx">indices</span><span class="p">.</span><span class="nx">Indices</span>
@@ -4853,16 +4743,16 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">InvocOutput</span>
     <span class="nf">Send</span><span class="p">(</span>
         <span class="nx">toAddr</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">methodNum</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span>
-        <span class="nx">params</span>     <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span>
-        <span class="nx">value</span>      <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">methodNum</span>  <span class="nx">actors</span><span class="p">.</span><span class="nx">MethodNum</span>
+        <span class="nx">params</span>     <span class="nx">actors</span><span class="p">.</span><span class="nx">MethodParams</span>
+        <span class="nx">value</span>      <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="p">)</span> <span class="nx">InvocOutput</span>
     <span class="nf">SendQuery</span><span class="p">(</span>
         <span class="nx">toAddr</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">methodNum</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span>
-        <span class="nx">params</span>     <span class="p">[</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">]</span>
+        <span class="nx">methodNum</span>  <span class="nx">actors</span><span class="p">.</span><span class="nx">MethodNum</span>
+        <span class="nx">params</span>     <span class="nx">actors</span><span class="p">.</span><span class="nx">MethodParams</span>
     <span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
-    <span class="nf">SendFunds</span><span class="p">(</span><span class="nx">toAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
+    <span class="nf">SendFunds</span><span class="p">(</span><span class="nx">toAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
 
     <span class="c1">// Sends a message to another actor, trapping an unsuccessful execution.
 </span><span class="c1"></span>    <span class="c1">// This may only be invoked by the singleton Cron actor.
@@ -4894,9 +4784,9 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">InvocInput</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">To</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">Method</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span>
-    <span class="nx">Params</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span>
-    <span class="nx">Value</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">Method</span>  <span class="nx">actors</span><span class="p">.</span><span class="nx">MethodNum</span>
+    <span class="nx">Params</span>  <span class="nx">actors</span><span class="p">.</span><span class="nx">MethodParams</span>
+    <span class="nx">Value</span>   <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="kd">struct</span> <span class="p">{</span>

@@ -971,32 +971,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+<a href="../../../../../#systems__filecoin_nodes__repository__key_store" class="menu-item depth-4">
     
     
-        KeyStore &amp; user keys
+        Key Store
     
 </a>
 
 
 
 <ul class="menu-item-section depth-4">
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
 
 </ul>
 
@@ -1024,37 +1008,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         IpldStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
-    
-    
-        Usage in Systems
     
 </a>
 
@@ -1123,37 +1076,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Clock
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
-    
-    
-        Key Store
     
 </a>
 
@@ -3572,39 +3494,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#libraries__ipld__graphstore" class="menu-item depth-3">
-    
-    
-        GraphStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4756,7 +4645,7 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
 <span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">dt</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/data_transfer&#34;</span>
@@ -4781,7 +4670,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="c1">// The interface provided for storage providers
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageProvider</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">AddAsk</span><span class="p">(</span><span class="nx">price</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ttlsecs</span> <span class="kt">int64</span><span class="p">)</span> <span class="kt">error</span>
+    <span class="nf">AddAsk</span><span class="p">(</span><span class="nx">price</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ttlsecs</span> <span class="kt">int64</span><span class="p">)</span> <span class="kt">error</span>
 
     <span class="c1">// ListAsks lists current asks
 </span><span class="c1"></span>    <span class="nf">ListAsks</span><span class="p">(</span><span class="nx">addrress</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">[</span><span class="nx">StorageAsk</span><span class="p">]</span>
@@ -4793,10 +4682,10 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">ListIncompleteDeals</span><span class="p">()</span>  <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">MinerDeal</span><span class="p">],</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// AddStorageCollateral adds storage collateral
-</span><span class="c1"></span>    <span class="nf">AddStorageCollateral</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">error</span>
+</span><span class="c1"></span>    <span class="nf">AddStorageCollateral</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">error</span>
 
     <span class="c1">// GetStorageCollateral returns the current collateral balance
-</span><span class="c1"></span>    <span class="nf">GetStorageCollateral</span><span class="p">()</span> <span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">GetStorageCollateral</span><span class="p">()</span> <span class="p">(</span><span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// DataTransferValidator methods
 </span><span class="c1"></span>    <span class="nf">ValidatePush</span><span class="p">(</span>

@@ -971,32 +971,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+<a href="../../../../../#systems__filecoin_nodes__repository__key_store" class="menu-item depth-4">
     
     
-        KeyStore &amp; user keys
+        Key Store
     
 </a>
 
 
 
 <ul class="menu-item-section depth-4">
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
 
 </ul>
 
@@ -1024,37 +1008,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         IpldStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
-    
-    
-        Usage in Systems
     
 </a>
 
@@ -1123,37 +1076,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Clock
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
-    
-    
-        Key Store
     
 </a>
 
@@ -3572,39 +3494,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#libraries__ipld__graphstore" class="menu-item depth-3">
-    
-    
-        GraphStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4755,8 +4644,6 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">clock</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&#34;</span>
 <span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
 <span class="kn">import</span> <span class="nx">message_pool</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/message_pool&#34;</span>
-<span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
-<span class="kn">import</span> <span class="nx">key_store</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/key_store&#34;</span>
 
 <span class="kd">type</span> <span class="nx">FilecoinNode</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Node</span>         <span class="nx">libp2p</span><span class="p">.</span><span class="nx">Node</span>
@@ -4764,8 +4651,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">Repository</span>   <span class="nx">repo</span><span class="p">.</span><span class="nx">Repository</span>
     <span class="nx">FileStore</span>    <span class="nx">filestore</span><span class="p">.</span><span class="nx">FileStore</span>
     <span class="nx">Clock</span>        <span class="nx">clock</span><span class="p">.</span><span class="nx">UTCClock</span>
-    <span class="nx">LocalGraph</span>   <span class="nx">ipld</span><span class="p">.</span><span class="nx">GraphStore</span>
-    <span class="nx">KeyStore</span>     <span class="nx">key_store</span><span class="p">.</span><span class="nx">KeyStore</span>
+
     <span class="nx">MessagePool</span>  <span class="nx">message_pool</span><span class="p">.</span><span class="nx">MessagePoolSubsystem</span>
 <span class="p">}</span>
 </code></pre></div>

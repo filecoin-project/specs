@@ -971,32 +971,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+<a href="../../../../../#systems__filecoin_nodes__repository__key_store" class="menu-item depth-4">
     
     
-        KeyStore &amp; user keys
+        Key Store
     
 </a>
 
 
 
 <ul class="menu-item-section depth-4">
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
 
 </ul>
 
@@ -1024,37 +1008,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         IpldStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
-    
-    
-        Usage in Systems
     
 </a>
 
@@ -1123,37 +1076,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Clock
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
-    
-    
-        Key Store
     
 </a>
 
@@ -3572,39 +3494,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#libraries__ipld__graphstore" class="menu-item depth-3">
-    
-    
-        GraphStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4753,11 +4642,10 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
 
 <span class="kd">type</span> <span class="nx">PowerTableHAMT</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">}</span>  <span class="c1">// TODO: convert address to ActorID
 </span><span class="c1"></span>
@@ -4776,7 +4664,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">NominalPower</span>              <span class="nx">PowerTableHAMT</span>
     <span class="nx">NumMinersMeetingMinPower</span>  <span class="kt">int</span>
 
-    <span class="nf">_slashPledgeCollateral</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">_slashPledgeCollateral</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="nf">_selectMinersToSurprise</span><span class="p">(</span><span class="nx">challengeCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
 
     <span class="nf">_addClaimedPowerForSector</span><span class="p">(</span>
@@ -4821,17 +4709,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_power_consensus</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_power</span>
 
 <span class="kn">import</span> <span class="p">(</span>
     <span class="s">&#34;sort&#34;</span>
 
+    <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+    <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
     <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
     <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
-    <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-    <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&#34;</span>
     <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/indices&#34;</span>
     <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
@@ -4867,11 +4754,11 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_slashPledgeCollateral</span><span class="p">(</span>
-    <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">slashAmountRequested</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+    <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">slashAmountRequested</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 
-    <span class="nf">Assert</span><span class="p">(</span><span class="nx">slashAmountRequested</span> <span class="o">&gt;=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">slashAmountRequested</span> <span class="o">&gt;=</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 
-    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountSlashed</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithSubtractPreservingNonnegative</span><span class="p">(</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountSlashed</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">BalanceTable_WithSubtractPreservingNonnegative</span><span class="p">(</span>
         <span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">slashAmountRequested</span><span class="p">)</span>
     <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
     <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">EscrowTable_</span> <span class="p">=</span> <span class="nx">newTable</span>
@@ -4934,8 +4821,8 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">minerPower</span><span class="p">,</span> <span class="kc">true</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getCurrPledgeForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">currPledge</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getCurrPledgeForMiner</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">currPledge</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_addClaimedPowerForSector</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">storageWeightDesc</span> <span class="nx">SectorStorageWeightDesc</span><span class="p">)</span> <span class="p">{</span>
@@ -5056,12 +4943,14 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_power_consensus</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_power</span>
 
 <span class="kn">import</span> <span class="p">(</span>
     <span class="s">&#34;math&#34;</span>
 
+    <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+    <span class="nx">serde</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/serde&#34;</span>
+    <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
     <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
     <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
     <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
@@ -5069,10 +4958,17 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
     <span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
-    <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&#34;</span>
     <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/indices&#34;</span>
     <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
-    <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="p">)</span>
+
+<span class="kd">type</span> <span class="nx">ConsensusFaultType</span> <span class="kt">int</span>
+
+<span class="kd">const</span> <span class="p">(</span>
+    <span class="nx">UncommittedPowerFault</span> <span class="nx">ConsensusFaultType</span> <span class="p">=</span> <span class="mi">0</span>
+    <span class="nx">DoubleForkMiningFault</span> <span class="nx">ConsensusFaultType</span> <span class="p">=</span> <span class="mi">1</span>
+    <span class="nx">ParentGrindingFault</span>   <span class="nx">ConsensusFaultType</span> <span class="p">=</span> <span class="mi">2</span>
+    <span class="nx">TimeOffsetMiningFault</span> <span class="nx">ConsensusFaultType</span> <span class="p">=</span> <span class="mi">3</span>
 <span class="p">)</span>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
@@ -5085,7 +4981,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">msgValue</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReceived</span><span class="p">()</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Escrow operation failed&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -5093,7 +4989,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">WithdrawBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amountRequested</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">WithdrawBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amountRequested</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">amountRequested</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;Amount to withdraw must be nonnegative&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -5103,7 +4999,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">minBalanceMaintainRequired</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_rtGetPledgeCollateralReqForMinerOrAbort</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountExtracted</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithExtractPartial</span><span class="p">(</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountExtracted</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">BalanceTable_WithExtractPartial</span><span class="p">(</span>
         <span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">amountRequested</span><span class="p">,</span> <span class="nx">minBalanceMaintainRequired</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Escrow operation failed&#34;</span><span class="p">)</span>
@@ -5122,19 +5018,19 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
             <span class="nx">addr</span><span class="p">.</span><span class="nx">InitActorAddr</span><span class="p">,</span>
             <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_InitActor_Exec</span><span class="p">,</span>
-            <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span>
-                <span class="nx">actor</span><span class="p">.</span><span class="nf">Serialize_CodeID</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_StorageMiner</span><span class="p">)),</span>
-                <span class="nx">addr</span><span class="p">.</span><span class="nf">Serialize_Address_Compact</span><span class="p">(</span><span class="nx">ownerAddr</span><span class="p">),</span>
-                <span class="nx">addr</span><span class="p">.</span><span class="nf">Serialize_Address_Compact</span><span class="p">(</span><span class="nx">workerAddr</span><span class="p">),</span>
-                <span class="nx">sector</span><span class="p">.</span><span class="nf">Serialize_SectorSize</span><span class="p">(</span><span class="nx">sectorSize</span><span class="p">),</span>
-                <span class="nx">libp2p</span><span class="p">.</span><span class="nf">Serialize_PeerID</span><span class="p">(</span><span class="nx">peerId</span><span class="p">),</span>
-            <span class="p">},</span>
-            <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+            <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
+                <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_StorageMiner</span><span class="p">),</span>
+                <span class="nx">ownerAddr</span><span class="p">,</span>
+                <span class="nx">workerAddr</span><span class="p">,</span>
+                <span class="nx">sectorSize</span><span class="p">,</span>
+                <span class="nx">peerId</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
         <span class="p">).</span><span class="nf">ReturnValue</span><span class="p">(),</span>
     <span class="p">)</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithNewAddressEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">newMinerAddr</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReceived</span><span class="p">())</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">BalanceTable_WithNewAddressEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">newMinerAddr</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReceived</span><span class="p">())</span>
     <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
     <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">EscrowTable_</span> <span class="p">=</span> <span class="nx">newTable</span>
     <span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()[</span><span class="nx">newMinerAddr</span><span class="p">]</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -5148,12 +5044,12 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">DeleteMiner</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-    <span class="nx">minerPledgeBalance</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nx">minerPledgeBalance</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;Miner address not found&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="nx">minerPledgeBalance</span> <span class="p">&gt;</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">minerPledgeBalance</span> <span class="p">&gt;</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Deletion requested for miner with pledge balance still remaining&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
@@ -5277,9 +5173,9 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">st</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">StoragePowerActorState_I</span><span class="p">{</span>
         <span class="nx">TotalNetworkPower_</span><span class="p">:</span>        <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
         <span class="nx">PowerTable_</span><span class="p">:</span>               <span class="nf">PowerTableHAMT_Empty</span><span class="p">(),</span>
-        <span class="nx">EscrowTable_</span><span class="p">:</span>              <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTableHAMT_Empty</span><span class="p">(),</span>
+        <span class="nx">EscrowTable_</span><span class="p">:</span>              <span class="nx">autil</span><span class="p">.</span><span class="nf">BalanceTableHAMT_Empty</span><span class="p">(),</span>
         <span class="nx">CachedDeferredCronEvents_</span><span class="p">:</span> <span class="nf">MinerEventsHAMT_Empty</span><span class="p">(),</span>
-        <span class="nx">PoStDetectedFaultMiners_</span><span class="p">:</span>  <span class="nx">actor_util</span><span class="p">.</span><span class="nf">MinerSetHAMT_Empty</span><span class="p">(),</span>
+        <span class="nx">PoStDetectedFaultMiners_</span><span class="p">:</span>  <span class="nx">autil</span><span class="p">.</span><span class="nf">MinerSetHAMT_Empty</span><span class="p">(),</span>
         <span class="nx">ClaimedPower_</span><span class="p">:</span>             <span class="nf">PowerTableHAMT_Empty</span><span class="p">(),</span>
         <span class="nx">NominalPower_</span><span class="p">:</span>             <span class="nf">PowerTableHAMT_Empty</span><span class="p">(),</span>
         <span class="nx">NumMinersMeetingMinPower_</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
@@ -5321,8 +5217,8 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
             <span class="nx">addr</span><span class="p">,</span>
             <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StorageMinerActor_OnSurprisePoStChallenge</span><span class="p">,</span>
-            <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{},</span>
-            <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+            <span class="kc">nil</span><span class="p">,</span>
+            <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
@@ -5337,7 +5233,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">CachedDeferredCronEvents</span><span class="p">(),</span> <span class="nx">epoch</span><span class="p">)</span>
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-    <span class="nx">minerEventsRetain</span> <span class="o">:=</span> <span class="p">[]</span><span class="nx">actor_util</span><span class="p">.</span><span class="nx">MinerEvent</span><span class="p">{}</span>
+    <span class="nx">minerEventsRetain</span> <span class="o">:=</span> <span class="p">[]</span><span class="nx">autil</span><span class="p">.</span><span class="nx">MinerEvent</span><span class="p">{}</span>
     <span class="k">for</span> <span class="nx">minerEvent</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">minerEvents</span> <span class="p">{</span>
         <span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()[</span><span class="nx">minerEvent</span><span class="p">.</span><span class="nf">MinerAddr</span><span class="p">()];</span> <span class="nx">found</span> <span class="p">{</span>
             <span class="nx">minerEventsRetain</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">minerEventsRetain</span><span class="p">,</span> <span class="nx">minerEvent</span><span class="p">)</span>
@@ -5348,15 +5244,15 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
             <span class="nx">minerEvent</span><span class="p">.</span><span class="nf">MinerAddr</span><span class="p">(),</span>
             <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StorageMinerActor_OnDeferredCronEvent</span><span class="p">,</span>
-            <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span>
-                <span class="nx">sector</span><span class="p">.</span><span class="nf">Serialize_SectorNumber_Array</span><span class="p">(</span><span class="nx">minerEvent</span><span class="p">.</span><span class="nf">Sectors</span><span class="p">()),</span>
-            <span class="p">},</span>
-            <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+            <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
+                <span class="nx">minerEvent</span><span class="p">.</span><span class="nf">Sectors</span><span class="p">(),</span>
+            <span class="p">),</span>
+            <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
         <span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">_rtGetPledgeCollateralReqForMinerOrAbort</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">_rtGetPledgeCollateralReqForMinerOrAbort</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
     <span class="nx">minerNominalPower</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">NominalPower</span><span class="p">()[</span><span class="nx">minerAddr</span><span class="p">]</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
@@ -5366,7 +5262,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrIndices</span><span class="p">().</span><span class="nf">PledgeCollateralReq</span><span class="p">(</span><span class="nx">minerNominalPower</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">_rtSlashPledgeCollateral</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amountToSlash</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">_rtSlashPledgeCollateral</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amountToSlash</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
     <span class="nx">amountSlashed</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_slashPledgeCollateral</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">amountToSlash</span><span class="p">)</span>
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
@@ -5382,9 +5278,9 @@ https://github.com/alex-shpak/hugo-book
     <span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">NominalPower</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
     <span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PoStDetectedFaultMiners</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
 
-    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountSlashed</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithExtractAll</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountSlashed</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">BalanceTable_WithExtractAll</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
     <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
-    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="p">=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nf">BalanceTable_WithDeletedAddressEntry</span><span class="p">(</span><span class="nx">newTable</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="p">=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">BalanceTable_WithDeletedAddressEntry</span><span class="p">(</span><span class="nx">newTable</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
     <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
     <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">EscrowTable_</span> <span class="p">=</span> <span class="nx">newTable</span>
 
@@ -5392,15 +5288,6 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nx">rt</span><span class="p">.</span><span class="nf">DeleteActor</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
     <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">amountSlashed</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">////////////////////////////////////////////////////////////////////////////////
-</span><span class="c1">// Dispatch table
-</span><span class="c1">////////////////////////////////////////////////////////////////////////////////
-</span><span class="c1"></span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
-    <span class="nf">IMPL_FINISH</span><span class="p">()</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 

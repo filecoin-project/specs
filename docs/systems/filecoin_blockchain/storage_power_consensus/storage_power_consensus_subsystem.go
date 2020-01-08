@@ -3,6 +3,7 @@ package storage_power_consensus
 import (
 	"math"
 
+	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
@@ -44,24 +45,19 @@ func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree st
 	return spc.ec().IsWinningChallengeTicket(challengeTicket, sectorUtilization, networkPower, sectorsSampled, numSectors)
 }
 
-// TODO: fix linking here
-var node node_base.FilecoinNode
-
-func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTree stateTree.StateTree) StoragePowerActorState {
+func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTree stateTree.StateTree) spowact.StoragePowerActorState {
 	powerAddr := addr.StoragePowerActorAddr
 	actorState, ok := stateTree.GetActor(powerAddr)
 	util.Assert(ok)
 	substateCID := actorState.State()
 
-	substate, err := node.LocalGraph().Get(ipld.CID(substateCID))
-	if err != nil {
-		panic("TODO")
-	}
+	substate, ok := spc.node().Repository().StateStore().Get(ipld.CID(substateCID))
+	util.Assert(ok)
 
-	// TODO fix conversion to bytes
-	panic(substate)
+	// fix conversion to bytes
+	util.IMPL_FINISH(substate)
 	var serializedSubstate util.Serialization
-	st, err := Deserialize_StoragePowerActorState(serializedSubstate)
+	st, err := spowact.Deserialize_StoragePowerActorState(serializedSubstate)
 
 	if err == nil {
 		panic("Deserialization error")

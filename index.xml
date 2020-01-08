@@ -21,48 +21,6 @@
     </item>
     
     <item>
-      <title></title>
-      <link>/docs/systems/filecoin_token/multisig/multisig_actor_old/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_token/multisig/multisig_actor_old/</guid>
-      <description>Multisig Account Actor (DEPRECATED)  Code Cid: &amp;lt;codec:raw&amp;gt;&amp;lt;mhType:identity&amp;gt;&amp;lt;&amp;quot;multisig&amp;quot;&amp;gt;  A basic multisig account actor. Allows sending of messages like a normal account actor, but with the requirement of M of N parties agreeing to the operation. Completed and/or cancelled operations stick around in the actors state until explicitly cleared out. Proposers may cancel transactions they propose, or transactions by proposers who are no longer approved signers.
-Self modification methods (add/remove signer, change requirement) are called by doing a multisig transaction invoking the desired method on the contract itself.</description>
-    </item>
-    
-    <item>
-      <title></title>
-      <link>/docs/systems/filecoin_token/payment_channels/payment_channel_actor_old/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_token/payment_channels/payment_channel_actor_old/</guid>
-      <description>Payment Channel Actor (DEPRECATED)  Code Cid: &amp;lt;codec:raw&amp;gt;&amp;lt;mhType:identity&amp;gt;&amp;lt;&amp;quot;paych&amp;quot;&amp;gt;  The payment channel actor manages the on-chain state of a point to point payment channel.
-type PaymentChannel struct { from Address to Address toSend TokenAmount closingAt UInt minCloseHeight UInt laneStates {UInt:LaneState} } representation tuple type SignedVoucher struct { TimeLock BlockHeight SecretPreimage Bytes Extra ModVerifyParams Lane Uint Nonce Uint Merges []Merge Amount TokenAmount MinCloseHeight Uint Signature Signature } type ModVerifyParams struct { Actor Address Method Uint Data Bytes } type Merge struct { Lane Uint Nonce Uint } type LaneState struct { Closed bool Redeemed TokenAmount Nonce Uint } type PaymentChannelMethod union { | PaymentChannelConstructor 0 | UpdateChannelState 1 | Close 2 | Collect 3 } representation keyed Methods    Name Method ID     Constructor 1   UpdateChannelState 2   Close 3   Collect 4    Constructor Parameters</description>
-    </item>
-    
-    <item>
-      <title></title>
-      <link>/docs/systems/filecoin_vm/sysactors/account_actor_old/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_vm/sysactors/account_actor_old/</guid>
-      <description>Account Actor  Code Cid: &amp;lt;codec:raw&amp;gt;&amp;lt;mhType:identity&amp;gt;&amp;lt;&amp;quot;account&amp;quot;&amp;gt;  The Account actor is the actor used for normal keypair backed accounts on the filecoin network.
-type AccountActorState struct { address Address } Methods    Name Method ID     AccountConstructor 1   GetAddress 2    type AccountConstructor struct { }  GetAddress Parameters
-type GetAddress struct { } representation tuple Algorithm
-func GetAddress() Address { return self.</description>
-    </item>
-    
-    <item>
-      <title></title>
-      <link>/docs/systems/filecoin_vm/sysactors/init_actor_old/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_vm/sysactors/init_actor_old/</guid>
-      <description>Init Actor  Code Cid: &amp;lt;codec:raw&amp;gt;&amp;lt;mhType:identity&amp;gt;&amp;lt;&amp;quot;init&amp;quot;&amp;gt;  The init actor is responsible for creating new actors on the filecoin network. This is a built-in actor and cannot be replicated. In the future, this actor will be responsible for loading new code into the system (for user programmable actors). ID allocation for user instantiated actors starts at 100. This means that NextID will initially be set to 100.
-type InitActorState struct { addressMap {Address:ID}&amp;lt;Hamt&amp;gt; nextId UInt } Methods    Name Method ID     Constructor 1   Exec 2   GetIdForAddress 3    Constructor Parameters</description>
-    </item>
-    
-    <item>
       <title>About this specification</title>
       <link>/docs/intro/process/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -77,8 +35,7 @@ type InitActorState struct { addressMap {Address:ID}&amp;lt;Hamt&amp;gt; nextId 
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_vm/sysactors/account_actor/</guid>
-      <description>(You can see the old AccountActor here )
-import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; type AccountActorCode struct {} type AccountActorState struct { Address addr.Address }  package sysactors import ( ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; exitcode &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&amp;#34; ) func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput { // Nothing. intentionally left blank. 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr) return rt.SuccessReturn() } func (a *AccountActorCode_I) InvokeMethod(rt vmr.Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput { switch method { case actor.</description>
+      <description> import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; type AccountActorCode struct {} type AccountActorState struct { Address addr.Address }  package account import ( ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; ) type InvocOutput = vmr.InvocOutput func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput { // Nothing. intentionally left blank. 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr) return rt.SuccessReturn() } func (st *AccountActorState_I) CID() ipld.CID { panic(&amp;#34;TODO&amp;#34;) }  </description>
     </item>
     
     <item>
@@ -182,7 +139,7 @@ The response contains the requested chain in reverse iteration order.</descripti
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_vm/sysactors/cron_actor/</guid>
-      <description>import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type CronActorState struct { // Cron has no internal state } type CronTableEntry struct { ToAddr addr.Address MethodNum actor.MethodNum } type CronActorCode struct { // Entries is a set of actors (and corresponding methods) to call during EpochTick.  // This can be done a bunch of ways. We do it this way here to make it easy to add  // a handler to Cron elsewhere in the spec code.</description>
+      <description>import actors &amp;#34;github.com/filecoin-project/specs/actors&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type CronActorState struct { // Cron has no internal state } type CronTableEntry struct { ToAddr addr.Address MethodNum actors.MethodNum } type CronActorCode struct { // Entries is a set of actors (and corresponding methods) to call during EpochTick.  // This can be done a bunch of ways. We do it this way here to make it easy to add  // a handler to Cron elsewhere in the spec code.</description>
     </item>
     
     <item>
@@ -361,15 +318,6 @@ Further more, every full node must implement and offer the bitswap protocol and 
     </item>
     
     <item>
-      <title>GraphStore - IPLD Data Storage</title>
-      <link>/docs/libraries/ipld/graphstore/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/libraries/ipld/graphstore/</guid>
-      <description> // imported as ipld.Store type GraphStore struct { Get(cid CID) (Object, error) Put(o Object) (CID, error) }  </description>
-    </item>
-    
-    <item>
       <title>GraphSync</title>
       <link>/docs/libraries/ipfs/graphsync/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -395,8 +343,7 @@ All Systems, as defined in this document, require the following:
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_vm/sysactors/init_actor/</guid>
-      <description>(You can see the old InitActor here )
-import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: addr.ActorID} NextID addr.ActorID NetworkName string // Allocates a new ID and maps another address to it. Returns the ID-address.  MapAddressToNewID(address addr.Address) addr.Address // Resolves an address to an ID-address, if possible. Returns the argument if un-mapped.  ResolveAddress(address addr.Address) addr.</description>
+      <description>import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import actors &amp;#34;github.com/filecoin-project/specs/actors&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: addr.ActorID} NextID addr.ActorID NetworkName string // Allocates a new ID and maps another address to it. Returns the ID-address.  MapAddressToNewID(address addr.Address) addr.Address // Resolves an address to an ID-address, if possible. Returns the argument if un-mapped.  ResolveAddress(address addr.Address) addr.Address } type InitActorCode struct { Constructor(r vmr.</description>
     </item>
     
     <item>
@@ -447,8 +394,7 @@ Upon receiving the message, its validity must be checked: the signature must be 
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_token/multisig/multisig_actor/</guid>
-      <description>(You can see the old Multisig Actor here )
-import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; type TxSeqNo UVarint type NumRequired UVarint type EpochDuration UVarint type Epoch UVarint type MultisigActor struct { signers [address.Address] required NumRequired nextTxId TxSeqNo initialBalance actor.TokenAmount startingBlock Epoch unlockDuration EpochDuration // transactions {TxSeqNo: Transaction} // TODO Transaction type does not exist  Construct( signers [address.Address] required NumRequired unlockDuration EpochDuration ) Propose( to address.Address value actor.TokenAmount method string params Bytes ) TxSeqNo Approve(txid TxSeqNo) Cancel(txid TxSeqNo) ClearCompleted() AddSigner(signer address.</description>
+      <description>import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actors &amp;#34;github.com/filecoin-project/specs/actors&amp;#34; type TxSeqNo UVarint type NumRequired UVarint type EpochDuration UVarint type Epoch UVarint type MultisigActor struct { signers [address.Address] required NumRequired nextTxId TxSeqNo initialBalance actors.TokenAmount startingBlock Epoch unlockDuration EpochDuration // transactions {TxSeqNo: Transaction} // TODO Transaction type does not exist  Construct( signers [address.Address] required NumRequired unlockDuration EpochDuration ) Propose( to address.Address value actors.TokenAmount method string params Bytes ) TxSeqNo Approve(txid TxSeqNo) Cancel(txid TxSeqNo) ClearCompleted() AddSigner(signer address.</description>
     </item>
     
     <item>
@@ -466,7 +412,7 @@ import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/ac
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_nodes/node_types/node/</guid>
-      <description> import repo &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/repository&amp;#34; import filestore &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import message_pool &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/message_pool&amp;#34; import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; import key_store &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/key_store&amp;#34; type FilecoinNode struct { Node libp2p.Node Repository repo.Repository FileStore filestore.FileStore Clock clock.UTCClock LocalGraph ipld.GraphStore KeyStore key_store.KeyStore MessagePool message_pool.MessagePoolSubsystem }  </description>
+      <description> import repo &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/repository&amp;#34; import filestore &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import message_pool &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/message_pool&amp;#34; type FilecoinNode struct { Node libp2p.Node Repository repo.Repository FileStore filestore.FileStore Clock clock.UTCClock MessagePool message_pool.MessagePoolSubsystem }  </description>
     </item>
     
     <item>
@@ -475,8 +421,7 @@ import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/ac
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_token/payment_channels/payment_channel_actor/</guid>
-      <description>(You can see the old Payment Channel Actor here )
-type Voucher struct {} type VouchersApprovalResponse struct {} type PieceInclusionProof struct {} type PaymentChannelActor struct { RedeemVoucherWithApproval(voucher Voucher) RedeemVoucherWithPIP(voucher Voucher, pip PieceInclusionProof) }  </description>
+      <description> type Voucher struct {} type VouchersApprovalResponse struct {} type PieceInclusionProof struct {} type PaymentChannelActor struct { RedeemVoucherWithApproval(voucher Voucher) RedeemVoucherWithPIP(voucher Voucher, pip PieceInclusionProof) }  </description>
     </item>
     
     <item>
@@ -505,7 +450,7 @@ The basic premise is this: User A wants to be able to send many small payments t
       
       <guid>/docs/systems/filecoin_files/piece/piece_store/</guid>
       <description>A PieceStore is an object that can store and retrieve pieces from some local storage. The PieceStore additionally keeps an index of pieces.
-import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; type PieceID UVarint // PieceStore is an object that stores pieces into some local storage. // it is internally backed by an IpldStore. type PieceStore struct { Store ipld.Store Index {PieceID: Piece} Get(i PieceID) struct {p Piece, e error} Put(p Piece) error Delete(i PieceID) error }  </description>
+import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; type PieceID UVarint // PieceStore is an object that stores pieces into some local storage. // it is internally backed by an IpldStore. type PieceStore struct { Store ipld.GraphStore Index {PieceID: Piece} Get(i PieceID) struct {p Piece, e error} Put(p Piece) error Delete(i PieceID) error }  </description>
     </item>
     
     <item>
@@ -572,7 +517,7 @@ Encoding On-chain data for randomness Any randomness derived from on-chain value
       
       <guid>/docs/systems/filecoin_markets/retrieval_market/retrieval_client/</guid>
       <description>Client Dependencies The Retrieval Client Depends On The Following Dependencies
- Host: A libp2p host (set setup the libp2p protocols) Filecoin Node: A node implementation to query the chain for pieces and to setup and manage payment channels BlockStore: Same as one used by data transfer module Data Transfer: V1 only &amp;ndash;Module used for transferring payload. Writes to the blockstore.  API import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import libp2p &amp;#34;github.</description>
+ Host: A libp2p host (set setup the libp2p protocols) Filecoin Node: A node implementation to query the chain for pieces and to setup and manage payment channels BlockStore: Same as one used by data transfer module Data Transfer: V1 only &amp;ndash;Module used for transferring payload. Writes to the blockstore.  API import actors &amp;#34;github.com/filecoin-project/specs/actors&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import libp2p &amp;#34;github.</description>
     </item>
     
     <item>
@@ -613,7 +558,7 @@ import piece &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/p
       
       <guid>/docs/systems/filecoin_markets/retrieval_market/retrieval_provider/</guid>
       <description>Provider Dependencies The Retrieval Provider Depends On The Following Dependencies
- Host: A libp2p host (set setup the libp2p protocols) Filecoin Node: A node implementation to query the chain for pieces and to setup and manage payment channels StorageMining Subsystem: For unsealing sectors BlockStore: Same as one used by data transfer module Data Transfer: V1 only &amp;ndash; Module used for transferring payload. Reads from the blockstore.  API import actor &amp;#34;github.</description>
+ Host: A libp2p host (set setup the libp2p protocols) Filecoin Node: A node implementation to query the chain for pieces and to setup and manage payment channels StorageMining Subsystem: For unsealing sectors BlockStore: Same as one used by data transfer module Data Transfer: V1 only &amp;ndash; Module used for transferring payload. Reads from the blockstore.  API import actors &amp;#34;github.</description>
     </item>
     
     <item>
@@ -749,7 +694,7 @@ Introduction Background on Proof-of-Replication Proof-of-Replication enables a p
       <guid>/docs/systems/filecoin_markets/storage_market/storage_client/</guid>
       <description>The StorageClient is a module that discovers miners, determines their asks, and proposes deals to StorageProviders. It also tracks deals as they move through the deal flow. Note that any address registered as a StorageMarketParticipant with the StorageMarketActor can be used with the StorageClient. A single participant can be a client, provider, or both at the same time.
 &amp;ndash;
-import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import libp2p &amp;#34;github.</description>
+import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&amp;#34; import actors &amp;#34;github.com/filecoin-project/specs/actors&amp;#34; import libp2p &amp;#34;github.</description>
     </item>
     
     <item>
@@ -787,8 +732,7 @@ A deal has the following states:
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/storage_mining/storage_miner_actor/</guid>
-      <description>(You can see the old Storage Miner Actor here )
-StorageMinerActor interface import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import actor_util &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&amp;#34; import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&amp;#34; import filcrypto &amp;#34;github.com/filecoin-project/specs/algorithms/crypto&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import sealing &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; type MinerPoStState union { // Normal operation: The miner has passed either an ElectionPoSt or a SurprisePoSt  // sufficiently recently.  OK struct { LastSuccessfulPoSt block.ChainEpoch } // SurprisePoSt challenge state: The miner has not submitted timely ElectionPoSts,  // and as a result, the system has fallen back to proving storage via SurprisePoSt.</description>
+      <description>StorageMinerActor interface import actors &amp;#34;github.com/filecoin-project/specs/actors&amp;#34; import autil &amp;#34;github.com/filecoin-project/specs/actors/util&amp;#34; import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&amp;#34; import filcrypto &amp;#34;github.com/filecoin-project/specs/algorithms/crypto&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import sealing &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; type MinerPoStState union { // Normal operation: The miner has passed either an ElectionPoSt or a SurprisePoSt  // sufficiently recently.  OK struct { LastSuccessfulPoSt block.ChainEpoch } // SurprisePoSt challenge state: The miner has not submitted timely ElectionPoSts,  // and as a result, the system has fallen back to proving storage via SurprisePoSt.</description>
     </item>
     
     <item>
@@ -816,7 +760,7 @@ Active Miner Mining Cycle In order to mine blocks on the Filecoin blockchain a m
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_blockchain/storage_power_consensus/storage_power_actor/</guid>
-      <description>StoragePowerActor interface import actor_util &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; type PowerTableHAMT {addr.Address: block.StoragePower} // TODO: convert address to ActorID  type MinerEventsHAMT {block.ChainEpoch: actor_util.MinerEventSetHAMT} type StoragePowerActorState struct { TotalNetworkPower block.StoragePower PowerTable PowerTableHAMT EscrowTable actor_util.BalanceTableHAMT // Metadata cached for efficient processing of sector/challenge events.  CachedDeferredCronEvents MinerEventsHAMT PoStDetectedFaultMiners actor_util.MinerSetHAMT ClaimedPower PowerTableHAMT NominalPower PowerTableHAMT NumMinersMeetingMinPower int _slashPledgeCollateral(address addr.Address, amount actor.TokenAmount) actor.TokenAmount _selectMinersToSurprise(challengeCount int, randomness util.Randomness) [addr.Address] _addClaimedPowerForSector( minerAddr addr.</description>
+      <description>StoragePowerActor interface import actor_util &amp;#34;github.com/filecoin-project/specs/actors/util&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import actors &amp;#34;github.com/filecoin-project/specs/actors&amp;#34; type PowerTableHAMT {addr.Address: block.StoragePower} // TODO: convert address to ActorID  type MinerEventsHAMT {block.ChainEpoch: actor_util.MinerEventSetHAMT} type StoragePowerActorState struct { TotalNetworkPower block.StoragePower PowerTable PowerTableHAMT EscrowTable actor_util.BalanceTableHAMT // Metadata cached for efficient processing of sector/challenge events.  CachedDeferredCronEvents MinerEventsHAMT PoStDetectedFaultMiners actor_util.MinerSetHAMT ClaimedPower PowerTableHAMT NominalPower PowerTableHAMT NumMinersMeetingMinPower int _slashPledgeCollateral(address addr.Address, amount actors.TokenAmount) actors.TokenAmount _selectMinersToSurprise(challengeCount int, randomness util.Randomness) [addr.Address] _addClaimedPowerForSector( minerAddr addr.</description>
     </item>
     
     <item>
@@ -844,15 +788,6 @@ Active Miner Mining Cycle In order to mine blocks on the Filecoin blockchain a m
       
       <guid>/docs/libraries/ipfs/unixfs/</guid>
       <description></description>
-    </item>
-    
-    <item>
-      <title>Usage in Systems</title>
-      <link>/docs/systems/filecoin_nodes/repository/usage/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_nodes/repository/usage/</guid>
-      <description>TODO: - Explain how repo is used with systems and subsystems - compartmentalized local storage - store ipld datastructures of stateful objects</description>
     </item>
     
     <item>

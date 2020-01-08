@@ -29,15 +29,6 @@
     </item>
     
     <item>
-      <title>GraphStore - IPLD Data Storage</title>
-      <link>/docs/libraries/ipld/graphstore/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/libraries/ipld/graphstore/</guid>
-      <description> // imported as ipld.Store type GraphStore struct { Get(cid CID) (Object, error) Put(o Object) (CID, error) }  </description>
-    </item>
-    
-    <item>
       <title>Selectors - IPLD Query Language</title>
       <link>/docs/libraries/ipld/selectors/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>

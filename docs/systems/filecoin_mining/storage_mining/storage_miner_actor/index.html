@@ -971,32 +971,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+<a href="../../../../../#systems__filecoin_nodes__repository__key_store" class="menu-item depth-4">
     
     
-        KeyStore &amp; user keys
+        Key Store
     
 </a>
 
 
 
 <ul class="menu-item-section depth-4">
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
 
 </ul>
 
@@ -1024,37 +1008,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         IpldStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
-    
-    
-        Usage in Systems
     
 </a>
 
@@ -1123,37 +1076,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Clock
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
-    
-    
-        Key Store
     
 </a>
 
@@ -3572,39 +3494,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#libraries__ipld__graphstore" class="menu-item depth-3">
-    
-    
-        GraphStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4735,8 +4624,6 @@ https://github.com/alex-shpak/hugo-book
 
 <div id="systems__filecoin_mining__storage_mining__storage_miner_actor__storage_miner_actor"></div>
 
-<p>(You can see the <em>old</em> Storage Miner Actor <a href="docs/systems/filecoin_mining/storage_mining/storage_miner_actor_old">here</a> )</p>
-
 <h1 id="storagemineractor-interface"><code>StorageMinerActor</code> interface</h1>
 
 
@@ -4757,9 +4644,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+<span class="kn">import</span> <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
 <span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
@@ -4801,7 +4687,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">SectorOnChainInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">State</span>                       <span class="nx">SectorState</span>
     <span class="nx">Info</span>                        <span class="nx">sealing</span><span class="p">.</span><span class="nx">SectorPreCommitInfo</span>  <span class="c1">// Also contains Expiration field.
-</span><span class="c1"></span>    <span class="nx">PreCommitDeposit</span>            <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+</span><span class="c1"></span>    <span class="nx">PreCommitDeposit</span>            <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="nx">PreCommitEpoch</span>              <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="nx">ActivationEpoch</span>             <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if still in PreCommit state.
 </span><span class="c1"></span>    <span class="nx">DeclaredFaultEpoch</span>          <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if not currently declared faulted.
@@ -4828,13 +4714,13 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">ProvingSet</span>  <span class="nx">SectorNumberSetHAMT</span>
     <span class="nx">Info</span>        <span class="nx">MinerInfo</span>
 
-    <span class="nf">_getStorageWeightDescForSector</span><span class="p">(</span><span class="nx">sectorNumber</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">SectorStorageWeightDesc</span>
-    <span class="nf">_getStorageWeightDescForSectorMaybe</span><span class="p">(</span><span class="nx">sectorNumber</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">ret</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">SectorStorageWeightDesc</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
-    <span class="nf">_getStorageWeightDescsForSectors</span><span class="p">(</span><span class="nx">sectorNumbers</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">])</span> <span class="p">[</span><span class="nx">actor_util</span><span class="p">.</span><span class="nx">SectorStorageWeightDesc</span><span class="p">]</span>
+    <span class="nf">GetStorageWeightDescForSectorMaybe</span><span class="p">(</span><span class="nx">sectorNumber</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">ret</span> <span class="nx">autil</span><span class="p">.</span><span class="nx">SectorStorageWeightDesc</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
+    <span class="nf">_getStorageWeightDescForSector</span><span class="p">(</span><span class="nx">sectorNumber</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="nx">autil</span><span class="p">.</span><span class="nx">SectorStorageWeightDesc</span>
+    <span class="nf">_getStorageWeightDescsForSectors</span><span class="p">(</span><span class="nx">sectorNumbers</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">])</span> <span class="p">[</span><span class="nx">autil</span><span class="p">.</span><span class="nx">SectorStorageWeightDesc</span><span class="p">]</span>
 
     <span class="nf">_getSectorDealIDsAssert</span><span class="p">(</span><span class="nx">sectorNumber</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealIDs</span>
 
-    <span class="nf">_verifySurprisePoStMeetsTargetReq</span><span class="p">(</span><span class="nx">candidate</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">VerifySurprisePoStMeetsTargetReq</span><span class="p">(</span><span class="nx">candidate</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageMinerActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4892,21 +4778,17 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_mining</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_miner</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+    <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
     <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
     <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
     <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
     <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-    <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&#34;</span>
     <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/indices&#34;</span>
-    <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
-
-<span class="kd">var</span> <span class="nx">Assert</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Assert</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getSectorOnChainInfo</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">info</span> <span class="nx">SectorOnChainInfo</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">sectorInfo</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Sectors</span><span class="p">()[</span><span class="nx">sectorNo</span><span class="p">]</span>
@@ -4932,13 +4814,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getStorageWeightDescForSector</span><span class="p">(</span><span class="nx">sectorNumber</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="nx">SectorStorageWeightDesc</span> <span class="p">{</span>
-    <span class="nx">ret</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getStorageWeightDescForSectorMaybe</span><span class="p">(</span><span class="nx">sectorNumber</span><span class="p">)</span>
-    <span class="nf">Assert</span><span class="p">(</span><span class="nx">found</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nx">ret</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getStorageWeightDescForSectorMaybe</span><span class="p">(</span><span class="nx">sectorNumber</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">ret</span> <span class="nx">SectorStorageWeightDesc</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">GetStorageWeightDescForSectorMaybe</span><span class="p">(</span><span class="nx">sectorNumber</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">ret</span> <span class="nx">SectorStorageWeightDesc</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">sectorInfo</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Sectors</span><span class="p">()[</span><span class="nx">sectorNumber</span><span class="p">]</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
         <span class="nx">ret</span> <span class="p">=</span> <span class="kc">nil</span>
@@ -4953,6 +4829,12 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
     <span class="nx">ok</span> <span class="p">=</span> <span class="kc">true</span>
     <span class="k">return</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getStorageWeightDescForSector</span><span class="p">(</span><span class="nx">sectorNumber</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="nx">SectorStorageWeightDesc</span> <span class="p">{</span>
+    <span class="nx">ret</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">GetStorageWeightDescForSectorMaybe</span><span class="p">(</span><span class="nx">sectorNumber</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">found</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">ret</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getStorageWeightDescsForSectors</span><span class="p">(</span><span class="nx">sectorNumbers</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">[]</span><span class="nx">SectorStorageWeightDesc</span> <span class="p">{</span>
@@ -5021,7 +4903,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">ret</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_verifySurprisePoStMeetsTargetReq</span><span class="p">(</span><span class="nx">candidate</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">VerifySurprisePoStMeetsTargetReq</span><span class="p">(</span><span class="nx">candidate</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="c1">// TODO: Determine what should be the acceptance criterion for sector numbers proven in SurprisePoSt proofs.
 </span><span class="c1"></span>    <span class="nf">TODO</span><span class="p">()</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
@@ -5058,10 +4940,14 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_mining</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_miner</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+    <span class="s">&#34;math/big&#34;</span>
+
+    <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+    <span class="nx">serde</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/serde&#34;</span>
+    <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
     <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
     <span class="nx">filproofs</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto/filproofs&#34;</span>
     <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
@@ -5069,10 +4955,8 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
     <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
     <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
-    <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
     <span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
-    <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_util&#34;</span>
     <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/indices&#34;</span>
     <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
@@ -5155,8 +5039,8 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
         <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
         <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_OnMinerSurprisePoStSuccess</span><span class="p">,</span>
-        <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{},</span>
-        <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="kc">nil</span><span class="p">,</span>
+        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="p">)</span>
 <span class="p">}</span>
 
@@ -5208,11 +5092,11 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
         <span class="nx">addr</span><span class="p">.</span><span class="nx">StorageMarketActorAddr</span><span class="p">,</span>
         <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StorageMarketActor_OnMinerSectorPreCommit_VerifyDealsOrAbort</span><span class="p">,</span>
-        <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span>
-            <span class="nx">deal</span><span class="p">.</span><span class="nf">Serialize_DealIDs</span><span class="p">(</span><span class="nx">info</span><span class="p">.</span><span class="nf">DealIDs</span><span class="p">()),</span>
-            <span class="nx">sector</span><span class="p">.</span><span class="nf">Serialize_SectorPreCommitInfo</span><span class="p">(</span><span class="nx">info</span><span class="p">),</span>
-        <span class="p">},</span>
-        <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
+            <span class="nx">info</span><span class="p">.</span><span class="nf">DealIDs</span><span class="p">(),</span>
+            <span class="nx">info</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="p">)</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="p">=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
@@ -5223,7 +5107,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">PreCommitDeposit_</span><span class="p">:</span> <span class="nx">depositReq</span><span class="p">,</span>
         <span class="nx">PreCommitEpoch_</span><span class="p">:</span>   <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(),</span>
         <span class="nx">ActivationEpoch_</span><span class="p">:</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch_None</span><span class="p">,</span>
-        <span class="nx">DealWeight_</span><span class="p">:</span>       <span class="nx">util</span><span class="p">.</span><span class="nf">BigFromInt</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+        <span class="nx">DealWeight_</span><span class="p">:</span>       <span class="o">*</span><span class="nx">big</span><span class="p">.</span><span class="nf">NewInt</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span>
     <span class="p">}</span>
     <span class="nx">st</span><span class="p">.</span><span class="nf">Sectors</span><span class="p">()[</span><span class="nx">info</span><span class="p">.</span><span class="nf">SectorNumber</span><span class="p">()]</span> <span class="p">=</span> <span class="nx">newSectorInfo</span>
 
@@ -5273,21 +5157,23 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
         <span class="nx">addr</span><span class="p">.</span><span class="nx">StorageMarketActorAddr</span><span class="p">,</span>
         <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StorageMarketActor_OnMinerSectorProveCommit_VerifyDealsOrAbort</span><span class="p">,</span>
-        <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span>
-            <span class="nx">deal</span><span class="p">.</span><span class="nf">Serialize_DealIDs</span><span class="p">(</span><span class="nx">preCommitSector</span><span class="p">.</span><span class="nf">Info</span><span class="p">().</span><span class="nf">DealIDs</span><span class="p">()),</span>
-            <span class="nx">sector</span><span class="p">.</span><span class="nf">Serialize_SectorProveCommitInfo</span><span class="p">(</span><span class="nx">info</span><span class="p">),</span>
-        <span class="p">},</span>
-        <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
+            <span class="nx">preCommitSector</span><span class="p">.</span><span class="nf">Info</span><span class="p">().</span><span class="nf">DealIDs</span><span class="p">(),</span>
+            <span class="nx">info</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="p">)</span>
 
-    <span class="nx">dealWeight</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">util</span><span class="p">.</span><span class="nf">Deserialize_BigInt</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">SendQuery</span><span class="p">(</span>
+    <span class="nx">res</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SendQuery</span><span class="p">(</span>
         <span class="nx">addr</span><span class="p">.</span><span class="nx">StorageMarketActorAddr</span><span class="p">,</span>
         <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StorageMarketActor_GetWeightForDealSet</span><span class="p">,</span>
-        <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span>
-            <span class="nx">deal</span><span class="p">.</span><span class="nf">Serialize_DealIDs</span><span class="p">(</span><span class="nx">preCommitSector</span><span class="p">.</span><span class="nf">Info</span><span class="p">().</span><span class="nf">DealIDs</span><span class="p">()),</span>
-        <span class="p">},</span>
-    <span class="p">))</span>
-    <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+        <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
+            <span class="nx">preCommitSector</span><span class="p">.</span><span class="nf">Info</span><span class="p">().</span><span class="nf">DealIDs</span><span class="p">(),</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+    <span class="kd">var</span> <span class="nx">dealWeight</span> <span class="o">*</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span>
+    <span class="nx">err</span> <span class="o">:=</span> <span class="nx">serde</span><span class="p">.</span><span class="nf">Deserialize</span><span class="p">(</span><span class="nx">res</span><span class="p">,</span> <span class="nx">dealWeight</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="p">=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
@@ -5296,7 +5182,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">Info_</span><span class="p">:</span>            <span class="nx">preCommitSector</span><span class="p">.</span><span class="nf">Info</span><span class="p">(),</span>
         <span class="nx">PreCommitEpoch_</span><span class="p">:</span>  <span class="nx">preCommitSector</span><span class="p">.</span><span class="nf">PreCommitEpoch</span><span class="p">(),</span>
         <span class="nx">ActivationEpoch_</span><span class="p">:</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(),</span>
-        <span class="nx">DealWeight_</span><span class="p">:</span>      <span class="nx">dealWeight</span><span class="p">,</span>
+        <span class="nx">DealWeight_</span><span class="p">:</span>      <span class="o">*</span><span class="nx">dealWeight</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="nx">st</span><span class="p">.</span><span class="nf">ProvingSet</span><span class="p">()[</span><span class="nx">info</span><span class="p">.</span><span class="nf">SectorNumber</span><span class="p">()]</span> <span class="p">=</span> <span class="kc">true</span>
@@ -5312,10 +5198,10 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
         <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
         <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_OnSectorProveCommit</span><span class="p">,</span>
-        <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span>
-            <span class="nx">actor_util</span><span class="p">.</span><span class="nf">Serialize_SectorStorageWeightDesc</span><span class="p">(</span><span class="nx">storageWeightDesc</span><span class="p">),</span>
-        <span class="p">},</span>
-        <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
+            <span class="nx">storageWeightDesc</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="p">)</span>
 
     <span class="c1">// Return PreCommit deposit to worker upon successful ProveCommit.
@@ -5352,11 +5238,11 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
         <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
         <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_OnSectorModifyWeightDesc</span><span class="p">,</span>
-        <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span>
-            <span class="nx">actor_util</span><span class="p">.</span><span class="nf">Serialize_SectorStorageWeightDesc</span><span class="p">(</span><span class="nx">storageWeightDescPrev</span><span class="p">),</span>
-            <span class="nx">actor_util</span><span class="p">.</span><span class="nf">Serialize_SectorStorageWeightDesc</span><span class="p">(</span><span class="nx">storageWeightDescNew</span><span class="p">),</span>
-        <span class="p">},</span>
-        <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
+            <span class="nx">storageWeightDescPrev</span><span class="p">,</span>
+            <span class="nx">storageWeightDescNew</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="p">)</span>
 <span class="p">}</span>
 
@@ -5365,7 +5251,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">Info</span><span class="p">().</span><span class="nf">Worker</span><span class="p">())</span>
     <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtTerminateSector</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">sectorNumber</span><span class="p">,</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">SectorTerminationType_UserTermination</span><span class="p">)</span>
+    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtTerminateSector</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">sectorNumber</span><span class="p">,</span> <span class="nx">autil</span><span class="p">.</span><span class="nx">SectorTerminationType_UserTermination</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">////////////
@@ -5464,8 +5350,10 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
             <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
             <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveBegin</span><span class="p">,</span>
-            <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span><span class="nx">actor_util</span><span class="p">.</span><span class="nf">Serialize_SectorStorageWeightDesc</span><span class="p">(</span><span class="nx">storageWeightDesc</span><span class="p">)},</span>
-            <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+            <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
+                <span class="nx">storageWeightDesc</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
         <span class="p">)</span>
 
         <span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">ProvingSet</span><span class="p">(),</span> <span class="nx">sectorNumber</span><span class="p">)</span>
@@ -5479,8 +5367,10 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
             <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
             <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveEnd</span><span class="p">,</span>
-            <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span><span class="nx">actor_util</span><span class="p">.</span><span class="nf">Serialize_SectorStorageWeightDesc</span><span class="p">(</span><span class="nx">storageWeightDesc</span><span class="p">)},</span>
-            <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+            <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
+                <span class="nx">storageWeightDesc</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
         <span class="p">)</span>
 
         <span class="nx">st</span><span class="p">.</span><span class="nf">ProvingSet</span><span class="p">()[</span><span class="nx">sectorNumber</span><span class="p">]</span> <span class="p">=</span> <span class="kc">true</span>
@@ -5511,7 +5401,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// Note: the following test may be false, if sector expiration has been extended by the worker
 </span><span class="c1"></span>    <span class="c1">// in the interim after the Cron request was enrolled.
 </span><span class="c1"></span>    <span class="k">if</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="nx">checkSector</span><span class="p">.</span><span class="nf">Info</span><span class="p">().</span><span class="nf">Expiration</span><span class="p">()</span> <span class="p">{</span>
-        <span class="nx">a</span><span class="p">.</span><span class="nf">_rtTerminateSector</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">sectorNumber</span><span class="p">,</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">SectorTerminationType_NormalExpiration</span><span class="p">)</span>
+        <span class="nx">a</span><span class="p">.</span><span class="nf">_rtTerminateSector</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">sectorNumber</span><span class="p">,</span> <span class="nx">autil</span><span class="p">.</span><span class="nx">SectorTerminationType_NormalExpiration</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
@@ -5529,19 +5419,21 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>        <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
             <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
             <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveEnd</span><span class="p">,</span>
-            <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span><span class="nx">actor_util</span><span class="p">.</span><span class="nf">Serialize_SectorStorageWeightDesc</span><span class="p">(</span><span class="nx">storageWeightDesc</span><span class="p">)},</span>
-            <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+            <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
+                <span class="nx">storageWeightDesc</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
         <span class="p">)</span>
     <span class="p">}</span>
 
     <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
         <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
         <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_OnSectorTerminate</span><span class="p">,</span>
-        <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span>
-            <span class="nx">actor_util</span><span class="p">.</span><span class="nf">Serialize_SectorStorageWeightDesc</span><span class="p">(</span><span class="nx">storageWeightDesc</span><span class="p">),</span>
-            <span class="nx">actor_util</span><span class="p">.</span><span class="nf">Serialize_SectorTerminationType</span><span class="p">(</span><span class="nx">terminationType</span><span class="p">),</span>
-        <span class="p">},</span>
-        <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
+            <span class="nx">storageWeightDesc</span><span class="p">,</span>
+            <span class="nx">terminationType</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="p">)</span>
 
     <span class="nx">a</span><span class="p">.</span><span class="nf">_rtDeleteSectorEntry</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">sectorNumber</span><span class="p">)</span>
@@ -5588,10 +5480,10 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
         <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
         <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_OnMinerSurprisePoStFailure</span><span class="p">,</span>
-        <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span>
-            <span class="nx">util</span><span class="p">.</span><span class="nf">Serialize_Int</span><span class="p">(</span><span class="nx">numConsecutiveFailures</span><span class="p">),</span>
-        <span class="p">},</span>
-        <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
+            <span class="nx">numConsecutiveFailures</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_rtEnrollCronEvent</span><span class="p">(</span>
@@ -5600,11 +5492,11 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
         <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
         <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_OnMinerEnrollCronEvent</span><span class="p">,</span>
-        <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span>
-            <span class="nx">block</span><span class="p">.</span><span class="nf">Serialize_ChainEpoch</span><span class="p">(</span><span class="nx">eventEpoch</span><span class="p">),</span>
-            <span class="nx">sector</span><span class="p">.</span><span class="nf">Serialize_SectorNumber_Array</span><span class="p">(</span><span class="nx">sectorNumbers</span><span class="p">),</span>
-        <span class="p">},</span>
-        <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
+            <span class="nx">eventEpoch</span><span class="p">,</span>
+            <span class="nx">sectorNumbers</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="p">)</span>
 <span class="p">}</span>
 
@@ -5621,7 +5513,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_rtGetStorageWeightDescForSector</span><span class="p">(</span>
-    <span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNumber</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">SectorStorageWeightDesc</span> <span class="p">{</span>
+    <span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNumber</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="nx">autil</span><span class="p">.</span><span class="nx">SectorStorageWeightDesc</span> <span class="p">{</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
     <span class="nx">ret</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getStorageWeightDescForSector</span><span class="p">(</span><span class="nx">sectorNumber</span><span class="p">)</span>
@@ -5630,7 +5522,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_rtGetStorageWeightDescsForSectors</span><span class="p">(</span>
-    <span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNumbers</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">[]</span><span class="nx">actor_util</span><span class="p">.</span><span class="nx">SectorStorageWeightDesc</span> <span class="p">{</span>
+    <span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNumbers</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">[]</span><span class="nx">autil</span><span class="p">.</span><span class="nx">SectorStorageWeightDesc</span> <span class="p">{</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
     <span class="nx">ret</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getStorageWeightDescsForSectors</span><span class="p">(</span><span class="nx">sectorNumbers</span><span class="p">)</span>
@@ -5651,10 +5543,10 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
         <span class="nx">addr</span><span class="p">.</span><span class="nx">StorageMarketActorAddr</span><span class="p">,</span>
         <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StorageMarketActor_OnMinerSectorsTerminate</span><span class="p">,</span>
-        <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span>
-            <span class="nx">deal</span><span class="p">.</span><span class="nf">Serialize_DealIDs</span><span class="p">(</span><span class="nx">dealIDs</span><span class="p">),</span>
-        <span class="p">},</span>
-        <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
+            <span class="nx">dealIDs</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="p">)</span>
 <span class="p">}</span>
 
@@ -5726,16 +5618,16 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">pieceInfos</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">sector</span><span class="p">.</span><span class="nf">Deserialize_PieceInfos</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">SendQuery</span><span class="p">(</span>
         <span class="nx">addr</span><span class="p">.</span><span class="nx">StorageMarketActorAddr</span><span class="p">,</span>
         <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StorageMarketActor_GetPieceInfosForDealIDs</span><span class="p">,</span>
-        <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">{</span>
-            <span class="nx">sector</span><span class="p">.</span><span class="nf">Serialize_SectorSize</span><span class="p">(</span><span class="nx">sectorSize</span><span class="p">),</span>
-            <span class="nx">deal</span><span class="p">.</span><span class="nf">Serialize_DealIDs</span><span class="p">(</span><span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">DealIDs</span><span class="p">()),</span>
-        <span class="p">},</span>
+        <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
+            <span class="nx">sectorSize</span><span class="p">,</span>
+            <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">DealIDs</span><span class="p">(),</span>
+        <span class="p">),</span>
     <span class="p">))</span>
     <span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
 
     <span class="c1">// Unless we enforce a minimum padding amount, this totalPieceSize calculation can be removed.
 </span><span class="c1"></span>    <span class="c1">// Leaving for now until that decision is entirely finalized.
-</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">totalPieceSize</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UInt</span>
+</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">totalPieceSize</span> <span class="kt">uint64</span>
     <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">pieceInfo</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">pieceInfos</span><span class="p">.</span><span class="nf">Items</span><span class="p">()</span> <span class="p">{</span>
         <span class="nx">pieceSize</span> <span class="o">:=</span> <span class="nx">pieceInfo</span><span class="p">.</span><span class="nf">Size</span><span class="p">()</span>
         <span class="nx">totalPieceSize</span> <span class="o">+=</span> <span class="nx">pieceSize</span>

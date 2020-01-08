@@ -971,32 +971,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+<a href="../../../../../#systems__filecoin_nodes__repository__key_store" class="menu-item depth-4">
     
     
-        KeyStore &amp; user keys
+        Key Store
     
 </a>
 
 
 
 <ul class="menu-item-section depth-4">
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
 
 </ul>
 
@@ -1024,37 +1008,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         IpldStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
-    
-    
-        Usage in Systems
     
 </a>
 
@@ -1123,37 +1076,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Clock
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
-    
-    
-        Key Store
     
 </a>
 
@@ -3572,39 +3494,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#libraries__ipld__graphstore" class="menu-item depth-3">
-    
-    
-        GraphStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4765,7 +4654,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
 <span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
@@ -4775,7 +4664,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">Status</span>                 <span class="nx">DealStatus</span>
     <span class="nx">Sender</span>                 <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
     <span class="nx">TotalReceived</span>          <span class="nx">UInt</span>
-    <span class="nx">FundsSpent</span>             <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">FundsSpent</span>             <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">Open</span> <span class="kd">struct</span> <span class="p">{}</span>
@@ -4807,7 +4696,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">Retrieve</span><span class="p">(</span>
         <span class="nx">pieceCID</span>      <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>
         <span class="nx">params</span>        <span class="nx">RetrievalParams</span>
-        <span class="nx">totalFunds</span>    <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">totalFunds</span>    <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
         <span class="nx">miner</span>         <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
         <span class="nx">clientWallet</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
         <span class="nx">minerWallet</span>   <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
@@ -4815,7 +4704,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">SubscribeToEvents</span><span class="p">(</span><span class="nx">subscriber</span> <span class="nx">RetrievalClientSubscriber</span><span class="p">)</span>
 
     <span class="c1">// V1
-</span><span class="c1"></span>    <span class="nf">AddMoreFunds</span><span class="p">(</span><span class="nx">id</span> <span class="nx">RetrievalDealID</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">error</span>
+</span><span class="c1"></span>    <span class="nf">AddMoreFunds</span><span class="p">(</span><span class="nx">id</span> <span class="nx">RetrievalDealID</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">error</span>
     <span class="nf">CancelDeal</span><span class="p">(</span><span class="nx">id</span> <span class="nx">RetrievalDealID</span><span class="p">)</span> <span class="kt">error</span>
     <span class="nf">RetrievalStatus</span><span class="p">(</span><span class="nx">id</span> <span class="nx">RetrievalDealID</span><span class="p">)</span>
     <span class="nf">ListDeals</span><span class="p">()</span> <span class="p">{</span><span class="nx">RetrievalDealID</span><span class="p">:</span> <span class="nx">RetrievalClientDealState</span><span class="p">}</span>

@@ -972,32 +972,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+<a href="../../../#systems__filecoin_nodes__repository__key_store" class="menu-item depth-4">
     
     
-        KeyStore &amp; user keys
+        Key Store
     
 </a>
 
 
 
 <ul class="menu-item-section depth-4">
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
 
 </ul>
 
@@ -1025,37 +1009,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         IpldStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
-    
-    
-        Usage in Systems
     
 </a>
 
@@ -1124,37 +1077,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Clock
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
-    
-    
-        Key Store
     
 </a>
 
@@ -3573,39 +3495,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../#libraries__ipld__graphstore" class="menu-item depth-3">
-    
-    
-        GraphStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4750,14 +4639,20 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Store</span> <span class="nx">GraphStore</span>
-
-<span class="c1">// imported as ipld.Object
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// imported as ipld.Object
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">Object</span> <span class="kd">interface</span> <span class="p">{</span>
     <span class="nf">CID</span><span class="p">()</span> <span class="nx">CID</span>
 
     <span class="c1">// Populate(v interface{}) error
 </span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">GraphStore</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// Retrieves a serialized value from the store by CID. Returns the value and whether it was found.
+</span><span class="c1"></span>    <span class="nf">Get</span><span class="p">(</span><span class="nx">cid</span> <span class="nx">CID</span><span class="p">)</span>           <span class="p">(</span><span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="kt">bool</span><span class="p">)</span>
+
+    <span class="c1">// Puts a serialized value in the store, returning the CID.
+</span><span class="c1"></span>    <span class="nf">Put</span><span class="p">(</span><span class="nx">value</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">)</span>  <span class="p">(</span><span class="nx">cid</span> <span class="nx">CID</span><span class="p">)</span>
+<span class="p">}</span>
 </code></pre></div>
 
 

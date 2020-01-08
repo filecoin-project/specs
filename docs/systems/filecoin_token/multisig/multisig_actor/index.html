@@ -971,32 +971,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+<a href="../../../../../#systems__filecoin_nodes__repository__key_store" class="menu-item depth-4">
     
     
-        KeyStore &amp; user keys
+        Key Store
     
 </a>
 
 
 
 <ul class="menu-item-section depth-4">
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
 
 </ul>
 
@@ -1024,37 +1008,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         IpldStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
-    
-    
-        Usage in Systems
     
 </a>
 
@@ -1123,37 +1076,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Clock
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
-    
-    
-        Key Store
     
 </a>
 
@@ -3572,39 +3494,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#libraries__ipld__graphstore" class="menu-item depth-3">
-    
-    
-        GraphStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4731,9 +4620,7 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  <p>(You can see the <em>old</em> Multisig Actor <a href="docs/systems/filecoin_token/multisig/multisig_actor_old">here</a> )</p>
-
-
+  
 
 
 
@@ -4753,7 +4640,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
 
 <span class="kd">type</span> <span class="nx">TxSeqNo</span> <span class="nx">UVarint</span>
 <span class="kd">type</span> <span class="nx">NumRequired</span> <span class="nx">UVarint</span>
@@ -4764,7 +4651,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">signers</span>         <span class="p">[</span><span class="nx">address</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
     <span class="nx">required</span>        <span class="nx">NumRequired</span>
     <span class="nx">nextTxId</span>        <span class="nx">TxSeqNo</span>
-    <span class="nx">initialBalance</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">initialBalance</span>  <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="nx">startingBlock</span>   <span class="nx">Epoch</span>
     <span class="nx">unlockDuration</span>  <span class="nx">EpochDuration</span>
     <span class="c1">// transactions    {TxSeqNo: Transaction} // TODO Transaction type does not exist
@@ -4776,7 +4663,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">)</span>
     <span class="nf">Propose</span><span class="p">(</span>
         <span class="nx">to</span>      <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">value</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">value</span>   <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
         <span class="nx">method</span>  <span class="kt">string</span>
         <span class="nx">params</span>  <span class="nx">Bytes</span>
     <span class="p">)</span> <span class="nx">TxSeqNo</span>

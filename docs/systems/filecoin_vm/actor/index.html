@@ -972,32 +972,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+<a href="../../../../#systems__filecoin_nodes__repository__key_store" class="menu-item depth-4">
     
     
-        KeyStore &amp; user keys
+        Key Store
     
 </a>
 
 
 
 <ul class="menu-item-section depth-4">
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
 
 </ul>
 
@@ -1025,37 +1009,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         IpldStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
-    
-    
-        Usage in Systems
     
 </a>
 
@@ -1124,37 +1077,6 @@ https://github.com/alex-shpak/hugo-book
     
     
         Clock
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
-    
-    
-        Key Store
     
 </a>
 
@@ -3573,39 +3495,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__ipld__graphstore" class="menu-item depth-3">
-    
-    
-        GraphStore
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4753,32 +4642,8 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// This contains actor things that are _outside_ of VM exection.
 </span><span class="c1">// The VM uses this to execute actors.
 </span><span class="c1"></span>
+<span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
-
-<span class="c1">// TokenAmount is an amount of Filecoin tokens. This type is used within
-</span><span class="c1">// the VM in message execution, to account movement of tokens, payment
-</span><span class="c1">// of VM gas, and more.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">TokenAmount</span> <span class="nx">Int</span>  <span class="c1">// TODO: should be BigInt (attoFIL)
-</span><span class="c1"></span>
-<span class="c1">// MethodNum is an integer that represents a particular method
-</span><span class="c1">// in an actor&#39;s function table. These numbers are used to compress
-</span><span class="c1">// invocation of actor code, and to decouple human language concerns
-</span><span class="c1">// about method names from the ability to uniquely refer to a particular
-</span><span class="c1">// method.
-</span><span class="c1">//
-</span><span class="c1">// Consider MethodNum numbers to be similar in concerns as for
-</span><span class="c1">// offsets in function tables (in programming languages), and for
-</span><span class="c1">// tags in ProtocolBuffer fields. Tags in ProtocolBuffers recommend
-</span><span class="c1">// assigning a unique tag to a field and never reusing that tag.
-</span><span class="c1">// If a field is no longer used, the field name may change but should
-</span><span class="c1">// still remain defined in the code to ensure the tag number is not
-</span><span class="c1">// reused accidentally. The same should apply to the MethodNum
-</span><span class="c1">// associated with methods in Filecoin VM Actors.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">MethodNum</span> <span class="nx">Int</span>
-
-<span class="c1">// MethodParams is an array of objects to pass into a method. This
-</span><span class="c1">// is the list of arguments/parameters.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">MethodParams</span> <span class="p">[</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">]</span>
 
 <span class="c1">// CallSeqNum is an invocation (Call) sequence (Seq) number (Num).
 </span><span class="c1">// This is a value used for securing against replay attacks:
@@ -4842,7 +4707,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// CID of the root of optional actor-specific sub-state.
 </span><span class="c1"></span>    <span class="nx">State</span>       <span class="nx">ActorSubstateCID</span>
     <span class="c1">// Balance of tokens held by this actor.
-</span><span class="c1"></span>    <span class="nx">Balance</span>     <span class="nx">TokenAmount</span>
+</span><span class="c1"></span>    <span class="nx">Balance</span>     <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="c1">// Expected sequence number of the next message sent by this actor.
 </span><span class="c1"></span>    <span class="c1">// Initially zero, incremented when an account actor originates a top-level message.
 </span><span class="c1"></span>    <span class="c1">// Always zero for other actors.
@@ -4900,6 +4765,7 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">actor</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+	<span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
 	<span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
@@ -4911,11 +4777,11 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">Serialization</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
 
 <span class="kd">const</span> <span class="p">(</span>
-	<span class="nx">MethodSend</span>        <span class="p">=</span> <span class="nf">MethodNum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-	<span class="nx">MethodConstructor</span> <span class="p">=</span> <span class="nf">MethodNum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+	<span class="nx">MethodSend</span>        <span class="p">=</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">MethodNum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+	<span class="nx">MethodConstructor</span> <span class="p">=</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">MethodNum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 	<span class="c1">// TODO: remove this once canonical method numbers are finalized
-</span><span class="c1"></span>	<span class="nx">MethodPlaceholder</span> <span class="p">=</span> <span class="nf">MethodNum</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">))</span>
+</span><span class="c1"></span>	<span class="nx">MethodPlaceholder</span> <span class="p">=</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">MethodNum</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">ActorState_I</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span> <span class="p">{</span>
@@ -4985,11 +4851,6 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">ActorSubstateCID</span><span class="p">)</span> <span class="nf">Ref</span><span class="p">()</span> <span class="o">*</span><span class="nx">ActorSubstateCID</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">x</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">TokenAmount_Placeholder</span><span class="p">()</span> <span class="nx">TokenAmount</span> <span class="p">{</span>
-	<span class="nf">TODO</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 

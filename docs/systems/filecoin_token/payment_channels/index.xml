@@ -11,23 +11,12 @@
     
     
     <item>
-      <title></title>
-      <link>/docs/systems/filecoin_token/payment_channels/payment_channel_actor_old/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_token/payment_channels/payment_channel_actor_old/</guid>
-      <description>Payment Channel Actor (DEPRECATED)  Code Cid: &amp;lt;codec:raw&amp;gt;&amp;lt;mhType:identity&amp;gt;&amp;lt;&amp;quot;paych&amp;quot;&amp;gt;  The payment channel actor manages the on-chain state of a point to point payment channel.
-type PaymentChannel struct { from Address to Address toSend TokenAmount closingAt UInt minCloseHeight UInt laneStates {UInt:LaneState} } representation tuple type SignedVoucher struct { TimeLock BlockHeight SecretPreimage Bytes Extra ModVerifyParams Lane Uint Nonce Uint Merges []Merge Amount TokenAmount MinCloseHeight Uint Signature Signature } type ModVerifyParams struct { Actor Address Method Uint Data Bytes } type Merge struct { Lane Uint Nonce Uint } type LaneState struct { Closed bool Redeemed TokenAmount Nonce Uint } type PaymentChannelMethod union { | PaymentChannelConstructor 0 | UpdateChannelState 1 | Close 2 | Collect 3 } representation keyed Methods    Name Method ID     Constructor 1   UpdateChannelState 2   Close 3   Collect 4    Constructor Parameters</description>
-    </item>
-    
-    <item>
       <title>Payment Channel Actor</title>
       <link>/docs/systems/filecoin_token/payment_channels/payment_channel_actor/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_token/payment_channels/payment_channel_actor/</guid>
-      <description>(You can see the old Payment Channel Actor here )
-type Voucher struct {} type VouchersApprovalResponse struct {} type PieceInclusionProof struct {} type PaymentChannelActor struct { RedeemVoucherWithApproval(voucher Voucher) RedeemVoucherWithPIP(voucher Voucher, pip PieceInclusionProof) }  </description>
+      <description> type Voucher struct {} type VouchersApprovalResponse struct {} type PieceInclusionProof struct {} type PaymentChannelActor struct { RedeemVoucherWithApproval(voucher Voucher) RedeemVoucherWithPIP(voucher Voucher, pip PieceInclusionProof) }  </description>
     </item>
     
   </channel>

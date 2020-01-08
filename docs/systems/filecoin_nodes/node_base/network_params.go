@@ -1,9 +1,16 @@
 package node_base
 
 import (
+	actors "github.com/filecoin-project/specs/actors"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 )
+
+/////////////////////////////////////////////////////////////
+// Global
+/////////////////////////////////////////////////////////////
+
+const NETWORK = addr.Address_NetworkID_Testnet
 
 /////////////////////////////////////////////////////////////
 // Commitment
@@ -56,7 +63,7 @@ const SPC_LOOKBACK_SEAL = FINALITY  // should be set to finality
 
 // FIL deposit per sector precommit in Interactive PoRep
 // refunded after ProveCommit but burned if PreCommit expires
-const PRECOMMIT_DEPOSIT_PER_BYTE = actor.TokenAmount(0) // placeholder
-const FAULT_SLASH_PERC_DECLARED = 1                     // placeholder
-const FAULT_SLASH_PERC_DETECTED = 10                    // placeholder
-const FAULT_SLASH_PERC_TERMINATED = 100                 // placeholder
+const PRECOMMIT_DEPOSIT_PER_BYTE = actors.TokenAmount(0) // placeholder
+const FAULT_SLASH_PERC_DECLARED = 1                      // placeholder
+const FAULT_SLASH_PERC_DETECTED = 10                     // placeholder
+const FAULT_SLASH_PERC_TERMINATED = 100                  // placeholder
