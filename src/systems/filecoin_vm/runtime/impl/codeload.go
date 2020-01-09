@@ -2,7 +2,7 @@ package impl
 
 import (
 	abi "github.com/filecoin-project/specs/actors/abi"
-	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+	vmr "github.com/filecoin-project/specs/actors/runtime"
 )
 
 func loadActorCode(codeID abi.ActorCodeID) (vmr.ActorCode, error) {

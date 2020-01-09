@@ -1,11 +1,5 @@
 package exitcode
 
-import (
-	"fmt"
-
-	util "github.com/filecoin-project/specs/util"
-)
-
 type SystemErrorCode int
 type UserDefinedErrorCode int
 
@@ -14,9 +8,6 @@ const (
 	SystemErrorCode_Placeholder      = SystemErrorCode(-(1 << 30))
 	UserDefinedErrorCode_Placeholder = UserDefinedErrorCode(-(1 << 30))
 )
-
-var IMPL_FINISH = util.IMPL_FINISH
-var TODO = util.TODO
 
 // TODO: assign all of these.
 const (
@@ -95,7 +86,6 @@ func (x *ExitCode_I) AllowsStateUpdate() bool {
 }
 
 func (x *ExitCode_I) Equals(ExitCode) bool {
-	IMPL_FINISH()
 	panic("")
 }
 
@@ -105,27 +95,6 @@ func EnsureErrorCode(x ExitCode) ExitCode {
 		x = SystemError(RuntimeAPIError)
 	}
 	return x
-}
-
-type RuntimeError struct {
-	ExitCode ExitCode
-	ErrMsg   string
-}
-
-func (x *RuntimeError) String() string {
-	ret := fmt.Sprintf("Runtime error: %v", x.ExitCode)
-	if x.ErrMsg != "" {
-		ret += fmt.Sprintf(" (\"%v\")", x.ErrMsg)
-	}
-	return ret
-}
-
-func RuntimeError_Make(exitCode ExitCode, errMsg string) *RuntimeError {
-	exitCode = EnsureErrorCode(exitCode)
-	return &RuntimeError{
-		ExitCode: exitCode,
-		ErrMsg:   errMsg,
-	}
 }
 
 func UserDefinedError(e UserDefinedErrorCode) ExitCode {

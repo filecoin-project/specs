@@ -3,11 +3,11 @@ package init
 import (
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
+	vmr "github.com/filecoin-project/specs/actors/runtime"
 	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 )
 
 type InvocOutput = vmr.InvocOutput

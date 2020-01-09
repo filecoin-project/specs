@@ -4,13 +4,13 @@ import (
 	"math"
 
 	abi "github.com/filecoin-project/specs/actors/abi"
+	vmr "github.com/filecoin-project/specs/actors/runtime"
 	serde "github.com/filecoin-project/specs/actors/serde"
 	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
-	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 )
 
 type InvocOutput = vmr.InvocOutput

@@ -1,4 +1,0 @@
-type MinerEntrySpec enum {
-    MinerOnly
-    MinerOrSignable
-}
