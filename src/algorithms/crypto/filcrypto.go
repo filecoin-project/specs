@@ -3,12 +3,12 @@ package crypto
 import (
 	"bytes"
 	"encoding/binary"
-	"math"
-
+	abi "github.com/filecoin-project/specs/actors/abi"
 	util "github.com/filecoin-project/specs/util"
+	"math"
 )
 
-func RandomInt(randomness util.Randomness, nonce int, limit int) int {
+func RandomInt(randomness abi.Randomness, nonce int, limit int) int {
 	nonceBytes := BigEndianBytesFromInt(nonce)
 	input := randomness
 	input = append(input, nonceBytes...)
