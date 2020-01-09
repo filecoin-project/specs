@@ -15,8 +15,13 @@ const NETWORK = addr.Address_NetworkID_Testnet
 // Commitment
 /////////////////////////////////////////////////////////////
 
-// TODO: placeholder epoch value -- this will be set later
-const MAX_PROVE_COMMIT_SECTOR_PERIOD = abi.ChainEpoch(3) // placeholder
+// If a sector PreCommit appear at epoch T, then the corresponding ProveCommit
+// must appear between epochs
+//   (T + MIN_PROVE_COMMIT_SECTOR_EPOCH, T + MAX_PROVE_COMMIT_SECTOR_EPOCH)
+// inclusive.
+// TODO: placeholder epoch values -- will be set later
+const MIN_PROVE_COMMIT_SECTOR_EPOCH = abi.ChainEpoch(5)
+const MAX_PROVE_COMMIT_SECTOR_EPOCH = abi.ChainEpoch(10)
 
 /////////////////////////////////////////////////////////////
 // PoSt

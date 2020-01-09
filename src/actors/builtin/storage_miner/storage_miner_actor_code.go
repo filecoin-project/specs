@@ -172,7 +172,7 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 	UpdateRelease(rt, h, st)
 
 	// Request deferred Cron check for PreCommit expiry check.
-	expiryBound := rt.CurrEpoch() + sector.MAX_PROVE_COMMIT_SECTOR_EPOCH + 1
+	expiryBound := rt.CurrEpoch() + node_base.MAX_PROVE_COMMIT_SECTOR_EPOCH + 1
 	a._rtEnrollCronEvent(rt, expiryBound, []sector.SectorNumber{info.SectorNumber()})
 
 	if info.Expiration() <= rt.CurrEpoch() {
@@ -192,8 +192,8 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		rt.AbortArgMsg("Sector not valid or not in PreCommit state")
 	}
 
-	if rt.CurrEpoch() > preCommitSector.PreCommitEpoch()+sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
-		rt.AbortStateMsg("Deadline exceeded for ProveCommitSector")
+	if rt.CurrEpoch() > preCommitSector.PreCommitEpoch()+node_base.MAX_PROVE_COMMIT_SECTOR_EPOCH || rt.CurrEpoch() < preCommitSector.PreCommitEpoch()+node_base.MIN_PROVE_COMMIT_SECTOR_EPOCH {
+		rt.AbortStateMsg("Invalid ProveCommitSector epoch")
 	}
 
 	TODO()
@@ -449,7 +449,7 @@ func (a *StorageMinerActorCode_I) _rtCheckSectorExpiry(rt Runtime, sectorNumber 
 	}
 
 	if checkSector.State() == SectorState_PreCommit {
-		if rt.CurrEpoch()-checkSector.PreCommitEpoch() > sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
+		if rt.CurrEpoch()-checkSector.PreCommitEpoch() > node_base.MAX_PROVE_COMMIT_SECTOR_EPOCH {
 			a._rtDeleteSectorEntry(rt, sectorNumber)
 			rt.SendFunds(addr.BurntFundsActorAddr, checkSector.PreCommitDeposit())
 		}

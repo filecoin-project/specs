@@ -1,4 +1,3 @@
-import abi "github.com/filecoin-project/specs/actors/abi"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
@@ -16,18 +15,6 @@ type SectorNumber UInt
 type FaultSet CompactSectorSet
 type StorageFaultType int
 
-// AMT from expiration epoch to dealID and to sectorNumber
-// defined as struct to specify helpers
-// effectively an AMT of the form DealExpirationAMT[Expiration][DealID] = PayloadPower
-type DealExpirationAMT struct {
-    Expiration  abi.ChainEpoch  // key
-    Value       DealExpirationValue  // value
-}
-
-type DealExpirationValue struct {
-    ID     deal.DealID  // key
-    Power  abi.StoragePower  // value
-}
 // SectorSize indicates one of a set of possible sizes in the network.
 type SectorSize UInt
 

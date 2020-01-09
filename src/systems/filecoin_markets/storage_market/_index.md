@@ -76,12 +76,11 @@ Execution now moves back to the `StorageClient`
 
 # Publishing
 
-Data is now transferred, both parties have agreed, and it's time for the `StorageProvider` to publish the deal.
+Data is now transferred, both parties have agreed, and it's time to publish the deal. Given that the counter signature on a deal proposal is a standard message signature by the provider and the signed deal is an on-chain message, it is usually the `StorageProvider` that publishes the deal. However, if `StorageProvider` decides to send this signed on-chain message to the client before calling `PublishStorageDeal` then client can publish the deal on chain. Client's funds are not locked until the deal is published and a published deal that is not activated within some window will result in on-chain penalty.
 
 12. First, the `StorageProvider` adds collateral for the deal as needed to the `StorageMarketActor` (using `AddBalance`)
-13. Now, the `StorageProvider` calls `PublishStorageDeals` on the `StorageMarketActor` to publish the deal. It sends the StorageDealProposal signed by the client as well as its own signature in the message to publish the storage deal.
-14. For convenience, the `StorageProvider` responds sends a message to the `StorageClient` on the `Storage Deal Protocol` with the CID of the message it is
-putting on chain
+13. Now, the `StorageProvider` prepares and signs the on-chain `StorageDeal` message with the `StorageDealProposal` signed by the client and its own signature. It can now either send this message back to the client or call `PublishStorageDeals` on the `StorageMarketActor` to publish the deal. It is recommended for `StorageProvider` to send back the signed message before `PublishStorageDeals` is called.
+14. After calling `PublishStorageDeals`, `StorageProvider` sends a message to the `StorageClient` on the `Storage Deal Protocol` with the CID of the message that it is putting on chain for convenience.
 15. If all goes well, the `StorageMarketActor` responds with an on chain `DealID` for the published deal.
 
 
