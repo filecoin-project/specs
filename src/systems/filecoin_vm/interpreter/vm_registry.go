@@ -1,17 +1,18 @@
 package interpreter
 
-import "errors"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import addr "github.com/filecoin-project/go-address"
-import ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
-import vmr "github.com/filecoin-project/specs/actors/runtime"
-import abi "github.com/filecoin-project/specs/actors/abi"
-import builtin "github.com/filecoin-project/specs/actors/builtin"
-import accact "github.com/filecoin-project/specs/actors/builtin/account"
-import cronact "github.com/filecoin-project/specs/actors/builtin/cron"
-import initact "github.com/filecoin-project/specs/actors/builtin/init"
-import spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
-import smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
+import (
+	"errors"
+
+	abi "github.com/filecoin-project/specs/actors/abi"
+	builtin "github.com/filecoin-project/specs/actors/builtin"
+	accact "github.com/filecoin-project/specs/actors/builtin/account"
+	cronact "github.com/filecoin-project/specs/actors/builtin/cron"
+	initact "github.com/filecoin-project/specs/actors/builtin/init"
+	smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
+	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
+	vmr "github.com/filecoin-project/specs/actors/runtime"
+	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
+)
 
 var (
 	ErrActorNotFound = errors.New("Actor Not Found")
@@ -66,12 +67,12 @@ func _registerBuiltinActors() {
 	// wire in CRON actions.
 	// TODO: move this to CronActor's constructor method
 	cron.Entries_ = append(cron.Entries_, &cronact.CronTableEntry_I{
-		ToAddr_:    addr.StoragePowerActorAddr,
+		ToAddr_:    builtin.StoragePowerActorAddr,
 		MethodNum_: ai.Method_StoragePowerActor_OnEpochTickEnd,
 	})
 
 	cron.Entries_ = append(cron.Entries_, &cronact.CronTableEntry_I{
-		ToAddr_:    addr.StorageMarketActorAddr,
+		ToAddr_:    builtin.StorageMarketActorAddr,
 		MethodNum_: ai.Method_StorageMarketActor_OnEpochTickEnd,
 	})
 }

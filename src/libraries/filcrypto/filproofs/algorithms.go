@@ -11,6 +11,7 @@ import (
 	big "math/big"
 
 	addr "github.com/filecoin-project/go-address"
+	abi "github.com/filecoin-project/specs/actors/abi"
 	file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"

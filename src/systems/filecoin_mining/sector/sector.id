@@ -1,6 +1,7 @@
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
+import abi "github.com/filecoin-project/specs/actors/abi"
 
 type Bytes32 Bytes
 type Commitment Bytes32  // TODO

@@ -3,13 +3,14 @@ package reward
 import (
 	"math"
 
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
+	builtin "github.com/filecoin-project/specs/actors/builtin"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	serde "github.com/filecoin-project/specs/actors/serde"
 	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	addr "github.com/filecoin-project/go-address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 )
 
@@ -90,7 +91,7 @@ func (st *RewardActorState_I) _withdrawReward(rt vmr.Runtime, ownerAddr addr.Add
 }
 
 func (a *RewardActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
-	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr)
 
 	// initialize Reward Map with investor accounts
 	panic("TODO")
@@ -103,7 +104,7 @@ func (a *RewardActorCode_I) AwardBlockReward(
 	minerNominalPower abi.StoragePower,
 	currPledge abi.TokenAmount,
 ) {
-	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr)
 
 	inds := rt.CurrIndices()
 	pledgeReq := inds.PledgeCollateralReq(minerNominalPower)
@@ -119,7 +120,7 @@ func (a *RewardActorCode_I) AwardBlockReward(
 	if rewardToGarnish > 0 {
 		// Send fund to SPA for collateral
 		rt.Send(
-			addr.StoragePowerActorAddr,
+			builtin.StoragePowerActorAddr,
 			ai.Method_StoragePowerActor_AddBalance,
 			serde.MustSerializeParams(miner),
 			abi.TokenAmount(rewardToGarnish),

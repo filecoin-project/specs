@@ -1,8 +1,8 @@
 package node_base
 
 import (
-	abi "github.com/filecoin-project/specs/actors/abi"
 	addr "github.com/filecoin-project/go-address"
+	abi "github.com/filecoin-project/specs/actors/abi"
 )
 
 /////////////////////////////////////////////////////////////

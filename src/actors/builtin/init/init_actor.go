@@ -8,7 +8,7 @@ import (
 	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+	util "github.com/filecoin-project/specs/util"
 )
 
 type InvocOutput = vmr.InvocOutput
@@ -18,11 +18,11 @@ type Bytes = abi.Bytes
 var AssertMsg = autil.AssertMsg
 
 func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
-	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr)
 	h := rt.AcquireState()
 	st := &InitActorState_I{
 		AddressMap_:  map[addr.Address]abi.ActorID{}, // TODO: HAMT
-		NextID_:      abi.ActorID(addr.FirstNonSingletonActorId),
+		NextID_:      abi.ActorID(builtin.FirstNonSingletonActorId),
 		NetworkName_: vmr.NetworkName(),
 	}
 	UpdateRelease(rt, h, st)
@@ -62,7 +62,8 @@ func (a *InitActorCode_I) Exec(rt Runtime, execCodeID abi.ActorCodeID, construct
 	})
 
 	return rt.ValueReturn(
-		Bytes(addr.Serialize_Address_Compact(idAddr)))
+		Bytes(idAddr.Bytes()),
+	)
 }
 
 // This method is disabled until proven necessary.
@@ -76,7 +77,9 @@ func (a *InitActorCode_I) Exec(rt Runtime, execCodeID abi.ActorCodeID, construct
 func (s *InitActorState_I) ResolveAddress(address addr.Address) addr.Address {
 	actorID, ok := s.AddressMap()[address]
 	if ok {
-		return addr.Address_Make_ID(addr.Address_NetworkID_Testnet, actorID)
+		idAddr, err := addr.NewIDAddress(uint64(actorID))
+		util.Assert(err == nil)
+		return idAddr
 	}
 	return address
 }
@@ -85,7 +88,9 @@ func (s *InitActorState_I) MapAddressToNewID(address addr.Address) addr.Address 
 	actorID := s.NextID_
 	s.NextID_++
 	s.AddressMap()[address] = actorID
-	return addr.Address_Make_ID(addr.Address_NetworkID_Testnet, actorID)
+	idAddr, err := addr.NewIDAddress(uint64(actorID))
+	util.Assert(err == nil)
+	return idAddr
 }
 
 func _codeIDSupportsExec(callerCodeID abi.ActorCodeID, execCodeID abi.ActorCodeID) bool {

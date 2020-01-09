@@ -3,7 +3,9 @@ package storage_mining
 // import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 // import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import (
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
+	builtin "github.com/filecoin-project/specs/actors/builtin"
 	sminact "github.com/filecoin-project/specs/actors/builtin/storage_miner"
 	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
@@ -14,8 +16,6 @@ import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
-	addr "github.com/filecoin-project/go-address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
@@ -46,7 +46,7 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 
 	unsignedCreationMessage := &msg.UnsignedMessage_I{
 		From_:       ownerAddr,
-		To_:         addr.StoragePowerActorAddr,
+		To_:         builtin.StoragePowerActorAddr,
 		Method_:     ai.Method_StoragePowerActor_CreateMiner,
 		Params_:     serde.MustSerializeParams(ownerAddr, workerAddr, peerId),
 		CallSeqNum_: ownerActor.CallSeqNum(),
@@ -58,12 +58,12 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 	var workerKey filcrypto.SigKeyPair // sms._keyStore().Worker()
 	signedMessage, err := msg.Sign(unsignedCreationMessage, workerKey)
 	if err != nil {
-		return nil, err
+		return addr.Undef, err
 	}
 
 	err = sms.Node().MessagePool().Syncer().SubmitMessage(signedMessage)
 	if err != nil {
-		return nil, err
+		return addr.Undef, err
 	}
 
 	// WAIT for block reception with appropriate response from SPA
@@ -228,7 +228,7 @@ func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateT
 }
 
 func (sms *StorageMiningSubsystem_I) _getStoragePowerActorState(stateTree stateTree.StateTree) spowact.StoragePowerActorState {
-	powerAddr := addr.StoragePowerActorAddr
+	powerAddr := builtin.StoragePowerActorAddr
 	actorState, ok := stateTree.GetActor(powerAddr)
 	util.Assert(ok)
 	substateCID := actorState.State()
@@ -288,12 +288,10 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 		Output_: onChainInfo.Randomness(),
 	}
 
-	// get worker key from minerAddr
-	workerKey, err := sma.Info().Worker().GetKey()
-	if err != nil {
-		return false
-	}
-
+	// TODO if the workerAddress is secp then payload will be the blake2b hash of its public key
+	// and we will need to recover the entire public key from worker before handing off to Verify
+	// example of recover code: https://github.com/ipsn/go-secp256k1/blob/master/secp256.go#L93
+	workerKey := sma.Info().Worker().Payload()
 	if !postRand.Verify(postRandomnessInput, filcrypto.VRFPublicKey(workerKey)) {
 		return false
 	}
@@ -383,8 +381,8 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 }
 
 func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.StateTree, sPoSt sector.OnChainPoStVerifyInfo, gasPrice abi.TokenAmount, gasLimit msg.GasAmount) error {
-
-	workerAddr, err := addr.Address_Make_Key(node_base.NETWORK, addr.KeyHash(sms.Node().Repository().KeyStore().WorkerKey().VRFPublicKey()))
+	// TODO if workerAddr is not a secp key (e.g. BLS) then this will need to be handled differently
+	workerAddr, err := addr.NewSecp256k1Address(sms.Node().Repository().KeyStore().WorkerKey().VRFPublicKey())
 	if err != nil {
 		return err
 	}

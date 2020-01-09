@@ -1,9 +1,11 @@
 package cron
 
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import abi "github.com/filecoin-project/specs/actors/abi"
-import vmr "github.com/filecoin-project/specs/actors/runtime"
-import addr "github.com/filecoin-project/go-address"
+import (
+	abi "github.com/filecoin-project/specs/actors/abi"
+	builtin "github.com/filecoin-project/specs/actors/builtin"
+	vmr "github.com/filecoin-project/specs/actors/runtime"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+)
 
 const (
 	Method_CronActor_EpochTick = actor.MethodPlaceholder + iota
@@ -14,12 +16,12 @@ type Runtime = vmr.Runtime
 
 func (a *CronActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 	// Nothing. intentionally left blank.
-	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr)
 	return rt.SuccessReturn()
 }
 
 func (a *CronActorCode_I) EpochTick(rt vmr.Runtime) InvocOutput {
-	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr)
 
 	// a.Entries is basically a static registry for now, loaded
 	// in the interpreter static registry.

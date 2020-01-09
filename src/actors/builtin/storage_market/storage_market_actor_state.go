@@ -8,8 +8,6 @@ import (
 	actor_util "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
-	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 )
 
 const epochUndefined = abi.ChainEpoch(-1)

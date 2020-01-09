@@ -5,7 +5,6 @@ import (
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -97,11 +96,13 @@ func RT_Address_Is_StorageMiner(rt Runtime, minerAddr addr.Address) bool {
 }
 
 func RT_GetMinerAccountsAssert(rt Runtime, minerAddr addr.Address) (ownerAddr addr.Address, workerAddr addr.Address) {
-	ownerAddr = addr.Deserialize_Address_Compact_Assert(
+	ownerAddr, err := addr.NewFromBytes(
 		rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetOwnerAddr, nil))
+	util.Assert(err == nil)
 
-	workerAddr = addr.Deserialize_Address_Compact_Assert(
+	workerAddr, err = addr.NewFromBytes(
 		rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetWorkerAddr, nil))
+	util.Assert(err == nil)
 
 	return
 }

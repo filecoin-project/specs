@@ -8,8 +8,6 @@ import (
 	actor_util "github.com/filecoin-project/specs/actors/util"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -44,7 +42,7 @@ func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, entryAddr addr.Ad
 
 	UpdateRelease(rt, h, st)
 
-	rt.SendFunds(addr.BurntFundsActorAddr, amountSlashedTotal)
+	rt.SendFunds(builtin.BurntFundsActorAddr, amountSlashedTotal)
 	rt.SendFunds(recipientAddr, amountExtracted)
 }
 
@@ -81,7 +79,7 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 	for _, newDeal := range newStorageDeals {
 		p := newDeal.Proposal()
 
-		if !p.Provider().Equals(providerAddr) {
+		if p.Provider() != providerAddr {
 			rt.AbortArgMsg("Incorrect provider listed in deal")
 		}
 
@@ -118,7 +116,7 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 
 	UpdateRelease(rt, h, st)
 
-	rt.SendFunds(addr.BurntFundsActorAddr, amountSlashedTotal)
+	rt.SendFunds(builtin.BurntFundsActorAddr, amountSlashedTotal)
 }
 
 // Note: in the case of a capacity-commitment sector (one with zero deals), this function should succeed vacuously.
@@ -182,7 +180,7 @@ func (a *StorageMarketActorCode_I) GetWeightForDealSet(rt Runtime, dealIDs deal.
 
 	for _, dealID := range dealIDs.Items() {
 		_, dealP := st._getOnChainDealAssert(dealID)
-		Assert(dealP.Provider().Equals(minerAddr))
+		Assert(dealP.Provider() == minerAddr)
 
 		IMPL_FINISH() // BigInt arithmetic
 		ret += int(dealP.Duration()) * int(dealP.PieceSize().Total())
@@ -201,7 +199,7 @@ func (a *StorageMarketActorCode_I) TerminateDealsOnSlashProviderSector(rt Runtim
 
 	for _, dealID := range dealIDs.Items() {
 		_, dealP := st._rtGetOnChainDealOrAbort(rt, dealID)
-		Assert(dealP.Provider().Equals(minerAddr))
+		Assert(dealP.Provider() == minerAddr)
 
 		// Note: we do not perform the balance transfers here, but rather simply record the flag
 		// to indicate that _processDealSlashed should be called when the deferred state computation
@@ -213,7 +211,7 @@ func (a *StorageMarketActorCode_I) TerminateDealsOnSlashProviderSector(rt Runtim
 }
 
 func (a *StorageMarketActorCode_I) OnEpochTickEnd(rt Runtime) {
-	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.CronActorAddr)
 
 	h, st := a.State(rt)
 
@@ -284,11 +282,11 @@ func (a *StorageMarketActorCode_I) OnEpochTickEnd(rt Runtime) {
 
 	UpdateRelease(rt, h, st)
 
-	rt.SendFunds(addr.BurntFundsActorAddr, amountSlashedTotal)
+	rt.SendFunds(builtin.BurntFundsActorAddr, amountSlashedTotal)
 }
 
 func (a *StorageMarketActorCode_I) Constructor(rt Runtime) {
-	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr)
 	h := rt.AcquireState()
 
 	st := &StorageMarketActorState_I{
@@ -332,7 +330,7 @@ func _rtAbortIfDealAlreadyProven(rt Runtime, deal deal.OnChainDeal) {
 }
 
 func _rtAbortIfDealNotFromProvider(rt Runtime, dealP deal.StorageDealProposal, minerAddr addr.Address) {
-	if !dealP.Provider().Equals(minerAddr) {
+	if dealP.Provider() != minerAddr {
 		rt.AbortStateMsg("Deal has incorrect miner as its provider.")
 	}
 }

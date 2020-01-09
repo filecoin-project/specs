@@ -12,8 +12,8 @@ import (
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
+	util "github.com/filecoin-project/specs/util"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 )
 
@@ -69,9 +69,9 @@ func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Addres
 	vmr.RT_ValidateImmediateCallerIsSignable(rt)
 	ownerAddr := rt.ImmediateCaller()
 
-	newMinerAddr := addr.Deserialize_Address_Compact_Assert(
+	newMinerAddr, err := addr.NewFromBytes(
 		rt.Send(
-			addr.InitActorAddr,
+			builtin.InitActorAddr,
 			ai.Method_InitActor_Exec,
 			serde.MustSerializeParams(
 				builtin.StorageMinerActorCodeID,
@@ -83,6 +83,7 @@ func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Addres
 			abi.TokenAmount(0),
 		).ReturnValue(),
 	)
+	util.Assert(err == nil)
 
 	h, st := a.State(rt)
 	newTable, ok := autil.BalanceTable_WithNewAddressEntry(st.EscrowTable(), newMinerAddr, rt.ValueReceived())
@@ -252,14 +253,14 @@ func (a *StoragePowerActorCode_I) ReportVerifiedConsensusFault(rt Runtime, slash
 
 // Called by Cron.
 func (a *StoragePowerActorCode_I) OnEpochTickEnd(rt Runtime) {
-	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.CronActorAddr)
 
 	a._rtInitiateNewSurprisePoStChallenges(rt)
 	a._rtProcessDeferredCronEvents(rt)
 }
 
 func (a *StoragePowerActorCode_I) Constructor(rt Runtime) {
-	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr)
 	h := rt.AcquireState()
 
 	st := &StoragePowerActorState_I{
@@ -359,7 +360,7 @@ func (a *StoragePowerActorCode_I) _rtSlashPledgeCollateral(rt Runtime, minerAddr
 	amountSlashed := st._slashPledgeCollateral(minerAddr, amountToSlash)
 	UpdateRelease(rt, h, st)
 
-	rt.SendFunds(addr.BurntFundsActorAddr, amountSlashed)
+	rt.SendFunds(builtin.BurntFundsActorAddr, amountSlashed)
 }
 
 func (a *StoragePowerActorCode_I) _rtDeleteMinerActor(rt Runtime, minerAddr addr.Address) {
@@ -379,5 +380,5 @@ func (a *StoragePowerActorCode_I) _rtDeleteMinerActor(rt Runtime, minerAddr addr
 	UpdateRelease(rt, h, st)
 
 	rt.DeleteActor(minerAddr)
-	rt.SendFunds(addr.BurntFundsActorAddr, amountSlashed)
+	rt.SendFunds(builtin.BurntFundsActorAddr, amountSlashed)
 }

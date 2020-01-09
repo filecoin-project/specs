@@ -8,7 +8,6 @@ import (
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 )
 
 func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(minerPower abi.StoragePower) bool {
