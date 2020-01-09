@@ -218,7 +218,8 @@ The Replication Algorithm  proceeds as follows:
 
 - Calculate `ReplicaID` using `Hash` (SHA256):
 
-`ReplicaID` is a 32-byte array constructed by hashing the concatenation of the following values
+`ReplicaID` is a 32-byte array constructed by hashing the concatenation of the following values:
+
 - `ProverId` is a 32-byte array uniquely identifying a prover.
 - `SectorNumber` is an unsigned 64-bit integer in little-endian encoding represented as an 8-byte array.
 - `RandomSeed` is a 32-byte array of randomness extracted from the chain.
