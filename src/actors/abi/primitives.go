@@ -1,4 +1,9 @@
-package actors
+package abi
+
+// The abi package contains definitions of all types that cross the VM boundary and are used
+// within actor code.
+//
+// Primitive types include numerics and opaque array types.
 
 // Epoch number of the chain state, which acts as a proxy for time within the VM.
 type ChainEpoch int64

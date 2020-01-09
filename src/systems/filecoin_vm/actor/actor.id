@@ -1,7 +1,7 @@
 // This contains actor things that are _outside_ of VM exection.
-// The VM uses this to execute actors.
+// The VM uses this to execute abi.
 
-import actors "github.com/filecoin-project/specs/actors"
+import abi "github.com/filecoin-project/specs/actors/abi"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
 // CallSeqNum is an invocation (Call) sequence (Seq) number (Num).
@@ -66,10 +66,10 @@ type ActorState struct {
     // CID of the root of optional actor-specific sub-state.
     State       ActorSubstateCID
     // Balance of tokens held by this actor.
-    Balance     actors.TokenAmount
+    Balance     abi.TokenAmount
     // Expected sequence number of the next message sent by this actor.
     // Initially zero, incremented when an account actor originates a top-level message.
-    // Always zero for other actors.
+    // Always zero for other abi.
     CallSeqNum
 }
 

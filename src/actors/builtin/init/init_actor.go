@@ -1,7 +1,7 @@
 package init
 
 import (
-	actors "github.com/filecoin-project/specs/actors"
+	abi "github.com/filecoin-project/specs/actors/abi"
 	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
@@ -11,7 +11,7 @@ import (
 
 type InvocOutput = vmr.InvocOutput
 type Runtime = vmr.Runtime
-type Bytes = actors.Bytes
+type Bytes = abi.Bytes
 
 var AssertMsg = autil.AssertMsg
 
@@ -27,7 +27,7 @@ func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
 	return rt.ValueReturn(nil)
 }
 
-func (a *InitActorCode_I) Exec(rt Runtime, execCodeID actor.CodeID, constructorParams actors.MethodParams) InvocOutput {
+func (a *InitActorCode_I) Exec(rt Runtime, execCodeID actor.CodeID, constructorParams abi.MethodParams) InvocOutput {
 	rt.ValidateImmediateCallerAcceptAny()
 	callerCodeID, ok := rt.GetActorCodeID(rt.ImmediateCaller())
 	AssertMsg(ok, "no code for actor at %s", rt.ImmediateCaller())

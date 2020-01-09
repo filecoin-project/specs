@@ -1,4 +1,4 @@
-import actors "github.com/filecoin-project/specs/actors"
+import abi "github.com/filecoin-project/specs/actors/abi"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
@@ -8,7 +8,7 @@ type RetrievalClientDealState struct {
     Status                 DealStatus
     Sender                 libp2p.PeerID
     TotalReceived          UInt
-    FundsSpent             actors.TokenAmount
+    FundsSpent             abi.TokenAmount
 }
 
 type Open struct {}
@@ -40,7 +40,7 @@ type RetrievalClient struct {
     Retrieve(
         pieceCID      piece.PieceCID
         params        RetrievalParams
-        totalFunds    actors.TokenAmount
+        totalFunds    abi.TokenAmount
         miner         libp2p.PeerID
         clientWallet  addr.Address
         minerWallet   addr.Address
@@ -48,7 +48,7 @@ type RetrievalClient struct {
     SubscribeToEvents(subscriber RetrievalClientSubscriber)
 
     // V1
-    AddMoreFunds(id RetrievalDealID, amount actors.TokenAmount) error
+    AddMoreFunds(id RetrievalDealID, amount abi.TokenAmount) error
     CancelDeal(id RetrievalDealID) error
     RetrievalStatus(id RetrievalDealID)
     ListDeals() {RetrievalDealID: RetrievalClientDealState}

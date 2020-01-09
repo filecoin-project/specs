@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 
-	actors "github.com/filecoin-project/specs/actors"
+	abi "github.com/filecoin-project/specs/actors/abi"
 	acctact "github.com/filecoin-project/specs/actors/builtin/account"
 	initact "github.com/filecoin-project/specs/actors/builtin/init"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
@@ -92,7 +92,7 @@ type VMContext struct {
 	// during the current top-level message execution.
 	// Note: resets with every top-level message, and therefore not necessarily monotonic.
 	_internalCallSeqNum actor.CallSeqNum
-	_valueReceived      actors.TokenAmount
+	_valueReceived      abi.TokenAmount
 	_gasRemaining       msg.GasAmount
 	_numValidateCalls   int
 	_output             vmr.InvocOutput
@@ -106,7 +106,7 @@ func VMContext_Make(
 	internalCallSeqNum actor.CallSeqNum,
 	globalState st.StateTree,
 	actorAddress addr.Address,
-	valueReceived actors.TokenAmount,
+	valueReceived abi.TokenAmount,
 	gasRemaining msg.GasAmount) *VMContext {
 
 	return &VMContext{
@@ -173,7 +173,7 @@ func (rt *VMContext) _createActor(codeID actor.CodeID, address addr.Address) {
 	actorState := &actor.ActorState_I{
 		CodeID_:     codeID,
 		State_:      actor.ActorSubstateCID(ipld.EmptyCID()),
-		Balance_:    actors.TokenAmount(0),
+		Balance_:    abi.TokenAmount(0),
 		CallSeqNum_: 0,
 	}
 
@@ -390,7 +390,7 @@ func (rt *VMContext) _rtAllocGas(x msg.GasAmount) {
 	}
 }
 
-func (rt *VMContext) _transferFunds(from addr.Address, to addr.Address, amount actors.TokenAmount) error {
+func (rt *VMContext) _transferFunds(from addr.Address, to addr.Address, amount abi.TokenAmount) error {
 	rt._checkRunning()
 	rt._checkActorStateNotAcquired()
 
@@ -449,8 +449,8 @@ func _catchRuntimeErrors(f func() InvocOutput) (output InvocOutput, exitCode exi
 func _invokeMethodInternal(
 	rt *VMContext,
 	actorCode vmr.ActorCode,
-	method actors.MethodNum,
-	params actors.MethodParams) (
+	method abi.MethodNum,
+	params abi.MethodParams) (
 	ret InvocOutput, exitCode exitcode.ExitCode, internalCallSeqNumFinal actor.CallSeqNum) {
 
 	if method == actor.MethodSend {
@@ -600,19 +600,19 @@ func (rt *VMContext) _sendInternalOutputs(input InvocInput, errSpec ErrorHandlin
 }
 
 func (rt *VMContext) Send(
-	toAddr addr.Address, methodNum actors.MethodNum, params actors.MethodParams, value actors.TokenAmount) InvocOutput {
+	toAddr addr.Address, methodNum abi.MethodNum, params abi.MethodParams, value abi.TokenAmount) InvocOutput {
 
 	return rt.SendPropagatingErrors(vmr.InvocInput_Make(toAddr, methodNum, params, value))
 }
 
-func (rt *VMContext) SendQuery(toAddr addr.Address, methodNum actors.MethodNum, params actors.MethodParams) util.Serialization {
-	invocOutput := rt.Send(toAddr, methodNum, params, actors.TokenAmount(0))
+func (rt *VMContext) SendQuery(toAddr addr.Address, methodNum abi.MethodNum, params abi.MethodParams) util.Serialization {
+	invocOutput := rt.Send(toAddr, methodNum, params, abi.TokenAmount(0))
 	ret := invocOutput.ReturnValue()
 	Assert(ret != nil)
 	return ret
 }
 
-func (rt *VMContext) SendFunds(toAddr addr.Address, value actors.TokenAmount) {
+func (rt *VMContext) SendFunds(toAddr addr.Address, value abi.TokenAmount) {
 	rt.Send(toAddr, actor.MethodSend, nil, value)
 }
 
@@ -626,22 +626,22 @@ func (rt *VMContext) SendCatchingErrors(input InvocInput) (InvocOutput, exitcode
 	return rt._sendInternalOutputs(input, CatchErrors)
 }
 
-func (rt *VMContext) CurrentBalance() actors.TokenAmount {
+func (rt *VMContext) CurrentBalance() abi.TokenAmount {
 	IMPL_FINISH()
 	panic("")
 }
 
-func (rt *VMContext) ValueReceived() actors.TokenAmount {
+func (rt *VMContext) ValueReceived() abi.TokenAmount {
 	return rt._valueReceived
 }
 
-func (rt *VMContext) Randomness(tag filcrypto.DomainSeparationTag, epoch actors.ChainEpoch) util.Randomness {
+func (rt *VMContext) Randomness(tag filcrypto.DomainSeparationTag, epoch abi.ChainEpoch) util.Randomness {
 	IMPL_TODO()
 	panic("")
 }
 
 func (rt *VMContext) RandomnessWithAuxSeed(
-	tag filcrypto.DomainSeparationTag, epoch actors.ChainEpoch, auxSeed util.Serialization) util.Randomness {
+	tag filcrypto.DomainSeparationTag, epoch abi.ChainEpoch, auxSeed util.Serialization) util.Randomness {
 
 	IMPL_TODO()
 	panic("")
@@ -677,7 +677,7 @@ func (rt *VMContext) IpldGet(c ipld.CID, o ipld.Object) bool {
 	return ok
 }
 
-func (rt *VMContext) CurrEpoch() actors.ChainEpoch {
+func (rt *VMContext) CurrEpoch() abi.ChainEpoch {
 	IMPL_FINISH()
 	panic("")
 }

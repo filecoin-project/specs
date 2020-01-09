@@ -1,7 +1,7 @@
 package storage_miner
 
 import (
-	actors "github.com/filecoin-project/specs/actors"
+	abi "github.com/filecoin-project/specs/actors/abi"
 	actor_util "github.com/filecoin-project/specs/actors/util"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
@@ -65,14 +65,14 @@ func (st *StorageMinerActorState_I) _getStorageWeightDescsForSectors(sectorNumbe
 	return ret
 }
 
-func MinerPoStState_New_OK(lastSuccessfulPoSt actors.ChainEpoch) MinerPoStState {
+func MinerPoStState_New_OK(lastSuccessfulPoSt abi.ChainEpoch) MinerPoStState {
 	return MinerPoStState_Make_OK(&MinerPoStState_OK_I{
 		LastSuccessfulPoSt_: lastSuccessfulPoSt,
 	})
 }
 
 func MinerPoStState_New_Challenged(
-	surpriseChallengeEpoch actors.ChainEpoch,
+	surpriseChallengeEpoch abi.ChainEpoch,
 	challengedSectors []sector.SectorNumber,
 	numConsecutiveFailures int,
 ) MinerPoStState {
@@ -98,12 +98,12 @@ func (x *SectorOnChainInfo_I) Is_TemporaryFault() bool {
 	return ret
 }
 
-func (x *SectorOnChainInfo_I) EffectiveFaultBeginEpoch() actors.ChainEpoch {
+func (x *SectorOnChainInfo_I) EffectiveFaultBeginEpoch() abi.ChainEpoch {
 	Assert(x.Is_TemporaryFault())
 	return x.DeclaredFaultEpoch() + indices.StorageMining_DeclaredFaultEffectiveDelay()
 }
 
-func (x *SectorOnChainInfo_I) EffectiveFaultEndEpoch() actors.ChainEpoch {
+func (x *SectorOnChainInfo_I) EffectiveFaultEndEpoch() abi.ChainEpoch {
 	Assert(x.Is_TemporaryFault())
 	return x.EffectiveFaultBeginEpoch() + x.DeclaredFaultDuration()
 }

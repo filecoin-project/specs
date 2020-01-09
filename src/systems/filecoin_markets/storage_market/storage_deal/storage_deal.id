@@ -1,4 +1,4 @@
-import actors "github.com/filecoin-project/specs/actors"
+import abi "github.com/filecoin-project/specs/actors/abi"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
@@ -29,17 +29,17 @@ type StorageDealProposal struct {
     // with total amount StoragePricePerEpoch * (EndEpoch - StartEpoch).
     // Storage deal must appear in a sealed (proven) sector no later than StartEpoch,
     // otherwise it is invalid.
-    StartEpoch                    actors.ChainEpoch
-    EndEpoch                      actors.ChainEpoch
-    StoragePricePerEpoch          actors.TokenAmount
+    StartEpoch                    abi.ChainEpoch
+    EndEpoch                      abi.ChainEpoch
+    StoragePricePerEpoch          abi.TokenAmount
 
-    ProviderCollateral            actors.TokenAmount
-    ClientCollateral              actors.TokenAmount
+    ProviderCollateral            abi.TokenAmount
+    ClientCollateral              abi.TokenAmount
 
-    Duration()                    actors.ChainEpoch     @(cached)  // EndEpoch - StartEpoch
-    TotalStorageFee()             actors.TokenAmount  // StoragePricePerEpoch * Duration
-    ClientBalanceRequirement()    actors.TokenAmount  // ClientCollateral + TotalStorageFee
-    ProviderBalanceRequirement()  actors.TokenAmount  // ProviderCollateral
+    Duration()                    abi.ChainEpoch        @(cached)  // EndEpoch - StartEpoch
+    TotalStorageFee()             abi.TokenAmount  // StoragePricePerEpoch * Duration
+    ClientBalanceRequirement()    abi.TokenAmount  // ClientCollateral + TotalStorageFee
+    ProviderBalanceRequirement()  abi.TokenAmount  // ProviderCollateral
 
     CID()                         &StorageDealProposal
 }
@@ -57,7 +57,7 @@ type StorageDeal struct {
 type OnChainDeal struct {
     ID                DealID
     Deal              StorageDeal
-    SectorStartEpoch  actors.ChainEpoch  // -1 if not yet included in proven sector
-    LastUpdatedEpoch  actors.ChainEpoch  // -1 if deal state never updated
-    SlashEpoch        actors.ChainEpoch  // -1 if deal never slashed
+    SectorStartEpoch  abi.ChainEpoch  // -1 if not yet included in proven sector
+    LastUpdatedEpoch  abi.ChainEpoch  // -1 if deal state never updated
+    SlashEpoch        abi.ChainEpoch  // -1 if deal never slashed
 }

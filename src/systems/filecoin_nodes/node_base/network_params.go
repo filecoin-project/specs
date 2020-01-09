@@ -1,7 +1,7 @@
 package node_base
 
 import (
-	actors "github.com/filecoin-project/specs/actors"
+	abi "github.com/filecoin-project/specs/actors/abi"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 )
 
@@ -16,28 +16,28 @@ const NETWORK = addr.Address_NetworkID_Testnet
 /////////////////////////////////////////////////////////////
 
 // TODO: placeholder epoch value -- this will be set later
-const MAX_PROVE_COMMIT_SECTOR_PERIOD = actors.ChainEpoch(3) // placeholder
+const MAX_PROVE_COMMIT_SECTOR_PERIOD = abi.ChainEpoch(3) // placeholder
 
 /////////////////////////////////////////////////////////////
 // PoSt
 /////////////////////////////////////////////////////////////
 
-const MAX_SURPRISE_POST_RESPONSE_PERIOD = actors.ChainEpoch(4) // placeholder
-const POST_CHALLENGE_TIME = actors.ChainEpoch(1)               // placeholder
+const MAX_SURPRISE_POST_RESPONSE_PERIOD = abi.ChainEpoch(4) // placeholder
+const POST_CHALLENGE_TIME = abi.ChainEpoch(1)               // placeholder
 // sets the average frequency
-const PROVING_PERIOD = actors.ChainEpoch(2) // placeholder, 2 days
+const PROVING_PERIOD = abi.ChainEpoch(2) // placeholder, 2 days
 // how long after a POST challenge before a miner can get challenged again
-const SURPRISE_NO_CHALLENGE_PERIOD = actors.ChainEpoch(0) // placeholder, 2 hours
+const SURPRISE_NO_CHALLENGE_PERIOD = abi.ChainEpoch(0) // placeholder, 2 hours
 // how many sectors should be challenged in surprise post (if miner has fewer, will get dup challenges)
 const SURPRISE_CHALLENGE_COUNT = 200 // placeholder
 // how long miner has to respond to the challenge before it expires
-const CHALLENGE_DURATION = actors.ChainEpoch(0) // placeholder, 2 hours
+const CHALLENGE_DURATION = abi.ChainEpoch(0) // placeholder, 2 hours
 // number of detected faults before a miner's sectors are all terminated
 const MAX_CONSECUTIVE_FAULTS = 3
 
 // Time between when a temporary sector fault is declared, and when it becomes
 // effective for purposes of reducing the active proving set for PoSts.
-const DECLARED_FAULT_EFFECTIVE_DELAY = actors.ChainEpoch(20) // placeholder
+const DECLARED_FAULT_EFFECTIVE_DELAY = abi.ChainEpoch(20) // placeholder
 
 const EPOST_SAMPLE_RATE_NUM = 1    // placeholder
 const EPOST_SAMPLE_RATE_DENOM = 25 // placeholder
@@ -63,10 +63,10 @@ const SPC_LOOKBACK_SEAL = FINALITY  // should be set to finality
 // FIL deposit per sector precommit in Interactive PoRep
 // refunded after ProveCommit but burned if PreCommit expires
 
-const PRECOMMIT_DEPOSIT_PER_BYTE = actors.TokenAmount(0) // placeholder
-const FAULT_SLASH_PERC_DECLARED = 1                      // placeholder
-const FAULT_SLASH_PERC_DETECTED = 10                     // placeholder
-const FAULT_SLASH_PERC_TERMINATED = 100                  // placeholder
+const PRECOMMIT_DEPOSIT_PER_BYTE = abi.TokenAmount(0) // placeholder
+const FAULT_SLASH_PERC_DECLARED = 1                   // placeholder
+const FAULT_SLASH_PERC_DETECTED = 10                  // placeholder
+const FAULT_SLASH_PERC_TERMINATED = 100               // placeholder
 
 /////////////////////////////////////////////////////////////
 // Slashing

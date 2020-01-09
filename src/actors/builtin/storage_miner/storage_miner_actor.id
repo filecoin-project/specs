@@ -1,4 +1,4 @@
-import actors "github.com/filecoin-project/specs/actors"
+import abi "github.com/filecoin-project/specs/actors/abi"
 import autil "github.com/filecoin-project/specs/actors/util"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
@@ -11,13 +11,13 @@ type MinerPoStState union {
     // Normal operation: The miner has passed either an ElectionPoSt or a SurprisePoSt
     // sufficiently recently.
     OK struct {
-        LastSuccessfulPoSt actors.ChainEpoch
+        LastSuccessfulPoSt abi.ChainEpoch
     }
 
     // SurprisePoSt challenge state: The miner has not submitted timely ElectionPoSts,
     // and as a result, the system has fallen back to proving storage via SurprisePoSt.
     Challenged struct {
-        SurpriseChallengeEpoch  actors.ChainEpoch
+        SurpriseChallengeEpoch  abi.ChainEpoch
         ChallengedSectors       [sector.SectorNumber]
         NumConsecutiveFailures  int
     }
@@ -40,17 +40,17 @@ type SectorState enum {
 type SectorOnChainInfo struct {
     State                       SectorState
     Info                        sealing.SectorPreCommitInfo  // Also contains Expiration field.
-    PreCommitDeposit            actors.TokenAmount
-    PreCommitEpoch              actors.ChainEpoch
-    ActivationEpoch             actors.ChainEpoch  // -1 if still in PreCommit state.
-    DeclaredFaultEpoch          actors.ChainEpoch  // -1 if not currently declared faulted.
-    DeclaredFaultDuration       actors.ChainEpoch  // -1 if not currently declared faulted.
+    PreCommitDeposit            abi.TokenAmount
+    PreCommitEpoch              abi.ChainEpoch
+    ActivationEpoch             abi.ChainEpoch  // -1 if still in PreCommit state.
+    DeclaredFaultEpoch          abi.ChainEpoch  // -1 if not currently declared faulted.
+    DeclaredFaultDuration       abi.ChainEpoch  // -1 if not currently declared faulted.
     DealWeight                  BigInt  // -1 if not yet validated with StorageMarketActor.
 
     // Must be significantly larger than DeclaredFaultEpoch, since otherwise it may be possible
     // to declare faults adaptively in order to exempt challenged sectors.
-    EffectiveFaultBeginEpoch()  actors.ChainEpoch
-    EffectiveFaultEndEpoch()    actors.ChainEpoch
+    EffectiveFaultBeginEpoch()  abi.ChainEpoch
+    EffectiveFaultEndEpoch()    abi.ChainEpoch
 
     Is_TemporaryFault()         bool
 }
