@@ -634,8 +634,8 @@ func (rt *VMContext) ValueReceived() abi.TokenAmount {
 	return rt._valueReceived
 }
 
-func (rt *VMContext) Chain() chain.Chain {
-	return rt._chain
+func (rt *VMContext) GetRandomness(epoch block.ChainEpoch) util.Randomness {
+	return rt._chain.RandomnessAtEpoch(epoch)
 }
 
 func (rt *VMContext) NewActorAddress() addr.Address {
