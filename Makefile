@@ -126,13 +126,13 @@ clean-deps: .PHONY
 	-rm -r bin/.emacs
 
 # intermediate targets
-website: go-test hugo-build
+website: diagrams hugo-build
 	mkdir -p build/website
 	-rm -rf build/website/*
 	mv hugo/public/* build/website
 	@echo TODO: add generate-code to this target
 
-pdf: go-test hugo-build
+pdf: diagrams hugo-build
 	@echo TODO: add generate-code to this target
 	bin/build-pdf.sh
 
@@ -143,11 +143,6 @@ hugo-build: $(MD_FILES)
 generate-code: $(IPLD_FILES)
 	echo TODO: use codeGen && exit 1
 	# bin/codeGen <input-files?>
-
-go-test: $(GO_FILES)
-	# testing should have the side effect that all go is compiled
-	cd hugo/content/codeGen && go build && go test ./...
-	# cd hugo/content/code && go build && go test ./...
 
 hugo-src: $(shell find src | grep '.md') hugo/data/version.yml
 	rm -rf hugo/content/docs
