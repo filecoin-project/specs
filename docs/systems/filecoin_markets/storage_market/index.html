@@ -4726,13 +4726,12 @@ seal the sector, and tell the Storage Market Actor that the deal is in a sector,
 
 <h1 id="publishing">Publishing</h1>
 
-<p>Data is now transferred, both parties have agreed, and it&rsquo;s time for the <code>StorageProvider</code> to publish the deal.</p>
+<p>Data is now transferred, both parties have agreed, and it&rsquo;s time to publish the deal. Given that the counter signature on a deal proposal is a standard message signature by the provider and the signed deal is an on-chain message, it is usually the <code>StorageProvider</code> that publishes the deal. However, if <code>StorageProvider</code> decides to send this signed on-chain message to the client before calling <code>PublishStorageDeal</code> then client can publish the deal on chain. Client&rsquo;s funds are not locked until the deal is published and a published deal that is not activated within some window will result in on-chain penalty.</p>
 
 <ol>
 <li>First, the <code>StorageProvider</code> adds collateral for the deal as needed to the <code>StorageMarketActor</code> (using <code>AddBalance</code>)</li>
-<li>Now, the <code>StorageProvider</code> calls <code>PublishStorageDeals</code> on the <code>StorageMarketActor</code> to publish the deal. It sends the StorageDealProposal signed by the client as well as its own signature in the message to publish the storage deal.</li>
-<li>For convenience, the <code>StorageProvider</code> responds sends a message to the <code>StorageClient</code> on the <code>Storage Deal Protocol</code> with the CID of the message it is
-putting on chain</li>
+<li>Now, the <code>StorageProvider</code> prepares and signs the on-chain <code>StorageDeal</code> message with the <code>StorageDealProposal</code> signed by the client and its own signature. It can now either send this message back to the client or call <code>PublishStorageDeals</code> on the <code>StorageMarketActor</code> to publish the deal. It is recommended for <code>StorageProvider</code> to send back the signed message before <code>PublishStorageDeals</code> is called.</li>
+<li>After calling <code>PublishStorageDeals</code>, <code>StorageProvider</code> sends a message to the <code>StorageClient</code> on the <code>Storage Deal Protocol</code> with the CID of the message that it is putting on chain for convenience.</li>
 <li>If all goes well, the <code>StorageMarketActor</code> responds with an on chain <code>DealID</code> for the published deal.</li>
 </ol>
 
@@ -4776,9 +4775,8 @@ putting on chain</li>
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
 <span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
@@ -4790,16 +4788,16 @@ putting on chain</li>
 <span class="c1">// StorageAsk is the current price and parameters a miner is currently offering for storage
 </span><span class="c1">// (analogous to an Ask in a financial market)
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageAsk</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Price</span>             <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// attoFIL per GiB per epoch
-</span><span class="c1"></span>    <span class="nx">Collateral</span>        <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// attoFIL per GiB per epoch
+    <span class="nx">Price</span>             <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// attoFIL per GiB per epoch
+</span><span class="c1"></span>    <span class="nx">Collateral</span>        <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// attoFIL per GiB per epoch
 </span><span class="c1"></span>
     <span class="nx">MinPieceSize</span>      <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceSize</span>
     <span class="c1">// address of miner actor for deals
 </span><span class="c1"></span>    <span class="nx">Miner</span>             <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
     <span class="c1">// the epoch at the time this ask was published
-</span><span class="c1"></span>    <span class="nx">PublicationEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">MaxDuration</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">MinDuration</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+</span><span class="c1"></span>    <span class="nx">PublicationEpoch</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">MaxDuration</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">MinDuration</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="c1">// a miner should update sequence number each time it publishes an ask
 </span><span class="c1"></span>    <span class="c1">// so that anyone with two asks from the same miner can determine which is
 </span><span class="c1"></span>    <span class="c1">// more current

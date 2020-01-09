@@ -1,3 +1,4 @@
+import abi "github.com/filecoin-project/specs/actors/abi"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
@@ -21,7 +22,7 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     IsWinningPartialTicket(
         st                 st.StateTree
         partialTicket      sector.PartialTicket
-        sectorUtilization  block.StoragePower
+        sectorUtilization  abi.StoragePower
         numSectors         util.UVarint
     ) bool
 
@@ -40,15 +41,15 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     // Randomness methods
 
     // call by StorageMiningSubsystem during block production
-    GetTicketProductionRand(chain chain.Chain, epoch block.ChainEpoch) util.Randomness
+    GetTicketProductionRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness
 
     // call by StorageMiningSubsystem in sealing sector
-    GetSealRand(chain chain.Chain, epoch block.ChainEpoch) util.Randomness
+    GetSealRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness
 
     // call by StorageMiningSubsystem after sealing
-    GetPoStChallengeRand(chain chain.Chain, epoch block.ChainEpoch) util.Randomness
+    GetPoStChallengeRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness
 
-    GetFinalizedEpoch(currentEpoch block.ChainEpoch) block.ChainEpoch
+    GetFinalizedEpoch(currentEpoch abi.ChainEpoch) abi.ChainEpoch
 }
 
 type StoragePowerConsensusError struct {}

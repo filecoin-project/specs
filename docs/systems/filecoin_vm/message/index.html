@@ -4714,7 +4714,7 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+<span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 
 <span class="c1">// GasAmount is a quantity of gas.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">GasAmount</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4737,15 +4737,15 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 </span><span class="c1"></span>    <span class="nx">CallSeqNum</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span>
 
     <span class="c1">// Amount of value to transfer from sender&#39;s to receiver&#39;s balance.
-</span><span class="c1"></span>    <span class="nx">Value</span>       <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
+</span><span class="c1"></span>    <span class="nx">Value</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
     <span class="c1">// Optional method to invoke on receiver, zero for a plain value send.
-</span><span class="c1"></span>    <span class="nx">Method</span>      <span class="nx">actors</span><span class="p">.</span><span class="nx">MethodNum</span>
+</span><span class="c1"></span>    <span class="nx">Method</span>      <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span>
     <span class="c1">/// Serialized parameters to the method (if method is non-zero).
-</span><span class="c1"></span>    <span class="nx">Params</span>      <span class="nx">actors</span><span class="p">.</span><span class="nx">MethodParams</span>
+</span><span class="c1"></span>    <span class="nx">Params</span>      <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodParams</span>
 
     <span class="c1">// GasPrice is a Gas-to-FIL cost
-</span><span class="c1"></span>    <span class="nx">GasPrice</span>    <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
+</span><span class="c1"></span>    <span class="nx">GasPrice</span>    <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="nx">GasLimit</span>    <span class="nx">GasAmount</span>
 <span class="p">}</span>  <span class="c1">// representation tuple
 </span><span class="c1"></span>

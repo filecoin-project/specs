@@ -4644,10 +4644,9 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
 <span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
 <span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
@@ -4658,13 +4657,13 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// Normal operation: The miner has passed either an ElectionPoSt or a SurprisePoSt
 </span><span class="c1"></span>    <span class="c1">// sufficiently recently.
 </span><span class="c1"></span>    <span class="nx">OK</span> <span class="kd">struct</span> <span class="p">{</span>
-        <span class="nx">LastSuccessfulPoSt</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">LastSuccessfulPoSt</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="p">}</span>
 
     <span class="c1">// SurprisePoSt challenge state: The miner has not submitted timely ElectionPoSts,
 </span><span class="c1"></span>    <span class="c1">// and as a result, the system has fallen back to proving storage via SurprisePoSt.
 </span><span class="c1"></span>    <span class="nx">Challenged</span> <span class="kd">struct</span> <span class="p">{</span>
-        <span class="nx">SurpriseChallengeEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">SurpriseChallengeEpoch</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
         <span class="nx">ChallengedSectors</span>       <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">]</span>
         <span class="nx">NumConsecutiveFailures</span>  <span class="kt">int</span>
     <span class="p">}</span>
@@ -4687,17 +4686,17 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">SectorOnChainInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">State</span>                       <span class="nx">SectorState</span>
     <span class="nx">Info</span>                        <span class="nx">sealing</span><span class="p">.</span><span class="nx">SectorPreCommitInfo</span>  <span class="c1">// Also contains Expiration field.
-</span><span class="c1"></span>    <span class="nx">PreCommitDeposit</span>            <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nx">PreCommitEpoch</span>              <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">ActivationEpoch</span>             <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if still in PreCommit state.
-</span><span class="c1"></span>    <span class="nx">DeclaredFaultEpoch</span>          <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if not currently declared faulted.
-</span><span class="c1"></span>    <span class="nx">DeclaredFaultDuration</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if not currently declared faulted.
+</span><span class="c1"></span>    <span class="nx">PreCommitDeposit</span>            <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">PreCommitEpoch</span>              <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">ActivationEpoch</span>             <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if still in PreCommit state.
+</span><span class="c1"></span>    <span class="nx">DeclaredFaultEpoch</span>          <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if not currently declared faulted.
+</span><span class="c1"></span>    <span class="nx">DeclaredFaultDuration</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if not currently declared faulted.
 </span><span class="c1"></span>    <span class="nx">DealWeight</span>                  <span class="nx">BigInt</span>  <span class="c1">// -1 if not yet validated with StorageMarketActor.
 </span><span class="c1"></span>
     <span class="c1">// Must be significantly larger than DeclaredFaultEpoch, since otherwise it may be possible
 </span><span class="c1"></span>    <span class="c1">// to declare faults adaptively in order to exempt challenged sectors.
-</span><span class="c1"></span>    <span class="nf">EffectiveFaultBeginEpoch</span><span class="p">()</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nf">EffectiveFaultEndEpoch</span><span class="p">()</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+</span><span class="c1"></span>    <span class="nf">EffectiveFaultBeginEpoch</span><span class="p">()</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nf">EffectiveFaultEndEpoch</span><span class="p">()</span>    <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 
     <span class="nf">Is_TemporaryFault</span><span class="p">()</span>         <span class="kt">bool</span>
 <span class="p">}</span>
@@ -4781,9 +4780,9 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_miner</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+    <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
     <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
     <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
-    <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
     <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
     <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
@@ -4845,14 +4844,14 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">ret</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">MinerPoStState_New_OK</span><span class="p">(</span><span class="nx">lastSuccessfulPoSt</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">MinerPoStState</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">MinerPoStState_New_OK</span><span class="p">(</span><span class="nx">lastSuccessfulPoSt</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">MinerPoStState</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nf">MinerPoStState_Make_OK</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">MinerPoStState_OK_I</span><span class="p">{</span>
         <span class="nx">LastSuccessfulPoSt_</span><span class="p">:</span> <span class="nx">lastSuccessfulPoSt</span><span class="p">,</span>
     <span class="p">})</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">MinerPoStState_New_Challenged</span><span class="p">(</span>
-    <span class="nx">surpriseChallengeEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
+    <span class="nx">surpriseChallengeEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
     <span class="nx">challengedSectors</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">,</span>
     <span class="nx">numConsecutiveFailures</span> <span class="kt">int</span><span class="p">,</span>
 <span class="p">)</span> <span class="nx">MinerPoStState</span> <span class="p">{</span>
@@ -4872,18 +4871,18 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">SectorOnChainInfo_I</span><span class="p">)</span> <span class="nf">Is_TemporaryFault</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="nx">ret</span> <span class="o">:=</span> <span class="p">(</span><span class="nx">x</span><span class="p">.</span><span class="nf">State</span><span class="p">()</span> <span class="o">==</span> <span class="nx">SectorState_TemporaryFault</span><span class="p">)</span>
     <span class="k">if</span> <span class="nx">ret</span> <span class="p">{</span>
-        <span class="nf">Assert</span><span class="p">(</span><span class="nx">x</span><span class="p">.</span><span class="nf">DeclaredFaultEpoch</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch_None</span><span class="p">)</span>
-        <span class="nf">Assert</span><span class="p">(</span><span class="nx">x</span><span class="p">.</span><span class="nf">DeclaredFaultDuration</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch_None</span><span class="p">)</span>
+        <span class="nf">Assert</span><span class="p">(</span><span class="nx">x</span><span class="p">.</span><span class="nf">DeclaredFaultEpoch</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">epochUndefined</span><span class="p">)</span>
+        <span class="nf">Assert</span><span class="p">(</span><span class="nx">x</span><span class="p">.</span><span class="nf">DeclaredFaultDuration</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">epochUndefined</span><span class="p">)</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="nx">ret</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">SectorOnChainInfo_I</span><span class="p">)</span> <span class="nf">EffectiveFaultBeginEpoch</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">SectorOnChainInfo_I</span><span class="p">)</span> <span class="nf">EffectiveFaultBeginEpoch</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
     <span class="nf">Assert</span><span class="p">(</span><span class="nx">x</span><span class="p">.</span><span class="nf">Is_TemporaryFault</span><span class="p">())</span>
     <span class="k">return</span> <span class="nx">x</span><span class="p">.</span><span class="nf">DeclaredFaultEpoch</span><span class="p">()</span> <span class="o">+</span> <span class="nx">indices</span><span class="p">.</span><span class="nf">StorageMining_DeclaredFaultEffectiveDelay</span><span class="p">()</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">SectorOnChainInfo_I</span><span class="p">)</span> <span class="nf">EffectiveFaultEndEpoch</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">SectorOnChainInfo_I</span><span class="p">)</span> <span class="nf">EffectiveFaultEndEpoch</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
     <span class="nf">Assert</span><span class="p">(</span><span class="nx">x</span><span class="p">.</span><span class="nf">Is_TemporaryFault</span><span class="p">())</span>
     <span class="k">return</span> <span class="nx">x</span><span class="p">.</span><span class="nf">EffectiveFaultBeginEpoch</span><span class="p">()</span> <span class="o">+</span> <span class="nx">x</span><span class="p">.</span><span class="nf">DeclaredFaultDuration</span><span class="p">()</span>
 <span class="p">}</span>
@@ -4945,21 +4944,21 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="p">(</span>
     <span class="s">&#34;math/big&#34;</span>
 
-    <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+    <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
     <span class="nx">serde</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/serde&#34;</span>
     <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
     <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
     <span class="nx">filproofs</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto/filproofs&#34;</span>
     <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
-    <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
     <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
     <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
     <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
     <span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
     <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/indices&#34;</span>
-    <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
+
+<span class="kd">const</span> <span class="nx">epochUndefined</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1">// Actor methods
@@ -5040,7 +5039,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
         <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_OnMinerSurprisePoStSuccess</span><span class="p">,</span>
         <span class="kc">nil</span><span class="p">,</span>
-        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="p">)</span>
 <span class="p">}</span>
 
@@ -5096,7 +5095,7 @@ https://github.com/alex-shpak/hugo-book
             <span class="nx">info</span><span class="p">.</span><span class="nf">DealIDs</span><span class="p">(),</span>
             <span class="nx">info</span><span class="p">,</span>
         <span class="p">),</span>
-        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="p">)</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="p">=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
@@ -5106,7 +5105,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">Info_</span><span class="p">:</span>             <span class="nx">info</span><span class="p">,</span>
         <span class="nx">PreCommitDeposit_</span><span class="p">:</span> <span class="nx">depositReq</span><span class="p">,</span>
         <span class="nx">PreCommitEpoch_</span><span class="p">:</span>   <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(),</span>
-        <span class="nx">ActivationEpoch_</span><span class="p">:</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch_None</span><span class="p">,</span>
+        <span class="nx">ActivationEpoch_</span><span class="p">:</span>  <span class="nx">epochUndefined</span><span class="p">,</span>
         <span class="nx">DealWeight_</span><span class="p">:</span>       <span class="o">*</span><span class="nx">big</span><span class="p">.</span><span class="nf">NewInt</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span>
     <span class="p">}</span>
     <span class="nx">st</span><span class="p">.</span><span class="nf">Sectors</span><span class="p">()[</span><span class="nx">info</span><span class="p">.</span><span class="nf">SectorNumber</span><span class="p">()]</span> <span class="p">=</span> <span class="nx">newSectorInfo</span>
@@ -5114,7 +5113,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
     <span class="c1">// Request deferred Cron check for PreCommit expiry check.
-</span><span class="c1"></span>    <span class="nx">expiryBound</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="o">+</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">MAX_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span class="c1"></span>    <span class="nx">expiryBound</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="o">+</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">MAX_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="nx">a</span><span class="p">.</span><span class="nf">_rtEnrollCronEvent</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">expiryBound</span><span class="p">,</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">{</span><span class="nx">info</span><span class="p">.</span><span class="nf">SectorNumber</span><span class="p">()})</span>
 
     <span class="k">if</span> <span class="nx">info</span><span class="p">.</span><span class="nf">Expiration</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="p">{</span>
@@ -5134,8 +5133,8 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;Sector not valid or not in PreCommit state&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">preCommitSector</span><span class="p">.</span><span class="nf">PreCommitEpoch</span><span class="p">()</span><span class="o">+</span><span class="nx">sector</span><span class="p">.</span><span class="nx">MAX_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Deadline exceeded for ProveCommitSector&#34;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">preCommitSector</span><span class="p">.</span><span class="nf">PreCommitEpoch</span><span class="p">()</span><span class="o">+</span><span class="nx">node_base</span><span class="p">.</span><span class="nx">MAX_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="o">||</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">preCommitSector</span><span class="p">.</span><span class="nf">PreCommitEpoch</span><span class="p">()</span><span class="o">+</span><span class="nx">node_base</span><span class="p">.</span><span class="nx">MIN_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Invalid ProveCommitSector epoch&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="nf">TODO</span><span class="p">()</span>
@@ -5161,7 +5160,7 @@ https://github.com/alex-shpak/hugo-book
             <span class="nx">preCommitSector</span><span class="p">.</span><span class="nf">Info</span><span class="p">().</span><span class="nf">DealIDs</span><span class="p">(),</span>
             <span class="nx">info</span><span class="p">,</span>
         <span class="p">),</span>
-        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="p">)</span>
 
     <span class="nx">res</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SendQuery</span><span class="p">(</span>
@@ -5201,7 +5200,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
             <span class="nx">storageWeightDesc</span><span class="p">,</span>
         <span class="p">),</span>
-        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="p">)</span>
 
     <span class="c1">// Return PreCommit deposit to worker upon successful ProveCommit.
@@ -5212,7 +5211,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// Sector Modification //
 </span><span class="c1">/////////////////////////
 </span><span class="c1"></span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">ExtendSectorExpiration</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNumber</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">,</span> <span class="nx">newExpiration</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">ExtendSectorExpiration</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNumber</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">,</span> <span class="nx">newExpiration</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">storageWeightDescPrev</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_rtGetStorageWeightDescForSector</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">sectorNumber</span><span class="p">)</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
@@ -5242,7 +5241,7 @@ https://github.com/alex-shpak/hugo-book
             <span class="nx">storageWeightDescPrev</span><span class="p">,</span>
             <span class="nx">storageWeightDescNew</span><span class="p">,</span>
         <span class="p">),</span>
-        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="p">)</span>
 <span class="p">}</span>
 
@@ -5258,8 +5257,8 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// Faults //
 </span><span class="c1">////////////
 </span><span class="c1"></span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">DeclareTemporaryFaults</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNumbers</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">,</span> <span class="nx">duration</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="nx">duration</span> <span class="o">&lt;=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">DeclareTemporaryFaults</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNumbers</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">,</span> <span class="nx">duration</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">duration</span> <span class="o">&lt;=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;Temporary fault duration must be positive&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
@@ -5353,7 +5352,7 @@ https://github.com/alex-shpak/hugo-book
             <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
                 <span class="nx">storageWeightDesc</span><span class="p">,</span>
             <span class="p">),</span>
-            <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+            <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
         <span class="p">)</span>
 
         <span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">ProvingSet</span><span class="p">(),</span> <span class="nx">sectorNumber</span><span class="p">)</span>
@@ -5361,8 +5360,8 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="k">if</span> <span class="nx">checkSector</span><span class="p">.</span><span class="nf">Is_TemporaryFault</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="o">==</span> <span class="nx">checkSector</span><span class="p">.</span><span class="nf">EffectiveFaultEndEpoch</span><span class="p">()</span> <span class="p">{</span>
         <span class="nx">checkSector</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">State_</span> <span class="p">=</span> <span class="nx">SectorState_Active</span>
-        <span class="nx">checkSector</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">DeclaredFaultEpoch_</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch_None</span>
-        <span class="nx">checkSector</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">DeclaredFaultDuration_</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch_None</span>
+        <span class="nx">checkSector</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">DeclaredFaultEpoch_</span> <span class="p">=</span> <span class="nx">epochUndefined</span>
+        <span class="nx">checkSector</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">DeclaredFaultDuration_</span> <span class="p">=</span> <span class="nx">epochUndefined</span>
 
         <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
             <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
@@ -5370,7 +5369,7 @@ https://github.com/alex-shpak/hugo-book
             <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
                 <span class="nx">storageWeightDesc</span><span class="p">,</span>
             <span class="p">),</span>
-            <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+            <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
         <span class="p">)</span>
 
         <span class="nx">st</span><span class="p">.</span><span class="nf">ProvingSet</span><span class="p">()[</span><span class="nx">sectorNumber</span><span class="p">]</span> <span class="p">=</span> <span class="kc">true</span>
@@ -5391,7 +5390,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="nx">checkSector</span><span class="p">.</span><span class="nf">State</span><span class="p">()</span> <span class="o">==</span> <span class="nx">SectorState_PreCommit</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span><span class="o">-</span><span class="nx">checkSector</span><span class="p">.</span><span class="nf">PreCommitEpoch</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">MAX_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span><span class="o">-</span><span class="nx">checkSector</span><span class="p">.</span><span class="nf">PreCommitEpoch</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">MAX_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="p">{</span>
             <span class="nx">a</span><span class="p">.</span><span class="nf">_rtDeleteSectorEntry</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">sectorNumber</span><span class="p">)</span>
             <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">checkSector</span><span class="p">.</span><span class="nf">PreCommitDeposit</span><span class="p">())</span>
         <span class="p">}</span>
@@ -5422,7 +5421,7 @@ https://github.com/alex-shpak/hugo-book
             <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
                 <span class="nx">storageWeightDesc</span><span class="p">,</span>
             <span class="p">),</span>
-            <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+            <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
         <span class="p">)</span>
     <span class="p">}</span>
 
@@ -5433,7 +5432,7 @@ https://github.com/alex-shpak/hugo-book
             <span class="nx">storageWeightDesc</span><span class="p">,</span>
             <span class="nx">terminationType</span><span class="p">,</span>
         <span class="p">),</span>
-        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="p">)</span>
 
     <span class="nx">a</span><span class="p">.</span><span class="nf">_rtDeleteSectorEntry</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">sectorNumber</span><span class="p">)</span>
@@ -5483,11 +5482,11 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
             <span class="nx">numConsecutiveFailures</span><span class="p">,</span>
         <span class="p">),</span>
-        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMinerActorCode_I</span><span class="p">)</span> <span class="nf">_rtEnrollCronEvent</span><span class="p">(</span>
-    <span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">eventEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">sectorNumbers</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">eventEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">sectorNumbers</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">{</span>
 
     <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
         <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
@@ -5496,7 +5495,7 @@ https://github.com/alex-shpak/hugo-book
             <span class="nx">eventEpoch</span><span class="p">,</span>
             <span class="nx">sectorNumbers</span><span class="p">,</span>
         <span class="p">),</span>
-        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="p">)</span>
 <span class="p">}</span>
 
@@ -5546,7 +5545,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
             <span class="nx">dealIDs</span><span class="p">,</span>
         <span class="p">),</span>
-        <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="p">)</span>
 <span class="p">}</span>
 
@@ -5647,8 +5646,8 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
 
     <span class="nf">IMPL_TODO</span><span class="p">()</span> <span class="c1">// Use randomness APIs
-</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">svInfoRandomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
-    <span class="kd">var</span> <span class="nx">svInfoInteractiveRandomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">svInfoRandomness</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">Randomness</span>
+    <span class="kd">var</span> <span class="nx">svInfoInteractiveRandomness</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">Randomness</span>
 
     <span class="nx">svInfo</span> <span class="o">:=</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealVerifyInfo_I</span><span class="p">{</span>
         <span class="nx">SectorID_</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID_I</span><span class="p">{</span>
@@ -5683,7 +5682,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_surprisePoStSampleChallengedSectors</span><span class="p">(</span>
-    <span class="nx">sampleRandomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span> <span class="nx">provingSet</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span> <span class="p">{</span>
+    <span class="nx">sampleRandomness</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span> <span class="nx">provingSet</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span> <span class="p">{</span>
 
     <span class="nf">IMPL_TODO</span><span class="p">()</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>

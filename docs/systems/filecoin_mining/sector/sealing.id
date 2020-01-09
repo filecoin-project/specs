@@ -1,7 +1,7 @@
+import abi "github.com/filecoin-project/specs/actors/abi"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
 type Path struct {}  // TODO
 
@@ -36,8 +36,8 @@ type SealVerifyInfo struct {
 // data stored on the state tree for each sector.
 type OnChainSealVerifyInfo struct {
     SealedCID         SealedSectorCID  // CommR
-    SealEpoch         block.ChainEpoch
-    InteractiveEpoch  block.ChainEpoch
+    SealEpoch         abi.ChainEpoch
+    InteractiveEpoch  abi.ChainEpoch
     Proof             SealProof
     DealIDs           deal.DealIDs
     SectorNumber
@@ -48,22 +48,22 @@ type OnChainSealVerifyInfo struct {
 type SealCommitment struct {
     SealedCID   SealedSectorCID  // CommR
     DealIDs     deal.DealIDs
-    Expiration  block.ChainEpoch
+    Expiration  abi.ChainEpoch
 }
 
 type SectorPreCommitInfo struct {
     SectorNumber
     SealedCID     SealedSectorCID  // CommR
-    SealEpoch     block.ChainEpoch
+    SealEpoch     abi.ChainEpoch
     DealIDs       deal.DealIDs
-    Expiration    block.ChainEpoch
+    Expiration    abi.ChainEpoch
 }
 
 type SectorProveCommitInfo struct {
     SectorNumber
     Proof             SealProof
-    InteractiveEpoch  block.ChainEpoch
-    Expiration        block.ChainEpoch
+    InteractiveEpoch  abi.ChainEpoch
+    Expiration        abi.ChainEpoch
 }
 
 // PersistentProofAux is meta data required to generate certain proofs

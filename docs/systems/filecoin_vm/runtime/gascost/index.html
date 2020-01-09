@@ -4642,7 +4642,7 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">runtime</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-	<span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 	<span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 	<span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
@@ -4750,9 +4750,9 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Affine</span><span class="p">(</span><span class="nx">IpldPutBase</span><span class="p">,</span> <span class="nx">dataSize</span><span class="p">,</span> <span class="nx">IpldPutPerByte</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">value</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">value</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span> <span class="p">{</span>
 	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">SendBase</span>
-	<span class="k">if</span> <span class="nx">value</span> <span class="o">!=</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">value</span> <span class="o">!=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
 		<span class="nx">ret</span> <span class="p">=</span> <span class="nx">ret</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">SendTransferFunds</span><span class="p">)</span>
 	<span class="p">}</span>
 	<span class="k">if</span> <span class="nx">method</span> <span class="o">!=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodSend</span> <span class="p">{</span>

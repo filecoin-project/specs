@@ -3,18 +3,16 @@ package storage_power
 import (
 	"sort"
 
-	actors "github.com/filecoin-project/specs/actors"
+	abi "github.com/filecoin-project/specs/actors/abi"
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
-	util "github.com/filecoin-project/specs/util"
 )
 
-func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(minerPower block.StoragePower) bool {
+func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(minerPower abi.StoragePower) bool {
 	IMPL_TODO() // import from consts
-	MIN_MINER_SIZE_STOR := block.StoragePower(0)
+	MIN_MINER_SIZE_STOR := abi.StoragePower(0)
 	MIN_MINER_SIZE_TARG := 0
 
 	// if miner is larger than min power requirement, we're set
@@ -34,7 +32,7 @@ func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(mine
 	}
 
 	// get size of MIN_MINER_SIZE_TARGth largest miner
-	minerSizes := make([]block.StoragePower, 0, len(st.PowerTable()))
+	minerSizes := make([]abi.StoragePower, 0, len(st.PowerTable()))
 	for _, v := range st.PowerTable() {
 		minerSizes = append(minerSizes, v)
 	}
@@ -43,9 +41,9 @@ func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(mine
 }
 
 func (st *StoragePowerActorState_I) _slashPledgeCollateral(
-	minerAddr addr.Address, slashAmountRequested actors.TokenAmount) actors.TokenAmount {
+	minerAddr addr.Address, slashAmountRequested abi.TokenAmount) abi.TokenAmount {
 
-	Assert(slashAmountRequested >= actors.TokenAmount(0))
+	Assert(slashAmountRequested >= abi.TokenAmount(0))
 
 	newTable, amountSlashed, ok := autil.BalanceTable_WithSubtractPreservingNonnegative(
 		st.EscrowTable(), minerAddr, slashAmountRequested)
@@ -69,7 +67,7 @@ func addrInArray(a addr.Address, list []addr.Address) bool {
 }
 
 // _selectMinersToSurprise implements the PoSt-Surprise sampling algorithm
-func (st *StoragePowerActorState_I) _selectMinersToSurprise(challengeCount int, randomness util.Randomness) []addr.Address {
+func (st *StoragePowerActorState_I) _selectMinersToSurprise(challengeCount int, randomness abi.Randomness) []addr.Address {
 	// this wont quite work -- a.PowerTable() is a HAMT by actor address, doesn't
 	// support enumerating by int index. maybe we need that as an interface too,
 	// or something similar to an iterator (or iterator over the keys)
@@ -100,17 +98,17 @@ func (st *StoragePowerActorState_I) _selectMinersToSurprise(challengeCount int, 
 }
 
 func (st *StoragePowerActorState_I) _getPowerTotalForMiner(minerAddr addr.Address) (
-	power block.StoragePower, ok bool) {
+	power abi.StoragePower, ok bool) {
 
 	minerPower, found := st.PowerTable()[minerAddr]
 	if !found {
-		return block.StoragePower(0), found
+		return abi.StoragePower(0), found
 	}
 
 	return minerPower, true
 }
 
-func (st *StoragePowerActorState_I) _getCurrPledgeForMiner(minerAddr addr.Address) (currPledge actors.TokenAmount, ok bool) {
+func (st *StoragePowerActorState_I) _getCurrPledgeForMiner(minerAddr addr.Address) (currPledge abi.TokenAmount, ok bool) {
 	return autil.BalanceTable_GetEntry(st.EscrowTable(), minerAddr)
 }
 
@@ -169,12 +167,12 @@ func (st *StoragePowerActorState_I) _updatePowerEntriesFromClaimedPower(minerAdd
 	st._setPowerEntryInternal(minerAddr, power)
 }
 
-func (st *StoragePowerActorState_I) _setClaimedPowerEntryInternal(minerAddr addr.Address, updatedMinerClaimedPower block.StoragePower) {
+func (st *StoragePowerActorState_I) _setClaimedPowerEntryInternal(minerAddr addr.Address, updatedMinerClaimedPower abi.StoragePower) {
 	Assert(updatedMinerClaimedPower >= 0)
 	st.Impl().ClaimedPower_[minerAddr] = updatedMinerClaimedPower
 }
 
-func (st *StoragePowerActorState_I) _setNominalPowerEntryInternal(minerAddr addr.Address, updatedMinerNominalPower block.StoragePower) {
+func (st *StoragePowerActorState_I) _setNominalPowerEntryInternal(minerAddr addr.Address, updatedMinerNominalPower abi.StoragePower) {
 	Assert(updatedMinerNominalPower >= 0)
 	prevMinerNominalPower, ok := st.NominalPower()[minerAddr]
 	Assert(ok)
@@ -188,7 +186,7 @@ func (st *StoragePowerActorState_I) _setNominalPowerEntryInternal(minerAddr addr
 	}
 }
 
-func (st *StoragePowerActorState_I) _setPowerEntryInternal(minerAddr addr.Address, updatedMinerPower block.StoragePower) {
+func (st *StoragePowerActorState_I) _setPowerEntryInternal(minerAddr addr.Address, updatedMinerPower abi.StoragePower) {
 	Assert(updatedMinerPower >= 0)
 	prevMinerPower, ok := st.PowerTable()[minerAddr]
 	Assert(ok)
@@ -196,9 +194,8 @@ func (st *StoragePowerActorState_I) _setPowerEntryInternal(minerAddr addr.Addres
 	st.Impl().TotalNetworkPower_ += (updatedMinerPower - prevMinerPower)
 }
 
-func (st *StoragePowerActorState_I) _getPledgeSlashForConsensusFault(currPledge actors.TokenAmount, faultType ConsensusFaultType) actors.TokenAmount {
+func (st *StoragePowerActorState_I) _getPledgeSlashForConsensusFault(currPledge abi.TokenAmount, faultType ConsensusFaultType) abi.TokenAmount {
 	// default is to slash all pledge collateral for all consensus fault
-	util.PARAM_FINISH()
 	TODO()
 	switch faultType {
 	case DoubleForkMiningFault:
@@ -212,14 +209,14 @@ func (st *StoragePowerActorState_I) _getPledgeSlashForConsensusFault(currPledge 
 	}
 }
 
-func _getConsensusFaultSlasherReward(elapsedEpoch block.ChainEpoch, collateralToSlash actors.TokenAmount) actors.TokenAmount {
+func _getConsensusFaultSlasherReward(elapsedEpoch abi.ChainEpoch, collateralToSlash abi.TokenAmount) abi.TokenAmount {
 	TODO()
 	// BigInt Operation
 	// var growthRate = node_base.SLASHER_SHARE_GROWTH_RATE_NUM / node_base.SLASHER_SHARE_GROWTH_RATE_DENOM
 	// var multiplier = growthRate^elapsedEpoch
 	// var slasherProportion = min(INITIAL_SLASHER_SHARE * multiplier, 1.0)
 	// return collateralToSlash * slasherProportion
-	return actors.TokenAmount(0)
+	return abi.TokenAmount(0)
 }
 
 func PowerTableHAMT_Empty() PowerTableHAMT {

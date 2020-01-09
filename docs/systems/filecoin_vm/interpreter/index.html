@@ -4814,7 +4814,7 @@ it will be created as an account actor.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">interpreter</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-	<span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 	<span class="nx">cronact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/cron&#34;</span>
 	<span class="nx">initact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/init&#34;</span>
 	<span class="nx">sminact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_miner&#34;</span>
@@ -4861,8 +4861,8 @@ it will be created as an account actor.</p>
 </span><span class="c1"></span>		<span class="nx">epostMessage</span> <span class="o">:=</span> <span class="nf">_makeElectionPoStMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
 		<span class="nx">outTree</span> <span class="p">=</span> <span class="nf">_applyMessageBuiltinAssert</span><span class="p">(</span><span class="nx">store</span><span class="p">,</span> <span class="nx">outTree</span><span class="p">,</span> <span class="nx">epostMessage</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
 
-		<span class="nx">minerPenaltyTotal</span> <span class="o">:=</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-		<span class="kd">var</span> <span class="nx">minerPenaltyCurr</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
+		<span class="nx">minerPenaltyTotal</span> <span class="o">:=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+		<span class="kd">var</span> <span class="nx">minerPenaltyCurr</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
 		<span class="c1">// Process BLS messages from the block.
 </span><span class="c1"></span>		<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">m</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">BLSMessages</span><span class="p">()</span> <span class="p">{</span>
@@ -4906,7 +4906,7 @@ it will be created as an account actor.</p>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyMessage</span><span class="p">(</span>
 	<span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">onChainMessageSize</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">retTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">retReceipt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">,</span> <span class="nx">retMinerPenalty</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">retTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">retReceipt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">,</span> <span class="nx">retMinerPenalty</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="nx">store</span> <span class="o">:=</span> <span class="nx">vmi</span><span class="p">.</span><span class="nf">Node</span><span class="p">().</span><span class="nf">Repository</span><span class="p">().</span><span class="nf">StateStore</span><span class="p">()</span>
 	<span class="nx">senderAddr</span> <span class="o">:=</span> <span class="nf">_resolveSender</span><span class="p">(</span><span class="nx">store</span><span class="p">,</span> <span class="nx">inTree</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
@@ -4931,7 +4931,7 @@ it will be created as an account actor.</p>
 			<span class="nf">Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">().</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">vmiGasUsed</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">vmiGasRemaining</span><span class="p">)))</span>
 			<span class="nx">tree</span> <span class="p">=</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span><span class="nx">tree</span><span class="p">,</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">senderAddr</span><span class="p">,</span> <span class="nx">vmiGasRemainingFIL</span><span class="p">)</span>
 			<span class="nx">tree</span> <span class="p">=</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span><span class="nx">tree</span><span class="p">,</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">minerOwner</span><span class="p">,</span> <span class="nx">vmiGasUsedFIL</span><span class="p">)</span>
-			<span class="nx">retMinerPenalty</span> <span class="p">=</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+			<span class="nx">retMinerPenalty</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
 		<span class="k">case</span> <span class="nx">SenderResolveSpec_Invalid</span><span class="p">:</span>
 			<span class="nx">retMinerPenalty</span> <span class="p">=</span> <span class="nx">vmiGasUsedFIL</span>
@@ -5094,14 +5094,14 @@ it will be created as an account actor.</p>
 		<span class="nx">actor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
 		<span class="nx">tree</span><span class="p">,</span>
 		<span class="nx">senderAddr</span><span class="p">,</span>
-		<span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+		<span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
 		<span class="nx">gasRemainingInit</span><span class="p">,</span>
 	<span class="p">)</span>
 
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SendToplevelFromInterpreter</span><span class="p">(</span><span class="nx">invoc</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">from</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">from</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span> <span class="p">{</span>
 	<span class="c1">// TODO: assert amount nonnegative
 </span><span class="c1"></span>	<span class="nx">retTree</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithFundsTransfer</span><span class="p">(</span><span class="nx">from</span><span class="p">,</span> <span class="nx">to</span><span class="p">,</span> <span class="nx">amount</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
@@ -5111,10 +5111,10 @@ it will be created as an account actor.</p>
 	<span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">gas</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">price</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">gas</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">price</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span> <span class="c1">// BigInt arithmetic
-</span><span class="c1"></span>	<span class="c1">// return actors.TokenAmount(util.UVarint(gas) * util.UVarint(price))
+</span><span class="c1"></span>	<span class="c1">// return abi.TokenAmount(util.UVarint(gas) * util.UVarint(price))
 </span><span class="c1"></span><span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_makeInvocInput</span><span class="p">(</span><span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">)</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput</span> <span class="p">{</span>
@@ -5127,7 +5127,7 @@ it will be created as an account actor.</p>
 <span class="p">}</span>
 
 <span class="c1">// Builds a message for paying block reward to a miner&#39;s owner.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeBlockRewardMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">penalty</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeBlockRewardMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">penalty</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
 	<span class="nx">params</span> <span class="o">:=</span> <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">penalty</span><span class="p">)</span>
 	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// serialize other inputs to BlockRewardMessage or get this from query in RewardActor
 </span><span class="c1"></span>
@@ -5211,10 +5211,11 @@ it will be created as an account actor.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">interpreter</span>
 
 <span class="kn">import</span> <span class="s">&#34;errors&#34;</span>
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
 <span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
+<span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
+<span class="kn">import</span> <span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin&#34;</span>
 <span class="kn">import</span> <span class="nx">accact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/account&#34;</span>
 <span class="kn">import</span> <span class="nx">cronact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/cron&#34;</span>
 <span class="kn">import</span> <span class="nx">initact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/init&#34;</span>
@@ -5225,29 +5226,17 @@ it will be created as an account actor.</p>
 	<span class="nx">ErrActorNotFound</span> <span class="p">=</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;Actor Not Found&#34;</span><span class="p">)</span>
 <span class="p">)</span>
 
-<span class="c1">// CodeIDs for system actors
-</span><span class="c1"></span><span class="kd">var</span> <span class="p">(</span>
-	<span class="nx">SystemActorCodeID</span>         <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_System</span><span class="p">)</span>
-	<span class="nx">InitActorCodeID</span>           <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_Init</span><span class="p">)</span>
-	<span class="nx">CronActorCodeID</span>           <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_Cron</span><span class="p">)</span>
-	<span class="nx">AccountActorCodeID</span>        <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_Account</span><span class="p">)</span>
-	<span class="nx">StoragePowerActorCodeID</span>   <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_StoragePower</span><span class="p">)</span>
-	<span class="nx">StorageMinerActorCodeID</span>   <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_StorageMiner</span><span class="p">)</span>
-	<span class="nx">StorageMarketActorCodeID</span>  <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_StorageMarket</span><span class="p">)</span>
-	<span class="nx">PaymentChannelActorCodeID</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_PaymentChannel</span><span class="p">)</span>
-<span class="p">)</span>
-
 <span class="kd">var</span> <span class="nx">staticActorCodeRegistry</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">actorCodeRegistry</span><span class="p">{}</span>
 
 <span class="kd">type</span> <span class="nx">actorCodeRegistry</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">code</span> <span class="kd">map</span><span class="p">[</span><span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">]</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span>
+	<span class="nx">code</span> <span class="kd">map</span><span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">]</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">actorCodeRegistry</span><span class="p">)</span> <span class="nf">_registerActor</span><span class="p">(</span><span class="nx">id</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">,</span> <span class="nx">actor</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">actorCodeRegistry</span><span class="p">)</span> <span class="nf">_registerActor</span><span class="p">(</span><span class="nx">id</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">,</span> <span class="nx">actor</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">r</span><span class="p">.</span><span class="nx">code</span><span class="p">[</span><span class="nx">id</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actor</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">actorCodeRegistry</span><span class="p">)</span> <span class="nf">_loadActor</span><span class="p">(</span><span class="nx">id</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">actorCodeRegistry</span><span class="p">)</span> <span class="nf">_loadActor</span><span class="p">(</span><span class="nx">id</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">a</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">r</span><span class="p">.</span><span class="nx">code</span><span class="p">[</span><span class="nx">id</span><span class="p">]</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">ErrActorNotFound</span>
@@ -5255,11 +5244,11 @@ it will be created as an account actor.</p>
 	<span class="k">return</span> <span class="nx">a</span><span class="p">,</span> <span class="kc">nil</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">id</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">,</span> <span class="nx">actor</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">id</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">,</span> <span class="nx">actor</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">staticActorCodeRegistry</span><span class="p">.</span><span class="nf">_registerActor</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span> <span class="nx">actor</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">LoadActor</span><span class="p">(</span><span class="nx">id</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">LoadActor</span><span class="p">(</span><span class="nx">id</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">staticActorCodeRegistry</span><span class="p">.</span><span class="nf">_loadActor</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5277,11 +5266,11 @@ it will be created as an account actor.</p>
 </span><span class="c1"></span>
 	<span class="nx">cron</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">cronact</span><span class="p">.</span><span class="nx">CronActorCode_I</span><span class="p">{}</span>
 
-	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">InitActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">initact</span><span class="p">.</span><span class="nx">InitActorCode_I</span><span class="p">{})</span>
-	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">CronActorCodeID</span><span class="p">,</span> <span class="nx">cron</span><span class="p">)</span>
-	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">AccountActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">accact</span><span class="p">.</span><span class="nx">AccountActorCode_I</span><span class="p">{})</span>
-	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">StoragePowerActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">spowact</span><span class="p">.</span><span class="nx">StoragePowerActorCode_I</span><span class="p">{})</span>
-	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">StorageMarketActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageMarketActorCode_I</span><span class="p">{})</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">InitActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">initact</span><span class="p">.</span><span class="nx">InitActorCode_I</span><span class="p">{})</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">CronActorCodeID</span><span class="p">,</span> <span class="nx">cron</span><span class="p">)</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">AccountActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">accact</span><span class="p">.</span><span class="nx">AccountActorCode_I</span><span class="p">{})</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StoragePowerActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">spowact</span><span class="p">.</span><span class="nx">StoragePowerActorCode_I</span><span class="p">{})</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMarketActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageMarketActorCode_I</span><span class="p">{})</span>
 
 	<span class="c1">// wire in CRON actions.
 </span><span class="c1"></span>	<span class="c1">// TODO: move this to CronActor&#39;s constructor method

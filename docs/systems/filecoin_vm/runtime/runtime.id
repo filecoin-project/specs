@@ -1,7 +1,6 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import actors "github.com/filecoin-project/specs/actors"
+import abi "github.com/filecoin-project/specs/actors/abi"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
@@ -11,15 +10,15 @@ import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 // Runtime is the VM's internal runtime object.
 // this is everything that is accessible to actors, beyond parameters.
 type Runtime interface {
-    CurrEpoch() block.ChainEpoch
+    CurrEpoch() abi.ChainEpoch
 
     // Randomness returns a (pseudo)random string for the given epoch and tag.
-    Randomness(tag filcrypto.DomainSeparationTag, epoch block.ChainEpoch) util.Randomness
+    Randomness(tag filcrypto.DomainSeparationTag, epoch abi.ChainEpoch) abi.Randomness
     RandomnessWithAuxSeed(
         tag      filcrypto.DomainSeparationTag
-        epoch    block.ChainEpoch
+        epoch    abi.ChainEpoch
         auxSeed  util.Serialization
-    ) util.Randomness
+    ) abi.Randomness
 
     // The address of the immediate calling actor.
     // Not necessarily the actor in the From field of the initial on-chain Message.
@@ -27,8 +26,8 @@ type Runtime interface {
     ImmediateCaller() addr.Address
     ValidateImmediateCallerIs(caller addr.Address)
     ValidateImmediateCallerInSet(callers [addr.Address])
-    ValidateImmediateCallerAcceptAnyOfType(type_ actor.BuiltinActorID)
-    ValidateImmediateCallerAcceptAnyOfTypes(types [actor.BuiltinActorID])
+    ValidateImmediateCallerAcceptAnyOfType(type_ abi.ActorCodeID)
+    ValidateImmediateCallerAcceptAnyOfTypes(types [abi.ActorCodeID])
     ValidateImmediateCallerAcceptAny()
     ValidateImmediateCallerMatches(CallerPattern)
 
@@ -67,14 +66,14 @@ type Runtime interface {
     // Check that the given condition is true (and call Abort if not).
     Assert(bool)
 
-    CurrentBalance()  actors.TokenAmount
-    ValueReceived()   actors.TokenAmount
+    CurrentBalance()  abi.TokenAmount
+    ValueReceived()   abi.TokenAmount
 
     // Look up the current values of several system-wide economic indices.
     CurrIndices()     indices.Indices
 
     // Look up the code ID of a given actor address.
-    GetActorCodeID(addr addr.Address) (ret actor.CodeID, ok bool)
+    GetActorCodeID(addr addr.Address) (ret abi.ActorCodeID, ok bool)
 
     // Run a (pure function) computation, consuming the gas cost associated with that function.
     // This mechanism is intended to capture the notion of an ABI between the VM and native
@@ -86,16 +85,16 @@ type Runtime interface {
     SendPropagatingErrors(input InvocInput) InvocOutput
     Send(
         toAddr     addr.Address
-        methodNum  actors.MethodNum
-        params     actors.MethodParams
-        value      actors.TokenAmount
+        methodNum  abi.MethodNum
+        params     abi.MethodParams
+        value      abi.TokenAmount
     ) InvocOutput
     SendQuery(
         toAddr     addr.Address
-        methodNum  actors.MethodNum
-        params     actors.MethodParams
+        methodNum  abi.MethodNum
+        params     abi.MethodParams
     ) util.Serialization
-    SendFunds(toAddr addr.Address, value actors.TokenAmount)
+    SendFunds(toAddr addr.Address, value abi.TokenAmount)
 
     // Sends a message to another actor, trapping an unsuccessful execution.
     // This may only be invoked by the singleton Cron actor.
@@ -110,7 +109,7 @@ type Runtime interface {
     // Creates an actor in the state tree, with empty state. May only be called by InitActor.
     CreateActor(
         // The new actor's code identifier.
-        codeId   actor.CodeID
+        codeId   abi.ActorCodeID
         // Address under which the new actor's state will be stored. Must be an ID-address.
         address  addr.Address
     )
@@ -127,9 +126,9 @@ type Runtime interface {
 
 type InvocInput struct {
     To      addr.Address
-    Method  actors.MethodNum
-    Params  actors.MethodParams
-    Value   actors.TokenAmount
+    Method  abi.MethodNum
+    Params  abi.MethodParams
+    Value   abi.TokenAmount
 }
 
 type InvocOutput struct {

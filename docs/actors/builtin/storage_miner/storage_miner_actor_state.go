@@ -1,9 +1,9 @@
 package storage_miner
 
 import (
+	abi "github.com/filecoin-project/specs/actors/abi"
 	actor_util "github.com/filecoin-project/specs/actors/util"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
@@ -65,14 +65,14 @@ func (st *StorageMinerActorState_I) _getStorageWeightDescsForSectors(sectorNumbe
 	return ret
 }
 
-func MinerPoStState_New_OK(lastSuccessfulPoSt block.ChainEpoch) MinerPoStState {
+func MinerPoStState_New_OK(lastSuccessfulPoSt abi.ChainEpoch) MinerPoStState {
 	return MinerPoStState_Make_OK(&MinerPoStState_OK_I{
 		LastSuccessfulPoSt_: lastSuccessfulPoSt,
 	})
 }
 
 func MinerPoStState_New_Challenged(
-	surpriseChallengeEpoch block.ChainEpoch,
+	surpriseChallengeEpoch abi.ChainEpoch,
 	challengedSectors []sector.SectorNumber,
 	numConsecutiveFailures int,
 ) MinerPoStState {
@@ -92,18 +92,18 @@ func MinerPoStState_New_DetectedFault(numConsecutiveFailures int) MinerPoStState
 func (x *SectorOnChainInfo_I) Is_TemporaryFault() bool {
 	ret := (x.State() == SectorState_TemporaryFault)
 	if ret {
-		Assert(x.DeclaredFaultEpoch() != block.ChainEpoch_None)
-		Assert(x.DeclaredFaultDuration() != block.ChainEpoch_None)
+		Assert(x.DeclaredFaultEpoch() != epochUndefined)
+		Assert(x.DeclaredFaultDuration() != epochUndefined)
 	}
 	return ret
 }
 
-func (x *SectorOnChainInfo_I) EffectiveFaultBeginEpoch() block.ChainEpoch {
+func (x *SectorOnChainInfo_I) EffectiveFaultBeginEpoch() abi.ChainEpoch {
 	Assert(x.Is_TemporaryFault())
 	return x.DeclaredFaultEpoch() + indices.StorageMining_DeclaredFaultEffectiveDelay()
 }
 
-func (x *SectorOnChainInfo_I) EffectiveFaultEndEpoch() block.ChainEpoch {
+func (x *SectorOnChainInfo_I) EffectiveFaultEndEpoch() abi.ChainEpoch {
 	Assert(x.Is_TemporaryFault())
 	return x.EffectiveFaultBeginEpoch() + x.DeclaredFaultDuration()
 }

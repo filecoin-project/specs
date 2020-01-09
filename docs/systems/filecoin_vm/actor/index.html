@@ -4640,9 +4640,9 @@ https://github.com/alex-shpak/hugo-book
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// This contains actor things that are _outside_ of VM exection.
-</span><span class="c1">// The VM uses this to execute actors.
+</span><span class="c1">// The VM uses this to execute abi.
 </span><span class="c1"></span>
-<span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+<span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 
 <span class="c1">// CallSeqNum is an invocation (Call) sequence (Seq) number (Num).
@@ -4666,36 +4666,6 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// serialized code for the actor in the Filecoin Specification.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">Code</span> <span class="nx">Bytes</span>
 
-<span class="c1">// CodeID identifies an actor&#39;s code (either one of the builtin actors,
-</span><span class="c1">// or, in the future, potentially a CID of VM code for a custom actor.)
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">CodeID</span> <span class="nx">union</span> <span class="p">{</span>
-    <span class="nx">Builtin</span>        <span class="nx">BuiltinActorID</span>
-    <span class="nx">UserDefined</span>    <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
-
-    <span class="nf">IsBuiltin</span><span class="p">()</span>    <span class="kt">bool</span>
-    <span class="nf">IsSingleton</span><span class="p">()</span>  <span class="kt">bool</span>
-
-    <span class="c1">// Indicates whether an in-VM message Send operation (with a given actor as sender)
-</span><span class="c1"></span>    <span class="c1">// can be triggered by a signed on-chain message from this actor&#39;s corresponding
-</span><span class="c1"></span>    <span class="c1">// party/parties.
-</span><span class="c1"></span>    <span class="nf">IsSignable</span><span class="p">()</span>   <span class="kt">bool</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">BuiltinActorID</span> <span class="nx">enum</span> <span class="p">{</span>
-    <span class="c1">// The SystemActor has no methods and no state.
-</span><span class="c1"></span>    <span class="c1">// It exists only to be the implicit sender of privileged messages that arise from
-</span><span class="c1"></span>    <span class="c1">// the VM interpreter itself (e.g., cron and block reward triggers and EPoSts).
-</span><span class="c1"></span>    <span class="nx">System</span>
-
-    <span class="nx">Init</span>
-    <span class="nx">Cron</span>
-    <span class="nx">Account</span>
-    <span class="nx">PaymentChannel</span>
-    <span class="nx">StoragePower</span>
-    <span class="nx">StorageMiner</span>
-    <span class="nx">StorageMarket</span>
-<span class="p">}</span>
-
 <span class="c1">// Actor is a base computation object in the Filecoin VM. Similar
 </span><span class="c1">// to Actors in the Actor Model (programming), or Objects in Object-
 </span><span class="c1">// Oriented Programming, or Ethereum Contracts in the EVM.
@@ -4703,14 +4673,14 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// ActorState represents the on-chain storage all actors keep.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ActorState</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// Identifies the code this actor executes.
-</span><span class="c1"></span>    <span class="nx">CodeID</span>
+</span><span class="c1"></span>    <span class="nx">CodeID</span>      <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span>
     <span class="c1">// CID of the root of optional actor-specific sub-state.
 </span><span class="c1"></span>    <span class="nx">State</span>       <span class="nx">ActorSubstateCID</span>
     <span class="c1">// Balance of tokens held by this actor.
-</span><span class="c1"></span>    <span class="nx">Balance</span>     <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
+</span><span class="c1"></span>    <span class="nx">Balance</span>     <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="c1">// Expected sequence number of the next message sent by this actor.
 </span><span class="c1"></span>    <span class="c1">// Initially zero, incremented when an account actor originates a top-level message.
-</span><span class="c1"></span>    <span class="c1">// Always zero for other actors.
+</span><span class="c1"></span>    <span class="c1">// Always zero for other abi.
 </span><span class="c1"></span>    <span class="nx">CallSeqNum</span>
 <span class="p">}</span>
 
@@ -4765,7 +4735,7 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">actor</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-	<span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 	<span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
@@ -4777,76 +4747,15 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">Serialization</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
 
 <span class="kd">const</span> <span class="p">(</span>
-	<span class="nx">MethodSend</span>        <span class="p">=</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">MethodNum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-	<span class="nx">MethodConstructor</span> <span class="p">=</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">MethodNum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+	<span class="nx">MethodSend</span>        <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">MethodNum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+	<span class="nx">MethodConstructor</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">MethodNum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 	<span class="c1">// TODO: remove this once canonical method numbers are finalized
-</span><span class="c1"></span>	<span class="nx">MethodPlaceholder</span> <span class="p">=</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">MethodNum</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">MethodPlaceholder</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">MethodNum</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">ActorState_I</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">id</span> <span class="o">*</span><span class="nx">CodeID_I</span><span class="p">)</span> <span class="nf">IsBuiltin</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="k">switch</span> <span class="nx">id</span><span class="p">.</span><span class="nf">Which</span><span class="p">()</span> <span class="p">{</span>
-	<span class="k">case</span> <span class="nx">CodeID_Case_Builtin</span><span class="p">:</span>
-		<span class="k">return</span> <span class="kc">true</span>
-	<span class="k">default</span><span class="p">:</span>
-		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Actor code ID case not supported&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">id</span> <span class="o">*</span><span class="nx">CodeID_I</span><span class="p">)</span> <span class="nf">IsSingleton</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="p">!</span><span class="nx">id</span><span class="p">.</span><span class="nf">IsBuiltin</span><span class="p">()</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="kc">false</span>
-	<span class="p">}</span>
-
-	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">a</span> <span class="o">:=</span> <span class="k">range</span> <span class="p">[]</span><span class="nx">BuiltinActorID</span><span class="p">{</span>
-		<span class="nx">BuiltinActorID_Init</span><span class="p">,</span>
-		<span class="nx">BuiltinActorID_Cron</span><span class="p">,</span>
-		<span class="nx">BuiltinActorID_Init</span><span class="p">,</span>
-		<span class="nx">BuiltinActorID_StoragePower</span><span class="p">,</span>
-		<span class="nx">BuiltinActorID_StorageMarket</span><span class="p">,</span>
-	<span class="p">}</span> <span class="p">{</span>
-		<span class="k">if</span> <span class="nx">id</span><span class="p">.</span><span class="nf">As_Builtin</span><span class="p">()</span> <span class="o">==</span> <span class="nx">a</span> <span class="p">{</span>
-			<span class="k">return</span> <span class="kc">true</span>
-		<span class="p">}</span>
-	<span class="p">}</span>
-
-	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">a</span> <span class="o">:=</span> <span class="k">range</span> <span class="p">[]</span><span class="nx">BuiltinActorID</span><span class="p">{</span>
-		<span class="nx">BuiltinActorID_Account</span><span class="p">,</span>
-		<span class="nx">BuiltinActorID_PaymentChannel</span><span class="p">,</span>
-		<span class="nx">BuiltinActorID_StorageMiner</span><span class="p">,</span>
-	<span class="p">}</span> <span class="p">{</span>
-		<span class="k">if</span> <span class="nx">id</span><span class="p">.</span><span class="nf">As_Builtin</span><span class="p">()</span> <span class="o">==</span> <span class="nx">a</span> <span class="p">{</span>
-			<span class="k">return</span> <span class="kc">false</span>
-		<span class="p">}</span>
-	<span class="p">}</span>
-
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Actor code ID case not supported&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">BuiltinActorID_SignableTypes</span><span class="p">()</span> <span class="p">[]</span><span class="nx">BuiltinActorID</span> <span class="p">{</span>
-	<span class="nf">IMPL_TODO</span><span class="p">()</span> <span class="c1">// TODO: Update for MultiSig actors
-</span><span class="c1"></span>
-	<span class="k">return</span> <span class="p">[]</span><span class="nx">BuiltinActorID</span><span class="p">{</span>
-		<span class="nx">BuiltinActorID_Account</span><span class="p">,</span>
-	<span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">id</span> <span class="o">*</span><span class="nx">CodeID_I</span><span class="p">)</span> <span class="nf">IsSignable</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="p">!</span><span class="nx">id</span><span class="p">.</span><span class="nf">IsBuiltin</span><span class="p">()</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="kc">false</span>
-	<span class="p">}</span>
-
-	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">a</span> <span class="o">:=</span> <span class="k">range</span> <span class="nf">BuiltinActorID_SignableTypes</span><span class="p">()</span> <span class="p">{</span>
-		<span class="k">if</span> <span class="nx">id</span><span class="p">.</span><span class="nf">As_Builtin</span><span class="p">()</span> <span class="o">==</span> <span class="nx">a</span> <span class="p">{</span>
-			<span class="k">return</span> <span class="kc">true</span>
-		<span class="p">}</span>
-	<span class="p">}</span>
-
-	<span class="k">return</span> <span class="kc">false</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">ActorSubstateCID</span><span class="p">)</span> <span class="nf">Ref</span><span class="p">()</span> <span class="o">*</span><span class="nx">ActorSubstateCID</span> <span class="p">{</span>

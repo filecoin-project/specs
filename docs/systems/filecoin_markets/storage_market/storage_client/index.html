@@ -4645,16 +4645,15 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
-<span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+<span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 <span class="kn">import</span> <span class="nx">message</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 
-<span class="c1">// ClientDeal is the information about a storage deal that storage client tracks
+<span class="c1">// ClientLocalDealInfo is the information about a storage deal that storage client tracks
 </span><span class="c1">// locally about a deal until it goes on chain. It is persisted to local storage
 </span><span class="c1">// and updated as the deal goes through stages leading up to its being published
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">ClientDeal</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">ClientLocalDealInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">ProposalCid</span>     <span class="o">&amp;</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
     <span class="nx">Proposal</span>        <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
     <span class="nx">State</span>           <span class="nx">StorageDealStatus</span>
@@ -4685,10 +4684,10 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="c1">// ListInProgressDeals lists deals that are in progress or rejected
 </span><span class="c1"></span>    <span class="c1">// - but not on chain
-</span><span class="c1"></span>    <span class="nf">ListLocalDeals</span><span class="p">()</span>  <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">ClientDeal</span><span class="p">],</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">ListLocalDeals</span><span class="p">()</span>  <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">ClientLocalDealInfo</span><span class="p">],</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// GetInProgressDeal looks up an in progress deal by proposal CID
-</span><span class="c1"></span>    <span class="nf">GetInProgressDeal</span><span class="p">(</span><span class="nx">proposalCID</span> <span class="o">&amp;</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="p">(</span><span class="nx">ClientDeal</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">GetInProgressDeal</span><span class="p">(</span><span class="nx">proposalCID</span> <span class="o">&amp;</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="p">(</span><span class="nx">ClientLocalDealInfo</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// GetAsk returns the current ask for a storage provider
 </span><span class="c1"></span>    <span class="nf">GetAsk</span><span class="p">(</span><span class="nx">info</span> <span class="nx">StorageProviderInfo</span><span class="p">)</span> <span class="p">(</span><span class="nx">StorageAsk</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
@@ -4697,17 +4696,17 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">ProposeStorageDeal</span><span class="p">(</span>
         <span class="nx">info</span>                <span class="nx">StorageProviderInfo</span>
         <span class="nx">payloadCid</span>          <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
-        <span class="nx">proposalExpiration</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">duration</span>            <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">price</span>               <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
-        <span class="nx">collateral</span>          <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">proposalExpiration</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">duration</span>            <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">price</span>               <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">collateral</span>          <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="p">)</span> <span class="p">(</span><span class="nx">ProposeStorageDealResult</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// GetPaymentEscrow returns the current funds available for deal payment
-</span><span class="c1"></span>    <span class="nf">GetPaymentEscrow</span><span class="p">()</span> <span class="p">(</span><span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">GetPaymentEscrow</span><span class="p">()</span> <span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// AddPaymentEscrow adds storage collateral
-</span><span class="c1"></span>    <span class="nf">AddPaymentEscrow</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">error</span>
+</span><span class="c1"></span>    <span class="nf">AddPaymentEscrow</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">error</span>
 <span class="p">}</span>
 </code></pre></div>
 

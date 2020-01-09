@@ -4640,7 +4640,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+<span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 
 <span class="kd">type</span> <span class="nx">TxSeqNo</span> <span class="nx">UVarint</span>
 <span class="kd">type</span> <span class="nx">NumRequired</span> <span class="nx">UVarint</span>
@@ -4651,7 +4651,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">signers</span>         <span class="p">[</span><span class="nx">address</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
     <span class="nx">required</span>        <span class="nx">NumRequired</span>
     <span class="nx">nextTxId</span>        <span class="nx">TxSeqNo</span>
-    <span class="nx">initialBalance</span>  <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">initialBalance</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="nx">startingBlock</span>   <span class="nx">Epoch</span>
     <span class="nx">unlockDuration</span>  <span class="nx">EpochDuration</span>
     <span class="c1">// transactions    {TxSeqNo: Transaction} // TODO Transaction type does not exist
@@ -4663,7 +4663,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">)</span>
     <span class="nf">Propose</span><span class="p">(</span>
         <span class="nx">to</span>      <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">value</span>   <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">value</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
         <span class="nx">method</span>  <span class="kt">string</span>
         <span class="nx">params</span>  <span class="nx">Bytes</span>
     <span class="p">)</span> <span class="nx">TxSeqNo</span>

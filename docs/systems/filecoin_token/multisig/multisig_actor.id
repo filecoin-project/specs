@@ -1,5 +1,5 @@
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import actors "github.com/filecoin-project/specs/actors"
+import abi "github.com/filecoin-project/specs/actors/abi"
 
 type TxSeqNo UVarint
 type NumRequired UVarint
@@ -10,7 +10,7 @@ type MultisigActor struct {
     signers         [address.Address]
     required        NumRequired
     nextTxId        TxSeqNo
-    initialBalance  actors.TokenAmount
+    initialBalance  abi.TokenAmount
     startingBlock   Epoch
     unlockDuration  EpochDuration
     // transactions    {TxSeqNo: Transaction} // TODO Transaction type does not exist
@@ -22,7 +22,7 @@ type MultisigActor struct {
     )
     Propose(
         to      address.Address
-        value   actors.TokenAmount
+        value   abi.TokenAmount
         method  string
         params  Bytes
     ) TxSeqNo

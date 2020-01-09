@@ -1,7 +1,7 @@
 package cron
 
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import actors "github.com/filecoin-project/specs/actors"
+import abi "github.com/filecoin-project/specs/actors/abi"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
@@ -28,7 +28,7 @@ func (a *CronActorCode_I) EpochTick(rt vmr.Runtime) InvocOutput {
 			To_:     entry.ToAddr(),
 			Method_: entry.MethodNum(),
 			Params_: nil,
-			Value_:  actors.TokenAmount(0),
+			Value_:  abi.TokenAmount(0),
 		})
 	}
 

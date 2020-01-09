@@ -3,6 +3,7 @@ package storage_power_consensus
 import (
 	"math/big"
 
+	abi "github.com/filecoin-project/specs/actors/abi"
 	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
@@ -43,7 +44,7 @@ func (self *ExpectedConsensus_I) IsValidConsensusFault(faults spowact.ConsensusF
 	// && !block2.Parents.include(block1)
 }
 
-func (self *ExpectedConsensus_I) IsWinningChallengeTicket(challengeTicket util.Bytes, sectorPower block.StoragePower, networkPower block.StoragePower, numSectorsSampled util.UVarint, numSectorsMiner util.UVarint) bool {
+func (self *ExpectedConsensus_I) IsWinningChallengeTicket(challengeTicket util.Bytes, sectorPower abi.StoragePower, networkPower abi.StoragePower, numSectorsSampled util.UVarint, numSectorsMiner util.UVarint) bool {
 	// Conceptually we are mapping the pseudorandom, deterministic hash output of the challenge ticket onto [0,1]
 	// by dividing by 2^HashLen and comparing that to the sector's target.
 	// if the challenge ticket hash / max hash val < sectorPower / totalPower * ec.ExpectedLeaders * numSectorsMiner / numSectorsSampled

@@ -1,15 +1,14 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-import actors "github.com/filecoin-project/specs/actors"
+import abi "github.com/filecoin-project/specs/actors/abi"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import message "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
-// ClientDeal is the information about a storage deal that storage client tracks
+// ClientLocalDealInfo is the information about a storage deal that storage client tracks
 // locally about a deal until it goes on chain. It is persisted to local storage
 // and updated as the deal goes through stages leading up to its being published
-type ClientDeal struct {
+type ClientLocalDealInfo struct {
     ProposalCid     &deal.StorageDealProposal
     Proposal        deal.StorageDealProposal
     State           StorageDealStatus
@@ -40,10 +39,10 @@ type StorageClient struct {
 
     // ListInProgressDeals lists deals that are in progress or rejected
     // - but not on chain
-    ListLocalDeals()  (deals [ClientDeal], error)
+    ListLocalDeals()  (deals [ClientLocalDealInfo], error)
 
     // GetInProgressDeal looks up an in progress deal by proposal CID
-    GetInProgressDeal(proposalCID &deal.StorageDealProposal) (ClientDeal, error)
+    GetInProgressDeal(proposalCID &deal.StorageDealProposal) (ClientLocalDealInfo, error)
 
     // GetAsk returns the current ask for a storage provider
     GetAsk(info StorageProviderInfo) (StorageAsk, error)
@@ -52,15 +51,15 @@ type StorageClient struct {
     ProposeStorageDeal(
         info                StorageProviderInfo
         payloadCid          ipld.CID
-        proposalExpiration  block.ChainEpoch
-        duration            block.ChainEpoch
-        price               actors.TokenAmount
-        collateral          actors.TokenAmount
+        proposalExpiration  abi.ChainEpoch
+        duration            abi.ChainEpoch
+        price               abi.TokenAmount
+        collateral          abi.TokenAmount
     ) (ProposeStorageDealResult, error)
 
     // GetPaymentEscrow returns the current funds available for deal payment
-    GetPaymentEscrow() (actors.TokenAmount, error)
+    GetPaymentEscrow() (abi.TokenAmount, error)
 
     // AddPaymentEscrow adds storage collateral
-    AddPaymentEscrow(amount actors.TokenAmount) error
+    AddPaymentEscrow(amount abi.TokenAmount) error
 }

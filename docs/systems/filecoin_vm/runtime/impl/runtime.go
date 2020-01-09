@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"encoding/binary"
 
-	actors "github.com/filecoin-project/specs/actors"
+	abi "github.com/filecoin-project/specs/actors/abi"
+	builtin "github.com/filecoin-project/specs/actors/builtin"
 	acctact "github.com/filecoin-project/specs/actors/builtin/account"
 	initact "github.com/filecoin-project/specs/actors/builtin/init"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
@@ -93,7 +93,7 @@ type VMContext struct {
 	// during the current top-level message execution.
 	// Note: resets with every top-level message, and therefore not necessarily monotonic.
 	_internalCallSeqNum actor.CallSeqNum
-	_valueReceived      actors.TokenAmount
+	_valueReceived      abi.TokenAmount
 	_gasRemaining       msg.GasAmount
 	_numValidateCalls   int
 	_output             vmr.InvocOutput
@@ -107,7 +107,7 @@ func VMContext_Make(
 	internalCallSeqNum actor.CallSeqNum,
 	globalState st.StateTree,
 	actorAddress addr.Address,
-	valueReceived actors.TokenAmount,
+	valueReceived abi.TokenAmount,
 	gasRemaining msg.GasAmount) *VMContext {
 
 	return &VMContext{
@@ -158,7 +158,7 @@ func (rt *VMContext) AbortAPI(msg string) {
 	rt.Abort(exitcode.SystemError(exitcode.RuntimeAPIError), msg)
 }
 
-func (rt *VMContext) CreateActor(codeID actor.CodeID, address addr.Address) {
+func (rt *VMContext) CreateActor(codeID abi.ActorCodeID, address addr.Address) {
 	if !rt._actorAddress.Equals(addr.InitActorAddr) {
 		rt.AbortAPI("Only InitActor may call rt.CreateActor")
 	}
@@ -169,12 +169,12 @@ func (rt *VMContext) CreateActor(codeID actor.CodeID, address addr.Address) {
 	rt._createActor(codeID, address)
 }
 
-func (rt *VMContext) _createActor(codeID actor.CodeID, address addr.Address) {
+func (rt *VMContext) _createActor(codeID abi.ActorCodeID, address addr.Address) {
 	// Create empty actor state.
 	actorState := &actor.ActorState_I{
 		CodeID_:     codeID,
 		State_:      actor.ActorSubstateCID(ipld.EmptyCID()),
-		Balance_:    actors.TokenAmount(0),
+		Balance_:    abi.TokenAmount(0),
 		CallSeqNum_: 0,
 	}
 
@@ -195,10 +195,7 @@ func (rt *VMContext) DeleteActor(address addr.Address) {
 
 	// Special case: StoragePowerActor may delete a StorageMinerActor.
 	addrCodeID, found := rt.GetActorCodeID(address)
-	if found &&
-		rt._actorAddress.Equals(addr.StoragePowerActorAddr) &&
-		addrCodeID.Is_Builtin() && addrCodeID.As_Builtin() == actor.BuiltinActorID_StorageMiner {
-
+	if found && rt._actorAddress.Equals(addr.StoragePowerActorAddr) && addrCodeID == builtin.StorageMinerActorCodeID {
 		ok = true
 	}
 
@@ -302,19 +299,16 @@ func (rt *VMContext) ValidateImmediateCallerMatches(
 	rt._numValidateCalls += 1
 }
 
-func CallerPattern_MakeAcceptAnyOfTypes(rt *VMContext, types []actor.BuiltinActorID) CallerPattern {
+func CallerPattern_MakeAcceptAnyOfTypes(rt *VMContext, types []abi.ActorCodeID) CallerPattern {
 	return CallerPattern{
 		Matches: func(y addr.Address) bool {
 			codeID, ok := rt.GetActorCodeID(y)
 			if !ok {
 				panic("Internal runtime error: actor not found")
 			}
-			Assert(codeID != nil)
-			if !codeID.IsBuiltin() {
-				return false
-			}
+
 			for _, type_ := range types {
-				if codeID.As_Builtin() == type_ {
+				if codeID == type_ {
 					return true
 				}
 			}
@@ -331,11 +325,11 @@ func (rt *VMContext) ValidateImmediateCallerInSet(callersExpected []addr.Address
 	rt.ValidateImmediateCallerMatches(vmr.CallerPattern_MakeSet(callersExpected))
 }
 
-func (rt *VMContext) ValidateImmediateCallerAcceptAnyOfType(type_ actor.BuiltinActorID) {
-	rt.ValidateImmediateCallerAcceptAnyOfTypes([]actor.BuiltinActorID{type_})
+func (rt *VMContext) ValidateImmediateCallerAcceptAnyOfType(type_ abi.ActorCodeID) {
+	rt.ValidateImmediateCallerAcceptAnyOfTypes([]abi.ActorCodeID{type_})
 }
 
-func (rt *VMContext) ValidateImmediateCallerAcceptAnyOfTypes(types []actor.BuiltinActorID) {
+func (rt *VMContext) ValidateImmediateCallerAcceptAnyOfTypes(types []abi.ActorCodeID) {
 	rt.ValidateImmediateCallerMatches(CallerPattern_MakeAcceptAnyOfTypes(rt, types))
 }
 
@@ -391,7 +385,7 @@ func (rt *VMContext) _rtAllocGas(x msg.GasAmount) {
 	}
 }
 
-func (rt *VMContext) _transferFunds(from addr.Address, to addr.Address, amount actors.TokenAmount) error {
+func (rt *VMContext) _transferFunds(from addr.Address, to addr.Address, amount abi.TokenAmount) error {
 	rt._checkRunning()
 	rt._checkActorStateNotAcquired()
 
@@ -404,7 +398,7 @@ func (rt *VMContext) _transferFunds(from addr.Address, to addr.Address, amount a
 	return nil
 }
 
-func (rt *VMContext) GetActorCodeID(actorAddr addr.Address) (ret actor.CodeID, ok bool) {
+func (rt *VMContext) GetActorCodeID(actorAddr addr.Address) (ret abi.ActorCodeID, ok bool) {
 	IMPL_FINISH()
 	panic("")
 }
@@ -450,8 +444,8 @@ func _catchRuntimeErrors(f func() InvocOutput) (output InvocOutput, exitCode exi
 func _invokeMethodInternal(
 	rt *VMContext,
 	actorCode vmr.ActorCode,
-	method actors.MethodNum,
-	params actors.MethodParams) (
+	method abi.MethodNum,
+	params abi.MethodParams) (
 	ret InvocOutput, exitCode exitcode.ExitCode, internalCallSeqNumFinal actor.CallSeqNum) {
 
 	if method == actor.MethodSend {
@@ -561,7 +555,7 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 	rt._saveInitActorState(initSubState)
 
 	// Create new account actor (charges gas).
-	rt._createActor(actor.CodeID(actor.CodeID_Make_Builtin(actor.BuiltinActorID_Account)), newIdAddr)
+	rt._createActor(builtin.AccountActorCodeID, newIdAddr)
 
 	// Initialize account actor substate with it's pubkey address.
 	substate := &acctact.AccountActorState_I{
@@ -601,19 +595,19 @@ func (rt *VMContext) _sendInternalOutputs(input InvocInput, errSpec ErrorHandlin
 }
 
 func (rt *VMContext) Send(
-	toAddr addr.Address, methodNum actors.MethodNum, params actors.MethodParams, value actors.TokenAmount) InvocOutput {
+	toAddr addr.Address, methodNum abi.MethodNum, params abi.MethodParams, value abi.TokenAmount) InvocOutput {
 
 	return rt.SendPropagatingErrors(vmr.InvocInput_Make(toAddr, methodNum, params, value))
 }
 
-func (rt *VMContext) SendQuery(toAddr addr.Address, methodNum actors.MethodNum, params actors.MethodParams) util.Serialization {
-	invocOutput := rt.Send(toAddr, methodNum, params, actors.TokenAmount(0))
+func (rt *VMContext) SendQuery(toAddr addr.Address, methodNum abi.MethodNum, params abi.MethodParams) util.Serialization {
+	invocOutput := rt.Send(toAddr, methodNum, params, abi.TokenAmount(0))
 	ret := invocOutput.ReturnValue()
 	Assert(ret != nil)
 	return ret
 }
 
-func (rt *VMContext) SendFunds(toAddr addr.Address, value actors.TokenAmount) {
+func (rt *VMContext) SendFunds(toAddr addr.Address, value abi.TokenAmount) {
 	rt.Send(toAddr, actor.MethodSend, nil, value)
 }
 
@@ -627,22 +621,22 @@ func (rt *VMContext) SendCatchingErrors(input InvocInput) (InvocOutput, exitcode
 	return rt._sendInternalOutputs(input, CatchErrors)
 }
 
-func (rt *VMContext) CurrentBalance() actors.TokenAmount {
+func (rt *VMContext) CurrentBalance() abi.TokenAmount {
 	IMPL_FINISH()
 	panic("")
 }
 
-func (rt *VMContext) ValueReceived() actors.TokenAmount {
+func (rt *VMContext) ValueReceived() abi.TokenAmount {
 	return rt._valueReceived
 }
 
-func (rt *VMContext) Randomness(tag filcrypto.DomainSeparationTag, epoch block.ChainEpoch) util.Randomness {
+func (rt *VMContext) Randomness(tag filcrypto.DomainSeparationTag, epoch abi.ChainEpoch) util.Randomness {
 	IMPL_TODO()
 	panic("")
 }
 
 func (rt *VMContext) RandomnessWithAuxSeed(
-	tag filcrypto.DomainSeparationTag, epoch block.ChainEpoch, auxSeed util.Serialization) util.Randomness {
+	tag filcrypto.DomainSeparationTag, epoch abi.ChainEpoch, auxSeed util.Serialization) util.Randomness {
 
 	IMPL_TODO()
 	panic("")
@@ -678,7 +672,7 @@ func (rt *VMContext) IpldGet(c ipld.CID, o ipld.Object) bool {
 	return ok
 }
 
-func (rt *VMContext) CurrEpoch() block.ChainEpoch {
+func (rt *VMContext) CurrEpoch() abi.ChainEpoch {
 	IMPL_FINISH()
 	panic("")
 }

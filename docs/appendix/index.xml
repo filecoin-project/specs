@@ -25,7 +25,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/appendix/network_params/</guid>
-      <description>Some of these parameters are used around the code in the Filecoin subsystems and actors. Others are used as part of the proofs libraries.
+      <description>Some of these parameters are used around the code in the Filecoin subsystems and abi. Others are used as part of the proofs libraries.
 Most are generated/finalized using the orient framework. It is used to modelize the Filecoin network.
 ⚠️ WARNING: Filecoin is not yet launched, and we are finishing protocol spec and implementations. Parameters are set here as placeholders and highly likely to change to fit product and security requirements.</description>
     </item>

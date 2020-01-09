@@ -1,14 +1,14 @@
 package util
 
 import (
-	actors "github.com/filecoin-project/specs/actors"
+	abi "github.com/filecoin-project/specs/actors/abi"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 )
 
 // Create a new entry in the balance table, with the specified initial balance.
 // May fail if the specified address already exists in the table.
-func BalanceTable_WithNewAddressEntry(table BalanceTableHAMT, address addr.Address, initBalance actors.TokenAmount) (
+func BalanceTable_WithNewAddressEntry(table BalanceTableHAMT, address addr.Address, initBalance abi.TokenAmount) (
 	ret BalanceTableHAMT, ok bool) {
 
 	IMPL_FINISH()
@@ -25,7 +25,7 @@ func BalanceTable_WithDeletedAddressEntry(table BalanceTableHAMT, address addr.A
 }
 
 // Add the given amount to the given address's balance table entry.
-func BalanceTable_WithAdd(table BalanceTableHAMT, address addr.Address, amount actors.TokenAmount) (
+func BalanceTable_WithAdd(table BalanceTableHAMT, address addr.Address, amount abi.TokenAmount) (
 	ret BalanceTableHAMT, ok bool) {
 
 	IMPL_FINISH()
@@ -38,17 +38,17 @@ func BalanceTable_WithAdd(table BalanceTableHAMT, address addr.Address, amount a
 // Note: ok should be set to true here, even if the operation caused the entry to hit zero.
 // The only failure case is when the address does not exist in the table.
 func BalanceTable_WithSubtractPreservingNonnegative(
-	table BalanceTableHAMT, address addr.Address, amount actors.TokenAmount) (
-	ret BalanceTableHAMT, amountSubtracted actors.TokenAmount, ok bool) {
+	table BalanceTableHAMT, address addr.Address, amount abi.TokenAmount) (
+	ret BalanceTableHAMT, amountSubtracted abi.TokenAmount, ok bool) {
 
-	return BalanceTable_WithExtractPartial(table, address, amount, actors.TokenAmount(0))
+	return BalanceTable_WithExtractPartial(table, address, amount, abi.TokenAmount(0))
 }
 
 // Extract the given amount from the given address's balance table entry, subject to the requirement
 // of a minimum balance `minBalanceMaintain`. If not possible to withdraw the entire amount
 // requested, then the balance will remain unchanged.
 func BalanceTable_WithExtract(
-	table BalanceTableHAMT, address addr.Address, amount actors.TokenAmount, minBalanceMaintain actors.TokenAmount) (
+	table BalanceTableHAMT, address addr.Address, amount abi.TokenAmount, minBalanceMaintain abi.TokenAmount) (
 	ret BalanceTableHAMT, ok bool) {
 
 	IMPL_FINISH()
@@ -58,8 +58,8 @@ func BalanceTable_WithExtract(
 // Extract as much as possible (may be zero) up to the specified amount from the given address's
 // balance table entry, subject to the requirement of a minimum balance `minBalanceMaintain`.
 func BalanceTable_WithExtractPartial(
-	table BalanceTableHAMT, address addr.Address, amount actors.TokenAmount, minBalanceMaintain actors.TokenAmount) (
-	ret BalanceTableHAMT, amountExtracted actors.TokenAmount, ok bool) {
+	table BalanceTableHAMT, address addr.Address, amount abi.TokenAmount, minBalanceMaintain abi.TokenAmount) (
+	ret BalanceTableHAMT, amountExtracted abi.TokenAmount, ok bool) {
 
 	IMPL_FINISH()
 	panic("")
@@ -67,7 +67,7 @@ func BalanceTable_WithExtractPartial(
 
 // Extract all available from the given address's balance table entry.
 func BalanceTable_WithExtractAll(table BalanceTableHAMT, address addr.Address) (
-	ret BalanceTableHAMT, amountExtracted actors.TokenAmount, ok bool) {
+	ret BalanceTableHAMT, amountExtracted abi.TokenAmount, ok bool) {
 
 	IMPL_FINISH()
 	panic("")
@@ -76,7 +76,7 @@ func BalanceTable_WithExtractAll(table BalanceTableHAMT, address addr.Address) (
 // Determine whether the given address's entry in the balance table meets the required minimum
 // `minBalanceMaintain`.
 func BalanceTable_IsEntrySufficient(
-	table BalanceTableHAMT, address addr.Address, minBalanceMaintain actors.TokenAmount) (ret bool, ok bool) {
+	table BalanceTableHAMT, address addr.Address, minBalanceMaintain abi.TokenAmount) (ret bool, ok bool) {
 
 	IMPL_FINISH()
 	panic("")
@@ -85,7 +85,7 @@ func BalanceTable_IsEntrySufficient(
 // Retrieve the balance table entry corresponding to the given address.
 func BalanceTable_GetEntry(
 	table BalanceTableHAMT, address addr.Address) (
-	ret actors.TokenAmount, ok bool) {
+	ret abi.TokenAmount, ok bool) {
 
 	IMPL_FINISH()
 	panic("")

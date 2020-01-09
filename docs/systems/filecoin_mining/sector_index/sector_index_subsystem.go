@@ -1,8 +1,7 @@
 package sector_index
 
 import (
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	// piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+	abi "github.com/filecoin-project/specs/actors/abi"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 )
@@ -15,7 +14,7 @@ func (sis *SectorIndexerSubsystem_I) AddNewDeal(deal deal.StorageDeal) StageDeal
 // 	panic("TODO")
 // }
 
-func (sis *SectorIndexerSubsystem_I) SectorsExpiredAtEpoch(epoch block.ChainEpoch) []sector.SectorID {
+func (sis *SectorIndexerSubsystem_I) SectorsExpiredAtEpoch(epoch abi.ChainEpoch) []sector.SectorID {
 	panic("TODO")
 }
 

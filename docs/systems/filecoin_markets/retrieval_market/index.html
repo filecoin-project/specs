@@ -4795,7 +4795,7 @@ V1 will also include additional mechanisms for timeouts and cancellations. (to b
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 <span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+<span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 
 <span class="kd">type</span> <span class="nx">PaymentVoucher</span> <span class="kd">struct</span> <span class="p">{}</span>
@@ -4823,7 +4823,7 @@ V1 will also include additional mechanisms for timeouts and cancellations. (to b
 <span class="kd">type</span> <span class="nx">RetrievalQueryParams</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">PayloadCID</span>                  <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>  <span class="c1">// optional, query if miner has this cid in this piece. some miners may not be able to respond.
 </span><span class="c1"></span>    <span class="nx">Selector</span>                    <span class="nx">ipld</span><span class="p">.</span><span class="nx">Selector</span>  <span class="c1">// optional, query if miner has this cid in this piece. some miners may not be able to respond.
-</span><span class="c1"></span>    <span class="nx">MaxPricePerByte</span>             <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// optional, tell miner uninterested if more expensive than this
+</span><span class="c1"></span>    <span class="nx">MaxPricePerByte</span>             <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// optional, tell miner uninterested if more expensive than this
 </span><span class="c1"></span>    <span class="nx">MinPaymentInterval</span>          <span class="nx">UInt</span>  <span class="c1">// optional, tell miner uninterested unless payment interval is greater than this
 </span><span class="c1"></span>    <span class="nx">MinPaymentIntervalIncrease</span>  <span class="nx">UInt</span>  <span class="c1">// optional, tell miner uninterested unless payment interval increase is greater than this
 </span><span class="c1"></span><span class="p">}</span>
@@ -4842,7 +4842,7 @@ V1 will also include additional mechanisms for timeouts and cancellations. (to b
 </span><span class="c1"></span>    <span class="nx">ExpectedPayloadSize</span>         <span class="kt">uint64</span>  <span class="c1">// V1 - optional, if PayloadCID + selector are specified and miner knows, can offer an expected size
 </span><span class="c1"></span>
     <span class="nx">PaymentAddress</span>              <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>  <span class="c1">// address to send funds to -- may be different than miner addr
-</span><span class="c1"></span>    <span class="nx">MinPricePerByte</span>             <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
+</span><span class="c1"></span>    <span class="nx">MinPricePerByte</span>             <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="nx">MaxPaymentInterval</span>          <span class="nx">UInt</span>
     <span class="nx">MaxPaymentIntervalIncrease</span>  <span class="nx">UInt</span>
 
@@ -4875,7 +4875,7 @@ V1 will also include additional mechanisms for timeouts and cancellations. (to b
 <span class="kd">type</span> <span class="nx">RetrievalParams</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">PayloadCID</span>               <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>  <span class="c1">// V1
 </span><span class="c1"></span>    <span class="nx">Selector</span>                 <span class="nx">ipld</span><span class="p">.</span><span class="nx">Selector</span>  <span class="c1">// V1
-</span><span class="c1"></span>    <span class="nx">PricePerByte</span>             <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
+</span><span class="c1"></span>    <span class="nx">PricePerByte</span>             <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="nx">PaymentInterval</span>          <span class="nx">UInt</span>
     <span class="nx">PaymentIntervalIncrease</span>  <span class="nx">UInt</span>
 <span class="p">}</span>
@@ -4898,7 +4898,7 @@ V1 will also include additional mechanisms for timeouts and cancellations. (to b
     <span class="nx">ID</span>           <span class="nx">RetrievalDealID</span>  <span class="c1">// V1 - an identifier for the retrieval
 </span><span class="c1"></span>
     <span class="c1">// payment required to proceed
-</span><span class="c1"></span>    <span class="nx">PaymentOwed</span>  <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
+</span><span class="c1"></span>    <span class="nx">PaymentOwed</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
     <span class="nx">Message</span>      <span class="kt">string</span>
     <span class="nx">Blocks</span>       <span class="p">[</span><span class="nx">Block</span><span class="p">]</span>  <span class="c1">// V0 only

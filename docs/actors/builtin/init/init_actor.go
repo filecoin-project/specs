@@ -1,7 +1,8 @@
 package init
 
 import (
-	actors "github.com/filecoin-project/specs/actors"
+	abi "github.com/filecoin-project/specs/actors/abi"
+	builtin "github.com/filecoin-project/specs/actors/builtin"
 	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
@@ -11,7 +12,7 @@ import (
 
 type InvocOutput = vmr.InvocOutput
 type Runtime = vmr.Runtime
-type Bytes = actors.Bytes
+type Bytes = abi.Bytes
 
 var AssertMsg = autil.AssertMsg
 
@@ -27,7 +28,7 @@ func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
 	return rt.ValueReturn(nil)
 }
 
-func (a *InitActorCode_I) Exec(rt Runtime, execCodeID actor.CodeID, constructorParams actors.MethodParams) InvocOutput {
+func (a *InitActorCode_I) Exec(rt Runtime, execCodeID abi.ActorCodeID, constructorParams abi.MethodParams) InvocOutput {
 	rt.ValidateImmediateCallerAcceptAny()
 	callerCodeID, ok := rt.GetActorCodeID(rt.ImmediateCaller())
 	AssertMsg(ok, "no code for actor at %s", rt.ImmediateCaller())
@@ -86,23 +87,19 @@ func (s *InitActorState_I) MapAddressToNewID(address addr.Address) addr.Address 
 	return addr.Address_Make_ID(addr.Address_NetworkID_Testnet, actorID)
 }
 
-func _codeIDSupportsExec(callerCodeID actor.CodeID, execCodeID actor.CodeID) bool {
-	if !execCodeID.IsBuiltin() || execCodeID.IsSingleton() {
-		return false
-	}
-
-	if execCodeID.As_Builtin() == actor.BuiltinActorID_Account {
+func _codeIDSupportsExec(callerCodeID abi.ActorCodeID, execCodeID abi.ActorCodeID) bool {
+	if execCodeID == builtin.AccountActorCodeID {
 		// Special case: account actors must be created implicitly by sending value;
 		// cannot be created via exec.
 		return false
 	}
 
-	if execCodeID.As_Builtin() == actor.BuiltinActorID_PaymentChannel {
+	if execCodeID == builtin.PaymentChannelActorCodeID {
 		return true
 	}
 
-	if execCodeID.As_Builtin() == actor.BuiltinActorID_StorageMiner {
-		if callerCodeID.Is_Builtin() && callerCodeID.As_Builtin() == actor.BuiltinActorID_StoragePower {
+	if execCodeID == builtin.StorageMinerActorCodeID {
+		if callerCodeID == builtin.StoragePowerActorCodeID {
 			return true
 		}
 	}

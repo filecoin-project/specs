@@ -4641,10 +4641,10 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
+<span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
 <span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
-<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Path</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// TODO
 </span><span class="c1"></span>
@@ -4679,8 +4679,8 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// data stored on the state tree for each sector.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">OnChainSealVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SealedCID</span>         <span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
-</span><span class="c1"></span>    <span class="nx">SealEpoch</span>         <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">InteractiveEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+</span><span class="c1"></span>    <span class="nx">SealEpoch</span>         <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">InteractiveEpoch</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="nx">Proof</span>             <span class="nx">SealProof</span>
     <span class="nx">DealIDs</span>           <span class="nx">deal</span><span class="p">.</span><span class="nx">DealIDs</span>
     <span class="nx">SectorNumber</span>
@@ -4691,22 +4691,22 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealCommitment</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SealedCID</span>   <span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
 </span><span class="c1"></span>    <span class="nx">DealIDs</span>     <span class="nx">deal</span><span class="p">.</span><span class="nx">DealIDs</span>
-    <span class="nx">Expiration</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">Expiration</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SectorPreCommitInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SectorNumber</span>
     <span class="nx">SealedCID</span>     <span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
-</span><span class="c1"></span>    <span class="nx">SealEpoch</span>     <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+</span><span class="c1"></span>    <span class="nx">SealEpoch</span>     <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="nx">DealIDs</span>       <span class="nx">deal</span><span class="p">.</span><span class="nx">DealIDs</span>
-    <span class="nx">Expiration</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">Expiration</span>    <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SectorProveCommitInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SectorNumber</span>
     <span class="nx">Proof</span>             <span class="nx">SealProof</span>
-    <span class="nx">InteractiveEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">Expiration</span>        <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">InteractiveEpoch</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">Expiration</span>        <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 
 <span class="c1">// PersistentProofAux is meta data required to generate certain proofs

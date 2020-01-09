@@ -1,6 +1,5 @@
-import actors "github.com/filecoin-project/specs/actors"
+import abi "github.com/filecoin-project/specs/actors/abi"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
@@ -12,16 +11,16 @@ type StorageDealStatus uint64
 // StorageAsk is the current price and parameters a miner is currently offering for storage
 // (analogous to an Ask in a financial market)
 type StorageAsk struct {
-    Price             actors.TokenAmount  // attoFIL per GiB per epoch
-    Collateral        actors.TokenAmount  // attoFIL per GiB per epoch
+    Price             abi.TokenAmount  // attoFIL per GiB per epoch
+    Collateral        abi.TokenAmount  // attoFIL per GiB per epoch
 
     MinPieceSize      piece.PieceSize
     // address of miner actor for deals
     Miner             addr.Address
     // the epoch at the time this ask was published
-    PublicationEpoch  block.ChainEpoch
-    MaxDuration       block.ChainEpoch
-    MinDuration       block.ChainEpoch
+    PublicationEpoch  abi.ChainEpoch
+    MaxDuration       abi.ChainEpoch
+    MinDuration       abi.ChainEpoch
     // a miner should update sequence number each time it publishes an ask
     // so that anyone with two asks from the same miner can determine which is
     // more current

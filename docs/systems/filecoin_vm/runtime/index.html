@@ -4656,9 +4656,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+<span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 <span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
 <span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/indices&#34;</span>
@@ -4668,15 +4667,15 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">// Runtime is the VM&#39;s internal runtime object.
 </span><span class="c1">// this is everything that is accessible to actors, beyond parameters.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">Runtime</span> <span class="kd">interface</span> <span class="p">{</span>
-    <span class="nf">CurrEpoch</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nf">CurrEpoch</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 
     <span class="c1">// Randomness returns a (pseudo)random string for the given epoch and tag.
-</span><span class="c1"></span>    <span class="nf">Randomness</span><span class="p">(</span><span class="nx">tag</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+</span><span class="c1"></span>    <span class="nf">Randomness</span><span class="p">(</span><span class="nx">tag</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">Randomness</span>
     <span class="nf">RandomnessWithAuxSeed</span><span class="p">(</span>
         <span class="nx">tag</span>      <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag</span>
-        <span class="nx">epoch</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">epoch</span>    <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
         <span class="nx">auxSeed</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
-    <span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+    <span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">Randomness</span>
 
     <span class="c1">// The address of the immediate calling actor.
 </span><span class="c1"></span>    <span class="c1">// Not necessarily the actor in the From field of the initial on-chain Message.
@@ -4684,8 +4683,8 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">ImmediateCaller</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
     <span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">caller</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
     <span class="nf">ValidateImmediateCallerInSet</span><span class="p">(</span><span class="nx">callers</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">])</span>
-    <span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">type_</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID</span><span class="p">)</span>
-    <span class="nf">ValidateImmediateCallerAcceptAnyOfTypes</span><span class="p">(</span><span class="nx">types</span> <span class="p">[</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID</span><span class="p">])</span>
+    <span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">type_</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">)</span>
+    <span class="nf">ValidateImmediateCallerAcceptAnyOfTypes</span><span class="p">(</span><span class="nx">types</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">])</span>
     <span class="nf">ValidateImmediateCallerAcceptAny</span><span class="p">()</span>
     <span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span><span class="nx">CallerPattern</span><span class="p">)</span>
 
@@ -4724,14 +4723,14 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// Check that the given condition is true (and call Abort if not).
 </span><span class="c1"></span>    <span class="nf">Assert</span><span class="p">(</span><span class="kt">bool</span><span class="p">)</span>
 
-    <span class="nf">CurrentBalance</span><span class="p">()</span>  <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nf">ValueReceived</span><span class="p">()</span>   <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">CurrentBalance</span><span class="p">()</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">ValueReceived</span><span class="p">()</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
     <span class="c1">// Look up the current values of several system-wide economic indices.
 </span><span class="c1"></span>    <span class="nf">CurrIndices</span><span class="p">()</span>     <span class="nx">indices</span><span class="p">.</span><span class="nx">Indices</span>
 
     <span class="c1">// Look up the code ID of a given actor address.
-</span><span class="c1"></span>    <span class="nf">GetActorCodeID</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">ret</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">GetActorCodeID</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">ret</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
 
     <span class="c1">// Run a (pure function) computation, consuming the gas cost associated with that function.
 </span><span class="c1"></span>    <span class="c1">// This mechanism is intended to capture the notion of an ABI between the VM and native
@@ -4743,16 +4742,16 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">InvocOutput</span>
     <span class="nf">Send</span><span class="p">(</span>
         <span class="nx">toAddr</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">methodNum</span>  <span class="nx">actors</span><span class="p">.</span><span class="nx">MethodNum</span>
-        <span class="nx">params</span>     <span class="nx">actors</span><span class="p">.</span><span class="nx">MethodParams</span>
-        <span class="nx">value</span>      <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">methodNum</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span>
+        <span class="nx">params</span>     <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodParams</span>
+        <span class="nx">value</span>      <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="p">)</span> <span class="nx">InvocOutput</span>
     <span class="nf">SendQuery</span><span class="p">(</span>
         <span class="nx">toAddr</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">methodNum</span>  <span class="nx">actors</span><span class="p">.</span><span class="nx">MethodNum</span>
-        <span class="nx">params</span>     <span class="nx">actors</span><span class="p">.</span><span class="nx">MethodParams</span>
+        <span class="nx">methodNum</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span>
+        <span class="nx">params</span>     <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodParams</span>
     <span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
-    <span class="nf">SendFunds</span><span class="p">(</span><span class="nx">toAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
+    <span class="nf">SendFunds</span><span class="p">(</span><span class="nx">toAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
 
     <span class="c1">// Sends a message to another actor, trapping an unsuccessful execution.
 </span><span class="c1"></span>    <span class="c1">// This may only be invoked by the singleton Cron actor.
@@ -4767,7 +4766,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// Creates an actor in the state tree, with empty state. May only be called by InitActor.
 </span><span class="c1"></span>    <span class="nf">CreateActor</span><span class="p">(</span>
         <span class="c1">// The new actor&#39;s code identifier.
-</span><span class="c1"></span>        <span class="nx">codeId</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span>
+</span><span class="c1"></span>        <span class="nx">codeId</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span>
         <span class="c1">// Address under which the new actor&#39;s state will be stored. Must be an ID-address.
 </span><span class="c1"></span>        <span class="nx">address</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
     <span class="p">)</span>
@@ -4784,9 +4783,9 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">InvocInput</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">To</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">Method</span>  <span class="nx">actors</span><span class="p">.</span><span class="nx">MethodNum</span>
-    <span class="nx">Params</span>  <span class="nx">actors</span><span class="p">.</span><span class="nx">MethodParams</span>
-    <span class="nx">Value</span>   <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">Method</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span>
+    <span class="nx">Params</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodParams</span>
+    <span class="nx">Value</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="kd">struct</span> <span class="p">{</span>

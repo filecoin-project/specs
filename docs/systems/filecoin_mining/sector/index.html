@@ -4683,7 +4683,6 @@ and serves to make storage conform to a set of expectations.</p>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Bytes32</span> <span class="nx">Bytes</span>
 <span class="kd">type</span> <span class="nx">Commitment</span> <span class="nx">Bytes32</span>  <span class="c1">// TODO
@@ -4697,18 +4696,6 @@ and serves to make storage conform to a set of expectations.</p>
 <span class="kd">type</span> <span class="nx">FaultSet</span> <span class="nx">CompactSectorSet</span>
 <span class="kd">type</span> <span class="nx">StorageFaultType</span> <span class="kt">int</span>
 
-<span class="c1">// AMT from expiration epoch to dealID and to sectorNumber
-</span><span class="c1">// defined as struct to specify helpers
-</span><span class="c1">// effectively an AMT of the form DealExpirationAMT[Expiration][DealID] = PayloadPower
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">DealExpirationAMT</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Expiration</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// key
-</span><span class="c1"></span>    <span class="nx">Value</span>       <span class="nx">DealExpirationValue</span>  <span class="c1">// value
-</span><span class="c1"></span><span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">DealExpirationValue</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ID</span>     <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>  <span class="c1">// key
-</span><span class="c1"></span>    <span class="nx">Power</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>  <span class="c1">// value
-</span><span class="c1"></span><span class="p">}</span>
 <span class="c1">// SectorSize indicates one of a set of possible sizes in the network.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorSize</span> <span class="nx">UInt</span>
 

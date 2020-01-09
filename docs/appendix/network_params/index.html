@@ -4622,7 +4622,7 @@ https://github.com/alex-shpak/hugo-book
 <article class="markdown">
   
 
-<p>Some of these parameters are used around the code in the Filecoin subsystems and actors. Others are used as part of the proofs libraries.</p>
+<p>Some of these parameters are used around the code in the Filecoin subsystems and abi. Others are used as part of the proofs libraries.</p>
 
 <p>Most are generated/finalized using the <a href="https://github.com/filecoin-project/orient">orient framework</a>. It is used to modelize the Filecoin network.</p>
 
@@ -4652,8 +4652,7 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">node_base</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-    <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
-    <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
+    <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="p">)</span>
 
@@ -4667,29 +4666,34 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// Commitment
 </span><span class="c1">/////////////////////////////////////////////////////////////
 </span><span class="c1"></span>
-<span class="c1">// TODO: placeholder epoch value -- this will be set later
-</span><span class="c1"></span><span class="kd">const</span> <span class="nx">MAX_PROVE_COMMIT_SECTOR_PERIOD</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="c1">// placeholder
-</span><span class="c1"></span>
+<span class="c1">// If a sector PreCommit appear at epoch T, then the corresponding ProveCommit
+</span><span class="c1">// must appear between epochs
+</span><span class="c1">//   (T + MIN_PROVE_COMMIT_SECTOR_EPOCH, T + MAX_PROVE_COMMIT_SECTOR_EPOCH)
+</span><span class="c1">// inclusive.
+</span><span class="c1">// TODO: placeholder epoch values -- will be set later
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">MIN_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="kd">const</span> <span class="nx">MAX_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
 <span class="c1">/////////////////////////////////////////////////////////////
 </span><span class="c1">// PoSt
 </span><span class="c1">/////////////////////////////////////////////////////////////
 </span><span class="c1"></span>
-<span class="kd">const</span> <span class="nx">MAX_SURPRISE_POST_RESPONSE_PERIOD</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="c1">// placeholder
-</span><span class="c1"></span><span class="kd">const</span> <span class="nx">POST_CHALLENGE_TIME</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>               <span class="c1">// placeholder
+<span class="kd">const</span> <span class="nx">MAX_SURPRISE_POST_RESPONSE_PERIOD</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">POST_CHALLENGE_TIME</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>               <span class="c1">// placeholder
 </span><span class="c1">// sets the average frequency
-</span><span class="c1"></span><span class="kd">const</span> <span class="nx">PROVING_PERIOD</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="c1">// placeholder, 2 days
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">PROVING_PERIOD</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="c1">// placeholder, 2 days
 </span><span class="c1">// how long after a POST challenge before a miner can get challenged again
-</span><span class="c1"></span><span class="kd">const</span> <span class="nx">SURPRISE_NO_CHALLENGE_PERIOD</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// placeholder, 2 hours
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">SURPRISE_NO_CHALLENGE_PERIOD</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// placeholder, 2 hours
 </span><span class="c1">// how many sectors should be challenged in surprise post (if miner has fewer, will get dup challenges)
 </span><span class="c1"></span><span class="kd">const</span> <span class="nx">SURPRISE_CHALLENGE_COUNT</span> <span class="p">=</span> <span class="mi">200</span> <span class="c1">// placeholder
 </span><span class="c1">// how long miner has to respond to the challenge before it expires
-</span><span class="c1"></span><span class="kd">const</span> <span class="nx">CHALLENGE_DURATION</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// placeholder, 2 hours
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">CHALLENGE_DURATION</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// placeholder, 2 hours
 </span><span class="c1">// number of detected faults before a miner&#39;s sectors are all terminated
 </span><span class="c1"></span><span class="kd">const</span> <span class="nx">MAX_CONSECUTIVE_FAULTS</span> <span class="p">=</span> <span class="mi">3</span>
 
 <span class="c1">// Time between when a temporary sector fault is declared, and when it becomes
 </span><span class="c1">// effective for purposes of reducing the active proving set for PoSts.
-</span><span class="c1"></span><span class="kd">const</span> <span class="nx">DECLARED_FAULT_EFFECTIVE_DELAY</span> <span class="p">=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span> <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">DECLARED_FAULT_EFFECTIVE_DELAY</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span> <span class="c1">// placeholder
 </span><span class="c1"></span>
 <span class="kd">const</span> <span class="nx">EPOST_SAMPLE_RATE_NUM</span> <span class="p">=</span> <span class="mi">1</span>    <span class="c1">// placeholder
 </span><span class="c1"></span><span class="kd">const</span> <span class="nx">EPOST_SAMPLE_RATE_DENOM</span> <span class="p">=</span> <span class="mi">25</span> <span class="c1">// placeholder
@@ -4715,10 +4719,10 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">// FIL deposit per sector precommit in Interactive PoRep
 </span><span class="c1">// refunded after ProveCommit but burned if PreCommit expires
 </span><span class="c1"></span>
-<span class="kd">const</span> <span class="nx">PRECOMMIT_DEPOSIT_PER_BYTE</span> <span class="p">=</span> <span class="nx">actors</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// placeholder
-</span><span class="c1"></span><span class="kd">const</span> <span class="nx">FAULT_SLASH_PERC_DECLARED</span> <span class="p">=</span> <span class="mi">1</span>                      <span class="c1">// placeholder
-</span><span class="c1"></span><span class="kd">const</span> <span class="nx">FAULT_SLASH_PERC_DETECTED</span> <span class="p">=</span> <span class="mi">10</span>                     <span class="c1">// placeholder
-</span><span class="c1"></span><span class="kd">const</span> <span class="nx">FAULT_SLASH_PERC_TERMINATED</span> <span class="p">=</span> <span class="mi">100</span>                  <span class="c1">// placeholder
+<span class="kd">const</span> <span class="nx">PRECOMMIT_DEPOSIT_PER_BYTE</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">FAULT_SLASH_PERC_DECLARED</span> <span class="p">=</span> <span class="mi">1</span>                   <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">FAULT_SLASH_PERC_DETECTED</span> <span class="p">=</span> <span class="mi">10</span>                  <span class="c1">// placeholder
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">FAULT_SLASH_PERC_TERMINATED</span> <span class="p">=</span> <span class="mi">100</span>               <span class="c1">// placeholder
 </span><span class="c1"></span>
 <span class="c1">/////////////////////////////////////////////////////////////
 </span><span class="c1">// Slashing

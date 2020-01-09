@@ -4681,7 +4681,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">spc</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus&#34;</span>
 <span class="kn">import</span> <span class="nx">spowact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_power&#34;</span>
 <span class="kn">import</span> <span class="nx">sminact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_miner&#34;</span>
-<span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+<span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 <span class="kn">import</span> <span class="nx">blockchain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&#34;</span>
@@ -4723,7 +4723,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">workerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
         <span class="nx">sectorSize</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">UInt</span>
         <span class="nx">peerId</span>      <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
-        <span class="nx">pledgeAmt</span>   <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">pledgeAmt</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="p">)</span>
 
     <span class="c1">// call by StorageMarket.StorageProvider at the start of a deal.
@@ -4756,7 +4756,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">_submitSurprisePoStMessage</span><span class="p">(</span>
         <span class="nx">state</span>     <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span>
         <span class="nx">sPoSt</span>     <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
-        <span class="nx">gasPrice</span>  <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">gasPrice</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
         <span class="nx">gasLimit</span>  <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span>
     <span class="p">)</span> <span class="kt">error</span>
 

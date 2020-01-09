@@ -4645,17 +4645,17 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
-<span class="kn">import</span> <span class="nx">actors</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
+<span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">dt</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/data_transfer&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 
-<span class="c1">// MinerDeal is the information that a storage provider tracks locally about
+<span class="c1">// ProviderLocalDealInfo is the information that a storage provider tracks locally about
 </span><span class="c1">// a deal. It contains not only the storage proposal but the state of the deal
 </span><span class="c1">// as it moves throught the system. It is persisted to local storage and updated 
 </span><span class="c1">// as the deal goes through stages leading up to its being published (and afterward)
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">MinerDeal</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">ProviderLocalDealInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">ProposalCid</span>   <span class="o">&amp;</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
     <span class="nx">Proposal</span>      <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
     <span class="nx">MinerPeerID</span>   <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
@@ -4670,7 +4670,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="c1">// The interface provided for storage providers
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageProvider</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">AddAsk</span><span class="p">(</span><span class="nx">price</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ttlsecs</span> <span class="kt">int64</span><span class="p">)</span> <span class="kt">error</span>
+    <span class="nf">AddAsk</span><span class="p">(</span><span class="nx">price</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ttlsecs</span> <span class="kt">int64</span><span class="p">)</span> <span class="kt">error</span>
 
     <span class="c1">// ListAsks lists current asks
 </span><span class="c1"></span>    <span class="nf">ListAsks</span><span class="p">(</span><span class="nx">addrress</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">[</span><span class="nx">StorageAsk</span><span class="p">]</span>
@@ -4679,13 +4679,13 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">ListDeals</span><span class="p">()</span>            <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">],</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// ListIncompleteDeals lists deals that are in progress or rejected
-</span><span class="c1"></span>    <span class="nf">ListIncompleteDeals</span><span class="p">()</span>  <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">MinerDeal</span><span class="p">],</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">ListIncompleteDeals</span><span class="p">()</span>  <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">ProviderLocalDealInfo</span><span class="p">],</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// AddStorageCollateral adds storage collateral
-</span><span class="c1"></span>    <span class="nf">AddStorageCollateral</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">error</span>
+</span><span class="c1"></span>    <span class="nf">AddStorageCollateral</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">error</span>
 
     <span class="c1">// GetStorageCollateral returns the current collateral balance
-</span><span class="c1"></span>    <span class="nf">GetStorageCollateral</span><span class="p">()</span> <span class="p">(</span><span class="nx">actors</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">GetStorageCollateral</span><span class="p">()</span> <span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// DataTransferValidator methods
 </span><span class="c1"></span>    <span class="nf">ValidatePush</span><span class="p">(</span>
