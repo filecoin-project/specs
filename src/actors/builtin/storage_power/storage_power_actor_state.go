@@ -9,7 +9,6 @@ import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
-	util "github.com/filecoin-project/specs/util"
 )
 
 func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(minerPower block.StoragePower) bool {
@@ -69,7 +68,7 @@ func addrInArray(a addr.Address, list []addr.Address) bool {
 }
 
 // _selectMinersToSurprise implements the PoSt-Surprise sampling algorithm
-func (st *StoragePowerActorState_I) _selectMinersToSurprise(challengeCount int, randomness util.Randomness) []addr.Address {
+func (st *StoragePowerActorState_I) _selectMinersToSurprise(challengeCount int, randomness actors.Randomness) []addr.Address {
 	// this wont quite work -- a.PowerTable() is a HAMT by actor address, doesn't
 	// support enumerating by int index. maybe we need that as an interface too,
 	// or something similar to an iterator (or iterator over the keys)
@@ -198,7 +197,6 @@ func (st *StoragePowerActorState_I) _setPowerEntryInternal(minerAddr addr.Addres
 
 func (st *StoragePowerActorState_I) _getPledgeSlashForConsensusFault(currPledge actors.TokenAmount, faultType ConsensusFaultType) actors.TokenAmount {
 	// default is to slash all pledge collateral for all consensus fault
-	util.PARAM_FINISH()
 	TODO()
 	switch faultType {
 	case DoubleForkMiningFault:

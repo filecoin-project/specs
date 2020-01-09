@@ -21,7 +21,7 @@ type StoragePowerActorState struct {
     NumMinersMeetingMinPower  int
 
     _slashPledgeCollateral(address addr.Address, amount actors.TokenAmount) actors.TokenAmount
-    _selectMinersToSurprise(challengeCount int, randomness util.Randomness) [addr.Address]
+    _selectMinersToSurprise(challengeCount int, randomness actors.Randomness) [addr.Address]
 
     _addClaimedPowerForSector(
         minerAddr          addr.Address

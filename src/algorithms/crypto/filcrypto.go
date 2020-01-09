@@ -8,7 +8,7 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
-func RandomInt(randomness util.Randomness, nonce int, limit int) int {
+func RandomInt(randomness util.Bytes, nonce int, limit int) int {
 	nonceBytes := LittleEndianBytesFromInt(nonce)
 	input := randomness
 	input = append(input, nonceBytes...)

@@ -16,7 +16,6 @@ import (
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
-	util "github.com/filecoin-project/specs/util"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -705,8 +704,8 @@ func (a *StorageMinerActorCode_I) _rtVerifySealOrAbort(rt Runtime, onChainInfo s
 	}
 
 	IMPL_TODO() // Use randomness APIs
-	var svInfoRandomness util.Randomness
-	var svInfoInteractiveRandomness util.Randomness
+	var svInfoRandomness actors.Randomness
+	var svInfoInteractiveRandomness actors.Randomness
 
 	svInfo := sector.SealVerifyInfo_I{
 		SectorID_: &sector.SectorID_I{
@@ -741,7 +740,7 @@ func getSectorNums(m map[sector.SectorNumber]SectorOnChainInfo) []sector.SectorN
 }
 
 func _surprisePoStSampleChallengedSectors(
-	sampleRandomness util.Randomness, provingSet []sector.SectorNumber) []sector.SectorNumber {
+	sampleRandomness actors.Randomness, provingSet []sector.SectorNumber) []sector.SectorNumber {
 
 	IMPL_TODO()
 	panic("")
