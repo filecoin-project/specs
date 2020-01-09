@@ -100,7 +100,7 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, tipset chai
 
 func (vmi *VMInterpreter_I) ApplyMessage(
 	inTree st.StateTree, chain chain.Chain, message msg.UnsignedMessage, onChainMessageSize int, minerAddr addr.Address) (
-	retTree st.StateTree, retReceipt vmr.MessageReceipt, retMinerPenalty actors.TokenAmount) {
+	retTree st.StateTree, retReceipt vmr.MessageReceipt, retMinerPenalty abi.TokenAmount) {
 
 	store := vmi.Node().Repository().StateStore()
 	senderAddr := _resolveSender(store, inTree, message.From())

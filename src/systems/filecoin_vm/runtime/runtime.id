@@ -9,10 +9,10 @@ import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 // Runtime is the VM's internal runtime object.
 // this is everything that is accessible to actors, beyond parameters.
 type Runtime interface {
-    CurrEpoch() block.ChainEpoch
+    CurrEpoch() abi.ChainEpoch
 
     // Randomness returns a (pseudo)random string for the given epoch and tag.
-    GetRandomness(epoch block.ChainEpoch) abi.Randomness
+    GetRandomness(epoch abi.ChainEpoch) abi.Randomness
 
     // The address of the immediate calling actor.
     // Not necessarily the actor in the From field of the initial on-chain Message.

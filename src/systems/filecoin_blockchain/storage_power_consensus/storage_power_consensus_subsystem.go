@@ -66,6 +66,6 @@ func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTre
 	return st
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetFinalizedEpoch(currentEpoch block.ChainEpoch) block.ChainEpoch {
+func (spc *StoragePowerConsensusSubsystem_I) GetFinalizedEpoch(currentEpoch abi.ChainEpoch) abi.ChainEpoch {
 	return currentEpoch - node_base.FINALITY
 }

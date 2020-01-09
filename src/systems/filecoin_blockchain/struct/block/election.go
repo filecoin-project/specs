@@ -17,6 +17,6 @@ func (tix *Ticket_I) Verify(randomness util.Bytes, pk filcrypto.VRFPublicKey, mi
 	return tix.VRFResult_.Verify(input, pk)
 }
 
-func (tix *Ticket_I) DrawRandomness(epoch ChainEpoch) util.Bytes {
+func (tix *Ticket_I) DrawRandomness(epoch abi.ChainEpoch) util.Bytes {
 	return filcrypto.DeriveRandWithEpoch(filcrypto.DomainSeparationTag_TicketDrawing, tix.Output(), int(epoch))
 }

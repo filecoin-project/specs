@@ -4,17 +4,17 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 type Chain struct {
     HeadTipset Tipset
 
-    TipsetAtEpoch(epoch block.ChainEpoch) Tipset
-    RandomnessAtEpoch(epoch block.ChainEpoch) Bytes
+    TipsetAtEpoch(epoch abi.ChainEpoch) Tipset
+    RandomnessAtEpoch(epoch abi.ChainEpoch) Bytes
 
     // call by StorageMiningSubsystem during block production
-    GetTicketProductionRand(epoch block.ChainEpoch) util.Randomness
+    GetTicketProductionRand(epoch abi.ChainEpoch) abi.Randomness
 
     // call by StorageMiningSubsystem in sealing sector
-    GetSealRand(epoch block.ChainEpoch) util.Randomness
+    GetSealRand(epoch abi.ChainEpoch) abi.Randomness
 
     // call by StorageMiningSubsystem after sealing
-    GetPoStChallengeRand(epoch block.ChainEpoch) util.Randomness
+    GetPoStChallengeRand(epoch abi.ChainEpoch) abi.Randomness
 }
 
 // Checkpoint represents a particular block to use as a trust anchor

@@ -38,7 +38,7 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
 
     StoragePowerConsensusError() StoragePowerConsensusError
 
-    GetFinalizedEpoch(currentEpoch block.ChainEpoch) block.ChainEpoch
+    GetFinalizedEpoch(currentEpoch abi.ChainEpoch) abi.ChainEpoch
 }
 
 type StoragePowerConsensusError struct {}

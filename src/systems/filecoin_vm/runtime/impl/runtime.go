@@ -634,7 +634,7 @@ func (rt *VMContext) ValueReceived() abi.TokenAmount {
 	return rt._valueReceived
 }
 
-func (rt *VMContext) GetRandomness(epoch block.ChainEpoch) util.Randomness {
+func (rt *VMContext) GetRandomness(epoch abi.ChainEpoch) abi.Randomness {
 	return rt._chain.RandomnessAtEpoch(epoch)
 }
 
