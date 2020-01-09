@@ -7,7 +7,6 @@ import (
 	serde "github.com/filecoin-project/specs/actors/serde"
 	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
@@ -44,7 +43,7 @@ func (st *RewardActorState_I) CID() ipld.CID {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (r *Reward_I) AmountVested(elapsedEpoch block.ChainEpoch) actors.TokenAmount {
+func (r *Reward_I) AmountVested(elapsedEpoch actors.ChainEpoch) actors.TokenAmount {
 	switch r.VestingFunction() {
 	case VestingFunction_None:
 		return r.Value()
@@ -101,7 +100,7 @@ func (a *RewardActorCode_I) AwardBlockReward(
 	rt vmr.Runtime,
 	miner addr.Address,
 	penalty actors.TokenAmount,
-	minerNominalPower block.StoragePower,
+	minerNominalPower actors.StoragePower,
 	currPledge actors.TokenAmount,
 ) {
 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)

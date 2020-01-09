@@ -1,3 +1,4 @@
+import actors "github.com/filecoin-project/specs/actors"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 import spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
@@ -10,8 +11,8 @@ type ExpectedConsensus struct {
     IsValidConsensusFault(faults spowact.ConsensusFaultType, blocks [block.Block]) bool
     IsWinningChallengeTicket(
         challengeTicket    util.Bytes
-        sectorPower        block.StoragePower
-        networkPower       block.StoragePower
+        sectorPower        actors.StoragePower
+        networkPower       actors.StoragePower
         numSectorsSampled  util.UVarint
         numSectorsMiner    util.UVarint
     ) bool

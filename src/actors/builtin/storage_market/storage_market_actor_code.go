@@ -3,7 +3,6 @@ package storage_market
 import (
 	actors "github.com/filecoin-project/specs/actors"
 	actor_util "github.com/filecoin-project/specs/actors/util"
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
@@ -102,7 +101,7 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 		onchainDeal := &deal.OnChainDeal_I{
 			ID_:               id,
 			Deal_:             newDeal,
-			SectorStartEpoch_: block.ChainEpoch_None,
+			SectorStartEpoch_: epochUndefined,
 		}
 
 		st.Deals()[id] = onchainDeal
@@ -297,7 +296,7 @@ func (a *StorageMarketActorCode_I) Constructor(rt Runtime) {
 		NextID_:                         deal.DealID(0),
 		CachedDealIDsByParty_:           CachedDealIDsByPartyHAMT_Empty(),
 		CachedExpirationsPending_:       CachedExpirationsPendingHAMT_Empty(),
-		CachedExpirationsNextProcEpoch_: block.ChainEpoch(0),
+		CachedExpirationsNextProcEpoch_: actors.ChainEpoch(0),
 	}
 
 	UpdateRelease(rt, h, st)
@@ -325,7 +324,7 @@ func (st *StorageMarketActorState_I) _rtUpdatePendingDealStatesForParty(rt Runti
 }
 
 func _rtAbortIfDealAlreadyProven(rt Runtime, deal deal.OnChainDeal) {
-	if deal.SectorStartEpoch() != block.ChainEpoch_None {
+	if deal.SectorStartEpoch() != epochUndefined {
 		rt.AbortStateMsg("Deal has already appeared in proven sector.")
 	}
 }
@@ -348,7 +347,7 @@ func _rtAbortIfDealEndElapsed(rt Runtime, dealP deal.StorageDealProposal) {
 	}
 }
 
-func _rtAbortIfDealExceedsSectorLifetime(rt Runtime, dealP deal.StorageDealProposal, sectorExpiration block.ChainEpoch) {
+func _rtAbortIfDealExceedsSectorLifetime(rt Runtime, dealP deal.StorageDealProposal, sectorExpiration actors.ChainEpoch) {
 	if dealP.EndEpoch() > sectorExpiration {
 		rt.AbortStateMsg("Deal would outlive its containing sector.")
 	}
@@ -361,7 +360,7 @@ func (st *StorageMarketActorState_I) _rtAbortIfAddressEntryDoesNotExist(rt Runti
 }
 
 func _rtAbortIfDealInvalidForNewSectorSeal(
-	rt Runtime, minerAddr addr.Address, sectorExpiration block.ChainEpoch, deal deal.OnChainDeal) {
+	rt Runtime, minerAddr addr.Address, sectorExpiration actors.ChainEpoch, deal deal.OnChainDeal) {
 
 	dealP := deal.Deal().Proposal()
 

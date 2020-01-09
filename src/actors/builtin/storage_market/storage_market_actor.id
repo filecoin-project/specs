@@ -1,7 +1,6 @@
 import actors "github.com/filecoin-project/specs/actors"
 import actor_util "github.com/filecoin-project/specs/actors/util"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
@@ -9,7 +8,7 @@ type DealsAMT {deal.DealID: deal.OnChainDeal}
 type DealWeight deal.DealWeight
 
 type CachedDealIDsByPartyHAMT {addr.Address: actor_util.DealIDSetHAMT}
-type CachedExpirationsPendingHAMT {block.ChainEpoch: DealIDQueue}
+type CachedExpirationsPendingHAMT {actors.ChainEpoch: DealIDQueue}
 
 type StorageMarketActorState struct {
     Deals                           DealsAMT
@@ -27,7 +26,7 @@ type StorageMarketActorState struct {
     // Metadata cached for efficient iteration over deals.
     CachedDealIDsByParty            CachedDealIDsByPartyHAMT
     CachedExpirationsPending        CachedExpirationsPendingHAMT
-    CachedExpirationsNextProcEpoch  block.ChainEpoch
+    CachedExpirationsNextProcEpoch  actors.ChainEpoch
     CurrEpochNumDealsPublished      int
 
     _rtAbortIfAddressEntryDoesNotExist(rt Runtime, entryAddr addr.Address)
@@ -35,9 +34,9 @@ type StorageMarketActorState struct {
     _rtGetOnChainDealOrAbort(rt Runtime, dealID deal.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal)
     _rtLockBalanceOrAbort(rt Runtime, addr addr.Address, amount actors.TokenAmount)
 
-    _updatePendingDealStates(dealIDs [deal.DealID], epoch block.ChainEpoch) (amountSlashedTotal actors.TokenAmount)
-    _updatePendingDealState(dealID deal.DealID, epoch block.ChainEpoch) (amountSlashed actors.TokenAmount)
-    _processDealPaymentEpochsElapsed(dealID deal.DealID, numEpochsElapsed block.ChainEpoch)
+    _updatePendingDealStates(dealIDs [deal.DealID], epoch actors.ChainEpoch) (amountSlashedTotal actors.TokenAmount)
+    _updatePendingDealState(dealID deal.DealID, epoch actors.ChainEpoch) (amountSlashed actors.TokenAmount)
+    _processDealPaymentEpochsElapsed(dealID deal.DealID, numEpochsElapsed actors.ChainEpoch)
     _processDealSlashed(dealID deal.DealID) (amountSlashed actors.TokenAmount)
     _processDealInitTimedOut(dealID deal.DealID) (amountSlashed actors.TokenAmount)
     _processDealExpired(dealID deal.DealID)

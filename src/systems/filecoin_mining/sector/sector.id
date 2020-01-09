@@ -1,8 +1,8 @@
+import actors "github.com/filecoin-project/specs/actors"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
 type Bytes32 Bytes
 type Commitment Bytes32  // TODO
@@ -20,13 +20,13 @@ type StorageFaultType int
 // defined as struct to specify helpers
 // effectively an AMT of the form DealExpirationAMT[Expiration][DealID] = PayloadPower
 type DealExpirationAMT struct {
-    Expiration  block.ChainEpoch  // key
+    Expiration  actors.ChainEpoch  // key
     Value       DealExpirationValue  // value
 }
 
 type DealExpirationValue struct {
     ID     deal.DealID  // key
-    Power  block.StoragePower  // value
+    Power  actors.StoragePower  // value
 }
 // SectorSize indicates one of a set of possible sizes in the network.
 type SectorSize UInt

@@ -1,4 +1,4 @@
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import actors "github.com/filecoin-project/specs/actors"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
@@ -23,11 +23,11 @@ type SectorIndexerSubsystem struct {
     AddNewDeal(deal deal.StorageDeal) StageDealResponse
 
     // bring back if needed.
-    // OnNewTipset(chain Chain, epoch blockchain.Epoch) struct {}
+    // OnNewTipset(chain Chain, epoch actors.Epoch) struct {}
 
     // SectorsExpiredAtEpoch returns the set of sectors that expire
     // at a particular epoch.
-    SectorsExpiredAtEpoch(epoch block.ChainEpoch) [sector.SectorID]
+    SectorsExpiredAtEpoch(epoch actors.ChainEpoch) [sector.SectorID]
 
     // removeSectors removes the given sectorIDs from storage.
     removeSectors(sectorIDs [sector.SectorID])

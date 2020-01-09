@@ -3,7 +3,6 @@ import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_
 import actors "github.com/filecoin-project/specs/actors"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import message "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
 // ClientDeal is the information about a storage deal that storage client tracks
@@ -52,8 +51,8 @@ type StorageClient struct {
     ProposeStorageDeal(
         info                StorageProviderInfo
         payloadCid          ipld.CID
-        proposalExpiration  block.ChainEpoch
-        duration            block.ChainEpoch
+        proposalExpiration  actors.ChainEpoch
+        duration            actors.ChainEpoch
         price               actors.TokenAmount
         collateral          actors.TokenAmount
     ) (ProposeStorageDealResult, error)

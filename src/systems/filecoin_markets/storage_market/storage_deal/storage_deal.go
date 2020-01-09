@@ -1,7 +1,6 @@
 package storage_deal
 
 import actors "github.com/filecoin-project/specs/actors"
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
 import util "github.com/filecoin-project/specs/util"
 
@@ -14,7 +13,7 @@ func (d *StorageDeal_I) Proposal() StorageDealProposal {
 	panic("")
 }
 
-func (p *StorageDealProposal_I) Duration() block.ChainEpoch {
+func (p *StorageDealProposal_I) Duration() actors.ChainEpoch {
 	return (p.EndEpoch() - p.StartEpoch())
 }
 

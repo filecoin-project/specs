@@ -1,7 +1,7 @@
 package sector
 
 import (
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+	actors "github.com/filecoin-project/specs/actors"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -15,8 +15,8 @@ type Serialization = util.Serialization
 //   (T + MIN_PROVE_COMMIT_SECTOR_EPOCH, T + MAX_PROVE_COMMIT_SECTOR_EPOCH)
 // inclusive.
 // TODO: placeholder epoch values -- will be set later
-const MIN_PROVE_COMMIT_SECTOR_EPOCH = block.ChainEpoch(5)
-const MAX_PROVE_COMMIT_SECTOR_EPOCH = block.ChainEpoch(10)
+const MIN_PROVE_COMMIT_SECTOR_EPOCH = actors.ChainEpoch(5)
+const MAX_PROVE_COMMIT_SECTOR_EPOCH = actors.ChainEpoch(10)
 
 const (
 	DeclaredFault StorageFaultType = 1 + iota
@@ -28,7 +28,7 @@ func (amt *DealExpirationAMT_I) Size() int {
 	return 0
 }
 
-func (amt *DealExpirationAMT_I) Add(key block.ChainEpoch, value DealExpirationValue) {
+func (amt *DealExpirationAMT_I) Add(key actors.ChainEpoch, value DealExpirationValue) {
 	// helper function to add entry into the AMT
 }
 
@@ -38,13 +38,13 @@ func (amt *DealExpirationAMT_I) ActiveDealIDs() []deal.DealID {
 }
 
 // return last item in the expiration amt
-func (q *DealExpirationAMT_I) LastDealExpiration() block.ChainEpoch {
-	ret := block.ChainEpoch(0)
+func (q *DealExpirationAMT_I) LastDealExpiration() actors.ChainEpoch {
+	ret := actors.ChainEpoch(0)
 	return ret
 }
 
 // return deal IDs expiring in epoch range
-func (q *DealExpirationAMT_I) ExpiredDealsInRange(start block.ChainEpoch, end block.ChainEpoch) []DealExpirationValue {
+func (q *DealExpirationAMT_I) ExpiredDealsInRange(start actors.ChainEpoch, end actors.ChainEpoch) []DealExpirationValue {
 	ret := make([]DealExpirationValue, 0)
 	return ret
 }

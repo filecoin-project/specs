@@ -9,7 +9,6 @@ import (
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
@@ -17,6 +16,8 @@ import (
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 )
+
+const epochUndefined = actors.ChainEpoch(-1)
 
 ////////////////////////////////////////////////////////////////////////////////
 // Actor methods
@@ -163,7 +164,7 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 		Info_:             info,
 		PreCommitDeposit_: depositReq,
 		PreCommitEpoch_:   rt.CurrEpoch(),
-		ActivationEpoch_:  block.ChainEpoch_None,
+		ActivationEpoch_:  epochUndefined,
 		DealWeight_:       *big.NewInt(-1),
 	}
 	st.Sectors()[info.SectorNumber()] = newSectorInfo
@@ -269,7 +270,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 // Sector Modification //
 /////////////////////////
 
-func (a *StorageMinerActorCode_I) ExtendSectorExpiration(rt Runtime, sectorNumber sector.SectorNumber, newExpiration block.ChainEpoch) {
+func (a *StorageMinerActorCode_I) ExtendSectorExpiration(rt Runtime, sectorNumber sector.SectorNumber, newExpiration actors.ChainEpoch) {
 	storageWeightDescPrev := a._rtGetStorageWeightDescForSector(rt, sectorNumber)
 
 	h, st := a.State(rt)
@@ -315,8 +316,8 @@ func (a *StorageMinerActorCode_I) TerminateSector(rt Runtime, sectorNumber secto
 // Faults //
 ////////////
 
-func (a *StorageMinerActorCode_I) DeclareTemporaryFaults(rt Runtime, sectorNumbers []sector.SectorNumber, duration block.ChainEpoch) {
-	if duration <= block.ChainEpoch(0) {
+func (a *StorageMinerActorCode_I) DeclareTemporaryFaults(rt Runtime, sectorNumbers []sector.SectorNumber, duration actors.ChainEpoch) {
+	if duration <= actors.ChainEpoch(0) {
 		rt.AbortArgMsg("Temporary fault duration must be positive")
 	}
 
@@ -418,8 +419,8 @@ func (a *StorageMinerActorCode_I) _rtCheckTemporaryFaultEvents(rt Runtime, secto
 
 	if checkSector.Is_TemporaryFault() && rt.CurrEpoch() == checkSector.EffectiveFaultEndEpoch() {
 		checkSector.Impl().State_ = SectorState_Active
-		checkSector.Impl().DeclaredFaultEpoch_ = block.ChainEpoch_None
-		checkSector.Impl().DeclaredFaultDuration_ = block.ChainEpoch_None
+		checkSector.Impl().DeclaredFaultEpoch_ = epochUndefined
+		checkSector.Impl().DeclaredFaultDuration_ = epochUndefined
 
 		rt.Send(
 			addr.StoragePowerActorAddr,
@@ -544,7 +545,7 @@ func (a *StorageMinerActorCode_I) _rtCheckSurprisePoStExpiry(rt Runtime) {
 }
 
 func (a *StorageMinerActorCode_I) _rtEnrollCronEvent(
-	rt Runtime, eventEpoch block.ChainEpoch, sectorNumbers []sector.SectorNumber) {
+	rt Runtime, eventEpoch actors.ChainEpoch, sectorNumbers []sector.SectorNumber) {
 
 	rt.Send(
 		addr.StoragePowerActorAddr,

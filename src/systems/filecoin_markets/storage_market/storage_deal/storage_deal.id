@@ -1,6 +1,5 @@
 import actors "github.com/filecoin-project/specs/actors"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
@@ -30,14 +29,14 @@ type StorageDealProposal struct {
     // with total amount StoragePricePerEpoch * (EndEpoch - StartEpoch).
     // Storage deal must appear in a sealed (proven) sector no later than StartEpoch,
     // otherwise it is invalid.
-    StartEpoch                    block.ChainEpoch
-    EndEpoch                      block.ChainEpoch
+    StartEpoch                    actors.ChainEpoch
+    EndEpoch                      actors.ChainEpoch
     StoragePricePerEpoch          actors.TokenAmount
 
     ProviderCollateral            actors.TokenAmount
     ClientCollateral              actors.TokenAmount
 
-    Duration()                    block.ChainEpoch      @(cached)  // EndEpoch - StartEpoch
+    Duration()                    actors.ChainEpoch     @(cached)  // EndEpoch - StartEpoch
     TotalStorageFee()             actors.TokenAmount  // StoragePricePerEpoch * Duration
     ClientBalanceRequirement()    actors.TokenAmount  // ClientCollateral + TotalStorageFee
     ProviderBalanceRequirement()  actors.TokenAmount  // ProviderCollateral
@@ -58,7 +57,7 @@ type StorageDeal struct {
 type OnChainDeal struct {
     ID                DealID
     Deal              StorageDeal
-    SectorStartEpoch  block.ChainEpoch  // -1 if not yet included in proven sector
-    LastUpdatedEpoch  block.ChainEpoch  // -1 if deal state never updated
-    SlashEpoch        block.ChainEpoch  // -1 if deal never slashed
+    SectorStartEpoch  actors.ChainEpoch  // -1 if not yet included in proven sector
+    LastUpdatedEpoch  actors.ChainEpoch  // -1 if deal state never updated
+    SlashEpoch        actors.ChainEpoch  // -1 if deal never slashed
 }

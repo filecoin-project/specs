@@ -4,18 +4,19 @@ import (
 	actors "github.com/filecoin-project/specs/actors"
 	actor_util "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 )
 
+const epochUndefined = actors.ChainEpoch(-1)
+
 ////////////////////////////////////////////////////////////////////////////////
 // Deal state operations
 ////////////////////////////////////////////////////////////////////////////////
 
-func (st *StorageMarketActorState_I) _updatePendingDealStates(dealIDs []deal.DealID, epoch block.ChainEpoch) (
+func (st *StorageMarketActorState_I) _updatePendingDealStates(dealIDs []deal.DealID, epoch actors.ChainEpoch) (
 	amountSlashedTotal actors.TokenAmount) {
 
 	IMPL_FINISH() // BigInt arithmetic
@@ -29,7 +30,7 @@ func (st *StorageMarketActorState_I) _updatePendingDealStates(dealIDs []deal.Dea
 	return
 }
 
-func (st *StorageMarketActorState_I) _updatePendingDealState(dealID deal.DealID, epoch block.ChainEpoch) (
+func (st *StorageMarketActorState_I) _updatePendingDealState(dealID deal.DealID, epoch actors.ChainEpoch) (
 	amountSlashed actors.TokenAmount) {
 
 	IMPL_FINISH() // BigInt arithmetic
@@ -37,15 +38,15 @@ func (st *StorageMarketActorState_I) _updatePendingDealState(dealID deal.DealID,
 
 	deal, dealP := st._getOnChainDealAssert(dealID)
 
-	everUpdated := (deal.LastUpdatedEpoch() != block.ChainEpoch_None)
-	everSlashed := (deal.SlashEpoch() != block.ChainEpoch_None)
+	everUpdated := (deal.LastUpdatedEpoch() != epochUndefined)
+	everSlashed := (deal.SlashEpoch() != epochUndefined)
 
 	Assert(!everUpdated || (deal.LastUpdatedEpoch() <= epoch))
 	if deal.LastUpdatedEpoch() == epoch {
 		return
 	}
 
-	if deal.SectorStartEpoch() == block.ChainEpoch_None {
+	if deal.SectorStartEpoch() == epochUndefined {
 		// Not yet appeared in proven sector; check for timeout.
 		if dealP.StartEpoch() >= epoch {
 			st._processDealInitTimedOut(dealID)
@@ -96,9 +97,9 @@ func (st *StorageMarketActorState_I) _deleteDeal(dealID deal.DealID) {
 }
 
 // Note: only processes deal payments, not deal expiration (even if the deal has expired).
-func (st *StorageMarketActorState_I) _processDealPaymentEpochsElapsed(dealID deal.DealID, numEpochsElapsed block.ChainEpoch) {
+func (st *StorageMarketActorState_I) _processDealPaymentEpochsElapsed(dealID deal.DealID, numEpochsElapsed actors.ChainEpoch) {
 	deal, dealP := st._getOnChainDealAssert(dealID)
-	Assert(deal.SectorStartEpoch() != block.ChainEpoch_None)
+	Assert(deal.SectorStartEpoch() != epochUndefined)
 
 	// Process deal payment for the elapsed epochs.
 	IMPL_FINISH() // BigInt arithmetic
@@ -108,10 +109,10 @@ func (st *StorageMarketActorState_I) _processDealPaymentEpochsElapsed(dealID dea
 
 func (st *StorageMarketActorState_I) _processDealSlashed(dealID deal.DealID) (amountSlashed actors.TokenAmount) {
 	deal, dealP := st._getOnChainDealAssert(dealID)
-	Assert(deal.SectorStartEpoch() != block.ChainEpoch_None)
+	Assert(deal.SectorStartEpoch() != epochUndefined)
 
 	slashEpoch := deal.SlashEpoch()
-	Assert(slashEpoch != block.ChainEpoch_None)
+	Assert(slashEpoch != epochUndefined)
 
 	// unlock client collateral and locked storage fee
 	clientCollateral := dealP.ClientCollateral()
@@ -131,7 +132,7 @@ func (st *StorageMarketActorState_I) _processDealSlashed(dealID deal.DealID) (am
 // for both provider and client.
 func (st *StorageMarketActorState_I) _processDealInitTimedOut(dealID deal.DealID) (amountSlashed actors.TokenAmount) {
 	deal, dealP := st._getOnChainDealAssert(dealID)
-	Assert(deal.SectorStartEpoch() == block.ChainEpoch_None)
+	Assert(deal.SectorStartEpoch() == epochUndefined)
 
 	st._unlockBalance(dealP.Client(), dealP.ClientBalanceRequirement())
 
@@ -148,7 +149,7 @@ func (st *StorageMarketActorState_I) _processDealInitTimedOut(dealID deal.DealID
 // Normal expiration. Delete deal and unlock collaterals for both miner and client.
 func (st *StorageMarketActorState_I) _processDealExpired(dealID deal.DealID) {
 	deal, dealP := st._getOnChainDealAssert(dealID)
-	Assert(deal.SectorStartEpoch() != block.ChainEpoch_None)
+	Assert(deal.SectorStartEpoch() != epochUndefined)
 
 	// Note: payment has already been completed at this point (_rtProcessDealPaymentEpochsElapsed)
 	st._unlockBalance(dealP.Provider(), dealP.ProviderCollateral())
@@ -294,7 +295,7 @@ func _rtDealProposalIsInternallyValid(rt Runtime, dealP deal.StorageDealProposal
 	return true
 }
 
-func _dealGetPaymentRemaining(deal deal.OnChainDeal, epoch block.ChainEpoch) actors.TokenAmount {
+func _dealGetPaymentRemaining(deal deal.OnChainDeal, epoch actors.ChainEpoch) actors.TokenAmount {
 	dealP := deal.Deal().Proposal()
 	Assert(epoch <= dealP.EndEpoch())
 
