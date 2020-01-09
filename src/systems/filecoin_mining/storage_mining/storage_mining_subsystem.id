@@ -71,22 +71,22 @@ type StorageMiningSubsystem struct {
     OnNewRound()
 
     _runMiningCycle()
-    _tryLeaderElection(st stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainPoStVerifyInfo
+    _tryLeaderElection(st stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainElectionPoStVerifyInfo
     _trySurprisePoSt(st stateTree.StateTree, sma sminact.StorageMinerActorState) error
     _submitSurprisePoStMessage(
         state     stateTree.StateTree
-        sPoSt     sector.OnChainPoStVerifyInfo
+        sPoSt     sector.OnChainSurprisePoStVerifyInfo
         gasPrice  abi.TokenAmount
         gasLimit  msg.GasAmount
     ) error
 
     VerifyElectionPoSt(
         header       block.BlockHeader
-        onChainInfo  sector.OnChainPoStVerifyInfo
+        onChainInfo  sector.OnChainElectionPoStVerifyInfo
     ) bool
 
     _verifyElection(
         header       block.BlockHeader
-        onChainInfo  sector.OnChainPoStVerifyInfo
+        onChainInfo  sector.OnChainElectionPoStVerifyInfo
     ) bool
 }

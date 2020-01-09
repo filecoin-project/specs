@@ -77,7 +77,7 @@ func (a *StorageMinerActorCode_I) OnSurprisePoStChallenge(rt Runtime) {
 }
 
 // Invoked by miner's worker address to submit a response to a pending SurprisePoSt challenge.
-func (a *StorageMinerActorCode_I) SubmitSurprisePoStResponse(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) {
+func (a *StorageMinerActorCode_I) SubmitSurprisePoStResponse(rt Runtime, onChainInfo sector.OnChainSurprisePoStVerifyInfo) {
 	h, st := a.State(rt)
 	rt.ValidateImmediateCallerIs(st.Info().Worker())
 
@@ -604,7 +604,7 @@ func (a *StorageMinerActorCode_I) _rtNotifyMarketForTerminatedSectors(rt Runtime
 	)
 }
 
-func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) {
+func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onChainInfo sector.OnChainSurprisePoStVerifyInfo) {
 	h, st := a.State(rt)
 	info := st.Info()
 
@@ -622,15 +622,10 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 	// 	rt.AbortStateMsg("Invalid Surprise PoSt. Tickets do not meet target.")
 	// }
 
-	postRand := &filcrypto.VRFResult_I{
-		Output_: onChainInfo.Randomness(),
-	}
-
 	randomnessK := rt.GetRandomness(challengeEpoch - node_base.SPC_LOOKBACK_POST)
-	postRandomnessInput := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_SurprisePoStChallengeSeed, randomnessK, rt.CurrReceiver())
-	if !postRand.Verify(postRandomnessInput, info.WorkerVRFKey()) {
-		rt.AbortStateMsg("Invalid Surprise PoSt. Invalid randomness.")
-	}
+	// regenerate randomness used. The PoSt Verification below will fail if
+	// the same was not used to generate the proof
+	postRandomness := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_SurprisePoStChallengeSeed, randomnessK, rt.CurrReceiver())
 
 	UpdateRelease(rt, h, st)
 
@@ -645,7 +640,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 	pvInfo := sector.PoStVerifyInfo_I{
 		OnChain_:    onChainInfo,
 		PoStCfg_:    &postCfg,
-		Randomness_: onChainInfo.Randomness(),
+		Randomness_: sector.PoStRandomness(postRandomness),
 	}
 
 	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{SurprisePoStCfg_: &postCfg})

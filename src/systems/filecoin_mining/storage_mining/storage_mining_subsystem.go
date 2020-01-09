@@ -122,11 +122,11 @@ func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 	}
 }
 
-func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainPoStVerifyInfo {
+func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainElectionPoStVerifyInfo {
 	// Randomness for ElectionPoSt
 	randomnessK := sms._blockchain().BestChain().GetPoStChallengeRand(sms._blockchain().LatestEpoch())
-
 	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_ElectionPoStChallengeSeed, randomnessK, sms.Node().Repository().KeyStore().MinerAddress())
+	// Use VRF to generate secret randomness
 	postRandomness := sms.Node().Repository().KeyStore().WorkerKey().Impl().Generate(input).Output()
 
 	// TODO: add how sectors are actually stored in the SMS proving set
@@ -163,9 +163,7 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.Stat
 
 	postProof := sms.StorageProving().Impl().CreateElectionPoStProof(postRandomness, winningCandidates)
 
-	var ctc sector.ChallengeTicketsCommitment // TODO: proofs to fix when complete
-	electionPoSt := &sector.OnChainPoStVerifyInfo_I{
-		CommT_:      ctc,
+	electionPoSt := &sector.OnChainElectionPoStVerifyInfo_I{
 		Candidates_: winningCandidates,
 		Randomness_: postRandomness,
 		Proof_:      postProof,
@@ -235,7 +233,7 @@ func (sms *StorageMiningSubsystem_I) _getStoragePowerActorState(stateTree stateT
 	return st
 }
 
-func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
+func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, header block.BlockHeader, onChainInfo sector.OnChainElectionPoStVerifyInfo) bool {
 	sma := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
 	spa := sms._getStoragePowerActorState(header.ParentState())
 
@@ -265,12 +263,12 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 		Output_: onChainInfo.Randomness(),
 	}
 
+	// Verify VRF output from appropriate input corresponds to randomness used
 	// get worker key from minerAddr
 	workerKey, err := sma.Info().Worker().GetKey()
 	if err != nil {
 		return false
 	}
-
 	if !postRand.Verify(input, filcrypto.VRFPublicKey(workerKey)) {
 		return false
 	}
@@ -300,7 +298,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 	return isPoStVerified
 }
 
-func (sms *StorageMiningSubsystem_I) _verifyElection(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
+func (sms *StorageMiningSubsystem_I) _verifyElection(header block.BlockHeader, onChainInfo sector.OnChainElectionPoStVerifyInfo) bool {
 	st := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
 
 	var numMinerSectors uint64
@@ -322,7 +320,7 @@ func (sms *StorageMiningSubsystem_I) _verifyElection(header block.BlockHeader, o
 	return true
 }
 
-func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainPoStVerifyInfo {
+func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainSurprisePoStVerifyInfo {
 	if !sma.PoStState().Is_Challenged() {
 		return nil
 	}
@@ -330,14 +328,14 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 	// get randomness for SurprisePoSt
 	challEpoch := sma.PoStState().As_Challenged().SurpriseChallengeEpoch()
 	randomnessK := sms._blockchain().BestChain().GetPoStChallengeRand(challEpoch)
-	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_SurprisePoStChallengeSeed, randomnessK, sms.Node().Repository().KeyStore().MinerAddress())
-	postRandomness := sms.Node().Repository().KeyStore().WorkerKey().Impl().Generate(input).Output()
+	// unlike with ElectionPoSt no need to use a VRF
+	postRandomness := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_SurprisePoStChallengeSeed, randomnessK, sms.Node().Repository().KeyStore().MinerAddress())
 
 	// TODO: add how sectors are actually stored in the SMS proving set
 	util.TODO()
 	provingSet := make([]sector.SectorID, 0)
 
-	candidates := sms.StorageProving().Impl().GenerateSurprisePoStCandidates(postRandomness, provingSet)
+	candidates := sms.StorageProving().Impl().GenerateSurprisePoStCandidates(sector.PoStRandomness(postRandomness), provingSet)
 
 	if len(candidates) <= 0 {
 		// Error. Will fail this surprise post and must then redeclare faults
@@ -351,19 +349,18 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 		}
 	}
 
-	postProof := sms.StorageProving().Impl().CreateSurprisePoStProof(postRandomness, winningCandidates)
+	postProof := sms.StorageProving().Impl().CreateSurprisePoStProof(sector.PoStRandomness(postRandomness), winningCandidates)
 
 	var ctc sector.ChallengeTicketsCommitment // TODO: proofs to fix when complete
-	surprisePoSt := &sector.OnChainPoStVerifyInfo_I{
+	surprisePoSt := &sector.OnChainSurprisePoStVerifyInfo_I{
 		CommT_:      ctc,
 		Candidates_: winningCandidates,
-		Randomness_: postRandomness,
 		Proof_:      postProof,
 	}
 	return surprisePoSt
 }
 
-func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.StateTree, sPoSt sector.OnChainPoStVerifyInfo, gasPrice abi.TokenAmount, gasLimit msg.GasAmount) error {
+func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.StateTree, sPoSt sector.OnChainSurprisePoStVerifyInfo, gasPrice abi.TokenAmount, gasLimit msg.GasAmount) error {
 
 	workerAddr, err := addr.Address_Make_Key(node_base.NETWORK, addr.KeyHash(sms.Node().Repository().KeyStore().WorkerKey().VRFPublicKey()))
 	if err != nil {
