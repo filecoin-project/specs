@@ -130,6 +130,7 @@ At a high-level, to validate a winning PoSt Proof:
 3. **Verify `PartialTicket` returned**
 
     - Prove that the PartialTicket were appropriately derived from the eligible sectors, by submitting all miner sectors along with the wanted number of tickets and verifying that the outputted PartialTicket match.
+    - Verify that no duplicate PartialTickets were submitted, that is there are no two tickets with the same `challengeIndex` (challengeIndices are unique across challenged sectors). Tickets challenging the same sector at different indices are valid).
 
 4. **Derive and validate the `ChallengeTicket` from the PartialTickets**
 

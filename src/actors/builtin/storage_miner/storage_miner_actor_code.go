@@ -616,6 +616,15 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 	challengeEpoch := st.PoStState().As_Challenged().SurpriseChallengeEpoch()
 	challengedSectors := st.PoStState().As_Challenged().ChallengedSectors()
 
+	// verify no duplicate tickets
+	challengeIndices := make(map[uint64]bool)
+	for _, tix := range onChainInfo.Candidates() {
+		if _, ok := challengeIndices[tix.ChallengeIndex()]; ok {
+			rt.AbortStateMsg("Invalid Surprise PoSt. Duplicate ticket included.")
+		}
+		challengeIndices[tix.ChallengeIndex()] = true
+	}
+
 	TODO(challengedSectors)
 	// TODO: Determine what should be the acceptance criterion for sector numbers
 	// proven in SurprisePoSt proofs.
