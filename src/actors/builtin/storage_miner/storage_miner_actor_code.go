@@ -12,7 +12,7 @@ import (
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	addr "github.com/filecoin-project/go-address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 )

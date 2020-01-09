@@ -1,7 +1,8 @@
 package interpreter
 
 import "errors"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import addr "github.com/filecoin-project/go-address"
 import ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 import vmr "github.com/filecoin-project/specs/actors/runtime"
 import abi "github.com/filecoin-project/specs/actors/abi"

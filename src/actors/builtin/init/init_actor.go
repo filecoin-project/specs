@@ -1,13 +1,14 @@
 package init
 
 import (
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 )
 
 type InvocOutput = vmr.InvocOutput
@@ -20,8 +21,8 @@ func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
 	h := rt.AcquireState()
 	st := &InitActorState_I{
-		AddressMap_:  map[addr.Address]addr.ActorID{}, // TODO: HAMT
-		NextID_:      addr.ActorID(addr.FirstNonSingletonActorId),
+		AddressMap_:  map[addr.Address]abi.ActorID{}, // TODO: HAMT
+		NextID_:      abi.ActorID(addr.FirstNonSingletonActorId),
 		NetworkName_: vmr.NetworkName(),
 	}
 	UpdateRelease(rt, h, st)

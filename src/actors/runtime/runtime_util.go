@@ -1,10 +1,11 @@
 package runtime
 
 import (
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	util "github.com/filecoin-project/specs/util"
 )

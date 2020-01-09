@@ -2,8 +2,8 @@ package cron
 
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import abi "github.com/filecoin-project/specs/actors/abi"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import vmr "github.com/filecoin-project/specs/actors/runtime"
+import addr "github.com/filecoin-project/go-address"
 
 const (
 	Method_CronActor_EpochTick = actor.MethodPlaceholder + iota

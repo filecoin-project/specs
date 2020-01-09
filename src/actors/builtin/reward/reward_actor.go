@@ -9,7 +9,7 @@ import (
 	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	addr "github.com/filecoin-project/go-address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 )
 

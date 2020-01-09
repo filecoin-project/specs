@@ -4,7 +4,7 @@ import (
 	"github.com/filecoin-project/specs/actors/abi"
 	"github.com/filecoin-project/specs/libraries/ipld"
 	"github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	addr "github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/specs/util"
 )
 

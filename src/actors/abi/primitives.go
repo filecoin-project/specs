@@ -49,3 +49,7 @@ type StoragePower int64 // TODO bigint
 
 // The unit of sector weight (power-epochs)
 type SectorWeight int64 // TODO bigint
+
+// ActorID is a sequential number assigned to actors in the state tree.
+// ActorIDs are assigned by the InitActor when an actor is created.
+type ActorID int64

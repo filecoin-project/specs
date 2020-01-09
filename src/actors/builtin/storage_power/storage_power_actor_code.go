@@ -3,6 +3,7 @@ package storage_power
 import (
 	"math"
 
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
@@ -11,7 +12,7 @@ import (
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 )

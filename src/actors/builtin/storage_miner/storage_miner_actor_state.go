@@ -1,12 +1,12 @@
 package storage_miner
 
 import (
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	actor_util "github.com/filecoin-project/specs/actors/util"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 )
 

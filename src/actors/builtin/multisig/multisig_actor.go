@@ -1,11 +1,12 @@
 package multisig
 
 import (
+	addr "github.com/filecoin-project/go-address"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 )
 
 type InvocOutput = vmr.InvocOutput
@@ -46,7 +47,7 @@ func (a *MultiSigActorCode_I) Approve(rt vmr.Runtime, txnID TxnID, txn MultiSigT
 	a._rtApproveTransactionOrAbort(rt, callerAddr, txnID, txn)
 }
 
-func (a *MultiSigActorCode_I) AddAuthorizedParty(rt vmr.Runtime, actorID addr.ActorID) {
+func (a *MultiSigActorCode_I) AddAuthorizedParty(rt vmr.Runtime, actorID abi.ActorID) {
 	// Can only be called by the multisig wallet itself.
 	rt.ValidateImmediateCallerIs(rt.CurrReceiver())
 
@@ -55,7 +56,7 @@ func (a *MultiSigActorCode_I) AddAuthorizedParty(rt vmr.Runtime, actorID addr.Ac
 	UpdateRelease_MultiSig(rt, h, st)
 }
 
-func (a *MultiSigActorCode_I) RemoveAuthorizedParty(rt vmr.Runtime, actorID addr.ActorID) {
+func (a *MultiSigActorCode_I) RemoveAuthorizedParty(rt vmr.Runtime, actorID abi.ActorID) {
 	// Can only be called by the multisig wallet itself.
 	rt.ValidateImmediateCallerIs(rt.CurrReceiver())
 
@@ -74,7 +75,7 @@ func (a *MultiSigActorCode_I) RemoveAuthorizedParty(rt vmr.Runtime, actorID addr
 	UpdateRelease_MultiSig(rt, h, st)
 }
 
-func (a *MultiSigActorCode_I) SwapAuthorizedParty(rt vmr.Runtime, oldActorID addr.ActorID, newActorID addr.ActorID) {
+func (a *MultiSigActorCode_I) SwapAuthorizedParty(rt vmr.Runtime, oldActorID abi.ActorID, newActorID abi.ActorID) {
 	// Can only be called by the multisig wallet itself.
 	rt.ValidateImmediateCallerIs(rt.CurrReceiver())
 

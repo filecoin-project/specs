@@ -1,13 +1,15 @@
 package storage_market
 
 import (
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	actor_util "github.com/filecoin-project/specs/actors/util"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 )
 
 ////////////////////////////////////////////////////////////////////////////////

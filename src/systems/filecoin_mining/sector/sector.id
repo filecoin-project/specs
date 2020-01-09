@@ -1,7 +1,6 @@
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 
 type Bytes32 Bytes
 type Commitment Bytes32  // TODO
@@ -29,7 +28,7 @@ type SectorSize UInt
 
 // TODO make sure this is globally unique
 type SectorID struct {
-    Miner   addr.ActorID
+    Miner   abi.ActorID
     Number  SectorNumber
 }
 

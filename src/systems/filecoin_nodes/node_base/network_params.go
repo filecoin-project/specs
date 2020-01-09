@@ -2,14 +2,14 @@ package node_base
 
 import (
 	abi "github.com/filecoin-project/specs/actors/abi"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	addr "github.com/filecoin-project/go-address"
 )
 
 /////////////////////////////////////////////////////////////
 // Global
 /////////////////////////////////////////////////////////////
 
-const NETWORK = addr.Address_NetworkID_Testnet
+const NETWORK = addr.Testnet
 
 /////////////////////////////////////////////////////////////
 // Commitment

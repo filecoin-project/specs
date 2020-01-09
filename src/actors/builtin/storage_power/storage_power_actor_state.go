@@ -3,11 +3,12 @@ package storage_power
 import (
 	"sort"
 
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 )
 
 func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(minerPower abi.StoragePower) bool {

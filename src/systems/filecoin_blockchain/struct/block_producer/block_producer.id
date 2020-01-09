@@ -1,6 +1,6 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import addr "github.com/filecoin-project/go-address"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
