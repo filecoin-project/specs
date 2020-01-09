@@ -27,7 +27,7 @@ const epochUndefined = abi.ChainEpoch(-1)
 func (a *StorageMinerActorCode_I) StageWorkerKeyChange(rt Runtime, key filcrypto.VRFPublicKey) (err error) {
 	h, st := a.State(rt)
 	rt.ValidateImmediateCallerIs(st.Info().Owner())
-	util.IMPL_TODO() // verify public key syntax
+	autil.IMPL_TODO() // verify public key syntax
 
 	keyAddr, err := addr.Address_Make_Key(node_base.NETWORK, addr.KeyHash(key))
 	if err != nil {
@@ -56,7 +56,7 @@ func (a *StorageMinerActorCode_I) CommitWorkerKeyChange(rt Runtime) (err error) 
 	// lazy updates to worker keys if at effectiveness
 	if st.Info().PendingKeyChange().EffectiveAt() <= rt.CurrEpoch() {
 		st.Info()._updateMinerKey()
-		util.TODO()
+		autil.TODO()
 		// remains to update the key in every deal, or associate deals to minerActorID instead of workerKey
 	}
 	Release(rt, h, st)
