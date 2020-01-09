@@ -31,6 +31,6 @@ A syntactically valid receipt has:
 
 # Exit codes
 
-{{< readfile file="/docs/actors/runtime/vm_exitcodes.id" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/runtime/exitcode/vm_exitcodes.id" code="true" lang="go" >}}
 
-{{< readfile file="/docs/actors/runtime/vm_exitcodes.go" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/runtime/exitcode/vm_exitcodes.go" code="true" lang="go" >}}
