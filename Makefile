@@ -11,6 +11,14 @@
 # - keep diagrams/builsys/buildsys.dot in sync with the targets here
 #      that is a diagram that is meant to make it easy to understand everything here.
 
+# Pick the right python version.
+# If python2 exists, use it. Otherwise, assume python is python2.
+ifneq (,$(shell which python2 2>/dev/null))
+PYTHON ?= python2
+else
+PYTHON ?= python
+endif
+
 help:
 	@echo "SYNOPSIS"
 	@echo "	make -- filecoin spec build toolchain commands"
@@ -66,6 +74,13 @@ help:
 	@echo "	make watch-hugo           watch and rebuild hugo"
 	@echo ""
 
+# Source
+ORG_FILES=$(shell find -L hugo/content -name '*.org')
+ORG_MD_FILES=$(ORG_FILES:%.org=%.md)
+IPLD_FILES=$(shell find -L hugo/content -name '*.ipld')
+GO_FILES=$(shell find -L hugo/content -name '*.go')
+MD_FILES=$(shell find -L hugo/content -name '*.md') $(ORG_MD_FILES)
+
 # main Targets
 build: diagrams build-code website
 
@@ -111,19 +126,28 @@ clean-deps: .PHONY
 	-rm -r bin/.emacs
 
 # intermediate targets
-# NOTE: For now, disable org2md — must manually generate until batch-mode build issues are resolved.
-website: diagrams build-hugo # org2md
+website: go-test hugo-build
 	mkdir -p build/website
 	-rm -rf build/website/*
 	mv hugo/public/* build/website
 	@echo TODO: add generate-code to this target
 
-pdf: diagrams build-hugo # org2md
+pdf: go-test hugo-build
 	@echo TODO: add generate-code to this target
 	bin/build-pdf.sh
 
-build-hugo: hugo-src $(shell find hugo/content | grep '.md')
+hugo-build: $(MD_FILES)
 	cd hugo && hugo
+
+# todo
+generate-code: $(IPLD_FILES)
+	echo TODO: use codeGen && exit 1
+	# bin/codeGen <input-files?>
+
+go-test: $(GO_FILES)
+	# testing should have the side effect that all go is compiled
+	cd hugo/content/codeGen && go build && go test ./...
+	# cd hugo/content/code && go build && go test ./...
 
 hugo-src: $(shell find src | grep '.md') hugo/data/version.yml
 	rm -rf hugo/content/docs
@@ -174,7 +198,6 @@ org2md: $(ORG_MD_FILES)
         # Skip this until batch-mode build issues are resolve.
 	# bin/org2hugomd.el <$< >$@
 
-
 # building our tools
 bins: bin/codeGen bin/watcher
 
@@ -191,14 +214,12 @@ test-codeGen: bin/codeGen
 
 # other
 
-serve: build-hugo .PHONY
-	echo "run 'make website' and refresh to update"
-	cd hugo && hugo serve --noHTTPCache
+serve: hugo-build .PHONY
+	cd hugo && hugo serve
 
 serve-website: website .PHONY
 	# use this if `make serve` breaks
-	echo "run 'make website' and refresh to update"
-	cd build/website && python -m SimpleHTTPServer 1313
+	cd build/website && $(PYTHON) -m SimpleHTTPServer 1313
 
 serve-and-watch: serve watch-hugo
 	echo "make sure you run this with 'make -j2'"

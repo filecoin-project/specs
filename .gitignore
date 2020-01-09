@@ -8,6 +8,7 @@ hugo/resources
 hugo/content/docs
 hugo/content/ox-hugo
 hugo/content/codeGen/main
+hugo/resources
 .DS_Store
 *.gen.go
 hugo/data/version.yml
