@@ -4,12 +4,12 @@ import (
 	"math"
 
 	abi "github.com/filecoin-project/specs/actors/abi"
+	builtin "github.com/filecoin-project/specs/actors/builtin"
 	serde "github.com/filecoin-project/specs/actors/serde"
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
@@ -73,7 +73,7 @@ func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Addres
 			addr.InitActorAddr,
 			ai.Method_InitActor_Exec,
 			serde.MustSerializeParams(
-				actor.CodeID_Make_Builtin(actor.BuiltinActorID_StorageMiner),
+				builtin.StorageMinerActorCodeID,
 				ownerAddr,
 				workerAddr,
 				sectorSize,
@@ -122,14 +122,14 @@ func (a *StoragePowerActorCode_I) DeleteMiner(rt Runtime, minerAddr addr.Address
 }
 
 func (a *StoragePowerActorCode_I) OnSectorProveCommit(rt Runtime, storageWeightDesc SectorStorageWeightDesc) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	a._rtAddPowerForSector(rt, rt.ImmediateCaller(), storageWeightDesc)
 }
 
 func (a *StoragePowerActorCode_I) OnSectorTerminate(
 	rt Runtime, storageWeightDesc SectorStorageWeightDesc, terminationType SectorTerminationType) {
 
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 	a._rtdeductClaimedPowerForSectorAssert(rt, minerAddr, storageWeightDesc)
 
@@ -140,25 +140,25 @@ func (a *StoragePowerActorCode_I) OnSectorTerminate(
 }
 
 func (a *StoragePowerActorCode_I) OnSectorTemporaryFaultEffectiveBegin(rt Runtime, storageWeightDesc SectorStorageWeightDesc) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	a._rtdeductClaimedPowerForSectorAssert(rt, rt.ImmediateCaller(), storageWeightDesc)
 }
 
 func (a *StoragePowerActorCode_I) OnSectorTemporaryFaultEffectiveEnd(rt Runtime, storageWeightDesc SectorStorageWeightDesc) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	a._rtAddPowerForSector(rt, rt.ImmediateCaller(), storageWeightDesc)
 }
 
 func (a *StoragePowerActorCode_I) OnSectorModifyWeightDesc(
 	rt Runtime, storageWeightDescPrev SectorStorageWeightDesc, storageWeightDescNew SectorStorageWeightDesc) {
 
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	a._rtdeductClaimedPowerForSectorAssert(rt, rt.ImmediateCaller(), storageWeightDescPrev)
 	a._rtAddPowerForSector(rt, rt.ImmediateCaller(), storageWeightDescNew)
 }
 
 func (a *StoragePowerActorCode_I) OnMinerSurprisePoStSuccess(rt Runtime) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
@@ -168,7 +168,7 @@ func (a *StoragePowerActorCode_I) OnMinerSurprisePoStSuccess(rt Runtime) {
 }
 
 func (a *StoragePowerActorCode_I) OnMinerSurprisePoStFailure(rt Runtime, numConsecutiveFailures int) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)

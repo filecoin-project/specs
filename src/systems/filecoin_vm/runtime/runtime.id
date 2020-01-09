@@ -26,8 +26,8 @@ type Runtime interface {
     ImmediateCaller() addr.Address
     ValidateImmediateCallerIs(caller addr.Address)
     ValidateImmediateCallerInSet(callers [addr.Address])
-    ValidateImmediateCallerAcceptAnyOfType(type_ actor.BuiltinActorID)
-    ValidateImmediateCallerAcceptAnyOfTypes(types [actor.BuiltinActorID])
+    ValidateImmediateCallerAcceptAnyOfType(type_ abi.ActorCodeID)
+    ValidateImmediateCallerAcceptAnyOfTypes(types [abi.ActorCodeID])
     ValidateImmediateCallerAcceptAny()
     ValidateImmediateCallerMatches(CallerPattern)
 
@@ -73,7 +73,7 @@ type Runtime interface {
     CurrIndices()     indices.Indices
 
     // Look up the code ID of a given actor address.
-    GetActorCodeID(addr addr.Address) (ret actor.CodeID, ok bool)
+    GetActorCodeID(addr addr.Address) (ret abi.ActorCodeID, ok bool)
 
     // Run a (pure function) computation, consuming the gas cost associated with that function.
     // This mechanism is intended to capture the notion of an ABI between the VM and native
@@ -109,7 +109,7 @@ type Runtime interface {
     // Creates an actor in the state tree, with empty state. May only be called by InitActor.
     CreateActor(
         // The new actor's code identifier.
-        codeId   actor.CodeID
+        codeId   abi.ActorCodeID
         // Address under which the new actor's state will be stored. Must be an ID-address.
         address  addr.Address
     )

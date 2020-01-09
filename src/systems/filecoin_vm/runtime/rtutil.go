@@ -2,8 +2,8 @@ package runtime
 
 import (
 	abi "github.com/filecoin-project/specs/actors/abi"
+	builtin "github.com/filecoin-project/specs/actors/builtin"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
@@ -91,26 +91,17 @@ func MessageReceipt_MakeSystemError(errCode exitcode.SystemErrorCode, gasUsed ms
 	)
 }
 
-func RT_AddressIsSignable_AbortIfNotFound(rt Runtime, addr addr.Address) bool {
-	codeID, ok := rt.GetActorCodeID(addr)
-	if !ok {
-		rt.AbortArgMsg("Address not found")
-	}
-	return codeID.IsSignable()
-}
-
 func RT_ValidateImmediateCallerIsSignable(rt Runtime) {
-	IMPL_TODO() // TODO: Update for MultiSig actors
-	rt.ValidateImmediateCallerAcceptAnyOfTypes(actor.BuiltinActorID_SignableTypes())
+	rt.ValidateImmediateCallerAcceptAnyOfTypes([]abi.ActorCodeID{
+		builtin.AccountActorCodeID,
+		builtin.MultisigActorCodeID,
+	})
 }
 
 func RT_Address_Is_StorageMiner(rt Runtime, minerAddr addr.Address) bool {
 	codeID, ok := rt.GetActorCodeID(minerAddr)
 	Assert(ok)
-	if !codeID.IsBuiltin() {
-		return false
-	}
-	return (codeID.As_Builtin() == actor.BuiltinActorID_StorageMiner)
+	return codeID == builtin.StorageMinerActorCodeID
 }
 
 func RT_GetMinerAccountsAssert(rt Runtime, minerAddr addr.Address) (ownerAddr addr.Address, workerAddr addr.Address) {

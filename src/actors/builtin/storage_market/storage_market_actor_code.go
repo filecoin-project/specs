@@ -2,10 +2,10 @@ package storage_market
 
 import (
 	abi "github.com/filecoin-project/specs/actors/abi"
+	builtin "github.com/filecoin-project/specs/actors/builtin"
 	actor_util "github.com/filecoin-project/specs/actors/util"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 )
@@ -121,7 +121,7 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 
 // Note: in the case of a capacity-commitment sector (one with zero deals), this function should succeed vacuously.
 func (a *StorageMarketActorCode_I) VerifyDealsOnSectorPreCommit(rt Runtime, dealIDs deal.DealIDs, sectorInfo sector.SectorPreCommitInfo) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
@@ -135,7 +135,7 @@ func (a *StorageMarketActorCode_I) VerifyDealsOnSectorPreCommit(rt Runtime, deal
 }
 
 func (a *StorageMarketActorCode_I) UpdateDealsOnSectorProveCommit(rt Runtime, dealIDs deal.DealIDs, sectorInfo sector.SectorProveCommitInfo) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
@@ -150,7 +150,7 @@ func (a *StorageMarketActorCode_I) UpdateDealsOnSectorProveCommit(rt Runtime, de
 }
 
 func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, dealIDs deal.DealIDs) sector.PieceInfos {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 
 	ret := []sector.PieceInfo{}
 
@@ -170,7 +170,7 @@ func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, dealIDs d
 }
 
 func (a *StorageMarketActorCode_I) GetWeightForDealSet(rt Runtime, dealIDs deal.DealIDs) deal.DealWeight {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 
 	IMPL_FINISH() // BigInt arithmetic
@@ -192,7 +192,7 @@ func (a *StorageMarketActorCode_I) GetWeightForDealSet(rt Runtime, dealIDs deal.
 }
 
 func (a *StorageMarketActorCode_I) TerminateDealsOnSlashProviderSector(rt Runtime, dealIDs deal.DealIDs) {
-	rt.ValidateImmediateCallerAcceptAnyOfType(actor.BuiltinActorID_StorageMiner)
+	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)

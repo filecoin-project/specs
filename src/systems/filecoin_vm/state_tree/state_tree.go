@@ -22,7 +22,7 @@ func (st *StateTree_I) GetActor(a addr.Address) (actor.ActorState, bool) {
 	return as, found
 }
 
-func (st *StateTree_I) GetActorCodeID_Assert(a addr.Address) actor.CodeID {
+func (st *StateTree_I) GetActorCodeID_Assert(a addr.Address) abi.ActorCodeID {
 	ret, found := st.GetActor(a)
 	Assert(found)
 	return ret.CodeID()

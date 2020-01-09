@@ -25,36 +25,6 @@ type CallSeqNum UVarint
 // serialized code for the actor in the Filecoin Specification.
 type Code Bytes
 
-// CodeID identifies an actor's code (either one of the builtin actors,
-// or, in the future, potentially a CID of VM code for a custom actor.)
-type CodeID union {
-    Builtin        BuiltinActorID
-    UserDefined    ipld.CID
-
-    IsBuiltin()    bool
-    IsSingleton()  bool
-
-    // Indicates whether an in-VM message Send operation (with a given actor as sender)
-    // can be triggered by a signed on-chain message from this actor's corresponding
-    // party/parties.
-    IsSignable()   bool
-}
-
-type BuiltinActorID enum {
-    // The SystemActor has no methods and no state.
-    // It exists only to be the implicit sender of privileged messages that arise from
-    // the VM interpreter itself (e.g., cron and block reward triggers and EPoSts).
-    System
-
-    Init
-    Cron
-    Account
-    PaymentChannel
-    StoragePower
-    StorageMiner
-    StorageMarket
-}
-
 // Actor is a base computation object in the Filecoin VM. Similar
 // to Actors in the Actor Model (programming), or Objects in Object-
 // Oriented Programming, or Ethereum Contracts in the EVM.
@@ -62,7 +32,7 @@ type BuiltinActorID enum {
 // ActorState represents the on-chain storage all actors keep.
 type ActorState struct {
     // Identifies the code this actor executes.
-    CodeID
+    CodeID      abi.ActorCodeID
     // CID of the root of optional actor-specific sub-state.
     State       ActorSubstateCID
     // Balance of tokens held by this actor.

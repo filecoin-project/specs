@@ -1,10 +1,11 @@
 package interpreter
 
 import "errors"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+import abi "github.com/filecoin-project/specs/actors/abi"
+import builtin "github.com/filecoin-project/specs/actors/builtin"
 import accact "github.com/filecoin-project/specs/actors/builtin/account"
 import cronact "github.com/filecoin-project/specs/actors/builtin/cron"
 import initact "github.com/filecoin-project/specs/actors/builtin/init"
@@ -15,29 +16,17 @@ var (
 	ErrActorNotFound = errors.New("Actor Not Found")
 )
 
-// CodeIDs for system actors
-var (
-	SystemActorCodeID         = actor.CodeID_Make_Builtin(actor.BuiltinActorID_System)
-	InitActorCodeID           = actor.CodeID_Make_Builtin(actor.BuiltinActorID_Init)
-	CronActorCodeID           = actor.CodeID_Make_Builtin(actor.BuiltinActorID_Cron)
-	AccountActorCodeID        = actor.CodeID_Make_Builtin(actor.BuiltinActorID_Account)
-	StoragePowerActorCodeID   = actor.CodeID_Make_Builtin(actor.BuiltinActorID_StoragePower)
-	StorageMinerActorCodeID   = actor.CodeID_Make_Builtin(actor.BuiltinActorID_StorageMiner)
-	StorageMarketActorCodeID  = actor.CodeID_Make_Builtin(actor.BuiltinActorID_StorageMarket)
-	PaymentChannelActorCodeID = actor.CodeID_Make_Builtin(actor.BuiltinActorID_PaymentChannel)
-)
-
 var staticActorCodeRegistry = &actorCodeRegistry{}
 
 type actorCodeRegistry struct {
-	code map[actor.CodeID]vmr.ActorCode
+	code map[abi.ActorCodeID]vmr.ActorCode
 }
 
-func (r *actorCodeRegistry) _registerActor(id actor.CodeID, actor vmr.ActorCode) {
+func (r *actorCodeRegistry) _registerActor(id abi.ActorCodeID, actor vmr.ActorCode) {
 	r.code[id] = actor
 }
 
-func (r *actorCodeRegistry) _loadActor(id actor.CodeID) (vmr.ActorCode, error) {
+func (r *actorCodeRegistry) _loadActor(id abi.ActorCodeID) (vmr.ActorCode, error) {
 	a, ok := r.code[id]
 	if !ok {
 		return nil, ErrActorNotFound
@@ -45,11 +34,11 @@ func (r *actorCodeRegistry) _loadActor(id actor.CodeID) (vmr.ActorCode, error) {
 	return a, nil
 }
 
-func RegisterActor(id actor.CodeID, actor vmr.ActorCode) {
+func RegisterActor(id abi.ActorCodeID, actor vmr.ActorCode) {
 	staticActorCodeRegistry._registerActor(id, actor)
 }
 
-func LoadActor(id actor.CodeID) (vmr.ActorCode, error) {
+func LoadActor(id abi.ActorCodeID) (vmr.ActorCode, error) {
 	return staticActorCodeRegistry._loadActor(id)
 }
 
@@ -67,11 +56,11 @@ func _registerBuiltinActors() {
 
 	cron := &cronact.CronActorCode_I{}
 
-	RegisterActor(InitActorCodeID, &initact.InitActorCode_I{})
-	RegisterActor(CronActorCodeID, cron)
-	RegisterActor(AccountActorCodeID, &accact.AccountActorCode_I{})
-	RegisterActor(StoragePowerActorCodeID, &spowact.StoragePowerActorCode_I{})
-	RegisterActor(StorageMarketActorCodeID, &smarkact.StorageMarketActorCode_I{})
+	RegisterActor(builtin.InitActorCodeID, &initact.InitActorCode_I{})
+	RegisterActor(builtin.CronActorCodeID, cron)
+	RegisterActor(builtin.AccountActorCodeID, &accact.AccountActorCode_I{})
+	RegisterActor(builtin.StoragePowerActorCodeID, &spowact.StoragePowerActorCode_I{})
+	RegisterActor(builtin.StorageMarketActorCodeID, &smarkact.StorageMarketActorCode_I{})
 
 	// wire in CRON actions.
 	// TODO: move this to CronActor's constructor method
