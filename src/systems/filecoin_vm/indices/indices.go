@@ -6,7 +6,6 @@ import (
 	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -168,7 +167,7 @@ func (inds *Indices_I) StorageMining_TemporaryFaultFee(
 }
 
 func (inds *Indices_I) NetworkTransactionFee(
-	toActorCodeID actor.CodeID,
+	toActorCodeID abi.ActorCodeID,
 	methodNum abi.MethodNum,
 ) abi.TokenAmount {
 	PARAM_FINISH()

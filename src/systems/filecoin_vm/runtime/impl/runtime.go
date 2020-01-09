@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 
 	abi "github.com/filecoin-project/specs/actors/abi"
+	builtin "github.com/filecoin-project/specs/actors/builtin"
 	acctact "github.com/filecoin-project/specs/actors/builtin/account"
 	initact "github.com/filecoin-project/specs/actors/builtin/init"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
@@ -157,7 +158,7 @@ func (rt *VMContext) AbortAPI(msg string) {
 	rt.Abort(exitcode.SystemError(exitcode.RuntimeAPIError), msg)
 }
 
-func (rt *VMContext) CreateActor(codeID actor.CodeID, address addr.Address) {
+func (rt *VMContext) CreateActor(codeID abi.ActorCodeID, address addr.Address) {
 	if !rt._actorAddress.Equals(addr.InitActorAddr) {
 		rt.AbortAPI("Only InitActor may call rt.CreateActor")
 	}
@@ -168,7 +169,7 @@ func (rt *VMContext) CreateActor(codeID actor.CodeID, address addr.Address) {
 	rt._createActor(codeID, address)
 }
 
-func (rt *VMContext) _createActor(codeID actor.CodeID, address addr.Address) {
+func (rt *VMContext) _createActor(codeID abi.ActorCodeID, address addr.Address) {
 	// Create empty actor state.
 	actorState := &actor.ActorState_I{
 		CodeID_:     codeID,
@@ -194,10 +195,7 @@ func (rt *VMContext) DeleteActor(address addr.Address) {
 
 	// Special case: StoragePowerActor may delete a StorageMinerActor.
 	addrCodeID, found := rt.GetActorCodeID(address)
-	if found &&
-		rt._actorAddress.Equals(addr.StoragePowerActorAddr) &&
-		addrCodeID.Is_Builtin() && addrCodeID.As_Builtin() == actor.BuiltinActorID_StorageMiner {
-
+	if found && rt._actorAddress.Equals(addr.StoragePowerActorAddr) && addrCodeID == builtin.StorageMinerActorCodeID {
 		ok = true
 	}
 
@@ -301,19 +299,16 @@ func (rt *VMContext) ValidateImmediateCallerMatches(
 	rt._numValidateCalls += 1
 }
 
-func CallerPattern_MakeAcceptAnyOfTypes(rt *VMContext, types []actor.BuiltinActorID) CallerPattern {
+func CallerPattern_MakeAcceptAnyOfTypes(rt *VMContext, types []abi.ActorCodeID) CallerPattern {
 	return CallerPattern{
 		Matches: func(y addr.Address) bool {
 			codeID, ok := rt.GetActorCodeID(y)
 			if !ok {
 				panic("Internal runtime error: actor not found")
 			}
-			Assert(codeID != nil)
-			if !codeID.IsBuiltin() {
-				return false
-			}
+
 			for _, type_ := range types {
-				if codeID.As_Builtin() == type_ {
+				if codeID == type_ {
 					return true
 				}
 			}
@@ -330,11 +325,11 @@ func (rt *VMContext) ValidateImmediateCallerInSet(callersExpected []addr.Address
 	rt.ValidateImmediateCallerMatches(vmr.CallerPattern_MakeSet(callersExpected))
 }
 
-func (rt *VMContext) ValidateImmediateCallerAcceptAnyOfType(type_ actor.BuiltinActorID) {
-	rt.ValidateImmediateCallerAcceptAnyOfTypes([]actor.BuiltinActorID{type_})
+func (rt *VMContext) ValidateImmediateCallerAcceptAnyOfType(type_ abi.ActorCodeID) {
+	rt.ValidateImmediateCallerAcceptAnyOfTypes([]abi.ActorCodeID{type_})
 }
 
-func (rt *VMContext) ValidateImmediateCallerAcceptAnyOfTypes(types []actor.BuiltinActorID) {
+func (rt *VMContext) ValidateImmediateCallerAcceptAnyOfTypes(types []abi.ActorCodeID) {
 	rt.ValidateImmediateCallerMatches(CallerPattern_MakeAcceptAnyOfTypes(rt, types))
 }
 
@@ -403,7 +398,7 @@ func (rt *VMContext) _transferFunds(from addr.Address, to addr.Address, amount a
 	return nil
 }
 
-func (rt *VMContext) GetActorCodeID(actorAddr addr.Address) (ret actor.CodeID, ok bool) {
+func (rt *VMContext) GetActorCodeID(actorAddr addr.Address) (ret abi.ActorCodeID, ok bool) {
 	IMPL_FINISH()
 	panic("")
 }
@@ -560,7 +555,7 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 	rt._saveInitActorState(initSubState)
 
 	// Create new account actor (charges gas).
-	rt._createActor(actor.CodeID(actor.CodeID_Make_Builtin(actor.BuiltinActorID_Account)), newIdAddr)
+	rt._createActor(builtin.AccountActorCodeID, newIdAddr)
 
 	// Initialize account actor substate with it's pubkey address.
 	substate := &acctact.AccountActorState_I{

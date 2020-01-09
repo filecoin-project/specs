@@ -1,5 +1,7 @@
 package abi
 
+import cid "github.com/ipfs/go-cid"
+
 // The abi package contains definitions of all types that cross the VM boundary and are used
 // within actor code.
 //
@@ -7,6 +9,10 @@ package abi
 
 // Epoch number of the chain state, which acts as a proxy for time within the VM.
 type ChainEpoch int64
+
+// ActorCodeID identifies an actor's code (either one of the builtin actors,
+// or, in the future, a CID of VM bytecode for a user-defined actor).
+type ActorCodeID cid.Cid
 
 // MethodNum is an integer that represents a particular method
 // in an actor's function table. These numbers are used to compress
