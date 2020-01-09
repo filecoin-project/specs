@@ -1,6 +1,6 @@
 package storage_deal
 
-import actors "github.com/filecoin-project/specs/actors"
+import abi "github.com/filecoin-project/specs/actors/abi"
 
 import util "github.com/filecoin-project/specs/util"
 
@@ -13,18 +13,18 @@ func (d *StorageDeal_I) Proposal() StorageDealProposal {
 	panic("")
 }
 
-func (p *StorageDealProposal_I) Duration() actors.ChainEpoch {
+func (p *StorageDealProposal_I) Duration() abi.ChainEpoch {
 	return (p.EndEpoch() - p.StartEpoch())
 }
 
-func (p *StorageDealProposal_I) TotalStorageFee() actors.TokenAmount {
-	return actors.TokenAmount(uint64(p.StoragePricePerEpoch()) * uint64(p.Duration()))
+func (p *StorageDealProposal_I) TotalStorageFee() abi.TokenAmount {
+	return abi.TokenAmount(uint64(p.StoragePricePerEpoch()) * uint64(p.Duration()))
 }
 
-func (p *StorageDealProposal_I) ClientBalanceRequirement() actors.TokenAmount {
+func (p *StorageDealProposal_I) ClientBalanceRequirement() abi.TokenAmount {
 	return (p.ClientCollateral() + p.TotalStorageFee())
 }
 
-func (p *StorageDealProposal_I) ProviderBalanceRequirement() actors.TokenAmount {
+func (p *StorageDealProposal_I) ProviderBalanceRequirement() abi.TokenAmount {
 	return p.ProviderCollateral()
 }

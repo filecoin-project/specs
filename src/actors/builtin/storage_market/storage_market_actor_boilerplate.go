@@ -1,7 +1,7 @@
 package storage_market
 
 import (
-	actors "github.com/filecoin-project/specs/actors"
+	abi "github.com/filecoin-project/specs/actors/abi"
 	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
@@ -24,7 +24,7 @@ var RT_ValidateImmediateCallerIsSignable = vmr.RT_ValidateImmediateCallerIsSigna
 
 type InvocOutput = vmr.InvocOutput
 type Runtime = vmr.Runtime
-type Bytes = actors.Bytes
+type Bytes = abi.Bytes
 
 var Assert = autil.Assert
 var IMPL_FINISH = autil.IMPL_FINISH

@@ -1,7 +1,7 @@
 package block
 
 import (
-	actors "github.com/filecoin-project/specs/actors"
+	abi "github.com/filecoin-project/specs/actors/abi"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
@@ -22,7 +22,7 @@ func (tix *Ticket_I) Verify(randomness util.Bytes, pk filcrypto.VRFPublicKey, mi
 	return tix.VRFResult_.Verify(input, pk)
 }
 
-func (tix *Ticket_I) DrawRandomness(epoch actors.ChainEpoch) util.Bytes {
+func (tix *Ticket_I) DrawRandomness(epoch abi.ChainEpoch) util.Bytes {
 	input := Serialize_TicketDrawingSeedInput(&TicketDrawingSeedInput_I{
 		PastTicket_: tix.Output(),
 		Epoch_:      epoch,

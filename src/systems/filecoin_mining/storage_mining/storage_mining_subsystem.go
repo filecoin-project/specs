@@ -3,7 +3,7 @@ package storage_mining
 // import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 // import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import (
-	actors "github.com/filecoin-project/specs/actors"
+	abi "github.com/filecoin-project/specs/actors/abi"
 	sminact "github.com/filecoin-project/specs/actors/builtin/storage_miner"
 	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 	serde "github.com/filecoin-project/specs/actors/serde"
@@ -38,7 +38,7 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 	workerAddr addr.Address,
 	sectorSize util.UInt,
 	peerId libp2p.PeerID,
-	pledgeAmt actors.TokenAmount,
+	pledgeAmt abi.TokenAmount,
 ) (addr.Address, error) {
 
 	ownerActor, ok := state.GetActor(ownerAddr)
@@ -116,7 +116,7 @@ func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 		sPoSt := sms._trySurprisePoSt(chainHead.StateTree(), sma)
 
 		var gasLimit msg.GasAmount
-		var gasPrice = actors.TokenAmount(0)
+		var gasPrice = abi.TokenAmount(0)
 		util.IMPL_FINISH("read from consts (in this case user set param)")
 		sms._submitSurprisePoStMessage(chainHead.StateTree(), sPoSt, gasPrice, gasLimit)
 	}
@@ -260,7 +260,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 
 	// 1. Verify miner has enough power (includes implicit checks on min miner size
 	// and challenge status via SPA's power table).
-	if pow == actors.StoragePower(0) {
+	if pow == abi.StoragePower(0) {
 		return false
 	}
 
@@ -377,7 +377,7 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 	return surprisePoSt
 }
 
-func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.StateTree, sPoSt sector.OnChainPoStVerifyInfo, gasPrice actors.TokenAmount, gasLimit msg.GasAmount) error {
+func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.StateTree, sPoSt sector.OnChainPoStVerifyInfo, gasPrice abi.TokenAmount, gasLimit msg.GasAmount) error {
 
 	workerAddr, err := addr.Address_Make_Key(node_base.NETWORK, addr.KeyHash(sms.Node().Repository().KeyStore().WorkerKey().VRFPublicKey()))
 	if err != nil {
@@ -391,7 +391,7 @@ func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.
 		Method_:     ai.Method_StorageMinerActor_SubmitSurprisePoStResponse,
 		Params_:     serde.MustSerializeParams(sPoSt),
 		CallSeqNum_: worker.CallSeqNum(),
-		Value_:      actors.TokenAmount(0),
+		Value_:      abi.TokenAmount(0),
 		GasPrice_:   gasPrice,
 		GasLimit_:   gasLimit,
 	}

@@ -3,7 +3,7 @@ package storage_power
 import (
 	"math"
 
-	actors "github.com/filecoin-project/specs/actors"
+	abi "github.com/filecoin-project/specs/actors/abi"
 	serde "github.com/filecoin-project/specs/actors/serde"
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
@@ -43,7 +43,7 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime, minerAddr addr.Address)
 	UpdateRelease(rt, h, st)
 }
 
-func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Address, amountRequested actors.TokenAmount) {
+func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Address, amountRequested abi.TokenAmount) {
 	if amountRequested < 0 {
 		rt.AbortArgMsg("Amount to withdraw must be nonnegative")
 	}
@@ -79,7 +79,7 @@ func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Addres
 				sectorSize,
 				peerId,
 			),
-			actors.TokenAmount(0),
+			abi.TokenAmount(0),
 		).ReturnValue(),
 	)
 
@@ -87,9 +87,9 @@ func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Addres
 	newTable, ok := autil.BalanceTable_WithNewAddressEntry(st.EscrowTable(), newMinerAddr, rt.ValueReceived())
 	Assert(ok)
 	st.Impl().EscrowTable_ = newTable
-	st.PowerTable()[newMinerAddr] = actors.StoragePower(0)
-	st.ClaimedPower()[newMinerAddr] = actors.StoragePower(0)
-	st.NominalPower()[newMinerAddr] = actors.StoragePower(0)
+	st.PowerTable()[newMinerAddr] = abi.StoragePower(0)
+	st.ClaimedPower()[newMinerAddr] = abi.StoragePower(0)
+	st.NominalPower()[newMinerAddr] = abi.StoragePower(0)
 	UpdateRelease(rt, h, st)
 
 	return newMinerAddr
@@ -103,7 +103,7 @@ func (a *StoragePowerActorCode_I) DeleteMiner(rt Runtime, minerAddr addr.Address
 		rt.AbortArgMsg("Miner address not found")
 	}
 
-	if minerPledgeBalance > actors.TokenAmount(0) {
+	if minerPledgeBalance > abi.TokenAmount(0) {
 		rt.AbortStateMsg("Deletion requested for miner with pledge balance still remaining")
 	}
 
@@ -189,7 +189,7 @@ func (a *StoragePowerActorCode_I) OnMinerSurprisePoStFailure(rt Runtime, numCons
 	}
 }
 
-func (a *StoragePowerActorCode_I) ReportVerifiedConsensusFault(rt Runtime, slasheeAddr addr.Address, faultEpoch actors.ChainEpoch, faultType ConsensusFaultType) {
+func (a *StoragePowerActorCode_I) ReportVerifiedConsensusFault(rt Runtime, slasheeAddr addr.Address, faultEpoch abi.ChainEpoch, faultType ConsensusFaultType) {
 	TODO()
 	panic("")
 	// TODO: The semantics here are quite delicate:
@@ -262,7 +262,7 @@ func (a *StoragePowerActorCode_I) Constructor(rt Runtime) {
 	h := rt.AcquireState()
 
 	st := &StoragePowerActorState_I{
-		TotalNetworkPower_:        actors.StoragePower(0),
+		TotalNetworkPower_:        abi.StoragePower(0),
 		PowerTable_:               PowerTableHAMT_Empty(),
 		EscrowTable_:              autil.BalanceTableHAMT_Empty(),
 		CachedDeferredCronEvents_: MinerEventsHAMT_Empty(),
@@ -309,7 +309,7 @@ func (a *StoragePowerActorCode_I) _rtInitiateNewSurprisePoStChallenges(rt Runtim
 			addr,
 			ai.Method_StorageMinerActor_OnSurprisePoStChallenge,
 			nil,
-			actors.TokenAmount(0))
+			abi.TokenAmount(0))
 	}
 }
 
@@ -338,12 +338,12 @@ func (a *StoragePowerActorCode_I) _rtProcessDeferredCronEvents(rt Runtime) {
 			serde.MustSerializeParams(
 				minerEvent.Sectors(),
 			),
-			actors.TokenAmount(0),
+			abi.TokenAmount(0),
 		)
 	}
 }
 
-func (a *StoragePowerActorCode_I) _rtGetPledgeCollateralReqForMinerOrAbort(rt Runtime, minerAddr addr.Address) actors.TokenAmount {
+func (a *StoragePowerActorCode_I) _rtGetPledgeCollateralReqForMinerOrAbort(rt Runtime, minerAddr addr.Address) abi.TokenAmount {
 	h, st := a.State(rt)
 	minerNominalPower, found := st.NominalPower()[minerAddr]
 	if !found {
@@ -353,7 +353,7 @@ func (a *StoragePowerActorCode_I) _rtGetPledgeCollateralReqForMinerOrAbort(rt Ru
 	return rt.CurrIndices().PledgeCollateralReq(minerNominalPower)
 }
 
-func (a *StoragePowerActorCode_I) _rtSlashPledgeCollateral(rt Runtime, minerAddr addr.Address, amountToSlash actors.TokenAmount) {
+func (a *StoragePowerActorCode_I) _rtSlashPledgeCollateral(rt Runtime, minerAddr addr.Address, amountToSlash abi.TokenAmount) {
 	h, st := a.State(rt)
 	amountSlashed := st._slashPledgeCollateral(minerAddr, amountToSlash)
 	UpdateRelease(rt, h, st)

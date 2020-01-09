@@ -1,7 +1,7 @@
 package runtime
 
 import (
-	actors "github.com/filecoin-project/specs/actors"
+	abi "github.com/filecoin-project/specs/actors/abi"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
@@ -60,7 +60,7 @@ func CallerPattern_MakeAcceptAny() CallerPattern {
 	}
 }
 
-func InvocInput_Make(to addr.Address, method actors.MethodNum, params actors.MethodParams, value actors.TokenAmount) InvocInput {
+func InvocInput_Make(to addr.Address, method abi.MethodNum, params abi.MethodParams, value abi.TokenAmount) InvocInput {
 	return &InvocInput_I{
 		To_:     to,
 		Method_: method,
@@ -139,7 +139,7 @@ func RT_MinerEntry_ValidateCaller_DetermineFundsLocation(rt Runtime, entryAddr a
 	}
 }
 
-func RT_ConfirmFundsReceiptOrAbort_RefundRemainder(rt Runtime, fundsRequired actors.TokenAmount) {
+func RT_ConfirmFundsReceiptOrAbort_RefundRemainder(rt Runtime, fundsRequired abi.TokenAmount) {
 	if rt.ValueReceived() < fundsRequired {
 		rt.AbortFundsMsg("Insufficient funds received accompanying message")
 	}

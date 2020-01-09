@@ -1,6 +1,6 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-import actors "github.com/filecoin-project/specs/actors"
+import abi "github.com/filecoin-project/specs/actors/abi"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import message "github.com/filecoin-project/specs/systems/filecoin_vm/message"
@@ -51,15 +51,15 @@ type StorageClient struct {
     ProposeStorageDeal(
         info                StorageProviderInfo
         payloadCid          ipld.CID
-        proposalExpiration  actors.ChainEpoch
-        duration            actors.ChainEpoch
-        price               actors.TokenAmount
-        collateral          actors.TokenAmount
+        proposalExpiration  abi.ChainEpoch
+        duration            abi.ChainEpoch
+        price               abi.TokenAmount
+        collateral          abi.TokenAmount
     ) (ProposeStorageDealResult, error)
 
     // GetPaymentEscrow returns the current funds available for deal payment
-    GetPaymentEscrow() (actors.TokenAmount, error)
+    GetPaymentEscrow() (abi.TokenAmount, error)
 
     // AddPaymentEscrow adds storage collateral
-    AddPaymentEscrow(amount actors.TokenAmount) error
+    AddPaymentEscrow(amount abi.TokenAmount) error
 }

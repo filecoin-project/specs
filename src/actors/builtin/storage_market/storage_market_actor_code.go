@@ -1,7 +1,7 @@
 package storage_market
 
 import (
-	actors "github.com/filecoin-project/specs/actors"
+	abi "github.com/filecoin-project/specs/actors/abi"
 	actor_util "github.com/filecoin-project/specs/actors/util"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -14,9 +14,9 @@ import (
 // Actor methods
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, entryAddr addr.Address, amountRequested actors.TokenAmount) {
+func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, entryAddr addr.Address, amountRequested abi.TokenAmount) {
 	IMPL_FINISH() // BigInt arithmetic
-	amountSlashedTotal := actors.TokenAmount(0)
+	amountSlashedTotal := abi.TokenAmount(0)
 
 	if amountRequested < 0 {
 		rt.AbortArgMsg("Negative amount.")
@@ -66,7 +66,7 @@ func (a *StorageMarketActorCode_I) AddBalance(rt Runtime, entryAddr addr.Address
 
 func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDeals []deal.StorageDeal) {
 	IMPL_FINISH() // BigInt arithmetic
-	amountSlashedTotal := actors.TokenAmount(0)
+	amountSlashedTotal := abi.TokenAmount(0)
 
 	// Deal message must have a From field identical to the provider of all the deals.
 	// This allows us to retain and verify only the client's signature in each deal proposal itself.
@@ -296,7 +296,7 @@ func (a *StorageMarketActorCode_I) Constructor(rt Runtime) {
 		NextID_:                         deal.DealID(0),
 		CachedDealIDsByParty_:           CachedDealIDsByPartyHAMT_Empty(),
 		CachedExpirationsPending_:       CachedExpirationsPendingHAMT_Empty(),
-		CachedExpirationsNextProcEpoch_: actors.ChainEpoch(0),
+		CachedExpirationsNextProcEpoch_: abi.ChainEpoch(0),
 	}
 
 	UpdateRelease(rt, h, st)
@@ -307,7 +307,7 @@ func (a *StorageMarketActorCode_I) Constructor(rt Runtime) {
 ////////////////////////////////////////////////////////////////////////////////
 
 func (st *StorageMarketActorState_I) _rtUpdatePendingDealStatesForParty(rt Runtime, addr addr.Address) (
-	amountSlashedTotal actors.TokenAmount) {
+	amountSlashedTotal abi.TokenAmount) {
 
 	// For consistency with OnEpochTickEnd, only process updates up to the end of the _previous_ epoch.
 	epoch := rt.CurrEpoch() - 1
@@ -347,7 +347,7 @@ func _rtAbortIfDealEndElapsed(rt Runtime, dealP deal.StorageDealProposal) {
 	}
 }
 
-func _rtAbortIfDealExceedsSectorLifetime(rt Runtime, dealP deal.StorageDealProposal, sectorExpiration actors.ChainEpoch) {
+func _rtAbortIfDealExceedsSectorLifetime(rt Runtime, dealP deal.StorageDealProposal, sectorExpiration abi.ChainEpoch) {
 	if dealP.EndEpoch() > sectorExpiration {
 		rt.AbortStateMsg("Deal would outlive its containing sector.")
 	}
@@ -360,7 +360,7 @@ func (st *StorageMarketActorState_I) _rtAbortIfAddressEntryDoesNotExist(rt Runti
 }
 
 func _rtAbortIfDealInvalidForNewSectorSeal(
-	rt Runtime, minerAddr addr.Address, sectorExpiration actors.ChainEpoch, deal deal.OnChainDeal) {
+	rt Runtime, minerAddr addr.Address, sectorExpiration abi.ChainEpoch, deal deal.OnChainDeal) {
 
 	dealP := deal.Deal().Proposal()
 
@@ -416,7 +416,7 @@ func (st *StorageMarketActorState_I) _rtGetOnChainDealOrAbort(rt Runtime, dealID
 	return
 }
 
-func (st *StorageMarketActorState_I) _rtLockBalanceOrAbort(rt Runtime, addr addr.Address, amount actors.TokenAmount) {
+func (st *StorageMarketActorState_I) _rtLockBalanceOrAbort(rt Runtime, addr addr.Address, amount abi.TokenAmount) {
 	if amount < 0 {
 		rt.AbortArgMsg("Negative amount")
 	}

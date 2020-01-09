@@ -1,4 +1,4 @@
-import actors "github.com/filecoin-project/specs/actors"
+import abi "github.com/filecoin-project/specs/actors/abi"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
 import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
@@ -11,7 +11,7 @@ type Tipset struct {
     Parents             Tipset                @(cached)
     StateTree           st.StateTree          @(cached)
     Weight              block.ChainWeight     @(cached)
-    Epoch               actors.ChainEpoch     @(cached)
+    Epoch               abi.ChainEpoch        @(cached)
 
     // Returns the largest timestamp fom the tipset's blocks.
     LatestTimestamp()   clock.UnixTime        @(cached)

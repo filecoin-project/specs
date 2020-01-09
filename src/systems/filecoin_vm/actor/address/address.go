@@ -10,7 +10,7 @@ var Assert = util.Assert
 
 type Int = util.Int
 
-// Addresses for singleton system actors.
+// Addresses for singleton system abi.
 var (
 	// Distinguished AccountActor that is the source of system implicit messages.
 	SystemActorAddr        = Address_Make_ID(Address_NetworkID_Testnet, 0)

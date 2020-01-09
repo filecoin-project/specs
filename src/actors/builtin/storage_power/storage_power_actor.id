@@ -1,13 +1,13 @@
 import actor_util "github.com/filecoin-project/specs/actors/util"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import actors "github.com/filecoin-project/specs/actors"
+import abi "github.com/filecoin-project/specs/actors/abi"
 
-type PowerTableHAMT {addr.Address: actors.StoragePower}  // TODO: convert address to ActorID
+type PowerTableHAMT {addr.Address: abi.StoragePower}  // TODO: convert address to ActorID
 
-type MinerEventsHAMT {actors.ChainEpoch: actor_util.MinerEventSetHAMT}
+type MinerEventsHAMT {abi.ChainEpoch: actor_util.MinerEventSetHAMT}
 
 type StoragePowerActorState struct {
-    TotalNetworkPower         actors.StoragePower
+    TotalNetworkPower         abi.StoragePower
 
     PowerTable                PowerTableHAMT
     EscrowTable               actor_util.BalanceTableHAMT
@@ -19,8 +19,8 @@ type StoragePowerActorState struct {
     NominalPower              PowerTableHAMT
     NumMinersMeetingMinPower  int
 
-    _slashPledgeCollateral(address addr.Address, amount actors.TokenAmount) actors.TokenAmount
-    _selectMinersToSurprise(challengeCount int, randomness actors.Randomness) [addr.Address]
+    _slashPledgeCollateral(address addr.Address, amount abi.TokenAmount) abi.TokenAmount
+    _selectMinersToSurprise(challengeCount int, randomness abi.Randomness) [addr.Address]
 
     _addClaimedPowerForSector(
         minerAddr          addr.Address
@@ -31,8 +31,8 @@ type StoragePowerActorState struct {
         storageWeightDesc  SectorStorageWeightDesc
     )
     _updatePowerEntriesFromClaimedPower(minerAddr addr.Address)
-    _getCurrPledgeForMiner(minerAddr addr.Address) (currPledge actors.TokenAmount, ok bool)
-    _getPledgeSlashForConsensusFault(currPledge actors.TokenAmount, faultType ConsensusFaultType) actors.TokenAmount
+    _getCurrPledgeForMiner(minerAddr addr.Address) (currPledge abi.TokenAmount, ok bool)
+    _getPledgeSlashForConsensusFault(currPledge abi.TokenAmount, faultType ConsensusFaultType) abi.TokenAmount
 }
 
 type StoragePowerActorCode struct {

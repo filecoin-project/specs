@@ -3,7 +3,7 @@ package storage_power_consensus
 import (
 	"math"
 
-	actors "github.com/filecoin-project/specs/actors"
+	abi "github.com/filecoin-project/specs/actors/abi"
 	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
@@ -34,7 +34,7 @@ func (spc *StoragePowerConsensusSubsystem_I) ComputeChainWeight(tipset chain.Tip
 	return spc.ec().ComputeChainWeight(tipset)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree stateTree.StateTree, inds inds.Indices, partialTicket sector.PartialTicket, sectorUtilization actors.StoragePower, numSectors util.UVarint) bool {
+func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree stateTree.StateTree, inds inds.Indices, partialTicket sector.PartialTicket, sectorUtilization abi.StoragePower, numSectors util.UVarint) bool {
 
 	// finalize the partial ticket
 	challengeTicket := filcrypto.SHA256(partialTicket)
@@ -66,18 +66,18 @@ func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTre
 	return st
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionRand(chain chain.Chain, epoch actors.ChainEpoch) util.Randomness {
+func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness {
 	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_TICKET)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetSealRand(chain chain.Chain, epoch actors.ChainEpoch) util.Randomness {
+func (spc *StoragePowerConsensusSubsystem_I) GetSealRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness {
 	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_SEAL)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallengeRand(chain chain.Chain, epoch actors.ChainEpoch) util.Randomness {
+func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallengeRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness {
 	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_POST)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetFinalizedEpoch(currentEpoch actors.ChainEpoch) actors.ChainEpoch {
+func (spc *StoragePowerConsensusSubsystem_I) GetFinalizedEpoch(currentEpoch abi.ChainEpoch) abi.ChainEpoch {
 	return currentEpoch - node_base.FINALITY
 }
