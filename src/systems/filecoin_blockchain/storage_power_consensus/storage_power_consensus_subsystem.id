@@ -1,0 +1,55 @@
+import abi "github.com/filecoin-project/specs/actors/abi"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
+import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+import spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
+import node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
+
+type StoragePowerConsensusSubsystem struct {//(@mutable)
+    ChooseTipsetToMine(tipsets [chain.Tipset]) [chain.Tipset]
+
+    node        node_base.FilecoinNode
+    ec          ExpectedConsensus
+    blockchain  blockchain.BlockchainSubsystem
+
+    // call by BlockchainSubsystem during block reception
+    ValidateBlock(block block.Block) error
+
+    IsWinningPartialTicket(
+        st                 st.StateTree
+        partialTicket      sector.PartialTicket
+        sectorUtilization  abi.StoragePower
+        numSectors         util.UVarint
+    ) bool
+
+    _getStoragePowerActorState(stateTree st.StateTree) spowact.StoragePowerActorState
+
+    validateTicket(
+        tix             block.Ticket
+        pk              filcrypto.VRFPublicKey
+        minerActorAddr  addr.Address
+    ) bool
+
+    computeChainWeight(tipset chain.Tipset) block.ChainWeight
+
+    StoragePowerConsensusError() StoragePowerConsensusError
+
+    // Randomness methods
+
+    // call by StorageMiningSubsystem during block production
+    GetTicketProductionRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness
+
+    // call by StorageMiningSubsystem in sealing sector
+    GetSealRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness
+
+    // call by StorageMiningSubsystem after sealing
+    GetPoStChallengeRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness
+
+    GetFinalizedEpoch(currentEpoch abi.ChainEpoch) abi.ChainEpoch
+}
+
+type StoragePowerConsensusError struct {}

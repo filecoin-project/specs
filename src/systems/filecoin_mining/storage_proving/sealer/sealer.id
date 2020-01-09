@@ -1,0 +1,38 @@
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
+
+type SealInputs struct {
+    SectorID      sector.SectorID
+    SealCfg       sector.SealCfg
+    MinerID       addr.Address
+    RandomSeed    sector.SealRandomness
+    UnsealedPath  file.Path
+    SealedPath    file.Path
+    DealIDs       [deal.DealID]
+}
+
+type CreateSealProofInputs struct {
+    SectorID               sector.SectorID
+    SealCfg                sector.SealCfg
+    InteractiveRandomSeed  sector.InteractiveSealRandomness
+    SealedPaths            [file.Path]
+    SealOutputs
+}
+
+type SealOutputs struct {
+    ProofAuxTmp sector.ProofAuxTmp
+}
+
+type CreateSealProofOutputs struct {
+    SealInfo  sector.SealVerifyInfo
+    ProofAux  sector.PersistentProofAux
+}
+
+type SectorSealer struct {
+    SealSector() union {so SealOutputs, err error}
+    CreateSealProof(si CreateSealProofInputs) union {so CreateSealProofOutputs, err error}
+
+    MaxUnsealedBytesPerSector(SectorSize UInt) UInt
+}

@@ -1,0 +1,10 @@
+type ExitCode union {
+    IsSuccess()          bool
+    IsError()            bool
+    AllowsStateUpdate()  bool
+    Equals(ExitCode)     bool
+
+    Success              struct {}
+    SystemError          SystemErrorCode
+    UserDefinedError     UVarint
+}

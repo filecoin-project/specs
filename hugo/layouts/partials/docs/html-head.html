@@ -1,10 +1,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{- template "title" . }} | {{ .Site.Title -}}</title>
+<title>{{- partial "docs/title" . }} | {{ .Site.Title -}}</title>
 
 <!-- Theme stylesheet, you can customize scss by creatig `assets/custom.scss` in your website -->
 {{ $styles := resources.Get "book.scss" | resources.ToCSS | resources.Minify | resources.Fingerprint }}
 <link rel="stylesheet" href="{{ $styles.RelPermalink }}">
+<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 <!-- Favicon -->
 <link rel="icon" href="{{ "favicon.png" | relURL }}" type="image/x-icon">
@@ -13,6 +14,10 @@
 {{ with .OutputFormats.Get "rss" -}}
   {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
 {{ end -}}
+
+<!-- Scripts -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/javascript" src="./gumshoe.polyfills.min.js"></script>
 
 {{ "<!--" | safeHTML }}
 Made with Book Theme

@@ -1,0 +1,31 @@
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
+import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+import node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
+
+type UInt64 UInt
+
+// The messages from one block in a tipset.
+type BlockMessages struct {
+    BLSMessages   [msg.UnsignedMessage]
+    SECPMessages  [msg.SignedMessage]
+    Miner         addr.Address  // The block miner's actor address
+    PoStProof     Bytes  // The miner's Election PoSt proof output
+}
+
+// The messages from a tipset, grouped by block.
+type TipSetMessages struct {
+    Blocks  [BlockMessages]
+    Epoch   UInt64  // The chain epoch of the blocks
+}
+
+type VMInterpreter struct {
+    Node node_base.FilecoinNode
+    ApplyTipSetMessages(inTree st.StateTree, msgs TipSetMessages) struct {outTree st.StateTree, ret [vmr.MessageReceipt]}
+    ApplyMessage(
+        inTree     st.StateTree
+        msg        msg.UnsignedMessage
+        minerAddr  addr.Address
+    ) struct {outTree st.StateTree, ret vmr.MessageReceipt}
+}

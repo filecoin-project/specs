@@ -1,0 +1,33 @@
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
+
+type BlockProducer struct {
+    // call by StorageMiningSubsystem when elected as a leader
+    // a procedural call that calls GetMostProfitableMessages(minerAddr Address)
+    // and then get back the messages and call AssembleBlock
+    // TODO minerAddr is of type StorageMiner.Address
+    GenerateBlock(
+        ePoStInfo  sector.OnChainPoStVerifyInfo
+        newTicket  block.Ticket
+        chainHead  chain.Tipset
+        minerAddr  addr.Address
+    )
+
+    // call by BlockProducer itself after getting back messages
+    AssembleBlock(
+        ePoStInfo  sector.OnChainPoStVerifyInfo
+        T0         block.Ticket
+        tipset     chain.Tipset
+        minerAddr  addr.Address
+        messages   [msg.SignedMessage]
+    ) block.Block
+}
+
+type BlockStore struct {
+    GetBlock(cid ipld.CID) block.Block
+    PutBlock(block block.Block) error
+}

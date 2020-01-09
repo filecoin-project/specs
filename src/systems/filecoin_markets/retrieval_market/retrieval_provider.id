@@ -1,0 +1,37 @@
+import abi "github.com/filecoin-project/specs/actors/abi"
+import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+
+type RetrievalProviderDealState struct {
+    RetrievalDealProposal
+    Status                 DealStatus
+    Receiver               libp2p.PeerID
+    TotalSent              UInt
+    FundsReceived          abi.TokenAmount
+}
+
+type RetrievalProviderEvent struct {
+    Open
+    Progress
+    Error
+    Complete
+}
+
+type RetrievalProviderDealID struct {
+    From  libp2p.PeerID
+    ID    RetrievalDealID
+}
+
+type RetrievalProviderSubscriber struct {
+    OnEvent(event RetrievalProviderEvent, RetrievalProviderDealState)
+}
+
+type RetrievalProvider struct {
+    // V0
+    SetPricePerByte(price abi.TokenAmount)
+    SetPaymentInterval(paymentInterval UInt, paymentIntervalIncrease UInt)
+    SubscribeToEvents(subscriber RetrievalProviderSubscriber)
+
+    // V1
+    SetPricePerUnseal(price abi.TokenAmount)
+    ListDeals() {RetrievalProviderDealID: RetrievalProviderDealState}
+}

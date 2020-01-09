@@ -1,0 +1,19 @@
+import abi "github.com/filecoin-project/specs/actors/abi"
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+
+// The on-chain state data structure is a map (HAMT) of addresses to actor states.
+// Only ID addresses are expected as keys.
+type StateTree struct {
+    ActorStates  {addr.Address: actor.ActorState}  // HAMT
+
+    // Returns the CID of the root node of the HAMT.
+    RootCID()    ipld.CID
+
+    // Looks up an actor state by address.
+    GetActor(a addr.Address) (state actor.ActorState, ok bool)
+
+    // Looks up an abi.ActorCodeID by address.
+    GetActorCodeID_Assert(a addr.Address) abi.ActorCodeID
+}

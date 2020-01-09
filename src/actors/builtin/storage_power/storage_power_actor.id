@@ -1,0 +1,41 @@
+import actor_util "github.com/filecoin-project/specs/actors/util"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import abi "github.com/filecoin-project/specs/actors/abi"
+
+type PowerTableHAMT {addr.Address: abi.StoragePower}  // TODO: convert address to ActorID
+
+type MinerEventsHAMT {abi.ChainEpoch: actor_util.MinerEventSetHAMT}
+
+type StoragePowerActorState struct {
+    TotalNetworkPower         abi.StoragePower
+
+    PowerTable                PowerTableHAMT
+    EscrowTable               actor_util.BalanceTableHAMT
+
+    // Metadata cached for efficient processing of sector/challenge events.
+    CachedDeferredCronEvents  MinerEventsHAMT
+    PoStDetectedFaultMiners   actor_util.MinerSetHAMT
+    ClaimedPower              PowerTableHAMT
+    NominalPower              PowerTableHAMT
+    NumMinersMeetingMinPower  int
+
+    _slashPledgeCollateral(address addr.Address, amount abi.TokenAmount) abi.TokenAmount
+    _selectMinersToSurprise(challengeCount int, randomness abi.Randomness) [addr.Address]
+
+    _addClaimedPowerForSector(
+        minerAddr          addr.Address
+        storageWeightDesc  SectorStorageWeightDesc
+    )
+    _deductClaimedPowerForSectorAssert(
+        minerAddr          addr.Address
+        storageWeightDesc  SectorStorageWeightDesc
+    )
+    _updatePowerEntriesFromClaimedPower(minerAddr addr.Address)
+    _getCurrPledgeForMiner(minerAddr addr.Address) (currPledge abi.TokenAmount, ok bool)
+    _getPledgeSlashForConsensusFault(currPledge abi.TokenAmount, faultType ConsensusFaultType) abi.TokenAmount
+}
+
+type StoragePowerActorCode struct {
+    // Intentionally left blank (VM methods do not require Golang prototypes).
+    // Can be filled in once InvokeMethod is implemented for this actor.
+}

@@ -93,13 +93,21 @@ main() {
   # package manager packages
   tryinstall wget wget
   tryinstall emacs emacs
+  require_version "$(emacs -version)" emacs 26.3 "recommended install from you package manager"
   tryinstall sbcl sbcl
   mkdir -p deps/bin
+
+  # lisp / emacs
   install_quicklisp
   install_slime
   install_cllaunch
   install_emacs_deps
+
+  # git repos
+  prun git submodule update --init --recursive
+
+  # orient
   link_orient_to_quicklisp
+  return 0
 }
 main $1
-

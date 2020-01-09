@@ -1,5 +1,6 @@
 ---
-title: "Filecoin Improvement Proposals (FIPs)"
+menuTitle: FIPs
+title: "FIPs - Filecoin Improvement Proposals"
 ---
 
 TODO

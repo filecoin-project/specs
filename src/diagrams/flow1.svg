@@ -1,0 +1,394 @@
+<svg id="mermaid-1568896188901" width="100%" xmlns="http://www.w3.org/2000/svg" height="100%" style="max-width:3960px;" viewBox="-50 -10 3960 5065"><style>
+
+
+#mermaid-1568896188901 .label {
+  font-family: 'trebuchet ms', verdana, arial;
+  color: #333; }
+
+#mermaid-1568896188901 .label text {
+  fill: #333; }
+
+#mermaid-1568896188901 .node rect,
+#mermaid-1568896188901 .node circle,
+#mermaid-1568896188901 .node ellipse,
+#mermaid-1568896188901 .node polygon {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 1px; }
+
+#mermaid-1568896188901 .node.clickable {
+  cursor: pointer; }
+
+#mermaid-1568896188901 .arrowheadPath {
+  fill: #333333; }
+
+#mermaid-1568896188901 .edgePath .path {
+  stroke: #333333;
+  stroke-width: 1.5px; }
+
+#mermaid-1568896188901 .edgeLabel {
+  background-color: #e8e8e8; }
+
+#mermaid-1568896188901 .cluster rect {
+  fill: #ffffde;
+  stroke: #aaaa33;
+  stroke-width: 1px; }
+
+#mermaid-1568896188901 .cluster text {
+  fill: #333; }
+
+#mermaid-1568896188901 div.mermaidTooltip {
+  position: absolute;
+  text-align: center;
+  max-width: 200px;
+  padding: 2px;
+  font-family: 'trebuchet ms', verdana, arial;
+  font-size: 12px;
+  background: #ffffde;
+  border: 1px solid #aaaa33;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 100; }
+
+#mermaid-1568896188901 .actor {
+  stroke: #CCCCFF;
+  fill: #ECECFF; }
+
+#mermaid-1568896188901 text.actor {
+  fill: black;
+  stroke: none; }
+
+#mermaid-1568896188901 .actor-line {
+  stroke: grey; }
+
+#mermaid-1568896188901 .messageLine0 {
+  stroke-width: 1.5;
+  stroke-dasharray: '2 2';
+  stroke: #333; }
+
+#mermaid-1568896188901 .messageLine1 {
+  stroke-width: 1.5;
+  stroke-dasharray: '2 2';
+  stroke: #333; }
+
+#mermaid-1568896188901 #arrowhead {
+  fill: #333; }
+
+#mermaid-1568896188901 .sequenceNumber {
+  fill: white; }
+
+#mermaid-1568896188901 #sequencenumber {
+  fill: #333; }
+
+#mermaid-1568896188901 #crosshead path {
+  fill: #333 !important;
+  stroke: #333 !important; }
+
+#mermaid-1568896188901 .messageText {
+  fill: #333;
+  stroke: none; }
+
+#mermaid-1568896188901 .labelBox {
+  stroke: #CCCCFF;
+  fill: #ECECFF; }
+
+#mermaid-1568896188901 .labelText {
+  fill: black;
+  stroke: none; }
+
+#mermaid-1568896188901 .loopText {
+  fill: black;
+  stroke: none; }
+
+#mermaid-1568896188901 .loopLine {
+  stroke-width: 2;
+  stroke-dasharray: '2 2';
+  stroke: #CCCCFF; }
+
+#mermaid-1568896188901 .note {
+  stroke: #aaaa33;
+  fill: #fff5ad; }
+
+#mermaid-1568896188901 .noteText {
+  fill: black;
+  stroke: none;
+  font-family: 'trebuchet ms', verdana, arial;
+  font-size: 14px; }
+
+#mermaid-1568896188901 .activation0 {
+  fill: #f4f4f4;
+  stroke: #666; }
+
+#mermaid-1568896188901 .activation1 {
+  fill: #f4f4f4;
+  stroke: #666; }
+
+#mermaid-1568896188901 .activation2 {
+  fill: #f4f4f4;
+  stroke: #666; }
+
+
+#mermaid-1568896188901 .section {
+  stroke: none;
+  opacity: 0.2; }
+
+#mermaid-1568896188901 .section0 {
+  fill: rgba(102, 102, 255, 0.49); }
+
+#mermaid-1568896188901 .section2 {
+  fill: #fff400; }
+
+#mermaid-1568896188901 .section1,
+#mermaid-1568896188901 .section3 {
+  fill: white;
+  opacity: 0.2; }
+
+#mermaid-1568896188901 .sectionTitle0 {
+  fill: #333; }
+
+#mermaid-1568896188901 .sectionTitle1 {
+  fill: #333; }
+
+#mermaid-1568896188901 .sectionTitle2 {
+  fill: #333; }
+
+#mermaid-1568896188901 .sectionTitle3 {
+  fill: #333; }
+
+#mermaid-1568896188901 .sectionTitle {
+  text-anchor: start;
+  font-size: 11px;
+  text-height: 14px; }
+
+
+#mermaid-1568896188901 .grid .tick {
+  stroke: lightgrey;
+  opacity: 0.3;
+  shape-rendering: crispEdges; }
+
+#mermaid-1568896188901 .grid path {
+  stroke-width: 0; }
+
+
+#mermaid-1568896188901 .today {
+  fill: none;
+  stroke: red;
+  stroke-width: 2px; }
+
+
+
+#mermaid-1568896188901 .task {
+  stroke-width: 2; }
+
+#mermaid-1568896188901 .taskText {
+  text-anchor: middle;
+  font-size: 11px; }
+
+#mermaid-1568896188901 .taskTextOutsideRight {
+  fill: black;
+  text-anchor: start;
+  font-size: 11px; }
+
+#mermaid-1568896188901 .taskTextOutsideLeft {
+  fill: black;
+  text-anchor: end;
+  font-size: 11px; }
+
+
+#mermaid-1568896188901 .task.clickable {
+  cursor: pointer; }
+
+#mermaid-1568896188901 .taskText.clickable {
+  cursor: pointer;
+  fill: #003163 !important;
+  font-weight: bold; }
+
+#mermaid-1568896188901 .taskTextOutsideLeft.clickable {
+  cursor: pointer;
+  fill: #003163 !important;
+  font-weight: bold; }
+
+#mermaid-1568896188901 .taskTextOutsideRight.clickable {
+  cursor: pointer;
+  fill: #003163 !important;
+  font-weight: bold; }
+
+
+#mermaid-1568896188901 .taskText0,
+#mermaid-1568896188901 .taskText1,
+#mermaid-1568896188901 .taskText2,
+#mermaid-1568896188901 .taskText3 {
+  fill: white; }
+
+#mermaid-1568896188901 .task0,
+#mermaid-1568896188901 .task1,
+#mermaid-1568896188901 .task2,
+#mermaid-1568896188901 .task3 {
+  fill: #8a90dd;
+  stroke: #534fbc; }
+
+#mermaid-1568896188901 .taskTextOutside0,
+#mermaid-1568896188901 .taskTextOutside2 {
+  fill: black; }
+
+#mermaid-1568896188901 .taskTextOutside1,
+#mermaid-1568896188901 .taskTextOutside3 {
+  fill: black; }
+
+
+#mermaid-1568896188901 .active0,
+#mermaid-1568896188901 .active1,
+#mermaid-1568896188901 .active2,
+#mermaid-1568896188901 .active3 {
+  fill: #bfc7ff;
+  stroke: #534fbc; }
+
+#mermaid-1568896188901 .activeText0,
+#mermaid-1568896188901 .activeText1,
+#mermaid-1568896188901 .activeText2,
+#mermaid-1568896188901 .activeText3 {
+  fill: black !important; }
+
+
+#mermaid-1568896188901 .done0,
+#mermaid-1568896188901 .done1,
+#mermaid-1568896188901 .done2,
+#mermaid-1568896188901 .done3 {
+  stroke: grey;
+  fill: lightgrey;
+  stroke-width: 2; }
+
+#mermaid-1568896188901 .doneText0,
+#mermaid-1568896188901 .doneText1,
+#mermaid-1568896188901 .doneText2,
+#mermaid-1568896188901 .doneText3 {
+  fill: black !important; }
+
+
+#mermaid-1568896188901 .crit0,
+#mermaid-1568896188901 .crit1,
+#mermaid-1568896188901 .crit2,
+#mermaid-1568896188901 .crit3 {
+  stroke: #ff8888;
+  fill: red;
+  stroke-width: 2; }
+
+#mermaid-1568896188901 .activeCrit0,
+#mermaid-1568896188901 .activeCrit1,
+#mermaid-1568896188901 .activeCrit2,
+#mermaid-1568896188901 .activeCrit3 {
+  stroke: #ff8888;
+  fill: #bfc7ff;
+  stroke-width: 2; }
+
+#mermaid-1568896188901 .doneCrit0,
+#mermaid-1568896188901 .doneCrit1,
+#mermaid-1568896188901 .doneCrit2,
+#mermaid-1568896188901 .doneCrit3 {
+  stroke: #ff8888;
+  fill: lightgrey;
+  stroke-width: 2;
+  cursor: pointer;
+  shape-rendering: crispEdges; }
+
+#mermaid-1568896188901 .milestone {
+  transform: rotate(45deg) scale(0.8, 0.8); }
+
+#mermaid-1568896188901 .milestoneText {
+  font-style: italic; }
+
+#mermaid-1568896188901 .doneCritText0,
+#mermaid-1568896188901 .doneCritText1,
+#mermaid-1568896188901 .doneCritText2,
+#mermaid-1568896188901 .doneCritText3 {
+  fill: black !important; }
+
+#mermaid-1568896188901 .activeCritText0,
+#mermaid-1568896188901 .activeCritText1,
+#mermaid-1568896188901 .activeCritText2,
+#mermaid-1568896188901 .activeCritText3 {
+  fill: black !important; }
+
+#mermaid-1568896188901 .titleText {
+  text-anchor: middle;
+  font-size: 18px;
+  fill: black; }
+
+#mermaid-1568896188901 g.classGroup text {
+  fill: #9370DB;
+  stroke: none;
+  font-family: 'trebuchet ms', verdana, arial;
+  font-size: 10px; }
+
+#mermaid-1568896188901 g.classGroup rect {
+  fill: #ECECFF;
+  stroke: #9370DB; }
+
+#mermaid-1568896188901 g.classGroup line {
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1568896188901 .classLabel .box {
+  stroke: none;
+  stroke-width: 0;
+  fill: #ECECFF;
+  opacity: 0.5; }
+
+#mermaid-1568896188901 .classLabel .label {
+  fill: #9370DB;
+  font-size: 10px; }
+
+#mermaid-1568896188901 .relation {
+  stroke: #9370DB;
+  stroke-width: 1;
+  fill: none; }
+
+#mermaid-1568896188901 #compositionStart {
+  fill: #9370DB;
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1568896188901 #compositionEnd {
+  fill: #9370DB;
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1568896188901 #aggregationStart {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1568896188901 #aggregationEnd {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1568896188901 #dependencyStart {
+  fill: #9370DB;
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1568896188901 #dependencyEnd {
+  fill: #9370DB;
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1568896188901 #extensionStart {
+  fill: #9370DB;
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1568896188901 #extensionEnd {
+  fill: #9370DB;
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1568896188901 .commit-id,
+#mermaid-1568896188901 .commit-msg,
+#mermaid-1568896188901 .branch-label {
+  fill: lightgrey;
+  color: lightgrey; }
+</style><style>#mermaid-1568896188901 {
+    color: rgb(52, 58, 64);
+    font: normal normal 400 normal 16px / 27.2px merriweather, "book antiqua", Georgia, "century schoolbook", serif;
+  }</style><g></g><g><line id="actor0" x1="75" y1="5" x2="75" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="0" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="75" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="75" dy="0">RetrievalClient</tspan></text></g><g><line id="actor1" x1="275" y1="5" x2="275" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="200" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="275" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="275" dy="0">RetrievalProvider</tspan></text></g><g><line id="actor2" x1="475" y1="5" x2="475" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="400" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="475" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="475" dy="0">StorageClient</tspan></text></g><g><line id="actor3" x1="675" y1="5" x2="675" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="600" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="675" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="675" dy="0">StorageMarketActor</tspan></text></g><g><line id="actor4" x1="875" y1="5" x2="875" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="800" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="875" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="875" dy="0">StorageProvider</tspan></text></g><g><line id="actor5" x1="1075" y1="5" x2="1075" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1000" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1075" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="1075" dy="0">PaymentChannelActor</tspan></text></g><g><line id="actor6" x1="1275" y1="5" x2="1275" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1200" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1275" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="1275" dy="0">Blockchain</tspan></text></g><g><line id="actor7" x1="1475" y1="5" x2="1475" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1400" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1475" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="1475" dy="0">BlockSyncer</tspan></text></g><g><line id="actor8" x1="1675" y1="5" x2="1675" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1600" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1675" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="1675" dy="0">BlockProducer</tspan></text></g><g><line id="actor9" x1="1875" y1="5" x2="1875" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1800" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1875" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="1875" dy="0">StoragePowerConsensus</tspan></text></g><g><line id="actor10" x1="2075" y1="5" x2="2075" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="2000" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="2075" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="2075" dy="0">StoragePowerActor</tspan></text></g><g><line id="actor11" x1="2275" y1="5" x2="2275" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="2200" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="2275" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="2275" dy="0">StorageMining</tspan></text></g><g><line id="actor12" x1="2475" y1="5" x2="2475" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="2400" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="2475" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="2475" dy="0">StorageMinerActor</tspan></text></g><g><line id="actor13" x1="2675" y1="5" x2="2675" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="2600" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="2675" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="2675" dy="0">SectorIndexing</tspan></text></g><g><line id="actor14" x1="2875" y1="5" x2="2875" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="2800" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="2875" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="2875" dy="0">StorageProving</tspan></text></g><g><line id="actor15" x1="3075" y1="5" x2="3075" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="3000" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="3075" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="3075" dy="0">FilProofs</tspan></text></g><g><line id="actor16" x1="3275" y1="5" x2="3275" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="3200" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="3275" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="3275" dy="0">Clock</tspan></text></g><g><line id="actor17" x1="3475" y1="5" x2="3475" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="3400" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="3475" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="3475" dy="0">libp2p</tspan></text></g><g><line id="actor18" x1="3675" y1="5" x2="3675" y2="5054" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="3600" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="3675" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="3675" dy="0">PostSubmission</tspan></text></g><defs><marker id="arrowhead" refX="5" refY="2" markerWidth="6" markerHeight="4" orient="auto"><path d="M 0,0 V 4 L6,2 Z"></path></marker></defs><defs><marker id="crosshead" markerWidth="15" markerHeight="8" orient="auto" refX="16" refY="4"><path fill="black" stroke="#000000" stroke-width="1px" d="M 9,2 V 6 L16,4 Z" style="stroke-dasharray: 0, 0;"></path><path fill="none" stroke="#000000" stroke-width="1px" d="M 0,1 L 6,7 M 6,1 L 0,7" style="stroke-dasharray: 0, 0;"></path></marker></defs><defs><marker id="sequencenumber" refX="15" refY="15" markerWidth="60" markerHeight="40" orient="auto"><circle cx="15" cy="15" r="6"></circle></marker></defs><g><rect x="50" y="75" fill="#EDF2AE" stroke="#666" width="250" height="36" rx="0" ry="0" class="note"></rect><text x="46" y="99" class="noteText"><tspan x="66">RetrievalMarketSubsystem</tspan></text></g><g><rect x="450" y="121" fill="#EDF2AE" stroke="#666" width="450" height="36" rx="0" ry="0" class="note"></rect><text x="446" y="145" class="noteText"><tspan x="466">StorageMarketSubsystem</tspan></text></g><g><rect x="1250" y="167" fill="#EDF2AE" stroke="#666" width="850" height="36" rx="0" ry="0" class="note"></rect><text x="1246" y="191" class="noteText"><tspan x="1266">BlockchainGroup</tspan></text></g><g><rect x="2250" y="213" fill="#EDF2AE" stroke="#666" width="650" height="36" rx="0" ry="0" class="note"></rect><text x="2246" y="237" class="noteText"><tspan x="2266">MiningGroup</tspan></text></g><g><text x="175" y="302" class="messageText" style="text-anchor: middle;">DealProposal</text><line x1="75" y1="309" x2="275" y2="309" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><text x="175" y="337" class="messageText" style="text-anchor: middle;">Accepted, Rejected</text><line x1="275" y1="344" x2="75" y2="344" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><line x1="65" y1="259" x2="285" y2="259" class="loopLine"></line><line x1="285" y1="259" x2="285" y2="354" class="loopLine"></line><line x1="65" y1="354" x2="285" y2="354" class="loopLine"></line><line x1="65" y1="259" x2="65" y2="354" class="loopLine"></line><polygon points="65,259 115,259 115,272 106.6,279 65,279" class="labelBox"></polygon><text x="72.5" y="274" class="labelText"><tspan x="72.5">opt</tspan></text><text x="175" y="274" class="loopText" style="text-anchor: middle;"><tspan x="175">[ RetrievalDealMake ]</tspan></text></g><g><text x="175" y="407" class="messageText" style="text-anchor: middle;">Query(CID)</text><line x1="75" y1="414" x2="275" y2="414" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><text x="175" y="442" class="messageText" style="text-anchor: middle;">MinPrice, Unavail</text><line x1="275" y1="449" x2="75" y2="449" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><line x1="65" y1="364" x2="285" y2="364" class="loopLine"></line><line x1="285" y1="364" x2="285" y2="459" class="loopLine"></line><line x1="65" y1="459" x2="285" y2="459" class="loopLine"></line><line x1="65" y1="364" x2="65" y2="459" class="loopLine"></line><polygon points="65,364 115,364 115,377 106.6,384 65,384" class="labelBox"></polygon><text x="72.5" y="379" class="labelText"><tspan x="72.5">opt</tspan></text><text x="175" y="379" class="loopText" style="text-anchor: middle;"><tspan x="175">[ RetrievalQuery ]</tspan></text></g><g><text x="2275" y="512" class="messageText" style="text-anchor: middle;">CreateMiner(WorkerPubKey, PledgeCollateral)</text><path d="M 2275,519 C 2335,509 2335,549 2275,539" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></path></g><g><text x="2175" y="577" class="messageText" style="text-anchor: middle;">RegisterMiner(OwnerAddr, WorkerPubKey)</text><line x1="2275" y1="584" x2="2075" y2="584" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;"></line></g><g><text x="2175" y="612" class="messageText" style="text-anchor: middle;">StorageMinerActor</text><line x1="2075" y1="619" x2="2275" y2="619" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;"></line></g><g><line x1="2065" y1="469" x2="2474.390625" y2="469" class="loopLine"></line><line x1="2474.390625" y1="469" x2="2474.390625" y2="629" class="loopLine"></line><line x1="2065" y1="629" x2="2474.390625" y2="629" class="loopLine"></line><line x1="2065" y1="469" x2="2065" y2="629" class="loopLine"></line><polygon points="2065,469 2115,469 2115,482 2106.6,489 2065,489" class="labelBox"></polygon><text x="2072.5" y="484" class="labelText"><tspan x="2072.5">opt</tspan></text><text x="2269.6953125" y="484" class="loopText" style="text-anchor: middle;"><tspan x="2269.6953125">[ RegisterStorageMiner ]</tspan></text></g><g><rect x="300" y="664" fill="#EDF2AE" stroke="#666" width="150" height="36" rx="0" ry="0" class="note"></rect><text x="296" y="688" class="noteText"><tspan x="316">Piece, PieceCID</tspan></text></g><g><text x="675" y="728" class="messageText" style="text-anchor: middle;">DealProposal</text><line x1="475" y1="735" x2="875" y2="735" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><text x="675" y="763" class="messageText" style="text-anchor: middle;">DealResponse,DealAccepted,Deal</text><line x1="875" y1="770" x2="475" y2="770" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><rect x="300" y="780" fill="#EDF2AE" stroke="#666" width="150" height="36" rx="0" ry="0" class="note"></rect><text x="296" y="804" class="noteText"><tspan x="316">Piece, PieceCID, Deal</tspan></text></g><g><rect x="900" y="826" fill="#EDF2AE" stroke="#666" width="150" height="36" rx="0" ry="0" class="note"></rect><text x="896" y="850" class="noteText"><tspan x="916">Piece, PieceCID, Deal</tspan></text></g><g><text x="675" y="890" class="messageText" style="text-anchor: middle;">StorageDealQuery</text><line x1="475" y1="897" x2="875" y2="897" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><text x="675" y="925" class="messageText" style="text-anchor: middle;">DealResponse,DealAccepted,Deal</text><line x1="875" y1="932" x2="475" y2="932" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><line x1="290" y1="639" x2="1060" y2="639" class="loopLine"></line><line x1="1060" y1="639" x2="1060" y2="942" class="loopLine"></line><line x1="290" y1="942" x2="1060" y2="942" class="loopLine"></line><line x1="290" y1="639" x2="290" y2="942" class="loopLine"></line><polygon points="290,639 340,639 340,652 331.6,659 290,659" class="labelBox"></polygon><text x="297.5" y="654" class="labelText"><tspan x="297.5">opt</tspan></text><text x="675" y="654" class="loopText" style="text-anchor: middle;"><tspan x="675">[ StorageDealMake ]</tspan></text></g><g><text x="1575" y="995" class="messageText" style="text-anchor: middle;">MadeDeal(Deal,PieceRef)</text><line x1="875" y1="1002" x2="2275" y2="1002" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><text x="2475" y="1030" class="messageText" style="text-anchor: middle;">AddToSector(Deal, PieceRef)</text><line x1="2275" y1="1037" x2="2675" y2="1037" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><rect x="2670" y="1039" fill="#EDF2AE" stroke="#666" width="10" height="163" rx="0" ry="0" class="activation0"></rect></g><g><text x="2680" y="1065" class="messageText" style="text-anchor: middle;">SectorID ← PackDealIntoSector(Deal)</text><path d="M 2680,1072 C 2740,1062 2740,1102 2680,1092" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="2680" y="1130" class="messageText" style="text-anchor: middle;">PIP ← PackSector(SectorID)</text><path d="M 2680,1137 C 2740,1127 2740,1167 2680,1157" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="2472.5" y="1195" class="messageText" style="text-anchor: middle;">SectorID</text><line x1="2670" y1="1202" x2="2275" y2="1202" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><text x="1575" y="1230" class="messageText" style="text-anchor: middle;">DealInSector(Deal,PieceRef,PIP,SectorID)</text><line x1="2275" y1="1237" x2="875" y2="1237" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><line x1="865" y1="952" x2="2842.4375" y2="952" class="loopLine"></line><line x1="2842.4375" y1="952" x2="2842.4375" y2="1247" class="loopLine"></line><line x1="865" y1="1247" x2="2842.4375" y2="1247" class="loopLine"></line><line x1="865" y1="952" x2="865" y2="1247" class="loopLine"></line><polygon points="865,952 915,952 915,965 906.6,972 865,972" class="labelBox"></polygon><text x="872.5" y="967" class="labelText"><tspan x="872.5">opt</tspan></text><text x="1853.71875" y="967" class="loopText" style="text-anchor: middle;"><tspan x="1853.71875">[ AddingDealToSector ]</tspan></text></g><g><text x="675" y="1300" class="messageText" style="text-anchor: middle;">StorageDealQuery</text><line x1="475" y1="1307" x2="875" y2="1307" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><text x="675" y="1335" class="messageText" style="text-anchor: middle;">DealResponse,DealAccepted,Deal,PIP</text><line x1="875" y1="1342" x2="475" y2="1342" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><line x1="465" y1="1257" x2="885" y2="1257" class="loopLine"></line><line x1="885" y1="1257" x2="885" y2="1352" class="loopLine"></line><line x1="465" y1="1352" x2="885" y2="1352" class="loopLine"></line><line x1="465" y1="1257" x2="465" y2="1352" class="loopLine"></line><polygon points="465,1257 515,1257 515,1270 506.6,1277 465,1277" class="labelBox"></polygon><text x="472.5" y="1272" class="labelText"><tspan x="472.5">opt</tspan></text><text x="675" y="1272" class="loopText" style="text-anchor: middle;"><tspan x="675">[ ClientQuery ]</tspan></text></g><g><text x="2575" y="1405" class="messageText" style="text-anchor: middle;">SealSector(SectorID, ReplicaCfg)</text><line x1="2275" y1="1412" x2="2875" y2="1412" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><rect x="2870" y="1414" fill="#EDF2AE" stroke="#666" width="10" height="98" rx="0" ry="0" class="activation0"></rect></g><g><text x="2880" y="1440" class="messageText" style="text-anchor: middle;">SealOutputs ← Seal(SectorID, ReplicaCfg)</text><path d="M 2880,1447 C 2940,1437 2940,1477 2880,1467" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="2572.5" y="1505" class="messageText" style="text-anchor: middle;">(SectorID,SealOutputs)</text><line x1="2870" y1="1512" x2="2275" y2="1512" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><text x="2375" y="1565" class="messageText" style="text-anchor: middle;">CommitSector(SectorID, OnBlockchainSectorInfo, StorageCollateral)</text><line x1="2275" y1="1572" x2="2475" y2="1572" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="2775" y="1600" class="messageText" style="text-anchor: middle;">VerifySeal(SectorID, OnSectorInfo)</text><line x1="2475" y1="1607" x2="3075" y2="1607" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><rect x="3070" y="1609" fill="#EDF2AE" stroke="#666" width="10" height="33" rx="0" ry="0" class="activation0"></rect></g><g><text x="2772.5" y="1635" class="messageText" style="text-anchor: middle;">{1,0} ← VerifySeal</text><line x1="3070" y1="1642" x2="2475" y2="1642" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="2475" y="1695" class="messageText" style="text-anchor: middle;">...Update State...</text><path d="M 2475,1702 C 2535,1692 2535,1732 2475,1722" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="2275" y="1760" class="messageText" style="text-anchor: middle;">UpdatePower(MinerAddr)</text><line x1="2475" y1="1767" x2="2075" y2="1767" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="2475" y="1795" class="messageText" style="text-anchor: middle;">1 ← CommitSector(.)</text><path d="M 2475,1802 C 2535,1792 2535,1832 2475,1822" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="2475" y="1880" class="messageText" style="text-anchor: middle;">0 ← CommitSector(.)</text><path d="M 2475,1887 C 2535,1877 2535,1917 2475,1907" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><line x1="2065" y1="1652" x2="2585" y2="1652" class="loopLine"></line><line x1="2585" y1="1652" x2="2585" y2="1927" class="loopLine"></line><line x1="2065" y1="1927" x2="2585" y2="1927" class="loopLine"></line><line x1="2065" y1="1652" x2="2065" y2="1927" class="loopLine"></line><line x1="2065" y1="1842" x2="2585" y2="1842" class="loopLine" style="stroke-dasharray: 3, 3;"></line><polygon points="2065,1652 2115,1652 2115,1665 2106.6,1672 2065,1672" class="labelBox"></polygon><text x="2072.5" y="1667" class="labelText"><tspan x="2072.5">alt</tspan></text><text x="2325" y="1667" class="loopText" style="text-anchor: middle;"><tspan x="2325">[ 1 - success ]</tspan></text><text x="2325" y="1857" class="loopText" style="text-anchor: middle;"><tspan x="2325">[ 0 - failure ]</tspan></text></g><g><line x1="2055" y1="1522" x2="3090" y2="1522" class="loopLine"></line><line x1="3090" y1="1522" x2="3090" y2="1937" class="loopLine"></line><line x1="2055" y1="1937" x2="3090" y2="1937" class="loopLine"></line><line x1="2055" y1="1522" x2="2055" y2="1937" class="loopLine"></line><polygon points="2055,1522 2105,1522 2105,1535 2096.6,1542 2055,1542" class="labelBox"></polygon><text x="2062.5" y="1537" class="labelText"><tspan x="2062.5">opt</tspan></text><text x="2572.5" y="1537" class="loopText" style="text-anchor: middle;"><tspan x="2572.5">[ CommitSector ]</tspan></text></g><g><line x1="2045" y1="1362" x2="3100" y2="1362" class="loopLine"></line><line x1="3100" y1="1362" x2="3100" y2="1947" class="loopLine"></line><line x1="2045" y1="1947" x2="3100" y2="1947" class="loopLine"></line><line x1="2045" y1="1362" x2="2045" y2="1947" class="loopLine"></line><polygon points="2045,1362 2095,1362 2095,1375 2086.6,1382 2045,1382" class="labelBox"></polygon><text x="2052.5" y="1377" class="labelText"><tspan x="2052.5">opt</tspan></text><text x="2572.5" y="1377" class="loopText" style="text-anchor: middle;"><tspan x="2572.5">[ SealingSector ]</tspan></text></g><g><text x="675" y="2000" class="messageText" style="text-anchor: middle;">StorageDealQuery</text><line x1="475" y1="2007" x2="875" y2="2007" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><text x="675" y="2035" class="messageText" style="text-anchor: middle;">DealResponse,DealAccepted,Deal,PIP,SealedSectorCID</text><line x1="875" y1="2042" x2="475" y2="2042" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><line x1="465" y1="1957" x2="885" y2="1957" class="loopLine"></line><line x1="885" y1="1957" x2="885" y2="2052" class="loopLine"></line><line x1="465" y1="2052" x2="885" y2="2052" class="loopLine"></line><line x1="465" y1="1957" x2="465" y2="2052" class="loopLine"></line><polygon points="465,1957 515,1957 515,1970 506.6,1977 465,1977" class="labelBox"></polygon><text x="472.5" y="1972" class="labelText"><tspan x="472.5">opt</tspan></text><text x="675" y="1972" class="loopText" style="text-anchor: middle;"><tspan x="675">[ ClientQuery ]</tspan></text></g><g><rect x="900" y="2087" fill="#EDF2AE" stroke="#666" width="150" height="36" rx="0" ry="0" class="note"></rect><text x="896" y="2111" class="noteText"><tspan x="916">Deal</tspan></text></g><g><text x="675" y="2176" class="messageText" style="text-anchor: middle;">ReconcileRequest(Deal, [Voucher])</text><line x1="875" y1="2183" x2="475" y2="2183" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><text x="675" y="2236" class="messageText" style="text-anchor: middle;">StorageDealQuery(Deal)</text><line x1="475" y1="2243" x2="875" y2="2243" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="675" y="2271" class="messageText" style="text-anchor: middle;">PieceID, SectorID, PIP</text><line x1="875" y1="2278" x2="475" y2="2278" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><line x1="465" y1="2193" x2="885" y2="2193" class="loopLine"></line><line x1="885" y1="2193" x2="885" y2="2288" class="loopLine"></line><line x1="465" y1="2288" x2="885" y2="2288" class="loopLine"></line><line x1="465" y1="2193" x2="465" y2="2288" class="loopLine"></line><polygon points="465,2193 515,2193 515,2206 506.6,2213 465,2213" class="labelBox"></polygon><text x="472.5" y="2208" class="labelText"><tspan x="472.5">opt</tspan></text><text x="675" y="2208" class="loopText" style="text-anchor: middle;"><tspan x="675">[ If Client Does Not Have PIP ]</tspan></text></g><g><text x="875" y="2316" class="messageText" style="text-anchor: middle;">VerifySectorExists(SectorID)</text><line x1="475" y1="2323" x2="1275" y2="2323" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="475" y="2351" class="messageText" style="text-anchor: middle;">VerifyPIP(SectorID, PIP)</text><path d="M 475,2358 C 535,2348 535,2388 475,2378" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="475" y="2416" class="messageText" style="text-anchor: middle;">ReconcileResponse ← SignVouchers([Voucher])</text><path d="M 475,2423 C 535,2413 535,2453 475,2443" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="675" y="2481" class="messageText" style="text-anchor: middle;">ReconcileResponse</text><line x1="475" y1="2488" x2="875" y2="2488" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><text x="975" y="2516" class="messageText" style="text-anchor: middle;">RedeemVoucher(ReconcileResponse.Voucher)</text><line x1="875" y1="2523" x2="1075" y2="2523" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><text x="775" y="2571" class="messageText" style="text-anchor: middle;">RedeemVoucher(Voucher, PIP)</text><line x1="875" y1="2578" x2="675" y2="2578" class="messageLine0" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="fill: none;"></line></g><g><line x1="272.25" y1="2133" x2="1285" y2="2133" class="loopLine"></line><line x1="1285" y1="2133" x2="1285" y2="2588" class="loopLine"></line><line x1="272.25" y1="2588" x2="1285" y2="2588" class="loopLine"></line><line x1="272.25" y1="2133" x2="272.25" y2="2588" class="loopLine"></line><line x1="272.25" y1="2533" x2="1285" y2="2533" class="loopLine" style="stroke-dasharray: 3, 3;"></line><polygon points="272.25,2133 322.25,2133 322.25,2146 313.85,2153 272.25,2153" class="labelBox"></polygon><text x="279.75" y="2148" class="labelText"><tspan x="279.75">alt</tspan></text><text x="778.625" y="2148" class="loopText" style="text-anchor: middle;"><tspan x="778.625">[ Via Client ]</tspan></text><text x="778.625" y="2548" class="loopText" style="text-anchor: middle;"><tspan x="778.625">[ Via Blockchain ]</tspan></text></g><g><line x1="262.25" y1="2062" x2="1295" y2="2062" class="loopLine"></line><line x1="1295" y1="2062" x2="1295" y2="2598" class="loopLine"></line><line x1="262.25" y1="2598" x2="1295" y2="2598" class="loopLine"></line><line x1="262.25" y1="2062" x2="262.25" y2="2598" class="loopLine"></line><polygon points="262.25,2062 312.25,2062 312.25,2075 303.85,2082 262.25,2082" class="labelBox"></polygon><text x="269.75" y="2077" class="labelText"><tspan x="269.75">loop</tspan></text><text x="778.625" y="2077" class="loopText" style="text-anchor: middle;"><tspan x="778.625">[ StorageDealCollect ]</tspan></text></g><g><text x="2475" y="2651" class="messageText" style="text-anchor: middle;">block ← Subscription.Next()</text><line x1="3475" y1="2658" x2="1475" y2="2658" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="1475" y="2686" class="messageText" style="text-anchor: middle;">ValidateBlock(block)</text><path d="M 1475,2693 C 1535,2683 1535,2723 1475,2713" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="2275" y="2751" class="messageText" style="text-anchor: middle;">ValidateBlock(block)</text><line x1="1475" y1="2758" x2="3075" y2="2758" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="1675" y="2786" class="messageText" style="text-anchor: middle;">ValidateBlock(block)</text><line x1="1475" y1="2793" x2="1875" y2="2793" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="1375" y="2821" class="messageText" style="text-anchor: middle;">ValidateBlock(block)</text><line x1="1475" y1="2828" x2="1275" y2="2828" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="1375" y="2856" class="messageText" style="text-anchor: middle;">{StateTree} ← ValidateBlock(block)</text><line x1="1275" y1="2863" x2="1475" y2="2863" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="1275" y="2916" class="messageText" style="text-anchor: middle;">AssembleTipsets([block])</text><path d="M 1275,2923 C 1335,2913 1335,2953 1275,2943" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="1575" y="2981" class="messageText" style="text-anchor: middle;">BestTipset([Tipset])</text><line x1="1275" y1="2988" x2="1875" y2="2988" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="1575" y="3016" class="messageText" style="text-anchor: middle;">{Tipset} ← BestTipset([Tipset])</text><line x1="1275" y1="3023" x2="1875" y2="3023" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><line x1="1160.7265625" y1="2873" x2="1885" y2="2873" class="loopLine"></line><line x1="1885" y1="2873" x2="1885" y2="3033" class="loopLine"></line><line x1="1160.7265625" y1="3033" x2="1885" y2="3033" class="loopLine"></line><line x1="1160.7265625" y1="2873" x2="1160.7265625" y2="3033" class="loopLine"></line><polygon points="1160.7265625,2873 1210.7265625,2873 1210.7265625,2886 1202.3265625,2893 1160.7265625,2893" class="labelBox"></polygon><text x="1168.2265625" y="2888" class="labelText"><tspan x="1168.2265625">alt</tspan></text><text x="1522.86328125" y="2888" class="loopText" style="text-anchor: middle;"><tspan x="1522.86328125">[ Round Cutoff ]</tspan></text></g><g><line x1="1150.7265625" y1="2608" x2="3485" y2="2608" class="loopLine"></line><line x1="3485" y1="2608" x2="3485" y2="3043" class="loopLine"></line><line x1="1150.7265625" y1="3043" x2="3485" y2="3043" class="loopLine"></line><line x1="1150.7265625" y1="2608" x2="1150.7265625" y2="3043" class="loopLine"></line><polygon points="1150.7265625,2608 1200.7265625,2608 1200.7265625,2621 1192.3265625,2628 1150.7265625,2628" class="labelBox"></polygon><text x="1158.2265625" y="2623" class="labelText"><tspan x="1158.2265625">loop</tspan></text><text x="2317.86328125" y="2623" class="loopText" style="text-anchor: middle;"><tspan x="2317.86328125">[ BlockReception ]</tspan></text></g><g><text x="1275" y="3121" class="messageText" style="text-anchor: middle;">tipset ← onNewBestTipset()</text><path d="M 1275,3128 C 1335,3118 1335,3158 1275,3148" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="1275" y="3206" class="messageText" style="text-anchor: middle;">tipset ← addNullBlock(tipset)</text><path d="M 1275,3213 C 1335,3203 1335,3243 1275,3233" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><line x1="1144.578125" y1="3078" x2="1405.421875" y2="3078" class="loopLine"></line><line x1="1405.421875" y1="3078" x2="1405.421875" y2="3253" class="loopLine"></line><line x1="1144.578125" y1="3253" x2="1405.421875" y2="3253" class="loopLine"></line><line x1="1144.578125" y1="3078" x2="1144.578125" y2="3253" class="loopLine"></line><line x1="1144.578125" y1="3168" x2="1405.421875" y2="3168" class="loopLine" style="stroke-dasharray: 3, 3;"></line><polygon points="1144.578125,3078 1194.578125,3078 1194.578125,3091 1186.178125,3098 1144.578125,3098" class="labelBox"></polygon><text x="1152.078125" y="3093" class="labelText"><tspan x="1152.078125">alt</tspan></text><text x="1275" y="3093" class="loopText" style="text-anchor: middle;"><tspan x="1275">[ New Tipset ]</tspan></text><text x="1275" y="3183" class="loopText" style="text-anchor: middle;"><tspan x="1275">[ Retrying on null block ]</tspan></text></g><g><text x="1575" y="3281" class="messageText" style="text-anchor: middle;">tryLeaderElection(tipset)</text><line x1="1275" y1="3288" x2="1875" y2="3288" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="1875" y="3316" class="messageText" style="text-anchor: middle;">VDF(VRF())</text><path d="M 1875,3323 C 1935,3313 1935,3353 1875,3343" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="1575" y="3381" class="messageText" style="text-anchor: middle;">{Electifact} ← tryLeaderElection(.)</text><line x1="1875" y1="3388" x2="1275" y2="3388" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="1475" y="3441" class="messageText" style="text-anchor: middle;">AssembleBlock(Electifact)</text><line x1="1275" y1="3448" x2="1675" y2="3448" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="1675" y="3476" class="messageText" style="text-anchor: middle;">block ← AssembleBlock()</text><path d="M 1675,3483 C 1735,3473 1735,3513 1675,3503" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="1575" y="3541" class="messageText" style="text-anchor: middle;">SendBlock(block)</text><line x1="1675" y1="3548" x2="1475" y2="3548" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><line x1="1265" y1="3398" x2="1786.9921875" y2="3398" class="loopLine"></line><line x1="1786.9921875" y1="3398" x2="1786.9921875" y2="3558" class="loopLine"></line><line x1="1265" y1="3558" x2="1786.9921875" y2="3558" class="loopLine"></line><line x1="1265" y1="3398" x2="1265" y2="3558" class="loopLine"></line><polygon points="1265,3398 1315,3398 1315,3411 1306.6,3418 1265,3418" class="labelBox"></polygon><text x="1272.5" y="3413" class="labelText"><tspan x="1272.5">opt</tspan></text><text x="1525.99609375" y="3413" class="loopText" style="text-anchor: middle;"><tspan x="1525.99609375">[ Electifact - success ]</tspan></text></g><g><line x1="1134.578125" y1="3053" x2="1985" y2="3053" class="loopLine"></line><line x1="1985" y1="3053" x2="1985" y2="3568" class="loopLine"></line><line x1="1134.578125" y1="3568" x2="1985" y2="3568" class="loopLine"></line><line x1="1134.578125" y1="3053" x2="1134.578125" y2="3568" class="loopLine"></line><polygon points="1134.578125,3053 1184.578125,3053 1184.578125,3066 1176.178125,3073 1134.578125,3073" class="labelBox"></polygon><text x="1142.078125" y="3068" class="labelText"><tspan x="1142.078125">loop</tspan></text><text x="1559.7890625" y="3068" class="loopText" style="text-anchor: middle;"><tspan x="1559.7890625">[ BlockProduction ]</tspan></text></g><g><rect x="3700" y="3603" fill="#EDF2AE" stroke="#666" width="150" height="36" rx="0" ry="0" class="note"></rect><text x="3696" y="3627" class="noteText"><tspan x="3716">in every proving period</tspan></text></g><g><text x="1775" y="3667" class="messageText" style="text-anchor: middle;">GetRandomness(PoSt)</text><line x1="2275" y1="3674" x2="1275" y2="3674" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="1775" y="3702" class="messageText" style="text-anchor: middle;">randomness ← GetRandomness(PoSt)</text><line x1="1275" y1="3709" x2="2275" y2="3709" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="2575" y="3737" class="messageText" style="text-anchor: middle;">GeneratePoSt(randomness)</text><line x1="2275" y1="3744" x2="2875" y2="3744" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="2575" y="3772" class="messageText" style="text-anchor: middle;">PoSt ← GeneratePoSt(randomness)</text><line x1="2875" y1="3779" x2="2275" y2="3779" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="2275" y="3807" class="messageText" style="text-anchor: middle;">PublishPoSt()</text><path d="M 2275,3814 C 2335,3804 2335,3844 2275,3834" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><line x1="1265" y1="3578" x2="3860" y2="3578" class="loopLine"></line><line x1="3860" y1="3578" x2="3860" y2="3854" class="loopLine"></line><line x1="1265" y1="3854" x2="3860" y2="3854" class="loopLine"></line><line x1="1265" y1="3578" x2="1265" y2="3854" class="loopLine"></line><polygon points="1265,3578 1315,3578 1315,3591 1306.6,3598 1265,3598" class="labelBox"></polygon><text x="1272.5" y="3593" class="labelText"><tspan x="1272.5">loop</tspan></text><text x="2562.5" y="3593" class="loopText" style="text-anchor: middle;"><tspan x="2562.5">[ PoStSubmission ]</tspan></text></g><g><text x="2275" y="3907" class="messageText" style="text-anchor: middle;">DoneSet(Sector)</text><path d="M 2275,3914 C 2335,3904 2335,3944 2275,3934" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="2475" y="3972" class="messageText" style="text-anchor: middle;">DoneSet(Sector)</text><line x1="2275" y1="3979" x2="2675" y2="3979" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><line x1="2165" y1="3864" x2="2685" y2="3864" class="loopLine"></line><line x1="2685" y1="3864" x2="2685" y2="3989" class="loopLine"></line><line x1="2165" y1="3989" x2="2685" y2="3989" class="loopLine"></line><line x1="2165" y1="3864" x2="2165" y2="3989" class="loopLine"></line><polygon points="2165,3864 2215,3864 2215,3877 2206.6,3884 2165,3884" class="labelBox"></polygon><text x="2172.5" y="3879" class="labelText"><tspan x="2172.5">alt</tspan></text><text x="2425" y="3879" class="loopText" style="text-anchor: middle;"><tspan x="2425">[ PoStCompletion ]</tspan></text></g><g><text x="2475" y="4067" class="messageText" style="text-anchor: middle;">DeclareFaults([faults])</text><path d="M 2475,4074 C 2535,4064 2535,4104 2475,4094" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="2175" y="4132" class="messageText" style="text-anchor: middle;">SuspendMiner(Address)</text><line x1="2475" y1="4139" x2="1875" y2="4139" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="2575" y="4187" class="messageText" style="text-anchor: middle;">SuspendMiner(Address)</text><line x1="3275" y1="4194" x2="1875" y2="4194" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><line x1="1865" y1="4024" x2="3285" y2="4024" class="loopLine"></line><line x1="3285" y1="4024" x2="3285" y2="4204" class="loopLine"></line><line x1="1865" y1="4204" x2="3285" y2="4204" class="loopLine"></line><line x1="1865" y1="4024" x2="1865" y2="4204" class="loopLine"></line><line x1="1865" y1="4149" x2="3285" y2="4149" class="loopLine" style="stroke-dasharray: 3, 3;"></line><polygon points="1865,4024 1915,4024 1915,4037 1906.6,4044 1865,4044" class="labelBox"></polygon><text x="1872.5" y="4039" class="labelText"><tspan x="1872.5">alt</tspan></text><text x="2575" y="4039" class="loopText" style="text-anchor: middle;"><tspan x="2575">[ Declared Storage Fault ]</tspan></text><text x="2575" y="4164" class="loopText" style="text-anchor: middle;"><tspan x="2575">[ Undeclared Storage Fault ]</tspan></text></g><g><text x="2475" y="4257" class="messageText" style="text-anchor: middle;">PublishPoSt(FaultedPoSt)</text><path d="M 2475,4264 C 2535,4254 2535,4294 2475,4284" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="2175" y="4322" class="messageText" style="text-anchor: middle;">UpdatePower()</text><line x1="2475" y1="4329" x2="1875" y2="4329" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="2875" y="4377" class="messageText" style="text-anchor: middle;">SlashStorageCollateral(Fault)</text><line x1="3275" y1="4384" x2="2475" y2="4384" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="2475" y="4412" class="messageText" style="text-anchor: middle;">AddCollateral(Sector)</text><path d="M 2475,4419 C 2535,4409 2535,4449 2475,4439" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="2475" y="4477" class="messageText" style="text-anchor: middle;">PublishPoSt(FaultedPoSt)</text><path d="M 2475,4484 C 2535,4474 2535,4514 2475,4504" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="2275" y="4542" class="messageText" style="text-anchor: middle;">UpdatePower()</text><line x1="2475" y1="4549" x2="2075" y2="4549" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="2875" y="4597" class="messageText" style="text-anchor: middle;">SlashStorageCollateral(Fault)</text><line x1="3275" y1="4604" x2="2475" y2="4604" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="2475" y="4632" class="messageText" style="text-anchor: middle;">AddCollateral(Sector)</text><path d="M 2475,4639 C 2535,4629 2535,4669 2475,4659" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="2575" y="4697" class="messageText" style="text-anchor: middle;">SealSector(SectorID, ReplicaCfg)</text><line x1="2275" y1="4704" x2="2875" y2="4704" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><line x1="1865" y1="4214" x2="3285" y2="4214" class="loopLine"></line><line x1="3285" y1="4214" x2="3285" y2="4714" class="loopLine"></line><line x1="1865" y1="4714" x2="3285" y2="4714" class="loopLine"></line><line x1="1865" y1="4214" x2="1865" y2="4714" class="loopLine"></line><line x1="1865" y1="4339" x2="3285" y2="4339" class="loopLine" style="stroke-dasharray: 3, 3;"></line><line x1="1865" y1="4559" x2="3285" y2="4559" class="loopLine" style="stroke-dasharray: 3, 3;"></line><polygon points="1865,4214 1915,4214 1915,4227 1906.6,4234 1865,4234" class="labelBox"></polygon><text x="1872.5" y="4229" class="labelText"><tspan x="1872.5">alt</tspan></text><text x="2575" y="4229" class="loopText" style="text-anchor: middle;"><tspan x="2575">[ Recovery in Grace Period ]</tspan></text><text x="2575" y="4354" class="loopText" style="text-anchor: middle;"><tspan x="2575">[ Recovery past Grace Period ]</tspan></text><text x="2575" y="4574" class="loopText" style="text-anchor: middle;"><tspan x="2575">[ Recovery Past Sector Failure Timeout ]</tspan></text></g><g><line x1="1855" y1="3999" x2="3295" y2="3999" class="loopLine"></line><line x1="3295" y1="3999" x2="3295" y2="4724" class="loopLine"></line><line x1="1855" y1="4724" x2="3295" y2="4724" class="loopLine"></line><line x1="1855" y1="3999" x2="1855" y2="4724" class="loopLine"></line><polygon points="1855,3999 1905,3999 1905,4012 1896.6,4019 1855,4019" class="labelBox"></polygon><text x="1862.5" y="4014" class="labelText"><tspan x="1862.5">opt</tspan></text><text x="2575" y="4014" class="loopText" style="text-anchor: middle;"><tspan x="2575">[ Storage Fault ]</tspan></text></g><g><text x="2275" y="4777" class="messageText" style="text-anchor: middle;">DeclareConsensusFault(Proof)</text><line x1="2475" y1="4784" x2="2075" y2="4784" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="1975" y="4812" class="messageText" style="text-anchor: middle;">ValidateFault(Proof)</text><line x1="2075" y1="4819" x2="1875" y2="4819" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;"></line></g><g><rect x="1870" y="4821" fill="#EDF2AE" stroke="#666" width="10" height="128" rx="0" ry="0" class="activation0"></rect></g><g><text x="1977.5" y="4872" class="messageText" style="text-anchor: middle;">TerminateMiner()</text><line x1="1880" y1="4879" x2="2075" y2="4879" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="1977.5" y="4907" class="messageText" style="text-anchor: middle;">SlashPledgeCollateral(Address)</text><line x1="1880" y1="4914" x2="2075" y2="4914" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="2177.5" y="4942" class="messageText" style="text-anchor: middle;">Reward ← DeclareConsensusFault(Proof)</text><line x1="1880" y1="4949" x2="2475" y2="4949" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;"></line></g><g><line x1="1860" y1="4829" x2="2485" y2="4829" class="loopLine"></line><line x1="2485" y1="4829" x2="2485" y2="4959" class="loopLine"></line><line x1="1860" y1="4959" x2="2485" y2="4959" class="loopLine"></line><line x1="1860" y1="4829" x2="1860" y2="4959" class="loopLine"></line><polygon points="1860,4829 1910,4829 1910,4842 1901.6,4849 1860,4849" class="labelBox"></polygon><text x="1867.5" y="4844" class="labelText"><tspan x="1867.5">alt</tspan></text><text x="2172.5" y="4844" class="loopText" style="text-anchor: middle;"><tspan x="2172.5">[ Valid Fault ]</tspan></text></g><g><line x1="1850" y1="4734" x2="2495" y2="4734" class="loopLine"></line><line x1="2495" y1="4734" x2="2495" y2="4969" class="loopLine"></line><line x1="1850" y1="4969" x2="2495" y2="4969" class="loopLine"></line><line x1="1850" y1="4734" x2="1850" y2="4969" class="loopLine"></line><polygon points="1850,4734 1900,4734 1900,4747 1891.6,4754 1850,4754" class="labelBox"></polygon><text x="1857.5" y="4749" class="labelText"><tspan x="1857.5">opt</tspan></text><text x="2172.5" y="4749" class="loopText" style="text-anchor: middle;"><tspan x="2172.5">[ Consensus Fault ]</tspan></text></g><g><rect x="0" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="75" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="75" dy="0">RetrievalClient</tspan></text></g><g><rect x="200" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="275" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="275" dy="0">RetrievalProvider</tspan></text></g><g><rect x="400" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="475" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="475" dy="0">StorageClient</tspan></text></g><g><rect x="600" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="675" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="675" dy="0">StorageMarketActor</tspan></text></g><g><rect x="800" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="875" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="875" dy="0">StorageProvider</tspan></text></g><g><rect x="1000" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1075" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="1075" dy="0">PaymentChannelActor</tspan></text></g><g><rect x="1200" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1275" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="1275" dy="0">Blockchain</tspan></text></g><g><rect x="1400" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1475" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="1475" dy="0">BlockSyncer</tspan></text></g><g><rect x="1600" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1675" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="1675" dy="0">BlockProducer</tspan></text></g><g><rect x="1800" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1875" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="1875" dy="0">StoragePowerConsensus</tspan></text></g><g><rect x="2000" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="2075" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="2075" dy="0">StoragePowerActor</tspan></text></g><g><rect x="2200" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="2275" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="2275" dy="0">StorageMining</tspan></text></g><g><rect x="2400" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="2475" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="2475" dy="0">StorageMinerActor</tspan></text></g><g><rect x="2600" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="2675" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="2675" dy="0">SectorIndexing</tspan></text></g><g><rect x="2800" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="2875" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="2875" dy="0">StorageProving</tspan></text></g><g><rect x="3000" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="3075" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="3075" dy="0">FilProofs</tspan></text></g><g><rect x="3200" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="3275" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="3275" dy="0">Clock</tspan></text></g><g><rect x="3400" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="3475" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="3475" dy="0">libp2p</tspan></text></g><g><rect x="3600" y="4989" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="3675" y="5021.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px; font-family: Open-Sans, sans-serif;"><tspan x="3675" dy="0">PostSubmission</tspan></text></g></svg>

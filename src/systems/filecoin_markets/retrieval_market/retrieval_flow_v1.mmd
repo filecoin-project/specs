@@ -1,0 +1,81 @@
+sequenceDiagram
+
+  participant Client as RetrievalClient
+  participant DTS as Data Transfer Subsystem
+  participant Provider as RetrievalProvider
+  participant Node
+  participant BSC as BlockStore (Client)
+  participant BSP as BlockStore (Provider)
+  participant StorageMiner as Storage Miner Subsystem
+
+  opt Discovery
+    Client ->> Node : Query Chain For Providers w/ PieceID
+    activate Node
+    Node -->> Client : Providers With PieceID
+    deactivate Node
+  end
+
+  Client ->> Provider : Send Query for Piece
+  activate Provider
+  Provider -->> Client : Send information about Piece (price, size, etc)
+  deactivate Provider
+  Client ->> DTS : Open Pull Data Transfer w/ RetrievalDealProposal voucher
+  activate DTS
+  DTS ->> Provider : Validate RetrievalDealProposal
+  activate Provider
+  Provider -->> DTS : Data Transfer Accepted
+  DTS -->> Client : Update Transfer In Progress
+  opt Create Payment Channel
+  activate Client
+  Client -> DTS : Pause
+  Client ->> Node : Create Payment Channel
+  activate Node
+  Node -->> Client : Message For Channel Gets On Chain
+  deactivate Node
+  Client -> DTS : Unpause
+  deactivate Client
+  end
+  opt Unsealing
+  Provider ->> DTS : Pause
+  Provider ->> StorageMiner : Unseal Sector
+  activate StorageMiner
+  StorageMiner -->> Provider : Unsealed Piece Data
+  deactivate StorageMiner
+  Provider ->> BSP: Write Piece Blocks to BlockStore
+  activate BSP
+  BSP -->> Provider : Blocks written
+  deactivate BSP
+  Provider ->> DTS : Unpause
+  end
+  loop Retrieve In Pieces
+    loop Sending Data until Payment Required
+        DTS ->> BSP: Read Blocks from BlockStore
+        activate BSP
+        BSP -->> DTS : Blocks
+        deactivate BSP        
+        DTS ->> DTS : Handle Send+Verify Of Blocks
+        DTS ->> BSC : Write Blocks
+        activate BSC
+        BSC --> DTS: Blocks written
+        deactivate BSC
+    end
+    Provider ->> DTS : Pause
+    Provider ->> DTS : Send Request Payment Intermediate Voucher
+    DTS ->> Client : Validate Request Payment Voucher
+    activate Client
+    Client ->> Node : Create Voucher On Payment Channel
+    activate Node
+    Node -->> Client : Message For Voucher Gets On Chain
+    deactivate Node
+    Client ->> DTS : Send Reference To Payment Voucher
+    deactivate Client
+    DTS ->> Provider : Validate Reference To Payment Voucher
+    Provider ->> Node : Redeem Voucher On Payment Channel
+    activate Node
+    Node -->> Provider : Message For Voucher Redeemed On Chain
+    deactivate Node
+    Provider ->> DTS : Unpause
+  end
+  deactivate Provider
+  DTS -->> Client : Update Transfer Complete
+  deactivate DTS

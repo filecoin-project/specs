@@ -1,1 +1,0 @@
-type TokenAmount UInt

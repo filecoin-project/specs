@@ -24,33 +24,55 @@ help:
 	@echo "	make -- filecoin spec build toolchain commands"
 	@echo ""
 	@echo "USAGE"
-	@echo "	make deps        # run this once, to install & build dependencies"
-	@echo "	make build       # run this every time you want to re-build artifacts"
-	@echo ""
-	@echo "WARNING !"
-	@echo "	this build tool is WIP, so some targets may not work yet"
-	@echo "	this should stabilize in the next couple of days"
+	@echo "	make deps-basic  run this once, to install & build basic dependencies"
+	@echo "	make build       run this every time you want to re-build artifacts"
 	@echo ""
 	@echo "MAIN TARGETS"
 	@echo "	make help        description of the targets (this message)"
-	@echo "	make deps        install all dependencies of this tool chain"
-	@echo "	make deps-user   install dependencies for user tooling"
 	@echo "	make build       build all final artifacts (website only for now)"
-	@echo "	make test        run all test cases (go-test only for now)"
+	@echo "	make test        run all test cases (test-code only for now)"
 	@echo "	make drafts      publish artifacts to ipfs and show an address"
 	@echo "	make publish     publish final artifacts to spec website (github pages)"
+	@echo "	make clean       removes all build artifacts. you shouldn't need this"
+	@echo "	make serve       start hugo in serving mode -- must run 'make build' on changes manually"
+	@echo ""
+	@echo "INSTALL DEPENDENCIES"
+	@echo "	make deps        install ALL dependencies of this tool chain"
+	@echo "	make deps-basic  install minimal dependencies of this tool chain"
+	@echo "	make deps-diag   install dependencies for rendering diagrams"
+	@echo "	make deps-orient install dependencies for running orient"
+	@echo "	make deps-ouser  install dependencies for orient user-environment tooling"
+	@echo "	make bins        compile some build tools whose source is in this repo"
 	@echo ""
 	@echo "INTERMEDIATE TARGETS"
 	@echo "	make website     build the website artifact"
 	@#echo "	make pdf         build the pdf artifact"
-	@echo "	make hugo-build  run the hugo part of the pipeline"
-	@echo "	make gen-code    generate code artifacts (eg ipld -> go)"
+	@echo "	make diagrams    build diagram artifacts ({dot, mmd} -> svg)"
 	@echo "	make org2md      run org mode to markdown compilation"
-	@echo "	make go-test     run test cases in code artifacts"
 	@echo ""
-	@echo "OTHER TARGETS"
-	@echo "	make bins        compile some build tools whose source is in this repo"
-	@echo "	make serve       start hugo in serving mode -- must run make build on changes manually"
+	@echo "HUGO TARGETS"
+	@echo "	make hugo-src    copy sources into hugo dir"
+	@echo "	make build-hugo  run the hugo part of the pipeline"
+	@echo "	make watch-hugo  watch and rebuild hugo"
+	@echo ""
+	@echo "CODE TARGETS"
+	@echo "	make gen-code    generate code artifacts (eg id -> go)"
+	@echo "	make test-code   run test cases in code artifacts"
+	@echo "	make build-code  build all src go code (test it)"
+	@echo "	make clean-code  remove build code artifacts"
+	@echo "	make watch-code  watch and rebuild code"
+	@echo ""
+	@echo "CLEAN TARGETS"
+	@echo "	make clean       remove all build artifacts"
+	@echo "	make clean-deps  remove (some of) the dependencies installed in this repo"
+	@echo "	make clean-hugo  remove intermediate hugo artifacts"
+	@echo "	make clean-code  remove build code artifacts"
+	@echo ""
+	@echo "WATCH TARGETS"
+	@echo "	make serve-and-watch -j2  serve, watch, and rebuild all - works for live edit"
+	@echo "	make watch-code           watch and rebuild code"
+	@echo "	make watch-hugo           watch and rebuild hugo"
+	@echo ""
 
 # Source
 ORG_FILES=$(shell find -L hugo/content -name '*.org')
@@ -60,25 +82,48 @@ GO_FILES=$(shell find -L hugo/content -name '*.go')
 MD_FILES=$(shell find -L hugo/content -name '*.md') $(ORG_MD_FILES)
 
 # main Targets
-build: website
+build: diagrams build-code website
 
-deps: submodules
-	bin/install-deps.sh
-	@# make bins last, after installing other deps
-	@# so we re-invoke make.
-	make bins
-
-submodules:
-	git submodule update --init --recursive
-
-deps-user: deps
-	bin/install-deps-orient-user.sh
+test: test-code test-codeGen
 
 drafts: website
 	bin/publish-to-ipfs.sh
 
 publish: website
 	bin/publish-to-gh-pages.sh
+
+clean: .PHONY
+	rm -rf build
+
+# install dependencies
+
+deps: deps-basic deps-diag deps-orient
+	@# make bins last, after installing other deps
+	@# so we re-invoke make.
+	make bins
+
+deps-basic:
+	bin/install-deps-basic.sh -y
+
+deps-ouser:
+	bin/install-deps-orient-user.sh -y
+
+deps-orient: submodules
+	bin/install-deps-orient.sh -y
+
+deps-diag:
+	bin/install-deps-diagrams.sh -y
+
+submodules:
+	git submodule update --init --recursive
+
+clean-deps: .PHONY
+	@echo "WARNING: this does not uninstall global packages, sorry."
+	@echo "         If you would like to remove them, see bin/install-deps.sh"
+	-rm -r deps
+	-git checkout ./deps/package.json
+	-rm -r .slime
+	-rm -r bin/.emacs
 
 # intermediate targets
 website: go-test hugo-build
@@ -104,20 +149,68 @@ go-test: $(GO_FILES)
 	cd hugo/content/codeGen && go build && go test ./...
 	# cd hugo/content/code && go build && go test ./...
 
+hugo-src: $(shell find src | grep '.md') hugo/data/version.yml
+	rm -rf hugo/content/docs
+	cp -r src hugo/content/docs
+	# ox-hugo exports to src/content, so we need to copy that also.
+	cp -R src/content/ hugo/content/docs
+	mkdir -p hugo/content/ox-hugo
+	cp src/static/ox-hugo/* hugo/content/ox-hugo
+
+# run this every time.
+hugo/data/version.yml: src/version.yml .PHONY
+	bin/write-spec-version.sh <$< >$@
+
+# this is used to get "serve-and-watch" working. trick is to use
+hugo-src-rsync: $(shell find src | grep '.md') gen-code diagrams
+	@mkdir -p hugo/content/docs
+	rsync -av --inplace src/ hugo/content/docs
+	printf " " >> hugo/content/_index.md # force reload
+	printf " " >> hugo/content/menu/index.md # force reload
+
+watch-hugo: .PHONY
+	bin/watcher --cmd="make hugo-src-rsync" --startcmd src 2>/dev/null
+
+clean-hugo: .PHONY
+	rm -rf hugo/content/docs
+
+all-orient: .PHONY orient
+	bin/build-spec-orient.sh
+
+ORIENT_FILES=$(shell find src -name '*.orient')
+ORIENT_INPUT_FILES= $(patsubst %.orient, %.json, $(ORIENT_FILES))
+ORIENT_OUTPUT_FILES=$(patsubst src/%.orient, build/%.orient.json, $(ORIENT_FILES))
+orient: $(ORIENT_OUTPUT_FILES)
+
+$(ORIENT_OUTPUT_FILES): build/%.orient.json: src/%.orient src/%.json
+	bin/solve-orient.sh $+ $@
+
 # convert orgmode to markdown
+ORG_FILES=$(shell find src | grep .org)
+ORG_MD_FILES=$(patsubst %.org, %.md, $(ORG_FILES))
 org2md: $(ORG_MD_FILES)
 %.md: %.org
 	# use emacs to compile.
 	# cd to each target's directory, run there
 	# this should invoke orient
 	# this should produce hugo markdown output
-	bin/org2hugomd.el <$< >$@
+
+        # Skip this until batch-mode build issues are resolve.
+	# bin/org2hugomd.el <$< >$@
 
 # building our tools
-bins: bin/codeGen
+bins: bin/codeGen bin/watcher
 
-bin/codeGen: hugo/content/codeGen/*.go
-	cd hugo/content/codeGen && go build -o ../../../bin/codeGen
+bin/codeGen: $(shell find tools/codeGen | grep .go)
+	cd tools/codeGen && go build -o ../../bin/codeGen
+
+bin/watcher:
+	go get -u github.com/radovskyb/watcher/...
+	go build -o $@ github.com/radovskyb/watcher/cmd/watcher
+
+test-codeGen: bin/codeGen
+	cd tools/codeGen && go build && go test ./...
+	# cd tools/codeGen/test_cases && make test # this is broken
 
 # other
 
@@ -128,5 +221,71 @@ serve-website: website .PHONY
 	# use this if `make serve` breaks
 	cd build/website && $(PYTHON) -m SimpleHTTPServer 1313
 
+serve-and-watch: serve watch-hugo
+	echo "make sure you run this with 'make -j2'"
 
 .PHONY:
+
+# code generation and building targets
+
+GO_INPUT_FILES=$(shell find src -iname '*.go')
+GO_OUTPUT_FILES=$(patsubst src/%.go, build/code/%.go, $(GO_INPUT_FILES))
+
+GO_UTIL_INPUT_FILE=tools/codeGen/util/util.go
+GO_UTIL_OUTPUT_FILE=build/code/util/util.go
+
+$(GO_UTIL_OUTPUT_FILE): $(GO_UTIL_INPUT_FILE)
+	mkdir -p $(dir $@)
+	cp $< $@
+
+build/code/%.go: src/%.go
+	mkdir -p $(dir $@)
+	cp $< $@
+
+ID_FILES=$(shell find src -name '*.id')
+GEN_GO_FILES=$(patsubst src/%.id, build/code/%.gen.go, $(ID_FILES))
+build/code/%.gen.go: src/%.id bin/codeGen
+	mkdir -p $(dir $@)
+	-bin/codeGen gen $< $@
+
+gen-code: bin/codeGen build/code/go.mod $(GEN_GO_FILES) $(GO_OUTPUT_FILES) $(GO_UTIL_OUTPUT_FILE)
+
+build/code/go.mod: src/build_go.mod
+	mkdir -p $(dir $@)
+	cp $< $@
+
+build-code: gen-code
+	cd build/code && go build -gcflags="-e" ./...
+
+test-code: build-code
+	cd build/code && go test ./...
+
+clean-code:
+	rm -rf build/code
+
+fmt-code:
+	bin/codeGen fmt ./src/...
+	go fmt ./src/...
+	go fmt ./tools/...
+	go fmt ./build/code/...
+
+watch-code: .PHONY
+	bin/watcher --cmd="make build-code" --startcmd src 2>/dev/null
+
+## diagrams
+
+DOTs=$(shell find src -name '*.dot')
+MMDs=$(shell find src -name '*.mmd')
+SVGs=$(DOTs:%=%.svg) $(MMDs:%=%.svg)
+
+diagrams: ${SVGs}
+
+watch-diagrams: diagrams
+	bin/watcher --cmd="make diagrams" --startcmd src 2>/dev/null
+
+%.dot.svg: %.dot
+	@which dot >/dev/null || echo "requires dot (graphviz) -- run make deps" && exit
+	dot -Tsvg $< >$@
+
+%.mmd.svg: %.mmd %.mmd.css
+	deps/node_modules/.bin/mmdc -i $< -o $@ --cssFile $(word 2,$^)

@@ -1,0 +1,5 @@
+
+type Foo struct {
+  Put(bar interface{}) error
+  Get(c CID) struct{bar interface{}, err error}
+}

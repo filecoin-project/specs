@@ -1,0 +1,223 @@
+import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
+
+type WinStackedDRGLayers UInt
+type WinStackedDRGNodeSize UInt
+type WinStackedDRGNodes UInt
+type WinStackedDRGWindowCount UInt
+type WinStackedDRGPartitions UInt
+type WinStackedDRGChallenges UInt
+type WinStackedDRGWindowChallenges UInt
+type WinStackedDRGLeafChallengeCount UInt
+type WinStackedDRGChallengeRangeSize UInt
+
+type DRGDepth struct {}
+type DRGFraction struct {}
+type DRGDegree UInt
+type DRGSeed struct {}
+type DRGNodeCount UInt
+type ExpanderGraphNodeCount UInt
+type ChungExpanderPermutationFeistelKeys [UInt]
+type ChungExpanderPermutationFeistelRounds UInt
+type ChungExpanderPermutationFeistelHashFunction enum {
+    Blake2S
+    SHA256
+}
+type ChungExpanderAlpha struct {}
+type ChungExpanderBeta struct {}
+type ExpanderGraphDegree UInt
+type ExpanderGraphSeed struct {}
+type DRGNodeSize UInt
+
+type SealAlgorithmArtifacts struct {
+    AlgorithmWideSetupArtifacts struct {
+        // trusted setup output parameters go here
+        // updates to public parameters go here
+    }
+
+    SealSetupArtifacts
+
+    // ProveArtifacts or
+    ChallengeArtifacts struct {
+        // inputs into prove() go here
+    }
+
+    VerifyArtifacts struct {
+        // inputs into verify() go here
+    }
+}
+
+// per-sector setup artifacts go here
+type SealSetupArtifacts struct {
+    CommD              sector.Commitment
+    CommR              sector.SealedSectorCID
+    CommC              sector.Commitment
+    CommQ              sector.Commitment
+    CommRLast          sector.Commitment
+    CommDTreePath      file.Path
+    CommCTreePath      file.Path
+    CommQTreePath      file.Path
+    CommRLastTreePath  file.Path
+    Seed               sector.SealSeed
+    KeyLayers          [Bytes]
+    Replica            Bytes  // This is what we challenge in PoSt. It will be regenerated just in time. Should probably be removed from here.
+}
+
+type EllipticCurve struct {
+    FieldModulus &util.BigInt
+}
+
+type WinStackedDRG struct {
+    Layers                  WinStackedDRGLayers
+    NodeSize                WinStackedDRGNodeSize
+    Nodes                   WinStackedDRGNodes
+    WindowCount             WinStackedDRGWindowCount
+    Partitions              WinStackedDRGPartitions
+    Challenges              WinStackedDRGChallenges
+    WindowChallenges        WinStackedDRGWindowChallenges
+    LeafChallengeCount      WinStackedDRGLeafChallengeCount
+    ChallengeRangeSize      WinStackedDRGChallengeRangeSize
+    Algorithm               struct {}
+    DRGCfg
+    ExpanderGraphCfg
+    WindowDRGCfg            DRGCfg
+    WindowExpanderGraphCfg  ExpanderGraphCfg
+    // invariant: DRGCfg.Nodes == ExpanderGraphCfg.Nodes
+    Curve                   EllipticCurve
+    Cfg                     SDRCfg
+
+    Drg()                   DRG
+    Expander()              ExpanderGraph
+
+    WindowDrg()             DRG
+    WindowExpander()        ExpanderGraph
+
+    Seal(
+        sid         sector.SectorID
+        data        Bytes
+        randomness  sector.SealRandomness
+    ) SealSetupArtifacts
+    CreateSealProof(
+        challengeSeed  sector.InteractiveSealRandomness
+        aux            sector.ProofAuxTmp
+    ) sector.SealProof
+    CreatePrivateSealProof(
+        randomness  sector.InteractiveSealRandomness
+        aux         sector.ProofAuxTmp
+    ) PrivateOfflineProof
+
+    CreateOfflineCircuitProof(
+        challengeProofs  [OfflineWindowProof]
+        aux              sector.ProofAuxTmp
+    ) sector.SealProof
+    VerifyPrivateSealProof(
+        privateProof  [OfflineWindowProof]
+        sealSeeds     [sector.SealSeed]
+        randomness    sector.InteractiveSealRandomness
+        commD         Commitment
+        commR         sector.SealedSectorCID
+    ) bool
+    VerifySeal(sv sector.SealVerifyInfo) bool
+
+    GenerateElectionPoStCandidates(
+        challengeSeed    sector.PoStRandomness
+        eligibleSectors  [sector.SectorNumber]
+        candidateCount   int
+        sectorStore      sectorIndex.SectorStore
+    ) [sector.PoStCandidate]
+    CreateElectionPoStProof(privateProofs [PrivatePoStProof]) sector.PoStProof
+    VerifyElectionPoSt(sv sector.PoStVerifyInfo) bool
+
+    GenerateSurprisePoStCandidates(
+        challengeSeed    sector.PoStRandomness
+        eligibleSectors  [sector.SectorNumber]
+        candidateCount   int
+        sectorStore      sectorIndex.SectorStore
+    ) [sector.PoStCandidate]
+    CreateSurprisePoStProof(privateProofs [PrivatePoStProof]) sector.PoStProof
+    VerifySurprisePoSt(sv sector.PoStVerifyInfo) bool
+    CreatePrivatePoStProof(
+        candidateProofs  [sector.PrivatePoStCandidateProof]
+        challengeSeed    sector.PoStRandomness
+        aux              sector.PersistentProofAux
+    ) PrivatePoStProof
+    VerifyPrivatePoStProof(
+        privateProof  PrivatePoStProof
+        candidates    [sector.PoStCandidate]
+        commRLast     sector.Commitment
+    ) bool
+}
+
+type SDRCfg struct {
+    SealCfg          sector.SealCfg
+    ElectionPoStCfg  sector.PoStCfg
+    SurprisePoStCfg  sector.PoStCfg
+}
+
+type DRGCfg struct {
+    Algorithm struct {
+        Depth     DRGDepth  // D
+        Fraction  DRGFraction  // E
+
+        ParentsAlgorithm enum {
+            DRSample
+        }
+
+        RNGAlgorithm enum {
+            ChaCha20
+        }
+    }
+    Degree DRGDegree
+    Seed DRGSeed
+    Nodes DRGNodeCount
+}
+
+type DRG struct {
+    Config         DRGCfg
+    Parents(UInt)  [UInt]
+}
+
+type ExpanderGraphCfg struct {
+    Algorithm union {
+        ChungExpanderAlgorithm
+    }
+
+    Degree  ExpanderGraphDegree
+    Seed    ExpanderGraphSeed
+    Nodes   ExpanderGraphNodeCount
+}
+
+type ExpanderGraph struct {
+    Config         ExpanderGraphCfg
+    Parents(UInt)  [UInt]
+}
+
+type ChungExpanderAlgorithm struct {
+    Alpha  ChungExpanderAlpha
+    Beta   ChungExpanderBeta
+    PermutationAlgorithm union {
+        Feistel
+    }
+    Parents(node UInt, ExpanderGraphDegree, nodes ExpanderGraphNodeCount) [UInt]
+}
+
+type Feistel struct {
+    Keys          ChungExpanderPermutationFeistelKeys
+    Rounds        ChungExpanderPermutationFeistelRounds
+    HashFunction  ChungExpanderPermutationFeistelHashFunction
+    Permute(size UInt, n UInt) UInt
+}
+
+type MerkleTree struct {
+    ProveInclusion(challenge UInt) InclusionProof
+    Leaf(index UInt) Bytes
+}
+
+// TODO: Needs to be generic over hash.
+type InclusionProof struct {
+    Leaf()       Bytes
+    LeafIndex()  UInt
+    Root()       Commitment
+    Verify(root Bytes, challenge UInt) bool
+}

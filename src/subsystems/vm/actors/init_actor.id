@@ -1,9 +1,0 @@
-
-type InitActorState struct {
-	// responsible for create new actors
-	Meta ActorMeta
-	AddressMap {Address:ActorID}
-	NextID ActorID
-
-	GetActorIDForAddress(address Address) ActorID
-}

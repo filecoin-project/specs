@@ -1,0 +1,402 @@
+// Colors
+$darkGray: #373f52;
+$mediumGray: #959595;
+$gray: #e1e1e1;
+$lightestGray: #d5dae6;
+$white: #ffffff;
+$black: #000000;
+$purple: #8f6cd6;
+$lightPurple: #7f60be;
+$codeBackground: #f7f9fc;
+$detailGray: #f7f7f7;
+$groupGray: #dddddd;
+$yellow: #f1c40f;
+$orange: #e67e22;
+$red: #e74c3c;
+$darkBlue: #1f5b83;
+$blue: #3498db;
+
+// width
+
+.container {
+  max-width: 90rem;
+}
+
+.book-menu {
+  flex: 0 0 22rem;
+}
+
+.book-menu nav {
+  width: 22rem;
+}
+
+
+// header-highlight
+
+$header-highlight: #e6fbfd;
+
+h1, h2, h3, h4, h5, h6 {
+  background: $header-highlight;
+}
+
+h1 {
+  font-weight: bold;
+  padding: 20px;
+}
+
+h2 {
+  padding: 18px;
+}
+
+h3 {
+  padding: 16px;
+}
+
+h4 {
+  padding: 14px;
+}
+
+h5 {
+  padding: 12px;
+}
+
+h6 {
+  padding: 10px;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+// section numbering
+
+$section-number-menu-color: #a9a9a9;
+
+// this has to happen once for the menu, once for the content
+// so that the counting is right for both.
+body, .book-menu, .book-page {
+  counter-reset : h1;
+}
+
+h1, .menu-item.depth-1 {
+  counter-reset : h2;
+}
+
+h2, .menu-item.depth-2 {
+  counter-reset : h3;
+}
+
+h3, .menu-item.depth-3 {
+  counter-reset : h4;
+}
+
+h4, .menu-item.depth-4 {
+  counter-reset : h5;
+}
+
+h5, .menu-item.depth-5 {
+  counter-reset : h6;
+}
+
+.menu-item:before {
+  color: $section-number-menu-color;
+}
+
+h1:before, h2:before, h3:before, h4:before, h5:before, h6:before {
+  color: $section-number-menu-color;
+}
+
+.menu-item.highlight {
+//  background: rgb(231, 252, 255); // probably not needed. here if we do
+}
+
+article h1:before, .menu-item.depth-1:before {
+  content : counter(h1,decimal) ". ";
+  counter-increment : h1;
+}
+
+article h2:before, .menu-item.depth-2:before {
+  content : counter(h1,decimal) "." counter(h2,decimal) ". ";
+  counter-increment : h2;
+}
+
+article h3:before, .menu-item.depth-3:before {
+  content : counter(h1,decimal) "." counter(h2,decimal) "." counter(h3,decimal) ". ";
+  counter-increment : h3;
+}
+
+article h4:before, .menu-item.depth-4:before {
+  content : counter(h1,decimal) "." counter(h2,decimal) "." counter(h3,decimal) "." counter(h4,decimal) ". ";
+  counter-increment : h4;
+}
+
+article h5:before, .menu-item.depth-5:before {
+  content : counter(h1,decimal) "." counter(h2,decimal) "." counter(h3,decimal) "." counter(h4,decimal) "." counter(h5,decimal) ". ";
+  counter-increment : h5;
+}
+
+article h6:before, .menu-item.depth-6:before {
+  content : counter(h1,decimal) "." counter(h2,decimal) "." counter(h3,decimal) "." counter(h4,decimal) "." counter(h5,decimal) "." counter(h6,decimal) ". ";
+  counter-increment : h6;
+}
+
+h1.nocount:before, h2.nocount:before, h3.nocount:before, h4.nocount:before, h5.nocount:before, h6.nocount:before,
+.menu-item.nocount:before {
+  content : "";
+  counter-increment : none;
+}
+
+// scrollspy highlighting
+
+#menu-toc li:not(.active-parent) > ul.maybe-hide > li:not(.active) {
+  display: none;
+}
+
+#menu-toc ul li.active-parent,
+#menu-toc ul.maybe-hide li.active-parent,
+#menu-toc li.active-parent > ul.maybe-hide > li {
+  display: block;
+}
+
+#menu-toc ul.maybe-hide li.active-parent > li
+
+#menu-toc ul li.active {
+  display: block;
+}
+
+#menu-toc li > a {
+  padding-left: 5px;
+}
+
+#menu-toc li.active > a {
+  background-color: $header-highlight;
+  padding: 8px 5px;
+  margin: -8px 0px;
+  // border-left: 3px solid $header-highlight;
+}
+
+// diagram
+
+.diagram {
+  text-align: center;
+}
+
+// header links
+
+h1:after, h2:after, h3:after, h4:after, h5:after, h6:after {
+  float:right;
+  content: "🔗";
+  opacity: 0.25;
+}
+
+h1:after, h2:after, h3:after, h4:after, h5:after, h6:after {
+  float:right;
+  content: "🔗";
+  opacity: 0.25;
+}
+
+h1:hover:after, h2:hover:after, h3:hover:after, h4:hover:after, h5:hover:after, h6:hover:after {
+  opacity: 1.0;
+  cursor: pointer;
+}
+
+
+
+.header-link {
+  position: absolute;
+  left: -0.5em;
+  opacity: 0;
+
+  transition: opacity 0.2s ease-in-out 0.1s;
+}
+
+h1:hover .header-link,
+h2:hover .header-link,
+h3:hover .header-link,
+h4:hover .header-link,
+h5:hover .header-link,
+h6:hover .header-link {
+  opacity: 1;
+}
+
+// remove scrolling
+html {
+  scroll-behavior: auto;
+}
+
+// TocMap
+
+.tocMap {
+  position: relative;
+  width: 100%;
+  text-align: center;
+}
+
+// hide the first label
+.tocMap > .tocMap-item > .tocMap-item-label {
+  display: none;
+}
+
+.tocMap-item {
+  background-color: inherit;
+  background-blend-mode: screen;
+  margin: 10px;
+  padding: 10px;
+  width: 120px;
+  font-size: 16px;
+  font-weight: bold;
+  height: 80px;
+
+  display: inline-flex;
+  flex-direction: row;
+}
+
+.tocMap-item.expanded {
+  width: 100%;
+  height: auto;
+  min-height: 80px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+
+
+.tocMap-children {
+//  position: absolute;
+//  right: 0px;
+//  top:0px;
+//  bottom:0px;
+  height: 100%;
+  display: none;
+}
+
+.tocMap-item.expanded > .tocMap-children {
+  width: calc(100% - 120px);
+  flex-grow: 3;
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.tocMap-item-label {
+  font-size: 18px;
+  font-weight: bold;
+  width: 140px;
+  height: 100%;
+  color: #000;
+  line-height: 1.2em;
+
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.tocMap-item-label i.menuIcon {
+  font-size: 30px;
+  font-style: inherit;
+}
+
+.tocMap-item-label i.statusIcon {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: 20px;
+  font-style: inherit;
+  opacity: 0.50;
+}
+
+.tocMap-item-label > a {
+  margin:0 auto;
+  flex: 1;
+}
+
+.tocMap-item-label > a,
+.tocMap-item-label > a:visited,
+.tocMap-item-label > a:hover,
+.tocMap-item-label > a:active {
+  margin:0 auto;
+  text-decoration: none;
+  color: inherit;
+}
+
+.tocMap .tocMap-item .tocMap-item.expanded,
+.tocMap .tocMap-item .tocMap-item.expanded .tocMap-item {
+    background-color: rgba(50, 50, 50, 0.10);
+}
+
+
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+1),
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+1) .tocMap-item {
+    background-color: rgba(255, 0, 0, 0.10);
+}
+
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+2),
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+2) .tocMap-item {
+    background-color: rgba(255, 255, 0, 0.25);
+}
+
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+3),
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+3) .tocMap-item {
+    background-color: rgba(255, 0, 255, 0.10);
+}
+
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+4),
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+4) .tocMap-item {
+    background-color: rgba(0, 0, 255, 0.10);
+}
+
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+5),
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+5) .tocMap-item {
+    background-color: rgba(0, 255, 0, 0.10);
+}
+
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+6),
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+6) .tocMap-item {
+    background-color: rgba(0, 255, 255, 0.15);
+}
+
+
+.tocMap > .tocMap-item.expanded {
+  margin: 0px;
+  padding: 0px;
+  background: none;
+}
+
+// -- Notices
+
+.todo_inline {
+  font-style: italic;
+}
+
+.notices {
+  font-style: italic;
+  margin: .5em 0;
+  padding: .25em 1.5em;
+  border-left: 3px solid $gray;
+  display: inline-block;
+
+  *:first-child {
+    padding-top: 0;
+    margin-top: 0;
+  }
+
+  *:last-child {
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+
+  &.warning {
+    border-left: 3px solid $red;
+  }
+
+  &.info {
+    border-left: 3px solid $blue;
+  }
+
+  &.note {
+    border-left: 3px solid $yellow;
+  }
+
+  &.todo {
+    border-left: 3px solid $orange;
+  }
+}

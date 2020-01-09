@@ -1,0 +1,30 @@
+<style type="text/css">
+/* dont introduce empty lines in this style tag. will break markdown's html pass-through. */
+#spec-splash {
+  text-align: center;
+  margin: 50px auto;
+}
+#spec-splash #spec-title {
+  font-family: EB Garamond;
+  font-size: 70px;
+}
+#spec-splash #spec-logo {
+  height: 256px;
+  width: 256px;
+}
+#spec-splash #spec-version {
+  margin: 10px auto;
+  font-family: Monaco, Menlo;
+}
+</style>
+
+<div id="spec-splash">
+  <div id="spec-title">Filecoin Specification</div>
+  <img id="spec-logo" src="./docs/filspeclogo.png" />
+  <div id="spec-version">
+    protocol version: <span id="protocol-version-number">{{ .Site.Data.version.filecoinVersion }}</span><br />
+    spec doc version: <span id="spec-version-number">{{ .Site.Data.version.specVersion }}</span>-<span id="spec-version-hash">{{ .Site.Data.version.shorthash }}</span>
+    <br />
+    last published: <span id="spec-version-date">{{ .Site.Data.version.date }}</span>
+  </div>
+</div>

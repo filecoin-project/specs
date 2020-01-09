@@ -1,7 +1,7 @@
 # baseURL = "https://filecoin-project.github.io/specs/"
 languageCode = "en-us"
 title = "Filecoin Spec"
-canonifyurls = true
+canonifyurls = false
 relativeURLs = true
 
 theme = "book"

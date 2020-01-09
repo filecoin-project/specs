@@ -1,0 +1,9 @@
+// sector sets
+type SectorSet [SectorID]
+type UnsealedSectorSet SectorSet
+type SealedSectorSet SectorSet
+
+// compact sector sets
+type Bitfield Bytes
+type RLEpBitfield Bitfield
+type CompactSectorSet RLEpBitfield

@@ -1,6 +1,4 @@
 <div>
-  {{ range $.Site.Data.sections }}
-    {{ $x := $.Site.GetPage (print "/docs/" .) }}
-    {{ $x.Render "sectionLayout" }}
-  {{ end }}
+  {{ $page := print "/docs" | $.Site.GetPage }}
+  {{ partial "sectionLayoutPartial.html" (dict "page" $page "depth" 0) }}
 </div>

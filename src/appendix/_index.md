@@ -3,5 +3,6 @@ title: Appendix
 entries:
   - sharray
   - address
-suppressMenu: true
+  - network_params
+suppressMenu: false
 ---

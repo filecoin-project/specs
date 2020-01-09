@@ -1,8 +1,0 @@
-
-type AccountActorState struct {
-	// normal keypair backed accounts
-	Meta ActorMeta
-	Address Address
-
-	GetAddress() Address
-}

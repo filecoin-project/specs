@@ -1,0 +1,7 @@
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+
+type AccountActorCode struct {}
+
+type AccountActorState struct {
+    Address addr.Address
+}

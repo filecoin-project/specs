@@ -1,0 +1,16 @@
+digraph G {
+  rankdir=RL;
+  node [shape=box, style="filled", color="green3"]
+
+  B1 [label="B1\nMinerAny"]
+  B2 [label="B2\nMinerA"]
+  B3 [label="B3\nMinerB",   color=pink]
+  B4 [label="B4\nMinerB",   color=pink]
+  
+  B2 -> B1
+  B3 -> B2
+  B4 -> B2
+
+  edge[style=invis];
+  B4 -> B3
+}

@@ -1,0 +1,37 @@
+// Address is defined here because this is where addresses start to make sense.
+// Addresses refer to actors defined in the StateTree, so Addresses are defined
+// on top of the StateTree.
+//
+// TODO: potentially move into a library, or its own directory.
+type Address struct {
+    NetworkID enum {
+        Testnet
+        Mainnet
+    }
+
+    Data union {
+        ID                   ActorID
+        PublicKey_Secp256k1  KeyHash  // TODO: reorder
+        ActorExec            ActorExecHash
+        PublicKey_BLS        KeyHash
+    }
+
+    VerifySyntax()   bool
+    String()         string
+    IsIDType()       bool  // Whether the address is an ID-address
+    IsKeyType()      bool  // Whether the address is a public key address (SECP or BLS)
+    Equals(Address)  bool
+    Ref()            Address_Ptr
+
+    // Returns the ID from an ID address (or error otherwise).
+    GetID()          (ActorID, error)
+    GetKey()         (KeyHash, error)
+}
+
+// ActorID is a sequential number assigned to actors in a Filecoin Chain.
+// ActorIDs are assigned by the InitActor, when an Actor is introduced into
+// the Runtime.
+type ActorID Int
+
+type KeyHash Bytes
+type ActorExecHash Bytes

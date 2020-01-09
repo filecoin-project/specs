@@ -1,0 +1,63 @@
+import abi "github.com/filecoin-project/specs/actors/abi"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+
+type DealID Int
+type DealIDs struct {
+    Items [DealID]
+}
+type DealWeight int  // should be BigInt
+
+// Note: Deal Collateral is only released and returned to clients and miners
+// when the storage deal stops counting towards power. In the current iteration,
+// it will be released when the sector containing the storage deals expires,
+// even though some storage deals can expire earlier than the sector does.
+// Collaterals are denominated in PerEpoch to incur a cost for self dealing or
+// minimal deals that last for a long time.
+// Note: ClientCollateralPerEpoch may not be needed and removed pending future confirmation.
+// There will be a Minimum value for both client and provider deal collateral.
+type StorageDealProposal struct {
+    PieceCID                      piece.PieceCID  // 35 bytes CommP
+    PieceSize                     piece.PieceSize
+    Client                        addr.Address
+    Provider                      addr.Address
+    ClientSignature               filcrypto.Signature
+
+    // Nominal start epoch. Deal payment is linear between StartEpoch and EndEpoch,
+    // with total amount StoragePricePerEpoch * (EndEpoch - StartEpoch).
+    // Storage deal must appear in a sealed (proven) sector no later than StartEpoch,
+    // otherwise it is invalid.
+    StartEpoch                    abi.ChainEpoch
+    EndEpoch                      abi.ChainEpoch
+    StoragePricePerEpoch          abi.TokenAmount
+
+    ProviderCollateral            abi.TokenAmount
+    ClientCollateral              abi.TokenAmount
+
+    Duration()                    abi.ChainEpoch        @(cached)  // EndEpoch - StartEpoch
+    TotalStorageFee()             abi.TokenAmount  // StoragePricePerEpoch * Duration
+    ClientBalanceRequirement()    abi.TokenAmount  // ClientCollateral + TotalStorageFee
+    ProviderBalanceRequirement()  abi.TokenAmount  // ProviderCollateral
+
+    CID()                         &StorageDealProposal
+}
+
+// Everything in this struct will go on chain
+// We are enforcing that StorageProvider calls PublishStorageDeal to get back a StorageDeal struct
+// Provider's signature is implicit in the onchain call
+type StorageDeal struct {
+    Proposal()      StorageDealProposal  // can extract proposal from the message
+    PublishMessage  msg.SignedMessage  // counter signature is implicit in the message
+
+    CID()           &StorageDeal
+}
+
+type OnChainDeal struct {
+    ID                DealID
+    Deal              StorageDeal
+    SectorStartEpoch  abi.ChainEpoch  // -1 if not yet included in proven sector
+    LastUpdatedEpoch  abi.ChainEpoch  // -1 if deal state never updated
+    SlashEpoch        abi.ChainEpoch  // -1 if deal never slashed
+}

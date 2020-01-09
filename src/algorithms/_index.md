@@ -2,9 +2,11 @@
 title: Algorithms
 entries:
   - expected_consensus
-  - proof_of_replication
-  - proof_of_spacetime
+  - porep
+  - post
   - payment_channels
-  - vdf
+  - block_sync
+  - gossip_sub
   - crypto
+  - cryptoecon
 ---

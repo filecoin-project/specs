@@ -12,22 +12,24 @@
   {{ $title = ($page.Param "menuTitle") }}
 {{ end }}
 
-<a href="/#{{ $tag }}">    
+<a href="/#{{ $tag }}" class="menu-item depth-{{ $depth }}">
+    {{ $page.Param "menuIcon" }}
     {{ if (eq $depth 1) }}
     <strong>
     {{ end }}
-        {{ $title }}
+        {{ $title | markdownify }}
     {{ if (eq $depth 1) }}
     </strong>
     {{ end }}
 </a>
 
+
 {{ if (not ($page.Param "suppressMenu")) }}
-<ul>
+<ul class="menu-item-section depth-{{ $depth }}">
 {{ range ($page.Param "entries") }}
     <li>
     {{ with $page.GetPage . }}
-      {{ partial "menuLayoutPartial.html" (dict "page" .) }}
+      {{ partial "menuLayoutPartial.html" (dict "page" . "depth" (add $depth 1)) }}
     {{ end }}
     </li>
 {{ end }}

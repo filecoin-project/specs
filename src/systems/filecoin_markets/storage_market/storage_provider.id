@@ -1,0 +1,65 @@
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
+import abi "github.com/filecoin-project/specs/actors/abi"
+import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import dt "github.com/filecoin-project/specs/systems/filecoin_files/data_transfer"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+
+// ProviderLocalDealInfo is the information that a storage provider tracks locally about
+// a deal. It contains not only the storage proposal but the state of the deal
+// as it moves throught the system. It is persisted to local storage and updated 
+// as the deal goes through stages leading up to its being published (and afterward)
+type ProviderLocalDealInfo struct {
+    ProposalCid   &deal.StorageDealProposal
+    Proposal      deal.StorageDealProposal
+    MinerPeerID   libp2p.PeerID
+    ClientPeerID  libp2p.PeerID
+    Status        StorageDealStatus
+
+    PayloadID     ipld.CID
+
+    DealID        deal.DealID
+    SectorID      sector.SectorID  // Set when State >= DealStaged
+}
+
+// The interface provided for storage providers
+type StorageProvider struct {
+    AddAsk(price abi.TokenAmount, ttlsecs int64) error
+
+    // ListAsks lists current asks
+    ListAsks(addrress addr.Address) [StorageAsk]
+
+    // ListDeals lists on-chain deals associated with this provider
+    ListDeals()            (deals [deal.StorageDeal], error)
+
+    // ListIncompleteDeals lists deals that are in progress or rejected
+    ListIncompleteDeals()  (deals [ProviderLocalDealInfo], error)
+
+    // AddStorageCollateral adds storage collateral
+    AddStorageCollateral(amount abi.TokenAmount) error
+
+    // GetStorageCollateral returns the current collateral balance
+    GetStorageCollateral() (abi.TokenAmount, error)
+
+    // DataTransferValidator methods
+    ValidatePush(
+        sender    libp2p.PeerID
+        voucher   dt.DataTransferVoucher
+        PieceRef  ipld.CID
+        Selector  ipld.Selector
+    )
+    ValidatePull(
+        receiver  libp2p.PeerID
+        voucher   dt.DataTransferVoucher
+        PieceRef  ipld.CID
+        Selector  ipld.Selector
+    )
+
+    // Data Transfer Listener
+    OnDataTransferEvent(event dt.DataTransferEvent, channelState dt.DataTransferState)
+
+    // libp2p listener on storage deal query
+    OnStorageQueryAsk(request AskProtocolRequest)
+    OnStorageDealProposal(response DealProtocolRequest)
+}

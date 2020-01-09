@@ -3,47 +3,62 @@
   - key concepts
   - filecoin vm
   - spec process
-- algorithms
-  - expected consensus
-  - proof of replication
-  - proof of spacetime
-  - payment channels
-  - verifiable delay functions
-  - cryptographic primitives
-- Subsystem Groups
-  - Data Structures
-    - Filecoin Nodes
-    - Repository
-    - Data Structures
-    - Filecoin Compact Serialization
-  - Networking
-    - Filecoin libp2p nodes
-    - libp2p protocols
-      - gossipsub
-      - kad-dht
-    - ipfs protocols
-      - graphsync
-      - bitswap
-  - State Machine
-    - State Tree
-    - Filecoin VM
-    - Message Pool
-    - Blockchain
-    - Storage Power Consensus
-  - Token
-    - Wallets
-    - Payments
-    - Payment Channels
-    - Fees
-  - Mining
-    - storage mining
-    - sector storage
-  - Markets
-    - storage market
-    - retrieval market
-    - data transfers
-  - Other
-    - Clock
+- Systems
+  x Filecoin Nodes
+    x Node
+    x Repository
+      - IpldStore
+      - KeyStore
+      - Config
+    x FileStore
+    x Network
+    x Clock
+  x Filecoin Blockchain
+    x State Tree
+    x Filecoin VM
+      - VM Interpreter
+      - Actors
+      - Message
+    x Message Pool
+    x Blockchain
+      x Chain Manager
+      x Block Syncer
+      x Message Pool
+    x Storage Power Consensus
+      x Storage Power Actor
+      x Expected Consensus
+  x Filecoin Token
+    x Wallets
+    x Payments
+    x Payment Channels
+  x Filecoin Mining
+    x storage mining
+    x storage indexing
+    x storage proving
+  x Filecoin Markets
+    x storage market
+    x retrieval market
+    x data transfers
+x libraries
+  x Filecoin Proofs
+  x Filecoin Compact Serialization
+  x ipld
+    x
+  x libp2p
+    x Filecoin libp2p nodes
+    x gossipsub
+    x kad-dht
+  x ipfs
+    x graphsync
+    x bitswap
+    x unixfs
+x algorithms
+  x expected consensus
+  x proof of replication
+  x proof of spacetime
+  x payment channels
+  x verifiable delay functions
+  x cryptographic primitives
 - Listings
   - Data Structures
   - Components

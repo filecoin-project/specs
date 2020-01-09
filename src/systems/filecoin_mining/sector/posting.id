@@ -1,0 +1,50 @@
+type PartialTicket Bytes  // 32 bytes
+type ChallengeTicketsCommitment Bytes
+type PoStRandomness Bytes
+
+// Can move to a new posting.id if we think worth it.
+type PoStCfg struct {
+    Type         PoStType
+    SectorSize
+    WindowCount  UInt
+    Partitions   UInt
+}
+
+type PoStType enum {
+    ElectionPoSt
+    SurprisePoSt
+}
+
+// TODO: refactor these types to get rid of the squishy optional fields.
+type PoStVerifyInfo struct {
+    PoStCfg
+    Randomness  PoStRandomness
+    CommR       SealedSectorCID
+    OnChain     OnChainPoStVerifyInfo
+}
+
+type PoStCandidate struct {
+    PartialTicket  // Optional —  will eventually be omitted for SurprisePoSt verification, needed for now.
+    PrivateProof    PrivatePoStCandidateProof  // Optional — should be ommitted for verification.
+    SectorID
+    ChallengeIndex  UInt
+}
+
+type OnChainPoStVerifyInfo struct {
+    CommT       ChallengeTicketsCommitment  // Optional — only needed for SurprisePoSt.
+    Candidates  [PoStCandidate]
+    Randomness  PoStRandomness
+    Proof       PoStProof
+}
+
+type PoStWitness struct {
+    Candidates [PoStCandidate]
+}
+
+type PoStProof struct {//<curve, system> {
+    Type        PoStType
+    Candidates  [PoStCandidate]
+    ProofBytes  Bytes
+}
+
+type PrivatePoStCandidateProof struct {}
