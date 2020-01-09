@@ -2,7 +2,6 @@ package node_base
 
 import (
 	actors "github.com/filecoin-project/specs/actors"
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 )
 
@@ -17,28 +16,28 @@ const NETWORK = addr.Address_NetworkID_Testnet
 /////////////////////////////////////////////////////////////
 
 // TODO: placeholder epoch value -- this will be set later
-const MAX_PROVE_COMMIT_SECTOR_PERIOD = block.ChainEpoch(3) // placeholder
+const MAX_PROVE_COMMIT_SECTOR_PERIOD = actors.ChainEpoch(3) // placeholder
 
 /////////////////////////////////////////////////////////////
 // PoSt
 /////////////////////////////////////////////////////////////
 
-const MAX_SURPRISE_POST_RESPONSE_PERIOD = block.ChainEpoch(4) // placeholder
-const POST_CHALLENGE_TIME = block.ChainEpoch(1)               // placeholder
+const MAX_SURPRISE_POST_RESPONSE_PERIOD = actors.ChainEpoch(4) // placeholder
+const POST_CHALLENGE_TIME = actors.ChainEpoch(1)               // placeholder
 // sets the average frequency
-const PROVING_PERIOD = block.ChainEpoch(2) // placeholder, 2 days
+const PROVING_PERIOD = actors.ChainEpoch(2) // placeholder, 2 days
 // how long after a POST challenge before a miner can get challenged again
-const SURPRISE_NO_CHALLENGE_PERIOD = block.ChainEpoch(0) // placeholder, 2 hours
+const SURPRISE_NO_CHALLENGE_PERIOD = actors.ChainEpoch(0) // placeholder, 2 hours
 // how many sectors should be challenged in surprise post (if miner has fewer, will get dup challenges)
 const SURPRISE_CHALLENGE_COUNT = 200 // placeholder
 // how long miner has to respond to the challenge before it expires
-const CHALLENGE_DURATION = block.ChainEpoch(0) // placeholder, 2 hours
+const CHALLENGE_DURATION = actors.ChainEpoch(0) // placeholder, 2 hours
 // number of detected faults before a miner's sectors are all terminated
 const MAX_CONSECUTIVE_FAULTS = 3
 
 // Time between when a temporary sector fault is declared, and when it becomes
 // effective for purposes of reducing the active proving set for PoSts.
-const DECLARED_FAULT_EFFECTIVE_DELAY = block.ChainEpoch(20) // placeholder
+const DECLARED_FAULT_EFFECTIVE_DELAY = actors.ChainEpoch(20) // placeholder
 
 const EPOST_SAMPLE_RATE_NUM = 1    // placeholder
 const EPOST_SAMPLE_RATE_DENOM = 25 // placeholder

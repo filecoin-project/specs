@@ -8,7 +8,6 @@ import (
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
@@ -88,9 +87,9 @@ func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Addres
 	newTable, ok := autil.BalanceTable_WithNewAddressEntry(st.EscrowTable(), newMinerAddr, rt.ValueReceived())
 	Assert(ok)
 	st.Impl().EscrowTable_ = newTable
-	st.PowerTable()[newMinerAddr] = block.StoragePower(0)
-	st.ClaimedPower()[newMinerAddr] = block.StoragePower(0)
-	st.NominalPower()[newMinerAddr] = block.StoragePower(0)
+	st.PowerTable()[newMinerAddr] = actors.StoragePower(0)
+	st.ClaimedPower()[newMinerAddr] = actors.StoragePower(0)
+	st.NominalPower()[newMinerAddr] = actors.StoragePower(0)
 	UpdateRelease(rt, h, st)
 
 	return newMinerAddr
@@ -190,7 +189,7 @@ func (a *StoragePowerActorCode_I) OnMinerSurprisePoStFailure(rt Runtime, numCons
 	}
 }
 
-func (a *StoragePowerActorCode_I) ReportVerifiedConsensusFault(rt Runtime, slasheeAddr addr.Address, faultEpoch block.ChainEpoch, faultType ConsensusFaultType) {
+func (a *StoragePowerActorCode_I) ReportVerifiedConsensusFault(rt Runtime, slasheeAddr addr.Address, faultEpoch actors.ChainEpoch, faultType ConsensusFaultType) {
 	TODO()
 	panic("")
 	// TODO: The semantics here are quite delicate:
@@ -263,7 +262,7 @@ func (a *StoragePowerActorCode_I) Constructor(rt Runtime) {
 	h := rt.AcquireState()
 
 	st := &StoragePowerActorState_I{
-		TotalNetworkPower_:        block.StoragePower(0),
+		TotalNetworkPower_:        actors.StoragePower(0),
 		PowerTable_:               PowerTableHAMT_Empty(),
 		EscrowTable_:              autil.BalanceTableHAMT_Empty(),
 		CachedDeferredCronEvents_: MinerEventsHAMT_Empty(),

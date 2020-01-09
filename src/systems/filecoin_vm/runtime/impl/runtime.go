@@ -9,7 +9,6 @@ import (
 	initact "github.com/filecoin-project/specs/actors/builtin/init"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
@@ -636,13 +635,13 @@ func (rt *VMContext) ValueReceived() actors.TokenAmount {
 	return rt._valueReceived
 }
 
-func (rt *VMContext) Randomness(tag filcrypto.DomainSeparationTag, epoch block.ChainEpoch) util.Randomness {
+func (rt *VMContext) Randomness(tag filcrypto.DomainSeparationTag, epoch actors.ChainEpoch) util.Randomness {
 	IMPL_TODO()
 	panic("")
 }
 
 func (rt *VMContext) RandomnessWithAuxSeed(
-	tag filcrypto.DomainSeparationTag, epoch block.ChainEpoch, auxSeed util.Serialization) util.Randomness {
+	tag filcrypto.DomainSeparationTag, epoch actors.ChainEpoch, auxSeed util.Serialization) util.Randomness {
 
 	IMPL_TODO()
 	panic("")
@@ -678,7 +677,7 @@ func (rt *VMContext) IpldGet(c ipld.CID, o ipld.Object) bool {
 	return ok
 }
 
-func (rt *VMContext) CurrEpoch() block.ChainEpoch {
+func (rt *VMContext) CurrEpoch() actors.ChainEpoch {
 	IMPL_FINISH()
 	panic("")
 }

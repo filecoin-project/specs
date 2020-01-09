@@ -3,7 +3,6 @@ package indices
 import (
 	actors "github.com/filecoin-project/specs/actors"
 	actor_util "github.com/filecoin-project/specs/actors/util"
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -27,20 +26,20 @@ func StorageDeal_ProviderInitTimedOutSlashAmount(deal deal.OnChainDeal) actors.T
 
 func (inds *Indices_I) StorageDeal_DurationBounds(
 	pieceSize piece.PieceSize,
-	startEpoch block.ChainEpoch,
-) (minDuration block.ChainEpoch, maxDuration block.ChainEpoch) {
+	startEpoch actors.ChainEpoch,
+) (minDuration actors.ChainEpoch, maxDuration actors.ChainEpoch) {
 
 	// placeholder
 	PARAM_FINISH()
-	minDuration = block.ChainEpoch(0)
-	maxDuration = block.ChainEpoch(1 << 20)
+	minDuration = actors.ChainEpoch(0)
+	maxDuration = actors.ChainEpoch(1 << 20)
 	return
 }
 
 func (inds *Indices_I) StorageDeal_StoragePricePerEpochBounds(
 	pieceSize piece.PieceSize,
-	startEpoch block.ChainEpoch,
-	endEpoch block.ChainEpoch,
+	startEpoch actors.ChainEpoch,
+	endEpoch actors.ChainEpoch,
 ) (minPrice actors.TokenAmount, maxPrice actors.TokenAmount) {
 
 	// placeholder
@@ -50,8 +49,8 @@ func (inds *Indices_I) StorageDeal_StoragePricePerEpochBounds(
 
 func (inds *Indices_I) StorageDeal_ProviderCollateralBounds(
 	pieceSize piece.PieceSize,
-	startEpoch block.ChainEpoch,
-	endEpoch block.ChainEpoch,
+	startEpoch actors.ChainEpoch,
+	endEpoch actors.ChainEpoch,
 ) (minProviderCollateral actors.TokenAmount, maxProviderCollateral actors.TokenAmount) {
 
 	// placeholder
@@ -61,8 +60,8 @@ func (inds *Indices_I) StorageDeal_ProviderCollateralBounds(
 
 func (inds *Indices_I) StorageDeal_ClientCollateralBounds(
 	pieceSize piece.PieceSize,
-	startEpoch block.ChainEpoch,
-	endEpoch block.ChainEpoch,
+	startEpoch actors.ChainEpoch,
+	endEpoch actors.ChainEpoch,
 ) (minClientCollateral actors.TokenAmount, maxClientCollateral actors.TokenAmount) {
 
 	// placeholder
@@ -72,22 +71,22 @@ func (inds *Indices_I) StorageDeal_ClientCollateralBounds(
 
 func (inds *Indices_I) SectorWeight(
 	sectorSize sector.SectorSize,
-	startEpoch block.ChainEpoch,
-	endEpoch block.ChainEpoch,
+	startEpoch actors.ChainEpoch,
+	endEpoch actors.ChainEpoch,
 	dealWeight deal.DealWeight,
-) block.SectorWeight {
+) actors.SectorWeight {
 	// for every sector, given its size, start, end, and deals within the sector
 	// assign sector power for the duration of its lifetime
 	PARAM_FINISH()
 	panic("")
 }
 
-func (inds *Indices_I) PledgeCollateralReq(minerNominalPower block.StoragePower) actors.TokenAmount {
+func (inds *Indices_I) PledgeCollateralReq(minerNominalPower actors.StoragePower) actors.TokenAmount {
 	PARAM_FINISH()
 	panic("")
 }
 
-func (inds *Indices_I) SectorWeightProportion(minerActiveSectorWeight block.SectorWeight) util.BigInt {
+func (inds *Indices_I) SectorWeightProportion(minerActiveSectorWeight actors.SectorWeight) util.BigInt {
 	// return proportion of SectorWeight for miner
 	PARAM_FINISH()
 	panic("")
@@ -100,10 +99,10 @@ func (inds *Indices_I) PledgeCollateralProportion(minerPledgeCollateral actors.T
 }
 
 func (inds *Indices_I) StoragePower(
-	minerActiveSectorWeight block.SectorWeight,
-	minerInactiveSectorWeight block.SectorWeight,
+	minerActiveSectorWeight actors.SectorWeight,
+	minerInactiveSectorWeight actors.SectorWeight,
 	minerPledgeCollateral actors.TokenAmount,
-) block.StoragePower {
+) actors.StoragePower {
 	// return StoragePower based on inputs
 	// StoragePower for miner = func(ActiveSectorWeight for miner, PledgeCollateral for miner, global indices)
 	PARAM_FINISH()
@@ -111,7 +110,7 @@ func (inds *Indices_I) StoragePower(
 }
 
 func (inds *Indices_I) StoragePowerProportion(
-	minerStoragePower block.StoragePower,
+	minerStoragePower actors.StoragePower,
 ) util.BigInt {
 	PARAM_FINISH()
 	panic("")
@@ -126,7 +125,7 @@ func (inds *Indices_I) CurrEpochBlockReward() actors.TokenAmount {
 }
 
 func (inds *Indices_I) GetCurrBlockRewardRewardForMiner(
-	minerStoragePower block.StoragePower,
+	minerStoragePower actors.StoragePower,
 	minerPledgeCollateral actors.TokenAmount,
 	// TODO extend or eliminate
 ) actors.TokenAmount {
@@ -145,7 +144,7 @@ func (inds *Indices_I) StoragePower_PledgeSlashForSectorTermination(
 
 // DetectedFault
 func (inds *Indices_I) StoragePower_PledgeSlashForSurprisePoStFailure(
-	minerClaimedPower block.StoragePower,
+	minerClaimedPower actors.StoragePower,
 	numConsecutiveFailures int,
 ) actors.TokenAmount {
 	PARAM_FINISH()
@@ -154,7 +153,7 @@ func (inds *Indices_I) StoragePower_PledgeSlashForSurprisePoStFailure(
 
 func (inds *Indices_I) StorageMining_PreCommitDeposit(
 	sectorSize sector.SectorSize,
-	expirationEpoch block.ChainEpoch,
+	expirationEpoch actors.ChainEpoch,
 ) actors.TokenAmount {
 	PARAM_FINISH()
 	panic("")
@@ -162,7 +161,7 @@ func (inds *Indices_I) StorageMining_PreCommitDeposit(
 
 func (inds *Indices_I) StorageMining_TemporaryFaultFee(
 	storageWeightDescs []actor_util.SectorStorageWeightDesc,
-	duration block.ChainEpoch,
+	duration actors.ChainEpoch,
 ) actors.TokenAmount {
 	PARAM_FINISH()
 	panic("")
@@ -178,22 +177,22 @@ func (inds *Indices_I) NetworkTransactionFee(
 
 func ConsensusPowerForStorageWeight(
 	storageWeightDesc actor_util.SectorStorageWeightDesc,
-) block.StoragePower {
+) actors.StoragePower {
 	PARAM_FINISH()
 	panic("")
 }
 
-func StoragePower_ConsensusMinMinerPower() block.StoragePower {
+func StoragePower_ConsensusMinMinerPower() actors.StoragePower {
 	PARAM_FINISH()
 	panic("")
 }
 
-func StorageMining_PoStNoChallengePeriod() block.ChainEpoch {
+func StorageMining_PoStNoChallengePeriod() actors.ChainEpoch {
 	PARAM_FINISH()
 	panic("")
 }
 
-func StorageMining_SurprisePoStProvingPeriod() block.ChainEpoch {
+func StorageMining_SurprisePoStProvingPeriod() actors.ChainEpoch {
 	PARAM_FINISH()
 	panic("")
 }
@@ -203,7 +202,7 @@ func StoragePower_SurprisePoStMaxConsecutiveFailures() int {
 	panic("")
 }
 
-func StorageMining_DeclaredFaultEffectiveDelay() block.ChainEpoch {
+func StorageMining_DeclaredFaultEffectiveDelay() actors.ChainEpoch {
 	PARAM_FINISH()
 	panic("")
 }

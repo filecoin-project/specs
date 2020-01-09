@@ -1,12 +1,13 @@
+import actors "github.com/filecoin-project/specs/actors"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
 type Chain struct {
     HeadTipset Tipset
 
-    TipsetAtEpoch(epoch block.ChainEpoch) Tipset
-    RandomnessAtEpoch(epoch block.ChainEpoch) Bytes
+    TipsetAtEpoch(epoch actors.ChainEpoch) Tipset
+    RandomnessAtEpoch(epoch actors.ChainEpoch) Bytes
 
-    LatestCheckpoint() block.ChainEpoch
+    LatestCheckpoint() actors.ChainEpoch
 }
 
 // Checkpoint represents a particular block to use as a trust anchor

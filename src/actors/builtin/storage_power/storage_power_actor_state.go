@@ -6,15 +6,13 @@ import (
 	actors "github.com/filecoin-project/specs/actors"
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
-	util "github.com/filecoin-project/specs/util"
 )
 
-func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(minerPower block.StoragePower) bool {
+func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(minerPower actors.StoragePower) bool {
 	IMPL_TODO() // import from consts
-	MIN_MINER_SIZE_STOR := block.StoragePower(0)
+	MIN_MINER_SIZE_STOR := actors.StoragePower(0)
 	MIN_MINER_SIZE_TARG := 0
 
 	// if miner is larger than min power requirement, we're set
@@ -34,7 +32,7 @@ func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(mine
 	}
 
 	// get size of MIN_MINER_SIZE_TARGth largest miner
-	minerSizes := make([]block.StoragePower, 0, len(st.PowerTable()))
+	minerSizes := make([]actors.StoragePower, 0, len(st.PowerTable()))
 	for _, v := range st.PowerTable() {
 		minerSizes = append(minerSizes, v)
 	}
@@ -69,7 +67,7 @@ func addrInArray(a addr.Address, list []addr.Address) bool {
 }
 
 // _selectMinersToSurprise implements the PoSt-Surprise sampling algorithm
-func (st *StoragePowerActorState_I) _selectMinersToSurprise(challengeCount int, randomness util.Randomness) []addr.Address {
+func (st *StoragePowerActorState_I) _selectMinersToSurprise(challengeCount int, randomness actors.Randomness) []addr.Address {
 	// this wont quite work -- a.PowerTable() is a HAMT by actor address, doesn't
 	// support enumerating by int index. maybe we need that as an interface too,
 	// or something similar to an iterator (or iterator over the keys)
@@ -100,11 +98,11 @@ func (st *StoragePowerActorState_I) _selectMinersToSurprise(challengeCount int, 
 }
 
 func (st *StoragePowerActorState_I) _getPowerTotalForMiner(minerAddr addr.Address) (
-	power block.StoragePower, ok bool) {
+	power actors.StoragePower, ok bool) {
 
 	minerPower, found := st.PowerTable()[minerAddr]
 	if !found {
-		return block.StoragePower(0), found
+		return actors.StoragePower(0), found
 	}
 
 	return minerPower, true
@@ -169,12 +167,12 @@ func (st *StoragePowerActorState_I) _updatePowerEntriesFromClaimedPower(minerAdd
 	st._setPowerEntryInternal(minerAddr, power)
 }
 
-func (st *StoragePowerActorState_I) _setClaimedPowerEntryInternal(minerAddr addr.Address, updatedMinerClaimedPower block.StoragePower) {
+func (st *StoragePowerActorState_I) _setClaimedPowerEntryInternal(minerAddr addr.Address, updatedMinerClaimedPower actors.StoragePower) {
 	Assert(updatedMinerClaimedPower >= 0)
 	st.Impl().ClaimedPower_[minerAddr] = updatedMinerClaimedPower
 }
 
-func (st *StoragePowerActorState_I) _setNominalPowerEntryInternal(minerAddr addr.Address, updatedMinerNominalPower block.StoragePower) {
+func (st *StoragePowerActorState_I) _setNominalPowerEntryInternal(minerAddr addr.Address, updatedMinerNominalPower actors.StoragePower) {
 	Assert(updatedMinerNominalPower >= 0)
 	prevMinerNominalPower, ok := st.NominalPower()[minerAddr]
 	Assert(ok)
@@ -188,7 +186,7 @@ func (st *StoragePowerActorState_I) _setNominalPowerEntryInternal(minerAddr addr
 	}
 }
 
-func (st *StoragePowerActorState_I) _setPowerEntryInternal(minerAddr addr.Address, updatedMinerPower block.StoragePower) {
+func (st *StoragePowerActorState_I) _setPowerEntryInternal(minerAddr addr.Address, updatedMinerPower actors.StoragePower) {
 	Assert(updatedMinerPower >= 0)
 	prevMinerPower, ok := st.PowerTable()[minerAddr]
 	Assert(ok)
@@ -198,7 +196,6 @@ func (st *StoragePowerActorState_I) _setPowerEntryInternal(minerAddr addr.Addres
 
 func (st *StoragePowerActorState_I) _getPledgeSlashForConsensusFault(currPledge actors.TokenAmount, faultType ConsensusFaultType) actors.TokenAmount {
 	// default is to slash all pledge collateral for all consensus fault
-	util.PARAM_FINISH()
 	TODO()
 	switch faultType {
 	case DoubleForkMiningFault:
@@ -212,7 +209,7 @@ func (st *StoragePowerActorState_I) _getPledgeSlashForConsensusFault(currPledge 
 	}
 }
 
-func _getConsensusFaultSlasherReward(elapsedEpoch block.ChainEpoch, collateralToSlash actors.TokenAmount) actors.TokenAmount {
+func _getConsensusFaultSlasherReward(elapsedEpoch actors.ChainEpoch, collateralToSlash actors.TokenAmount) actors.TokenAmount {
 	TODO()
 	// BigInt Operation
 	// var growthRate = node_base.SLASHER_SHARE_GROWTH_RATE_NUM / node_base.SLASHER_SHARE_GROWTH_RATE_DENOM

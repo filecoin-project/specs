@@ -260,7 +260,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 
 	// 1. Verify miner has enough power (includes implicit checks on min miner size
 	// and challenge status via SPA's power table).
-	if pow == block.StoragePower(0) {
+	if pow == actors.StoragePower(0) {
 		return false
 	}
 

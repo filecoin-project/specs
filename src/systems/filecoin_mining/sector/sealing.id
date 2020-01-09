@@ -1,7 +1,7 @@
+import actors "github.com/filecoin-project/specs/actors"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
 type Path struct {}  // TODO
 
@@ -36,8 +36,8 @@ type SealVerifyInfo struct {
 // data stored on the state tree for each sector.
 type OnChainSealVerifyInfo struct {
     SealedCID         SealedSectorCID  // CommR
-    SealEpoch         block.ChainEpoch
-    InteractiveEpoch  block.ChainEpoch
+    SealEpoch         actors.ChainEpoch
+    InteractiveEpoch  actors.ChainEpoch
     Proof             SealProof
     DealIDs           deal.DealIDs
     SectorNumber
@@ -48,22 +48,22 @@ type OnChainSealVerifyInfo struct {
 type SealCommitment struct {
     SealedCID   SealedSectorCID  // CommR
     DealIDs     deal.DealIDs
-    Expiration  block.ChainEpoch
+    Expiration  actors.ChainEpoch
 }
 
 type SectorPreCommitInfo struct {
     SectorNumber
     SealedCID     SealedSectorCID  // CommR
-    SealEpoch     block.ChainEpoch
+    SealEpoch     actors.ChainEpoch
     DealIDs       deal.DealIDs
-    Expiration    block.ChainEpoch
+    Expiration    actors.ChainEpoch
 }
 
 type SectorProveCommitInfo struct {
     SectorNumber
     Proof             SealProof
-    InteractiveEpoch  block.ChainEpoch
-    Expiration        block.ChainEpoch
+    InteractiveEpoch  actors.ChainEpoch
+    Expiration        actors.ChainEpoch
 }
 
 // PersistentProofAux is meta data required to generate certain proofs

@@ -1,6 +1,6 @@
+import actors "github.com/filecoin-project/specs/actors"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
 type UInt64 UInt
 
@@ -10,7 +10,7 @@ type UInt64 UInt
 // - "blockchain/builtins" or something like that - a component in the blockchain that handles storage verification
 type PoStSubmission struct {
     PostProof   sector.PoStProof
-    ChainEpoch  block.ChainEpoch
+    ChainEpoch  actors.ChainEpoch
 }
 
 type PoStGenerator struct {
