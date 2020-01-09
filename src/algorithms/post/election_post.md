@@ -5,6 +5,7 @@ title: Election PoSt
 This document describes Election-PoSt, the Proof-of-Spacetime used in Filecoin.
 
 At a high-level it marries `ElectionPoSt` with a `SurprisePoSt` fallback:
+
 - By coupling leader election and PoSt, `ElectionPoSt` ensures that miners must do the work to prove their sectors at every round in order to earn block rewards.
 - Small miners may not win on a regular basis however, `SurprisePoSt` thus comes in as a lower-bound to how often miners must PoSt and helps ensure the Power Table does not grow stale for its long-tail of smaller miners.
 

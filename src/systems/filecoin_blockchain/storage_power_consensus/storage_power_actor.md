@@ -46,6 +46,7 @@ Conversely, storage faults only lead to power loss once they are detected (up to
 Put another way, power accounting in the SPC is delayed between storage being proven or faulted, and power being updated in the power table (and so for leader election). This ensures fairness over time.
 
 The Miner lifecycle in the power table should be roughly as follows:
+
 - MinerRegistration: A new miner with an associated worker public key and address is registered on the power table by the storage mining subsystem, along with their associated sector size (there is only one per worker).
 - UpdatePower: These power increments and decrements are called by various storage actor (and must thus be verified by every full node on the network). Specifically:
     - Power is incremented to account for a new SectorCommitment at the first PoSt past the first ProvingPeriod.
@@ -65,5 +66,6 @@ Pledge collateral amount is committed based on power pledged to the system (i.e.
 Pledge Collateral will be slashed when {{<sref consensus_faults>}} are reported to the `StoragePowerActor`'s `ReportConsensusFault` method or when the `CronActor` calls the `StoragePowerActor`'s `ReportUncommittedPowerFault` method.
 
 Pledge Collateral is slashed for any fault affecting storage-power consensus, these include:
+
 - faults to expected consensus in particular (see {{<sref consensus_faults>}}) which will be reported by a slasher to the `StoragePowerActor` in exchange for a reward.
 - faults affecting consensus power more generally, specifically uncommitted power faults (i.e. {{<sref storage_faults>}}) which will be reported by the `CronActor` automatically.

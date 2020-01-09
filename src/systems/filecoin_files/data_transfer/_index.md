@@ -8,7 +8,7 @@ _Data Transfer_ is a system for transferring all or part of a `Piece` across the
 
 # Modules
 
-This diagram shows how Data Tranfer and its modules fit into the picture with the Storage and Retrieval Markets.
+This diagram shows how Data Transfer and its modules fit into the picture with the Storage and Retrieval Markets.
 In particular, note how the Data Transfer Request Validators from the markets are plugged into the Data Transfer module,
 but their code belongs in the Markets system.
 
