@@ -24,7 +24,7 @@ const epochUndefined = abi.ChainEpoch(-1)
 // Actor methods
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *StorageMinerActorCode_I) StageWorkerKeyChange(rt Runtime, key filcrypto.VRFPublicKey) (err error) {
+func (a *StorageMinerActorCode_I) StageWorkerKeyChange(rt Runtime, key filcrypto.VRFPublicKey) {
 	h, st := a.State(rt)
 	rt.ValidateImmediateCallerIs(st.Info().Owner())
 	autil.IMPL_TODO() // verify public key syntax
@@ -32,7 +32,7 @@ func (a *StorageMinerActorCode_I) StageWorkerKeyChange(rt Runtime, key filcrypto
 	keyAddr, err := addr.Address_Make_Key(node_base.NETWORK, addr.KeyHash(key))
 	if err != nil {
 		Release(rt, h, st)
-		return err
+		rt.AbortStateMsg("Could not make new key.")
 	}
 
 	keyChange := &MinerKeyChange_I{
@@ -46,11 +46,12 @@ func (a *StorageMinerActorCode_I) StageWorkerKeyChange(rt Runtime, key filcrypto
 	return nil
 }
 
-func (a *StorageMinerActorCode_I) CommitWorkerKeyChange(rt Runtime) (err error) {
+func (a *StorageMinerActorCode_I) CommitWorkerKeyChange(rt Runtime) {
 	h, st := a.State(rt)
+	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
 
 	if st.Info().PendingKeyChange() == nil {
-		return errors.New("No pending key change.")
+		rt.AbortStateMsg("No pending key change.")
 	}
 
 	// lazy updates to worker keys if at effectiveness
