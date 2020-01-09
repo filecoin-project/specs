@@ -36,7 +36,8 @@ A syntactically valid header must have:
 - `ElectionPoStOutput` containing:
    - a `Candidates` array with between 1 and `EC.ExpectedLeaders` values (inclusive),
    - a non-empty `PoStRandomness` field,
-   - a non-empty `Proof` field.
+   - a non-empty `Proof` field,
+- a non-empty `ForkSignal` field.
    
 A syntactically valid full block must have:
 

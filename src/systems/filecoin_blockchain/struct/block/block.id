@@ -26,6 +26,10 @@ type BlockHeader struct {
     Miner                  addr.Address
     ElectionPoStOutput     ElectionPoStVerifyInfo
 
+    // Fork Signal bitfield with bits used to advertise support for
+    // proposed forks and reset if fork is executed.
+    ForkSignal              uint64
+
     // Proposed update
     Messages               &TxMeta
     BLSAggregate           filcrypto.Signature
