@@ -48,7 +48,7 @@ make website
 
 ### Diagrams
 
-Install dependencies for digram making
+Install dependencies for diagram making
 ```
 make deps-diag
 ```
