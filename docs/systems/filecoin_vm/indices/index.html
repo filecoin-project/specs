@@ -1286,6 +1286,39 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_files__serialization" class="menu-item depth-3">
+    
+    
+        Formats and Serialization
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -1539,35 +1572,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#systems__filecoin_vm__runtime__exitcode" class="menu-item depth-4">
-    
-    
-        Exit Codes
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
     
     </li>
 
@@ -3958,7 +3962,7 @@ https://github.com/alex-shpak/hugo-book
 <a href="../../../../#algorithms__porep__stacked_drg_circuit" class="menu-item depth-3">
     
     
-        
+        Stacked DRG - Offline PoRep Circuit Spec
     
 </a>
 
@@ -4640,7 +4644,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
 <span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
@@ -4786,7 +4789,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">indices</span>
 
 <span class="kn">import</span> <span class="p">(</span>
@@ -4795,16 +4797,10 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 	<span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
 	<span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
-	<span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
 <span class="kd">var</span> <span class="nx">PARAM_FINISH</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">PARAM_FINISH</span>
-
-<span class="kd">func</span> <span class="nf">Indices_FromStateTree</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="nx">Indices</span> <span class="p">{</span>
-	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">StorageDeal_ProviderInitTimedOutSlashAmount</span><span class="p">(</span><span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 	<span class="c1">// placeholder

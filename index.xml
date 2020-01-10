@@ -11,16 +11,6 @@
     
     
     <item>
-      <title></title>
-      <link>/docs/algorithms/porep/stacked_drg_circuit/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/algorithms/porep/stacked_drg_circuit/</guid>
-      <description>Stacked DRG: Offline PoRep Circuit Spec Stacked DRG Overview Stacked DRG PoRep is based on layering DRG graphs LAYERS times. The data represented in each DRG layer is a labeling based on previously labeled nodes. The final labeled layer is the SDR key, and the &amp;lsquo;final layer&amp;rsquo; of replication the replica, an encoding of the original data using the generated key.
- ReplicaId is a unique replica identifier (see the Filecoin Proofs spec for details).</description>
-    </item>
-    
-    <item>
       <title>About this specification</title>
       <link>/docs/intro/process/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -35,7 +25,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_vm/sysactors/account_actor/</guid>
-      <description> import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; type AccountActorCode struct {} type AccountActorState struct { Address addr.Address }  package account import ( ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; ) type InvocOutput = vmr.InvocOutput func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput { // Nothing. intentionally left blank. 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr) return rt.SuccessReturn() } func (st *AccountActorState_I) CID() ipld.CID { panic(&amp;#34;TODO&amp;#34;) }  </description>
+      <description> import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; type AccountActorCode struct {} type AccountActorState struct { Address addr.Address }  package account import ( vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; ) type InvocOutput = vmr.InvocOutput func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput { // Nothing. intentionally left blank. 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr) return rt.SuccessReturn() } func (st *AccountActorState_I) CID() ipld.CID { panic(&amp;#34;TODO&amp;#34;) }  </description>
     </item>
     
     <item>
@@ -139,7 +129,7 @@ The response contains the requested chain in reverse iteration order.</descripti
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_vm/sysactors/cron_actor/</guid>
-      <description>import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type CronActorState struct { // Cron has no internal state } type CronTableEntry struct { ToAddr addr.Address MethodNum abi.MethodNum } type CronActorCode struct { // Entries is a set of actors (and corresponding methods) to call during EpochTick.  // This can be done a bunch of ways. We do it this way here to make it easy to add  // a handler to Cron elsewhere in the spec code.</description>
+      <description>import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; type CronActorState struct { // Cron has no internal state } type CronTableEntry struct { ToAddr addr.Address MethodNum abi.MethodNum } type CronActorCode struct { // Entries is a set of actors (and corresponding methods) to call during EpochTick.  // This can be done a bunch of ways. We do it this way here to make it easy to add  // a handler to Cron elsewhere in the spec code.</description>
     </item>
     
     <item>
@@ -179,7 +169,8 @@ Format The format consists of a header, followed by a series of blocks, of which
       
       <guid>/docs/algorithms/post/election_post/</guid>
       <description>This document describes Election-PoSt, the Proof-of-Spacetime used in Filecoin.
-At a high-level it marries ElectionPoSt with a SurprisePoSt fallback: - By coupling leader election and PoSt, ElectionPoSt ensures that miners must do the work to prove their sectors at every round in order to earn block rewards. - Small miners may not win on a regular basis however, SurprisePoSt thus comes in as a lower-bound to how often miners must PoSt and helps ensure the Power Table does not grow stale for its long-tail of smaller miners.</description>
+At a high-level it marries ElectionPoSt with a SurprisePoSt fallback:
+ By coupling leader election and PoSt, ElectionPoSt ensures that miners must do the work to prove their sectors at every round in order to earn block rewards. Small miners may not win on a regular basis however, SurprisePoSt thus comes in as a lower-bound to how often miners must PoSt and helps ensure the Power Table does not grow stale for its long-tail of smaller miners.</description>
     </item>
     
     <item>
@@ -343,7 +334,7 @@ All Systems, as defined in this document, require the following:
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_vm/sysactors/init_actor/</guid>
-      <description>import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: addr.ActorID} NextID addr.ActorID NetworkName string // Allocates a new ID and maps another address to it. Returns the ID-address.  MapAddressToNewID(address addr.Address) addr.Address // Resolves an address to an ID-address, if possible. Returns the argument if un-mapped.  ResolveAddress(address addr.Address) addr.Address } type InitActorCode struct { Constructor(r vmr.</description>
+      <description>import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: addr.ActorID} NextID addr.ActorID NetworkName string // Allocates a new ID and maps another address to it. Returns the ID-address.  MapAddressToNewID(address addr.Address) addr.Address // Resolves an address to an ID-address, if possible. Returns the argument if un-mapped.  ResolveAddress(address addr.Address) addr.Address } type InitActorCode struct { Constructor(r vmr.</description>
     </item>
     
     <item>
@@ -489,7 +480,8 @@ import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; t
       
       <guid>/docs/algorithms/crypto/randomness/</guid>
       <description>Randomness is used throughout the protocol in order to generate values and extend the blockchain. Random values are drawn from the Ticket Chain and appropriately formatted for usage. We describe this formatting below.
-Encoding On-chain data for randomness Any randomness derived from on-chain values uses the following encodings to represent these values as bytes - Bytes: Bytes - Ints: Little endian uint64 representation - Strings: ASCII - Objects: Their specified Serialization, currently CBOR-based serialization defined on algebraic datatypes</description>
+Encoding On-chain data for randomness Any randomness derived from on-chain values uses the following encodings to represent these values as bytes:
+ Bytes: Bytes Ints: Big-endian uint64 representation Strings: ASCII Objects: Their specified Serialization, currently CBOR-based serialization defined on algebraic datatypes  Domain Separation Tags For Signatures as well as Verifiable Random Function usage in the protocol, we define Domain Separation Tags with which we prepend random inputs.</description>
     </item>
     
     <item>
@@ -644,6 +636,16 @@ type Node struct { height Int items [Item] } representation tuple  Item may be e
       <guid>/docs/algorithms/crypto/signatures/</guid>
       <description>Signatures are cryptographic functions that attest to the origin of a particular message. In the context of Filecoin, signatures are used to send and receive messages with the assurance that each message was generated by a specific entity. In other words, it is infeasible for an entity i to generate a signed message that appears to have been generated by j, with j != i.
 Filecoin uses signatures to associate an action to a given party.</description>
+    </item>
+    
+    <item>
+      <title>Stacked DRG - Offline PoRep Circuit Spec</title>
+      <link>/docs/algorithms/porep/stacked_drg_circuit/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/algorithms/porep/stacked_drg_circuit/</guid>
+      <description>Stacked DRG Overview Stacked DRG PoRep is based on layering DRG graphs LAYERS times. The data represented in each DRG layer is a labeling based on previously labeled nodes. The final labeled layer is the SDR key, and the &amp;lsquo;final layer&amp;rsquo; of replication the replica, an encoding of the original data using the generated key.
+ ReplicaId is a unique replica identifier (see the Filecoin Proofs spec for details). CommD is the Merkle tree root hash of the input data to the first layer.</description>
     </item>
     
     <item>

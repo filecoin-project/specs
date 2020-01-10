@@ -1286,6 +1286,39 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_files__serialization" class="menu-item depth-3">
+    
+    
+        Formats and Serialization
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -1539,35 +1572,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#systems__filecoin_vm__runtime__exitcode" class="menu-item depth-4">
-    
-    
-        Exit Codes
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
     
     </li>
 
@@ -3958,7 +3962,7 @@ https://github.com/alex-shpak/hugo-book
 <a href="../../../../../#algorithms__porep__stacked_drg_circuit" class="menu-item depth-3">
     
     
-        
+        Stacked DRG - Offline PoRep Circuit Spec
     
 </a>
 
@@ -4677,10 +4681,13 @@ https://github.com/alex-shpak/hugo-book
 
 </p>
 
-<p>Filecoin storage miners rely on three main components:
-- <strong>The miner address</strong> uniquely assigned to a given storage miner actor upon calling <code>registerMiner()</code> in the Storage Power Consensus Subsystem. It is a unique identifier for a given storage miner to which its power and other keys will be associated.
-- <strong>The owner keypair</strong> is provided by the miner ahead of registration and its public key associated to the miner address. Block rewards and other payments are made to the ownerAddress.
-- <strong>The worker keypair</strong> can be chosen and changed by the miner, its public key associated to the miner address. It is used to sign transactions, signatures, etc.</p>
+<p>Filecoin storage miners rely on three main components:</p>
+
+<ul>
+<li><strong>The miner address</strong> uniquely assigned to a given storage miner actor upon calling <code>registerMiner()</code> in the Storage Power Consensus Subsystem. It is a unique identifier for a given storage miner to which its power and other keys will be associated.</li>
+<li><strong>The owner keypair</strong> is provided by the miner ahead of registration and its public key associated to the miner address. Block rewards and other payments are made to the ownerAddress.</li>
+<li><strong>The worker keypair</strong> can be chosen and changed by the miner, its public key associated to the miner address. It is used to sign transactions, signatures, etc.</li>
+</ul>
 
 <p>While miner addresses are unique, multiple storage miner actors can share an owner public key or likewise a worker public key.</p>
 

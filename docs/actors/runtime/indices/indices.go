@@ -6,16 +6,10 @@ import (
 	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
 )
 
 var PARAM_FINISH = util.PARAM_FINISH
-
-func Indices_FromStateTree(tree st.StateTree) Indices {
-	PARAM_FINISH()
-	panic("")
-}
 
 func StorageDeal_ProviderInitTimedOutSlashAmount(deal deal.OnChainDeal) abi.TokenAmount {
 	// placeholder

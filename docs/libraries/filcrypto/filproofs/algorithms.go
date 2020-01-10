@@ -1403,15 +1403,3 @@ func fromBytes_T(_ interface{}) util.T {
 func isPow2(n int) bool {
 	return n != 0 && n&(n-1) == 0
 }
-
-// FIXME: This does not belong in filproofs, and no effort is being made to ensure it has any particular properties.
-func RandomInt(randomness util.Randomness, nonce int, limit *big.Int) *big.Int {
-	nonceBytes := make([]byte, 8)
-	binary.LittleEndian.PutUint64(nonceBytes, uint64(nonce))
-	input := randomness
-	input = append(input, nonceBytes...)
-	ranHash := HashBytes_SHA256Hash(input[:])
-	hashInt := bigIntFromLittleEndianBytes(ranHash)
-	num := hashInt.Mod(hashInt, limit)
-	return num
-}

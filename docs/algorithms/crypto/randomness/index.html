@@ -1285,6 +1285,39 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_files__serialization" class="menu-item depth-3">
+    
+    
+        Formats and Serialization
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -1538,35 +1571,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#systems__filecoin_vm__runtime__exitcode" class="menu-item depth-4">
-    
-    
-        Exit Codes
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
     
     </li>
 
@@ -3957,7 +3961,7 @@ https://github.com/alex-shpak/hugo-book
 <a href="../../../../#algorithms__porep__stacked_drg_circuit" class="menu-item depth-3">
     
     
-        
+        Stacked DRG - Offline PoRep Circuit Spec
     
 </a>
 
@@ -4630,11 +4634,14 @@ We describe this formatting below.</p>
 
 <h2 id="encoding-on-chain-data-for-randomness">Encoding On-chain data for randomness</h2>
 
-<p>Any randomness derived from on-chain values uses the following encodings to represent these values as bytes
-- <strong>Bytes</strong>: Bytes
-- <strong>Ints</strong>: Little endian uint64 representation
-- <strong>Strings</strong>: ASCII
-- <strong>Objects</strong>: Their specified Serialization, currently CBOR-based serialization defined on algebraic datatypes</p>
+<p>Any randomness derived from on-chain values uses the following encodings to represent these values as bytes:</p>
+
+<ul>
+<li><strong>Bytes</strong>: Bytes</li>
+<li><strong>Ints</strong>: Big-endian uint64 representation</li>
+<li><strong>Strings</strong>: ASCII</li>
+<li><strong>Objects</strong>: Their specified Serialization, currently CBOR-based serialization defined on algebraic datatypes</li>
+</ul>
 
 <h2 id="domain-separation-tags">Domain Separation Tags</h2>
 
@@ -4658,7 +4665,7 @@ We describe this formatting below.</p>
 <p>In all cases, a ticket is used as the base of randomness (see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a>). In order to make randomness seed creation uniform, the protocol derives all such seeds in the same way, as follows (also see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a>):</p>
 <div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">For a given randomness input object randInputObject (typically containing a random ticket from the chain and other elements such as an epoch or a miner actor address):
 buffer = Bytes{}
-buffer.append(IntToLittleEndianBytes(AppropriateDST))
+buffer.append(IntToBigEndianBytes(AppropriateDST))
 buffer.append(-1) // a flag to be used in cases where FIL might need longer randomness outputs. Currently unused
 buffer.append(CBOR_Serialization(randInputObj))
 
@@ -4716,8 +4723,8 @@ randomness = SHA256(buffer)</code></pre></div>
 
 <span class="kd">func</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">,</span> <span class="nx">s</span> <span class="nx">Serialization</span><span class="p">,</span> <span class="nx">index</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">Randomness</span> <span class="p">{</span>
     <span class="nx">buffer</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">{}</span>
-    <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nf">LittleEndianBytesFromInt</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">tag</span><span class="p">))</span><span class="o">...</span><span class="p">)</span>
-    <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nf">LittleEndianBytesFromInt</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">index</span><span class="p">))</span><span class="o">...</span><span class="p">)</span>
+    <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nf">BigEndianBytesFromInt</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">tag</span><span class="p">))</span><span class="o">...</span><span class="p">)</span>
+    <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nf">BigEndianBytesFromInt</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">index</span><span class="p">))</span><span class="o">...</span><span class="p">)</span>
     <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span><span class="o">...</span><span class="p">)</span>
     <span class="nx">ret</span> <span class="o">:=</span> <span class="nf">SHA256</span><span class="p">(</span><span class="nx">buffer</span><span class="p">)</span>
     <span class="k">return</span> <span class="nf">Randomness</span><span class="p">(</span><span class="nx">ret</span><span class="p">)</span>

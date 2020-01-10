@@ -1286,6 +1286,39 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_files__serialization" class="menu-item depth-3">
+    
+    
+        Formats and Serialization
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -1539,35 +1572,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#systems__filecoin_vm__runtime__exitcode" class="menu-item depth-4">
-    
-    
-        Exit Codes
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
     
     </li>
 
@@ -3958,7 +3962,7 @@ https://github.com/alex-shpak/hugo-book
 <a href="../../../../../#algorithms__porep__stacked_drg_circuit" class="menu-item depth-3">
     
     
-        
+        Stacked DRG - Offline PoRep Circuit Spec
     
 </a>
 
@@ -4679,6 +4683,10 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">Miner</span>                  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
     <span class="nx">ElectionPoStOutput</span>     <span class="nx">ElectionPoStVerifyInfo</span>
 
+    <span class="c1">// Fork Signal bitfield with bits used to advertise support for
+</span><span class="c1"></span>    <span class="c1">// proposed forks and reset if fork is executed.
+</span><span class="c1"></span>    <span class="nx">ForkSignal</span>             <span class="kt">uint64</span>
+
     <span class="c1">// Proposed update
 </span><span class="c1"></span>    <span class="nx">Messages</span>               <span class="o">&amp;</span><span class="nx">TxMeta</span>
     <span class="nx">BLSAggregate</span>           <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span>
@@ -4795,9 +4803,10 @@ without reference to outside information such as the parent state tree.</p>
 <ul>
 <li>a <code>Candidates</code> array with between 1 and <code>EC.ExpectedLeaders</code> values (inclusive),</li>
 <li>a non-empty <code>PoStRandomness</code> field,</li>
-<li>a non-empty <code>Proof</code> field.
-<br /></li>
+<li>a non-empty <code>Proof</code> field,</li>
 </ul></li>
+<li>a non-empty <code>ForkSignal</code> field.
+<br /></li>
 </ul>
 
 <p>A syntactically valid full block must have:</p>

@@ -17,7 +17,8 @@
       
       <guid>/docs/algorithms/crypto/randomness/</guid>
       <description>Randomness is used throughout the protocol in order to generate values and extend the blockchain. Random values are drawn from the Ticket Chain and appropriately formatted for usage. We describe this formatting below.
-Encoding On-chain data for randomness Any randomness derived from on-chain values uses the following encodings to represent these values as bytes - Bytes: Bytes - Ints: Little endian uint64 representation - Strings: ASCII - Objects: Their specified Serialization, currently CBOR-based serialization defined on algebraic datatypes</description>
+Encoding On-chain data for randomness Any randomness derived from on-chain values uses the following encodings to represent these values as bytes:
+ Bytes: Bytes Ints: Big-endian uint64 representation Strings: ASCII Objects: Their specified Serialization, currently CBOR-based serialization defined on algebraic datatypes  Domain Separation Tags For Signatures as well as Verifiable Random Function usage in the protocol, we define Domain Separation Tags with which we prepend random inputs.</description>
     </item>
     
     <item>

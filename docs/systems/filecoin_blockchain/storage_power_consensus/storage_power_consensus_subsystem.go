@@ -5,6 +5,7 @@ import (
 
 	abi "github.com/filecoin-project/specs/actors/abi"
 	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
+	inds "github.com/filecoin-project/specs/actors/runtime/indices"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
@@ -12,7 +13,6 @@ import (
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	inds "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
 )

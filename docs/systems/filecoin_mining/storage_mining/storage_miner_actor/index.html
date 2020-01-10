@@ -1285,6 +1285,39 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_files__serialization" class="menu-item depth-3">
+    
+    
+        Formats and Serialization
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -1538,35 +1571,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#systems__filecoin_vm__runtime__exitcode" class="menu-item depth-4">
-    
-    
-        Exit Codes
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
     
     </li>
 
@@ -3957,7 +3961,7 @@ https://github.com/alex-shpak/hugo-book
 <a href="../../../../../#algorithms__porep__stacked_drg_circuit" class="menu-item depth-3">
     
     
-        
+        Stacked DRG - Offline PoRep Circuit Spec
     
 </a>
 
@@ -4781,12 +4785,12 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kn">import</span> <span class="p">(</span>
     <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
+    <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime/indices&#34;</span>
     <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
     <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
     <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
     <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-    <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/indices&#34;</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getSectorOnChainInfo</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">info</span> <span class="nx">SectorOnChainInfo</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
@@ -4945,6 +4949,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="s">&#34;math/big&#34;</span>
 
     <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
+    <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime/indices&#34;</span>
     <span class="nx">serde</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/serde&#34;</span>
     <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
     <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
@@ -4955,7 +4960,6 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
     <span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
-    <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/indices&#34;</span>
 <span class="p">)</span>
 
 <span class="kd">const</span> <span class="nx">epochUndefined</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
@@ -5556,6 +5560,15 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">Assert</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PoStState</span><span class="p">().</span><span class="nf">Is_Challenged</span><span class="p">())</span>
     <span class="nx">challengeEpoch</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">PoStState</span><span class="p">().</span><span class="nf">As_Challenged</span><span class="p">().</span><span class="nf">SurpriseChallengeEpoch</span><span class="p">()</span>
     <span class="nx">challengedSectors</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">PoStState</span><span class="p">().</span><span class="nf">As_Challenged</span><span class="p">().</span><span class="nf">ChallengedSectors</span><span class="p">()</span>
+
+    <span class="c1">// verify no duplicate tickets
+</span><span class="c1"></span>    <span class="nx">challengeIndices</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">uint64</span><span class="p">]</span><span class="kt">bool</span><span class="p">)</span>
+    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">tix</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">Candidates</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">challengeIndices</span><span class="p">[</span><span class="nx">tix</span><span class="p">.</span><span class="nf">ChallengeIndex</span><span class="p">()];</span> <span class="nx">ok</span> <span class="p">{</span>
+            <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Invalid Surprise PoSt. Duplicate ticket included.&#34;</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="nx">challengeIndices</span><span class="p">[</span><span class="nx">tix</span><span class="p">.</span><span class="nf">ChallengeIndex</span><span class="p">()]</span> <span class="p">=</span> <span class="kc">true</span>
+    <span class="p">}</span>
 
     <span class="nf">TODO</span><span class="p">(</span><span class="nx">challengedSectors</span><span class="p">)</span>
     <span class="c1">// TODO: Determine what should be the acceptance criterion for sector numbers

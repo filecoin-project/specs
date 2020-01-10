@@ -1286,6 +1286,39 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_files__serialization" class="menu-item depth-3">
+    
+    
+        Formats and Serialization
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -1539,35 +1572,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#systems__filecoin_vm__runtime__exitcode" class="menu-item depth-4">
-    
-    
-        Exit Codes
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
     
     </li>
 
@@ -3958,7 +3962,7 @@ https://github.com/alex-shpak/hugo-book
 <a href="../../../../#algorithms__porep__stacked_drg_circuit" class="menu-item depth-3">
     
     
-        
+        Stacked DRG - Offline PoRep Circuit Spec
     
 </a>
 
@@ -4755,7 +4759,7 @@ it will be created as an account actor.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 <span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
-<span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
+<span class="kn">import</span> <span class="nx">vmri</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/impl&#34;</span>
 <span class="kn">import</span> <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
 
 <span class="kd">type</span> <span class="nx">UInt64</span> <span class="nx">UInt</span>
@@ -4776,12 +4780,12 @@ it will be created as an account actor.</p>
 
 <span class="kd">type</span> <span class="nx">VMInterpreter</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Node</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">FilecoinNode</span>
-    <span class="nf">ApplyTipSetMessages</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="nx">TipSetMessages</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="p">[</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">]}</span>
+    <span class="nf">ApplyTipSetMessages</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="nx">TipSetMessages</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="p">[</span><span class="nx">vmri</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">]}</span>
     <span class="nf">ApplyMessage</span><span class="p">(</span>
         <span class="nx">inTree</span>     <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
         <span class="nx">msg</span>        <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span>
         <span class="nx">minerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">}</span>
+    <span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="nx">vmri</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4818,15 +4822,15 @@ it will be created as an account actor.</p>
 	<span class="nx">cronact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/cron&#34;</span>
 	<span class="nx">initact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/init&#34;</span>
 	<span class="nx">sminact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_miner&#34;</span>
+	<span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
+	<span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime/exitcode&#34;</span>
+	<span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime/indices&#34;</span>
 	<span class="nx">serde</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/serde&#34;</span>
 	<span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 	<span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 	<span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
-	<span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/indices&#34;</span>
 	<span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
-	<span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
-	<span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
 	<span class="nx">gascost</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost&#34;</span>
 	<span class="nx">vmri</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/impl&#34;</span>
 	<span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
@@ -4848,10 +4852,10 @@ it will be created as an account actor.</p>
 
 <span class="c1">// Applies all the message in a tipset, along with implicit block- and tipset-specific state
 </span><span class="c1">// transitions.
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyTipSetMessages</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="nx">TipSetMessages</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">receipts</span> <span class="p">[]</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyTipSetMessages</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="nx">TipSetMessages</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">receipts</span> <span class="p">[]</span><span class="nx">vmri</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">outTree</span> <span class="p">=</span> <span class="nx">inTree</span>
 	<span class="nx">seenMsgs</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">]</span><span class="kd">struct</span><span class="p">{})</span> <span class="c1">// CIDs of messages already seen once.
-</span><span class="c1"></span>	<span class="kd">var</span> <span class="nx">receipt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span>
+</span><span class="c1"></span>	<span class="kd">var</span> <span class="nx">receipt</span> <span class="nx">vmri</span><span class="p">.</span><span class="nx">MessageReceipt</span>
 	<span class="nx">store</span> <span class="o">:=</span> <span class="nx">vmi</span><span class="p">.</span><span class="nf">Node</span><span class="p">().</span><span class="nf">Repository</span><span class="p">().</span><span class="nf">StateStore</span><span class="p">()</span>
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">blk</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">msgs</span><span class="p">.</span><span class="nf">Blocks</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">()</span>
@@ -4906,7 +4910,7 @@ it will be created as an account actor.</p>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyMessage</span><span class="p">(</span>
 	<span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">onChainMessageSize</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">retTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">retReceipt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">,</span> <span class="nx">retMinerPenalty</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">retTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">retReceipt</span> <span class="nx">vmri</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">,</span> <span class="nx">retMinerPenalty</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="nx">store</span> <span class="o">:=</span> <span class="nx">vmi</span><span class="p">.</span><span class="nf">Node</span><span class="p">().</span><span class="nf">Repository</span><span class="p">().</span><span class="nf">StateStore</span><span class="p">()</span>
 	<span class="nx">senderAddr</span> <span class="o">:=</span> <span class="nf">_resolveSender</span><span class="p">(</span><span class="nx">store</span><span class="p">,</span> <span class="nx">inTree</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
@@ -4941,7 +4945,7 @@ it will be created as an account actor.</p>
 		<span class="p">}</span>
 
 		<span class="nx">retTree</span> <span class="p">=</span> <span class="nx">tree</span>
-		<span class="nx">retReceipt</span> <span class="p">=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">MessageReceipt_Make</span><span class="p">(</span><span class="nx">invocOutput</span><span class="p">,</span> <span class="nx">exitCode</span><span class="p">,</span> <span class="nx">vmiGasUsed</span><span class="p">)</span>
+		<span class="nx">retReceipt</span> <span class="p">=</span> <span class="nx">vmri</span><span class="p">.</span><span class="nf">MessageReceipt_Make</span><span class="p">(</span><span class="nx">invocOutput</span><span class="p">,</span> <span class="nx">exitCode</span><span class="p">,</span> <span class="nx">vmiGasUsed</span><span class="p">)</span>
 	<span class="p">}</span>
 
 	<span class="nx">_applyError</span> <span class="o">:=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">errExitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">SystemErrorCode</span><span class="p">,</span> <span class="nx">senderResolveSpec</span> <span class="nx">SenderResolveSpec</span><span class="p">)</span> <span class="p">{</span>
@@ -4992,7 +4996,7 @@ it will be created as an account actor.</p>
 
 	<span class="c1">// Check sender balance.
 </span><span class="c1"></span>	<span class="nx">gasLimitCost</span> <span class="o">:=</span> <span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(),</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">())</span>
-	<span class="nx">networkTxnFee</span> <span class="o">:=</span> <span class="nx">indices</span><span class="p">.</span><span class="nf">Indices_FromStateTree</span><span class="p">(</span><span class="nx">inTree</span><span class="p">).</span><span class="nf">NetworkTransactionFee</span><span class="p">(</span>
+	<span class="nx">networkTxnFee</span> <span class="o">:=</span> <span class="nf">indicesFromStateTree</span><span class="p">(</span><span class="nx">inTree</span><span class="p">).</span><span class="nf">NetworkTransactionFee</span><span class="p">(</span>
 		<span class="nx">inTree</span><span class="p">.</span><span class="nf">GetActorCodeID_Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">()),</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Method</span><span class="p">())</span>
 	<span class="nx">totalCost</span> <span class="o">:=</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Value</span><span class="p">()</span> <span class="o">+</span> <span class="nx">gasLimitCost</span> <span class="o">+</span> <span class="nx">networkTxnFee</span>
 	<span class="k">if</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">Balance</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">totalCost</span> <span class="p">{</span>
@@ -5014,12 +5018,12 @@ it will be created as an account actor.</p>
 	<span class="nx">invoc</span> <span class="o">:=</span> <span class="nf">_makeInvocInput</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span>
 	<span class="nx">sendRet</span><span class="p">,</span> <span class="nx">compTreePostSend</span> <span class="o">:=</span> <span class="nf">_applyMessageInternal</span><span class="p">(</span><span class="nx">store</span><span class="p">,</span> <span class="nx">compTreePreSend</span><span class="p">,</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">senderAddr</span><span class="p">,</span> <span class="nx">invoc</span><span class="p">,</span> <span class="nx">vmiGasRemaining</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
 
-	<span class="nx">ok</span> <span class="p">=</span> <span class="nf">_vmiBurnGas</span><span class="p">(</span><span class="nx">sendRet</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">())</span>
+	<span class="nx">ok</span> <span class="p">=</span> <span class="nf">_vmiBurnGas</span><span class="p">(</span><span class="nx">sendRet</span><span class="p">.</span><span class="nx">GasUsed</span><span class="p">)</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Interpreter error: runtime execution used more gas than provided&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 
-	<span class="nx">ok</span> <span class="p">=</span> <span class="nf">_vmiAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">OnChainReturnValue</span><span class="p">(</span><span class="nx">sendRet</span><span class="p">.</span><span class="nf">ReturnValue</span><span class="p">()))</span>
+	<span class="nx">ok</span> <span class="p">=</span> <span class="nf">_vmiAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">OnChainReturnValue</span><span class="p">(</span><span class="nx">sendRet</span><span class="p">.</span><span class="nx">ReturnValue</span><span class="p">))</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 		<span class="c1">// Insufficient gas remaining to cover the on-chain return value; proceed as in the case
 </span><span class="c1"></span>		<span class="c1">// of method execution failure.
@@ -5028,12 +5032,12 @@ it will be created as an account actor.</p>
 	<span class="p">}</span>
 
 	<span class="nx">compTreeRet</span> <span class="o">:=</span> <span class="nx">compTreePreSend</span>
-	<span class="k">if</span> <span class="nx">sendRet</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">().</span><span class="nf">AllowsStateUpdate</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">sendRet</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">.</span><span class="nf">AllowsStateUpdate</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nx">compTreeRet</span> <span class="p">=</span> <span class="nx">compTreePostSend</span>
 	<span class="p">}</span>
 
 	<span class="nf">_applyReturn</span><span class="p">(</span>
-		<span class="nx">compTreeRet</span><span class="p">,</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">sendRet</span><span class="p">.</span><span class="nf">ReturnValue</span><span class="p">()),</span> <span class="nx">sendRet</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">(),</span> <span class="nx">SenderResolveSpec_OK</span><span class="p">)</span>
+		<span class="nx">compTreeRet</span><span class="p">,</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">sendRet</span><span class="p">.</span><span class="nx">ReturnValue</span><span class="p">),</span> <span class="nx">sendRet</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">,</span> <span class="nx">SenderResolveSpec_OK</span><span class="p">)</span>
 	<span class="k">return</span>
 <span class="p">}</span>
 
@@ -5076,7 +5080,7 @@ it will be created as an account actor.</p>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="nx">invoc</span> <span class="o">:=</span> <span class="nf">_makeInvocInput</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span>
 	<span class="nx">retReceipt</span><span class="p">,</span> <span class="nx">retTree</span> <span class="o">:=</span> <span class="nf">_applyMessageInternal</span><span class="p">(</span><span class="nx">store</span><span class="p">,</span> <span class="nx">tree</span><span class="p">,</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">senderAddr</span><span class="p">,</span> <span class="nx">invoc</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
-	<span class="k">if</span> <span class="nx">retReceipt</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">retReceipt</span><span class="p">.</span><span class="nx">ExitCode</span> <span class="o">!=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;internal message application failed&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 
@@ -5084,7 +5088,7 @@ it will be created as an account actor.</p>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_applyMessageInternal</span><span class="p">(</span><span class="nx">store</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">GraphStore</span><span class="p">,</span> <span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">sender</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span><span class="p">,</span> <span class="nx">senderAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">invoc</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">,</span>
-	<span class="nx">gasRemainingInit</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">topLevelBlockWinner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">,</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">gasRemainingInit</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">topLevelBlockWinner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmri</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">,</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="nx">rt</span> <span class="o">:=</span> <span class="nx">vmri</span><span class="p">.</span><span class="nf">VMContext_Make</span><span class="p">(</span>
 		<span class="nx">store</span><span class="p">,</span>
@@ -5109,6 +5113,11 @@ it will be created as an account actor.</p>
 	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="nx">retTree</span>
 	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">indicesFromStateTree</span><span class="p">(</span><span class="nx">st</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="nx">indices</span><span class="p">.</span><span class="nx">Indices</span> <span class="p">{</span>
+	<span class="nf">TODO</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">gas</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">price</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
@@ -5213,7 +5222,7 @@ it will be created as an account actor.</p>
 <span class="kn">import</span> <span class="s">&#34;errors&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
-<span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
+<span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
 <span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin&#34;</span>
 <span class="kn">import</span> <span class="nx">accact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/account&#34;</span>

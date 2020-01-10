@@ -1285,6 +1285,39 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_files__serialization" class="menu-item depth-3">
+    
+    
+        Formats and Serialization
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -1538,35 +1571,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../#systems__filecoin_vm__runtime__exitcode" class="menu-item depth-4">
-    
-    
-        Exit Codes
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
     
     </li>
 
@@ -3957,7 +3961,7 @@ https://github.com/alex-shpak/hugo-book
 <a href="../../../#algorithms__porep__stacked_drg_circuit" class="menu-item depth-3">
     
     
-        
+        Stacked DRG - Offline PoRep Circuit Spec
     
 </a>
 
@@ -4643,13 +4647,16 @@ https://github.com/alex-shpak/hugo-book
 <h1 id="construction">Construction</h1>
 
 <p>The tree must not be sparse.
-Given an array of size <code>N</code> and a fixed width of <code>W</code>.
-- The left <code>floor(N/W)</code> leaves contain the first <code>N</code> items.
-- If <code>N % W != 0</code> the final leaf contains the final remainder.
-- The tree is perfectly balanced.
-- The height is the distance from the leaves, not the root.
-- Leaves (nodes with a height of 0) contain array values.
-- Inner nodes (nodes with height greater than zero) contain the cids of their child nodes.</p>
+Given an array of size <code>N</code> and a fixed width of <code>W</code>:</p>
+
+<ul>
+<li>The left <code>floor(N/W)</code> leaves contain the first <code>N</code> items.</li>
+<li>If <code>N % W != 0</code> the final leaf contains the final remainder.</li>
+<li>The tree is perfectly balanced.</li>
+<li>The height is the distance from the leaves, not the root.</li>
+<li>Leaves (nodes with a height of 0) contain array values.</li>
+<li>Inner nodes (nodes with height greater than zero) contain the cids of their child nodes.</li>
+</ul>
 
 <h1 id="operations">Operations</h1>
 

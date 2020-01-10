@@ -1285,6 +1285,39 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_files__serialization" class="menu-item depth-3">
+    
+    
+        Formats and Serialization
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -1538,35 +1571,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#systems__filecoin_vm__runtime__exitcode" class="menu-item depth-4">
-    
-    
-        Exit Codes
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
     
     </li>
 
@@ -3957,7 +3961,7 @@ https://github.com/alex-shpak/hugo-book
 <a href="../../../../#algorithms__porep__stacked_drg_circuit" class="menu-item depth-3">
     
     
-        
+        Stacked DRG - Offline PoRep Circuit Spec
     
 </a>
 
@@ -4624,9 +4628,12 @@ https://github.com/alex-shpak/hugo-book
 
 <p>This document describes Election-PoSt, the Proof-of-Spacetime used in Filecoin.</p>
 
-<p>At a high-level it marries <code>ElectionPoSt</code> with a <code>SurprisePoSt</code> fallback:
-- By coupling leader election and PoSt, <code>ElectionPoSt</code> ensures that miners must do the work to prove their sectors at every round in order to earn block rewards.
-- Small miners may not win on a regular basis however, <code>SurprisePoSt</code> thus comes in as a lower-bound to how often miners must PoSt and helps ensure the Power Table does not grow stale for its long-tail of smaller miners.</p>
+<p>At a high-level it marries <code>ElectionPoSt</code> with a <code>SurprisePoSt</code> fallback:</p>
+
+<ul>
+<li>By coupling leader election and PoSt, <code>ElectionPoSt</code> ensures that miners must do the work to prove their sectors at every round in order to earn block rewards.</li>
+<li>Small miners may not win on a regular basis however, <code>SurprisePoSt</code> thus comes in as a lower-bound to how often miners must PoSt and helps ensure the Power Table does not grow stale for its long-tail of smaller miners.</li>
+</ul>
 
 <h1 id="overview">Overview</h1>
 
@@ -4762,6 +4769,7 @@ return H(ChallengeTicket) / 2^len(H)</code></pre></div></li>
 
 <ul>
 <li>Prove that the PartialTicket were appropriately derived from the eligible sectors, by submitting all miner sectors along with the wanted number of tickets and verifying that the outputted PartialTicket match.</li>
+<li>Verify that no duplicate PartialTickets were submitted, that is there are no two tickets with the same <code>challengeIndex</code> (challengeIndices are unique across challenged sectors). Tickets challenging the same sector at different indices are valid).</li>
 </ul></li>
 
 <li><p><strong>Derive and validate the <code>ChallengeTicket</code> from the PartialTickets</strong></p>

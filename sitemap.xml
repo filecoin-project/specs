@@ -7,11 +7,6 @@
   </url>
   
   <url>
-    <loc>/docs/algorithms/porep/stacked_drg_circuit/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/docs/systems/filecoin_blockchain/</loc>
   </url>
   
@@ -129,6 +124,10 @@
   
   <url>
     <loc>/docs/algorithms/crypto/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_files/serialization/</loc>
   </url>
   
   <url>
@@ -504,6 +503,10 @@
   </url>
   
   <url>
+    <loc>/docs/algorithms/porep/stacked_drg_circuit/</loc>
+  </url>
+  
+  <url>
     <loc>/docs/algorithms/porep/porep_commitments/sdr_commitments/</loc>
   </url>
   
@@ -621,10 +624,6 @@
   
   <url>
     <loc>/docs/systems/filecoin_vm/actor/</loc>
-  </url>
-  
-  <url>
-    <loc>/docs/systems/filecoin_vm/runtime/exitcode/</loc>
   </url>
   
   <url>

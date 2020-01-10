@@ -11,13 +11,13 @@
     
     
     <item>
-      <title></title>
+      <title>Stacked DRG - Offline PoRep Circuit Spec</title>
       <link>/docs/algorithms/porep/stacked_drg_circuit/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/algorithms/porep/stacked_drg_circuit/</guid>
-      <description>Stacked DRG: Offline PoRep Circuit Spec Stacked DRG Overview Stacked DRG PoRep is based on layering DRG graphs LAYERS times. The data represented in each DRG layer is a labeling based on previously labeled nodes. The final labeled layer is the SDR key, and the &amp;lsquo;final layer&amp;rsquo; of replication the replica, an encoding of the original data using the generated key.
- ReplicaId is a unique replica identifier (see the Filecoin Proofs spec for details).</description>
+      <description>Stacked DRG Overview Stacked DRG PoRep is based on layering DRG graphs LAYERS times. The data represented in each DRG layer is a labeling based on previously labeled nodes. The final labeled layer is the SDR key, and the &amp;lsquo;final layer&amp;rsquo; of replication the replica, an encoding of the original data using the generated key.
+ ReplicaId is a unique replica identifier (see the Filecoin Proofs spec for details). CommD is the Merkle tree root hash of the input data to the first layer.</description>
     </item>
     
     <item>
