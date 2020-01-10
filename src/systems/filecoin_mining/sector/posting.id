@@ -1,11 +1,4 @@
-type PartialTicket Bytes  // 32 bytes
-type ChallengeTicketsCommitment Bytes
-type PoStRandomness Bytes
-
-// type PoStCfg struct {
-//     InstanceCfg PoStInstanceCfg
-//     ProofInstance
-// }
+import abi "github.com/filecoin-project/specs/actors/abi"
 
 // New proof ProofInstances can add new cfg types if needed.
 type PoStInstanceCfg union {
@@ -33,51 +26,6 @@ type PoStType enum {
     SurprisePoSt
 }
 
-// TODO: refactor these types to get rid of the squishy optional fields.
-type PoStVerifyInfo struct {
-    Randomness       PoStRandomness
-    CommR            SealedSectorCID
-    OnChain          OnChainPoStVerifyInfo
-    EligibleSectors  {SectorID: SealedSectorCID}
-}
-
-type PoStCandidate struct {
-    PartialTicket  // Optional —  will eventually be omitted for SurprisePoSt verification, needed for now.
-    PrivateProof    PrivatePoStCandidateProof  // Optional — should be ommitted for verification.
-    SectorID
-    ChallengeIndex  UInt
-}
-
-// implemented by both OnChainElectionPoStVerifyInfo and OnChainSurprisePoStVerifyInfo
-type OnChainPoStVerifyInfo interface {
-    Candidates()  [PoStCandidate]
-    Proofs()      [PoStProof]
-}
-
-type OnChainElectionPoStVerifyInfo struct {
-    // There should be one RegisteredProof for each PoSt Candi
-    RegisteredProofs  [RegisteredProof]
-    Candidates        [PoStCandidate]
-    Proofs            [PoStProof]
-    Randomness        PoStRandomness
-}
-
-type OnChainSurprisePoStVerifyInfo struct {
-    RegisteredProof
-    Candidates       [PoStCandidate]
-    Proofs           [PoStProof]
-    CommT            ChallengeTicketsCommitment
-}
-
 type PoStWitness struct {
-    Candidates [PoStCandidate]
-}
-
-type PoStProof struct {//<curve, system> {
-    ProofBytes Bytes
-}
-
-type PrivatePoStCandidateProof struct {
-    Algorithm     ProofAlgorithm
-    Externalized  Bytes
+    Candidates [abi.PoStCandidate]
 }

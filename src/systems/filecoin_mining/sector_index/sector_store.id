@@ -1,3 +1,4 @@
+import abi "github.com/filecoin-project/specs/actors/abi"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
@@ -13,27 +14,27 @@ type SectorStore struct {
     // GetSectorFile returns the file for a given sector id.
     // If the SectorID does not have any sector files associated yet, GetSectorFiles
     // returns an error.
-    GetSectorFiles(id sector.SectorID) union {f SectorFiles, err error}
+    GetSectorFiles(id abi.SectorID) union {f SectorFiles, err error}
 
-    GetSectorSealAlgorithm(id sector.SectorID) union {a sector.ProofAlgorithm, err error}
+    GetSectorSealAlgorithm(id abi.SectorID) union {a abi.ProofAlgorithm, err error}
 
     // TODO: This needs to be called when a sector is sealed with the algorithm that was used.
-    SetSectorSealAlgorithm(id sector.SectorID, a sector.ProofAlgorithm) error
+    SetSectorSealAlgorithm(id abi.SectorID, a abi.ProofAlgorithm) error
 
     // Get information, including a merkle tree file/path, needed to generate PoSt for a sector.
-    GetSectorPersistentProofAux(id sector.SectorID) sector.PersistentProofAux
+    GetSectorPersistentProofAux(id abi.SectorID) sector.PersistentProofAux
 
-    StoreSectorPersistentProofAux(id sector.SectorID, proofAux sector.PersistentProofAux) union {proofAux sector.PersistentProofAux, err error}
+    StoreSectorPersistentProofAux(id abi.SectorID, proofAux sector.PersistentProofAux) union {proofAux sector.PersistentProofAux, err error}
 
     // CreateSectorFiles allocates two sector files, one for unsealed and one for
     // sealed sector.
-    CreateSectorFiles(id sector.SectorID) union {f SectorFiles, err error}
+    CreateSectorFiles(id abi.SectorID) union {f SectorFiles, err error}
 }
 
 // SectorFiles is a datastructure that groups two file objects and a sectorID.
 // These files are where unsealed and sealed sectors should go.
 type SectorFiles struct {
-    SectorID  sector.SectorID
+    SectorID  abi.SectorID
     Unsealed  file.File
     Sealed    file.File
 }

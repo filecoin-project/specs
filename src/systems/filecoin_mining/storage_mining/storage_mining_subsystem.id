@@ -10,7 +10,6 @@ import blockproducer "github.com/filecoin-project/specs/systems/filecoin_blockch
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
 import node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import peer "github.com/libp2p/go-libp2p-core/peer"
@@ -71,22 +70,22 @@ type StorageMiningSubsystem struct {
     OnNewRound()
 
     _runMiningCycle()
-    _tryLeaderElection(st stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainElectionPoStVerifyInfo
+    _tryLeaderElection(st stateTree.StateTree, sma sminact.StorageMinerActorState) abi.OnChainElectionPoStVerifyInfo
     _trySurprisePoSt(st stateTree.StateTree, sma sminact.StorageMinerActorState) error
     _submitSurprisePoStMessage(
         state     stateTree.StateTree
-        sPoSt     sector.OnChainSurprisePoStVerifyInfo
+        sPoSt     abi.OnChainSurprisePoStVerifyInfo
         gasPrice  abi.TokenAmount
         gasLimit  msg.GasAmount
     ) error
 
     VerifyElectionPoSt(
         header       block.BlockHeader
-        onChainInfo  sector.OnChainElectionPoStVerifyInfo
+        onChainInfo  abi.OnChainElectionPoStVerifyInfo
     ) bool
 
     _verifyElection(
         header       block.BlockHeader
-        onChainInfo  sector.OnChainElectionPoStVerifyInfo
+        onChainInfo  abi.OnChainElectionPoStVerifyInfo
     ) bool
 }

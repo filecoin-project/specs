@@ -1,7 +1,6 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import addr "github.com/filecoin-project/go-address"
 import abi "github.com/filecoin-project/specs/actors/abi"
-import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import peer "github.com/libp2p/go-libp2p-core/peer"
 import cid "github.com/ipfs/go-cid"
 
@@ -36,7 +35,7 @@ type RetrievalQueryParams struct {
 }
 
 type RetrievalQuery struct {
-    PieceCID piece.PieceCID  // V0
+    PieceCID abi.PieceCID  // V0
     RetrievalQueryParams  // V1
 }
 
@@ -90,7 +89,7 @@ type RetrievalParams struct {
 type RetrievalDealID UInt
 
 type RetrievalDealProposal struct {
-    PieceCID         piece.PieceCID
+    PieceCID         abi.PieceCID
     ID               RetrievalDealID  // V1 - an identifier for the retrieval
     RetrievalParams
 }

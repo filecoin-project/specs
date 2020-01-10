@@ -1,6 +1,6 @@
 package sector
 
-import util "github.com/filecoin-project/specs/util"
+import abi "github.com/filecoin-project/specs/actors/abi"
 
 // NOTE: It's fairly unclear how any of this should interface/cooperate with filcrypto/filproofs.
 // Leaving now to preserve some historical intent for later refactoring.
@@ -19,18 +19,7 @@ var SealSeedHash = SHA256
 // 	return SealSeed(h)
 // }
 
-func (x PieceInfo_I) Ref() *PieceInfo_I {
-	return &x
-}
-
-func (svi *OnChainSealVerifyInfo_I) IsValidAtSealEpoch() bool {
-	// We can just hardcode logic for the range of epochs at which each circuit type is valid.
-	switch PROOFS[util.UInt(svi.RegisteredProof())].CircuitType() {
-	}
-	panic("TODO")
-}
-
-func (cfg *SealInstanceCfg_I) SectorSize() SectorSize {
+func (cfg *SealInstanceCfg_I) SectorSize() abi.SectorSize {
 	switch cfg.Which() {
 	case SealInstanceCfg_Case_WinStackedDRGCfgV1:
 		{
