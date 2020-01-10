@@ -177,23 +177,21 @@ poseidon = makeHash("poseidon", {
   ticket: 'poseidon64'
 })
 
-
 sha = makeHash("sha", {
-  commc: 'pedersen64',
+  commc: 'poseidon64',
   commc_column: 'sha64',
   commd: 'sha64',
-  commr: 'pedersen64',
-  ticket: 'pedersen64'
+  commr: 'poseidon64',
+  ticket: 'poseidon64'
 })
 
 sha_pure = makeHash("sha_pure", {
   commc: 'sha64',
   commc_column: 'sha64',
   commd: 'sha64',
-  commr: 'pedersen64',
-  ticket: 'pedersen64'
+  commr: 'poseidon64',
+  ticket: 'poseidon64'
 })
-
 
 constraints = ({
   "kdf_name": "sha",
@@ -551,40 +549,53 @@ md`## Dev`
 md`### Vars`
 constants = Object.assign({}, base, constraints, filecoin, bench, rig)
 
-combos = {
-  let query = [constants]
-  query = extend_query(query, [stackedReplicas])
-  query = extend_query(query, [stackedSDRParams])
-  query = extend_query(query, [poseidon, pedersen, sha, sha_pure])
-  query = extend_query(query, [
-    {sdr_delta: 0.04, spacegap: 0.19, proof_name: "d=0.04"},
-    {sdr_delta: 0.03, spacegap: 0.19, proof_name: "d=0.03"},
-    {sdr_delta: 0.02, spacegap: 0.19, proof_name: "d=0.02"},
-    {sdr_delta: 0.01, spacegap: 0.19, proof_name: "d=0.01"},
-  ])
-  query = extend_query(query, [
-    {drg_parents: 6, expander_parents: 8},
-    {drg_parents: 6, expander_parents: 18},
-    {drg_parents: 6, expander_parents: 30},
-    {drg_parents: 6, expander_parents: 34},
-    {drg_parents: 6, expander_parents: 46},
-  ])
-  return query
+class Query {
+  constructor(query = []) {
+    this.query = query
+  }
+  add (query) {
+    this.query = extend_query(this.query, [query])
+    return this
+  }
+  extend(query) {
+    this.query = extend_query(this.query, query)
+    return this
+  }
+  compile() {
+    return this.query
+  }
 }
 
-// combos = {
-//   let start = [constants]
-//   let proofs = extend_query(start, [wrapperVariant, wrapper, stackedReplicas])
-//   let graphs = extend_query(proofs, [stackedChungParams, stackedSDRParams])
-//   let windows = extend_query(graphs, window_size_mib_choices.map(d => ({window_size_mib: +d})))
-//   let query = extend_query(windows, [poseidon, pedersen])
+makeQuery = (query = []) => {
+  return new Query(query)
+}
 
-//   return query
-// }
+range = d3.range
+
+combos = {
+  return makeQuery([constants])
+    .add(stackedReplicas)
+    .add(stackedSDRParams)
+    .extend([poseidon, pedersen, sha, sha_pure])
+    .extend(range(0.01, 0.04, 0.01).map(d => ({
+      sdr_delta: d,
+      // spacegap: 0.19,
+      proof_name: `d=${d}`
+    })))
+    .extend(range(0.05, 0.2, 0.05).map(d => ({ spacegap: d})))
+    .extend([
+      {drg_parents: 6, expander_parents: 8},
+      {drg_parents: 6, expander_parents: 18},
+      {drg_parents: 6, expander_parents: 30},
+      {drg_parents: 6, expander_parents: 34},
+      {drg_parents: 6, expander_parents: 46},
+    ])
+    .compile()
+}
 
 createJsonDownloadButton(combos)
 
-solved_many_pre = (await solve_manys(combos))
+solved_many_pre = (await solve_many_chunk(combos))
   .map(d => {
     d.construction = `${d.graph_name}_${d.proof_name}`
     return d
@@ -593,6 +604,7 @@ solved_many_pre = (await solve_manys(combos))
 utility_fun = (data) => ev(utility_raw, data)
 
 solved_many = solved_many_pre
+  .filter(d => d !== null)
   // .filter(d => window_size_mib_config.some(c => d['window_size_mib'] === +c))
   .map(d => {
     const utility = utility_fun(d)
@@ -654,6 +666,56 @@ function solve_multiple(json) {
       })
     })
 
+}
+
+chunk = (json, parts) => {
+  return json.reduce((acc, curr) => {
+    const index = acc.length - 1
+
+    if (index < 0) {
+      acc.push([curr])
+      return acc
+    }
+
+    if (acc[index].length === parts) {
+      acc.push([curr])
+    } else {
+      acc[index].push(curr)
+    }
+
+    return acc
+  }, [])
+}
+
+chunk([1,2,3,4,5,6,7,8,9,10], 4)
+
+async function solve_many_chunk(json) {
+  const promised = await Promise.all(chunk(json, 10).map(chunk_json => {
+    return fetch(orientServer + '/solve-many', {
+      body: JSON.stringify(chunk_json),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      method: 'POST'
+    }).then(res => {
+      return res.json()
+    }).then(res => {
+      return res
+        .filter(d => d !== null)
+        .map(d => d.flat())
+        .flat()
+        .filter(d => d !== null)
+        .map(d => {
+          const results = {}
+          Object.keys(d)
+            .filter(key => !key.includes('%'))
+            .map(key => {
+              results[key] = d[key]
+            })
+
+          return results
+        })
+    })
+  }))
+  return promised.flat()
 }
 
 function solve_manys(json) {

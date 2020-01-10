@@ -596,8 +596,12 @@ ProofOfReplication (StackedSDRParameters):
 
   drg_e = 0.8
   drg_d = 0.2 // 1/4
-  // drg_parents = 6
-  // expander_parents = 8
+
+  sdr_eps > 0
+  sdr_eps <= 0.48
+  sdr_delta > 0
+  sdr_delta >= (sdr_eps/2 - 0.12)
+  sdr_delta < sdr_eps / 4
 
 ProofOfReplication (StackedChungParameters):
   describe(chung_a, "Chung A")
