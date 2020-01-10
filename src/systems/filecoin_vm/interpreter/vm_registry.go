@@ -3,7 +3,7 @@ package interpreter
 import "errors"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
-import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+import vmr "github.com/filecoin-project/specs/actors/runtime"
 import abi "github.com/filecoin-project/specs/actors/abi"
 import builtin "github.com/filecoin-project/specs/actors/builtin"
 import accact "github.com/filecoin-project/specs/actors/builtin/account"
