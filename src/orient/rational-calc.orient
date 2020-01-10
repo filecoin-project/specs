@@ -409,11 +409,16 @@ ProofOfReplication:
     describe(encoding_window_time_asic, "Time to encode a window with an ASIC", secs)
     describe(encoding_window_time_parallel_asic, "Time to encode a window in parallel with ASICs", secs)
     describe(kdf_time, "Average time to hash 32 bytes during KDF computation", secs)
+    describe(kdf_time_asic, "Average time to hash 32 bytes during KDF computation", secs)
     describe(kdf_latency_bandwidth, "Amount of data hashed per second (B/s)")
+    describe(kdf_latency_bandwidth_asic, "Amount of data hashed per second (B/s)")
     describe(kdf_latency_bandwidth_gb, "Amount of data hashed per second (GB/s)")
+    describe(kdf_latency_bandwidth_gb_asic, "Amount of data hashed per second (GB/s)")
 
     kdf_latency_bandwidth = ((kdf_latency_bandwidth_gb * gb_to_gib) * b_in_gib)
     kdf_time = (32/kdf_latency_bandwidth)
+
+
 
     // TODO: adding wrapper layer
     encoding_time = encoding_window_time * windows
@@ -430,6 +435,10 @@ ProofOfReplication:
       encoding_window_time_parallel = encoding_window_time / rig_cores
 
     Asic:
+      kdf_latency_bandwidth_asic = ((kdf_latency_bandwidth_gb_asic * gb_to_gib) * b_in_gib)
+      kdf_time_asic = (32/kdf_latency_bandwidth_asic)
+
+      kdf_time_asic = kdf_time / hashing_amax
       encoding_time_asic = encoding_time / hashing_amax
       encoding_window_time_asic = encoding_window_time / hashing_amax
       encoding_window_time_parallel_asic = encoding_window_time_parallel / hashing_amax

@@ -88,7 +88,7 @@ viewof filecoin = jsonToSliders({
   "filecoin_storage_capacity_eib": {value: 1, min: 0.5, max: 20, step: 0.5},
   "block_time": {value: 15, min: 15, max: 60, step: 1},
   "cost_amax": {value: 1, min: 1, max: 10, step: 1},
-  "hashing_amax": {value: 3, min: 1, max: 10, step: 1},
+  // "hashing_amax": {value: 3, min: 1, max: 10, step: 1},
   "spacegap": {value: 0.2, min: 0.01, max: 0.2, step: 0.01},
   "proofs_block_fraction": {value: 0.3, min: 0.01, max: 1, step: 0.01},
   "epost_challenged_sectors_fraction": {value: 0.04, min: 0.01, max: 1, step: 0.01},
@@ -130,17 +130,18 @@ hashes = ({
   },
   sha64: {
     constraints: 25840,
-    time:  0.3876e-6,
+    time: 130e-9,
   },
   sha32: {
     constraints: 25840/2,
-    time:  0.3876e-6/2,
+    time:  269.41e-9/10,
   }
 })
 
 bench = ({
-  // "kdf_time": 0.0000000128 / 2, // 2 1.28e-8/2, //5.4e-7,
-  "kdf_latency_bandwidth_gb": 2.5,
+  "kdf_time": hashes.sha32.time,
+  // "kdf_latency_bandwidth_gb": 1.2,
+  "kdf_latency_bandwidth_gb_asic": 7.5,
   "merkle_tree_datahash_time": 0.3876e-6,
   "merkle_tree_hash_time": 13.652e-6,
   "column_leaf_hash_time": 171e-6/10,
@@ -195,7 +196,7 @@ sha_pure = makeHash("sha_pure", {
 
 constraints = ({
   "kdf_name": "sha",
-  "kdf_latency_bandwidth_gb": 2.5,
+  // "kdf_latency_bandwidth_gb": 2.5,
   "kdf_constraints": hashes.sha32.constraints,
   "snark_size": 192,
   "porep_snark_partition_constraints": 100000000,
@@ -579,17 +580,11 @@ combos = {
     .extend([poseidon, pedersen, sha, sha_pure])
     .extend(range(0.01, 0.04, 0.01).map(d => ({
       sdr_delta: d,
-      // spacegap: 0.19,
-      proof_name: `d=${d}`
     })))
+    // .add({spacegap: 0.2})
+    // .extend(range(20, 30, 5).map(d => ({ drg_parents: 6, expander_parents: 8+d})))
     .extend(range(0.05, 0.2, 0.05).map(d => ({ spacegap: d})))
-    .extend([
-      {drg_parents: 6, expander_parents: 8},
-      {drg_parents: 6, expander_parents: 18},
-      {drg_parents: 6, expander_parents: 30},
-      {drg_parents: 6, expander_parents: 34},
-      {drg_parents: 6, expander_parents: 46},
-    ])
+    .extend(range(20, 52, 2).map(d => ({ drg_parents: 6, expander_parents: 8+d})))
     .compile()
 }
 
@@ -598,6 +593,7 @@ createJsonDownloadButton(combos)
 solved_many_pre = (await solve_many_chunk(combos))
   .map(d => {
     d.construction = `${d.graph_name}_${d.proof_name}`
+    d.proof_name = `sdr=${d.spacegap}_${d.sdr_delta}`
     return d
   })
 
@@ -686,8 +682,6 @@ chunk = (json, parts) => {
     return acc
   }, [])
 }
-
-chunk([1,2,3,4,5,6,7,8,9,10], 4)
 
 async function solve_many_chunk(json) {
   const promised = await Promise.all(chunk(json, 10).map(chunk_json => {
