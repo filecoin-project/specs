@@ -93,6 +93,10 @@ func fromBytes_T(_ interface{}) util.T {
 	return util.T{}
 }
 
+func fromBytes_PieceCID(_ interface{}) piece.PieceCID {
+	panic("Unimplemented for PieceCID")
+}
+
 func isPow2(n int) bool {
 	return n != 0 && n&(n-1) == 0
 }

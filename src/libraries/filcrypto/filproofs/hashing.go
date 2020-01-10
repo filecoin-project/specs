@@ -2,6 +2,9 @@ package filproofs
 
 import util "github.com/filecoin-project/specs/util"
 
+type SHA256Hash Bytes32
+type PedersenHash Bytes32
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Generic Hashing
 

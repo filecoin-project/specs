@@ -15,9 +15,14 @@ type SealSeed Bytes
 
 type SealCfg struct {
     SectorSize
-    InstanceCfg    union {WinStackedDRGCfgV1}  // New proof ProofInstances can add new cfg types if needed.
+    InstanceCfg    SealInstanceCfg
     Partitions     UInt
     ProofInstance
+}
+
+// New proof ProofInstances can add new cfg types if needed.
+type SealInstanceCfg union {
+    WinStackedDRGCfgV1
 }
 
 type WinStackedDRGCfgV1 struct {

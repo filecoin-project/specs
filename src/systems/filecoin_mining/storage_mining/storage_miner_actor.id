@@ -167,7 +167,7 @@ type MinerInfo struct {
 
     // Amount of space in each sector committed to the network by this miner.
     SectorSize              sector.SectorSize
-    InstanceCfg             sector.SealCfg_InstanceCfg
+    InstanceCfg             sector.SealInstanceCfg
     SealPartitions          UVarint
     ElectionPoStPartitions  UVarint
     SurprisePoStPartitions  UVarint

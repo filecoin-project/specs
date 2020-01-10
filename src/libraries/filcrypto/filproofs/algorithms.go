@@ -11,15 +11,12 @@ import (
 	big "math/big"
 
 	file "github.com/filecoin-project/specs/systems/filecoin_files/file"
-	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
 )
 
-type SHA256Hash Bytes32
-type PedersenHash Bytes32
 type Bytes32 []byte
 type UInt = util.UInt
 type PieceInfo = sector.PieceInfo
@@ -52,7 +49,7 @@ func PoStCfg(pType sector.PoStType, sectorSize sector.SectorSize, partitions UIn
 	}
 
 	return &sector.PoStCfg_I{
-		InstanceCfg_: sector.PoStCfg_InstanceCfg_Make_PoStCfgV1(&sector.PoStCfgV1_I{
+		InstanceCfg_: sector.PoStInstanceCfg_Make_PoStCfgV1(&sector.PoStCfgV1_I{
 			Type_:               pType,
 			Nodes_:              nodes,
 			Partitions_:         partitions,
@@ -574,7 +571,7 @@ func joinPieceInfos(left PieceInfo, right PieceInfo) PieceInfo {
 	util.Assert(left.Size() == right.Size())
 	return &sector.PieceInfo_I{
 		Size_:     left.Size() + right.Size(),
-		PieceCID_: piece.PieceCID(BinaryHash_SHA256Hash(AsBytes_PieceCID(left.PieceCID()), AsBytes_PieceCID(right.PieceCID()))), // FIXME: make this whole function generic?
+		PieceCID_: fromBytes_PieceCID(BinaryHash_SHA256Hash(AsBytes_PieceCID(left.PieceCID()), AsBytes_PieceCID(right.PieceCID()))), // FIXME: make this whole function generic?
 	}
 }
 
