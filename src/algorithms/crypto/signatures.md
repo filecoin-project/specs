@@ -13,6 +13,7 @@ example, Filecoin uses signatures in order to validate deal messages which repre
 action like a storage deal. 
 Filecoin uses signatures to verify the authenticity of the following objects (non
 exhaustive list):
+
 - Messages: Users authenticate their transactions to the blockchain.
 - Tickets: Miner authenticates its ticket (see {{<sref storage_mining_subsystem>}}).
 - Blocks: Block leader signs over all data in the block. 
@@ -86,8 +87,10 @@ Filecoin uses the [BLS signature scheme](https://datatracker.ietf.org/doc/draft-
 curve which generally yield three groups: G_1, G_2 and G_T. In the BLS signature
 scheme, there is a choice on which group to define the public key and the
 signature:
+
 - Public key is on G_1 and signature on G_2
 - Public key is on G_2 and signature on G_1
+
 The group G_1 is "smaller" and hence offer faster arithmetic operations and
 smaller byte representation of its elements. Filecoin currently uses the group
 **G_1 for representing public keys** and the group **G_2 for representing
@@ -100,6 +103,7 @@ explained in the [RFC Section
 **Rationale**: 
 BLS signatures have two main characteristics that are making them ideal
 candidates in recent blockchain systems:
+
 - BLS signatures are deterministic: for a given message and a given secret key,
   the signature is always the same.  That feature removes an important security 
   weakness of most randomized signature schemes: signer must never re-use the
@@ -120,6 +124,7 @@ PK2, sig12 = sig1 + sig2)` then aggregate with the third tuple to produce
 vulnerable to rogue-key attacks where the attacker can freely choose its public
 key. To prevent against this class of attacks there exists three different kind
 of measures, as explained [here](https://crypto.stanford.edu/~dabo/pubs/papers/BLSmultisig.html):
+
 - Enforce distinct messages
 - Prove knowledge of the secret key
 - Use a modified scheme (such as [BLS Multi Sig](https://crypto.stanford.edu/~dabo/pubs/papers/BLSmultisig.html))

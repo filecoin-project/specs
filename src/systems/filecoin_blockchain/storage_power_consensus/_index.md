@@ -88,7 +88,8 @@ While true:
 newRandomness = H(TicketDrawDST || index || Serialization(epoch || pastTicketOutput))
 ```
 
-In english, this means two things:
+In plain language, this means two things:
+
 - Choose the smallest ticket in the Tipset if it contains multiple blocks.
 - When sampling a ticket from an epoch with no blocks, draw the min ticket from the prior epoch with blocks and concatenate it with
     - the wanted epoch number
@@ -151,6 +152,7 @@ The below values are currently placeholders.
 {{% /notice %}}
 
 We currently set:
+
 - `MIN_MINER_SIZE_STOR = 1 << 40 Bytes` (100 TiB)
 - `MIN_MINER_SIZE_TARG = 3
 

@@ -1,4 +1,6 @@
-## Stacked DRG: Offline PoRep Circuit Spec
+---
+title: Stacked DRG - Offline PoRep Circuit Spec
+---
 
 ### Stacked DRG Overview
 

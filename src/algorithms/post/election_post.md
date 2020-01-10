@@ -5,6 +5,7 @@ title: Election PoSt
 This document describes Election-PoSt, the Proof-of-Spacetime used in Filecoin.
 
 At a high-level it marries `ElectionPoSt` with a `SurprisePoSt` fallback:
+
 - By coupling leader election and PoSt, `ElectionPoSt` ensures that miners must do the work to prove their sectors at every round in order to earn block rewards.
 - Small miners may not win on a regular basis however, `SurprisePoSt` thus comes in as a lower-bound to how often miners must PoSt and helps ensure the Power Table does not grow stale for its long-tail of smaller miners.
 
@@ -130,6 +131,7 @@ At a high-level, to validate a winning PoSt Proof:
 3. **Verify `PartialTicket` returned**
 
     - Prove that the PartialTicket were appropriately derived from the eligible sectors, by submitting all miner sectors along with the wanted number of tickets and verifying that the outputted PartialTicket match.
+    - Verify that no duplicate PartialTickets were submitted, that is there are no two tickets with the same `challengeIndex` (challengeIndices are unique across challenged sectors). Tickets challenging the same sector at different indices are valid).
 
 4. **Derive and validate the `ChallengeTicket` from the PartialTickets**
 

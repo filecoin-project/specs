@@ -24,7 +24,8 @@ We use DAG-CBOR for serialization, and blake2b-256 for hashing.
 # Construction
 
 The tree must not be sparse.
-Given an array of size `N` and a fixed width of `W`.
+Given an array of size `N` and a fixed width of `W`:
+
 - The left `floor(N/W)` leaves contain the first `N` items.
 - If `N % W != 0` the final leaf contains the final remainder.
 - The tree is perfectly balanced.

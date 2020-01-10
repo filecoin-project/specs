@@ -4,6 +4,7 @@ import (
 	"math/big"
 
 	abi "github.com/filecoin-project/specs/actors/abi"
+	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	serde "github.com/filecoin-project/specs/actors/serde"
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
@@ -14,7 +15,6 @@ import (
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
-	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 )
 
 const epochUndefined = abi.ChainEpoch(-1)
@@ -615,6 +615,15 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 	Assert(st.PoStState().Is_Challenged())
 	challengeEpoch := st.PoStState().As_Challenged().SurpriseChallengeEpoch()
 	challengedSectors := st.PoStState().As_Challenged().ChallengedSectors()
+
+	// verify no duplicate tickets
+	challengeIndices := make(map[uint64]bool)
+	for _, tix := range onChainInfo.Candidates() {
+		if _, ok := challengeIndices[tix.ChallengeIndex()]; ok {
+			rt.AbortStateMsg("Invalid Surprise PoSt. Duplicate ticket included.")
+		}
+		challengeIndices[tix.ChallengeIndex()] = true
+	}
 
 	TODO(challengedSectors)
 	// TODO: Determine what should be the acceptance criterion for sector numbers
