@@ -777,8 +777,8 @@ Timing:
 
 Timing (TimingAssumption):
   RegenAttack (StackedSDRParameters):
-  malicious_regen_time = (encoding_window_time_asic * drg_d) / (stacked_layers)
-  malicious_regen_time = block_time * time_amax
+    malicious_regen_time = (encoding_window_time_asic * drg_d) / (stacked_layers)
+    malicious_regen_time = block_time * time_amax
 
 Rationality:
   describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to store the entire sector, than re-encode those")
