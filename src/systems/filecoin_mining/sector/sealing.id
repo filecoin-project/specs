@@ -45,11 +45,11 @@ type SealVerifyInfo struct {
 // state tree but will be verified in sm.CommitSector. See SealCommitment for
 // data stored on the state tree for each sector.
 type OnChainSealVerifyInfo struct {
-    SealedCID         SealedSectorCID  // CommR
-    SealEpoch         abi.ChainEpoch
-    InteractiveEpoch  abi.ChainEpoch
-    Proof             SealProof
-    DealIDs           deal.DealIDs
+    SealedCID             SealedSectorCID  // CommR
+    SealEpoch             abi.ChainEpoch
+    InteractiveEpoch      abi.ChainEpoch
+    Proof                 SealProof
+    DealIDs               deal.DealIDs
     SectorNumber
 
     IsValidAtSealEpoch()  bool

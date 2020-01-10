@@ -653,23 +653,21 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 	UpdateRelease(rt, h, st)
 
 	// Get public inputs
-	postCfg := sector.PoStCfg_I{
-		Type_:        sector.PoStType_SurprisePoSt,
-		SectorSize_:  info.SectorSize(),
-		WindowCount_: info.WindowCount(),
-		Partitions_:  info.SurprisePoStPartitions(),
-	}
+
+	sectorSize := info.SectorSize()
+	postCfg := filproofs.SurprisePoStCfg(sectorSize)
 
 	pvInfo := sector.PoStVerifyInfo_I{
 		OnChain_:    onChainInfo,
-		PoStCfg_:    &postCfg,
+		PoStCfg_:    postCfg,
 		Randomness_: onChainInfo.Randomness(),
+		// EligibleSectors_: FIXME: verification needs these.
 	}
 
-	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{SurprisePoStCfg_: &postCfg})
+	pv := filproofs.SurprisePoStVerifier(postCfg)
 
 	// Verify the PoSt Proof
-	isVerified := sdr.VerifySurprisePoSt(&pvInfo)
+	isVerified := pv.VerifySurprisePoSt(&pvInfo)
 
 	if !isVerified {
 		rt.AbortStateMsg("Surprise PoSt failed to verify")
@@ -704,7 +702,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySealOrAbort(rt Runtime, onChainInfo s
 
 	sealCfg := sector.SealCfg_I{
 		SectorSize_:  sectorSize,
-		WindowCount_: info.WindowCount(),
+		InstanceCfg_: info.InstanceCfg(),
 		Partitions_:  info.SealPartitions(),
 	}
 
@@ -732,7 +730,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySealOrAbort(rt Runtime, onChainInfo s
 		UnsealedCID_:           unsealedCID,
 	}
 
-	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{SealCfg_: &sealCfg})
+	sdr := filproofs.WinSDRParams(&filproofs.ProofsCfg_I{SealCfg_: &sealCfg})
 
 	isVerified := sdr.VerifySeal(&svInfo)
 
