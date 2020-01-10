@@ -9,13 +9,13 @@ import (
 	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 	inds "github.com/filecoin-project/specs/actors/runtime/indices"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
+	cid "github.com/ipfs/go-cid"
 )
 
 // Storage Power Consensus Subsystem
@@ -53,7 +53,7 @@ func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTre
 	util.Assert(ok)
 	substateCID := actorState.State()
 
-	substate, ok := spc.node().Repository().StateStore().Get(ipld.CID(substateCID))
+	substate, ok := spc.node().Repository().StateStore().Get(cid.Cid(substateCID))
 	util.Assert(ok)
 
 	// fix conversion to bytes

@@ -6,8 +6,9 @@ import (
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	autil "github.com/filecoin-project/specs/actors/util"
-	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	cid "github.com/ipfs/go-cid"
 )
 
 type InvocOutput = vmr.InvocOutput
@@ -217,7 +218,7 @@ func MultiSigApprovalSetHAMT_Empty() MultiSigApprovalSetHAMT {
 
 func (a *MultiSigActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, MultiSigActorState) {
 	h := rt.AcquireState()
-	stateCID := ipld.CID(h.Take())
+	stateCID := cid.Cid(h.Take())
 	var state MultiSigActorState_I
 	if !rt.IpldGet(stateCID, &state) {
 		rt.AbortAPI("state not found")
@@ -232,6 +233,6 @@ func UpdateRelease_MultiSig(rt Runtime, h vmr.ActorStateHandle, st MultiSigActor
 	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
 	h.UpdateRelease(newCID)
 }
-func (st *MultiSigActorState_I) CID() ipld.CID {
+func (st *MultiSigActorState_I) CID() cid.Cid {
 	panic("TODO")
 }

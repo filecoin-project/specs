@@ -1,3 +1,0 @@
-type BytesKey string  // so that we can use it in go maps
-
-type CID BytesKey  // TODO: remove util.

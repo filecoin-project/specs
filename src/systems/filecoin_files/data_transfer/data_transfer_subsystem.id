@@ -1,5 +1,6 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+import cid "github.com/ipfs/go-cid"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import peer "github.com/libp2p/go-libp2p-core/peer"
 
@@ -48,7 +49,7 @@ type DataTransferChannel struct {
     // an identifier for this channel shared by request and responder, set by requestor through protocol
     transferID  TransferID
     // base CID for the piece being transferred
-    PieceRef    ipld.CID
+    PieceRef    cid.Cid
     // portion of Piece to return, specified by an IPLD selector
     Selector    ipld.Selector
     // used to verify this channel
@@ -110,19 +111,19 @@ type RequestValidator struct {
     ValidatePush(
         sender    peer.ID
         voucher   DataTransferVoucher
-        PieceRef  ipld.CID
+        PieceRef  cid.Cid
         Selector  ipld.Selector
     )
     ValidatePull(
         receiver  peer.ID
         voucher   DataTransferVoucher
-        PieceRef  ipld.CID
+        PieceRef  cid.Cid
         Selector  ipld.Selector
     )
     ValidateIntermediate(
         otherPeer  peer.ID
         voucher    DataTransferVoucher
-        PieceRef   ipld.CID
+        PieceRef   cid.Cid
         Selector   ipld.Selector
     )
 }
@@ -139,7 +140,7 @@ type DataTransferSubsystem struct @(mutable) {
     OpenPushDataChannel(
         to        peer.ID
         voucher   DataTransferVoucher
-        PieceRef  ipld.CID
+        PieceRef  cid.Cid
         Selector  ipld.Selector
     ) ChannelID
 
@@ -148,7 +149,7 @@ type DataTransferSubsystem struct @(mutable) {
     OpenPullDataChannel(
         to        peer.ID
         voucher   DataTransferVoucher
-        PieceRef  ipld.CID
+        PieceRef  cid.Cid
         Selector  ipld.Selector
     ) ChannelID
 

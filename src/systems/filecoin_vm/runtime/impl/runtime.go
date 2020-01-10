@@ -20,6 +20,7 @@ import (
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
+	cid "github.com/ipfs/go-cid"
 )
 
 type ActorSubstateCID = actor.ActorSubstateCID
@@ -193,7 +194,7 @@ func (rt *VMContext) _createActor(codeID abi.ActorCodeID, address addr.Address) 
 	// Create empty actor state.
 	actorState := &actor.ActorState_I{
 		CodeID_:     codeID,
-		State_:      actor.ActorSubstateCID(ipld.EmptyCID()),
+		State_:      actor.ActorSubstateCID(cid.Undef),
 		Balance_:    abi.TokenAmount(0),
 		CallSeqNum_: 0,
 	}
@@ -578,7 +579,7 @@ func (rt *VMContext) _loadInitActorState() initact.InitActorState {
 	initState, ok := rt._globalStatePending.GetActor(builtin.InitActorAddr)
 	util.Assert(ok)
 	var initSubState initact.InitActorState_I
-	ok = rt.IpldGet(ipld.CID(initState.State()), &initSubState)
+	ok = rt.IpldGet(cid.Cid(initState.State()), &initSubState)
 	util.Assert(ok)
 	return &initSubState
 }
@@ -665,7 +666,7 @@ func (rt *VMContext) NewActorAddress() addr.Address {
 	return newAddr
 }
 
-func (rt *VMContext) IpldPut(x ipld.Object) ipld.CID {
+func (rt *VMContext) IpldPut(x ipld.Object) cid.Cid {
 	IMPL_FINISH() // Serialization
 	serialized := []byte{}
 	cid := rt._store.Put(serialized)
@@ -673,7 +674,7 @@ func (rt *VMContext) IpldPut(x ipld.Object) ipld.CID {
 	return cid
 }
 
-func (rt *VMContext) IpldGet(c ipld.CID, o ipld.Object) bool {
+func (rt *VMContext) IpldGet(c cid.Cid, o ipld.Object) bool {
 	serialized, ok := rt._store.Get(c)
 	if ok {
 		rt._rtAllocGas(gascost.IpldGet(len(serialized)))

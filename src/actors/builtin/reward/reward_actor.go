@@ -9,9 +9,9 @@ import (
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	serde "github.com/filecoin-project/specs/actors/serde"
 	autil "github.com/filecoin-project/specs/actors/util"
-	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
+	cid "github.com/ipfs/go-cid"
 )
 
 type InvocOutput = vmr.InvocOutput
@@ -27,7 +27,7 @@ var TODO = autil.TODO
 
 func (a *RewardActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, RewardActorState) {
 	h := rt.AcquireState()
-	stateCID := ipld.CID(h.Take())
+	stateCID := cid.Cid(h.Take())
 	var state RewardActorState_I
 	if !rt.IpldGet(stateCID, &state) {
 		rt.AbortAPI("state not found")
@@ -38,7 +38,7 @@ func UpdateReleaseRewardActorState(rt Runtime, h vmr.ActorStateHandle, st Reward
 	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
 	h.UpdateRelease(newCID)
 }
-func (st *RewardActorState_I) CID() ipld.CID {
+func (st *RewardActorState_I) CID() cid.Cid {
 	panic("TODO")
 }
 

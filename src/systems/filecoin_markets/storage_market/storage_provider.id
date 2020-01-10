@@ -5,6 +5,7 @@ import addr "github.com/filecoin-project/go-address"
 import dt "github.com/filecoin-project/specs/systems/filecoin_files/data_transfer"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import peer "github.com/libp2p/go-libp2p-core/peer"
+import cid "github.com/ipfs/go-cid"
 
 // ProviderLocalDealInfo is the information that a storage provider tracks locally about
 // a deal. It contains not only the storage proposal but the state of the deal
@@ -17,7 +18,7 @@ type ProviderLocalDealInfo struct {
     ClientPeerID  peer.ID
     Status        StorageDealStatus
 
-    PayloadID     ipld.CID
+    PayloadID     cid.Cid
 
     DealID        deal.DealID
     SectorID      sector.SectorID  // Set when State >= DealStaged
@@ -46,13 +47,13 @@ type StorageProvider struct {
     ValidatePush(
         sender    peer.ID
         voucher   dt.DataTransferVoucher
-        PieceRef  ipld.CID
+        PieceRef  cid.Cid
         Selector  ipld.Selector
     )
     ValidatePull(
         receiver  peer.ID
         voucher   dt.DataTransferVoucher
-        PieceRef  ipld.CID
+        PieceRef  cid.Cid
         Selector  ipld.Selector
     )
 

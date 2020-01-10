@@ -8,8 +8,9 @@ import (
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	autil "github.com/filecoin-project/specs/actors/util"
-	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	cid "github.com/ipfs/go-cid"
 )
 
 type InvocOutput = vmr.InvocOutput
@@ -120,7 +121,7 @@ func _codeIDSupportsExec(callerCodeID abi.ActorCodeID, execCodeID abi.ActorCodeI
 
 func _loadState(rt Runtime) (vmr.ActorStateHandle, InitActorState) {
 	h := rt.AcquireState()
-	stateCID := ipld.CID(h.Take())
+	stateCID := cid.Cid(h.Take())
 	var state InitActorState_I
 	if !rt.IpldGet(stateCID, &state) {
 		rt.AbortAPI("state not found")
@@ -138,6 +139,6 @@ func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st InitActorState) {
 	h.UpdateRelease(newCID)
 }
 
-func (st *InitActorState_I) CID() ipld.CID {
+func (st *InitActorState_I) CID() cid.Cid {
 	panic("TODO")
 }

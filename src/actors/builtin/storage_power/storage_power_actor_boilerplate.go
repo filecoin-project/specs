@@ -3,8 +3,8 @@ package storage_power
 import (
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	autil "github.com/filecoin-project/specs/actors/util"
-	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	cid "github.com/ipfs/go-cid"
 )
 
 type BalanceTableHAMT = autil.BalanceTableHAMT
@@ -33,7 +33,7 @@ var TODO = autil.TODO
 
 func (a *StoragePowerActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, StoragePowerActorState) {
 	h := rt.AcquireState()
-	stateCID := ipld.CID(h.Take())
+	stateCID := cid.Cid(h.Take())
 	var state StoragePowerActorState_I
 	if !rt.IpldGet(stateCID, &state) {
 		rt.AbortAPI("state not found")
@@ -48,6 +48,6 @@ func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st StoragePowerActorState
 	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
 	h.UpdateRelease(newCID)
 }
-func (st *StoragePowerActorState_I) CID() ipld.CID {
+func (st *StoragePowerActorState_I) CID() cid.Cid {
 	panic("TODO")
 }
