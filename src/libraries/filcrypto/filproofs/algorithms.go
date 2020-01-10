@@ -652,10 +652,6 @@ func CreatePoStProof(cfg sector.PoStCfg, privateCandidateProofs []PrivatePostCan
 	var circuitProofs []sector.PoStProof
 	for algorithm, proofs := range proofsMap {
 		privateProof := createPrivatePoStProof(algorithm, proofs, challengeSeed)
-		// Hmmmmm: we cannot perform this santiy check without the sectorIDs. Should we require them just for that purpose or perform the check earlier?
-		// Sanity check: newly-created proofs must pass verification.
-		//util.Assert(sdr.VerifyPrivatePoStProof(privateProof, candidates, sectorIDs, sectorCommitments))
-
 		circuitProof := createPoStCircuitProof(cfg, algorithm, privateProof)
 		circuitProofs = append(circuitProofs, circuitProof)
 	}
@@ -664,13 +660,15 @@ func CreatePoStProof(cfg sector.PoStCfg, privateCandidateProofs []PrivatePostCan
 }
 
 type PrivatePoStProof struct {
+	Algorithm       sector.ProofAlgorithm
 	ChallengeSeed   sector.PoStRandomness
 	CandidateProofs []PrivatePostCandidateProof
 }
 
 func createPrivatePoStProof(algorithm sector.ProofAlgorithm, candidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) PrivatePoStProof {
-
+	// TODO: Verify that all candidateProofs share algorithm.
 	return PrivatePoStProof{
+		Algorithm:       algorithm,
 		ChallengeSeed:   challengeSeed,
 		CandidateProofs: candidateProofs,
 	}

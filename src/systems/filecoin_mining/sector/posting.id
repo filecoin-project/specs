@@ -48,10 +48,8 @@ type PoStWitness struct {
 }
 
 type PoStProof struct {//<curve, system> {
-    Type         PoStType
-    CircuitType  ConcreteCircuit
-    Candidates   [PoStCandidate]
-    ProofBytes   Bytes
+    Type PoStType
+    ProofInstance
 }
 
 type PrivatePoStCandidateProof struct {
