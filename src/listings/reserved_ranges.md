@@ -2,7 +2,7 @@
 title: "Reserved Ranges"
 ---
 
-# Actor Reserved Ranges
+# Actor ID Reserved Ranges
 
 | Actor                | ID |
 |---|---|
