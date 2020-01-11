@@ -352,8 +352,8 @@ func (sdr *WinStackedDRG_I) CreateOfflineCircuitProof(proof PrivateOfflineProof,
 
 	sealProof := sector.SealProof_I{
 		// TODO: This must also depend on the sector size if more than one size is in the spec.
-		ProofInstance_: sector.PROOFS[UInt(registeredProof)],
-		ProofBytes_:    bytes,
+		RegisteredProof_: registeredProof,
+		ProofBytes_:      bytes,
 	}
 
 	return &sealProof
@@ -516,8 +516,8 @@ func (sdr *WinStackedDRG_I) _createPoStCircuitProof(postCfg sector.PoStCfg, priv
 	cfg := postCfg.InstanceCfg().As_PoStCfgV1()
 
 	postProof := sector.PoStProof_I{
-		Type_:          cfg.Type(),
-		ProofInstance_: postCfg.ProofInstance(),
+		Type_:    cfg.Type(),
+		PoStCfg_: postCfg,
 	}
 
 	return &postProof

@@ -111,7 +111,7 @@ type SealArguments struct {
 }
 
 type SealProof struct {//<curve, system> {
-    ProofInstance
+    RegisteredProof
     ProofBytes Bytes
 }
 

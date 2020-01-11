@@ -35,7 +35,6 @@ type PoStType enum {
 
 // TODO: refactor these types to get rid of the squishy optional fields.
 type PoStVerifyInfo struct {
-    PoStCfg
     Randomness       PoStRandomness
     CommR            SealedSectorCID
     OnChain          OnChainPoStVerifyInfo
@@ -73,7 +72,7 @@ type PoStWitness struct {
 
 type PoStProof struct {//<curve, system> {
     Type PoStType
-    ProofInstance
+    PoStCfg
 }
 
 type PrivatePoStCandidateProof struct {

@@ -1,5 +1,7 @@
 package sector
 
+import util "github.com/filecoin-project/specs/util"
+
 // NOTE: It's fairly unclear how any of this should interface/cooperate with filcrypto/filproofs.
 // Leaving now to preserve some historical intent for later refactoring.
 
@@ -23,7 +25,7 @@ func (x PieceInfo_I) Ref() *PieceInfo_I {
 
 func (svi *OnChainSealVerifyInfo_I) IsValidAtSealEpoch() bool {
 	// We can just hardcode logic for the range of epochs at which each circuit type is valid.
-	switch svi.Proof().ProofInstance().CircuitType() {
+	switch PROOFS[util.UInt(svi.Proof().RegisteredProof())].CircuitType() {
 	}
 	panic("TODO")
 }

@@ -735,7 +735,7 @@ func (pv *PoStVerifier_I) _verifyPoStProof(sv sector.PoStVerifyInfo) bool {
 	// commT := sv.CommT()
 	// candidates := sv.Candidates()
 	// randomness := sv.Randomness()
-	// postProof := sv.OnChain.Proof()
+	// postProofs := sv.OnChain.Proofs()
 
 	// Verify circuit proof.
 	panic("TODO")

@@ -100,6 +100,7 @@ type ProofInstance struct {
     Type         ProofType
     Algorithm    ProofAlgorithm
     CircuitType  ConcreteCircuit
+    Partitions   UInt
 }
 
 type ProofType enum {
@@ -107,11 +108,13 @@ type ProofType enum {
     PoStProof
 }
 
+// This ordering, defines mappings to UInt in a way which MUST never change.
+// Make that explicit to avoid accidentally violating this constraint.
 type ProofAlgorithm enum {
-    StackedDRGSeal
-    WinStackedDRGSeal
-    StackedDRGPoSt
-    WinStackedDRGPoSt
+    StackedDRGSeal  // = 0
+    WinStackedDRGSeal  // = 1
+    StackedDRGPoSt  //= 2
+    WinStackedDRGPoSt  // = 3
 }
 
 type ConcreteCircuit struct {

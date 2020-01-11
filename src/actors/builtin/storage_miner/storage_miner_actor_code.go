@@ -645,8 +645,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 
 	pvInfo := sector.PoStVerifyInfo_I{
 		OnChain_:    onChainInfo,
-		PoStCfg_:    postCfg,
-		Randomness_: sector.PoStRandomness(postRandomness),
+		Randomness_: onChainInfo.Randomness(),
 		// EligibleSectors_: FIXME: verification needs these.
 	}
 
