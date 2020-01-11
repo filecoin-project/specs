@@ -2,23 +2,14 @@ package filproofs
 
 import (
 	"bytes"
-	// "errors"
-	// "fmt"
-	// "math"
-	// "math/rand"
-
-	// "encoding/binary"
 	big "math/big"
 
 	file "github.com/filecoin-project/specs/systems/filecoin_files/file"
-	// piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	//sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
-	// addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
 )
 
-func WinSDRParams(cfg ProofsCfg) *WinStackedDRG_I {
+func WinSDRParams(cfg sector.SealCfg) *WinStackedDRG_I {
 	// TODO: Bridge constants with orient model.
 	const LAYERS = 10
 	const OFFLINE_CHALLENGES = 6666
@@ -29,7 +20,7 @@ func WinSDRParams(cfg ProofsCfg) *WinStackedDRG_I {
 	// https://github.com/zkcrypto/pairing/blob/master/src/bls12_381/fr.rs#L4
 	FIELD_MODULUS.SetString("52435875175126190479447740508185965837690552500527637822603658699938581184513", 10)
 
-	nodes := UInt(cfg.SealCfg().SectorSize() / NODE_SIZE)
+	nodes := UInt(cfg.SectorSize() / NODE_SIZE)
 
 	return &WinStackedDRG_I{
 		Layers_:           WinStackedDRGLayers(LAYERS),
@@ -201,7 +192,7 @@ func (sdr *WinStackedDRG_I) CreatePrivateSealProof(randomness sector.Interactive
 	qTree := LoadMerkleTree(aux.CommQTreePath())
 
 	windows := int(sdr.WindowCount())
-	windowSize := int(uint64(sdr.Cfg().SealCfg().SectorSize()) / UInt(sdr.WindowCount()))
+	windowSize := int(uint64(sdr.Cfg().SectorSize()) / UInt(sdr.WindowCount()))
 
 	for c := range windowChallenges {
 		columnProofs := createColumnProofs(sdr.WindowDrg(), sdr.WindowExpander(), UInt(c), nodeSize, columnTree, aux, windows, windowSize)
@@ -226,7 +217,7 @@ func (sdr *WinStackedDRG_I) CreatePrivateSealProof(randomness sector.Interactive
 func (sdr *WinStackedDRG_I) VerifyPrivateSealProof(privateProof PrivateOfflineProof, sealSeed sector.SealSeed, randomness sector.InteractiveSealRandomness, commD Commitment, commR sector.SealedSectorCID) bool {
 	nodeSize := int(sdr.NodeSize())
 	windowCount := int(sdr.WindowCount())
-	windowSize := int(UInt(sdr.Cfg().SealCfg().SectorSize()) / UInt(sdr.WindowCount())) // TOOD: Make this a function.
+	windowSize := int(UInt(sdr.Cfg().SectorSize()) / UInt(sdr.WindowCount())) // TOOD: Make this a function.
 	layers := int(sdr.Layers())
 	curveModulus := sdr.Curve().FieldModulus()
 	windowChallenges, wrapperChallenges := sdr._generateOfflineChallenges(sealSeed, randomness, sdr.Challenges(), sdr.WindowChallenges())
@@ -353,7 +344,7 @@ func (sdr *WinStackedDRG_I) CreateOfflineCircuitProof(proof PrivateOfflineProof,
 
 	var registeredProof sector.RegisteredProof
 
-	switch sdr.Cfg().SealCfg().SectorSize() {
+	switch sdr.Cfg().SectorSize() {
 	case GIB_32:
 		registeredProof = sector.RegisteredProof_WinStackedDRG32GiBSeal
 	}

@@ -664,7 +664,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 		// EligibleSectors_: FIXME: verification needs these.
 	}
 
-	pv := filproofs.SurprisePoStVerifier(postCfg)
+	pv := filproofs.MakeSurprisePoStVerifier(postCfg)
 
 	// Verify the PoSt Proof
 	isVerified := pv.VerifySurprisePoSt(&pvInfo)
@@ -730,7 +730,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySealOrAbort(rt Runtime, onChainInfo s
 		UnsealedCID_:           unsealedCID,
 	}
 
-	sdr := filproofs.WinSDRParams(&filproofs.ProofsCfg_I{SealCfg_: &sealCfg})
+	sdr := filproofs.WinSDRParams(&sealCfg)
 
 	isVerified := sdr.VerifySeal(&svInfo)
 

@@ -8,9 +8,7 @@ import (
 )
 
 func (sps *StorageProvingSubsystem_I) VerifySeal(sv sector.SealVerifyInfo) StorageProvingSubsystem_VerifySeal_FunRet {
-	cfg := filproofs.ProofsCfg_I{
-		SealCfg_: sv.SealCfg(),
-	}
+	cfg := sv.SealCfg()
 
 	var result bool
 
@@ -18,7 +16,7 @@ func (sps *StorageProvingSubsystem_I) VerifySeal(sv sector.SealVerifyInfo) Stora
 	// but for now this expresses intent simply enough.
 	switch sv.SealCfg().ProofInstance().Algorithm() {
 	case sector.ProofAlgorithm_WinStackedDRGSeal:
-		result = filproofs.WinSDRParams(&cfg).VerifySeal(sv)
+		result = filproofs.WinSDRParams(cfg).VerifySeal(sv)
 	}
 
 	return StorageProvingSubsystem_VerifySeal_FunRet_Make_ok(StorageProvingSubsystem_VerifySeal_FunRet_ok(result)) //,

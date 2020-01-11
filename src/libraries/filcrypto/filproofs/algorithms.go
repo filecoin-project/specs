@@ -60,6 +60,12 @@ func PoStCfg(pType sector.PoStType, sectorSize sector.SectorSize, partitions UIn
 	}
 }
 
+func MakeSealVerifier(cfg sector.SealCfg) *SealVerifier_I {
+	return &SealVerifier_I{
+		SealCfg_: cfg,
+	}
+}
+
 func SurprisePoStCfg(sectorSize sector.SectorSize) *sector.PoStCfg_I {
 	return PoStCfg(sector.PoStType_SurprisePoSt, sectorSize, SURPRISE_POST_PARTITIONS)
 }
@@ -68,13 +74,13 @@ func ElectionPoStCfg(sectorSize sector.SectorSize) *sector.PoStCfg_I {
 	return PoStCfg(sector.PoStType_ElectionPoSt, sectorSize, ELECTION_POST_PARTITIONS)
 }
 
-func ElectionPoStVerifier(cfg sector.PoStCfg) *PoStVerifier_I {
+func MakeElectionPoStVerifier(cfg sector.PoStCfg) *PoStVerifier_I {
 	return &PoStVerifier_I{
 		ElectionPoStCfg_: cfg,
 	}
 }
 
-func SurprisePoStVerifier(cfg sector.PoStCfg) *PoStVerifier_I {
+func MakeSurprisePoStVerifier(cfg sector.PoStCfg) *PoStVerifier_I {
 	return &PoStVerifier_I{
 		SurprisePoStCfg_: cfg,
 	}
@@ -483,6 +489,23 @@ func addEncode(data []byte, key []byte, modulus *big.Int, nodeSize int) []byte {
 
 ////////////////////////////////////////////////////////////////////////////////
 // Seal Verification
+
+func (sv *SealVerifier_I) VerifySeal(svi sector.SealVerifyInfo) bool {
+	switch svi.SealCfg().ProofInstance().ID() {
+	case sector.RegisteredProof_WinStackedDRG32GiBSeal:
+		{
+			sdr := WinSDRParams(svi.SealCfg())
+
+			return sdr.VerifySeal(svi)
+		}
+	case sector.RegisteredProof_StackedDRG32GiBSeal:
+		{
+			panic("TODO")
+		}
+	}
+
+	return false
+}
 
 func ComputeUnsealedSectorCIDFromPieceInfos(sectorSize sector.SectorSize, pieceInfos []PieceInfo) (unsealedCID sector.UnsealedSectorCID, err error) {
 	rootPieceInfo := computeRootPieceInfo(pieceInfos)

@@ -311,7 +311,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 		Randomness_: onChainInfo.Randomness(),
 	}
 
-	pv := filproofs.ElectionPoStVerifier(postCfg)
+	pv := filproofs.MakeElectionPoStVerifier(postCfg)
 
 	// 5. Verify the PoSt Proof
 	isPoStVerified := pv.VerifyElectionPoSt(&pvInfo)
