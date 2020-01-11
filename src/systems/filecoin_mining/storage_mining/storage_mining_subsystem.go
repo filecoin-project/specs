@@ -161,14 +161,14 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.Stat
 		return nil
 	}
 
-	postProof := sms.StorageProving().Impl().CreateElectionPoStProof(postRandomness, winningCandidates)
+	postProofs := sms.StorageProving().Impl().CreateElectionPoStProof(postRandomness, winningCandidates)
 
-	var ctc sector.ChallengeTicketsCommitment // TODO: proofs to fix when complete
+	// var ctc sector.ChallengeTicketsCommitment // TODO: proofs to fix when complete
 	electionPoSt := &sector.OnChainPoStVerifyInfo_I{
-		CommT_:      ctc,
+		// CommT_:      ctc,
 		Candidates_: winningCandidates,
 		Randomness_: postRandomness,
-		Proof_:      postProof,
+		Proofs_:     postProofs,
 	}
 
 	return electionPoSt
@@ -303,23 +303,19 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 	info := sma.Info()
 	sectorSize := info.SectorSize()
 
-	postCfg := sector.PoStCfg_I{
-		Type_:        sector.PoStType_ElectionPoSt,
-		SectorSize_:  sectorSize,
-		WindowCount_: info.WindowCount(),
-		Partitions_:  info.ElectionPoStPartitions(),
-	}
+	postCfg := filproofs.ElectionPoStCfg(sectorSize)
 
 	pvInfo := sector.PoStVerifyInfo_I{
 		OnChain_:    onChainInfo,
-		PoStCfg_:    &postCfg,
+		PoStCfg_:    postCfg,
 		Randomness_: onChainInfo.Randomness(),
 	}
 
-	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{ElectionPoStCfg_: &postCfg})
+	pv := filproofs.MakeElectionPoStVerifier(postCfg)
 
-	// 6. Verify the PoSt Proof
-	isPoStVerified := sdr.VerifyElectionPoSt(&pvInfo)
+	// 5. Verify the PoSt Proof
+	isPoStVerified := pv.VerifyElectionPoSt(&pvInfo)
+
 	return isPoStVerified
 }
 
@@ -374,14 +370,14 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 		}
 	}
 
-	postProof := sms.StorageProving().Impl().CreateSurprisePoStProof(postRandomness, winningCandidates)
+	postProofs := sms.StorageProving().Impl().CreateSurprisePoStProof(postRandomness, winningCandidates)
 
-	var ctc sector.ChallengeTicketsCommitment // TODO: proofs to fix when complete
+	// var ctc sector.ChallengeTicketsCommitment // TODO: proofs to fix when complete
 	surprisePoSt := &sector.OnChainPoStVerifyInfo_I{
-		CommT_:      ctc,
+		// CommT_:      ctc,
 		Candidates_: winningCandidates,
 		Randomness_: postRandomness,
-		Proof_:      postProof,
+		Proofs_:     postProofs,
 	}
 	return surprisePoSt
 }

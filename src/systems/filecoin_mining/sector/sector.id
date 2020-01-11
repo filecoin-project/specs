@@ -85,3 +85,38 @@ type SealedSectorInfo struct {
     SealCfg
     SealArgs   SealArguments
 }
+
+type RegisteredProof enum {
+    WinStackedDRG32GiBSeal
+    WinStackedDRG32GiBPoSt
+    StackedDRG32GiBSeal
+    StackedDRG32GiBPoSt
+}
+
+type ProofRegistry {UInt: ProofInstance}
+
+type ProofInstance struct {
+    ID           RegisteredProof
+    Type         ProofType
+    Algorithm    ProofAlgorithm
+    CircuitType  ConcreteCircuit
+}
+
+type ProofType enum {
+    SealProof
+    PoStProof
+}
+
+type ProofAlgorithm enum {
+    StackedDRGSeal
+    WinStackedDRGSeal
+    StackedDRGPoSt
+    WinStackedDRGPoSt
+}
+
+type ConcreteCircuit struct {
+    // Name must be globally unique. It will be a hash derived from semantic content of circuit.
+    Name                      string
+    GrothParameterFileName()  string
+    VerifyingKeyFileName()    string
+}

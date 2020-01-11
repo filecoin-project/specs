@@ -15,8 +15,18 @@ type SealSeed Bytes
 
 type SealCfg struct {
     SectorSize
-    WindowCount  UInt
-    Partitions   UInt
+    InstanceCfg    SealInstanceCfg
+    Partitions     UInt
+    ProofInstance
+}
+
+// New proof ProofInstances can add new cfg types if needed.
+type SealInstanceCfg union {
+    WinStackedDRGCfgV1
+}
+
+type WinStackedDRGCfgV1 struct {
+    WindowCount UInt
 }
 
 // SealVerifyInfo is the structure of all the information a verifier
@@ -35,12 +45,14 @@ type SealVerifyInfo struct {
 // state tree but will be verified in sm.CommitSector. See SealCommitment for
 // data stored on the state tree for each sector.
 type OnChainSealVerifyInfo struct {
-    SealedCID         SealedSectorCID  // CommR
-    SealEpoch         abi.ChainEpoch
-    InteractiveEpoch  abi.ChainEpoch
-    Proof             SealProof
-    DealIDs           deal.DealIDs
+    SealedCID             SealedSectorCID  // CommR
+    SealEpoch             abi.ChainEpoch
+    InteractiveEpoch      abi.ChainEpoch
+    Proof                 SealProof
+    DealIDs               deal.DealIDs
     SectorNumber
+
+    IsValidAtSealEpoch()  bool
 }
 
 // SealCommitment is the information kept in the state tree about a sector.
@@ -94,24 +106,17 @@ type ProofAuxTmp struct {
 }
 
 type SealArguments struct {
-    Algorithm        SealAlgorithm
+    Algorithm        ProofAlgorithm
     OutputArtifacts  SealOutputArtifacts
 }
 
 type SealProof struct {//<curve, system> {
-    Config      SealProofConfig
-    ProofBytes  Bytes
-}
-
-type SealProofConfig struct {// TODO
+    ProofInstance
+    ProofBytes Bytes
 }
 
 // TODO: move into proofs lib
 type FilecoinSNARKProof struct {}  //<bls12-381, Groth16>
-
-type SealAlgorithm enum {
-    StackedDRG
-}
 
 // TODO
 type SealOutputArtifacts struct {}
