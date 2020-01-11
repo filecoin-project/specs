@@ -2,12 +2,12 @@ package storage_miner
 
 import (
 	abi "github.com/filecoin-project/specs/actors/abi"
+	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	actor_util "github.com/filecoin-project/specs/actors/util"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 )
 
 func (st *StorageMinerActorState_I) _getSectorOnChainInfo(sectorNo sector.SectorNumber) (info SectorOnChainInfo, ok bool) {

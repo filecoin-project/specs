@@ -1,9 +1,9 @@
 package account
 
 import (
+	vmr "github.com/filecoin-project/specs/actors/runtime"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 )
 
 type InvocOutput = vmr.InvocOutput

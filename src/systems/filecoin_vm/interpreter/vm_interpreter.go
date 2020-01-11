@@ -5,15 +5,15 @@ import (
 	cronact "github.com/filecoin-project/specs/actors/builtin/cron"
 	initact "github.com/filecoin-project/specs/actors/builtin/init"
 	sminact "github.com/filecoin-project/specs/actors/builtin/storage_miner"
+	vmr "github.com/filecoin-project/specs/actors/runtime"
+	exitcode "github.com/filecoin-project/specs/actors/runtime/exitcode"
+	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	serde "github.com/filecoin-project/specs/actors/serde"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
-	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	vmri "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/impl"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
@@ -35,10 +35,10 @@ const (
 
 // Applies all the message in a tipset, along with implicit block- and tipset-specific state
 // transitions.
-func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSetMessages) (outTree st.StateTree, receipts []vmr.MessageReceipt) {
+func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSetMessages) (outTree st.StateTree, receipts []vmri.MessageReceipt) {
 	outTree = inTree
 	seenMsgs := make(map[ipld.CID]struct{}) // CIDs of messages already seen once.
-	var receipt vmr.MessageReceipt
+	var receipt vmri.MessageReceipt
 	store := vmi.Node().Repository().StateStore()
 	for _, blk := range msgs.Blocks() {
 		minerAddr := blk.Miner()
@@ -93,7 +93,7 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSet
 
 func (vmi *VMInterpreter_I) ApplyMessage(
 	inTree st.StateTree, message msg.UnsignedMessage, onChainMessageSize int, minerAddr addr.Address) (
-	retTree st.StateTree, retReceipt vmr.MessageReceipt, retMinerPenalty abi.TokenAmount) {
+	retTree st.StateTree, retReceipt vmri.MessageReceipt, retMinerPenalty abi.TokenAmount) {
 
 	store := vmi.Node().Repository().StateStore()
 	senderAddr := _resolveSender(store, inTree, message.From())
@@ -128,7 +128,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 		}
 
 		retTree = tree
-		retReceipt = vmr.MessageReceipt_Make(invocOutput, exitCode, vmiGasUsed)
+		retReceipt = vmri.MessageReceipt_Make(invocOutput, exitCode, vmiGasUsed)
 	}
 
 	_applyError := func(tree st.StateTree, errExitCode exitcode.SystemErrorCode, senderResolveSpec SenderResolveSpec) {
@@ -179,7 +179,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 
 	// Check sender balance.
 	gasLimitCost := _gasToFIL(message.GasLimit(), message.GasPrice())
-	networkTxnFee := indices.Indices_FromStateTree(inTree).NetworkTransactionFee(
+	networkTxnFee := indicesFromStateTree(inTree).NetworkTransactionFee(
 		inTree.GetActorCodeID_Assert(message.To()), message.Method())
 	totalCost := message.Value() + gasLimitCost + networkTxnFee
 	if fromActor.Balance() < totalCost {
@@ -201,12 +201,12 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 	invoc := _makeInvocInput(message)
 	sendRet, compTreePostSend := _applyMessageInternal(store, compTreePreSend, sender, senderAddr, invoc, vmiGasRemaining, minerAddr)
 
-	ok = _vmiBurnGas(sendRet.GasUsed())
+	ok = _vmiBurnGas(sendRet.GasUsed)
 	if !ok {
 		panic("Interpreter error: runtime execution used more gas than provided")
 	}
 
-	ok = _vmiAllocGas(gascost.OnChainReturnValue(sendRet.ReturnValue()))
+	ok = _vmiAllocGas(gascost.OnChainReturnValue(sendRet.ReturnValue))
 	if !ok {
 		// Insufficient gas remaining to cover the on-chain return value; proceed as in the case
 		// of method execution failure.
@@ -215,12 +215,12 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 	}
 
 	compTreeRet := compTreePreSend
-	if sendRet.ExitCode().AllowsStateUpdate() {
+	if sendRet.ExitCode.AllowsStateUpdate() {
 		compTreeRet = compTreePostSend
 	}
 
 	_applyReturn(
-		compTreeRet, vmr.InvocOutput_Make(sendRet.ReturnValue()), sendRet.ExitCode(), SenderResolveSpec_OK)
+		compTreeRet, vmr.InvocOutput_Make(sendRet.ReturnValue), sendRet.ExitCode, SenderResolveSpec_OK)
 	return
 }
 
@@ -263,7 +263,7 @@ func _applyMessageBuiltinAssert(store ipld.GraphStore, tree st.StateTree, messag
 	Assert(ok)
 	invoc := _makeInvocInput(message)
 	retReceipt, retTree := _applyMessageInternal(store, tree, sender, senderAddr, invoc, message.GasLimit(), minerAddr)
-	if retReceipt.ExitCode() != exitcode.OK() {
+	if retReceipt.ExitCode != exitcode.OK() {
 		panic("internal message application failed")
 	}
 
@@ -271,7 +271,7 @@ func _applyMessageBuiltinAssert(store ipld.GraphStore, tree st.StateTree, messag
 }
 
 func _applyMessageInternal(store ipld.GraphStore, tree st.StateTree, sender actor.ActorState, senderAddr addr.Address, invoc vmr.InvocInput,
-	gasRemainingInit msg.GasAmount, topLevelBlockWinner addr.Address) (vmr.MessageReceipt, st.StateTree) {
+	gasRemainingInit msg.GasAmount, topLevelBlockWinner addr.Address) (vmri.MessageReceipt, st.StateTree) {
 
 	rt := vmri.VMContext_Make(
 		store,
@@ -296,6 +296,11 @@ func _withTransferFundsAssert(tree st.StateTree, from addr.Address, to addr.Addr
 	} else {
 		return retTree
 	}
+}
+
+func indicesFromStateTree(st st.StateTree) indices.Indices {
+	TODO()
+	panic("")
 }
 
 func _gasToFIL(gas msg.GasAmount, price abi.TokenAmount) abi.TokenAmount {

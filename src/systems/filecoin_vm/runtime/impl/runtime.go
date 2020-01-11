@@ -3,19 +3,20 @@ package impl
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	acctact "github.com/filecoin-project/specs/actors/builtin/account"
 	initact "github.com/filecoin-project/specs/actors/builtin/init"
+	vmr "github.com/filecoin-project/specs/actors/runtime"
+	exitcode "github.com/filecoin-project/specs/actors/runtime/exitcode"
+	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
@@ -23,12 +24,10 @@ import (
 
 type ActorSubstateCID = actor.ActorSubstateCID
 type ExitCode = exitcode.ExitCode
-type RuntimeError = exitcode.RuntimeError
 type CallerPattern = vmr.CallerPattern
 type Runtime = vmr.Runtime
 type InvocInput = vmr.InvocInput
 type InvocOutput = vmr.InvocOutput
-type MessageReceipt = vmr.MessageReceipt
 type ActorStateHandle = vmr.ActorStateHandle
 
 var EnsureErrorCode = exitcode.EnsureErrorCode
@@ -40,6 +39,27 @@ var Assert = util.Assert
 var IMPL_FINISH = util.IMPL_FINISH
 var IMPL_TODO = util.IMPL_TODO
 var TODO = util.TODO
+
+type RuntimeError struct {
+	ExitCode ExitCode
+	ErrMsg   string
+}
+
+func (x *RuntimeError) String() string {
+	ret := fmt.Sprintf("Runtime error: %v", x.ExitCode)
+	if x.ErrMsg != "" {
+		ret += fmt.Sprintf(" (\"%v\")", x.ErrMsg)
+	}
+	return ret
+}
+
+func RuntimeError_Make(exitCode ExitCode, errMsg string) *RuntimeError {
+	exitCode = EnsureErrorCode(exitCode)
+	return &RuntimeError{
+		ExitCode: exitCode,
+		ErrMsg:   errMsg,
+	}
+}
 
 func ActorSubstateCID_Equals(x, y ActorSubstateCID) bool {
 	IMPL_FINISH()
@@ -361,7 +381,7 @@ func (rt *VMContext) _throwError(exitCode ExitCode) {
 }
 
 func (rt *VMContext) _throwErrorFull(exitCode ExitCode, errMsg string) {
-	panic(exitcode.RuntimeError_Make(exitCode, errMsg))
+	panic(RuntimeError_Make(exitCode, errMsg))
 }
 
 func (rt *VMContext) _apiError(errMsg string) {
@@ -529,7 +549,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 		rtOuter._globalStatePending = rtInner._globalStatePending
 	}
 
-	return vmr.MessageReceipt_Make(invocOutput, exitCode, gasUsed)
+	return MessageReceipt_Make(invocOutput, exitCode, gasUsed)
 }
 
 // Loads a receiving actor state from the state tree, resolving non-ID addresses through the InitActor state.
@@ -591,7 +611,7 @@ func (rt *VMContext) _saveAccountActorState(address addr.Address, state acctact.
 
 func (rt *VMContext) _sendInternalOutputs(input InvocInput, errSpec ErrorHandlingSpec) (InvocOutput, exitcode.ExitCode) {
 	ret := rt._sendInternal(input, errSpec)
-	return vmr.InvocOutput_Make(ret.ReturnValue()), ret.ExitCode()
+	return vmr.InvocOutput_Make(ret.ReturnValue), ret.ExitCode
 }
 
 func (rt *VMContext) Send(

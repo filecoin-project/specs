@@ -4,6 +4,7 @@ import (
 	"math/big"
 
 	abi "github.com/filecoin-project/specs/actors/abi"
+	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	serde "github.com/filecoin-project/specs/actors/serde"
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
@@ -14,7 +15,6 @@ import (
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
-	indices "github.com/filecoin-project/specs/systems/filecoin_vm/indices"
 )
 
 const epochUndefined = abi.ChainEpoch(-1)
