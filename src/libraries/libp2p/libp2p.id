@@ -1,20 +1,17 @@
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import mf "github.com/filecoin-project/specs/libraries/multiformats"
-
-// PeerID is the CID of the public key of this peer
-type PeerID ipld.CID
+import peer "github.com/libp2p/go-libp2p-core/peer"
 
 // PeerInfo is a simple datastructure that relates PeerIDs to corresponding partial Multiaddrs.
 // This is a convenience struct used in interfaces where we must specify both, or may specify
 // either.
 type PeerInfo struct {
-    PeerID
+    PeerID peer.ID
     Addrs [mf.Multiaddr]
 }
 
 type Node struct {
     // PeerID returns the PeerID associated with this libp2p Node
-    PeerID() PeerID
+    PeerID() peer.ID
 
     // MountProtocol adds given Protocol under specified protocol id.
     MountProtocol(path ProtocolPath, protocol Protocol)

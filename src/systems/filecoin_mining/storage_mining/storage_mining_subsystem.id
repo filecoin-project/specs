@@ -12,8 +12,8 @@ import storage_proving "github.com/filecoin-project/specs/systems/filecoin_minin
 import node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
-import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+import peer "github.com/libp2p/go-libp2p-core/peer"
 
 type StorageMiningSubsystem struct {
     Node               node_base.FilecoinNode
@@ -43,7 +43,7 @@ type StorageMiningSubsystem struct {
         ownerAddr   addr.Address
         workerAddr  addr.Address
         sectorSize  util.UInt
-        peerId      libp2p.PeerID
+        peerId      peer.ID
         pledgeAmt   abi.TokenAmount
     )
 
