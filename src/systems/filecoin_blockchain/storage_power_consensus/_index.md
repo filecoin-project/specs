@@ -33,19 +33,6 @@ We must distinguish between both types of "miners" (storage and block miners). {
 
 However, given Filecoin's "useful Proof-of-Work" is achieved through file storage (PoRep and PoSt), there is little overhead cost for storage miners to participate in leader election. Such a {{<sref storage_miner_actor>}} need only register with the {{<sref storage_power_actor>}} in order to participate in Expected Consensus and mine blocks.
 
-{{<label storage_power>}}
-## On Power
-
-Per the above, we also clearly distinguish putting storage on-chain from gaining power in consensus (sometimes called "Storage Power") as follows:
-
-Consensus power in Filecoin is defined as the intersection between:
-
-- Proven Storage as of the PoSts verification (i.e. storage in the `Proving Set` since it will all be active by the time the PoSt is computed)
-- In-deal storage.
-Put another way **consensus power is in-deal storage in the Proving Set**. For instance, if a miner had two 32GB sector, each with 20 GB of in-deal storage; the miner would have 40GB worth of storage power for SPC.
-
-Read more in {{<sref storage_mining_subsystem>}}.
-
 {{<label tickets>}}
 ## Tickets
 
@@ -133,29 +120,3 @@ Each Ticket should be generated from the prior one in the ticket-chain and verif
 
 In the case that no miner is eligible to produce a block in a given round of EC, the storage power consensus subsystem will be called by the block producer to attempt another leader election by incrementing the nonce appended to the ticket drawn from the past in order to attempt to find a new winning `PartialTicket` and trying again. 
 Note that a miner may attempt to grind through tickets by incrementing the nonce repeatedly until they find a winning ticket. However, any block so generated in the future will be rejected by other miners (with synchronized clocks) until that epoch's appropriate time.
-
-{{<label min_miner_size>}}
-## Minimum Miner Size
-
-In order to secure Storage Power Consensus, the system defines a minimum miner size required to participate in consensus.
-
-Specifically, miners must have either at least `MIN_MINER_SIZE_STOR` of power (i.e. storage power currently used in storage deals) in order to participate in leader election. If no miner has `MIN_MINER_SIZE_STOR` or more power, miners with at least as much power as the smallest miner in the top `MIN_MINER_SIZE_TARG` of miners (sorted by storage power) will be able to participate in leader election. In plain english, take `MIN_MINER_SIZE_TARG = 3` for instance, this means that miners with at least as much power as the 3rd largest miner will be eligible to participate in consensus.
-
-Miners smaller than this cannot mine blocks and earn block rewards in the network. Their power will not be counted as part of total network power. However, **it is important to note that such miners can still have their power faulted and be penalized accordingly**.
-
-Accordingly, to bootstrap the network, the genesis block must include miners taking part in valid storage deals along with appropriate committed storage.
-
-The `MIN_MINER_SIZE_TARG` condition will not be used in a network in which any miner has more than `MIN_MINER_SIZE_STOR` power. It is nonetheless defined to ensure liveness in small networks (e.g. close to genesis or after large power drops).
-
-{{% notice placeholder %}}
-The below values are currently placeholders.
-{{% /notice %}}
-
-We currently set:
-
-- `MIN_MINER_SIZE_STOR = 1 << 40 Bytes` (100 TiB)
-- `MIN_MINER_SIZE_TARG = 3
-
-## Network recovery after halting
-
-Placeholder where we will define a means of rebooting network liveness after it halts catastrophically (i.e. empty power table).

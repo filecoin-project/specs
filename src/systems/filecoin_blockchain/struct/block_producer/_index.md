@@ -62,29 +62,7 @@ Miners should output their valid block as soon as it is produced, otherwise they
 
 TODO: Rework this.
 
-Over the entire lifetime of the protocol, 1,400,000,000 FIL (`TotalIssuance`) will be given out to miners. The rate at which the funds are given out is set to halve every six years, smoothly (not a fixed jump like in Bitcoin). These funds are initially held by the reward actor, and are transferred to miners in blocks that they mine. Over time, the reward will eventually become close zero as the fractional amount given out at each step shrinks the network account's balance to 0.
-
-The equation for the current block reward is of the form:
-
-```
-Reward = (IV * RemainingInNetworkActor) / TotalIssuance
-```
-
-`IV` is the initial value, and is set to:
-
-```
-IV = 153856861913558700202 attoFIL // 153.85 FIL
-```
-
-IV was derived from:
-```
-// Given one block every 30 seconds, this is how many blocks are in six years
-HalvingPeriodBlocks = 6 * 365 * 24 * 60 * 2 = 6,307,200 blocks
-λ = ln(2) / HalvingPeriodBlocks
-IV = TotalIssuance * (1-e^(-λ)) // Converted to attoFIL (10e18)
-```
-
-Each of the miners who produced a block in a tipset will receive a block reward. 
+Over the entire lifetime of the protocol, 1,400,000,000 FIL (`TotalIssuance`) will be given out to miners. Each of the miners who produced a block in a tipset will receive a block reward. 
 
 Note: Due to jitter in EC, and the gregorian calendar, there may be some error in the issuance schedule over time. This is expected to be small enough that it's not worth correcting for. Additionally, since the payout mechanism is transferring from the network account to the miner, there is no risk of minting *too much* FIL.
 

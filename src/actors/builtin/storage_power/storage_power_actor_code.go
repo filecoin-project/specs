@@ -132,7 +132,7 @@ func (a *StoragePowerActorCode_I) OnSectorTerminate(
 
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
-	a._rtdeductClaimedPowerForSectorAssert(rt, minerAddr, storageWeightDesc)
+	a._rtDeductClaimedPowerForSectorAssert(rt, minerAddr, storageWeightDesc)
 
 	if terminationType != SectorTerminationType_NormalExpiration {
 		amountToSlash := rt.CurrIndices().StoragePower_PledgeSlashForSectorTermination(storageWeightDesc, terminationType)
@@ -142,7 +142,7 @@ func (a *StoragePowerActorCode_I) OnSectorTerminate(
 
 func (a *StoragePowerActorCode_I) OnSectorTemporaryFaultEffectiveBegin(rt Runtime, storageWeightDesc SectorStorageWeightDesc) {
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
-	a._rtdeductClaimedPowerForSectorAssert(rt, rt.ImmediateCaller(), storageWeightDesc)
+	a._rtDeductClaimedPowerForSectorAssert(rt, rt.ImmediateCaller(), storageWeightDesc)
 }
 
 func (a *StoragePowerActorCode_I) OnSectorTemporaryFaultEffectiveEnd(rt Runtime, storageWeightDesc SectorStorageWeightDesc) {
@@ -154,7 +154,7 @@ func (a *StoragePowerActorCode_I) OnSectorModifyWeightDesc(
 	rt Runtime, storageWeightDescPrev SectorStorageWeightDesc, storageWeightDescNew SectorStorageWeightDesc) {
 
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
-	a._rtdeductClaimedPowerForSectorAssert(rt, rt.ImmediateCaller(), storageWeightDescPrev)
+	a._rtDeductClaimedPowerForSectorAssert(rt, rt.ImmediateCaller(), storageWeightDescPrev)
 	a._rtAddPowerForSector(rt, rt.ImmediateCaller(), storageWeightDescNew)
 }
 
@@ -286,7 +286,7 @@ func (a *StoragePowerActorCode_I) _rtAddPowerForSector(rt Runtime, minerAddr add
 	UpdateRelease(rt, h, st)
 }
 
-func (a *StoragePowerActorCode_I) _rtdeductClaimedPowerForSectorAssert(rt Runtime, minerAddr addr.Address, storageWeightDesc SectorStorageWeightDesc) {
+func (a *StoragePowerActorCode_I) _rtDeductClaimedPowerForSectorAssert(rt Runtime, minerAddr addr.Address, storageWeightDesc SectorStorageWeightDesc) {
 	h, st := a.State(rt)
 	st._deductClaimedPowerForSectorAssert(minerAddr, storageWeightDesc)
 	UpdateRelease(rt, h, st)
