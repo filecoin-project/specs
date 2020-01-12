@@ -40,7 +40,7 @@ Anytime a miner receives new valid blocks, it should evaluate what is the heavie
 
 ### Timing
 
-{{< diagram src="./diagrams/timing/timing.png" title="Mining Cycle Timing" >}}
+{{< diagram src="./diagrams/timing.png" title="Mining Cycle Timing" >}}
 
 The mining cycle relies on receiving and producing blocks concurrently.  The sequence of these events in time is given by the timing diagram above.  The upper row represents the conceptual consumption channel consisting of successive receiving periods `Rx` during which nodes validate and select blocks as chain heads.  The lower row is the conceptual production channel made up of a period of mining `M` followed by a period of transmission `Tx`.  The lengths of the periods are not to scale.
 
@@ -68,23 +68,15 @@ The miner actor has two distinct 'controller' {{<sref app_address "addresses">}}
 
 #### Changing Worker Addresses
 
-Note that any change to worker keys after registration (TODO: spec how this works) must be appropriately delayed in relation to randomness lookback for SEALing data (see [this issue](https://github.com/filecoin-project/specs/issues/415)).
+Note that any change to worker keys after registration must be appropriately delayed in relation to randomness lookback for SEALing data (see [this issue](https://github.com/filecoin-project/specs/issues/415)).
 
 ### Step 1: Committing Sectors
 
-When the miner has completed their first seal, they should post it on-chain using the {{<sref storage_miner_actor>}}'s `ProveCommitSector` function. The miner will need to put up pledge collateral in proportion to the amount of storage they commit on chain. If the miner had zero committed sectors prior to this call, this begins their proving period.
+When the miner has completed their first seal, they should post it on-chain using the {{<sref storage_miner_actor>}}'s `ProveCommitSector` function. The miner will need to put up pledge collateral in proportion to the amount of storage they commit on chain. If the miner had zero committed sectors prior to this call, this begins their proving period and miner gains power for the sector.
 
 You can read more about sectors {{<sref sector "here">}}.
 
-### Step 2: Getting Power
-
-As part of the ${{<sref election_post>}} process. A miner will be challenged by the blockchain with a surprise PoSt once per proving period on expectation.
-
-The miner's committed sectors will turn into {{<sref storage_power>}} enabling them to run {{<sref leader_election>}} after the first successful PoSt submission on these committed sectors. If the miner is committing sectors for the first time, a SurprisePoSt will move the sectors from the miner's `ProvingSet` into the active state, otherwise an ElectionPoSt could also do this.
-
-During this period, the miner may also commit to new sectors, but they will not be included in proofs of space time until the next successful PoSt they submit to the chain.
-
-### Step 3: Running Elections
+### Step 2: Running Elections
 
 Once the miner has power on the network, they can begin to submit `ElectionPoSts`. To do so, the miner must run a PoSt on a subset of their sectors in every round, using the outputted partial tickets to run leader election.
 
@@ -100,9 +92,9 @@ In this period, the miner can still:
 
 ### Faults
 
-If a miner detects {{<sref storage_faults>}} among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the `DeclareFaults()` method of the Storage Miner Actor. 
+If a miner detects {{<sref storage_faults>}} among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the `DeclareTemporaryFaults()` method of the Storage Miner Actor. 
 
-The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of winning Election and SurprisePoSts. By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can reverse the fault by calling `RecoverFaults()` to add the sector back into the `ProvingSet` and regain power.
+The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of winning Election and SurprisePoSts. By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can specify how long the duration of their TemporaryFault and pay a TemporaryFaultFee accordingly.
 
 A miner will no longer be able to declare faults after being challenged for a SurprisePoSt.
 

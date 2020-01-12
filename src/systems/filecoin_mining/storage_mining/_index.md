@@ -1,4 +1,4 @@
----
+ ---
 menuTitle: Storage Miner
 statusIcon: 🔁
 title: Storage Miner
@@ -19,36 +19,44 @@ The Filecoin Storage Mining Subsystem ensures a storage miner can effectively co
 The above involves a number of steps to putting on and maintaining online storage, such as:
 
 - Committing new storage (see Sealing and PoRep)
-- Continously proving storage ({see {<sref election_post>}})
+- Continously proving storage
 - Declaring storage faults and recovering from them.
 
-## Storage States
+## Sector Types
+
+There are two types of sectors, Regular Sectors with storage deals in them and Committed Capacity (CC) Sectors with no deals. All sectors require an expiration epoch that is declared upon PreCommit and sectors are assigned a StartEpoch at ProveCommit. Start and Expiration epoch collectively define the lifetime of a Sector. Length and size of active deals in a sector's lifetime determine the `DealWeight` of the sector. `SectorSize`, `Duration`, and `DealWeight` statically determine the power assigned to a sector that will remain constant throughout its lifetime. More details on cost and reward for different sector types will be announced soon.
+
+## Sector States
 
 When managing their storage {{<sref sector "sectors">}}  as part of Filecoin mining, storage providers will account for where in the {{<sref mining_cycle>}} their sectors are. For instance, has a sector been committed? Does it need a new PoSt? Most of these operations happen as part of cycles of chain epochs called `Proving Period`s each of which yield high confidence that every miner in the chain has proven their power (see {{<sref election_post>}}).
 
-Through most of this cycle, sectors will be part of the miner's `Proving Set`. This is the set of sectors that the miners are supposed to generate proofs against. It includes:
-- `Committed Sectors` which have an associated PoRep but have but yet to generate a PoSt, 
-- `Active Sectors` which have successfully been proven and are used in {{<sref storage_power_consensus>}} (SPC), and
-- `Recovering Sectors` which were faulted and are poised to recover through a new PoSt.
+There are three states that an individual sector can be in:
 
-Sectors in the `Proving Set` can be faulted and marked as `Failing` by the miner itself declaring a fault (`Declared Faults`), or through automatic fault detection by the network using on-chain data (`Detected Faults`). Note that storage in the `Proving Set` is used in SPC (specifically in-deal storage from the `Proving Set` counts toward {{<sref storage_power>}}). All storage is tracked by the system and affect a miner's ability to serve as a storage provider in the Filecoin Storage Market. 
+- `PreCommit` when a sector has been added through a PreCommit message.
+- `Active` when a sector has been proven through a ProveCommit message and when a sector's TemporaryFault period has ended.
+- `TemporaryFault` when a miner declares fault on a particular sector.
 
+`ProvingSet` is consist of sectors that miners are required to generate proofs against and is what counts towards miners' power. `ProvingSet` is only relevant when the miner is in OK stage of its `MinerPoStState`. 
 
-A sector that is in the `Failing` state for three consecutive `Proving Period`s will be terminated (`Terminated Faults`) meaning its data will be deemed unrecoverable by PoSt and the sector will have to be SEALed once more (as part of PoRep).
+Sectors enter `Active` from `PreCommit` through a ProveCommit message that serves as the first proof for the sector. PreCommit requires a PreCommit deposit which will be returned upon successful and timely ProveCommit. However, if there is no matching ProveCommit for a particular PreCommit message, the deposit will be burned at PreCommit expiration.
 
-Conversely `RecoverFaults()` can be called any time by the miner on a failing sector to return it to the `ProvingSet` and attempt to prove data is being stored once more. For instance an Active sector might move into the failing state during a power outage (through a declared or detected fault). At the end of the outage, the miner may call `RecoverFaults` to transition the state to `Recovering` before proving it once more and returning it to `Active`. 
+A particular sector enters `TemporaryFault` from `Active` through `DeclareTemporaryFault` with a specified period. Power associated with the sector will be lost immediately and miner needs to pay a `TemporaryFaultFee` determined by the power suspended and the duration of suspension. At the end of the declared duration, faulted sectors automatically regain power and enter `Active`. Miners are expected to prove over this recovered sector. Failure to do so may result in failing ElectionPoSt or `DetectedFault` from failing SurprisePoSt. 
 
-We illustrate these states below.
+{{< diagram src="diagrams/sector_state_machine.dot.svg" title="Sector State Machine" >}}
 
-{{< readfile file="storage_mining_subsystem.id" code="true" lang="go" >}}
+{{< diagram src="diagrams/sector_state_machine_legend.dot.svg" title="Sector State Machine Legend" >}}
 
-### Sector in StorageMiner State Machine (new one)
+### Miner PoSt State
 
-{{< diagram src="diagrams/sector_state_fsm.dot.svg" title="Sector State (new one)" >}}
+`MinerPoStState` keeps track of a miner's state in responding to PoSt and there are three states in `MinerPoStState`:
 
-{{< diagram src="diagrams/sector_state_legend.dot.svg" title="Sector State Legend (new one)" >}}
+- `OK` miner has passed either a ElectionPoSt or a SurprisePoSt sufficiently recently.
+- `Challenged` miner has been selected to prove its storage via SurprisePoSt and is currently in the Challenged state
+- `DetectedFault` miner has failed at least one SurprisePoSt, indicating that all claimed storage may not be proven. Miner has lost power on its sector and recovery can only proceed by a successful response to a subsequent SurprisePoSt challenge, up until the limit of number of consecutive failures.
 
-### Sector in StorageMiner State Machine (both)
+`DetectedFault` is a miner-wide PoSt state when all sectors are considered inactive. All power is lost immediately and pledge collateral is slashed. If a miner remains in `DetectedFault` for more than MaxConsecutiveFailures, all sectors will be terminated, both power and market actors will be notified.
 
-{{< diagram src="diagrams/sector_fsm.dot.svg" title="Sector State Machine (both)" >}}
+{{< diagram src="diagrams/miner_post_state_machine.dot.svg" title="Miner PoSt State Machine" >}}
+
+{{< diagram src="diagrams/miner_post_state_machine_legend.dot.svg" title="Miner PoSt State Machine Legend" >}}
 
