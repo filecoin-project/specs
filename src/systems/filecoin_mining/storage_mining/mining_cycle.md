@@ -94,7 +94,7 @@ In this period, the miner can still:
 
 If a miner detects {{<sref storage_faults>}} among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the `DeclareTemporaryFaults()` method of the Storage Miner Actor. 
 
-The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of winning Election and SurprisePoSts. By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can specify how long the duration of their TemporaryFault and pay a TemporaryFaultFee accordingly.
+The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of winning Election and SurprisePoSts. By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can specify how long the duration of their TemporaryFault and pay a TemporaryFaultFee.
 
 A miner will no longer be able to declare faults after being challenged for a SurprisePoSt.
 

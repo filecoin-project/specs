@@ -1,4 +1,4 @@
- ---
+---
 title: Storage Power Actor
 ---
 
@@ -52,7 +52,7 @@ Placeholder where we will define a means of rebooting network liveness after it 
 
 The portion of blocks a given miner generates through leader election in EC (and so the block rewards they earn) is proportional to their `Power Fraction` over time. That is, a miner whose storage represents 1% of total storage on the network should mine 1% of blocks on expectation.
 
-SPC provides a power table abstraction which tracks miner power (i.e. miner storage in relation to network storage) over time. The power table is updated for new sector commitments (incrementing miner power), when PoSts fail to be put on-chain (decrementing miner power) or for other storage and consensus faults. `_updatePowerEntriesFromClaimedPower` is called to update a particular miner's entry in the power table when its claimed power has changed.
+SPC provides a power table abstraction which tracks miner power (i.e. miner storage in relation to network storage) over time. The power table is updated for new sector commitments (incrementing miner power), for failed PoSts (decrementing miner power) or for other storage and consensus faults. `_updatePowerEntriesFromClaimedPower` is called to update a particular miner's entry in the power table when its claimed power has changed.
 
 Sector ProveCommit is the first time power is proven to the network and hence power is first added through `_rtAddPowerForSector` at `OnSectorProveCommit`. Power is also added when a sector's TemporaryFault period has ended. Miners are expected to prove over all their sectors that contribute to their power. `_rtDeductClaimedPowerForSectorAssert` is called to decrement a miner's power. This is called when a sector expires or invoked by miner through `OnSectorTerminate` and when a sector enters TemporaryFault through `OnSectorTemporaryFaultEffectiveBegin`. Both `_rtAddPowerForSector` and `_rtDeductClaimedPowerForSectorAssert` are currently called at `OnSectorModifyWeightDesc` as power is determined by `SectorStorageWeightDesc` and `SectorStorageWeightDesc` is only modified when a miner calls `ExtendSectorExpiration` to extend a sector's duration. This may or may not have an impact on power but the machinery is in place to preserve the flexibility.
 
