@@ -1,12 +1,12 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+import peer "github.com/libp2p/go-libp2p-core/peer"
 
 type RetrievalClientDealState struct {
     RetrievalDealProposal
     Status                 DealStatus
-    Sender                 libp2p.PeerID
+    Sender                 peer.ID
     TotalReceived          UInt
     FundsSpent             abi.TokenAmount
 }
@@ -41,7 +41,7 @@ type RetrievalClient struct {
         pieceCID      piece.PieceCID
         params        RetrievalParams
         totalFunds    abi.TokenAmount
-        miner         libp2p.PeerID
+        miner         peer.ID
         clientWallet  addr.Address
         minerWallet   addr.Address
     ) RetrievalDealID

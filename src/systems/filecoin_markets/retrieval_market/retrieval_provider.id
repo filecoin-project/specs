@@ -1,10 +1,10 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
-import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+import peer "github.com/libp2p/go-libp2p-core/peer"
 
 type RetrievalProviderDealState struct {
     RetrievalDealProposal
     Status                 DealStatus
-    Receiver               libp2p.PeerID
+    Receiver               peer.ID
     TotalSent              UInt
     FundsReceived          abi.TokenAmount
 }
@@ -17,7 +17,7 @@ type RetrievalProviderEvent struct {
 }
 
 type RetrievalProviderDealID struct {
-    From  libp2p.PeerID
+    From  peer.ID
     ID    RetrievalDealID
 }
 

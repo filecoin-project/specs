@@ -1,34 +1,22 @@
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
-import mf "github.com/filecoin-project/specs/libraries/multiformats"
-
-// PeerID is the CID of the public key of this peer
-type PeerID ipld.CID
-
-// PeerInfo is a simple datastructure that relates PeerIDs to corresponding partial Multiaddrs.
-// This is a convenience struct used in interfaces where we must specify both, or may specify
-// either.
-type PeerInfo struct {
-    PeerID
-    Addrs [mf.Multiaddr]
-}
+import peer "github.com/libp2p/go-libp2p-core/peer"
 
 type Node struct {
     // PeerID returns the PeerID associated with this libp2p Node
-    PeerID() PeerID
+    PeerID() peer.ID
 
     // MountProtocol adds given Protocol under specified protocol id.
     MountProtocol(path ProtocolPath, protocol Protocol)
 
     // ConnectPeerID establishes a connection to peer matching given PeerInfo.
     //
-    // PeerInfo.Addrs may be empty. If so:
+    // peer.AddrInfo may be empty. If so:
     // - Libp2pNode will try to use any Multiaddrs it knows (internal PeerStore)
     // - Libp2pNode may use any `PeerRouting` protocol mounted onto the libp2p node.
     //     TODO: how to define this.
     //     NOTE: probably implies using kad-dht or gossipsub for this.
     //
     // Idempotent. If a connection already exists, this method returns silently.
-    Connect(peerInfo PeerInfo)
+    Connect(peerInfo peer.AddrInfo)
 }
 
 type ProtocolPath string
@@ -64,12 +52,12 @@ type StreamProtocol struct {
     // AcceptStream accepts an incoming stream connection.
     AcceptStream() struct {
         stream    Stream
-        peerInfo  PeerInfo
+        peerInfo  peer.AddrInfo
         err       error
     }
 
     // OpenStream opens a stream to a particular PeerID.
-    OpenStream(peerInfo PeerInfo) struct {
+    OpenStream(peerInfo peer.AddrInfo) struct {
         stream  Stream
         err     error
     }
@@ -90,12 +78,12 @@ type DatagramProtocol struct {
     // AcceptDatagram accepts an incoming message.
     AcceptDatagram() struct {
         datagram  Datagram
-        peerInfo  PeerInfo
+        peerInfo  peer.AddrInfo
         err       error
     }
 
     // OpenStream opens a stream to a particular PeerID
-    SendDatagram(datagram Datagram, peerInfo PeerInfo) struct {err error}
+    SendDatagram(datagram Datagram, peerInfo peer.AddrInfo) struct {err error}
 }
 
 // type StorageDealLibp2pProtocol struct {

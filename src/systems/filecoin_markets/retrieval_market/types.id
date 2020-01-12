@@ -1,14 +1,14 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
-import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import abi "github.com/filecoin-project/specs/actors/abi"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+import peer "github.com/libp2p/go-libp2p-core/peer"
 
 type PaymentVoucher struct {}
 
 type RetrievalPeer struct {
     Address  addr.Address
-    ID       libp2p.PeerID  // optional
+    ID       peer.ID  // optional
 }
 
 type Available struct {}

@@ -9,12 +9,12 @@ import (
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
-	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
+	peer "github.com/libp2p/go-libp2p-core/peer"
 )
 
 const epochUndefined = abi.ChainEpoch(-1)
@@ -372,7 +372,7 @@ func (a *StorageMinerActorCode_I) OnDeferredCronEvent(rt Runtime, sectorNumbers 
 /////////////////
 
 func (a *StorageMinerActorCode_I) Constructor(
-	rt Runtime, ownerAddr addr.Address, workerAddr addr.Address, sectorSize sector.SectorSize, peerId libp2p.PeerID) {
+	rt Runtime, ownerAddr addr.Address, workerAddr addr.Address, sectorSize sector.SectorSize, peerId peer.ID) {
 
 	rt.ValidateImmediateCallerIs(addr.StoragePowerActorAddr)
 	h := rt.AcquireState()

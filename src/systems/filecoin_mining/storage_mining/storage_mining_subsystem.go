@@ -11,7 +11,6 @@ import (
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
-	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -21,6 +20,7 @@ import (
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
+	peer "github.com/libp2p/go-libp2p-core/peer"
 )
 
 type Serialization = util.Serialization
@@ -37,7 +37,7 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 	ownerAddr addr.Address,
 	workerAddr addr.Address,
 	sectorSize util.UInt,
-	peerId libp2p.PeerID,
+	peerId peer.ID,
 	pledgeAmt abi.TokenAmount,
 ) (addr.Address, error) {
 
