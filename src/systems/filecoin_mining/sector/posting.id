@@ -2,12 +2,30 @@ type PartialTicket Bytes  // 32 bytes
 type ChallengeTicketsCommitment Bytes
 type PoStRandomness Bytes
 
-// Can move to a new posting.id if we think worth it.
 type PoStCfg struct {
-    Type         PoStType
-    SectorSize
-    WindowCount  UInt
-    Partitions   UInt
+    InstanceCfg PoStInstanceCfg
+    ProofInstance
+}
+
+// New proof ProofInstances can add new cfg types if needed.
+type PoStInstanceCfg union {
+    PoStCfgV1
+    PoStCfgVBogus
+}
+
+type PoStCfgV1 struct {
+    Type                PoStType
+    Nodes               UInt
+    Partitions          UInt
+    LeafChallengeCount  UInt
+    ChallengeRangeSize  UInt
+}
+
+type PoStCfgVBogus struct {
+    Type                 PoStType
+    Nodes                UInt
+    Partitions           UInt
+    QuantumMonkeyBrains  UInt
 }
 
 type PoStType enum {
@@ -18,9 +36,10 @@ type PoStType enum {
 // TODO: refactor these types to get rid of the squishy optional fields.
 type PoStVerifyInfo struct {
     PoStCfg
-    Randomness  PoStRandomness
-    CommR       SealedSectorCID
-    OnChain     OnChainPoStVerifyInfo
+    Randomness       PoStRandomness
+    CommR            SealedSectorCID
+    OnChain          OnChainPoStVerifyInfo
+    EligibleSectors  {SectorID: SealedSectorCID}
 }
 
 type PoStCandidate struct {
@@ -31,10 +50,10 @@ type PoStCandidate struct {
 }
 
 type OnChainPoStVerifyInfo struct {
-    CommT       ChallengeTicketsCommitment  // Optional — only needed for SurprisePoSt.
+    // CommT       ChallengeTicketsCommitment  // Optional — only needed for SurprisePoSt. This is an as-yet unimplemented optimization.
     Candidates  [PoStCandidate]
     Randomness  PoStRandomness
-    Proof       PoStProof
+    Proofs      [PoStProof]
 }
 
 type PoStWitness struct {
@@ -42,9 +61,11 @@ type PoStWitness struct {
 }
 
 type PoStProof struct {//<curve, system> {
-    Type        PoStType
-    Candidates  [PoStCandidate]
-    ProofBytes  Bytes
+    Type PoStType
+    ProofInstance
 }
 
-type PrivatePoStCandidateProof struct {}
+type PrivatePoStCandidateProof struct {
+    Algorithm     ProofAlgorithm
+    Externalized  Bytes
+}

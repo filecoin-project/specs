@@ -3,6 +3,7 @@ title: Sector
 statusIcon: ✅
 entries:
 - sectorset
+- posting
 - sealing
 ---
 
