@@ -597,6 +597,8 @@ func joinPieceInfos(left PieceInfo, right PieceInfo) PieceInfo {
 	util.Assert(left.Size() == right.Size())
 
 	// FIXME: make this whole function generic?
+	// Note: cid.Bytes() isn't actually the payload data that we want input to the binary hash function, for more
+	// information see discussion: https://filecoinproject.slack.com/archives/CHMNDCK9P/p1578629688082700
 	sectorPieceCID, err := cid.Cast(BinaryHash_SHA256Hash(cid.Cid(left.PieceCID()).Bytes(), cid.Cid(right.PieceCID()).Bytes()))
 	util.Assert(err == nil)
 

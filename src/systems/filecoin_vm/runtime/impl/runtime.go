@@ -21,6 +21,8 @@ import (
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
 	cid "github.com/ipfs/go-cid"
+	cbornode "github.com/ipfs/go-ipld-cbor"
+	mh "github.com/multiformats/go-multihash"
 )
 
 type ActorSubstateCID = actor.ActorSubstateCID
@@ -41,9 +43,17 @@ var IMPL_FINISH = util.IMPL_FINISH
 var IMPL_TODO = util.IMPL_TODO
 var TODO = util.TODO
 
+var EmptyCBOR cid.Cid
+
 type RuntimeError struct {
 	ExitCode ExitCode
 	ErrMsg   string
+}
+
+func init() {
+	n, err := cbornode.WrapObject(map[string]struct{}{}, mh.SHA2_256, -1)
+	Assert(err == nil)
+	EmptyCBOR = n.Cid()
 }
 
 func (x *RuntimeError) String() string {
@@ -194,7 +204,7 @@ func (rt *VMContext) _createActor(codeID abi.ActorCodeID, address addr.Address) 
 	// Create empty actor state.
 	actorState := &actor.ActorState_I{
 		CodeID_:     codeID,
-		State_:      actor.ActorSubstateCID(cid.Undef),
+		State_:      actor.ActorSubstateCID(EmptyCBOR),
 		Balance_:    abi.TokenAmount(0),
 		CallSeqNum_: 0,
 	}
