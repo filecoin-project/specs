@@ -9,7 +9,6 @@ import (
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	autil "github.com/filecoin-project/specs/actors/util"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	cid "github.com/ipfs/go-cid"
 )
 

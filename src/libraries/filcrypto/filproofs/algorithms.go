@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/filecoin-project/specs/build/code/systems/filecoin_files/piece"
 	"math"
 	"math/rand"
 
@@ -13,6 +12,7 @@ import (
 
 	abi "github.com/filecoin-project/specs/actors/abi"
 	file "github.com/filecoin-project/specs/systems/filecoin_files/file"
+	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 	util "github.com/filecoin-project/specs/util"

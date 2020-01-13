@@ -7,6 +7,7 @@ import (
 	file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	util "github.com/filecoin-project/specs/util"
+	"github.com/ipfs/go-cid"
 )
 
 func WinSDRParams(cfg sector.SealCfg) *WinStackedDRG_I {
@@ -137,7 +138,7 @@ func (sdr *WinStackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness se
 	commC, commQ, commRLast, commR, commCTreePath, commQTreePath, commRLastTreePath := sdr.GenerateCommitments(replica, windowKeyLayers, qLayer)
 
 	result := SealSetupArtifacts_I{
-		CommD_:             Commitment(commD),
+		CommD_:             cid.Cid(commD).Bytes(),
 		CommR_:             SealedSectorCID(commR),
 		CommC_:             Commitment(commC),
 		CommQ_:             Commitment(commQ),
