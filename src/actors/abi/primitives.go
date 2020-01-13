@@ -41,6 +41,10 @@ type Bytes []byte
 // of VM gas, and more.
 type TokenAmount int64 // TODO bigint
 
+// The randomness seed is a string of byte, distinguished from Randomness 
+// for expressiveness: it hasn't been given the needed entropy
+type RandomnessSeed []byte
+
 // Randomness is a string of random bytes
 type Randomness []byte
 

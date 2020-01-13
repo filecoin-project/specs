@@ -18,7 +18,7 @@ const (
 )
 
 // Derive a random byte string from a domain separation tag and the appropriate values
-func DeriveRandWithMinerAddr(tag DomainSeparationTag, tix abi.Randomness, minerAddr addr.Address) Randomness {
+func DeriveRandWithMinerAddr(tag DomainSeparationTag, tix abi.RandomnessSeed, minerAddr addr.Address) Randomness {
 	buffer := _deriveRandInternal(tag, tix, -1)
 	var serializedAddr abi.Bytes
 	util.IMPL_FINISH() // serialize the address
@@ -27,14 +27,14 @@ func DeriveRandWithMinerAddr(tag DomainSeparationTag, tix abi.Randomness, minerA
 	return Randomness(ret)
 }
 
-func DeriveRandWithEpoch(tag DomainSeparationTag, tix abi.Randomness, epoch int) Randomness {
+func DeriveRandWithEpoch(tag DomainSeparationTag, tix abi.RandomnessSeed, epoch int) Randomness {
 	buffer := _deriveRandInternal(tag, tix, -1)
 	buffer = append(buffer, BigEndianBytesFromInt(epoch)...)
 	ret := SHA256(buffer)
 	return Randomness(ret)
 }
 
-func _deriveRandInternal(tag DomainSeparationTag, tix abi.Randomness, index int) util.Bytes {
+func _deriveRandInternal(tag DomainSeparationTag, tix abi.RandomnessSeed, index int) util.Bytes {
 	buffer := []byte{}
 	buffer = append(buffer, BigEndianBytesFromInt(int(tag))...)
 	buffer = append(buffer, BigEndianBytesFromInt(int(index))...)

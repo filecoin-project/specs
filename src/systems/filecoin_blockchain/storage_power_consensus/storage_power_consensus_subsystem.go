@@ -26,7 +26,7 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block block.Block_I) 
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket block.Ticket, pk filcrypto.VRFPublicKey, minerActorAddr addr.Address) bool {
-	randomness1 := spc.blockchain().BestChain().GetTicketProductionRand(spc.blockchain().LatestEpoch())
+	randomness1 := spc.blockchain().BestChain().GetTicketProductionRandSeed(spc.blockchain().LatestEpoch())
 
 	return ticket.Verify(randomness1, pk, minerActorAddr)
 }

@@ -57,7 +57,7 @@ type StorageMiningSubsystem struct {
 
     // call by StorageMiningSubsystem itself in BlockProduction
     PrepareNewTicket(
-        randomness  abi.Randomness
+        randomness  abi.RandomnessSeed
         minerAddr   addr.Address
     ) block.Ticket
 

@@ -5,16 +5,16 @@ type Chain struct {
     HeadTipset Tipset
 
     TipsetAtEpoch(epoch abi.ChainEpoch) Tipset
-    RandomnessAtEpoch(epoch abi.ChainEpoch) Bytes
+    RandomnessAtEpoch(epoch abi.ChainEpoch) abi.RandomnessSeed
 
     // call by StorageMiningSubsystem during block production
-    GetTicketProductionRand(epoch abi.ChainEpoch) abi.Randomness
+    GetTicketProductionRandSeed(epoch abi.ChainEpoch) abi.RandomnessSeed
 
     // call by StorageMiningSubsystem in sealing sector
-    GetSealRand(epoch abi.ChainEpoch) abi.Randomness
+    GetSealRandSeed(epoch abi.ChainEpoch) abi.RandomnessSeed
 
     // call by StorageMiningSubsystem after sealing
-    GetPoStChallengeRand(epoch abi.ChainEpoch) abi.Randomness
+    GetPoStChallengeRandSeed(epoch abi.ChainEpoch) abi.RandomnessSeed
 }
 
 // Checkpoint represents a particular block to use as a trust anchor

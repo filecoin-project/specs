@@ -107,7 +107,7 @@ func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 		ePoSt := sms._tryLeaderElection(chainHead.StateTree(), sma)
 		if ePoSt != nil {
 			// Randomness for ticket generation in block production
-			randomness1 := sms._blockchain().BestChain().GetTicketProductionRand(sms._blockchain().LatestEpoch())
+			randomness1 := sms._blockchain().BestChain().GetTicketProductionRandSeed(sms._blockchain().LatestEpoch())
 			newTicket := sms.PrepareNewTicket(randomness1, sms.Node().Repository().KeyStore().MinerAddress())
 
 			sms._blockProducer().GenerateBlock(ePoSt, newTicket, chainHead, sms.Node().Repository().KeyStore().MinerAddress())
@@ -125,7 +125,7 @@ func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainElectionPoStVerifyInfo {
 	// Randomness for ElectionPoSt
 
-	randomnessK := sms._blockchain().BestChain().GetPoStChallengeRand(sms._blockchain().LatestEpoch())
+	randomnessK := sms._blockchain().BestChain().GetPoStChallengeRandSeed(sms._blockchain().LatestEpoch())
 	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_ElectionPoStChallengeSeed, randomnessK, sms.Node().Repository().KeyStore().MinerAddress())
 	// Use VRF to generate secret randomness
 	postRandomness := sms.Node().Repository().KeyStore().WorkerKey().Impl().Generate(input).Output()
@@ -173,7 +173,7 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.Stat
 	return electionPoSt
 }
 
-func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness abi.Randomness, minerActorAddr addr.Address) block.Ticket {
+func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness abi.RandomnessSeed, minerActorAddr addr.Address) block.Ticket {
 	// run it through the VRF and get deterministic output
 
 	// take the VRFResult of that ticket as input, specifying the personalization (see data structures)
@@ -266,7 +266,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 	// verify the partialTickets themselves
 	// 4. Verify appropriate randomness
 	// TODO: fix away from BestChain()... every block should track its own chain up to its own production.
-	randomness := sms._blockchain().BestChain().GetPoStChallengeRand(header.Epoch())
+	randomness := sms._blockchain().BestChain().GetPoStChallengeRandSeed(header.Epoch())
 	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_ElectionPoStChallengeSeed, randomness, header.Miner())
 
 	postRand := &filcrypto.VRFResult_I{
@@ -332,7 +332,7 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 
 	// get randomness for SurprisePoSt
 	challEpoch := sma.PoStState().As_Challenged().SurpriseChallengeEpoch()
-	randomnessK := sms._blockchain().BestChain().GetPoStChallengeRand(challEpoch)
+	randomnessK := sms._blockchain().BestChain().GetPoStChallengeRandSeed(challEpoch)
 	// unlike with ElectionPoSt no need to use a VRF
 	postRandomness := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_SurprisePoStChallengeSeed, randomnessK, sms.Node().Repository().KeyStore().MinerAddress())
 
