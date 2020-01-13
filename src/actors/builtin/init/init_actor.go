@@ -1,6 +1,8 @@
 package init
 
 import (
+	"bytes"
+
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
@@ -8,7 +10,6 @@ import (
 	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	util "github.com/filecoin-project/specs/util"
 )
 
 type InvocOutput = vmr.InvocOutput
@@ -61,9 +62,11 @@ func (a *InitActorCode_I) Exec(rt Runtime, execCodeID abi.ActorCodeID, construct
 		Value_:  rt.ValueReceived(),
 	})
 
-	return rt.ValueReturn(
-		Bytes(idAddr.Bytes()),
-	)
+	var addrBuf bytes.Buffer
+	err := idAddr.MarshalCBOR(&addrBuf)
+	autil.Assert(err == nil)
+
+	return rt.ValueReturn(addrBuf.Bytes())
 }
 
 // This method is disabled until proven necessary.
@@ -78,7 +81,7 @@ func (s *InitActorState_I) ResolveAddress(address addr.Address) addr.Address {
 	actorID, ok := s.AddressMap()[address]
 	if ok {
 		idAddr, err := addr.NewIDAddress(uint64(actorID))
-		util.Assert(err == nil)
+		autil.Assert(err == nil)
 		return idAddr
 	}
 	return address
@@ -89,7 +92,7 @@ func (s *InitActorState_I) MapAddressToNewID(address addr.Address) addr.Address 
 	s.NextID_++
 	s.AddressMap()[address] = actorID
 	idAddr, err := addr.NewIDAddress(uint64(actorID))
-	util.Assert(err == nil)
+	autil.Assert(err == nil)
 	return idAddr
 }
 

@@ -1,6 +1,7 @@
 package storage_miner
 
 import (
+	"bytes"
 	"math/big"
 
 	addr "github.com/filecoin-project/go-address"
@@ -60,11 +61,15 @@ func (a *StorageMinerActorCode_I) OnSurprisePoStChallenge(rt Runtime) {
 		numConsecutiveFailures = st.PoStState().As_DetectedFault().NumConsecutiveFailures()
 	}
 
+	var curRecBuf bytes.Buffer
+	err := rt.CurrReceiver().MarshalCBOR(&curRecBuf)
+	autil.Assert(err == nil)
+
 	IMPL_TODO() // Determine auxiliary seed input to ensure uniqueness
 	challengedSectorsRandomness := rt.RandomnessWithAuxSeed(
 		filcrypto.DomainSeparationTag_SurprisePoStSampleSectors,
 		rt.CurrEpoch()-node_base.SPC_LOOKBACK_POST,
-		rt.CurrReceiver().Bytes(),
+		curRecBuf.Bytes(),
 	)
 
 	challengedSectors := _surprisePoStSampleChallengedSectors(
@@ -640,11 +645,15 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 		Output_: onChainInfo.Randomness(),
 	}
 
+	var curRecBuf bytes.Buffer
+	err := rt.CurrReceiver().MarshalCBOR(&curRecBuf)
+	autil.Assert(err == nil)
+
 	IMPL_TODO() // Determine auxiliary seed input to ensure uniqueness
 	postRandomnessInput := rt.RandomnessWithAuxSeed(
 		filcrypto.DomainSeparationTag_SurprisePoStVRFRandomnessInput,
 		challengeEpoch-node_base.SPC_LOOKBACK_POST,
-		rt.CurrReceiver().Bytes(),
+		curRecBuf.Bytes(),
 	)
 
 	if !postRand.Verify(postRandomnessInput, info.WorkerVRFKey()) {

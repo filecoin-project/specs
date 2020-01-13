@@ -1,6 +1,8 @@
 package runtime
 
 import (
+	"bytes"
+
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
@@ -96,12 +98,14 @@ func RT_Address_Is_StorageMiner(rt Runtime, minerAddr addr.Address) bool {
 }
 
 func RT_GetMinerAccountsAssert(rt Runtime, minerAddr addr.Address) (ownerAddr addr.Address, workerAddr addr.Address) {
-	ownerAddr, err := addr.NewFromBytes(
-		rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetOwnerAddr, nil))
+	raw := rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetOwnerAddr, nil)
+	r := bytes.NewReader(raw)
+	err := ownerAddr.UnmarshalCBOR(r)
 	util.Assert(err == nil)
 
-	workerAddr, err = addr.NewFromBytes(
-		rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetWorkerAddr, nil))
+	raw = rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetWorkerAddr, nil)
+	r = bytes.NewReader(raw)
+	err = workerAddr.UnmarshalCBOR(r)
 	util.Assert(err == nil)
 
 	return

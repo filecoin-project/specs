@@ -663,15 +663,16 @@ func (rt *VMContext) RandomnessWithAuxSeed(
 }
 
 func (rt *VMContext) NewActorAddress() addr.Address {
-	buf := new(bytes.Buffer)
-	_, err := buf.Write(rt._immediateCaller.Bytes())
+	addrBuf := new(bytes.Buffer)
+
+	err := rt._immediateCaller.MarshalCBOR(addrBuf)
+	util.Assert(err == nil)
+	err = binary.Write(addrBuf, binary.BigEndian, rt._toplevelSenderCallSeqNum)
 	util.Assert(err != nil)
-	err = binary.Write(buf, binary.BigEndian, rt._toplevelSenderCallSeqNum)
-	util.Assert(err != nil)
-	err = binary.Write(buf, binary.BigEndian, rt._internalCallSeqNum)
+	err = binary.Write(addrBuf, binary.BigEndian, rt._internalCallSeqNum)
 	util.Assert(err != nil)
 
-	newAddr, err := addr.NewActorAddress(buf.Bytes())
+	newAddr, err := addr.NewActorAddress(addrBuf.Bytes())
 	util.Assert(err == nil)
 	return newAddr
 }

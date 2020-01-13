@@ -83,7 +83,7 @@ func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Addres
 			abi.TokenAmount(0),
 		).ReturnValue(),
 	)
-	util.Assert(err == nil)
+	autil.Assert(err == nil)
 
 	h, st := a.State(rt)
 	newTable, ok := autil.BalanceTable_WithNewAddressEntry(st.EscrowTable(), newMinerAddr, rt.ValueReceived())
