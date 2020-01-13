@@ -22,7 +22,6 @@ func (chain *Chain_I) RandomnessAtEpoch(epoch abi.ChainEpoch) util.Bytes {
 	return ts.MinTicket().DrawRandomness(epoch)
 }
 
-
 func (chain *Chain_I) GetTicketProductionRand(epoch abi.ChainEpoch) abi.Randomness {
 	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_TICKET)
 }
