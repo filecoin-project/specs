@@ -178,7 +178,7 @@ poseidon = makeHash("poseidon", {
   ticket: 'poseidon64'
 })
 
-sha = makeHash("sha", {
+sha = makeHash("sha_poseidon", {
   commc: 'poseidon64',
   commc_column: 'sha64',
   commd: 'sha64',
@@ -186,13 +186,22 @@ sha = makeHash("sha", {
   ticket: 'poseidon64'
 })
 
-sha_pure = makeHash("sha_pure", {
-  commc: 'sha64',
+sha_pedersen = makeHash("sha_pedersen", {
+  commc: 'pedersen64',
   commc_column: 'sha64',
   commd: 'sha64',
-  commr: 'poseidon64',
-  ticket: 'poseidon64'
+  commr: 'pedersen64',
+  ticket: 'pedersen64'
 })
+
+
+// sha_pure = makeHash("sha_pure", {
+//   commc: 'sha64',
+//   commc_column: 'sha64',
+//   commd: 'sha64',
+//   commr: 'poseidon64',
+//   ticket: 'poseidon64'
+// })
 
 constraints = ({
   "kdf_name": "sha",
@@ -235,10 +244,21 @@ viewof utility_cols = checkbox({
 })
 
 table_constraints(
-  solved_many,
-  ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name', 'utility'].concat(utility_cols),
+  solved_many
+    .filter(d => {
+      return (
+        d.proof_name == "0.2_0.038" && d.hash_name == "sha_pedersen"
+      )
+        ||
+      (
+          d.proof_name == "0.2_0.049" && d.hash_name == "poseidon"
+      )
+    })
+    .map(d => Object.assign({}, d, {porep_time_parallel: +d.porep_time_parallel})),
+  ['proof_name', 'graph_parents', 'window_size_mib', 'hash_name', 'utility'].concat(utility_cols),
   [],
-  'utility'
+  // 'utility'
+  'porep_time_parallel'
 )
 
 md`## Graphs`
@@ -251,7 +271,7 @@ viewof proofs_per_block_kib_ruler = chooser(solved_many, 'proofs_per_block_kib',
 bar_chart(solved_many, 'proofs_per_block_kib', [
   'seals_size_per_block_kib',
   'posts_size_per_block_kib',
-], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
+], ['proof_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
   filter: d => d < Math.pow(10, proofs_per_block_kib_ruler),
   yrule: Math.pow(10, proofs_per_block_kib_ruler)
 })
@@ -262,7 +282,7 @@ viewof encoding_time_ruler = chooser(solved_many, 'encoding_time_mins', 60)
 
 bar_chart(solved_many, 'encoding_time_mins', [
   'encoding_time_mins',
-], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
+], ['proof_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
   filter: d => d < Math.pow(10, encoding_time_ruler),
   yrule: Math.pow(10, encoding_time_ruler)
 })
@@ -291,7 +311,7 @@ viewof decoding_time_parallel_ruler = chooser(solved_many, 'decoding_time_parall
 bar_chart(solved_many, 'decoding_time_parallel', [
   'encoding_window_time_parallel',
   'window_read_time_parallel',
-], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
+], ['proof_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
   filter: d => d < Math.pow(10, decoding_time_parallel_ruler),
   yrule: Math.pow(10, decoding_time_parallel_ruler)
 })
@@ -301,7 +321,7 @@ viewof decoding_time_ruler = chooser(solved_many, 'decoding_time', 16)
 bar_chart(solved_many, 'decoding_time', [
   'encoding_window_time',
   'window_read_time',
-], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
+], ['proof_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
   filter: d => d < Math.pow(10, decoding_time_ruler),
   yrule: Math.pow(10, decoding_time_ruler)
 })
@@ -324,7 +344,7 @@ bar_chart(solved_many, 'porep_time_parallel', [
   'porep_snark_time_parallel',
   'porep_commit_time_parallel',
   'encoding_time_parallel'
-], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
+], ['proof_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
   filter: d => d < Math.pow(10, porep_time_parallel_ruler),
   yrule: Math.pow(10, porep_time_parallel_ruler)
 })
@@ -337,7 +357,7 @@ bar_chart(solved_many, 'porep_cost', [
   'porep_commit_cost',
   'porep_encoding_cost',
   'porep_snark_cost'
-], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
+], ['proof_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
   filter: d => d < Math.pow(10, porep_cost_ruler),
   yrule: Math.pow(10, porep_cost_ruler)
 })
@@ -352,7 +372,7 @@ bar_chart(solved_many, 'porep_snark_constraints', [
   'porep_commr_inclusions_constraints',
   'porep_commd_inclusions_constraints',
   'porep_labelings_constraints'
-], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
+], ['proof_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
   filter: d => d < Math.pow(10, porep_snark_constraints_ruler),
   yrule: Math.pow(10, porep_snark_constraints_ruler)
 })
@@ -378,12 +398,12 @@ table_constraints(solved_many, [
 //   'commr_time',
 //   'commq_time',
 //   'commc_time'
-// ], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib'])
+// ], ['proof_name', 'graph_parents', 'window_size_mib'])
 
 // bar_chart(solved_many, 'commc_time', [
 //   'commc_tree_time',
 //   'commc_leaves_time',
-// ], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib'])
+// ], ['proof_name', 'graph_parents', 'window_size_mib'])
 
 md`### EPoSt`
 
@@ -396,7 +416,7 @@ bar_chart(solved_many, 'epost_time_parallel', [
   'post_ticket_gen',
   'epost_inclusions_time_parallel',
   'post_snark_time_parallel'
-], ['proof_name', 'graph_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
+], ['proof_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
   filter: d => d < Math.pow(10, epost_time_parallel_ruler),
   yrule: Math.pow(10, epost_time_parallel_ruler)
 })
@@ -577,23 +597,38 @@ combos = {
   return makeQuery([constants])
     .add(stackedReplicas)
     .add(stackedSDRParams)
-    .extend([poseidon, pedersen, sha, sha_pure])
-    .extend(range(0.01, 0.04, 0.01).map(d => ({
+    .extend([poseidon, sha_pedersen])
+    .extend(range(0.005, 0.06, 0.001).map(d => ({
       sdr_delta: d,
     })))
-    // .add({spacegap: 0.2})
-    // .extend(range(20, 30, 5).map(d => ({ drg_parents: 6, expander_parents: 8+d})))
-    .extend(range(0.05, 0.2, 0.05).map(d => ({ spacegap: d})))
-    .extend(range(20, 52, 2).map(d => ({ drg_parents: 6, expander_parents: 8+d})))
+    .add({ spacegap: 0.2})
+    .add({ drg_parents: 6 })
+    .add({ sector_size_mib: 32 * 1024 })
     .compile()
 }
+
+// combos = {
+//   return makeQuery([constants])
+//     .add(stackedReplicas)
+//     .add(stackedSDRParams)
+//     .extend([poseidon, pedersen, sha, sha_pedersen])
+//     // .extend(range(0.001, 0.02, 0.001).map(d => ({
+//     .extend(range(0.005, 0.04, 0.001).map(d => ({
+//       sdr_delta: d,
+//     })))
+//     // .add({spacegap: 0.2})
+//     // .extend(range(20, 30, 5).map(d => ({ drg_parents: 6, expander_parents: 8+d})))
+//     .extend(range(0.05, 0.20, 0.05).map(d => ({ spacegap: d})))
+//     .extend(range(20, 30, 5).map(d => ({ drg_parents: 6, expander_parents: 8+d})))
+//     .compile()
+// }
 
 createJsonDownloadButton(combos)
 
 solved_many_pre = (await solve_many_chunk(combos))
   .map(d => {
     d.construction = `${d.graph_name}_${d.proof_name}`
-    d.proof_name = `sdr=${d.spacegap}_${d.sdr_delta}`
+    d.proof_name = `${d.spacegap}_${d.sdr_delta}`
     return d
   })
 
@@ -1060,6 +1095,10 @@ graph_constraints = (solutions, x, y, group_by, opts) => {
         "x": {
           "field": x,
           "type": "quantitative",
+          "axis": {
+            "labelLimit": 400,
+            "labelPadding": 30
+          }
         },
         "y": {
           "field": y,
