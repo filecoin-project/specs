@@ -34,10 +34,10 @@ func DeriveRandWithEpoch(tag DomainSeparationTag, tix abi.RandomnessSeed, epoch 
 	return Randomness(ret)
 }
 
-func _deriveRandInternal(tag DomainSeparationTag, tix abi.RandomnessSeed, index int) util.Bytes {
+func _deriveRandInternal(tag DomainSeparationTag, s abi.RandomnessSeed, index int) util.Bytes {
 	buffer := []byte{}
 	buffer = append(buffer, BigEndianBytesFromInt(int(tag))...)
 	buffer = append(buffer, BigEndianBytesFromInt(int(index))...)
-	buffer = append(buffer, util.Bytes(tix)...)
+	buffer = append(buffer, util.Bytes(s)...)
 	return buffer
 }
