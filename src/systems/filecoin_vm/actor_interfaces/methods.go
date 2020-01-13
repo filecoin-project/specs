@@ -10,6 +10,10 @@ const (
 )
 
 const (
+	Method_CronActor_EpochTick = actor.MethodPlaceholder + iota
+)
+
+const (
 	Method_RewardActor_AwardBlockReward = actor.MethodPlaceholder + iota
 )
 
