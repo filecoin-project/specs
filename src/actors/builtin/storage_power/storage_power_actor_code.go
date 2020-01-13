@@ -13,7 +13,6 @@ import (
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
-	util "github.com/filecoin-project/specs/util"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 )
 
