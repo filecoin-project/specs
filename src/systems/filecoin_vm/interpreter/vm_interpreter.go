@@ -4,7 +4,6 @@ import (
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
-	cronact "github.com/filecoin-project/specs/actors/builtin/cron"
 	initact "github.com/filecoin-project/specs/actors/builtin/init"
 	sminact "github.com/filecoin-project/specs/actors/builtin/storage_miner"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
@@ -361,7 +360,7 @@ func _makeCronTickMessage(state st.StateTree) msg.UnsignedMessage {
 	return &msg.UnsignedMessage_I{
 		From_:       builtin.SystemActorAddr,
 		To_:         builtin.CronActorAddr,
-		Method_:     cronact.Method_CronActor_EpochTick,
+		Method_:     ai.Method_CronActor_EpochTick,
 		Params_:     nil,
 		CallSeqNum_: sysActor.CallSeqNum(),
 		Value_:      0,
