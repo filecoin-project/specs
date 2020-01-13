@@ -1,6 +1,6 @@
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import addr "github.com/filecoin-project/go-address"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 
 type SealInputs struct {

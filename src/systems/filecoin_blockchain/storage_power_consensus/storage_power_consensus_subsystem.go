@@ -3,7 +3,9 @@ package storage_power_consensus
 import (
 	"math"
 
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
+	builtin "github.com/filecoin-project/specs/actors/builtin"
 	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 	inds "github.com/filecoin-project/specs/actors/runtime/indices"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
@@ -12,7 +14,6 @@ import (
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -47,7 +48,7 @@ func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree st
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTree stateTree.StateTree) spowact.StoragePowerActorState {
-	powerAddr := addr.StoragePowerActorAddr
+	powerAddr := builtin.StoragePowerActorAddr
 	actorState, ok := stateTree.GetActor(powerAddr)
 	util.Assert(ok)
 	substateCID := actorState.State()

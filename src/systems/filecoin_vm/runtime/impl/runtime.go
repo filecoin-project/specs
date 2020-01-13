@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	acctact "github.com/filecoin-project/specs/actors/builtin/account"
@@ -15,7 +16,6 @@ import (
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
@@ -179,10 +179,10 @@ func (rt *VMContext) AbortAPI(msg string) {
 }
 
 func (rt *VMContext) CreateActor(codeID abi.ActorCodeID, address addr.Address) {
-	if !rt._actorAddress.Equals(addr.InitActorAddr) {
+	if rt._actorAddress != builtin.InitActorAddr {
 		rt.AbortAPI("Only InitActor may call rt.CreateActor")
 	}
-	if !address.IsIDType() {
+	if address.Protocol() != addr.ID {
 		rt.AbortAPI("New actor adddress must be an ID-address")
 	}
 
@@ -209,13 +209,13 @@ func (rt *VMContext) DeleteActor(address addr.Address) {
 	ok := false
 
 	// An actor may delete itself.
-	if rt._actorAddress.Equals(address) {
+	if rt._actorAddress == address {
 		ok = true
 	}
 
 	// Special case: StoragePowerActor may delete a StorageMinerActor.
 	addrCodeID, found := rt.GetActorCodeID(address)
-	if found && rt._actorAddress.Equals(addr.StoragePowerActorAddr) && addrCodeID == builtin.StorageMinerActorCodeID {
+	if found && rt._actorAddress == builtin.StoragePowerActorAddr && addrCodeID == builtin.StorageMinerActorCodeID {
 		ok = true
 	}
 
@@ -565,7 +565,7 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 		return act, targetIdAddr
 	}
 
-	if !targetRaw.IsKeyType() {
+	if targetRaw.Protocol() != addr.SECP256K1 && targetRaw.Protocol() != addr.BLS {
 		// Don't implicitly create an account actor for an address without an associated key.
 		rt._throwError(exitcode.SystemError(exitcode.ActorNotFound))
 	}
@@ -587,7 +587,7 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 }
 
 func (rt *VMContext) _loadInitActorState() initact.InitActorState {
-	initState, ok := rt._globalStatePending.GetActor(addr.InitActorAddr)
+	initState, ok := rt._globalStatePending.GetActor(builtin.InitActorAddr)
 	util.Assert(ok)
 	var initSubState initact.InitActorState_I
 	ok = rt.IpldGet(ipld.CID(initState.State()), &initSubState)
@@ -599,7 +599,7 @@ func (rt *VMContext) _saveInitActorState(state initact.InitActorState) {
 	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
 	// than the receiver.
 	rt._rtAllocGas(gascost.UpdateActorSubstate)
-	rt._updateActorSubstateInternal(addr.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
+	rt._updateActorSubstateInternal(builtin.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
 }
 
 func (rt *VMContext) _saveAccountActorState(address addr.Address, state acctact.AccountActorState) {
@@ -637,7 +637,7 @@ func (rt *VMContext) SendPropagatingErrors(input InvocInput) InvocOutput {
 }
 
 func (rt *VMContext) SendCatchingErrors(input InvocInput) (InvocOutput, exitcode.ExitCode) {
-	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.CronActorAddr)
 	return rt._sendInternalOutputs(input, CatchErrors)
 }
 
@@ -663,16 +663,18 @@ func (rt *VMContext) RandomnessWithAuxSeed(
 }
 
 func (rt *VMContext) NewActorAddress() addr.Address {
-	buf := new(bytes.Buffer)
-	_, err := buf.Write(addr.Serialize_Address(rt._immediateCaller))
+	addrBuf := new(bytes.Buffer)
+
+	err := rt._immediateCaller.MarshalCBOR(addrBuf)
+	util.Assert(err == nil)
+	err = binary.Write(addrBuf, binary.BigEndian, rt._toplevelSenderCallSeqNum)
 	util.Assert(err != nil)
-	err = binary.Write(buf, binary.BigEndian, rt._toplevelSenderCallSeqNum)
-	util.Assert(err != nil)
-	err = binary.Write(buf, binary.BigEndian, rt._internalCallSeqNum)
+	err = binary.Write(addrBuf, binary.BigEndian, rt._internalCallSeqNum)
 	util.Assert(err != nil)
 
-	hash := addr.ActorExecHash(buf.Bytes())
-	return addr.Address_Make_ActorExec(addr.Address_NetworkID_Testnet, hash)
+	newAddr, err := addr.NewActorAddress(addrBuf.Bytes())
+	util.Assert(err == nil)
+	return newAddr
 }
 
 func (rt *VMContext) IpldPut(x ipld.Object) ipld.CID {

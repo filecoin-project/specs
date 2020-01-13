@@ -1,11 +1,13 @@
 package multisig
 
 import (
+	addr "github.com/filecoin-project/go-address"
+	abi "github.com/filecoin-project/specs/actors/abi"
+	builtin "github.com/filecoin-project/specs/actors/builtin"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	autil "github.com/filecoin-project/specs/actors/util"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 )
 
 type InvocOutput = vmr.InvocOutput
@@ -46,7 +48,7 @@ func (a *MultiSigActorCode_I) Approve(rt vmr.Runtime, txnID TxnID, txn MultiSigT
 	a._rtApproveTransactionOrAbort(rt, callerAddr, txnID, txn)
 }
 
-func (a *MultiSigActorCode_I) AddAuthorizedParty(rt vmr.Runtime, actorID addr.ActorID) {
+func (a *MultiSigActorCode_I) AddAuthorizedParty(rt vmr.Runtime, actorID abi.ActorID) {
 	// Can only be called by the multisig wallet itself.
 	rt.ValidateImmediateCallerIs(rt.CurrReceiver())
 
@@ -55,7 +57,7 @@ func (a *MultiSigActorCode_I) AddAuthorizedParty(rt vmr.Runtime, actorID addr.Ac
 	UpdateRelease_MultiSig(rt, h, st)
 }
 
-func (a *MultiSigActorCode_I) RemoveAuthorizedParty(rt vmr.Runtime, actorID addr.ActorID) {
+func (a *MultiSigActorCode_I) RemoveAuthorizedParty(rt vmr.Runtime, actorID abi.ActorID) {
 	// Can only be called by the multisig wallet itself.
 	rt.ValidateImmediateCallerIs(rt.CurrReceiver())
 
@@ -74,7 +76,7 @@ func (a *MultiSigActorCode_I) RemoveAuthorizedParty(rt vmr.Runtime, actorID addr
 	UpdateRelease_MultiSig(rt, h, st)
 }
 
-func (a *MultiSigActorCode_I) SwapAuthorizedParty(rt vmr.Runtime, oldActorID addr.ActorID, newActorID addr.ActorID) {
+func (a *MultiSigActorCode_I) SwapAuthorizedParty(rt vmr.Runtime, oldActorID abi.ActorID, newActorID abi.ActorID) {
 	// Can only be called by the multisig wallet itself.
 	rt.ValidateImmediateCallerIs(rt.CurrReceiver())
 
@@ -112,7 +114,7 @@ func (a *MultiSigActorCode_I) ChangeNumApprovalsThreshold(rt vmr.Runtime, newThr
 func (a *MultiSigActorCode_I) Constructor(
 	rt vmr.Runtime, authorizedParties autil.ActorIDSetHAMT, numApprovalsThreshold int) {
 
-	rt.ValidateImmediateCallerIs(addr.InitActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.InitActorAddr)
 	h := rt.AcquireState()
 
 	st := &MultiSigActorState_I{
@@ -150,10 +152,11 @@ func (a *MultiSigActorCode_I) _rtApproveTransactionOrAbort(
 		// Could potentially amortize cost of cleanup via Cron.
 	}
 
-	AssertMsg(callerAddr.Data().Is_ID(), "caller address does not have ID")
-	actorID := callerAddr.Data().As_ID()
+	AssertMsg(callerAddr.Protocol() == addr.ID, "caller address does not have ID")
+	actorID, err := addr.IDFromAddress(callerAddr)
+	autil.Assert(err == nil)
 
-	st.PendingApprovals()[txnID][actorID] = true
+	st.PendingApprovals()[txnID][abi.ActorID(actorID)] = true
 	thresholdMet := (len(st.PendingApprovals()[txnID]) == st.NumApprovalsThreshold())
 
 	UpdateRelease_MultiSig(rt, h, st)
@@ -177,12 +180,13 @@ func (a *MultiSigActorCode_I) _rtDeletePendingTransaction(rt Runtime, txnID TxnI
 	UpdateRelease_MultiSig(rt, h, st)
 }
 
-func (a *MultiSigActorCode_I) _rtValidateAuthorizedPartyOrAbort(rt Runtime, addr addr.Address) {
-	AssertMsg(addr.Data().Is_ID(), "caller address does not have ID")
-	actorID := addr.Data().As_ID()
+func (a *MultiSigActorCode_I) _rtValidateAuthorizedPartyOrAbort(rt Runtime, address addr.Address) {
+	AssertMsg(address.Protocol() == addr.ID, "caller address does not have ID")
+	actorID, err := addr.IDFromAddress(address)
+	autil.Assert(err == nil)
 
 	h, st := a.State(rt)
-	if _, found := st.AuthorizedParties()[actorID]; !found {
+	if _, found := st.AuthorizedParties()[abi.ActorID(actorID)]; !found {
 		rt.AbortArgMsg("Party not authorized")
 	}
 	Release_MultiSig(rt, h, st)

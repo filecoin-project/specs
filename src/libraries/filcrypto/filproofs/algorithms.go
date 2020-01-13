@@ -10,10 +10,10 @@ import (
 	"encoding/binary"
 	big "math/big"
 
+	abi "github.com/filecoin-project/specs/actors/abi"
 	file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -169,7 +169,7 @@ func (f *Feistel_I) Permute(size UInt, i UInt) UInt {
 	panic("TODO")
 }
 
-func getProverID(minerID addr.ActorID) []byte {
+func getProverID(minerID abi.ActorID) []byte {
 	// return leb128(minerID)
 	panic("TODO")
 }

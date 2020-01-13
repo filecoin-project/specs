@@ -1,9 +1,9 @@
 package block
 
 import (
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
 )
 

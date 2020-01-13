@@ -1,4 +1,4 @@
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import addr "github.com/filecoin-project/go-address"
 
 type AccountActorCode struct {}
 

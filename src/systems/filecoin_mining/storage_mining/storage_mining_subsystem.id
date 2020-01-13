@@ -3,7 +3,7 @@ import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storag
 import spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 import sminact "github.com/filecoin-project/specs/actors/builtin/storage_miner"
 import abi "github.com/filecoin-project/specs/actors/abi"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import addr "github.com/filecoin-project/go-address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 import blockproducer "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block_producer"
