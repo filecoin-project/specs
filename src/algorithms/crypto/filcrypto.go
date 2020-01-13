@@ -19,11 +19,12 @@ func RandomInt(randomness abi.Randomness, nonce int, limit int) int {
 }
 
 func SHA256(util.Bytes) util.Bytes {
-	panic("TODO")
+	util.IMPL_FINISH()
+	return []byte{}
 }
 
 func IntFromBigEndianBytes(bytes []byte) int {
-	panic("TODO")
+	util.IMPL_FINISH()
 	return -1
 }
 

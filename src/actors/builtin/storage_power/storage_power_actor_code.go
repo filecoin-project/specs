@@ -314,7 +314,9 @@ func (a *StoragePowerActorCode_I) _rtInitiateNewSurprisePoStChallenges(rt Runtim
 	h, st := a.State(rt)
 
 	// sample the actor addresses
-	randomness := rt.Randomness(filcrypto.DomainSeparationTag_SurprisePoStSelectMiners, rt.CurrEpoch())
+	minerSelectionSeed := rt.GetRandomness(rt.CurrEpoch())
+	randomness := filcrypto.DeriveRandWithEpoch(filcrypto.DomainSeparationTag_SurprisePoStSelectMiners, minerSelectionSeed, int(rt.CurrEpoch()))
+
 	IMPL_FINISH() // BigInt arithmetic (not floating-point)
 	challengeCount := math.Ceil(float64(len(st.PowerTable())) / float64(provingPeriod))
 	surprisedMiners := st._selectMinersToSurprise(int(challengeCount), randomness)

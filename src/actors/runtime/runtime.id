@@ -2,7 +2,6 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import abi "github.com/filecoin-project/specs/actors/abi"
 import exitcode "github.com/filecoin-project/specs/actors/runtime/exitcode"
 import addr "github.com/filecoin-project/go-address"
-import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import indices "github.com/filecoin-project/specs/actors/runtime/indices"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import cid "github.com/ipfs/go-cid"
@@ -13,12 +12,7 @@ type Runtime interface {
     CurrEpoch() abi.ChainEpoch
 
     // Randomness returns a (pseudo)random string for the given epoch and tag.
-    Randomness(tag filcrypto.DomainSeparationTag, epoch abi.ChainEpoch) abi.Randomness
-    RandomnessWithAuxSeed(
-        tag      filcrypto.DomainSeparationTag
-        epoch    abi.ChainEpoch
-        auxSeed  util.Serialization
-    ) abi.Randomness
+    GetRandomness(epoch abi.ChainEpoch) abi.Randomness
 
     // The address of the immediate calling actor.
     // Not necessarily the actor in the From field of the initial on-chain Message.

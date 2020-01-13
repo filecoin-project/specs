@@ -14,13 +14,3 @@ type Ticket struct {
         minerActorAddr  addr.Address
     ) bool
 }
-
-type TicketProductionSeedInput struct {
-    PastTicket  util.Randomness
-    MinerAddr   addr.Address
-}
-
-type TicketDrawingSeedInput struct {
-    PastTicket  util.Randomness
-    Epoch       abi.ChainEpoch
-}

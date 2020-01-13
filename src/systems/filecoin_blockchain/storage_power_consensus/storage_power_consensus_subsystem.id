@@ -38,17 +38,6 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
 
     StoragePowerConsensusError() StoragePowerConsensusError
 
-    // Randomness methods
-
-    // call by StorageMiningSubsystem during block production
-    GetTicketProductionRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness
-
-    // call by StorageMiningSubsystem in sealing sector
-    GetSealRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness
-
-    // call by StorageMiningSubsystem after sealing
-    GetPoStChallengeRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness
-
     GetFinalizedEpoch(currentEpoch abi.ChainEpoch) abi.ChainEpoch
 }
 

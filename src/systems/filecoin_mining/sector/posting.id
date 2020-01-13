@@ -49,11 +49,22 @@ type PoStCandidate struct {
     ChallengeIndex  UInt
 }
 
-type OnChainPoStVerifyInfo struct {
-    // CommT       ChallengeTicketsCommitment  // Optional — only needed for SurprisePoSt. This is an as-yet unimplemented optimization.
+// implemented by both OnChainElectionPoStVerifyInfo and OnChainSurprisePoStVerifyInfo
+type OnChainPoStVerifyInfo interface {
+    Candidates()  [PoStCandidate]
+    Proofs()      [PoStProof]
+}
+
+type OnChainElectionPoStVerifyInfo struct {
     Candidates  [PoStCandidate]
-    Randomness  PoStRandomness
     Proofs      [PoStProof]
+    Randomness  PoStRandomness
+}
+
+type OnChainSurprisePoStVerifyInfo struct {
+    Candidates  [PoStCandidate]
+    Proofs      [PoStProof]
+    CommT       ChallengeTicketsCommitment
 }
 
 type PoStWitness struct {

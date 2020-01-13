@@ -57,11 +57,10 @@ type StorageMiningSubsystem struct {
 
     // call by StorageMiningSubsystem itself in BlockProduction
     PrepareNewTicket(
-        randomness  util.Randomness
+        randomness  abi.Randomness
         minerAddr   addr.Address
     ) block.Ticket
 
-    PreparePoStChallengeSeed(randomness util.Randomness, minerAddr addr.Address) util.Randomness
     _getStorageMinerActorState(stateTree stateTree.StateTree, minerAddr addr.Address) sminact.StorageMinerActorState
 
     // call by BlockChain when a new block is produced
@@ -72,27 +71,22 @@ type StorageMiningSubsystem struct {
     OnNewRound()
 
     _runMiningCycle()
-    _tryLeaderElection(st stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainPoStVerifyInfo
+    _tryLeaderElection(st stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainElectionPoStVerifyInfo
     _trySurprisePoSt(st stateTree.StateTree, sma sminact.StorageMinerActorState) error
     _submitSurprisePoStMessage(
         state     stateTree.StateTree
-        sPoSt     sector.OnChainPoStVerifyInfo
+        sPoSt     sector.OnChainSurprisePoStVerifyInfo
         gasPrice  abi.TokenAmount
         gasLimit  msg.GasAmount
     ) error
 
     VerifyElectionPoSt(
         header       block.BlockHeader
-        onChainInfo  sector.OnChainPoStVerifyInfo
+        onChainInfo  sector.OnChainElectionPoStVerifyInfo
     ) bool
 
     _verifyElection(
         header       block.BlockHeader
-        onChainInfo  sector.OnChainPoStVerifyInfo
+        onChainInfo  sector.OnChainElectionPoStVerifyInfo
     ) bool
-}
-
-type PoStChallengeSeedInput struct {
-    ticket     util.Randomness
-    minerAddr  addr.Address
 }
