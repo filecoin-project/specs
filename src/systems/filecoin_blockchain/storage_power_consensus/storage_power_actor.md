@@ -19,9 +19,11 @@ title: Storage Power Actor
 
 The portion of blocks a given miner generates through leader election in EC (and so the block rewards they earn) is proportional to their `Power Fraction` over time. That is, a miner whose storage represents 1% of total storage on the network should mine 1% of blocks on expectation.
 
-SPC provides a power table abstraction which tracks miner power (i.e. miner storage in relation to network storage) over time. The power table is updated for new sector commitments (incrementing miner power), for failed PoSts (decrementing miner power) or for other storage and consensus faults. `_updatePowerEntriesFromClaimedPower` is called to update a particular miner's entry in the power table when its claimed power has changed.
+SPC provides a power table abstraction which tracks miner power (i.e. miner storage in relation to network storage) over time. The power table is updated for new sector commitments (incrementing miner power), for failed PoSts (decrementing miner power) or for other storage and consensus faults.
 
-Sector ProveCommit is the first time power is proven to the network and hence power is first added through `_rtAddPowerForSector` at `OnSectorProveCommit`. Power is also added when a sector's TemporaryFault period has ended. Miners are expected to prove over all their sectors that contribute to their power. `_rtDeductClaimedPowerForSectorAssert` is called to decrement a miner's power. This is called when a sector expires or invoked by miner through `OnSectorTerminate` and when a sector enters TemporaryFault through `OnSectorTemporaryFaultEffectiveBegin`. Both `_rtAddPowerForSector` and `_rtDeductClaimedPowerForSectorAssert` are currently called at `OnSectorModifyWeightDesc` as power is determined by `SectorStorageWeightDesc` and `SectorStorageWeightDesc` is only modified when a miner calls `ExtendSectorExpiration` to extend a sector's duration. This may or may not have an impact on power but the machinery is in place to preserve the flexibility.
+Sector ProveCommit is the first time power is proven to the network and hence power is first added upon successful sector ProveCommit. Power is also added when a sector's TemporaryFault period has ended. Miners are expected to prove over all their sectors that contribute to their power. 
+
+Power is decremented when a sector expires, when a sector enters TemporaryFault, or when it is invoked by miners through Sector Termination. Miners can also extend the lifetime of a sector through `ExtendSectorExpiration` and thus modifying `SectorStorageWeightDesc`. This may or may not have an impact on power but the machinery is in place to preserve the flexibility.
 
 The Miner lifecycle in the power table should be roughly as follows:
 
@@ -29,11 +31,11 @@ The Miner lifecycle in the power table should be roughly as follows:
 - UpdatePower: These power increments and decrements are called by various storage actor (and must thus be verified by every full node on the network). Specifically:
     - Power is incremented at SectorProveCommit
     - All Power of a particular miner is decremented immediately after a missed SurprisePoSt (DetectedFault).
-    - A particular sector's power is decremented `OnSectorTemporaryFaultEffectiveBegin` when TemporaryFault is declared on the sector.
-    - A particular sector's power is added back `OnSectorTemporaryFaultEffectiveEnd` and miner is expected to prove over this sector. 
-    - A particular sector's power is removed when the sector is terminated through sector expiration or miner invocation (`_rtTerminateSector`).
+    - A particular sector's power is decremented when its TemporaryFault begins.
+    - A particular sector's power is added back when its TemporaryFault ends and miner is expected to prove over this sector. 
+    - A particular sector's power is removed when the sector is terminated through sector expiration or miner invocation.
 
-To summarize, only sectors in the Active state will command power. A Sector becomes Active when it is added upon ProveCommit. Power is immediately decremented upon `OnSectorTemporaryFaultEffectiveBegin` on an Active sector or when the miner is in DetectedFault state. Power will be restored upon `OnSectorTemporaryFaultEffectiveEnd` and when the miner successfully responds to a SurprisePoSt challenge. A sector's power is removed when it is terminated through either miner invocation or normal expiration. 
+To summarize, only sectors in the Active state will command power. A Sector becomes Active when it is added upon ProveCommit. Power is immediately decremented upon when TemporaryFault begins on an Active sector or when the miner is in Challenged or DetectedFault state. Power will be restored when TemporaryFault has ended and when the miner successfully responds to a SurprisePoSt challenge. A sector's power is removed when it is terminated through either miner invocation or normal expiration. 
 
 {{<label pledge_collateral>}}
 # Pledge Collateral

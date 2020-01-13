@@ -51,9 +51,11 @@ A particular sector enters `TemporaryFault` from `Active` through `DeclareTempor
 - `Challenged` miner has been selected to prove its storage via SurprisePoSt and is currently in the Challenged state
 - `DetectedFault` miner has failed at least one SurprisePoSt, indicating that all claimed storage may not be proven. Miner has lost power on its sector and recovery can only proceed by a successful response to a subsequent SurprisePoSt challenge, up until the limit of number of consecutive failures.
 
-`DetectedFault` is a miner-wide PoSt state when all sectors are considered inactive. All power is lost immediately and pledge collateral is slashed. If a miner remains in `DetectedFault` for more than MaxConsecutiveFailures, all sectors will be terminated, both power and market actors will be notified.
+`DetectedFault` is a miner-wide PoSt state when all sectors are considered inactive. All power is lost immediately and pledge collateral is slashed. If a miner remains in `DetectedFault` for more than MaxConsecutiveFailures, all sectors will be terminated, both power and market actors will be notified for slashing and return of client deal collateral.
 
 `ProvingSet` consists of sectors that miners are required to generate proofs against and is what counts towards miners' power. In other words, `ProvingSet` is a set of all `Active` sectors for a particular miner. `ProvingSet` is only relevant when the miner is in OK stage of its `MinerPoStState`. When a miner is in the `Challenged` state, `ChallengedSectors` specify the list of sectors to be challenged which is the `ProvingSet` before the challenge is issued thus allowing more sectors to be added while it is in the `Challenged` state.
+
+Miners can call ProveCommit to commit a sector and add to their Claimed Power. However, a miner's Nominal Power and Consensus Power will be zero when it is in either Challenged or DetectedFault state. Note also that miners can call DeclareTemporaryFault when they are in Challenged or DetectedFault state. This does not change the list of  sectors that are currently challenged which is a snapshot of all active sectors (ProvingSet) at the time of challenge.
 
 {{< diagram src="diagrams/miner_post_state_machine.dot.svg" title="Miner PoSt State Machine" >}}
 

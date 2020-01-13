@@ -24,19 +24,20 @@ title: Storage Deal Flow
 
 # Receive Challenge
 
-- 5. Miners enter the `Challenged` status whenever `OnSurprisePoStChallenge` is called by the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before `_rtCheckSurprisePoStExpiry` is called by the chain. Miners can only get out the challenge with `SubmitSurprisePoStResponse`.
-- 6. Miners are not allowed to call `DeclareFaults` when they are in the `Challenged` state but Pre and Prove Commits are allowed and it will not affect the challenge status as it specifies a list of ChallengedSectors.
+- 5. Miners enter the `Challenged` status when it receives a SurprisePoSt challenge from the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before the chain checks for SurprisePoSt expiry. Miners can only get out the challenge with `SubmitSurprisePoStResponse`.
+- 6. Miners are allowed to DeclareTemporaryFault when they are in the `Challenged` state but this will not change the list of sectors challenged as `Challenged` state specifies a list of sectors to be challenged which is a snapshot of all Active sectors at the time of challenge. Miners are also allowed to call ProveCommit which will add to their ClaimedPower but their Nominal and Consensus Power are still zero whe  they are in either Challenged or DetectedFault state.
 
 # Declare and Recover Faults
 
-- 7. Declared faults are penalized to a smaller degree than detected. Miners declare failing sectors by invoking `DeclareTemporaryFaults` with a specified fault duration and associated `TemporaryFaultFee`. Miner will lose power associated with the sector upon `OnSectorTemporaryFaultEffectiveBegin`.
-- 8. The loss of power associated with TemporaryFault will be restored upon `OnSectorTemporaryFaultEffectiveEnd` when the miner is now expected to prove over that sector. Failure to do so will result in unsuccessful ElectionPoSt or unsuccessful SurprisePoSt that leads to detected faults.
+- 7. Declared faults are penalized to a smaller degree than DetectedFault. Miners declare failing sectors by invoking `DeclareTemporaryFaults` with a specified fault duration and associated `TemporaryFaultFee`. Miner will lose power associated with the sector when the TemporaryFault period begins.
+- 8. The loss of power associated with TemporaryFault will be restored when the TemporaryFault period has ended and the miner is now expected to prove over that sector. Failure to do so will result in unsuccessful ElectionPoSt or unsuccessful SurprisePoSt that leads to detected faults.
 
 
 # Detect Faults
 
 - 9. `CronActor` triggers `StorageMinerActor._rtCheckSurprisePoStExpiry` through `StoragePowerActor` and checks if SurprisePoSt challenge has expired for a particular miner.
   - If no PoSt is submitted by the end of the `ProvingPeriod`, miner enters `DetectedFault` state, some `PledgeCollateral` is slashed, and all power is lost.
+  - Miners will now have to wait for the next SurprisePoSt challenge.
   - If the faults persist for `MAX_CONSECUTIVE_FAULTS` then sectors are terminated and provider deal collateral is slashed. 
 
 # Sector Expiration
