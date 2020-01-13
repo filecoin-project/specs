@@ -2,7 +2,7 @@
 title: Storage Market Actor
 ---
 
-`StorageMarketActor` is responsible for processing and managing on-chain deals. This is also the entry point of all storage deals and data into the system. It maintains a mapping of `StorageDealID` to `StorageDeal` and keeps track of locked balances of `StorageClient` and `StorageProvider`. When a deal is posted on chain through the `StorageMarketActor`, it will first check if both transacting parties have sufficient balances locked up and include the deal on chain. On every successful submission of `PoStProof`, `StorageMarketActor` will credit the `StorageProvider` a fraction of the storage fee based on how many blocks have passed since the last `PoStProof`. In the event that there are sectors included in the `FaultSet`, `StorageMarketActor` will fetch deal information from the chain and `SlashStorageFault` for faulting on those deals. Similarly, when a `PoStProof` is missed by the end of a `ProvingPeriod`, `SlashStorageFault` will also be called by the `CronActor` to penalize `StorageProvider` for dropping a `StorageDeal`.
+`StorageMarketActor` is responsible for processing and managing on-chain deals. This is also the entry point of all storage deals and data into the system. It maintains a mapping of `StorageDealID` to `StorageDeal` and keeps track of locked balances of `StorageClient` and `StorageProvider`. When a deal is posted on chain through the `StorageMarketActor`, it will first check if both transacting parties have sufficient balances locked up and include the deal on chain. 
 
 # `StorageMarketActor` interface
 
@@ -20,9 +20,7 @@ title: Storage Market Actor
 {{<label storage_deal_collateral>}}
 # Storage Deal Collateral
 
-Storage Deals have an associated collateral amount. This `StorageDealCollateral` is held in the `StorageMarketActor`.
-Its value is agreed upon by the storage provider and client off-chain, but must be greater than a protocol-defined minimum in any deal. Storage providers will choose to offer greater collateral to signal high-quality storage to clients.
-
-On `SectorFailureTimeout` (see {{<sref faults>}}), the `StorageDealCollateral` will be burned. In the future, the Filecoin protocol may be amended to send up to half of the collateral to storage clients as damages in such cases.
+There are two types of Storage Deal Collateral, ProviderDealCollateral and ClientDealCollateral. Both types of `StorageDealCollateral` are held in the `StorageMarketActor`.
+Their values are agreed upon by the storage provider and client off-chain, but must be greater than a protocol-defined minimum in any deal. Storage providers will choose to offer greater provider deal collateral to signal high-quality storage to clients. Provider deal collateral is only slashed when a sector is terminated other than normal expiration. If a miner enters Temporary Fault for a sector and later recovers from it, no deal collateral will be slashed.
 
 Upon graceful deal expiration, storage providers must wait for finality number of epochs (as defined in {{<sref finality>}}) before being able to withdraw their `StorageDealCollateral` from the `StorageMarketActor`.

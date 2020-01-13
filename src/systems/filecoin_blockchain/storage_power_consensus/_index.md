@@ -36,15 +36,13 @@ However, given Filecoin's "useful Proof-of-Work" is achieved through file storag
 {{<label storage_power>}}
 ## On Power
 
-Per the above, we also clearly distinguish putting storage on-chain from gaining power in consensus (sometimes called "Storage Power") as follows:
+Claimed power is assigned to every sector as a static function of its `SectorStorageWeightDesc` which includes `SectorSize`, `Duration`, and `DealWeight`. DealWeight is a measure that maps size and duration of active deals in a sector during its lifetime to its impact on power and reward distribution. A CommittedCapacity Sector (see {{<sref storage_mining_subsystem "Sector Types">}}) will have a DealWeight of zero but all sectors have an explicit Duration which is defined from the ChainEpoch that the sector comes online in a ProveCommit message to the Expiration ChainEpoch of the sector. In principle, power is the number of votes a miner has in leader election and it is a point in time concept of storage. However, the exact function that maps `SectorStorageWeightDesc` to claimed `StoragePower` and `BlockReward` will be announced soon.
 
-Consensus power in Filecoin is defined as the intersection between:
+More precisely,
 
-- Proven Storage as of the PoSts verification (i.e. storage in the `Proving Set` since it will all be active by the time the PoSt is computed)
-- In-deal storage.
-Put another way **consensus power is in-deal storage in the Proving Set**. For instance, if a miner had two 32GB sector, each with 20 GB of in-deal storage; the miner would have 40GB worth of storage power for SPC.
-
-Read more in {{<sref storage_mining_subsystem>}}.
+- Claimed power = power from ProveCommit sectors minus sectors in TemporaryFault effective duration.
+- Nominal power = claimed power, unless the miner is in DetectedFault or Challenged state. Nominal power is used to determine total network storage power for purposes of consensus minimum.
+- Consensus power = nominal power, unless the miner fails to meet consensus minimum, or is undercollateralized.
 
 {{<label tickets>}}
 ## Tickets
@@ -141,9 +139,9 @@ In order to secure Storage Power Consensus, the system defines a minimum miner s
 
 Specifically, miners must have either at least `MIN_MINER_SIZE_STOR` of power (i.e. storage power currently used in storage deals) in order to participate in leader election. If no miner has `MIN_MINER_SIZE_STOR` or more power, miners with at least as much power as the smallest miner in the top `MIN_MINER_SIZE_TARG` of miners (sorted by storage power) will be able to participate in leader election. In plain english, take `MIN_MINER_SIZE_TARG = 3` for instance, this means that miners with at least as much power as the 3rd largest miner will be eligible to participate in consensus.
 
-Miners smaller than this cannot mine blocks and earn block rewards in the network. Their power will not be counted as part of total network power. However, **it is important to note that such miners can still have their power faulted and be penalized accordingly**.
+Miners smaller than this cannot mine blocks and earn block rewards in the network. Their power will still be counted in the total network (raw or claimed) storage power, even though their power will not be counted as votes for leader election. However, **it is important to note that such miners can still have their power faulted and be penalized accordingly**.
 
-Accordingly, to bootstrap the network, the genesis block must include miners taking part in valid storage deals along with appropriate committed storage.
+Accordingly, to bootstrap the network, the genesis block must include miners, potentially just CommittedCapacity sectors, to initiate the network.
 
 The `MIN_MINER_SIZE_TARG` condition will not be used in a network in which any miner has more than `MIN_MINER_SIZE_STOR` power. It is nonetheless defined to ensure liveness in small networks (e.g. close to genesis or after large power drops).
 
@@ -153,7 +151,7 @@ The below values are currently placeholders.
 
 We currently set:
 
-- `MIN_MINER_SIZE_STOR = 1 << 40 Bytes` (100 TiB)
+- `MIN_MINER_SIZE_STOR = 100 * (1 << 40) Bytes` (100 TiB)
 - `MIN_MINER_SIZE_TARG = 3
 
 ## Network recovery after halting

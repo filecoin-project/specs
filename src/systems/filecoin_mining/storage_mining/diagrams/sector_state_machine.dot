@@ -1,0 +1,33 @@
+digraph sector_state {
+  Compound=true
+  splines=ortho
+  ranksep=0.2
+  nodesep=2
+  node [shape=circle width=1.2 fixedsize=true]
+  edge [penwidth=2]
+
+  Cleared [shape=doublecircle] // doublecircle because it is the init state
+  PreCommit
+
+  subgraph cluster_0 {
+      label="Proving Set (Counted for Power)"
+      style=filled
+      color=grey90
+     Active
+  }
+
+  TempFault
+
+  Cleared -> PreCommit [color="black"]
+  PreCommit -> Active [color="green"]
+
+  // fail to commit sector (expiry)
+  PreCommit -> Cleared [color="gray"]
+
+  // either declare Fault or miss PoSt
+  Active -> TempFault [color="orange"]
+  TempFault -> Active [color="cyan"]
+  PreCommit -> Active [style="invis"]
+  Active -> Cleared [color="blue:white:purple"]
+  
+}
