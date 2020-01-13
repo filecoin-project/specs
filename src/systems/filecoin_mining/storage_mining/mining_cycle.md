@@ -72,9 +72,9 @@ Note that any change to worker keys after registration must be appropriately del
 
 ### Step 1: Committing Sectors
 
-When the miner has completed their first seal, they should post it on-chain using the {{<sref storage_miner_actor>}}'s `ProveCommitSector` function. The miner will need to put up pledge collateral in proportion to the amount of storage they commit on chain. If the miner had zero committed sectors prior to this call, this begins their proving period and miner gains power for the sector.
+When the miner has completed their first seal, they should post it on-chain using the {{<sref storage_miner_actor>}}'s `ProveCommitSector` function. The miner will need to put up pledge collateral in proportion to the amount of storage they commit on chain. Miner will now gain power for this particular sector upon successful `ProveCommitSector`.
 
-You can read more about sectors {{<sref sector "here">}}.
+You can read more about sectors {{<sref sector "here">}} and how sector relates to power {{<sref storage_power "here">}}.
 
 ### Step 2: Running Elections
 
@@ -98,7 +98,7 @@ The miner will be unable to craft valid PoSts over faulty sectors, thereby reduc
 
 A miner will no longer be able to declare faults after being challenged for a SurprisePoSt.
 
-### Step 4: Deal/Sector Expiration
+### Step 3: Deal/Sector Expiration
 
 In order to stop mining, a miner must complete all of its storage deals. Once all deals in a sector have expired, the sector itself will expire thereby enabling the miner to remove the associated collateral from their account.
 

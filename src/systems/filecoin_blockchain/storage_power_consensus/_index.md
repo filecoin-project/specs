@@ -33,6 +33,16 @@ We must distinguish between both types of "miners" (storage and block miners). {
 
 However, given Filecoin's "useful Proof-of-Work" is achieved through file storage (PoRep and PoSt), there is little overhead cost for storage miners to participate in leader election. Such a {{<sref storage_miner_actor>}} need only register with the {{<sref storage_power_actor>}} in order to participate in Expected Consensus and mine blocks.
 
+{{<label storage_power>}}
+## On Power
+
+Claimed power is assigned to every sector as a static function of its `SectorStorageWeightDesc` which includes `SectorSize`, `Duration`, and `DealWeight`. DealWeight is a measure that maps size and duration of active deals in a sector during its lifetime to its impact on power and reward distribution. A CommittedCapacity Sector (see {{<sref storage_mining_subsystem "Sector Types">}}) will have a DealWeight of zero but all sectors have an explicit Duration which is defined from the ChainEpoch that the sector comes online in a ProveCommit message to the Expiration ChainEpoch of the sector. In principle, power is the number of votes a miner has in leader election and it is a point in time concept of storage. However, the exact function that maps `SectorStorageWeightDesc` to claimed `StoragePower` and `BlockReward` will be announced soon.
+
+More precisely,
+
+- Nominal power = claimed power, unless the miner is in DetectedFault state. Nominal power is used to determine total network storage power for purposes of consensus minimum.
+- Consensus power = nominal power, unless the miner fails to meet consensus minimum, or is undercollateralized.
+
 {{<label tickets>}}
 ## Tickets
 
@@ -120,3 +130,29 @@ Each Ticket should be generated from the prior one in the ticket-chain and verif
 
 In the case that no miner is eligible to produce a block in a given round of EC, the storage power consensus subsystem will be called by the block producer to attempt another leader election by incrementing the nonce appended to the ticket drawn from the past in order to attempt to find a new winning `PartialTicket` and trying again. 
 Note that a miner may attempt to grind through tickets by incrementing the nonce repeatedly until they find a winning ticket. However, any block so generated in the future will be rejected by other miners (with synchronized clocks) until that epoch's appropriate time.
+
+{{<label min_miner_size>}}
+## Minimum Miner Size
+
+In order to secure Storage Power Consensus, the system defines a minimum miner size required to participate in consensus.
+
+Specifically, miners must have either at least `MIN_MINER_SIZE_STOR` of power (i.e. storage power currently used in storage deals) in order to participate in leader election. If no miner has `MIN_MINER_SIZE_STOR` or more power, miners with at least as much power as the smallest miner in the top `MIN_MINER_SIZE_TARG` of miners (sorted by storage power) will be able to participate in leader election. In plain english, take `MIN_MINER_SIZE_TARG = 3` for instance, this means that miners with at least as much power as the 3rd largest miner will be eligible to participate in consensus.
+
+Miners smaller than this cannot mine blocks and earn block rewards in the network. Their power will still be counted in the total network (raw or claimed) storage power, even though their power will not be counted as votes for leader election. However, **it is important to note that such miners can still have their power faulted and be penalized accordingly**.
+
+Accordingly, to bootstrap the network, the genesis block must include miners, potentially just CommittedCapacity sectors, to initiate the network.
+
+The `MIN_MINER_SIZE_TARG` condition will not be used in a network in which any miner has more than `MIN_MINER_SIZE_STOR` power. It is nonetheless defined to ensure liveness in small networks (e.g. close to genesis or after large power drops).
+
+{{% notice placeholder %}}
+The below values are currently placeholders.
+{{% /notice %}}
+
+We currently set:
+
+- `MIN_MINER_SIZE_STOR = 100 * (1 << 40) Bytes` (100 TiB)
+- `MIN_MINER_SIZE_TARG = 3
+
+## Network recovery after halting
+
+Placeholder where we will define a means of rebooting network liveness after it halts catastrophically (i.e. empty power table).

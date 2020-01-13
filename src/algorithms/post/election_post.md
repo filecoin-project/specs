@@ -9,6 +9,7 @@ At a high-level it marries `ElectionPoSt` with a `SurprisePoSt` fallback:
 - By coupling leader election and PoSt, `ElectionPoSt` ensures that miners must do the work to prove their sectors at every round in order to earn block rewards.
 - Small miners may not win on a regular basis however, `SurprisePoSt` thus comes in as a lower-bound to how often miners must PoSt and helps ensure the Power Table does not grow stale for its long-tail of smaller miners.
 
+{{<label pledge_collateral>}}
 # Overview
 
 Election PoSt couples the PoSt process with block production, meaning that in order to produce a block, the miner must produce a valid PoSt proof (snark output). Specifically, a subset of non-faulted sectors the miner is storing (i.e. eligible sectors) allows them to attempt a leader election using a PartialTicket any of which could yield a valid ChallengeTicket for leader election. The probability of scratching a winning ChallengeTicket is dependent on sector size and total storage. Miners are rewarded in proportion to the quantity of winning ChallengeTickets they generate in a given epoch, thereby incentivizing a miner to check as much of their storage as allowed in order to express their full power in a leader election. The number of election proofs a miner can generate in a given epoch will determine the block reward it earns.

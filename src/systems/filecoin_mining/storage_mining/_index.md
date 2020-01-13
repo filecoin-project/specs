@@ -8,7 +8,6 @@ entries:
 ---
 
 {{<label storage_mining_subsystem>}}
-
 # Filecoin Storage Mining Subsystem
 
 The Filecoin Storage Mining Subsystem ensures a storage miner can effectively commit storage to the Filecoin protocol in order to both:
@@ -19,7 +18,7 @@ The Filecoin Storage Mining Subsystem ensures a storage miner can effectively co
 The above involves a number of steps to putting on and maintaining online storage, such as:
 
 - Committing new storage (see Sealing and PoRep)
-- Continously proving storage
+- Continously proving storage (see {{<sref election_post>}})
 - Declaring storage faults and recovering from them.
 
 ## Sector Types
@@ -54,7 +53,7 @@ A particular sector enters `TemporaryFault` from `Active` through `DeclareTempor
 
 `DetectedFault` is a miner-wide PoSt state when all sectors are considered inactive. All power is lost immediately and pledge collateral is slashed. If a miner remains in `DetectedFault` for more than MaxConsecutiveFailures, all sectors will be terminated, both power and market actors will be notified.
 
-`ProvingSet` is consist of sectors that miners are required to generate proofs against and is what counts towards miners' power. In other words, `ProvingSet` is a set of all `Active` sectors for a particular miner. `ProvingSet` is only relevant when the miner is in OK stage of its `MinerPoStState`. When a miner is in the `Challenged` state, `ChallengedSectors` specify the list of sectors to be challenged which is the `ProvingSet` before the challenge is issued thus allowing more sectors to be added while it is in the `Challenged` state.
+`ProvingSet` consists of sectors that miners are required to generate proofs against and is what counts towards miners' power. In other words, `ProvingSet` is a set of all `Active` sectors for a particular miner. `ProvingSet` is only relevant when the miner is in OK stage of its `MinerPoStState`. When a miner is in the `Challenged` state, `ChallengedSectors` specify the list of sectors to be challenged which is the `ProvingSet` before the challenge is issued thus allowing more sectors to be added while it is in the `Challenged` state.
 
 {{< diagram src="diagrams/miner_post_state_machine.dot.svg" title="Miner PoSt State Machine" >}}
 
