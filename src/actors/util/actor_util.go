@@ -145,3 +145,8 @@ func ActorIDSetHAMT_Empty() ActorIDSetHAMT {
 	IMPL_FINISH()
 	panic("")
 }
+
+func MinerEventSetHAMT_Empty() MinerEventSetHAMT {
+	IMPL_FINISH()
+	panic("")
+}
