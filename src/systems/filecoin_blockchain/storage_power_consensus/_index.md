@@ -40,7 +40,8 @@ Claimed power is assigned to every sector as a static function of its `SectorSto
 
 More precisely,
 
-- Nominal power = claimed power, unless the miner is in DetectedFault state. Nominal power is used to determine total network storage power for purposes of consensus minimum.
+- Claimed power = power from ProveCommit sectors minus sectors in TemporaryFault effective duration.
+- Nominal power = claimed power, unless the miner is in DetectedFault or Challenged state. Nominal power is used to determine total network storage power for purposes of consensus minimum.
 - Consensus power = nominal power, unless the miner fails to meet consensus minimum, or is undercollateralized.
 
 {{<label tickets>}}
