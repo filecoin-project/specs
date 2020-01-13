@@ -190,6 +190,22 @@ func (a *StoragePowerActorCode_I) OnMinerSurprisePoStFailure(rt Runtime, numCons
 	}
 }
 
+func (a *StoragePowerActorCode_I) OnMinerEnrollCronEvent(rt Runtime, eventEpoch abi.ChainEpoch, sectorNumbers []sector.SectorNumber) {
+	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
+	minerAddr := rt.ImmediateCaller()
+	minerEvent := &autil.MinerEvent_I{
+		MinerAddr_: minerAddr,
+		Sectors_:   sectorNumbers,
+	}
+
+	h, st := a.State(rt)
+	if _, found := st.Impl().CachedDeferredCronEvents_[eventEpoch]; !found {
+		st.Impl().CachedDeferredCronEvents_[eventEpoch] = autil.MinerEventSetHAMT_Empty()
+	}
+	st.Impl().CachedDeferredCronEvents_[eventEpoch][minerEvent] = true
+	UpdateRelease(rt, h, st)
+}
+
 func (a *StoragePowerActorCode_I) ReportVerifiedConsensusFault(rt Runtime, slasheeAddr addr.Address, faultEpoch abi.ChainEpoch, faultType ConsensusFaultType) {
 	TODO()
 	panic("")
@@ -378,6 +394,12 @@ func (a *StoragePowerActorCode_I) _rtDeleteMinerActor(rt Runtime, minerAddr addr
 
 	UpdateRelease(rt, h, st)
 
-	rt.DeleteActor(minerAddr)
+	rt.Send(
+		minerAddr,
+		ai.Method_StorageMinerActor_OnDeleteMiner,
+		serde.MustSerializeParams(),
+		abi.TokenAmount(0),
+	)
+
 	rt.SendFunds(builtin.BurntFundsActorAddr, amountSlashed)
 }

@@ -191,7 +191,7 @@ func (a *StorageMarketActorCode_I) GetWeightForDealSet(rt Runtime, dealIDs deal.
 	return deal.DealWeight(ret)
 }
 
-func (a *StorageMarketActorCode_I) TerminateDealsOnSlashProviderSector(rt Runtime, dealIDs deal.DealIDs) {
+func (a *StorageMarketActorCode_I) OnMinerSectorsTerminate(rt Runtime, dealIDs deal.DealIDs) {
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 

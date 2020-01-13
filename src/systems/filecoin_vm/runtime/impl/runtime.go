@@ -206,20 +206,8 @@ func (rt *VMContext) _createActor(codeID abi.ActorCodeID, address addr.Address) 
 }
 
 func (rt *VMContext) DeleteActor(address addr.Address) {
-	ok := false
-
-	// An actor may delete itself.
-	if rt._actorAddress == address {
-		ok = true
-	}
-
-	// Special case: StoragePowerActor may delete a StorageMinerActor.
-	addrCodeID, found := rt.GetActorCodeID(address)
-	if found && rt._actorAddress == builtin.StoragePowerActorAddr && addrCodeID == builtin.StorageMinerActorCodeID {
-		ok = true
-	}
-
-	if !ok {
+	// Only a given actor may delete itself.
+	if rt._actorAddress != address {
 		rt.AbortAPI("Invalid actor deletion request")
 	}
 

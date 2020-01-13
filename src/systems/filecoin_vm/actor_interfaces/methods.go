@@ -42,6 +42,7 @@ const (
 	// Internal mechanism events
 	Method_StorageMinerActor_OnVerifiedElectionPoSt
 	Method_StorageMinerActor_OnSurprisePoStChallenge
+	Method_StorageMinerActor_OnDeleteMiner
 
 	// State queries
 	Method_StorageMinerActor_GetPoStState

@@ -21,17 +21,6 @@ import (
 
 const epochUndefined = abi.ChainEpoch(-1)
 
-////////////////////////////////////////////////////////////////////////////////
-// Actor methods
-////////////////////////////////////////////////////////////////////////////////
-
-func (a *StorageMinerActorCode_I) GetWorkerVRFKey(rt Runtime) filcrypto.VRFPublicKey {
-	h, st := a.State(rt)
-	ret := st.Info().WorkerVRFKey()
-	Release(rt, h, st)
-	return ret
-}
-
 //////////////////
 // SurprisePoSt //
 //////////////////
@@ -108,13 +97,18 @@ func (a *StorageMinerActorCode_I) SubmitSurprisePoStResponse(rt Runtime, onChain
 	)
 }
 
+// Called by StoragePowerActor.
+func (a *StorageMinerActorCode_I) OnDeleteMiner(rt Runtime) {
+	rt.ValidateImmediateCallerIs(builtin.StoragePowerActorAddr)
+	minerAddr := rt.CurrReceiver()
+	rt.DeleteActor(minerAddr)
+}
+
 //////////////////
 // ElectionPoSt //
 //////////////////
 
 // Called by the VM interpreter once an ElectionPoSt has been verified.
-// Assumes the block reward has already been granted to the storage miner actor.
-// This only handles sector management.
 func (a *StorageMinerActorCode_I) OnVerifiedElectionPoSt(rt Runtime) {
 	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr)
 
