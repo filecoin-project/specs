@@ -162,7 +162,11 @@ func (a *MultiSigActorCode_I) _rtApproveTransactionOrAbort(
 	UpdateRelease_MultiSig(rt, h, st)
 
 	if thresholdMet {
-		// A sufficient number of approvals have arrived: relay the message and delete from pending queue.
+		if !st._hasAvailable(rt.CurrentBalance(), txn.Value(), rt.CurrEpoch()) {
+			rt.AbortArgMsg("insufficient funds unlocked")
+		}
+
+		// A sufficient number of approvals have arrived and sufficient funds have been unlocked: relay the message and delete from pending queue.
 		rt.Send(
 			txn.To(),
 			txn.Method(),
@@ -234,4 +238,27 @@ func UpdateRelease_MultiSig(rt Runtime, h vmr.ActorStateHandle, st MultiSigActor
 }
 func (st *MultiSigActorState_I) CID() cid.Cid {
 	panic("TODO")
+}
+
+func (st *MultiSigActorState_I) AmountLocked(elapsedEpoch abi.ChainEpoch) abi.TokenAmount {
+	if elapsedEpoch >= st.UnlockDuration() {
+		return abi.TokenAmount(0)
+	}
+
+	TODO() // BigInt
+	lockedProportion := (st.UnlockDuration() - elapsedEpoch) / st.UnlockDuration()
+	return abi.TokenAmount(uint64(st.InitialBalance()) * uint64(lockedProportion))
+}
+
+// return true if MultiSig maintains required locked balance after spending the amount
+func (st *MultiSigActorState_I) _hasAvailable(currBalance abi.TokenAmount, amountToSpend abi.TokenAmount, currEpoch abi.ChainEpoch) bool {
+	if amountToSpend < 0 || currBalance < amountToSpend {
+		return false
+	}
+
+	if currBalance-amountToSpend < st.AmountLocked(currEpoch-st.StartEpoch()) {
+		return false
+	}
+
+	return true
 }
