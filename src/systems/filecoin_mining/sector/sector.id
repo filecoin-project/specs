@@ -54,7 +54,7 @@ type SectorInDetail struct {
     Sealed struct {
         CID SealedSectorCID
         Bytes
-        SealCfg
+        RegisteredProof
     }
 }
 
@@ -74,7 +74,6 @@ type UnsealedSectorInfo struct {
     Size         SectorSize
     PieceCount   UVarint  // number of pieces in this sector (can get it from len(Pieces) too)
     Pieces       [piece.PieceInfo]  // wont get externalized easy, -- it's big
-    SealCfg  // this will be here as well. it's determined.
     // Deals       [deal.StorageDeal]
 }
 
@@ -82,15 +81,17 @@ type UnsealedSectorInfo struct {
 type SealedSectorInfo struct {
     SealedCID  SealedSectorCID
     Size       SectorSize
-    SealCfg
     SealArgs   SealArguments
 }
 
+// This ordering, defines mappings to UInt in a way which MUST never change.
+// The commented assignments correspond to the code which will be generated
+// and are included here to facilitate maintaining their
 type RegisteredProof enum {
-    WinStackedDRG32GiBSeal
-    WinStackedDRG32GiBPoSt
-    StackedDRG32GiBSeal
-    StackedDRG32GiBPoSt
+    WinStackedDRG32GiBSeal  // = 1
+    WinStackedDRG32GiBPoSt  // = 2
+    StackedDRG32GiBSeal  // = 3
+    StackedDRG32GiBPoSt  // = 4
 }
 
 type ProofRegistry {UInt: ProofInstance}
@@ -101,6 +102,12 @@ type ProofInstance struct {
     Algorithm    ProofAlgorithm
     CircuitType  ConcreteCircuit
     Partitions   UInt
+    Cfg          ProofCfg
+}
+
+type ProofCfg union {
+    SealCfg  SealInstanceCfg
+    PoStCfg  PoStInstanceCfg
 }
 
 type ProofType enum {
@@ -108,13 +115,11 @@ type ProofType enum {
     PoStProof
 }
 
-// This ordering, defines mappings to UInt in a way which MUST never change.
-// Make that explicit to avoid accidentally violating this constraint.
 type ProofAlgorithm enum {
-    StackedDRGSeal  // = 0
-    WinStackedDRGSeal  // = 1
-    StackedDRGPoSt  //= 2
-    WinStackedDRGPoSt  // = 3
+    StackedDRGSeal
+    WinStackedDRGSeal
+    StackedDRGPoSt
+    WinStackedDRGPoSt
 }
 
 type ConcreteCircuit struct {

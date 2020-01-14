@@ -9,27 +9,28 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunRet_I {
 	cfg := si.SealCfg()
+	sectorSize := si.SealCfg().Impl().SectorSize()
 	sdr := filproofs.WinSDRParams(cfg)
 
 	sid := si.SectorID()
-	sectorSize := int(si.SealCfg().SectorSize())
+	sectorSizeInt := int(sectorSize)
 
 	unsealedPath := si.UnsealedPath()
 
-	data := make(util.Bytes, si.SealCfg().SectorSize())
+	data := make(util.Bytes, sectorSize)
 	in := file.FromPath(unsealedPath)
 	inLength, err := in.Read(data)
 
 	if err != nil {
 		return SectorSealer_SealSector_FunRet_Make_err(err).Impl()
 	}
-	if inLength != sectorSize {
+	if inLength != sectorSizeInt {
 		return SectorSealer_SealSector_FunRet_Make_err(
 			errors.New("Sector file is wrong size"),
 		).Impl()
 	}
 
-	sealArtifacts := sdr.Seal(sid, data, si.RandomSeed())
+	sealArtifacts := sdr.Seal(si.RegisteredProof(), sid, data, si.RandomSeed())
 	sealedPath := si.SealedPath()
 
 	out := file.FromPath(sealedPath)
@@ -39,7 +40,7 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 		return SectorSealer_SealSector_FunRet_Make_err(err).Impl()
 	}
 
-	if outLength != sectorSize {
+	if outLength != sectorSizeInt {
 		return SectorSealer_SealSector_FunRet_Make_err(
 			errors.New("Wrote wrong sealed sector size"),
 		).Impl()

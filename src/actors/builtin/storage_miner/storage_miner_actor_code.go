@@ -645,7 +645,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 
 	pvInfo := sector.PoStVerifyInfo_I{
 		OnChain_:    onChainInfo,
-		Randomness_: onChainInfo.Randomness(),
+		Randomness_: sector.PoStRandomness(postRandomness),
 		// EligibleSectors_: FIXME: verification needs these.
 	}
 
@@ -685,11 +685,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySealOrAbort(rt Runtime, onChainInfo s
 
 	unsealedCID, _ := filproofs.ComputeUnsealedSectorCIDFromPieceInfos(sectorSize, pieceInfos.Items())
 
-	sealCfg := sector.SealCfg_I{
-		SectorSize_:  sectorSize,
-		InstanceCfg_: info.InstanceCfg(),
-		Partitions_:  info.SealPartitions(),
-	}
+	sealCfg := info.InstanceCfg()
 
 	minerActorID, err := addr.IDFromAddress(rt.CurrReceiver())
 	if err != nil {
@@ -708,14 +704,14 @@ func (a *StorageMinerActorCode_I) _rtVerifySealOrAbort(rt Runtime, onChainInfo s
 		OnChain_: onChainInfo,
 
 		// TODO: Make SealCfg sector.SealCfg from miner configuration (where is that?)
-		SealCfg_: &sealCfg,
+		RegisteredProof_: onChainInfo.RegisteredProof(),
 
 		Randomness_:            sector.SealRandomness(svInfoRandomness),
 		InteractiveRandomness_: sector.InteractiveSealRandomness(svInfoInteractiveRandomness),
 		UnsealedCID_:           unsealedCID,
 	}
 
-	sdr := filproofs.WinSDRParams(&sealCfg)
+	sdr := filproofs.WinSDRParams(sealCfg)
 
 	isVerified := sdr.VerifySeal(&svInfo)
 

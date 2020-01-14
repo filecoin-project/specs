@@ -4,18 +4,19 @@ import addr "github.com/filecoin-project/go-address"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 
 type SealInputs struct {
-    SectorID      sector.SectorID
-    SealCfg       sector.SealCfg
-    MinerID       addr.Address
-    RandomSeed    sector.SealRandomness
-    UnsealedPath  file.Path
-    SealedPath    file.Path
-    DealIDs       [deal.DealID]
+    RegisteredProof  sector.RegisteredProof  // FIXME: Ensure this is provided.
+    SectorID         sector.SectorID
+    SealCfg          sector.SealInstanceCfg
+    MinerID          addr.Address
+    RandomSeed       sector.SealRandomness
+    UnsealedPath     file.Path
+    SealedPath       file.Path
+    DealIDs          [deal.DealID]
 }
 
 type CreateSealProofInputs struct {
     SectorID               sector.SectorID
-    SealCfg                sector.SealCfg
+    SealCfg                sector.SealInstanceCfg
     InteractiveRandomSeed  sector.InteractiveSealRandomness
     SealedPaths            [file.Path]
     SealOutputs

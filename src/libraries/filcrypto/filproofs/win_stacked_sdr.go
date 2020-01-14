@@ -10,7 +10,8 @@ import (
 	"github.com/ipfs/go-cid"
 )
 
-func WinSDRParams(cfg sector.SealCfg) *WinStackedDRG_I {
+func WinSDRParams(c sector.SealInstanceCfg) *WinStackedDRG_I {
+	cfg := c.As_WinStackedDRGCfgV1()
 	// TODO: Bridge constants with orient model.
 	const LAYERS = 10
 	const OFFLINE_CHALLENGES = 6666
@@ -74,7 +75,7 @@ func WinSDRParams(cfg sector.SealCfg) *WinStackedDRG_I {
 		Curve_: &EllipticCurve_I{
 			FieldModulus_: *FIELD_MODULUS,
 		},
-		Cfg_: cfg,
+		Cfg_: c,
 	}
 }
 
@@ -102,7 +103,8 @@ func (sdr *WinStackedDRG_I) WindowExpander() *ExpanderGraph_I {
 	}
 }
 
-func (sdr *WinStackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness sector.SealRandomness) SealSetupArtifacts {
+func (sdr *WinStackedDRG_I) Seal(registeredProof sector.RegisteredProof, sid sector.SectorID, data []byte, randomness sector.SealRandomness) SealSetupArtifacts {
+
 	windowCount := int(sdr.WindowCount())
 	nodeSize := int(sdr.NodeSize())
 	nodes := int(sdr.Nodes())
@@ -193,7 +195,7 @@ func (sdr *WinStackedDRG_I) CreatePrivateSealProof(randomness sector.Interactive
 	qTree := LoadMerkleTree(aux.CommQTreePath())
 
 	windows := int(sdr.WindowCount())
-	windowSize := int(uint64(sdr.Cfg().SectorSize()) / UInt(sdr.WindowCount()))
+	windowSize := int(uint64(sdr.Cfg().As_WinStackedDRGCfgV1().SectorSize()) / UInt(sdr.WindowCount()))
 
 	for c := range windowChallenges {
 		columnProofs := createColumnProofs(sdr.WindowDrg(), sdr.WindowExpander(), UInt(c), nodeSize, columnTree, aux, windows, windowSize)
@@ -218,7 +220,7 @@ func (sdr *WinStackedDRG_I) CreatePrivateSealProof(randomness sector.Interactive
 func (sdr *WinStackedDRG_I) VerifyPrivateSealProof(privateProof PrivateOfflineProof, sealSeed sector.SealSeed, randomness sector.InteractiveSealRandomness, commD Commitment, commR sector.SealedSectorCID) bool {
 	nodeSize := int(sdr.NodeSize())
 	windowCount := int(sdr.WindowCount())
-	windowSize := int(UInt(sdr.Cfg().SectorSize()) / UInt(sdr.WindowCount())) // TOOD: Make this a function.
+	windowSize := int(UInt(sdr.Cfg().As_WinStackedDRGCfgV1().SectorSize()) / UInt(sdr.WindowCount())) // TOOD: Make this a function.
 	layers := int(sdr.Layers())
 	curveModulus := sdr.Curve().FieldModulus()
 	windowChallenges, wrapperChallenges := sdr._generateOfflineChallenges(sealSeed, randomness, sdr.Challenges(), sdr.WindowChallenges())
@@ -341,19 +343,11 @@ func (sdr *WinStackedDRG_I) CreateOfflineCircuitProof(proof PrivateOfflineProof,
 	// publicInputs := GeneratePublicInputs()
 
 	panic("TODO")
-	var bytes []byte
-
-	var registeredProof sector.RegisteredProof
-
-	switch sdr.Cfg().SectorSize() {
-	case GIB_32:
-		registeredProof = sector.RegisteredProof_WinStackedDRG32GiBSeal
-	}
+	var proofBytes []byte
+	panic("TODO")
 
 	sealProof := sector.SealProof_I{
-		// TODO: This must also depend on the sector size if more than one size is in the spec.
-		RegisteredProof_: registeredProof,
-		ProofBytes_:      bytes,
+		ProofBytes_: proofBytes,
 	}
 
 	return &sealProof
@@ -388,8 +382,8 @@ func (sdr *WinStackedDRG_I) _verifyOfflineCircuitProof(commD sector.UnsealedSect
 ////////////////////////////////////////////////////////////////////////////////
 // PoSt
 
-func (sdr *WinStackedDRG_I) _generateCandidate(postCfg sector.PoStCfg, randomness sector.PoStRandomness, aux sector.PersistentProofAux, sectorID sector.SectorID, sectorChallengeIndex UInt) sector.PoStCandidate {
-	cfg := postCfg.InstanceCfg().As_PoStCfgV1()
+func (sdr *WinStackedDRG_I) _generateCandidate(postCfg sector.PoStInstanceCfg, randomness sector.PoStRandomness, aux sector.PersistentProofAux, sectorID sector.SectorID, sectorChallengeIndex UInt) sector.PoStCandidate {
+	cfg := postCfg.As_PoStCfgV1()
 
 	nodes := int(cfg.Nodes())
 	leafChallengeCount := int(cfg.LeafChallengeCount())
@@ -425,8 +419,8 @@ func (sdr *WinStackedDRG_I) _generateCandidate(postCfg sector.PoStCfg, randomnes
 	return &candidate
 }
 
-func (sdr *WinStackedDRG_I) VerifyInternalPrivateCandidateProof(postCfg sector.PoStCfg, p *InternalPrivateCandidateProof, challengeSeed sector.PoStRandomness, candidate sector.PoStCandidate, commRLast Commitment) bool {
-	cfg := postCfg.InstanceCfg().As_PoStCfgV1()
+func (sdr *WinStackedDRG_I) VerifyInternalPrivateCandidateProof(postCfg sector.PoStInstanceCfg, p *InternalPrivateCandidateProof, challengeSeed sector.PoStRandomness, candidate sector.PoStCandidate, commRLast Commitment) bool {
+	cfg := postCfg.As_PoStCfgV1()
 	util.Assert(candidate.PrivateProof() == nil)
 	nodes := int(cfg.Nodes())
 	challengeRangeSize := int(cfg.ChallengeRangeSize())
@@ -484,7 +478,7 @@ func (sdr *WinStackedDRG_I) VerifyInternalPrivateCandidateProof(postCfg sector.P
 	return true
 }
 
-func (sdr *WinStackedDRG_I) VerifyPrivatePoStProof(cfg sector.PoStCfg, privateProof PrivatePoStProof, candidates []sector.PoStCandidate, sectorIDs []sector.SectorID, sectorCommitments sector.SectorCommitments) bool {
+func (sdr *WinStackedDRG_I) VerifyPrivatePoStProof(cfg sector.PoStInstanceCfg, privateProof PrivatePoStProof, candidates []sector.PoStCandidate, sectorIDs []sector.SectorID, sectorCommitments sector.SectorCommitments) bool {
 	// This is safe by construction.
 	challengeSeed := privateProof.ChallengeSeed
 
@@ -510,14 +504,14 @@ func (sdr *WinStackedDRG_I) VerifyPrivatePoStProof(cfg sector.PoStCfg, privatePr
 	return true
 }
 
-func (sdr *WinStackedDRG_I) _createPoStCircuitProof(postCfg sector.PoStCfg, privateProof PrivatePoStProof) sector.PoStProof {
+func (sdr *WinStackedDRG_I) _createPoStCircuitProof(postCfg sector.PoStInstanceCfg, privateProof PrivatePoStProof) sector.PoStProof {
 	panic("TODO")
 
-	cfg := postCfg.InstanceCfg().As_PoStCfgV1()
+	var proofBytes []byte
+	panic("TODO")
 
 	postProof := sector.PoStProof_I{
-		Type_:    cfg.Type(),
-		PoStCfg_: postCfg,
+		ProofBytes_: proofBytes,
 	}
 
 	return &postProof

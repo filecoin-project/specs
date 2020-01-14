@@ -48,6 +48,10 @@ var PROOFS ProofRegistry = ProofRegistry(map[util.UInt]ProofInstance{util.UInt(R
 	},
 })
 
+func RegisteredProofInstance(r RegisteredProof) ProofInstance {
+	return PROOFS[util.UInt(r)]
+}
+
 func (c *ConcreteCircuit_I) GrothParameterFileName() string {
 	return c.Name() + ".params"
 }

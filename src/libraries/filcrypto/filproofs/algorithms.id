@@ -84,7 +84,8 @@ type WinStackedDRG struct {
     WindowExpanderGraphCfg  ExpanderGraphCfg
     // invariant: DRGCfg.Nodes == ExpanderGraphCfg.Nodes
     Curve                   EllipticCurve
-    Cfg                     sector.SealCfg
+    RegisteredProof         sector.RegisteredProof
+    Cfg                     sector.SealInstanceCfg
 
     Drg()                   DRG
     Expander()              ExpanderGraph
@@ -93,9 +94,10 @@ type WinStackedDRG struct {
     WindowExpander()        ExpanderGraph
 
     Seal(
-        sid         sector.SectorID
-        data        Bytes
-        randomness  sector.SealRandomness
+        registeredProof  sector.RegisteredProof
+        sid              sector.SectorID
+        data             Bytes
+        randomness       sector.SealRandomness
     ) SealSetupArtifacts
     CreateSealProof(
         challengeSeed  sector.InteractiveSealRandomness
@@ -149,12 +151,11 @@ type WinStackedDRG struct {
 }
 
 type SealVerifier struct {
-    SealCfg sector.SealCfg
+    SealCfg sector.SealInstanceCfg
 }
 
 type PoStVerifier struct {
-    ElectionPoStCfg  sector.PoStCfg
-    SurprisePoStCfg  sector.PoStCfg
+    PoStCfg sector.PoStInstanceCfg
 }
 
 type DRGCfg struct {

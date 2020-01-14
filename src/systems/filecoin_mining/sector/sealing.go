@@ -25,7 +25,17 @@ func (x PieceInfo_I) Ref() *PieceInfo_I {
 
 func (svi *OnChainSealVerifyInfo_I) IsValidAtSealEpoch() bool {
 	// We can just hardcode logic for the range of epochs at which each circuit type is valid.
-	switch PROOFS[util.UInt(svi.Proof().RegisteredProof())].CircuitType() {
+	switch PROOFS[util.UInt(svi.RegisteredProof())].CircuitType() {
+	}
+	panic("TODO")
+}
+
+func (cfg *SealInstanceCfg_I) SectorSize() SectorSize {
+	switch cfg.Which() {
+	case SealInstanceCfg_Case_WinStackedDRGCfgV1:
+		{
+			return cfg.As_WinStackedDRGCfgV1().SectorSize()
+		}
 	}
 	panic("TODO")
 }

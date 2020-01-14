@@ -13,12 +13,10 @@ type InteractiveSealRandomness Bytes
 //    SealSeedHash(MinerID, SectorNumber, SealRandomness, UnsealedSectorCID)
 type SealSeed Bytes
 
-type SealCfg struct {
-    SectorSize
-    InstanceCfg    SealInstanceCfg
-    Partitions     UInt
-    ProofInstance
-}
+// type SealCfg struct {
+//     InstanceCfg    SealInstanceCfg
+//     ProofInstance
+// }
 
 // New proof ProofInstances can add new cfg types if needed.
 type SealInstanceCfg union {
@@ -26,6 +24,7 @@ type SealInstanceCfg union {
 }
 
 type WinStackedDRGCfgV1 struct {
+    SectorSize
     WindowCount UInt
 }
 
@@ -34,7 +33,7 @@ type WinStackedDRGCfgV1 struct {
 type SealVerifyInfo struct {
     SectorID
     OnChain                OnChainSealVerifyInfo
-    SealCfg
+    RegisteredProof
     Randomness             SealRandomness
     InteractiveRandomness  InteractiveSealRandomness
     UnsealedCID            UnsealedSectorCID  // CommD
@@ -48,6 +47,7 @@ type OnChainSealVerifyInfo struct {
     SealedCID             SealedSectorCID  // CommR
     SealEpoch             abi.ChainEpoch
     InteractiveEpoch      abi.ChainEpoch
+    RegisteredProof
     Proof                 SealProof
     DealIDs               deal.DealIDs
     SectorNumber
@@ -92,26 +92,27 @@ type PersistentProofAux struct {
 }
 
 type ProofAuxTmp struct {
-    PersistentAux  PersistentProofAux  // TODO: Move this to sealer.SealOutputs.
+    RegisteredProof  // FIXME: Make sure this is supplied.
+    PersistentAux    PersistentProofAux  // TODO: Move this to sealer.SealOutputs.
 
     SectorID
-    CommD          Commitment
-    CommR          SealedSectorCID
-    CommDTreePath  file.Path
-    CommCTreePath  file.Path
-    CommQTreePath  file.Path
+    CommD            Commitment
+    CommR            SealedSectorCID
+    CommDTreePath    file.Path
+    CommCTreePath    file.Path
+    CommQTreePath    file.Path
 
-    Seed           SealSeed
-    KeyLayers      [Bytes]
+    Seed             SealSeed
+    KeyLayers        [Bytes]
 }
 
 type SealArguments struct {
+    RegisteredProof
     Algorithm        ProofAlgorithm
     OutputArtifacts  SealOutputArtifacts
 }
 
 type SealProof struct {//<curve, system> {
-    RegisteredProof
     ProofBytes Bytes
 }
 

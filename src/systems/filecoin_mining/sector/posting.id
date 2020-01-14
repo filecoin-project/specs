@@ -2,10 +2,10 @@ type PartialTicket Bytes  // 32 bytes
 type ChallengeTicketsCommitment Bytes
 type PoStRandomness Bytes
 
-type PoStCfg struct {
-    InstanceCfg PoStInstanceCfg
-    ProofInstance
-}
+// type PoStCfg struct {
+//     InstanceCfg PoStInstanceCfg
+//     ProofInstance
+// }
 
 // New proof ProofInstances can add new cfg types if needed.
 type PoStInstanceCfg union {
@@ -71,8 +71,7 @@ type PoStWitness struct {
 }
 
 type PoStProof struct {//<curve, system> {
-    Type PoStType
-    PoStCfg
+    ProofBytes Bytes
 }
 
 type PrivatePoStCandidateProof struct {
