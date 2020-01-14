@@ -685,7 +685,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySealOrAbort(rt Runtime, onChainInfo s
 
 	unsealedCID, _ := filproofs.ComputeUnsealedSectorCIDFromPieceInfos(sectorSize, pieceInfos.Items())
 
-	sealCfg := info.InstanceCfg()
+	sealCfg := sector.RegisteredProofInstance(info.RegisteredProof()).Cfg().As_SealCfg()
 
 	minerActorID, err := addr.IDFromAddress(rt.CurrReceiver())
 	if err != nil {

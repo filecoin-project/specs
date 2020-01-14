@@ -55,15 +55,18 @@ type OnChainPoStVerifyInfo interface {
 }
 
 type OnChainElectionPoStVerifyInfo struct {
-    Candidates  [PoStCandidate]
-    Proofs      [PoStProof]
-    Randomness  PoStRandomness
+    // There should be one RegisteredProof for each PoSt Candi
+    RegisteredProofs  [RegisteredProof]
+    Candidates        [PoStCandidate]
+    Proofs            [PoStProof]
+    Randomness        PoStRandomness
 }
 
 type OnChainSurprisePoStVerifyInfo struct {
-    Candidates  [PoStCandidate]
-    Proofs      [PoStProof]
-    CommT       ChallengeTicketsCommitment
+    RegisteredProof
+    Candidates       [PoStCandidate]
+    Proofs           [PoStProof]
+    CommT            ChallengeTicketsCommitment
 }
 
 type PoStWitness struct {
