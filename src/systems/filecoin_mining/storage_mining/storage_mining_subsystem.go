@@ -12,7 +12,6 @@ import (
 	serde "github.com/filecoin-project/specs/actors/serde"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
-	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -20,6 +19,7 @@ import (
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
+	cid "github.com/ipfs/go-cid"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 )
 
@@ -212,7 +212,7 @@ func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateT
 	util.Assert(ok)
 	substateCID := actorState.State()
 
-	substate, ok := sms.Node().Repository().StateStore().Get(ipld.CID(substateCID))
+	substate, ok := sms.Node().Repository().StateStore().Get(cid.Cid(substateCID))
 	if !ok {
 		panic("Couldn't find sma state")
 	}
@@ -233,7 +233,7 @@ func (sms *StorageMiningSubsystem_I) _getStoragePowerActorState(stateTree stateT
 	util.Assert(ok)
 	substateCID := actorState.State()
 
-	substate, ok := sms.Node().Repository().StateStore().Get(ipld.CID(substateCID))
+	substate, ok := sms.Node().Repository().StateStore().Get(cid.Cid(substateCID))
 	if !ok {
 		panic("Couldn't find spa state")
 	}

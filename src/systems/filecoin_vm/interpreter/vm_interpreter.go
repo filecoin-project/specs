@@ -18,6 +18,7 @@ import (
 	vmri "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/impl"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
+	cid "github.com/ipfs/go-cid"
 )
 
 type Bytes = util.Bytes
@@ -37,7 +38,7 @@ const (
 // transitions.
 func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSetMessages) (outTree st.StateTree, receipts []vmri.MessageReceipt) {
 	outTree = inTree
-	seenMsgs := make(map[ipld.CID]struct{}) // CIDs of messages already seen once.
+	seenMsgs := make(map[cid.Cid]struct{}) // CIDs of messages already seen once.
 	var receipt vmri.MessageReceipt
 	store := vmi.Node().Repository().StateStore()
 	for _, blk := range msgs.Blocks() {
@@ -229,7 +230,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 func _resolveSender(store ipld.GraphStore, tree st.StateTree, address addr.Address) addr.Address {
 	initState, ok := tree.GetActor(builtin.InitActorAddr)
 	util.Assert(ok)
-	serialized, ok := store.Get(ipld.CID(initState.State()))
+	serialized, ok := store.Get(cid.Cid(initState.State()))
 	initSubState := initact.Deserialize_InitActorState_Assert(serialized)
 	return initSubState.ResolveAddress(address)
 }
@@ -238,7 +239,7 @@ func _resolveSender(store ipld.GraphStore, tree st.StateTree, address addr.Addre
 func _lookupMinerOwner(store ipld.GraphStore, tree st.StateTree, minerAddr addr.Address) addr.Address {
 	initState, ok := tree.GetActor(minerAddr)
 	util.Assert(ok)
-	serialized, ok := store.Get(ipld.CID(initState.State()))
+	serialized, ok := store.Get(cid.Cid(initState.State()))
 	// This tiny coupling between the VM and the storage miner actor is unfortunate.
 	// It could be avoided by:
 	// - paying gas rewards via the RewardActor, which can do the miner->owner lookup
@@ -369,6 +370,6 @@ func _makeCronTickMessage(state st.StateTree) msg.UnsignedMessage {
 	}
 }
 
-func _msgCID(msg msg.UnsignedMessage) ipld.CID {
+func _msgCID(msg msg.UnsignedMessage) cid.Cid {
 	panic("TODO")
 }

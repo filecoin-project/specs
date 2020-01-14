@@ -5,6 +5,7 @@ import addr "github.com/filecoin-project/go-address"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import indices "github.com/filecoin-project/specs/actors/runtime/indices"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import cid "github.com/ipfs/go-cid"
 
 // Runtime is the VM's internal runtime object.
 // this is everything that is accessible to actors, beyond parameters.
@@ -118,9 +119,9 @@ type Runtime interface {
     DeleteActor(address addr.Address)
 
     // Retrieves and deserializes an object from the store into o. Returns whether successful.
-    IpldGet(c ipld.CID, o ipld.Object) bool
+    IpldGet(c cid.Cid, o ipld.Object) bool
     // Serializes and stores an object, returning its CID.
-    IpldPut(x ipld.Object) ipld.CID
+    IpldPut(x ipld.Object) cid.Cid
 }
 
 type InvocInput struct {

@@ -12,9 +12,11 @@ import (
 
 	abi "github.com/filecoin-project/specs/actors/abi"
 	file "github.com/filecoin-project/specs/systems/filecoin_files/file"
+	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 	util "github.com/filecoin-project/specs/util"
+	"github.com/ipfs/go-cid"
 )
 
 type Bytes32 []byte
@@ -173,6 +175,7 @@ func getProverID(minerID abi.ActorID) []byte {
 	// return leb128(minerID)
 	panic("TODO")
 }
+
 func computeSealSeed(sid sector.SectorID, randomness sector.SealRandomness, commD sector.UnsealedSectorCID) sector.SealSeed {
 	proverId := getProverID(sid.Miner())
 	sectorNumber := sid.Number()
@@ -592,9 +595,16 @@ func zeroPadding(size UInt) PieceInfo {
 
 func joinPieceInfos(left PieceInfo, right PieceInfo) PieceInfo {
 	util.Assert(left.Size() == right.Size())
+
+	// FIXME: make this whole function generic?
+	// Note: cid.Bytes() isn't actually the payload data that we want input to the binary hash function, for more
+	// information see discussion: https://filecoinproject.slack.com/archives/CHMNDCK9P/p1578629688082700
+	sectorPieceCID, err := cid.Cast(BinaryHash_SHA256Hash(cid.Cid(left.PieceCID()).Bytes(), cid.Cid(right.PieceCID()).Bytes()))
+	util.Assert(err == nil)
+
 	return &sector.PieceInfo_I{
 		Size_:     left.Size() + right.Size(),
-		PieceCID_: fromBytes_PieceCID(BinaryHash_SHA256Hash(AsBytes_PieceCID(left.PieceCID()), AsBytes_PieceCID(right.PieceCID()))), // FIXME: make this whole function generic?
+		PieceCID_: piece.PieceCID(sectorPieceCID),
 	}
 }
 

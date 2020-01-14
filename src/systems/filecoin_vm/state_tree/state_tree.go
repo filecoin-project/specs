@@ -3,16 +3,16 @@ package state_tree
 import (
 	addr "github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/specs/actors/abi"
-	"github.com/filecoin-project/specs/libraries/ipld"
 	"github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	"github.com/filecoin-project/specs/util"
+	cid "github.com/ipfs/go-cid"
 )
 
 var Assert = util.Assert
 var IMPL_FINISH = util.IMPL_FINISH
 var IMPL_TODO = util.IMPL_TODO
 
-func (st *StateTree_I) RootCID() ipld.CID {
+func (st *StateTree_I) RootCID() cid.Cid {
 	IMPL_FINISH()
 	panic("")
 }

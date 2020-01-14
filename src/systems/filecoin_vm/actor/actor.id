@@ -2,7 +2,7 @@
 // The VM uses this to execute abi.
 
 import abi "github.com/filecoin-project/specs/actors/abi"
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import cid "github.com/ipfs/go-cid"
 
 // CallSeqNum is an invocation (Call) sequence (Seq) number (Num).
 // This is a value used for securing against replay attacks:
@@ -43,8 +43,8 @@ type ActorState struct {
     CallSeqNum
 }
 
-type ActorSystemStateCID ipld.CID
-type ActorSubstateCID ipld.CID
+type ActorSystemStateCID cid.Cid
+type ActorSubstateCID cid.Cid
 
 // ActorState represents the on-chain storage actors keep. This type is a
 // union of concrete types, for each of the Actors:
