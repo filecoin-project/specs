@@ -13,8 +13,8 @@ import (
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	exitcode "github.com/filecoin-project/specs/actors/runtime/exitcode"
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
-	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
+	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
@@ -107,6 +107,7 @@ type VMContext struct {
 	_globalStateInit    st.StateTree
 	_globalStatePending st.StateTree
 	_running            bool
+	_chain              chain.Chain
 	_actorAddress       addr.Address
 	_actorStateAcquired bool
 	// Tracks whether actor substate has changed in order to charge gas just once
@@ -132,6 +133,7 @@ type VMContext struct {
 
 func VMContext_Make(
 	store ipld.GraphStore,
+	chain chain.Chain,
 	toplevelSender addr.Address,
 	toplevelBlockWinner addr.Address,
 	toplevelSenderCallSeqNum actor.CallSeqNum,
@@ -143,6 +145,7 @@ func VMContext_Make(
 
 	return &VMContext{
 		_store:                store,
+		_chain:                chain,
 		_globalStateInit:      globalState,
 		_globalStatePending:   globalState,
 		_running:              false,
@@ -511,6 +514,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 
 	rtInner := VMContext_Make(
 		rtOuter._store,
+		rtOuter._chain,
 		rtOuter._toplevelSender,
 		rtOuter._toplevelBlockWinner,
 		rtOuter._toplevelSenderCallSeqNum,
@@ -649,16 +653,8 @@ func (rt *VMContext) ValueReceived() abi.TokenAmount {
 	return rt._valueReceived
 }
 
-func (rt *VMContext) Randomness(tag filcrypto.DomainSeparationTag, epoch abi.ChainEpoch) util.Randomness {
-	IMPL_TODO()
-	panic("")
-}
-
-func (rt *VMContext) RandomnessWithAuxSeed(
-	tag filcrypto.DomainSeparationTag, epoch abi.ChainEpoch, auxSeed util.Serialization) util.Randomness {
-
-	IMPL_TODO()
-	panic("")
+func (rt *VMContext) GetRandomness(epoch abi.ChainEpoch) abi.RandomnessSeed {
+	return rt._chain.RandomnessAtEpoch(epoch)
 }
 
 func (rt *VMContext) NewActorAddress() addr.Address {

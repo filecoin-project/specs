@@ -53,11 +53,12 @@ type Block struct {
     SECPMessages  [msg.SignedMessage]
 }
 
-// HACK: Duplicated from posting.id (actual source)
+// HACK: All of the below was duplicated from posting.id
+// in order to get spec to compile. Check the actual source for details
 type ElectionPoStVerifyInfo struct {
     Candidates  [PoStCandidate]
-    Randomness  PoStRandomness
     Proof       PoStProof
+    Randomness  PoStRandomness
 }
 
 type ChallengeTicketsCommitment struct {}  // see sector
