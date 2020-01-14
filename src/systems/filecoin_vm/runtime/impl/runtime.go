@@ -205,7 +205,7 @@ func (rt *VMContext) CreateActor(codeID abi.ActorCodeID, address addr.Address) {
 
 func (rt *VMContext) _createActor(codeID abi.ActorCodeID, address addr.Address) {
 	// Create empty actor state.
-	actorState := &actor.ActorState_I{
+	actorState := &actor.ActorState{
 		CodeID_:     codeID,
 		State_:      actor.ActorSubstateCID(EmptyCBOR),
 		Balance_:    abi.TokenAmount(0),
