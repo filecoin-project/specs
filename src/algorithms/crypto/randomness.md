@@ -54,7 +54,7 @@ buffer = Bytes{}
 buffer.append(IntToBigEndianBytes(AppropriateDST))
 buffer.append(-1) // a flag to be used in cases where FIL might need longer randomness outputs. Currently unused
 buffer.append(ticket_randomness)
-buffer.append(other needed inputs)
+buffer.append(other needed serialized inputs)
 
 randomness = SHA256(buffer)
 ```

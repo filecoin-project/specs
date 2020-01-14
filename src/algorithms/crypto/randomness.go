@@ -1,8 +1,11 @@
 package crypto
 
-import util "github.com/filecoin-project/specs/util"
-import addr "github.com/filecoin-project/go-address"
-import abi "github.com/filecoin-project/specs/actors/abi"
+import (
+	"bytes"
+	addr "github.com/filecoin-project/go-address"
+	abi "github.com/filecoin-project/specs/actors/abi"
+	util "github.com/filecoin-project/specs/util"
+)
 
 type DomainSeparationTag int
 type Randomness = abi.Randomness
@@ -19,24 +22,22 @@ const (
 
 // Derive a random byte string from a domain separation tag and the appropriate values
 func DeriveRandWithMinerAddr(tag DomainSeparationTag, tix abi.RandomnessSeed, minerAddr addr.Address) Randomness {
-	buffer := _deriveRandInternal(tag, tix, -1)
-	var serializedAddr abi.Bytes
-	util.IMPL_FINISH() // serialize the address
-	buffer = append(buffer, serializedAddr...)
-	ret := SHA256(buffer)
-	return Randomness(_deriveRandInternal(tag, tix, -1, minerAddr)))
+	var addrBuf bytes.Buffer
+	err := minerAddr.MarshalCBOR(&addrBuf)
+	util.Assert(err == nil)
+
+	return _deriveRandInternal(tag, tix, -1, addrBuf.Bytes())
 }
 
 func DeriveRandWithEpoch(tag DomainSeparationTag, tix abi.RandomnessSeed, epoch int) Randomness {
-	buffer = append(buffer, BigEndianBytesFromInt(epoch)...)
-	return Randomness(_deriveRandInternal(tag, tix, -1, epoch))
+	return _deriveRandInternal(tag, tix, -1, BigEndianBytesFromInt(epoch))
 }
 
-func _deriveRandInternal(tag DomainSeparationTag, randSeed abi.RandomnessSeed, index int, s Serialization) util.Bytes {
+func _deriveRandInternal(tag DomainSeparationTag, randSeed abi.RandomnessSeed, index int, s Serialization) Randomness {
 	buffer := []byte{}
 	buffer = append(buffer, BigEndianBytesFromInt(int(tag))...)
 	buffer = append(buffer, BigEndianBytesFromInt(int(index))...)
 	buffer = append(buffer, util.Bytes(randSeed)...)
 	buffer = append(buffer, s...)
-	return SHA256(buffer)
+	return Randomness(SHA256(buffer))
 }
