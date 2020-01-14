@@ -8,7 +8,7 @@ import (
 )
 
 func (sps *StorageProvingSubsystem_I) VerifySeal(sv sector.SealVerifyInfo) StorageProvingSubsystem_VerifySeal_FunRet {
-	registeredProof := sv.RegisteredProof()
+	registeredProof := sv.OnChain().RegisteredProof()
 	proofInstance := sector.RegisteredProofInstance(registeredProof)
 
 	var result bool

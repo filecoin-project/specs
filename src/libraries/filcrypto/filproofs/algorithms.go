@@ -481,10 +481,10 @@ func addEncode(data []byte, key []byte, modulus *big.Int, nodeSize int) []byte {
 // Seal Verification
 
 func (sv *SealVerifier_I) VerifySeal(svi sector.SealVerifyInfo) bool {
-	switch svi.RegisteredProof() {
+	switch svi.OnChain().RegisteredProof() {
 	case sector.RegisteredProof_WinStackedDRG32GiBSeal:
 		{
-			sdr := WinSDRParams(sector.RegisteredProofInstance(svi.RegisteredProof()).Cfg().As_SealCfg())
+			sdr := WinSDRParams(sector.RegisteredProofInstance(svi.OnChain().RegisteredProof()).Cfg().As_SealCfg())
 
 			return sdr.VerifySeal(svi)
 		}

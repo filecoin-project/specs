@@ -701,11 +701,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySealOrAbort(rt Runtime, onChainInfo s
 			Miner_:  abi.ActorID(minerActorID),
 			Number_: onChainInfo.SectorNumber(),
 		},
-		OnChain_: onChainInfo,
-
-		// TODO: Make SealCfg sector.SealCfg from miner configuration (where is that?)
-		RegisteredProof_: onChainInfo.RegisteredProof(),
-
+		OnChain_:               onChainInfo,
 		Randomness_:            sector.SealRandomness(svInfoRandomness),
 		InteractiveRandomness_: sector.InteractiveSealRandomness(svInfoInteractiveRandomness),
 		UnsealedCID_:           unsealedCID,

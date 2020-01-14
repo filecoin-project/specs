@@ -33,7 +33,6 @@ type WinStackedDRGCfgV1 struct {
 type SealVerifyInfo struct {
     SectorID
     OnChain                OnChainSealVerifyInfo
-    RegisteredProof
     Randomness             SealRandomness
     InteractiveRandomness  InteractiveSealRandomness
     UnsealedCID            UnsealedSectorCID  // CommD
