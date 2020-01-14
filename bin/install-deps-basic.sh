@@ -29,7 +29,7 @@ main() {
   must_run_from_spec_root
 
   # package manager packages
-  tryinstall hugo hugo\=bullseye
+  tryinstall hugo hugo
   tryinstall rsync rsync
 
   # submodules required for hugo themes
