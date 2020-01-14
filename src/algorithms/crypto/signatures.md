@@ -20,13 +20,9 @@ exhaustive list):
 
 ## Messages
 
-To generate a signature for the {{<sref message>}} type,
-first serialize it, then hash the serialized bytes with SHA256. Then, take
-the 32 byte digest output the hash and compute the signature over it.
+To generate a signature for the {{<sref message>}} type, compute the signature over the message's CID (taken as a byte array).
 
-**Note**: for each specific use of a signature scheme, it is recommended to use
-a domain separation tag to treat the hash function as an independent random
-oracle. These tags are indicated in the relevant places throughout the specs.
+**Note**: for each specific use of a signature scheme, it is recommended to use a domain separation tag to treat the hash function as an independent random oracle. These tags are indicated in the relevant places throughout the specs.
 Read more about this in {{<sref randomness>}}.
 
 ## Signature Types
