@@ -20,11 +20,23 @@ type MultiSigTransactionHAMT {TxnID: MultiSigTransaction}
 type MultiSigApprovalSetHAMT {TxnID: autil.ActorIDSetHAMT}
 
 type MultiSigActorState struct {
+    // Linear unlock
+    InitialBalance         abi.TokenAmount
+    StartEpoch             abi.ChainEpoch
+    UnlockDuration         abi.ChainEpoch
+
     AuthorizedParties      autil.ActorIDSetHAMT
     NumApprovalsThreshold  int
     NextTxnID              TxnID
     PendingTxns            MultiSigTransactionHAMT
     PendingApprovals       MultiSigApprovalSetHAMT
+
+    AmountLocked(elapsedEpoch abi.ChainEpoch) abi.TokenAmount
+    _hasAvailable(
+        currBalance    abi.TokenAmount
+        amountToSpend  abi.TokenAmount
+        currEpoch      abi.ChainEpoch
+    ) bool
 }
 
 type MultiSigActorCode struct {
