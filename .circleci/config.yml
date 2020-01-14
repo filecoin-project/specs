@@ -1,19 +1,31 @@
 version: 2.1
 
 jobs:
-  test:
+  code:
     docker:
       - image: circleci/golang:1.13
     steps:
       - checkout
       - run:
+          name: "Test code (Generate, Build, Test)"
+          command: make test
+      - run:
+          name: "Check code is formatted"
           command: |
-            make test
             make fmt-code
             git diff --exit-code
+  website:
+    docker:
+      - image: cibuilds/hugo:0.58.0
+    steps:
+      - checkout
+      - run:
+          name: "Build website"
+          command: make website
 
 workflows:
   version: 2.1
   test_all:
     jobs:
-      - test
+      - code
+      - website
