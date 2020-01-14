@@ -1,6 +1,6 @@
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import addr "github.com/filecoin-project/go-address"
-import 	actor "github.com/filecoin-project/specs/actors"
+import actor "github.com/filecoin-project/specs/actors"
 import abi "github.com/filecoin-project/specs/actors/abi"
 
 // GasAmount is a quantity of gas.
