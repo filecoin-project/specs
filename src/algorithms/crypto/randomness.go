@@ -24,20 +24,19 @@ func DeriveRandWithMinerAddr(tag DomainSeparationTag, tix abi.RandomnessSeed, mi
 	util.IMPL_FINISH() // serialize the address
 	buffer = append(buffer, serializedAddr...)
 	ret := SHA256(buffer)
-	return Randomness(ret)
+	return Randomness(_deriveRandInternal(tag, tix, -1, minerAddr)))
 }
 
 func DeriveRandWithEpoch(tag DomainSeparationTag, tix abi.RandomnessSeed, epoch int) Randomness {
-	buffer := _deriveRandInternal(tag, tix, -1)
 	buffer = append(buffer, BigEndianBytesFromInt(epoch)...)
-	ret := SHA256(buffer)
-	return Randomness(ret)
+	return Randomness(_deriveRandInternal(tag, tix, -1, epoch))
 }
 
-func _deriveRandInternal(tag DomainSeparationTag, s abi.RandomnessSeed, index int) util.Bytes {
+func _deriveRandInternal(tag DomainSeparationTag, randSeed abi.RandomnessSeed, index int, s Serialization) util.Bytes {
 	buffer := []byte{}
 	buffer = append(buffer, BigEndianBytesFromInt(int(tag))...)
 	buffer = append(buffer, BigEndianBytesFromInt(int(index))...)
-	buffer = append(buffer, util.Bytes(s)...)
-	return buffer
+	buffer = append(buffer, util.Bytes(randSeed)...)
+	buffer = append(buffer, s...)
+	return SHA256(buffer)
 }
