@@ -1392,7 +1392,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_vm__actor__address" class="menu-item depth-4">
+<a href="../../../../../#appendix__address" class="menu-item depth-2">
     
     
         Address
@@ -1401,7 +1401,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2629,6 +2629,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../../#systems__filecoin_mining__sector__posting" class="menu-item depth-4">
+    
+    
+        Sector PoSting
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
     
     
@@ -3340,6 +3371,68 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-1">
 
     <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        Filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
     
     </li>
 
@@ -4307,6 +4400,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../../#listings__reserved_ranges" class="menu-item depth-2">
+    
+    
+        Reserved Ranges
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../../#listings__data_structures" class="menu-item depth-2">
     
     
@@ -4624,9 +4748,11 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  <p>RewardActor is where unminted and unvested Filecoin tokens are kept. At genesis, RewardActor is initiailized with investor accounts, tokens, and vesting schedule in a <code>RewardMap</code> which is a mapping from owner addressws to <code>Reward</code> structs. A <code>Reward</code> struct contains a <code>StartEpoch</code> that keeps track of when this <code>Reward</code> is created, <code>Value</code> that represents the total number of tokens rewarded, and <code>ReleaseRate</code> which is the linear rate of release in the unit of FIL per Epoch. <code>WithdrawAmount</code> records how many tokens have been withdrawn from a <code>Reward</code> struct so far. Owner addresses can call <code>WithdrawReward</code> which will withdraw all vested tokens that the investor address has from the RewardMap so far. When <code>WithdrawAmount</code> equals <code>Value</code> in a <code>Reward</code> struct, the <code>Reward</code> struct will be removed from the <code>RewardMap</code>.</p>
+  <p>RewardActor is where unminted Filecoin tokens are kept. RewardActor contains a <code>RewardMap</code> which is a mapping from owner addresses to <code>Reward</code> structs.</p>
 
-<p><code>RewardMap</code> is also used in block reward minting to preserve the flexibility of introducing block reward vesting to the protocol. <code>MintReward</code> creates a new <code>Reward</code> struct and adds it to the <code>RewardMap</code>.</p>
+<p><code>Reward</code> struct is created to preserve the flexibility of introducing block reward vesting into the protocol. <code>MintReward</code> creates a new <code>Reward</code> struct and adds it to the <code>RewardMap</code>.</p>
+
+<p>A <code>Reward</code> struct contains a <code>StartEpoch</code> that keeps track of when this <code>Reward</code> is created, <code>Value</code> that represents the total number of tokens rewarded, and <code>EndEpoch</code> which is when the reward will be fully vested. <code>VestingFunction</code> is currently an enum to represent the flexibility of different vesting functions. <code>AmountWithdrawn</code> records how many tokens have been withdrawn from a <code>Reward</code> struct so far. Owner addresses can call <code>WithdrawReward</code> which will withdraw all vested tokens that the investor address has from the RewardMap so far. When <code>AmountWithdrawn</code> equals <code>Value</code> in a <code>Reward</code> struct, the <code>Reward</code> struct will be removed from the <code>RewardMap</code>.</p>
 
 <p>
 
@@ -4648,7 +4774,7 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
 <span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
 
 <span class="kd">type</span> <span class="nx">VestingFunction</span> <span class="nx">enum</span> <span class="p">{</span>
     <span class="nx">None</span>
@@ -4718,14 +4844,15 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="p">(</span>
     <span class="s">&#34;math&#34;</span>
 
+    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
     <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
+    <span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin&#34;</span>
     <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
     <span class="nx">serde</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/serde&#34;</span>
     <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
-    <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
     <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
     <span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
+    <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 <span class="p">)</span>
 
 <span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="p">=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span>
@@ -4741,7 +4868,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActorCode_I</span><span class="p">)</span> <span class="nf">State</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">RewardActorState</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
-    <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">())</span>
+    <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">cid</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">())</span>
     <span class="kd">var</span> <span class="nx">state</span> <span class="nx">RewardActorState_I</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nx">stateCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">state</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;state not found&#34;</span><span class="p">)</span>
@@ -4752,7 +4879,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">newCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">()))</span>
     <span class="nx">h</span><span class="p">.</span><span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">newCID</span><span class="p">)</span>
 <span class="p">}</span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">RewardActorState_I</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">RewardActorState_I</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span> <span class="p">{</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -4805,7 +4932,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActorCode_I</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
 
     <span class="c1">// initialize Reward Map with investor accounts
 </span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
@@ -4818,7 +4945,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">minerNominalPower</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span>
     <span class="nx">currPledge</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span>
 <span class="p">)</span> <span class="p">{</span>
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
 
     <span class="nx">inds</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrIndices</span><span class="p">()</span>
     <span class="nx">pledgeReq</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">PledgeCollateralReq</span><span class="p">(</span><span class="nx">minerNominalPower</span><span class="p">)</span>
@@ -4834,7 +4961,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">if</span> <span class="nx">rewardToGarnish</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
         <span class="c1">// Send fund to SPA for collateral
 </span><span class="c1"></span>        <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
-            <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
+            <span class="nx">builtin</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
             <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_AddBalance</span><span class="p">,</span>
             <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span><span class="nx">miner</span><span class="p">),</span>
             <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">rewardToGarnish</span><span class="p">),</span>

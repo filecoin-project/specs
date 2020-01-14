@@ -1393,7 +1393,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_vm__actor__address" class="menu-item depth-4">
+<a href="../../../../#appendix__address" class="menu-item depth-2">
     
     
         Address
@@ -1402,7 +1402,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2630,6 +2630,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../#systems__filecoin_mining__sector__posting" class="menu-item depth-4">
+    
+    
+        Sector PoSting
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
     
     
@@ -3341,6 +3372,68 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-1">
 
     <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        Filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
     
     </li>
 
@@ -4308,6 +4401,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../#listings__reserved_ranges" class="menu-item depth-2">
+    
+    
+        Reserved Ranges
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../#listings__data_structures" class="menu-item depth-2">
     
     
@@ -4861,8 +4985,9 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 <span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
-
+<span class="kn">import</span> <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 <span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
+<span class="kn">import</span> <span class="nx">peer</span> <span class="s">&#34;github.com/libp2p/go-libp2p-core/peer&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StorageDeal</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">RetrievalDeal</span> <span class="kd">struct</span> <span class="p">{}</span>
@@ -4900,7 +5025,7 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 <span class="kd">type</span> <span class="nx">TransferID</span> <span class="nx">UInt</span>
 
 <span class="kd">type</span> <span class="nx">ChannelID</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">to</span> <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+    <span class="nx">to</span> <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
     <span class="nx">id</span> <span class="nx">TransferID</span>
 <span class="p">}</span>
 
@@ -4909,15 +5034,15 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
     <span class="c1">// an identifier for this channel shared by request and responder, set by requestor through protocol
 </span><span class="c1"></span>    <span class="nx">transferID</span>  <span class="nx">TransferID</span>
     <span class="c1">// base CID for the piece being transferred
-</span><span class="c1"></span>    <span class="nx">PieceRef</span>    <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+</span><span class="c1"></span>    <span class="nx">PieceRef</span>    <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
     <span class="c1">// portion of Piece to return, specified by an IPLD selector
 </span><span class="c1"></span>    <span class="nx">Selector</span>    <span class="nx">ipld</span><span class="p">.</span><span class="nx">Selector</span>
     <span class="c1">// used to verify this channel
 </span><span class="c1"></span>    <span class="nx">voucher</span>     <span class="nx">DataTransferVoucher</span>
     <span class="c1">// the party that is sending the data (not who initiated the request)
-</span><span class="c1"></span>    <span class="nx">sender</span>      <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+</span><span class="c1"></span>    <span class="nx">sender</span>      <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
     <span class="c1">// the party that is receiving the data (not who initiated the request)
-</span><span class="c1"></span>    <span class="nx">recipient</span>   <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+</span><span class="c1"></span>    <span class="nx">recipient</span>   <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
     <span class="c1">// expected amount of data to be transferred
 </span><span class="c1"></span>    <span class="nx">totalSize</span>   <span class="nx">UVarint</span>
 <span class="p">}</span>
@@ -4932,7 +5057,7 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">Open</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Initiator</span> <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+    <span class="nx">Initiator</span> <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SendData</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4944,7 +5069,7 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">Pause</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Initiator</span> <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+    <span class="nx">Initiator</span> <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">Error</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4969,21 +5094,21 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 <span class="c1">// RequestValidator is an interface implemented by the client of the data transfer module to validate requests
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">RequestValidator</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nf">ValidatePush</span><span class="p">(</span>
-        <span class="nx">sender</span>    <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+        <span class="nx">sender</span>    <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
         <span class="nx">voucher</span>   <span class="nx">DataTransferVoucher</span>
-        <span class="nx">PieceRef</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+        <span class="nx">PieceRef</span>  <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
         <span class="nx">Selector</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">Selector</span>
     <span class="p">)</span>
     <span class="nf">ValidatePull</span><span class="p">(</span>
-        <span class="nx">receiver</span>  <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+        <span class="nx">receiver</span>  <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
         <span class="nx">voucher</span>   <span class="nx">DataTransferVoucher</span>
-        <span class="nx">PieceRef</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+        <span class="nx">PieceRef</span>  <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
         <span class="nx">Selector</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">Selector</span>
     <span class="p">)</span>
     <span class="nf">ValidateIntermediate</span><span class="p">(</span>
-        <span class="nx">otherPeer</span>  <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+        <span class="nx">otherPeer</span>  <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
         <span class="nx">voucher</span>    <span class="nx">DataTransferVoucher</span>
-        <span class="nx">PieceRef</span>   <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+        <span class="nx">PieceRef</span>   <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
         <span class="nx">Selector</span>   <span class="nx">ipld</span><span class="p">.</span><span class="nx">Selector</span>
     <span class="p">)</span>
 <span class="p">}</span>
@@ -4998,18 +5123,18 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 </span><span class="c1"></span>    <span class="c1">// open a data transfer that will send data to the recipient peer and
 </span><span class="c1"></span>    <span class="c1">// transfer parts of the piece that match the selector
 </span><span class="c1"></span>    <span class="nf">OpenPushDataChannel</span><span class="p">(</span>
-        <span class="nx">to</span>        <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+        <span class="nx">to</span>        <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
         <span class="nx">voucher</span>   <span class="nx">DataTransferVoucher</span>
-        <span class="nx">PieceRef</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+        <span class="nx">PieceRef</span>  <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
         <span class="nx">Selector</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">Selector</span>
     <span class="p">)</span> <span class="nx">ChannelID</span>
 
     <span class="c1">// open a data transfer that will request data from the sending peer and
 </span><span class="c1"></span>    <span class="c1">// transfer parts of the piece that match the selector
 </span><span class="c1"></span>    <span class="nf">OpenPullDataChannel</span><span class="p">(</span>
-        <span class="nx">to</span>        <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+        <span class="nx">to</span>        <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
         <span class="nx">voucher</span>   <span class="nx">DataTransferVoucher</span>
-        <span class="nx">PieceRef</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+        <span class="nx">PieceRef</span>  <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
         <span class="nx">Selector</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">Selector</span>
     <span class="p">)</span> <span class="nx">ChannelID</span>
 

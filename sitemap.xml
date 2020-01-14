@@ -31,10 +31,6 @@
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_vm/actor/address/</loc>
-  </url>
-  
-  <url>
     <loc>/docs/algorithms/</loc>
   </url>
   
@@ -120,6 +116,10 @@
   
   <url>
     <loc>/docs/algorithms/cryptoecon/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/filcrypto/</loc>
   </url>
   
   <url>
@@ -427,6 +427,10 @@
   </url>
   
   <url>
+    <loc>/docs/listings/reserved_ranges/</loc>
+  </url>
+  
+  <url>
     <loc>/docs/systems/filecoin_markets/retrieval_market/retrieval_client/</loc>
   </url>
   
@@ -468,6 +472,10 @@
   
   <url>
     <loc>/docs/systems/filecoin_mining/storage_proving/poster/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/sector/posting/</loc>
   </url>
   
   <url>

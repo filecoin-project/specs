@@ -1,8 +1,8 @@
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import cid "github.com/ipfs/go-cid"
 
 // PieceCID is the main reference to pieces in Filecoin. It is the CID
 // of the Piece.
-type PieceCID ipld.CID
+type PieceCID cid.Cid
 
 type NumBytes UVarint  // TODO: move into util
 

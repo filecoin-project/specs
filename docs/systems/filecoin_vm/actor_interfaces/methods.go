@@ -10,6 +10,10 @@ const (
 )
 
 const (
+	Method_CronActor_EpochTick = actor.MethodPlaceholder + iota
+)
+
+const (
 	Method_RewardActor_AwardBlockReward = actor.MethodPlaceholder + iota
 )
 
@@ -38,6 +42,7 @@ const (
 	// Internal mechanism events
 	Method_StorageMinerActor_OnVerifiedElectionPoSt
 	Method_StorageMinerActor_OnSurprisePoStChallenge
+	Method_StorageMinerActor_OnDeleteMiner
 
 	// State queries
 	Method_StorageMinerActor_GetPoStState

@@ -1392,7 +1392,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../#systems__filecoin_vm__actor__address" class="menu-item depth-4">
+<a href="../../../#appendix__address" class="menu-item depth-2">
     
     
         Address
@@ -1401,7 +1401,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2629,6 +2629,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../#systems__filecoin_mining__sector__posting" class="menu-item depth-4">
+    
+    
+        Sector PoSting
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
     
     
@@ -3340,6 +3371,68 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-1">
 
     <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        Filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
     
     </li>
 
@@ -4307,6 +4400,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../#listings__reserved_ranges" class="menu-item depth-2">
+    
+    
+        Reserved Ranges
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../#listings__data_structures" class="menu-item depth-2">
     
     
@@ -4644,47 +4768,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Address is defined here because this is where addresses start to make sense.
-</span><span class="c1">// Addresses refer to actors defined in the StateTree, so Addresses are defined
-</span><span class="c1">// on top of the StateTree.
-</span><span class="c1">//
-</span><span class="c1">// TODO: potentially move into a library, or its own directory.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Address</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">NetworkID</span> <span class="nx">enum</span> <span class="p">{</span>
-        <span class="nx">Testnet</span>
-        <span class="nx">Mainnet</span>
-    <span class="p">}</span>
-
-    <span class="nx">Data</span> <span class="nx">union</span> <span class="p">{</span>
-        <span class="nx">ID</span>                   <span class="nx">ActorID</span>
-        <span class="nx">PublicKey_Secp256k1</span>  <span class="nx">KeyHash</span>  <span class="c1">// TODO: reorder
-</span><span class="c1"></span>        <span class="nx">ActorExec</span>            <span class="nx">ActorExecHash</span>
-        <span class="nx">PublicKey_BLS</span>        <span class="nx">KeyHash</span>
-    <span class="p">}</span>
-
-    <span class="nf">VerifySyntax</span><span class="p">()</span>   <span class="kt">bool</span>
-    <span class="nf">String</span><span class="p">()</span>         <span class="kt">string</span>
-    <span class="nf">IsIDType</span><span class="p">()</span>       <span class="kt">bool</span>  <span class="c1">// Whether the address is an ID-address
-</span><span class="c1"></span>    <span class="nf">IsKeyType</span><span class="p">()</span>      <span class="kt">bool</span>  <span class="c1">// Whether the address is a public key address (SECP or BLS)
-</span><span class="c1"></span>    <span class="nf">Equals</span><span class="p">(</span><span class="nx">Address</span><span class="p">)</span>  <span class="kt">bool</span>
-    <span class="nf">Ref</span><span class="p">()</span>            <span class="nx">Address_Ptr</span>
-
-    <span class="c1">// Returns the ID from an ID address (or error otherwise).
-</span><span class="c1"></span>    <span class="nf">GetID</span><span class="p">()</span>          <span class="p">(</span><span class="nx">ActorID</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
-    <span class="nf">GetKey</span><span class="p">()</span>         <span class="p">(</span><span class="nx">KeyHash</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// ActorID is a sequential number assigned to actors in a Filecoin Chain.
-</span><span class="c1">// ActorIDs are assigned by the InitActor, when an Actor is introduced into
-</span><span class="c1">// the Runtime.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">ActorID</span> <span class="nx">Int</span>
-
-<span class="kd">type</span> <span class="nx">KeyHash</span> <span class="nx">Bytes</span>
-<span class="kd">type</span> <span class="nx">ActorExecHash</span> <span class="nx">Bytes</span>
-</code></pre></div>
+<p style="color: #D74848"><b><i>Something's not right. The <code>../systems/filecoin_vm/actor/address/address.id</code> file was not found.</i></b></p>
 
 
 
@@ -4703,148 +4787,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-
-
-
-
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">address</span>
-
-<span class="kn">import</span> <span class="p">(</span>
-    <span class="s">&#34;errors&#34;</span>
-
-    <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
-<span class="p">)</span>
-
-<span class="kd">var</span> <span class="nx">Assert</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Assert</span>
-
-<span class="kd">type</span> <span class="nx">Int</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Int</span>
-
-<span class="c1">// Addresses for singleton system abi.
-</span><span class="c1"></span><span class="kd">var</span> <span class="p">(</span>
-    <span class="c1">// Distinguished AccountActor that is the source of system implicit messages.
-</span><span class="c1"></span>    <span class="nx">SystemActorAddr</span>        <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="nx">InitActorAddr</span>          <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="nx">RewardActorAddr</span>        <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="nx">CronActorAddr</span>          <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-    <span class="nx">StoragePowerActorAddr</span>  <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-    <span class="nx">StorageMarketActorAddr</span> <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-    <span class="c1">// Distinguished AccountActor that is the destination of all burnt funds.
-</span><span class="c1"></span>    <span class="nx">BurntFundsActorAddr</span> <span class="p">=</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="mi">99</span><span class="p">)</span>
-<span class="p">)</span>
-
-<span class="kd">const</span> <span class="nx">FirstNonSingletonActorId</span> <span class="p">=</span> <span class="mi">100</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">VerifySyntax</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-    <span class="c1">// switch aType := addrType; aType {
-</span><span class="c1"></span>    <span class="c1">// case Address_Protocol.Secp256k1():
-</span><span class="c1"></span>    <span class="c1">//     // 80 Bytes
-</span><span class="c1"></span>    <span class="c1">//     return len(self)
-</span><span class="c1"></span>    <span class="c1">// case Address_Protocol.ID():
-</span><span class="c1"></span>    <span class="c1">//     // ?
-</span><span class="c1"></span>    <span class="c1">// case Address_Protocol.Actor():
-</span><span class="c1"></span>    <span class="c1">//     // Blake2b - 64 Bytes
-</span><span class="c1"></span>    <span class="c1">// case Address_Protocol.BLS():
-</span><span class="c1"></span>    <span class="c1">//     // BLS-12_381 - 48 Byte PK
-</span><span class="c1"></span>    <span class="c1">// }
-</span><span class="c1"></span><span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">Equals</span><span class="p">(</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">String</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nb">string</span><span class="p">(</span><span class="nf">Serialize_Address_Compact</span><span class="p">(</span><span class="nx">a</span><span class="p">))</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">Serialize_Address_Compact</span><span class="p">(</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span> <span class="p">{</span>
-    <span class="c1">// TODO: custom encoding as in
-</span><span class="c1"></span>    <span class="c1">// https://github.com/filecoin-project/lotus/blob/master/chain/address/address.go
-</span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">Deserialize_Address_Compact</span><span class="p">(</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">)</span> <span class="p">(</span><span class="nx">Address</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// TODO: custom encoding as in
-</span><span class="c1"></span>    <span class="c1">// https://github.com/filecoin-project/lotus/blob/master/chain/address/address.go
-</span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">Deserialize_Address_Compact_Assert</span><span class="p">(</span><span class="nx">x</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
-    <span class="nx">ret</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">Deserialize_Address_Compact</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
-    <span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nx">ret</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">IsIDType</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">IsKeyType</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
-
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">GetID</span><span class="p">()</span> <span class="p">(</span><span class="nx">ActorID</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">!</span><span class="nx">a</span><span class="p">.</span><span class="nf">IsIDType</span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="nf">ActorID</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;not an ID address&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Data_</span><span class="p">.</span><span class="nf">As_ID</span><span class="p">(),</span> <span class="kc">nil</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">GetKey</span><span class="p">()</span> <span class="p">(</span><span class="nx">KeyHash</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">!</span><span class="nx">a</span><span class="p">.</span><span class="nf">IsKeyType</span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="nf">KeyHash</span><span class="p">(</span><span class="kc">nil</span><span class="p">),</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;not a key address&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="k">if</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Data_</span><span class="p">.</span><span class="nf">Which</span><span class="p">()</span> <span class="o">==</span> <span class="nx">Address_Data_Case_PublicKey_BLS</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Data_</span><span class="p">.</span><span class="nf">As_PublicKey_BLS</span><span class="p">(),</span> <span class="kc">nil</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Data_</span><span class="p">.</span><span class="nf">Which</span><span class="p">()</span> <span class="o">==</span> <span class="nx">Address_Data_Case_PublicKey_Secp256k1</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Data_</span><span class="p">.</span><span class="nf">As_PublicKey_Secp256k1</span><span class="p">(),</span> <span class="kc">nil</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="nf">KeyHash</span><span class="p">(</span><span class="kc">nil</span><span class="p">),</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;not a recognized key type&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">net</span> <span class="nx">Address_NetworkID</span><span class="p">,</span> <span class="nx">x</span> <span class="nx">ActorID</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="o">&amp;</span><span class="nx">Address_I</span><span class="p">{</span>
-        <span class="nx">NetworkID_</span><span class="p">:</span> <span class="nx">net</span><span class="p">,</span>
-        <span class="nx">Data_</span><span class="p">:</span>      <span class="nf">Address_Data_Make_ID</span><span class="p">(</span><span class="nx">x</span><span class="p">),</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">Address_Make_Key</span><span class="p">(</span><span class="nx">net</span> <span class="nx">Address_NetworkID</span><span class="p">,</span> <span class="nx">x</span> <span class="nx">KeyHash</span><span class="p">)</span> <span class="p">(</span><span class="nx">Address</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">d</span> <span class="nx">Address_Data</span>
-    <span class="k">if</span> <span class="nx">util</span><span class="p">.</span><span class="nf">IsBLS</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">d</span> <span class="p">=</span> <span class="nf">Address_Data_Make_PublicKey_BLS</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">util</span><span class="p">.</span><span class="nf">IsSECP</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">d</span> <span class="p">=</span> <span class="nf">Address_Data_Make_PublicKey_Secp256k1</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;Not a recognized key type&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="o">&amp;</span><span class="nx">Address_I</span><span class="p">{</span>
-        <span class="nx">NetworkID_</span><span class="p">:</span> <span class="nx">net</span><span class="p">,</span>
-        <span class="nx">Data_</span><span class="p">:</span>      <span class="nx">d</span><span class="p">,</span>
-    <span class="p">},</span> <span class="kc">nil</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">Address_Make_ActorExec</span><span class="p">(</span><span class="nx">net</span> <span class="nx">Address_NetworkID</span><span class="p">,</span> <span class="nx">hash</span> <span class="nx">ActorExecHash</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="o">&amp;</span><span class="nx">Address_I</span><span class="p">{</span>
-        <span class="nx">NetworkID_</span><span class="p">:</span> <span class="nx">net</span><span class="p">,</span>
-        <span class="nx">Data_</span><span class="p">:</span>      <span class="nf">Address_Data_Make_ActorExec</span><span class="p">(</span><span class="nx">hash</span><span class="p">),</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">Address_Ptr</span> <span class="p">=</span> <span class="o">*</span><span class="nx">Address</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address_I</span><span class="p">)</span> <span class="nf">Ref</span><span class="p">()</span> <span class="nx">Address_Ptr</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">ret</span> <span class="nx">Address</span> <span class="p">=</span> <span class="nx">a</span>
-    <span class="k">return</span> <span class="o">&amp;</span><span class="nx">ret</span>
-<span class="p">}</span>
-</code></pre></div>
-
-
-
+<p style="color: #D74848"><b><i>Something's not right. The <code>../systems/filecoin_vm/actor/address/address.go</code> file was not found.</i></b></p>
 
 </p>
 

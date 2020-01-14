@@ -2,8 +2,8 @@ package actor
 
 import (
 	abi "github.com/filecoin-project/specs/actors/abi"
-	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	util "github.com/filecoin-project/specs/util"
+	cid "github.com/ipfs/go-cid"
 )
 
 var IMPL_FINISH = util.IMPL_FINISH
@@ -20,7 +20,7 @@ const (
 	MethodPlaceholder = abi.MethodNum(1 << 30)
 )
 
-func (st *ActorState_I) CID() ipld.CID {
+func (st *ActorState_I) CID() cid.Cid {
 	panic("TODO")
 }
 

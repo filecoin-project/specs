@@ -1393,7 +1393,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_vm__actor__address" class="menu-item depth-4">
+<a href="../../../../#appendix__address" class="menu-item depth-2">
     
     
         Address
@@ -1402,7 +1402,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2630,6 +2630,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../#systems__filecoin_mining__sector__posting" class="menu-item depth-4">
+    
+    
+        Sector PoSting
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
     
     
@@ -3341,6 +3372,68 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-1">
 
     <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        Filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
     
     </li>
 
@@ -4308,6 +4401,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../#listings__reserved_ranges" class="menu-item depth-2">
+    
+    
+        Reserved Ranges
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../#listings__data_structures" class="menu-item depth-2">
     
     
@@ -4684,14 +4808,14 @@ and serves to make storage conform to a set of expectations.</p>
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
-<span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
+<span class="kn">import</span> <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Bytes32</span> <span class="nx">Bytes</span>
 <span class="kd">type</span> <span class="nx">Commitment</span> <span class="nx">Bytes32</span>  <span class="c1">// TODO
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">UnsealedSectorCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
-<span class="kd">type</span> <span class="nx">SealedSectorCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">UnsealedSectorCID</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
+<span class="kd">type</span> <span class="nx">SealedSectorCID</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
 
 <span class="c1">// SectorNumber is a numeric identifier for a sector. It is usually
 </span><span class="c1">// relative to a Miner.
@@ -4714,7 +4838,7 @@ and serves to make storage conform to a set of expectations.</p>
 </span><span class="c1"></span>
 <span class="c1">// TODO make sure this is globally unique
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorID</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Miner</span>   <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span>
+    <span class="nx">Miner</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorID</span>
     <span class="nx">Number</span>  <span class="nx">SectorNumber</span>
 <span class="p">}</span>
 
@@ -4769,6 +4893,41 @@ and serves to make storage conform to a set of expectations.</p>
     <span class="nx">Size</span>       <span class="nx">SectorSize</span>
     <span class="nx">SealCfg</span>
     <span class="nx">SealArgs</span>   <span class="nx">SealArguments</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">RegisteredProof</span> <span class="nx">enum</span> <span class="p">{</span>
+    <span class="nx">WinStackedDRG32GiBSeal</span>
+    <span class="nx">WinStackedDRG32GiBPoSt</span>
+    <span class="nx">StackedDRG32GiBSeal</span>
+    <span class="nx">StackedDRG32GiBPoSt</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ProofRegistry</span> <span class="p">{</span><span class="nx">UInt</span><span class="p">:</span> <span class="nx">ProofInstance</span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ProofInstance</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ID</span>           <span class="nx">RegisteredProof</span>
+    <span class="nx">Type</span>         <span class="nx">ProofType</span>
+    <span class="nx">Algorithm</span>    <span class="nx">ProofAlgorithm</span>
+    <span class="nx">CircuitType</span>  <span class="nx">ConcreteCircuit</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ProofType</span> <span class="nx">enum</span> <span class="p">{</span>
+    <span class="nx">SealProof</span>
+    <span class="nx">PoStProof</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ProofAlgorithm</span> <span class="nx">enum</span> <span class="p">{</span>
+    <span class="nx">StackedDRGSeal</span>
+    <span class="nx">WinStackedDRGSeal</span>
+    <span class="nx">StackedDRGPoSt</span>
+    <span class="nx">WinStackedDRGPoSt</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ConcreteCircuit</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// Name must be globally unique. It will be a hash derived from semantic content of circuit.
+</span><span class="c1"></span>    <span class="nx">Name</span>                      <span class="kt">string</span>
+    <span class="nf">GrothParameterFileName</span><span class="p">()</span>  <span class="kt">string</span>
+    <span class="nf">VerifyingKeyFileName</span><span class="p">()</span>    <span class="kt">string</span>
 <span class="p">}</span>
 </code></pre></div>
 

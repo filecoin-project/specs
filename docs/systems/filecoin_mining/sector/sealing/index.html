@@ -1392,7 +1392,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_vm__actor__address" class="menu-item depth-4">
+<a href="../../../../../#appendix__address" class="menu-item depth-2">
     
     
         Address
@@ -1401,7 +1401,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2629,6 +2629,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../../#systems__filecoin_mining__sector__posting" class="menu-item depth-4">
+    
+    
+        Sector PoSting
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
     
     
@@ -3340,6 +3371,68 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-1">
 
     <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        Filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
     
     </li>
 
@@ -4307,6 +4400,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../../#listings__reserved_ranges" class="menu-item depth-2">
+    
+    
+        Reserved Ranges
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../../#listings__data_structures" class="menu-item depth-2">
     
     
@@ -4662,8 +4786,18 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">SealCfg</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SectorSize</span>
-    <span class="nx">WindowCount</span>  <span class="nx">UInt</span>
-    <span class="nx">Partitions</span>   <span class="nx">UInt</span>
+    <span class="nx">InstanceCfg</span>    <span class="nx">SealInstanceCfg</span>
+    <span class="nx">Partitions</span>     <span class="nx">UInt</span>
+    <span class="nx">ProofInstance</span>
+<span class="p">}</span>
+
+<span class="c1">// New proof ProofInstances can add new cfg types if needed.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealInstanceCfg</span> <span class="nx">union</span> <span class="p">{</span>
+    <span class="nx">WinStackedDRGCfgV1</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">WinStackedDRGCfgV1</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">WindowCount</span> <span class="nx">UInt</span>
 <span class="p">}</span>
 
 <span class="c1">// SealVerifyInfo is the structure of all the information a verifier
@@ -4682,12 +4816,14 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// state tree but will be verified in sm.CommitSector. See SealCommitment for
 </span><span class="c1">// data stored on the state tree for each sector.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">OnChainSealVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">SealedCID</span>         <span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
-</span><span class="c1"></span>    <span class="nx">SealEpoch</span>         <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">InteractiveEpoch</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">Proof</span>             <span class="nx">SealProof</span>
-    <span class="nx">DealIDs</span>           <span class="nx">deal</span><span class="p">.</span><span class="nx">DealIDs</span>
+    <span class="nx">SealedCID</span>             <span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
+</span><span class="c1"></span>    <span class="nx">SealEpoch</span>             <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">InteractiveEpoch</span>      <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">Proof</span>                 <span class="nx">SealProof</span>
+    <span class="nx">DealIDs</span>               <span class="nx">deal</span><span class="p">.</span><span class="nx">DealIDs</span>
     <span class="nx">SectorNumber</span>
+
+    <span class="nf">IsValidAtSealEpoch</span><span class="p">()</span>  <span class="kt">bool</span>
 <span class="p">}</span>
 
 <span class="c1">// SealCommitment is the information kept in the state tree about a sector.
@@ -4741,25 +4877,18 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SealArguments</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Algorithm</span>        <span class="nx">SealAlgorithm</span>
+    <span class="nx">Algorithm</span>        <span class="nx">ProofAlgorithm</span>
     <span class="nx">OutputArtifacts</span>  <span class="nx">SealOutputArtifacts</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SealProof</span> <span class="kd">struct</span> <span class="p">{</span><span class="c1">//&lt;curve, system&gt; {
-</span><span class="c1"></span>    <span class="nx">Config</span>      <span class="nx">SealProofConfig</span>
-    <span class="nx">ProofBytes</span>  <span class="nx">Bytes</span>
+</span><span class="c1"></span>    <span class="nx">ProofInstance</span>
+    <span class="nx">ProofBytes</span> <span class="nx">Bytes</span>
 <span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">SealProofConfig</span> <span class="kd">struct</span> <span class="p">{</span><span class="c1">// TODO
-</span><span class="c1"></span><span class="p">}</span>
 
 <span class="c1">// TODO: move into proofs lib
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">FilecoinSNARKProof</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">//&lt;bls12-381, Groth16&gt;
 </span><span class="c1"></span>
-<span class="kd">type</span> <span class="nx">SealAlgorithm</span> <span class="nx">enum</span> <span class="p">{</span>
-    <span class="nx">StackedDRG</span>
-<span class="p">}</span>
-
 <span class="c1">// TODO
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealOutputArtifacts</span> <span class="kd">struct</span> <span class="p">{}</span>
 

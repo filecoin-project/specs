@@ -1,7 +1,8 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
-
+import cid "github.com/ipfs/go-cid"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+import peer "github.com/libp2p/go-libp2p-core/peer"
 
 type StorageDeal struct {}
 type RetrievalDeal struct {}
@@ -39,7 +40,7 @@ type DataTransferStatus union {
 type TransferID UInt
 
 type ChannelID struct {
-    to libp2p.PeerID
+    to peer.ID
     id TransferID
 }
 
@@ -48,15 +49,15 @@ type DataTransferChannel struct {
     // an identifier for this channel shared by request and responder, set by requestor through protocol
     transferID  TransferID
     // base CID for the piece being transferred
-    PieceRef    ipld.CID
+    PieceRef    cid.Cid
     // portion of Piece to return, specified by an IPLD selector
     Selector    ipld.Selector
     // used to verify this channel
     voucher     DataTransferVoucher
     // the party that is sending the data (not who initiated the request)
-    sender      libp2p.PeerID
+    sender      peer.ID
     // the party that is receiving the data (not who initiated the request)
-    recipient   libp2p.PeerID
+    recipient   peer.ID
     // expected amount of data to be transferred
     totalSize   UVarint
 }
@@ -71,7 +72,7 @@ type DataTransferState struct @(mutable) {
 }
 
 type Open struct {
-    Initiator libp2p.PeerID
+    Initiator peer.ID
 }
 
 type SendData struct {
@@ -83,7 +84,7 @@ type Progress struct {
 }
 
 type Pause struct {
-    Initiator libp2p.PeerID
+    Initiator peer.ID
 }
 
 type Error struct {
@@ -108,21 +109,21 @@ type DataTransferSubscriber struct {
 // RequestValidator is an interface implemented by the client of the data transfer module to validate requests
 type RequestValidator struct {
     ValidatePush(
-        sender    libp2p.PeerID
+        sender    peer.ID
         voucher   DataTransferVoucher
-        PieceRef  ipld.CID
+        PieceRef  cid.Cid
         Selector  ipld.Selector
     )
     ValidatePull(
-        receiver  libp2p.PeerID
+        receiver  peer.ID
         voucher   DataTransferVoucher
-        PieceRef  ipld.CID
+        PieceRef  cid.Cid
         Selector  ipld.Selector
     )
     ValidateIntermediate(
-        otherPeer  libp2p.PeerID
+        otherPeer  peer.ID
         voucher    DataTransferVoucher
-        PieceRef   ipld.CID
+        PieceRef   cid.Cid
         Selector   ipld.Selector
     )
 }
@@ -137,18 +138,18 @@ type DataTransferSubsystem struct @(mutable) {
     // open a data transfer that will send data to the recipient peer and
     // transfer parts of the piece that match the selector
     OpenPushDataChannel(
-        to        libp2p.PeerID
+        to        peer.ID
         voucher   DataTransferVoucher
-        PieceRef  ipld.CID
+        PieceRef  cid.Cid
         Selector  ipld.Selector
     ) ChannelID
 
     // open a data transfer that will request data from the sending peer and
     // transfer parts of the piece that match the selector
     OpenPullDataChannel(
-        to        libp2p.PeerID
+        to        peer.ID
         voucher   DataTransferVoucher
-        PieceRef  ipld.CID
+        PieceRef  cid.Cid
         Selector  ipld.Selector
     ) ChannelID
 

@@ -1392,7 +1392,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_vm__actor__address" class="menu-item depth-4">
+<a href="../../../../../#appendix__address" class="menu-item depth-2">
     
     
         Address
@@ -1401,7 +1401,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2629,6 +2629,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../../#systems__filecoin_mining__sector__posting" class="menu-item depth-4">
+    
+    
+        Sector PoSting
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
     
     
@@ -3340,6 +3371,68 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-1">
 
     <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        Filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
     
     </li>
 
@@ -4307,6 +4400,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../../#listings__reserved_ranges" class="menu-item depth-2">
+    
+    
+        Reserved Ranges
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../../#listings__data_structures" class="menu-item depth-2">
     
     
@@ -4642,14 +4766,14 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
 <span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
 
 <span class="kd">type</span> <span class="nx">InitActorState</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// responsible for create new actors
-</span><span class="c1"></span>    <span class="nx">AddressMap</span>   <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">}</span>
-    <span class="nx">NextID</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span>
+</span><span class="c1"></span>    <span class="nx">AddressMap</span>   <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">}</span>
+    <span class="nx">NextID</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorID</span>
     <span class="nx">NetworkName</span>  <span class="kt">string</span>
 
     <span class="c1">// Allocates a new ID and maps another address to it. Returns the ID-address.
@@ -4663,7 +4787,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">Exec</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">code</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// This method is disabled until proven necessary.
-</span><span class="c1"></span>    <span class="c1">//GetActorIDForAddress(r vmr.Runtime, address addr.Address) addr.ActorID
+</span><span class="c1"></span>    <span class="c1">//GetActorIDForAddress(r vmr.Runtime, address addr.Address) abi.ActorID
 </span><span class="c1"></span><span class="p">}</span>
 </code></pre></div>
 
@@ -4692,13 +4816,15 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">init</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+    <span class="s">&#34;bytes&#34;</span>
+
+    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
     <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
     <span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin&#34;</span>
     <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
     <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
-    <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
     <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+    <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 <span class="p">)</span>
 
 <span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="p">=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span>
@@ -4708,11 +4834,11 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">var</span> <span class="nx">AssertMsg</span> <span class="p">=</span> <span class="nx">autil</span><span class="p">.</span><span class="nx">AssertMsg</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
     <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
     <span class="nx">st</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">InitActorState_I</span><span class="p">{</span>
-        <span class="nx">AddressMap_</span><span class="p">:</span>  <span class="kd">map</span><span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">{},</span> <span class="c1">// TODO: HAMT
-</span><span class="c1"></span>        <span class="nx">NextID_</span><span class="p">:</span>      <span class="nx">addr</span><span class="p">.</span><span class="nf">ActorID</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">FirstNonSingletonActorId</span><span class="p">),</span>
+        <span class="nx">AddressMap_</span><span class="p">:</span>  <span class="kd">map</span><span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">{},</span> <span class="c1">// TODO: HAMT
+</span><span class="c1"></span>        <span class="nx">NextID_</span><span class="p">:</span>      <span class="nx">abi</span><span class="p">.</span><span class="nf">ActorID</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">FirstNonSingletonActorId</span><span class="p">),</span>
         <span class="nx">NetworkName_</span><span class="p">:</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">NetworkName</span><span class="p">(),</span>
     <span class="p">}</span>
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
@@ -4751,8 +4877,11 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">Value_</span><span class="p">:</span>  <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReceived</span><span class="p">(),</span>
     <span class="p">})</span>
 
-    <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReturn</span><span class="p">(</span>
-        <span class="nf">Bytes</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nf">Serialize_Address_Compact</span><span class="p">(</span><span class="nx">idAddr</span><span class="p">)))</span>
+    <span class="kd">var</span> <span class="nx">addrBuf</span> <span class="nx">bytes</span><span class="p">.</span><span class="nx">Buffer</span>
+    <span class="nx">err</span> <span class="o">:=</span> <span class="nx">idAddr</span><span class="p">.</span><span class="nf">MarshalCBOR</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">addrBuf</span><span class="p">)</span>
+    <span class="nx">autil</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReturn</span><span class="p">(</span><span class="nx">addrBuf</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">())</span>
 <span class="p">}</span>
 
 <span class="c1">// This method is disabled until proven necessary.
@@ -4766,7 +4895,9 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">InitActorState_I</span><span class="p">)</span> <span class="nf">ResolveAddress</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
     <span class="nx">actorID</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">s</span><span class="p">.</span><span class="nf">AddressMap</span><span class="p">()[</span><span class="nx">address</span><span class="p">]</span>
     <span class="k">if</span> <span class="nx">ok</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="nx">actorID</span><span class="p">)</span>
+        <span class="nx">idAddr</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">NewIDAddress</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">actorID</span><span class="p">))</span>
+        <span class="nx">autil</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nx">idAddr</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="nx">address</span>
 <span class="p">}</span>
@@ -4775,7 +4906,9 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">actorID</span> <span class="o">:=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">NextID_</span>
     <span class="nx">s</span><span class="p">.</span><span class="nx">NextID_</span><span class="o">++</span>
     <span class="nx">s</span><span class="p">.</span><span class="nf">AddressMap</span><span class="p">()[</span><span class="nx">address</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actorID</span>
-    <span class="k">return</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Address_Make_ID</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="nx">actorID</span><span class="p">)</span>
+    <span class="nx">idAddr</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">NewIDAddress</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">actorID</span><span class="p">))</span>
+    <span class="nx">autil</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">idAddr</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_codeIDSupportsExec</span><span class="p">(</span><span class="nx">callerCodeID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">,</span> <span class="nx">execCodeID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
@@ -4802,7 +4935,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>
 <span class="kd">func</span> <span class="nf">_loadState</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">InitActorState</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
-    <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">())</span>
+    <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">cid</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">())</span>
     <span class="kd">var</span> <span class="nx">state</span> <span class="nx">InitActorState_I</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nx">stateCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">state</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;state not found&#34;</span><span class="p">)</span>
@@ -4820,7 +4953,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">h</span><span class="p">.</span><span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">newCID</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">InitActorState_I</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">InitActorState_I</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span> <span class="p">{</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>

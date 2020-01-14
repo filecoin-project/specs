@@ -18,7 +18,7 @@
       <guid>/docs/systems/filecoin_markets/storage_market/storage_client/</guid>
       <description>The StorageClient is a module that discovers miners, determines their asks, and proposes deals to StorageProviders. It also tracks deals as they move through the deal flow. Note that any address registered as a StorageMarketParticipant with the StorageMarketActor can be used with the StorageClient. A single participant can be a client, provider, or both at the same time.
 &amp;ndash;
-import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&amp;#34; import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import libp2p &amp;#34;github.</description>
+import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&amp;#34; import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; import message &amp;#34;github.</description>
     </item>
     
     <item>

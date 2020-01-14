@@ -1393,7 +1393,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_vm__actor__address" class="menu-item depth-4">
+<a href="../../../../../#appendix__address" class="menu-item depth-2">
     
     
         Address
@@ -1402,7 +1402,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2630,6 +2630,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../../#systems__filecoin_mining__sector__posting" class="menu-item depth-4">
+    
+    
+        Sector PoSting
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
     
     
@@ -3341,6 +3372,68 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-1">
 
     <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        Filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
     
     </li>
 
@@ -4308,6 +4401,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../../#listings__reserved_ranges" class="menu-item depth-2">
+    
+    
+        Reserved Ranges
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../../#listings__data_structures" class="menu-item depth-2">
     
     
@@ -4694,27 +4818,7 @@ the network will accept it and other miners will mine on top of it, earning the 
 
 <p>TODO: Rework this.</p>
 
-<p>Over the entire lifetime of the protocol, 1,400,000,000 FIL (<code>TotalIssuance</code>) will be given out to miners. The rate at which the funds are given out is set to halve every six years, smoothly (not a fixed jump like in Bitcoin). These funds are initially held by the reward actor, and are transferred to miners in blocks that they mine. Over time, the reward will eventually become close zero as the fractional amount given out at each step shrinks the network account&rsquo;s balance to 0.</p>
-
-<p>The equation for the current block reward is of the form:</p>
-
-<pre><code>Reward = (IV * RemainingInNetworkActor) / TotalIssuance
-</code></pre>
-
-<p><code>IV</code> is the initial value, and is set to:</p>
-
-<pre><code>IV = 153856861913558700202 attoFIL // 153.85 FIL
-</code></pre>
-
-<p>IV was derived from:</p>
-
-<pre><code>// Given one block every 30 seconds, this is how many blocks are in six years
-HalvingPeriodBlocks = 6 * 365 * 24 * 60 * 2 = 6,307,200 blocks
-λ = ln(2) / HalvingPeriodBlocks
-IV = TotalIssuance * (1-e^(-λ)) // Converted to attoFIL (10e18)
-</code></pre>
-
-<p>Each of the miners who produced a block in a tipset will receive a block reward.</p>
+<p>Over the entire lifetime of the protocol, 1,400,000,000 FIL (<code>TotalIssuance</code>) will be given out to miners. Each of the miners who produced a block in a tipset will receive a block reward.</p>
 
 <p>Note: Due to jitter in EC, and the gregorian calendar, there may be some error in the issuance schedule over time. This is expected to be small enough that it&rsquo;s not worth correcting for. Additionally, since the payout mechanism is transferring from the network account to the miner, there is no risk of minting <em>too much</em> FIL.</p>
 

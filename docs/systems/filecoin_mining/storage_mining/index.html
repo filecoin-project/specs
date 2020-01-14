@@ -1393,7 +1393,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_vm__actor__address" class="menu-item depth-4">
+<a href="../../../../#appendix__address" class="menu-item depth-2">
     
     
         Address
@@ -1402,7 +1402,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2630,6 +2630,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../#systems__filecoin_mining__sector__posting" class="menu-item depth-4">
+    
+    
+        Sector PoSting
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
     
     
@@ -3341,6 +3372,68 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-1">
 
     <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        Filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
     
     </li>
 
@@ -4308,6 +4401,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../#listings__reserved_ranges" class="menu-item depth-2">
+    
+    
+        Reserved Ranges
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../#listings__data_structures" class="menu-item depth-2">
     
     
@@ -4641,152 +4765,29 @@ https://github.com/alex-shpak/hugo-book
 
 <ul>
 <li>Committing new storage (see Sealing and PoRep)</li>
-<li>Continously proving storage ({see {<sref election_post>}})</li>
+<li>Continously proving storage (see <a href="../../../../#algorithms__post__election_post">Election PoSt</a>)</li>
 <li>Declaring storage faults and recovering from them.</li>
 </ul>
 
-<h2 id="storage-states">Storage States</h2>
+<h2 id="sector-types">Sector Types</h2>
+
+<p>There are two types of sectors, Regular Sectors with storage deals in them and Committed Capacity (CC) Sectors with no deals. All sectors require an expiration epoch that is declared upon PreCommit and sectors are assigned a StartEpoch at ProveCommit. Start and Expiration epoch collectively define the lifetime of a Sector. Length and size of active deals in a sector&rsquo;s lifetime determine the <code>DealWeight</code> of the sector. <code>SectorSize</code>, <code>Duration</code>, and <code>DealWeight</code> statically determine the power assigned to a sector that will remain constant throughout its lifetime. More details on cost and reward for different sector types will be announced soon.</p>
+
+<h2 id="sector-states">Sector States</h2>
 
 <p>When managing their storage <a href="../../../../#systems__filecoin_mining__sector___index">sectors</a>  as part of Filecoin mining, storage providers will account for where in the <a href="../../../../#systems__filecoin_mining__storage_mining__mining_cycle">Storage Mining Cycle</a> their sectors are. For instance, has a sector been committed? Does it need a new PoSt? Most of these operations happen as part of cycles of chain epochs called <code>Proving Period</code>s each of which yield high confidence that every miner in the chain has proven their power (see <a href="../../../../#algorithms__post__election_post">Election PoSt</a>).</p>
 
-<p>Through most of this cycle, sectors will be part of the miner&rsquo;s <code>Proving Set</code>. This is the set of sectors that the miners are supposed to generate proofs against. It includes:
-- <code>Committed Sectors</code> which have an associated PoRep but have but yet to generate a PoSt,
-- <code>Active Sectors</code> which have successfully been proven and are used in <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus___index">Storage Power Consensus</a> (SPC), and
-- <code>Recovering Sectors</code> which were faulted and are poised to recover through a new PoSt.</p>
+<p>There are three states that an individual sector can be in:</p>
 
-<p>Sectors in the <code>Proving Set</code> can be faulted and marked as <code>Failing</code> by the miner itself declaring a fault (<code>Declared Faults</code>), or through automatic fault detection by the network using on-chain data (<code>Detected Faults</code>). Note that storage in the <code>Proving Set</code> is used in SPC (specifically in-deal storage from the <code>Proving Set</code> counts toward <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power">Storage Power</a>). All storage is tracked by the system and affect a miner&rsquo;s ability to serve as a storage provider in the Filecoin Storage Market.</p>
+<ul>
+<li><code>PreCommit</code> when a sector has been added through a PreCommit message.</li>
+<li><code>Active</code> when a sector has been proven through a ProveCommit message and when a sector&rsquo;s TemporaryFault period has ended.</li>
+<li><code>TemporaryFault</code> when a miner declares fault on a particular sector.</li>
+</ul>
 
-<p>A sector that is in the <code>Failing</code> state for three consecutive <code>Proving Period</code>s will be terminated (<code>Terminated Faults</code>) meaning its data will be deemed unrecoverable by PoSt and the sector will have to be SEALed once more (as part of PoRep).</p>
+<p>Sectors enter <code>Active</code> from <code>PreCommit</code> through a ProveCommit message that serves as the first proof for the sector. PreCommit requires a PreCommit deposit which will be returned upon successful and timely ProveCommit. However, if there is no matching ProveCommit for a particular PreCommit message, the deposit will be burned at PreCommit expiration.</p>
 
-<p>Conversely <code>RecoverFaults()</code> can be called any time by the miner on a failing sector to return it to the <code>ProvingSet</code> and attempt to prove data is being stored once more. For instance an Active sector might move into the failing state during a power outage (through a declared or detected fault). At the end of the outage, the miner may call <code>RecoverFaults</code> to transition the state to <code>Recovering</code> before proving it once more and returning it to <code>Active</code>.</p>
-
-<p>We illustrate these states below.</p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sectoridx</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector_index&#34;</span>
-<span class="kn">import</span> <span class="nx">spc</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus&#34;</span>
-<span class="kn">import</span> <span class="nx">spowact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_power&#34;</span>
-<span class="kn">import</span> <span class="nx">sminact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_miner&#34;</span>
-<span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
-<span class="kn">import</span> <span class="nx">blockchain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&#34;</span>
-<span class="kn">import</span> <span class="nx">blockproducer</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block_producer&#34;</span>
-<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
-<span class="kn">import</span> <span class="nx">storage_proving</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving&#34;</span>
-<span class="kn">import</span> <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
-<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
-<span class="kn">import</span> <span class="nx">stateTree</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
-<span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
-<span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
-
-<span class="kd">type</span> <span class="nx">StorageMiningSubsystem</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Node</span>               <span class="nx">node_base</span><span class="p">.</span><span class="nx">FilecoinNode</span>
-
-    <span class="c1">// TODO: constructor
-</span><span class="c1"></span>    <span class="c1">// InitStorageMiningSubsystem(node node_base.FilecoinNode) struct{}
-</span><span class="c1"></span>
-    <span class="c1">// Component subsystems
-</span><span class="c1"></span>    <span class="c1">// StorageProvider    storage_provider.StorageProvider
-</span><span class="c1"></span>    <span class="nx">StoragePowerActor</span>  <span class="nx">spowact</span><span class="p">.</span><span class="nx">StoragePowerActorCode</span>
-    <span class="nx">MinerActor</span>         <span class="nx">sminact</span><span class="p">.</span><span class="nx">StorageMinerActorCode</span>
-    <span class="nx">SectorIndex</span>        <span class="nx">sectoridx</span><span class="p">.</span><span class="nx">SectorIndexerSubsystem</span>
-    <span class="nx">StorageProving</span>     <span class="nx">storage_proving</span><span class="p">.</span><span class="nx">StorageProvingSubsystem</span>
-
-    <span class="c1">// Need access to block producer in order to publish blocks
-</span><span class="c1"></span>    <span class="nx">_blockProducer</span>     <span class="nx">blockproducer</span><span class="p">.</span><span class="nx">BlockProducer</span>
-
-    <span class="c1">// Need access to SPC in order to mine a block
-</span><span class="c1"></span>    <span class="nx">_consensus</span>         <span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerConsensusSubsystem</span>
-
-    <span class="c1">// Need access to the blockchain system in order to query for things in the chain
-</span><span class="c1"></span>    <span class="nx">_blockchain</span>        <span class="nx">blockchain</span><span class="p">.</span><span class="nx">BlockchainSubsystem</span>
-
-    <span class="c1">// call by StorageMiningSubsystem itself to create miner
-</span><span class="c1"></span>    <span class="nf">CreateMiner</span><span class="p">(</span>
-        <span class="nx">state</span>       <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span>
-        <span class="nx">ownerAddr</span>   <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">workerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">sectorSize</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">UInt</span>
-        <span class="nx">peerId</span>      <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
-        <span class="nx">pledgeAmt</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="p">)</span>
-
-    <span class="c1">// call by StorageMarket.StorageProvider at the start of a deal.
-</span><span class="c1"></span>    <span class="c1">// Triggers AddNewDeal on SectorIndexer
-</span><span class="c1"></span>    <span class="c1">// StorageDeal contains DealCID
-</span><span class="c1"></span>    <span class="nf">HandleStorageDeal</span><span class="p">(</span><span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span>
-
-    <span class="c1">// call by StorageMinerActor when error in sealing
-</span><span class="c1"></span>    <span class="nf">CommitSectorError</span><span class="p">()</span>
-
-    <span class="c1">// call by StorageMiningSubsystem itself in BlockProduction
-</span><span class="c1"></span>    <span class="nf">PrepareNewTicket</span><span class="p">(</span>
-        <span class="nx">randomness</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
-        <span class="nx">minerAddr</span>   <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
-
-    <span class="nf">PreparePoStChallengeSeed</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
-    <span class="nf">_getStorageMinerActorState</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">sminact</span><span class="p">.</span><span class="nx">StorageMinerActorState</span>
-
-    <span class="c1">// call by BlockChain when a new block is produced
-</span><span class="c1"></span>    <span class="nf">OnNewBestChain</span><span class="p">()</span>
-
-    <span class="c1">// call by clock during BlockProduction
-</span><span class="c1"></span>    <span class="c1">// TODO: define clock better
-</span><span class="c1"></span>    <span class="nf">OnNewRound</span><span class="p">()</span>
-
-    <span class="nf">_runMiningCycle</span><span class="p">()</span>
-    <span class="nf">_tryLeaderElection</span><span class="p">(</span><span class="nx">st</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">sma</span> <span class="nx">sminact</span><span class="p">.</span><span class="nx">StorageMinerActorState</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
-    <span class="nf">_trySurprisePoSt</span><span class="p">(</span><span class="nx">st</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">sma</span> <span class="nx">sminact</span><span class="p">.</span><span class="nx">StorageMinerActorState</span><span class="p">)</span> <span class="kt">error</span>
-    <span class="nf">_submitSurprisePoStMessage</span><span class="p">(</span>
-        <span class="nx">state</span>     <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span>
-        <span class="nx">sPoSt</span>     <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
-        <span class="nx">gasPrice</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
-        <span class="nx">gasLimit</span>  <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span>
-    <span class="p">)</span> <span class="kt">error</span>
-
-    <span class="nf">VerifyElectionPoSt</span><span class="p">(</span>
-        <span class="nx">header</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span>
-        <span class="nx">onChainInfo</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
-    <span class="p">)</span> <span class="kt">bool</span>
-
-    <span class="nf">_verifyElection</span><span class="p">(</span>
-        <span class="nx">header</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span>
-        <span class="nx">onChainInfo</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
-    <span class="p">)</span> <span class="kt">bool</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">PoStChallengeSeedInput</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ticket</span>     <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
-    <span class="nx">minerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-<span class="p">}</span>
-</code></pre></div>
-
-
-
-
-
-
-<h3 id="sector-in-storageminer-state-machine-new-one">Sector in StorageMiner State Machine (new one)</h3>
+<p>A particular sector enters <code>TemporaryFault</code> from <code>Active</code> through <code>DeclareTemporaryFault</code> with a specified period. Power associated with the sector will be lost immediately and miner needs to pay a <code>TemporaryFaultFee</code> determined by the power suspended and the duration of suspension. At the end of the declared duration, faulted sectors automatically regain power and enter <code>Active</code>. Miners are expected to prove over this recovered sector. Failure to do so may result in failing ElectionPoSt or <code>DetectedFault</code> from failing SurprisePoSt.</p>
 
 
 
@@ -4802,14 +4803,14 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="diagram">
 
-<span class="diagram-title">Sector State (new one)</span>
+<span class="diagram-title">Sector State Machine</span>
 
 
 
 
-(<a href="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state_fsm.dot.svg" target="_blank">open in new tab</a>)
+(<a href="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state_machine.dot.svg" target="_blank">open in new tab</a>)
 <br />
-<img src="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state_fsm.dot.svg" />
+<img src="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state_machine.dot.svg" />
 
 
 
@@ -4831,14 +4832,14 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="diagram">
 
-<span class="diagram-title">Sector State Legend (new one)</span>
+<span class="diagram-title">Sector State Machine Legend</span>
 
 
 
 
-(<a href="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state_legend.dot.svg" target="_blank">open in new tab</a>)
+(<a href="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state_machine_legend.dot.svg" target="_blank">open in new tab</a>)
 <br />
-<img src="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state_legend.dot.svg" />
+<img src="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state_machine_legend.dot.svg" />
 
 
 
@@ -4846,7 +4847,21 @@ https://github.com/alex-shpak/hugo-book
 </div>
 
 
-<h3 id="sector-in-storageminer-state-machine-both">Sector in StorageMiner State Machine (both)</h3>
+<h3 id="miner-post-state">Miner PoSt State</h3>
+
+<p><code>MinerPoStState</code> keeps track of a miner&rsquo;s state in responding to PoSt and there are three states in <code>MinerPoStState</code>:</p>
+
+<ul>
+<li><code>OK</code> miner has passed either a ElectionPoSt or a SurprisePoSt sufficiently recently.</li>
+<li><code>Challenged</code> miner has been selected to prove its storage via SurprisePoSt and is currently in the Challenged state</li>
+<li><code>DetectedFault</code> miner has failed at least one SurprisePoSt, indicating that all claimed storage may not be proven. Miner has lost power on its sector and recovery can only proceed by a successful response to a subsequent SurprisePoSt challenge, up until the limit of number of consecutive failures.</li>
+</ul>
+
+<p><code>DetectedFault</code> is a miner-wide PoSt state when all sectors are considered inactive. All power is lost immediately and pledge collateral is slashed. If a miner remains in <code>DetectedFault</code> for more than MaxConsecutiveFailures, all sectors will be terminated, both power and market actors will be notified for slashing and return of client deal collateral.</p>
+
+<p><code>ProvingSet</code> consists of sectors that miners are required to generate proofs against and is what counts towards miners&rsquo; power. In other words, <code>ProvingSet</code> is a set of all <code>Active</code> sectors for a particular miner. <code>ProvingSet</code> is only relevant when the miner is in OK stage of its <code>MinerPoStState</code>. When a miner is in the <code>Challenged</code> state, <code>ChallengedSectors</code> specify the list of sectors to be challenged which is the <code>ProvingSet</code> before the challenge is issued thus allowing more sectors to be added while it is in the <code>Challenged</code> state.</p>
+
+<p>Miners can call ProveCommit to commit a sector and add to their Claimed Power. However, a miner&rsquo;s Nominal Power and Consensus Power will be zero when it is in either Challenged or DetectedFault state. Note also that miners can call DeclareTemporaryFault when they are in Challenged or DetectedFault state. This does not change the list of  sectors that are currently challenged which is a snapshot of all active sectors (ProvingSet) at the time of challenge.</p>
 
 
 
@@ -4862,14 +4877,43 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="diagram">
 
-<span class="diagram-title">Sector State Machine (both)</span>
+<span class="diagram-title">Miner PoSt State Machine</span>
 
 
 
 
-(<a href="docs/systems/filecoin_mining/storage_mining/diagrams/sector_fsm.dot.svg" target="_blank">open in new tab</a>)
+(<a href="docs/systems/filecoin_mining/storage_mining/diagrams/miner_post_state_machine.dot.svg" target="_blank">open in new tab</a>)
 <br />
-<img src="docs/systems/filecoin_mining/storage_mining/diagrams/sector_fsm.dot.svg" />
+<img src="docs/systems/filecoin_mining/storage_mining/diagrams/miner_post_state_machine.dot.svg" />
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Miner PoSt State Machine Legend</span>
+
+
+
+
+(<a href="docs/systems/filecoin_mining/storage_mining/diagrams/miner_post_state_machine_legend.dot.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_mining/storage_mining/diagrams/miner_post_state_machine_legend.dot.svg" />
 
 
 
@@ -4891,10 +4935,10 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li><a href="#filecoin-storage-mining-subsystem">Filecoin Storage Mining Subsystem</a>
 <ul>
-<li><a href="#storage-states">Storage States</a>
+<li><a href="#sector-types">Sector Types</a></li>
+<li><a href="#sector-states">Sector States</a>
 <ul>
-<li><a href="#sector-in-storageminer-state-machine-new-one">Sector in StorageMiner State Machine (new one)</a></li>
-<li><a href="#sector-in-storageminer-state-machine-both">Sector in StorageMiner State Machine (both)</a></li>
+<li><a href="#miner-post-state">Miner PoSt State</a></li>
 </ul></li>
 </ul></li>
 </ul>

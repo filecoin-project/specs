@@ -1,10 +1,10 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import addr "github.com/filecoin-project/go-address"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import message "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+import cid "github.com/ipfs/go-cid"
 
 type StorageDealStatus uint64
 
@@ -51,7 +51,7 @@ type DealProtocolRequest struct {
     // The deal being proposed
     DealProposal  deal.StorageDealProposal
     // root of the data to be transferred
-    Payload       ipld.CID
+    Payload       cid.Cid
 }
 
 // DealProtocolResponse is a response sent by a storage miner 

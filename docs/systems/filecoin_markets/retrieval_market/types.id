@@ -1,14 +1,15 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
-import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import addr "github.com/filecoin-project/go-address"
 import abi "github.com/filecoin-project/specs/actors/abi"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+import peer "github.com/libp2p/go-libp2p-core/peer"
+import cid "github.com/ipfs/go-cid"
 
 type PaymentVoucher struct {}
 
 type RetrievalPeer struct {
     Address  addr.Address
-    ID       libp2p.PeerID  // optional
+    ID       peer.ID  // optional
 }
 
 type Available struct {}
@@ -27,7 +28,7 @@ type RetrievalQueryItemStatus union {
 }
 
 type RetrievalQueryParams struct {
-    PayloadCID                  ipld.CID  // optional, query if miner has this cid in this piece. some miners may not be able to respond.
+    PayloadCID                  cid.Cid  // optional, query if miner has this cid in this piece. some miners may not be able to respond.
     Selector                    ipld.Selector  // optional, query if miner has this cid in this piece. some miners may not be able to respond.
     MaxPricePerByte             abi.TokenAmount  // optional, tell miner uninterested if more expensive than this
     MinPaymentInterval          UInt  // optional, tell miner uninterested unless payment interval is greater than this
@@ -79,7 +80,7 @@ type DealStatus union {
 }
 
 type RetrievalParams struct {
-    PayloadCID               ipld.CID  // V1
+    PayloadCID               cid.Cid  // V1
     Selector                 ipld.Selector  // V1
     PricePerByte             abi.TokenAmount
     PaymentInterval          UInt

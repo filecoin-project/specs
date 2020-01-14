@@ -1,9 +1,9 @@
 package util
 
 import (
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 )
 
 // Create a new entry in the balance table, with the specified initial balance.
@@ -142,6 +142,11 @@ func MinerSetHAMT_Empty() MinerSetHAMT {
 }
 
 func ActorIDSetHAMT_Empty() ActorIDSetHAMT {
+	IMPL_FINISH()
+	panic("")
+}
+
+func MinerEventSetHAMT_Empty() MinerEventSetHAMT {
 	IMPL_FINISH()
 	panic("")
 }

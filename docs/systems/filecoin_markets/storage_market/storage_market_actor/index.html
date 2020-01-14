@@ -1392,7 +1392,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_vm__actor__address" class="menu-item depth-4">
+<a href="../../../../../#appendix__address" class="menu-item depth-2">
     
     
         Address
@@ -1401,7 +1401,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2629,6 +2629,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../../#systems__filecoin_mining__sector__posting" class="menu-item depth-4">
+    
+    
+        Sector PoSting
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
     
     
@@ -3340,6 +3371,68 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-1">
 
     <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        Filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
     
     </li>
 
@@ -4307,6 +4400,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../../#listings__reserved_ranges" class="menu-item depth-2">
+    
+    
+        Reserved Ranges
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../../#listings__data_structures" class="menu-item depth-2">
     
     
@@ -4626,7 +4750,7 @@ https://github.com/alex-shpak/hugo-book
 <article class="markdown">
   
 
-<p><code>StorageMarketActor</code> is responsible for processing and managing on-chain deals. This is also the entry point of all storage deals and data into the system. It maintains a mapping of <code>StorageDealID</code> to <code>StorageDeal</code> and keeps track of locked balances of <code>StorageClient</code> and <code>StorageProvider</code>. When a deal is posted on chain through the <code>StorageMarketActor</code>, it will first check if both transacting parties have sufficient balances locked up and include the deal on chain. On every successful submission of <code>PoStProof</code>, <code>StorageMarketActor</code> will credit the <code>StorageProvider</code> a fraction of the storage fee based on how many blocks have passed since the last <code>PoStProof</code>. In the event that there are sectors included in the <code>FaultSet</code>, <code>StorageMarketActor</code> will fetch deal information from the chain and <code>SlashStorageFault</code> for faulting on those deals. Similarly, when a <code>PoStProof</code> is missed by the end of a <code>ProvingPeriod</code>, <code>SlashStorageFault</code> will also be called by the <code>CronActor</code> to penalize <code>StorageProvider</code> for dropping a <code>StorageDeal</code>.</p>
+<p><code>StorageMarketActor</code> is responsible for processing and managing on-chain deals. This is also the entry point of all storage deals and data into the system. It maintains a mapping of <code>StorageDealID</code> to <code>StorageDeal</code> and keeps track of locked balances of <code>StorageClient</code> and <code>StorageProvider</code>. When a deal is posted on chain through the <code>StorageMarketActor</code>, it will first check if both transacting parties have sufficient balances locked up and include the deal on chain.</p>
 
 <h1 id="storagemarketactor-interface"><code>StorageMarketActor</code> interface</h1>
 
@@ -4650,7 +4774,7 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 
@@ -4774,13 +4898,13 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_market</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
     <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
     <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
     <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime/indices&#34;</span>
     <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
     <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
     <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
-    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="p">)</span>
 
 <span class="kd">const</span> <span class="nx">epochUndefined</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
@@ -5131,13 +5255,13 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_market</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
     <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
     <span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin&#34;</span>
     <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
     <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
     <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
     <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
-    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="p">)</span>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
@@ -5172,7 +5296,7 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">amountSlashedTotal</span><span class="p">)</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">amountSlashedTotal</span><span class="p">)</span>
     <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">recipientAddr</span><span class="p">,</span> <span class="nx">amountExtracted</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5209,7 +5333,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">newDeal</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">newStorageDeals</span> <span class="p">{</span>
         <span class="nx">p</span> <span class="o">:=</span> <span class="nx">newDeal</span><span class="p">.</span><span class="nf">Proposal</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="p">!</span><span class="nx">p</span><span class="p">.</span><span class="nf">Provider</span><span class="p">().</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">providerAddr</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">p</span><span class="p">.</span><span class="nf">Provider</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">providerAddr</span> <span class="p">{</span>
             <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;Incorrect provider listed in deal&#34;</span><span class="p">)</span>
         <span class="p">}</span>
 
@@ -5246,7 +5370,7 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">amountSlashedTotal</span><span class="p">)</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">amountSlashedTotal</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">// Note: in the case of a capacity-commitment sector (one with zero deals), this function should succeed vacuously.
@@ -5310,7 +5434,7 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">dealID</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">dealIDs</span><span class="p">.</span><span class="nf">Items</span><span class="p">()</span> <span class="p">{</span>
         <span class="nx">_</span><span class="p">,</span> <span class="nx">dealP</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getOnChainDealAssert</span><span class="p">(</span><span class="nx">dealID</span><span class="p">)</span>
-        <span class="nf">Assert</span><span class="p">(</span><span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">().</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">))</span>
+        <span class="nf">Assert</span><span class="p">(</span><span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">()</span> <span class="o">==</span> <span class="nx">minerAddr</span><span class="p">)</span>
 
         <span class="nf">IMPL_FINISH</span><span class="p">()</span> <span class="c1">// BigInt arithmetic
 </span><span class="c1"></span>        <span class="nx">ret</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="nx">dealP</span><span class="p">.</span><span class="nf">Duration</span><span class="p">())</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="nx">dealP</span><span class="p">.</span><span class="nf">PieceSize</span><span class="p">().</span><span class="nf">Total</span><span class="p">())</span>
@@ -5321,7 +5445,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">deal</span><span class="p">.</span><span class="nf">DealWeight</span><span class="p">(</span><span class="nx">ret</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">TerminateDealsOnSlashProviderSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealIDs</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">OnMinerSectorsTerminate</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealIDs</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMinerActorCodeID</span><span class="p">)</span>
     <span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
 
@@ -5329,7 +5453,7 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">dealID</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">dealIDs</span><span class="p">.</span><span class="nf">Items</span><span class="p">()</span> <span class="p">{</span>
         <span class="nx">_</span><span class="p">,</span> <span class="nx">dealP</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_rtGetOnChainDealOrAbort</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealID</span><span class="p">)</span>
-        <span class="nf">Assert</span><span class="p">(</span><span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">().</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">))</span>
+        <span class="nf">Assert</span><span class="p">(</span><span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">()</span> <span class="o">==</span> <span class="nx">minerAddr</span><span class="p">)</span>
 
         <span class="c1">// Note: we do not perform the balance transfers here, but rather simply record the flag
 </span><span class="c1"></span>        <span class="c1">// to indicate that _processDealSlashed should be called when the deferred state computation
@@ -5341,7 +5465,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">OnEpochTickEnd</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">CronActorAddr</span><span class="p">)</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">CronActorAddr</span><span class="p">)</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
@@ -5412,11 +5536,11 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">amountSlashedTotal</span><span class="p">)</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">amountSlashedTotal</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
     <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
 
     <span class="nx">st</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">StorageMarketActorState_I</span><span class="p">{</span>
@@ -5460,7 +5584,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_rtAbortIfDealNotFromProvider</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealP</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">!</span><span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">().</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">minerAddr</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Deal has incorrect miner as its provider.&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
@@ -5570,10 +5694,8 @@ https://github.com/alex-shpak/hugo-book
 
 <h1 id="storage-deal-collateral">Storage Deal Collateral</h1>
 
-<p>Storage Deals have an associated collateral amount. This <code>StorageDealCollateral</code> is held in the <code>StorageMarketActor</code>.
-Its value is agreed upon by the storage provider and client off-chain, but must be greater than a protocol-defined minimum in any deal. Storage providers will choose to offer greater collateral to signal high-quality storage to clients.</p>
-
-<p>On <code>SectorFailureTimeout</code> (see <a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal__faults">Faults</a>), the <code>StorageDealCollateral</code> will be burned. In the future, the Filecoin protocol may be amended to send up to half of the collateral to storage clients as damages in such cases.</p>
+<p>There are two types of Storage Deal Collateral, ProviderDealCollateral and ClientDealCollateral. Both types of <code>StorageDealCollateral</code> are held in the <code>StorageMarketActor</code>.
+Their values are agreed upon by the storage provider and client off-chain, but must be greater than a protocol-defined minimum in any deal. Storage providers will choose to offer greater provider deal collateral to signal high-quality storage to clients. Provider deal collateral is only slashed when a sector is terminated other than normal expiration. If a miner enters Temporary Fault for a sector and later recovers from it, no deal collateral will be slashed.</p>
 
 <p>Upon graceful deal expiration, storage providers must wait for finality number of epochs (as defined in <a href="../../../../../#algorithms__expected_consensus__finality">EC Finality</a>) before being able to withdraw their <code>StorageDealCollateral</code> from the <code>StorageMarketActor</code>.</p>
 

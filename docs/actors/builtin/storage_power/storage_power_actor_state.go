@@ -3,20 +3,18 @@ package storage_power
 import (
 	"sort"
 
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 )
 
 func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(minerPower abi.StoragePower) bool {
-	IMPL_TODO() // import from consts
-	MIN_MINER_SIZE_STOR := abi.StoragePower(0)
-	MIN_MINER_SIZE_TARG := 0
 
 	// if miner is larger than min power requirement, we're set
-	if minerPower >= MIN_MINER_SIZE_STOR {
+	if minerPower >= node_base.MIN_MINER_SIZE_STOR {
 		return true
 	}
 
@@ -26,7 +24,7 @@ func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(mine
 	}
 
 	// else if none do, check whether in MIN_MINER_SIZE_TARG miners
-	if len(st.PowerTable()) <= MIN_MINER_SIZE_TARG {
+	if len(st.PowerTable()) <= node_base.MIN_MINER_SIZE_TARG {
 		// miner should pass
 		return true
 	}
@@ -37,7 +35,7 @@ func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(mine
 		minerSizes = append(minerSizes, v)
 	}
 	sort.Slice(minerSizes, func(i, j int) bool { return int(i) > int(j) })
-	return minerPower >= minerSizes[MIN_MINER_SIZE_TARG-1]
+	return minerPower >= minerSizes[node_base.MIN_MINER_SIZE_TARG-1]
 }
 
 func (st *StoragePowerActorState_I) _slashPledgeCollateral(

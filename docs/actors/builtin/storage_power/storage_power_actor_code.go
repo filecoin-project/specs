@@ -3,6 +3,7 @@ package storage_power
 import (
 	"math"
 
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
@@ -10,10 +11,9 @@ import (
 	serde "github.com/filecoin-project/specs/actors/serde"
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
+	peer "github.com/libp2p/go-libp2p-core/peer"
 )
 
 type ConsensusFaultType int
@@ -64,13 +64,13 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Add
 	rt.SendFunds(recipientAddr, amountExtracted)
 }
 
-func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Address, sectorSize sector.SectorSize, peerId libp2p.PeerID) addr.Address {
+func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Address, sectorSize sector.SectorSize, peerId peer.ID) addr.Address {
 	vmr.RT_ValidateImmediateCallerIsSignable(rt)
 	ownerAddr := rt.ImmediateCaller()
 
-	newMinerAddr := addr.Deserialize_Address_Compact_Assert(
+	newMinerAddr, err := addr.NewFromBytes(
 		rt.Send(
-			addr.InitActorAddr,
+			builtin.InitActorAddr,
 			ai.Method_InitActor_Exec,
 			serde.MustSerializeParams(
 				builtin.StorageMinerActorCodeID,
@@ -82,6 +82,7 @@ func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Addres
 			abi.TokenAmount(0),
 		).ReturnValue(),
 	)
+	autil.Assert(err == nil)
 
 	h, st := a.State(rt)
 	newTable, ok := autil.BalanceTable_WithNewAddressEntry(st.EscrowTable(), newMinerAddr, rt.ValueReceived())
@@ -131,7 +132,7 @@ func (a *StoragePowerActorCode_I) OnSectorTerminate(
 
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
-	a._rtdeductClaimedPowerForSectorAssert(rt, minerAddr, storageWeightDesc)
+	a._rtDeductClaimedPowerForSectorAssert(rt, minerAddr, storageWeightDesc)
 
 	if terminationType != SectorTerminationType_NormalExpiration {
 		amountToSlash := rt.CurrIndices().StoragePower_PledgeSlashForSectorTermination(storageWeightDesc, terminationType)
@@ -141,7 +142,7 @@ func (a *StoragePowerActorCode_I) OnSectorTerminate(
 
 func (a *StoragePowerActorCode_I) OnSectorTemporaryFaultEffectiveBegin(rt Runtime, storageWeightDesc SectorStorageWeightDesc) {
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
-	a._rtdeductClaimedPowerForSectorAssert(rt, rt.ImmediateCaller(), storageWeightDesc)
+	a._rtDeductClaimedPowerForSectorAssert(rt, rt.ImmediateCaller(), storageWeightDesc)
 }
 
 func (a *StoragePowerActorCode_I) OnSectorTemporaryFaultEffectiveEnd(rt Runtime, storageWeightDesc SectorStorageWeightDesc) {
@@ -153,7 +154,7 @@ func (a *StoragePowerActorCode_I) OnSectorModifyWeightDesc(
 	rt Runtime, storageWeightDescPrev SectorStorageWeightDesc, storageWeightDescNew SectorStorageWeightDesc) {
 
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
-	a._rtdeductClaimedPowerForSectorAssert(rt, rt.ImmediateCaller(), storageWeightDescPrev)
+	a._rtDeductClaimedPowerForSectorAssert(rt, rt.ImmediateCaller(), storageWeightDescPrev)
 	a._rtAddPowerForSector(rt, rt.ImmediateCaller(), storageWeightDescNew)
 }
 
@@ -187,6 +188,22 @@ func (a *StoragePowerActorCode_I) OnMinerSurprisePoStFailure(rt Runtime, numCons
 		amountToSlash := rt.CurrIndices().StoragePower_PledgeSlashForSurprisePoStFailure(minerClaimedPower, numConsecutiveFailures)
 		a._rtSlashPledgeCollateral(rt, minerAddr, amountToSlash)
 	}
+}
+
+func (a *StoragePowerActorCode_I) OnMinerEnrollCronEvent(rt Runtime, eventEpoch abi.ChainEpoch, sectorNumbers []sector.SectorNumber) {
+	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
+	minerAddr := rt.ImmediateCaller()
+	minerEvent := &autil.MinerEvent_I{
+		MinerAddr_: minerAddr,
+		Sectors_:   sectorNumbers,
+	}
+
+	h, st := a.State(rt)
+	if _, found := st.Impl().CachedDeferredCronEvents_[eventEpoch]; !found {
+		st.Impl().CachedDeferredCronEvents_[eventEpoch] = autil.MinerEventSetHAMT_Empty()
+	}
+	st.Impl().CachedDeferredCronEvents_[eventEpoch][minerEvent] = true
+	UpdateRelease(rt, h, st)
 }
 
 func (a *StoragePowerActorCode_I) ReportVerifiedConsensusFault(rt Runtime, slasheeAddr addr.Address, faultEpoch abi.ChainEpoch, faultType ConsensusFaultType) {
@@ -251,14 +268,14 @@ func (a *StoragePowerActorCode_I) ReportVerifiedConsensusFault(rt Runtime, slash
 
 // Called by Cron.
 func (a *StoragePowerActorCode_I) OnEpochTickEnd(rt Runtime) {
-	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.CronActorAddr)
 
 	a._rtInitiateNewSurprisePoStChallenges(rt)
 	a._rtProcessDeferredCronEvents(rt)
 }
 
 func (a *StoragePowerActorCode_I) Constructor(rt Runtime) {
-	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr)
 	h := rt.AcquireState()
 
 	st := &StoragePowerActorState_I{
@@ -285,7 +302,7 @@ func (a *StoragePowerActorCode_I) _rtAddPowerForSector(rt Runtime, minerAddr add
 	UpdateRelease(rt, h, st)
 }
 
-func (a *StoragePowerActorCode_I) _rtdeductClaimedPowerForSectorAssert(rt Runtime, minerAddr addr.Address, storageWeightDesc SectorStorageWeightDesc) {
+func (a *StoragePowerActorCode_I) _rtDeductClaimedPowerForSectorAssert(rt Runtime, minerAddr addr.Address, storageWeightDesc SectorStorageWeightDesc) {
 	h, st := a.State(rt)
 	st._deductClaimedPowerForSectorAssert(minerAddr, storageWeightDesc)
 	UpdateRelease(rt, h, st)
@@ -297,7 +314,9 @@ func (a *StoragePowerActorCode_I) _rtInitiateNewSurprisePoStChallenges(rt Runtim
 	h, st := a.State(rt)
 
 	// sample the actor addresses
-	randomness := rt.Randomness(filcrypto.DomainSeparationTag_SurprisePoStSelectMiners, rt.CurrEpoch())
+	minerSelectionSeed := rt.GetRandomness(rt.CurrEpoch())
+	randomness := filcrypto.DeriveRandWithEpoch(filcrypto.DomainSeparationTag_SurprisePoStSelectMiners, minerSelectionSeed, int(rt.CurrEpoch()))
+
 	IMPL_FINISH() // BigInt arithmetic (not floating-point)
 	challengeCount := math.Ceil(float64(len(st.PowerTable())) / float64(provingPeriod))
 	surprisedMiners := st._selectMinersToSurprise(int(challengeCount), randomness)
@@ -358,7 +377,7 @@ func (a *StoragePowerActorCode_I) _rtSlashPledgeCollateral(rt Runtime, minerAddr
 	amountSlashed := st._slashPledgeCollateral(minerAddr, amountToSlash)
 	UpdateRelease(rt, h, st)
 
-	rt.SendFunds(addr.BurntFundsActorAddr, amountSlashed)
+	rt.SendFunds(builtin.BurntFundsActorAddr, amountSlashed)
 }
 
 func (a *StoragePowerActorCode_I) _rtDeleteMinerActor(rt Runtime, minerAddr addr.Address) {
@@ -377,6 +396,12 @@ func (a *StoragePowerActorCode_I) _rtDeleteMinerActor(rt Runtime, minerAddr addr
 
 	UpdateRelease(rt, h, st)
 
-	rt.DeleteActor(minerAddr)
-	rt.SendFunds(addr.BurntFundsActorAddr, amountSlashed)
+	rt.Send(
+		minerAddr,
+		ai.Method_StorageMinerActor_OnDeleteMiner,
+		serde.MustSerializeParams(),
+		abi.TokenAmount(0),
+	)
+
+	rt.SendFunds(builtin.BurntFundsActorAddr, amountSlashed)
 }

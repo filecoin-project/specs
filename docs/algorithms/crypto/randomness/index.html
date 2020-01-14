@@ -1392,7 +1392,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_vm__actor__address" class="menu-item depth-4">
+<a href="../../../../#appendix__address" class="menu-item depth-2">
     
     
         Address
@@ -1401,7 +1401,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2629,6 +2629,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../#systems__filecoin_mining__sector__posting" class="menu-item depth-4">
+    
+    
+        Sector PoSting
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
     
     
@@ -3340,6 +3371,68 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-1">
 
     <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        Filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
     
     </li>
 
@@ -4307,6 +4400,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../#listings__reserved_ranges" class="menu-item depth-2">
+    
+    
+        Reserved Ranges
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../#listings__data_structures" class="menu-item depth-2">
     
     
@@ -4647,30 +4771,64 @@ We describe this formatting below.</p>
 
 <p>For <a href="../../../../#algorithms__crypto__signatures">Signatures</a> as well as <a href="../../../../#algorithms__crypto__vrf">Verifiable Random Function</a> usage in the protocol, we define Domain Separation Tags with which we prepend random inputs.</p>
 
-<p>The source of truth is defined below, but the currently defined DSTs are:
-- for drawing randomness from an on-chain ticket:
-    - <code>TicketDrawingDST = 1</code>
-- for generating a new random ticket:
-    - <code>TicketProductionDST = 2</code>
-- for generating randomness for running PoSt (ElectionPoSt or SurprisePoSt):
-    - <code>PoStDST = 3</code></p>
+<p>The source of truth is defined below, but the currently defined DSTs are:</p>
+
+<ul>
+<li>for drawing randomness from an on-chain ticket:
+
+<ul>
+<li><code>TicketDrawingDST = 1</code></li>
+</ul></li>
+<li>for generating a new random ticket:
+
+<ul>
+<li><code>TicketProductionDST = 2</code></li>
+</ul></li>
+<li>for generating randomness for running ElectionPoSt:
+
+<ul>
+<li><code>ElectionPoStChallengeSeedDST = 3</code></li>
+</ul></li>
+<li>for generating randomness for running SurprisePoSt:
+
+<ul>
+<li><code>SurprisePoStChallengeSeedDST = 4</code></li>
+</ul></li>
+<li>for selection of which miners to surprise:
+
+<ul>
+<li><code>SurprisePoStSelectMinersDST = 5</code></li>
+</ul></li>
+<li>for selection of which sectors to sample:
+
+<ul>
+<li><code>SurprisePoStSampleSectors = 6</code></li>
+</ul></li>
+</ul>
 
 <h2 id="forming-randomness-seeds">Forming Randomness Seeds</h2>
 
-<p>Different uses of randomness require randomness seeds predicated on a variety of inputs. For instance, the protocol defines the following objects (this list may not be exhaustive):
-- <code>TicketDrawingSeedInput</code> &ndash; uses ticket and epoch number
-- <code>TicketProductionSeedInput</code> &ndash; uses ticket and miner actor addr
-- <code>PoStChallengeSeedInput</code> &ndash; uses ticket and miner actor addr</p>
+<p>Different uses of randomness require randomness seeds predicated on a variety of inputs. For instance, we have:</p>
+
+<ul>
+<li><code>TicketDrawing</code> &ndash; uses ticket and epoch number</li>
+<li><code>TicketProduction</code> &ndash; uses ticket and miner actor addr</li>
+<li><code>PoStChallengeSeed</code> &ndash; uses ticket and miner actor addr</li>
+<li><code>SurprisePoStSelectMiners</code> &ndash; uses ticket and epoch number
+&hellip;</li>
+</ul>
 
 <p>In all cases, a ticket is used as the base of randomness (see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a>). In order to make randomness seed creation uniform, the protocol derives all such seeds in the same way, as follows (also see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a>):</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">For a given randomness input object randInputObject (typically containing a random ticket from the chain and other elements such as an epoch or a miner actor address):
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text"> For a given ticket&#39;s randomness ticket_randomness:
+
 buffer = Bytes{}
 buffer.append(IntToBigEndianBytes(AppropriateDST))
 buffer.append(-1) // a flag to be used in cases where FIL might need longer randomness outputs. Currently unused
-buffer.append(CBOR_Serialization(randInputObj))
+buffer.append(ticket_randomness)
+buffer.append(other needed serialized inputs)
 
 randomness = SHA256(buffer)</code></pre></div>
-
+<p>
 
 
 
@@ -4692,42 +4850,45 @@ randomness = SHA256(buffer)</code></pre></div>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">crypto</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+    <span class="s">&#34;bytes&#34;</span>
+    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
+    <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
     <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
-<span class="kd">type</span> <span class="nx">Randomness</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+<span class="kd">type</span> <span class="nx">DomainSeparationTag</span> <span class="kt">int</span>
+<span class="kd">type</span> <span class="nx">Randomness</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">Randomness</span>
 <span class="kd">type</span> <span class="nx">Serialization</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
 
-<span class="c1">// Derive a random byte string from a domain separation tag and an arbitrary
-</span><span class="c1">// serializable object.
-</span><span class="c1">//
-</span><span class="c1">// Note: to produce values of type Serialization, use the auto-generated method prototypes
-</span><span class="c1">//   Serialize_T(T) Serialization
-</span><span class="c1">// for each type T defined in .id.
-</span><span class="c1">//
-</span><span class="c1">// In order to derive randomness from a collection of objects, rather than just a single
-</span><span class="c1">// object, define a struct at the .id level that contains those objects as member fields.
-</span><span class="c1">// This will then cause a Serialize_*() method to be generated for the struct type.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">DeriveRand</span><span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">,</span> <span class="nx">s</span> <span class="nx">Serialization</span><span class="p">)</span> <span class="nx">Randomness</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span><span class="p">,</span> <span class="nx">s</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="kd">const</span> <span class="p">(</span>
+    <span class="nx">DomainSeparationTag_TicketDrawing</span> <span class="nx">DomainSeparationTag</span> <span class="p">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="kc">iota</span>
+    <span class="nx">DomainSeparationTag_TicketProduction</span>
+    <span class="nx">DomainSeparationTag_ElectionPoStChallengeSeed</span>
+    <span class="nx">DomainSeparationTag_SurprisePoStChallengeSeed</span>
+    <span class="nx">DomainSeparationTag_SurprisePoStSelectMiners</span>
+    <span class="nx">DomainSeparationTag_SurprisePoStSampleSectors</span>
+<span class="p">)</span>
+
+<span class="c1">// Derive a random byte string from a domain separation tag and the appropriate values
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">DeriveRandWithMinerAddr</span><span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">,</span> <span class="nx">tix</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">Randomness</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">addrBuf</span> <span class="nx">bytes</span><span class="p">.</span><span class="nx">Buffer</span>
+    <span class="nx">err</span> <span class="o">:=</span> <span class="nx">minerAddr</span><span class="p">.</span><span class="nf">MarshalCBOR</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">addrBuf</span><span class="p">)</span>
+    <span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span><span class="p">,</span> <span class="nx">tix</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">addrBuf</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">())</span>
 <span class="p">}</span>
 
-<span class="c1">// As in DeriveRand(), but additionally accepts an index into the implicit pseudorandom stream.
-</span><span class="c1">// Index must be strictly positive.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">DeriveRandWithIndex</span><span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">,</span> <span class="nx">s</span> <span class="nx">Serialization</span><span class="p">,</span> <span class="nx">index</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">Randomness</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="nx">index</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="p">{</span>
-        <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;DeriveRandWithIndex only accepts indices &gt; 0&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span><span class="p">,</span> <span class="nx">s</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">DeriveRandWithEpoch</span><span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">,</span> <span class="nx">tix</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span><span class="p">,</span> <span class="nx">epoch</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">Randomness</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span><span class="p">,</span> <span class="nx">tix</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nf">BigEndianBytesFromInt</span><span class="p">(</span><span class="nx">epoch</span><span class="p">))</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">,</span> <span class="nx">s</span> <span class="nx">Serialization</span><span class="p">,</span> <span class="nx">index</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">Randomness</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">,</span> <span class="nx">randSeed</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span><span class="p">,</span> <span class="nx">index</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">s</span> <span class="nx">Serialization</span><span class="p">)</span> <span class="nx">Randomness</span> <span class="p">{</span>
     <span class="nx">buffer</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">{}</span>
     <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nf">BigEndianBytesFromInt</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">tag</span><span class="p">))</span><span class="o">...</span><span class="p">)</span>
     <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nf">BigEndianBytesFromInt</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">index</span><span class="p">))</span><span class="o">...</span><span class="p">)</span>
-    <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span><span class="o">...</span><span class="p">)</span>
-    <span class="nx">ret</span> <span class="o">:=</span> <span class="nf">SHA256</span><span class="p">(</span><span class="nx">buffer</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nf">Randomness</span><span class="p">(</span><span class="nx">ret</span><span class="p">)</span>
+    <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(</span><span class="nx">randSeed</span><span class="p">)</span><span class="o">...</span><span class="p">)</span>
+    <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nx">s</span><span class="o">...</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nf">Randomness</span><span class="p">(</span><span class="nf">SHA256</span><span class="p">(</span><span class="nx">buffer</span><span class="p">))</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4735,6 +4896,25 @@ randomness = SHA256(buffer)</code></pre></div>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p style="color: #D74848"><b><i>Something's not right. The <code>chain.go</code> file was not found.</i></b></p>
+
+</p>
 
 </article>
 

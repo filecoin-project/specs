@@ -9,8 +9,9 @@ type WinStackedDRGWindowCount UInt
 type WinStackedDRGPartitions UInt
 type WinStackedDRGChallenges UInt
 type WinStackedDRGWindowChallenges UInt
-type WinStackedDRGLeafChallengeCount UInt
-type WinStackedDRGChallengeRangeSize UInt
+
+type PoStLeafChallengeCount UInt
+type PoStChallengeRangeSize UInt
 
 type DRGDepth struct {}
 type DRGFraction struct {}
@@ -76,8 +77,6 @@ type WinStackedDRG struct {
     Partitions              WinStackedDRGPartitions
     Challenges              WinStackedDRGChallenges
     WindowChallenges        WinStackedDRGWindowChallenges
-    LeafChallengeCount      WinStackedDRGLeafChallengeCount
-    ChallengeRangeSize      WinStackedDRGChallengeRangeSize
     Algorithm               struct {}
     DRGCfg
     ExpanderGraphCfg
@@ -85,7 +84,7 @@ type WinStackedDRG struct {
     WindowExpanderGraphCfg  ExpanderGraphCfg
     // invariant: DRGCfg.Nodes == ExpanderGraphCfg.Nodes
     Curve                   EllipticCurve
-    Cfg                     SDRCfg
+    Cfg                     sector.SealCfg
 
     Drg()                   DRG
     Expander()              ExpanderGraph
@@ -149,8 +148,11 @@ type WinStackedDRG struct {
     ) bool
 }
 
-type SDRCfg struct {
-    SealCfg          sector.SealCfg
+type SealVerifier struct {
+    SealCfg sector.SealCfg
+}
+
+type PoStVerifier struct {
     ElectionPoStCfg  sector.PoStCfg
     SurprisePoStCfg  sector.PoStCfg
 }

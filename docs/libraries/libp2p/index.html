@@ -1393,7 +1393,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../#systems__filecoin_vm__actor__address" class="menu-item depth-4">
+<a href="../../../#appendix__address" class="menu-item depth-2">
     
     
         Address
@@ -1402,7 +1402,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2630,6 +2630,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../#systems__filecoin_mining__sector__posting" class="menu-item depth-4">
+    
+    
+        Sector PoSting
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
     
     
@@ -3341,6 +3372,68 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-1">
 
     <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        Filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
     
     </li>
 
@@ -4308,6 +4401,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../#listings__reserved_ranges" class="menu-item depth-2">
+    
+    
+        Reserved Ranges
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../#listings__data_structures" class="menu-item depth-2">
     
     
@@ -4643,37 +4767,25 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
-<span class="kn">import</span> <span class="nx">mf</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/multiformats&#34;</span>
-
-<span class="c1">// PeerID is the CID of the public key of this peer
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PeerID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
-
-<span class="c1">// PeerInfo is a simple datastructure that relates PeerIDs to corresponding partial Multiaddrs.
-</span><span class="c1">// This is a convenience struct used in interfaces where we must specify both, or may specify
-</span><span class="c1">// either.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PeerInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PeerID</span>
-    <span class="nx">Addrs</span> <span class="p">[</span><span class="nx">mf</span><span class="p">.</span><span class="nx">Multiaddr</span><span class="p">]</span>
-<span class="p">}</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">peer</span> <span class="s">&#34;github.com/libp2p/go-libp2p-core/peer&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Node</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// PeerID returns the PeerID associated with this libp2p Node
-</span><span class="c1"></span>    <span class="nf">PeerID</span><span class="p">()</span> <span class="nx">PeerID</span>
+</span><span class="c1"></span>    <span class="nf">PeerID</span><span class="p">()</span> <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
 
     <span class="c1">// MountProtocol adds given Protocol under specified protocol id.
 </span><span class="c1"></span>    <span class="nf">MountProtocol</span><span class="p">(</span><span class="nx">path</span> <span class="nx">ProtocolPath</span><span class="p">,</span> <span class="nx">protocol</span> <span class="nx">Protocol</span><span class="p">)</span>
 
     <span class="c1">// ConnectPeerID establishes a connection to peer matching given PeerInfo.
 </span><span class="c1"></span>    <span class="c1">//
-</span><span class="c1"></span>    <span class="c1">// PeerInfo.Addrs may be empty. If so:
+</span><span class="c1"></span>    <span class="c1">// peer.AddrInfo may be empty. If so:
 </span><span class="c1"></span>    <span class="c1">// - Libp2pNode will try to use any Multiaddrs it knows (internal PeerStore)
 </span><span class="c1"></span>    <span class="c1">// - Libp2pNode may use any `PeerRouting` protocol mounted onto the libp2p node.
 </span><span class="c1"></span>    <span class="c1">//     TODO: how to define this.
 </span><span class="c1"></span>    <span class="c1">//     NOTE: probably implies using kad-dht or gossipsub for this.
 </span><span class="c1"></span>    <span class="c1">//
 </span><span class="c1"></span>    <span class="c1">// Idempotent. If a connection already exists, this method returns silently.
-</span><span class="c1"></span>    <span class="nf">Connect</span><span class="p">(</span><span class="nx">peerInfo</span> <span class="nx">PeerInfo</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">Connect</span><span class="p">(</span><span class="nx">peerInfo</span> <span class="nx">peer</span><span class="p">.</span><span class="nx">AddrInfo</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ProtocolPath</span> <span class="kt">string</span>
@@ -4709,12 +4821,12 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// AcceptStream accepts an incoming stream connection.
 </span><span class="c1"></span>    <span class="nf">AcceptStream</span><span class="p">()</span> <span class="kd">struct</span> <span class="p">{</span>
         <span class="nx">stream</span>    <span class="nx">Stream</span>
-        <span class="nx">peerInfo</span>  <span class="nx">PeerInfo</span>
+        <span class="nx">peerInfo</span>  <span class="nx">peer</span><span class="p">.</span><span class="nx">AddrInfo</span>
         <span class="nx">err</span>       <span class="kt">error</span>
     <span class="p">}</span>
 
     <span class="c1">// OpenStream opens a stream to a particular PeerID.
-</span><span class="c1"></span>    <span class="nf">OpenStream</span><span class="p">(</span><span class="nx">peerInfo</span> <span class="nx">PeerInfo</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class="c1"></span>    <span class="nf">OpenStream</span><span class="p">(</span><span class="nx">peerInfo</span> <span class="nx">peer</span><span class="p">.</span><span class="nx">AddrInfo</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span>
         <span class="nx">stream</span>  <span class="nx">Stream</span>
         <span class="nx">err</span>     <span class="kt">error</span>
     <span class="p">}</span>
@@ -4735,12 +4847,12 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// AcceptDatagram accepts an incoming message.
 </span><span class="c1"></span>    <span class="nf">AcceptDatagram</span><span class="p">()</span> <span class="kd">struct</span> <span class="p">{</span>
         <span class="nx">datagram</span>  <span class="nx">Datagram</span>
-        <span class="nx">peerInfo</span>  <span class="nx">PeerInfo</span>
+        <span class="nx">peerInfo</span>  <span class="nx">peer</span><span class="p">.</span><span class="nx">AddrInfo</span>
         <span class="nx">err</span>       <span class="kt">error</span>
     <span class="p">}</span>
 
     <span class="c1">// OpenStream opens a stream to a particular PeerID
-</span><span class="c1"></span>    <span class="nf">SendDatagram</span><span class="p">(</span><span class="nx">datagram</span> <span class="nx">Datagram</span><span class="p">,</span> <span class="nx">peerInfo</span> <span class="nx">PeerInfo</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+</span><span class="c1"></span>    <span class="nf">SendDatagram</span><span class="p">(</span><span class="nx">datagram</span> <span class="nx">Datagram</span><span class="p">,</span> <span class="nx">peerInfo</span> <span class="nx">peer</span><span class="p">.</span><span class="nx">AddrInfo</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 <span class="p">}</span>
 
 <span class="c1">// type StorageDealLibp2pProtocol struct {

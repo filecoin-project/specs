@@ -1393,7 +1393,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../#systems__filecoin_vm__actor__address" class="menu-item depth-4">
+<a href="../../../#appendix__address" class="menu-item depth-2">
     
     
         Address
@@ -1402,7 +1402,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2630,6 +2630,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../#systems__filecoin_mining__sector__posting" class="menu-item depth-4">
+    
+    
+        Sector PoSting
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
     
     
@@ -3341,6 +3372,68 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-1">
 
     <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        Filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
     
     </li>
 
@@ -4308,6 +4401,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../#listings__reserved_ranges" class="menu-item depth-2">
+    
+    
+        Reserved Ranges
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../#listings__data_structures" class="menu-item depth-2">
     
     
@@ -4830,7 +4954,7 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Ticket</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">VRFResult</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFResult</span>
@@ -4843,16 +4967,6 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">pk</span>              <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span>
         <span class="nx">minerActorAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
     <span class="p">)</span> <span class="kt">bool</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">TicketProductionSeedInput</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PastTicket</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
-    <span class="nx">MinerAddr</span>   <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">TicketDrawingSeedInput</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PastTicket</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
-    <span class="nx">Epoch</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4882,9 +4996,9 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">block</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
 	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 	<span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
-	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
@@ -4894,21 +5008,12 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">tix</span> <span class="o">*</span><span class="nx">Ticket_I</span><span class="p">)</span> <span class="nf">Verify</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 
-	<span class="nx">inputRand</span> <span class="o">:=</span> <span class="nf">Serialize_TicketProductionSeedInput</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">TicketProductionSeedInput_I</span><span class="p">{</span>
-		<span class="nx">PastTicket_</span><span class="p">:</span> <span class="nx">randomness</span><span class="p">,</span>
-		<span class="nx">MinerAddr_</span><span class="p">:</span>  <span class="nx">minerActorAddr</span><span class="p">,</span>
-	<span class="p">})</span>
-	<span class="nx">input</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">DeriveRand</span><span class="p">(</span><span class="nx">filcrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_TicketProduction</span><span class="p">,</span> <span class="nx">inputRand</span><span class="p">)</span>
-
+	<span class="nx">input</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">DeriveRandWithMinerAddr</span><span class="p">(</span><span class="nx">filcrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_TicketProduction</span><span class="p">,</span> <span class="nx">randomness</span><span class="p">,</span> <span class="nx">minerActorAddr</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">tix</span><span class="p">.</span><span class="nx">VRFResult_</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">pk</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">tix</span> <span class="o">*</span><span class="nx">Ticket_I</span><span class="p">)</span> <span class="nf">DrawRandomness</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
-	<span class="nx">input</span> <span class="o">:=</span> <span class="nf">Serialize_TicketDrawingSeedInput</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">TicketDrawingSeedInput_I</span><span class="p">{</span>
-		<span class="nx">PastTicket_</span><span class="p">:</span> <span class="nx">tix</span><span class="p">.</span><span class="nf">Output</span><span class="p">(),</span>
-		<span class="nx">Epoch_</span><span class="p">:</span>      <span class="nx">epoch</span><span class="p">,</span>
-	<span class="p">})</span>
-	<span class="k">return</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">DeriveRand</span><span class="p">(</span><span class="nx">filcrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_TicketDrawing</span><span class="p">,</span> <span class="nx">input</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">DeriveRandWithEpoch</span><span class="p">(</span><span class="nx">filcrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_TicketDrawing</span><span class="p">,</span> <span class="nx">tix</span><span class="p">.</span><span class="nf">Output</span><span class="p">(),</span> <span class="nb">int</span><span class="p">(</span><span class="nx">epoch</span><span class="p">))</span>
 <span class="p">}</span>
 </code></pre></div>
 

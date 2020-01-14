@@ -1392,7 +1392,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_vm__actor__address" class="menu-item depth-4">
+<a href="../../../../../#appendix__address" class="menu-item depth-2">
     
     
         Address
@@ -1401,7 +1401,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2629,6 +2629,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../../#systems__filecoin_mining__sector__posting" class="menu-item depth-4">
+    
+    
+        Sector PoSting
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
     
     
@@ -3340,6 +3371,68 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-1">
 
     <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        Filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
     
     </li>
 
@@ -4307,6 +4400,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../../#listings__reserved_ranges" class="menu-item depth-2">
+    
+    
+        Reserved Ranges
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../../#listings__data_structures" class="menu-item depth-2">
     
     
@@ -4647,7 +4771,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
 <span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 
 <span class="kd">type</span> <span class="nx">PowerTableHAMT</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">}</span>  <span class="c1">// TODO: convert address to ActorID
@@ -4719,20 +4843,18 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="p">(</span>
     <span class="s">&#34;sort&#34;</span>
 
+    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
     <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
     <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime/indices&#34;</span>
     <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
     <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
-    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+    <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_minerNominalPowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">minerPower</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="nf">IMPL_TODO</span><span class="p">()</span> <span class="c1">// import from consts
-</span><span class="c1"></span>    <span class="nx">MIN_MINER_SIZE_STOR</span> <span class="o">:=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="nx">MIN_MINER_SIZE_TARG</span> <span class="o">:=</span> <span class="mi">0</span>
 
     <span class="c1">// if miner is larger than min power requirement, we&#39;re set
-</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">minerPower</span> <span class="o">&gt;=</span> <span class="nx">MIN_MINER_SIZE_STOR</span> <span class="p">{</span>
+</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">minerPower</span> <span class="o">&gt;=</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">MIN_MINER_SIZE_STOR</span> <span class="p">{</span>
         <span class="k">return</span> <span class="kc">true</span>
     <span class="p">}</span>
 
@@ -4742,7 +4864,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
 
     <span class="c1">// else if none do, check whether in MIN_MINER_SIZE_TARG miners
-</span><span class="c1"></span>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="nx">MIN_MINER_SIZE_TARG</span> <span class="p">{</span>
+</span><span class="c1"></span>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">MIN_MINER_SIZE_TARG</span> <span class="p">{</span>
         <span class="c1">// miner should pass
 </span><span class="c1"></span>        <span class="k">return</span> <span class="kc">true</span>
     <span class="p">}</span>
@@ -4753,7 +4875,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">minerSizes</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">minerSizes</span><span class="p">,</span> <span class="nx">v</span><span class="p">)</span>
     <span class="p">}</span>
     <span class="nx">sort</span><span class="p">.</span><span class="nf">Slice</span><span class="p">(</span><span class="nx">minerSizes</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span> <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="nx">j</span><span class="p">)</span> <span class="p">})</span>
-    <span class="k">return</span> <span class="nx">minerPower</span> <span class="o">&gt;=</span> <span class="nx">minerSizes</span><span class="p">[</span><span class="nx">MIN_MINER_SIZE_TARG</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nx">minerPower</span> <span class="o">&gt;=</span> <span class="nx">minerSizes</span><span class="p">[</span><span class="nx">node_base</span><span class="p">.</span><span class="nx">MIN_MINER_SIZE_TARG</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_slashPledgeCollateral</span><span class="p">(</span>
@@ -4976,6 +5098,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="p">(</span>
     <span class="s">&#34;math&#34;</span>
 
+    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
     <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
     <span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin&#34;</span>
     <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
@@ -4983,10 +5106,9 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">serde</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/serde&#34;</span>
     <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
     <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
-    <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
     <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
-    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
     <span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
+    <span class="nx">peer</span> <span class="s">&#34;github.com/libp2p/go-libp2p-core/peer&#34;</span>
 <span class="p">)</span>
 
 <span class="kd">type</span> <span class="nx">ConsensusFaultType</span> <span class="kt">int</span>
@@ -5037,13 +5159,13 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">recipientAddr</span><span class="p">,</span> <span class="nx">amountExtracted</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">CreateMiner</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">workerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">sectorSize</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">peerId</span> <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">CreateMiner</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">workerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">sectorSize</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">peerId</span> <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
     <span class="nx">vmr</span><span class="p">.</span><span class="nf">RT_ValidateImmediateCallerIsSignable</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
     <span class="nx">ownerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
 
-    <span class="nx">newMinerAddr</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Deserialize_Address_Compact_Assert</span><span class="p">(</span>
+    <span class="nx">newMinerAddr</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">NewFromBytes</span><span class="p">(</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
-            <span class="nx">addr</span><span class="p">.</span><span class="nx">InitActorAddr</span><span class="p">,</span>
+            <span class="nx">builtin</span><span class="p">.</span><span class="nx">InitActorAddr</span><span class="p">,</span>
             <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_InitActor_Exec</span><span class="p">,</span>
             <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
                 <span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMinerActorCodeID</span><span class="p">,</span>
@@ -5055,6 +5177,7 @@ https://github.com/alex-shpak/hugo-book
             <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
         <span class="p">).</span><span class="nf">ReturnValue</span><span class="p">(),</span>
     <span class="p">)</span>
+    <span class="nx">autil</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
     <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">BalanceTable_WithNewAddressEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">EscrowTable</span><span class="p">(),</span> <span class="nx">newMinerAddr</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReceived</span><span class="p">())</span>
@@ -5104,7 +5227,7 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMinerActorCodeID</span><span class="p">)</span>
     <span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
-    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtdeductClaimedPowerForSectorAssert</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">storageWeightDesc</span><span class="p">)</span>
+    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtDeductClaimedPowerForSectorAssert</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">storageWeightDesc</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nx">terminationType</span> <span class="o">!=</span> <span class="nx">SectorTerminationType_NormalExpiration</span> <span class="p">{</span>
         <span class="nx">amountToSlash</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrIndices</span><span class="p">().</span><span class="nf">StoragePower_PledgeSlashForSectorTermination</span><span class="p">(</span><span class="nx">storageWeightDesc</span><span class="p">,</span> <span class="nx">terminationType</span><span class="p">)</span>
@@ -5114,7 +5237,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">OnSectorTemporaryFaultEffectiveBegin</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">storageWeightDesc</span> <span class="nx">SectorStorageWeightDesc</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMinerActorCodeID</span><span class="p">)</span>
-    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtdeductClaimedPowerForSectorAssert</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(),</span> <span class="nx">storageWeightDesc</span><span class="p">)</span>
+    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtDeductClaimedPowerForSectorAssert</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(),</span> <span class="nx">storageWeightDesc</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">OnSectorTemporaryFaultEffectiveEnd</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">storageWeightDesc</span> <span class="nx">SectorStorageWeightDesc</span><span class="p">)</span> <span class="p">{</span>
@@ -5126,7 +5249,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">storageWeightDescPrev</span> <span class="nx">SectorStorageWeightDesc</span><span class="p">,</span> <span class="nx">storageWeightDescNew</span> <span class="nx">SectorStorageWeightDesc</span><span class="p">)</span> <span class="p">{</span>
 
     <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMinerActorCodeID</span><span class="p">)</span>
-    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtdeductClaimedPowerForSectorAssert</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(),</span> <span class="nx">storageWeightDescPrev</span><span class="p">)</span>
+    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtDeductClaimedPowerForSectorAssert</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(),</span> <span class="nx">storageWeightDescPrev</span><span class="p">)</span>
     <span class="nx">a</span><span class="p">.</span><span class="nf">_rtAddPowerForSector</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(),</span> <span class="nx">storageWeightDescNew</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5160,6 +5283,22 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">amountToSlash</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrIndices</span><span class="p">().</span><span class="nf">StoragePower_PledgeSlashForSurprisePoStFailure</span><span class="p">(</span><span class="nx">minerClaimedPower</span><span class="p">,</span> <span class="nx">numConsecutiveFailures</span><span class="p">)</span>
         <span class="nx">a</span><span class="p">.</span><span class="nf">_rtSlashPledgeCollateral</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">amountToSlash</span><span class="p">)</span>
     <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">OnMinerEnrollCronEvent</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">eventEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">sectorNumbers</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMinerActorCodeID</span><span class="p">)</span>
+    <span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+    <span class="nx">minerEvent</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">autil</span><span class="p">.</span><span class="nx">MinerEvent_I</span><span class="p">{</span>
+        <span class="nx">MinerAddr_</span><span class="p">:</span> <span class="nx">minerAddr</span><span class="p">,</span>
+        <span class="nx">Sectors_</span><span class="p">:</span>   <span class="nx">sectorNumbers</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">CachedDeferredCronEvents_</span><span class="p">[</span><span class="nx">eventEpoch</span><span class="p">];</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+        <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">CachedDeferredCronEvents_</span><span class="p">[</span><span class="nx">eventEpoch</span><span class="p">]</span> <span class="p">=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">MinerEventSetHAMT_Empty</span><span class="p">()</span>
+    <span class="p">}</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">CachedDeferredCronEvents_</span><span class="p">[</span><span class="nx">eventEpoch</span><span class="p">][</span><span class="nx">minerEvent</span><span class="p">]</span> <span class="p">=</span> <span class="kc">true</span>
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">ReportVerifiedConsensusFault</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">slasheeAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">faultEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">faultType</span> <span class="nx">ConsensusFaultType</span><span class="p">)</span> <span class="p">{</span>
@@ -5224,14 +5363,14 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="c1">// Called by Cron.
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">OnEpochTickEnd</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">CronActorAddr</span><span class="p">)</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">CronActorAddr</span><span class="p">)</span>
 
     <span class="nx">a</span><span class="p">.</span><span class="nf">_rtInitiateNewSurprisePoStChallenges</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
     <span class="nx">a</span><span class="p">.</span><span class="nf">_rtProcessDeferredCronEvents</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
     <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
 
     <span class="nx">st</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">StoragePowerActorState_I</span><span class="p">{</span>
@@ -5258,7 +5397,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">_rtdeductClaimedPowerForSectorAssert</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">storageWeightDesc</span> <span class="nx">SectorStorageWeightDesc</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">_rtDeductClaimedPowerForSectorAssert</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">storageWeightDesc</span> <span class="nx">SectorStorageWeightDesc</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
     <span class="nx">st</span><span class="p">.</span><span class="nf">_deductClaimedPowerForSectorAssert</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">storageWeightDesc</span><span class="p">)</span>
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
@@ -5270,7 +5409,9 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
     <span class="c1">// sample the actor addresses
-</span><span class="c1"></span>    <span class="nx">randomness</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(</span><span class="nx">filcrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_SurprisePoStSelectMiners</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">())</span>
+</span><span class="c1"></span>    <span class="nx">minerSelectionSeed</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">GetRandomness</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">())</span>
+    <span class="nx">randomness</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">DeriveRandWithEpoch</span><span class="p">(</span><span class="nx">filcrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_SurprisePoStSelectMiners</span><span class="p">,</span> <span class="nx">minerSelectionSeed</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()))</span>
+
     <span class="nf">IMPL_FINISH</span><span class="p">()</span> <span class="c1">// BigInt arithmetic (not floating-point)
 </span><span class="c1"></span>    <span class="nx">challengeCount</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Ceil</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()))</span> <span class="o">/</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">provingPeriod</span><span class="p">))</span>
     <span class="nx">surprisedMiners</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_selectMinersToSurprise</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">challengeCount</span><span class="p">),</span> <span class="nx">randomness</span><span class="p">)</span>
@@ -5331,7 +5472,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">amountSlashed</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_slashPledgeCollateral</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">amountToSlash</span><span class="p">)</span>
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">amountSlashed</span><span class="p">)</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">amountSlashed</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActorCode_I</span><span class="p">)</span> <span class="nf">_rtDeleteMinerActor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
@@ -5350,8 +5491,14 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">DeleteActor</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">amountSlashed</span><span class="p">)</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
+        <span class="nx">minerAddr</span><span class="p">,</span>
+        <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StorageMinerActor_OnDeleteMiner</span><span class="p">,</span>
+        <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(),</span>
+        <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">amountSlashed</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -5366,30 +5513,11 @@ https://github.com/alex-shpak/hugo-book
 
 <p>The portion of blocks a given miner generates through leader election in EC (and so the block rewards they earn) is proportional to their <code>Power Fraction</code> over time. That is, a miner whose storage represents 1% of total storage on the network should mine 1% of blocks on expectation.</p>
 
-<p>SPC provides a power table abstraction which tracks miner power (i.e. miner storage in relation to network storage) over time. The power table is updated for new sector commitments (incrementing miner power), when PoSts fail to be put on-chain (decrementing miner power) or for other storage and consensus faults.</p>
+<p>SPC provides a power table abstraction which tracks miner power (i.e. miner storage in relation to network storage) over time. The power table is updated for new sector commitments (incrementing miner power), for failed PoSts (decrementing miner power) or for other storage and consensus faults.</p>
 
-<p>An invariant of the storage power consensus subsystem is that all storage in the power table must be verified. That is, miners can only derive power from storage they have already proven to the network.</p>
+<p>Sector ProveCommit is the first time power is proven to the network and hence power is first added upon successful sector ProveCommit. Power is also added when a sector&rsquo;s TemporaryFault period has ended. Miners are expected to prove over all their sectors that contribute to their power.</p>
 
-<p>In order to achieve this, Filecoin delays updating power for new sector commitments until the first valid PoSt in the next proving period corresponding to that sector. (TODO: potential delay this further in order to ensure that any power cut goes undetected at most as long as the shortest power delay on new sector commitments).</p>
-
-<p>For instance, say a miner X does the following:
-- In epoch 100: commits 10 TB
-- In epoch 110: publishes a PoSt for their storage
-- In epoch 120: commits another 10TB
-- In epoch 135: publishes a new PoSt for their storage</p>
-
-<p>Querying the power table for this miner at different rounds should yield (using the following shorthand as an illustration only):
-- <code>Power(X, 90) == 0</code>
-- <code>Power(X, 100) == 0</code>
-- <code>Power(X, 110) == 0</code>
-- <code>Power(X, 111) == 10</code>
-- <code>Power(X, 120) == 10</code>
-- <code>Power(X, 135) == 10</code>
-- <code>Power(x, 136) == 20</code></p>
-
-<p>Conversely, storage faults only lead to power loss once they are detected (up to one proving period after the fault) so miners will mine with no more power than they have used to store data over time.</p>
-
-<p>Put another way, power accounting in the SPC is delayed between storage being proven or faulted, and power being updated in the power table (and so for leader election). This ensures fairness over time.</p>
+<p>Power is decremented when a sector expires, when a sector enters TemporaryFault, or when it is invoked by miners through Sector Termination. Miners can also extend the lifetime of a sector through <code>ExtendSectorExpiration</code> and thus modifying <code>SectorStorageWeightDesc</code>. This may or may not have an impact on power but the machinery is in place to preserve the flexibility.</p>
 
 <p>The Miner lifecycle in the power table should be roughly as follows:</p>
 
@@ -5398,14 +5526,15 @@ https://github.com/alex-shpak/hugo-book
 <li>UpdatePower: These power increments and decrements are called by various storage actor (and must thus be verified by every full node on the network). Specifically:
 
 <ul>
-<li>Power is incremented to account for a new SectorCommitment at the first PoSt past the first ProvingPeriod.</li>
-<li>All Power is decremented immediately after a missed PoSt.</li>
-<li>Power is decremented immediately after faults are declared, proportional to the faulty sector size.</li>
-<li>Power is incremented after a PoSt recovering from a fault.</li>
-<li>Power is definitively removed from the Power Table past the sector failure timeout (see <a href="../../../../../#systems__filecoin_markets__storage_market__faults">Storage Faults</a>)
-To summarize, only sectors in the Active state will command power. A Sector becomes Active after their first PoSt from Committed and Recovering stages. Power is immediately decremented when an Active Sector enters the Failing state (through DeclareFaults or Cron) and when an Active Sector expires.</li>
+<li>Power is incremented at SectorProveCommit</li>
+<li>All Power of a particular miner is decremented immediately after a missed SurprisePoSt (DetectedFault).</li>
+<li>A particular sector&rsquo;s power is decremented when its TemporaryFault begins.</li>
+<li>A particular sector&rsquo;s power is added back when its TemporaryFault ends and miner is expected to prove over this sector.</li>
+<li>A particular sector&rsquo;s power is removed when the sector is terminated through sector expiration or miner invocation.</li>
 </ul></li>
 </ul>
+
+<p>To summarize, only sectors in the Active state will command power. A Sector becomes Active when it is added upon ProveCommit. Power is immediately decremented upon when TemporaryFault begins on an Active sector or when the miner is in Challenged or DetectedFault state. Power will be restored when TemporaryFault has ended and when the miner successfully responds to a SurprisePoSt challenge. A sector&rsquo;s power is removed when it is terminated through either miner invocation or normal expiration.</p>
 
 <div id="systems__filecoin_blockchain__storage_power_consensus__storage_power_actor__pledge_collateral"></div>
 
@@ -5413,15 +5542,15 @@ To summarize, only sectors in the Active state will command power. A Sector beco
 
 <p>Consensus in Filecoin is secured in part by economic incentives enforced by Pledge Collateral.</p>
 
-<p>Pledge collateral amount is committed based on power pledged to the system (i.e. proportional to number of sectors committed and sector size for a miner). It is a system-wide parameter and is committed to the <code>StoragePowerActor</code>. TODO: define parameter value. Pledge Collateral submission methods take on storage deals to determine the appropriate amount of collateral to be pledged. Pledge collateral can be posted by the <code>StorageMinerActor</code> at any time by a miner up to sector commitments. A sector commitment without the requisite posted pledge collateral will be deemed invalid.</p>
+<p>Pledge collateral amount is committed based on power pledged to the system (i.e. proportional to number of sectors committed and sector size for a miner). It is a system-wide parameter and is committed to the <code>StoragePowerActor</code>. Pledge collateral can be posted by the <code>StorageMinerActor</code> at any time by a miner and its requirement is dependent on miner&rsquo;s power. Details around pledge collateral will be announced soon.</p>
 
-<p>Pledge Collateral will be slashed when <a href="../../../../../#algorithms__expected_consensus__consensus_faults">Consensus Faults</a> are reported to the <code>StoragePowerActor</code>&rsquo;s <code>ReportConsensusFault</code> method or when the <code>CronActor</code> calls the <code>StoragePowerActor</code>&rsquo;s <code>ReportUncommittedPowerFault</code> method.</p>
+<p>Pledge Collateral will be slashed when <a href="../../../../../#algorithms__expected_consensus__consensus_faults">Consensus Faults</a> are reported to the <code>StoragePowerActor</code>&rsquo;s <code>ReportConsensusFault</code> method, when a miner fails a SurprisePoSt (DetectedFault), or when a miner terminates a sector earlier than its duration.</p>
 
 <p>Pledge Collateral is slashed for any fault affecting storage-power consensus, these include:</p>
 
 <ul>
 <li>faults to expected consensus in particular (see <a href="../../../../../#algorithms__expected_consensus__consensus_faults">Consensus Faults</a>) which will be reported by a slasher to the <code>StoragePowerActor</code> in exchange for a reward.</li>
-<li>faults affecting consensus power more generally, specifically uncommitted power faults (i.e. <a href="../../../../../#systems__filecoin_markets__storage_market__faults">Storage Faults</a>) which will be reported by the <code>CronActor</code> automatically.</li>
+<li>faults affecting consensus power more generally, specifically uncommitted power faults (i.e. <a href="../../../../../#systems__filecoin_markets__storage_market__faults">Storage Faults</a>) which will be reported by the <code>CronActor</code> automatically or when a miner terminates a sector earlier than its promised duration.</li>
 </ul>
 
 </article>

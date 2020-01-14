@@ -3,18 +3,19 @@ package storage_power_consensus
 import (
 	"math"
 
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
+	builtin "github.com/filecoin-project/specs/actors/builtin"
 	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 	inds "github.com/filecoin-project/specs/actors/runtime/indices"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
+	cid "github.com/ipfs/go-cid"
 )
 
 // Storage Power Consensus Subsystem
@@ -25,7 +26,7 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block block.Block_I) 
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket block.Ticket, pk filcrypto.VRFPublicKey, minerActorAddr addr.Address) bool {
-	randomness1 := spc.GetTicketProductionRand(spc.blockchain().BestChain(), spc.blockchain().LatestEpoch())
+	randomness1 := spc.blockchain().BestChain().GetTicketProductionRandSeed(spc.blockchain().LatestEpoch())
 
 	return ticket.Verify(randomness1, pk, minerActorAddr)
 }
@@ -47,12 +48,12 @@ func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree st
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTree stateTree.StateTree) spowact.StoragePowerActorState {
-	powerAddr := addr.StoragePowerActorAddr
+	powerAddr := builtin.StoragePowerActorAddr
 	actorState, ok := stateTree.GetActor(powerAddr)
 	util.Assert(ok)
 	substateCID := actorState.State()
 
-	substate, ok := spc.node().Repository().StateStore().Get(ipld.CID(substateCID))
+	substate, ok := spc.node().Repository().StateStore().Get(cid.Cid(substateCID))
 	util.Assert(ok)
 
 	// fix conversion to bytes
@@ -64,18 +65,6 @@ func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTre
 		panic("Deserialization error")
 	}
 	return st
-}
-
-func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness {
-	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_TICKET)
-}
-
-func (spc *StoragePowerConsensusSubsystem_I) GetSealRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness {
-	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_SEAL)
-}
-
-func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallengeRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness {
-	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_POST)
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetFinalizedEpoch(currentEpoch abi.ChainEpoch) abi.ChainEpoch {

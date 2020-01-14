@@ -16,7 +16,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_vm/sysactors/account_actor/</guid>
-      <description> import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; type AccountActorCode struct {} type AccountActorState struct { Address addr.Address }  package account import ( vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; ) type InvocOutput = vmr.InvocOutput func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput { // Nothing. intentionally left blank. 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr) return rt.SuccessReturn() } func (st *AccountActorState_I) CID() ipld.CID { panic(&amp;#34;TODO&amp;#34;) }  </description>
+      <description> import addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; type AccountActorCode struct {} type AccountActorState struct { Address addr.Address }  package account import ( builtin &amp;#34;github.com/filecoin-project/specs/actors/builtin&amp;#34; vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; cid &amp;#34;github.com/ipfs/go-cid&amp;#34; ) type InvocOutput = vmr.InvocOutput func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput { // Nothing. intentionally left blank. 	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr) return rt.SuccessReturn() } func (st *AccountActorState_I) CID() cid.Cid { panic(&amp;#34;TODO&amp;#34;) }  </description>
     </item>
     
     <item>
@@ -25,7 +25,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_vm/sysactors/cron_actor/</guid>
-      <description>import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; type CronActorState struct { // Cron has no internal state } type CronTableEntry struct { ToAddr addr.Address MethodNum abi.MethodNum } type CronActorCode struct { // Entries is a set of actors (and corresponding methods) to call during EpochTick.  // This can be done a bunch of ways. We do it this way here to make it easy to add  // a handler to Cron elsewhere in the spec code.</description>
+      <description>import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; import addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; type CronActorState struct { // Cron has no internal state } type CronTableEntry struct { ToAddr addr.Address MethodNum abi.MethodNum } type CronActorCode struct { // Entries is a set of actors (and corresponding methods) to call during EpochTick.  // This can be done a bunch of ways. We do it this way here to make it easy to add  // a handler to Cron elsewhere in the spec code.</description>
     </item>
     
     <item>
@@ -34,7 +34,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_vm/sysactors/init_actor/</guid>
-      <description>import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: addr.ActorID} NextID addr.ActorID NetworkName string // Allocates a new ID and maps another address to it. Returns the ID-address.  MapAddressToNewID(address addr.Address) addr.Address // Resolves an address to an ID-address, if possible. Returns the argument if un-mapped.  ResolveAddress(address addr.Address) addr.Address } type InitActorCode struct { Constructor(r vmr.</description>
+      <description>import addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: abi.ActorID} NextID abi.ActorID NetworkName string // Allocates a new ID and maps another address to it. Returns the ID-address.  MapAddressToNewID(address addr.Address) addr.Address // Resolves an address to an ID-address, if possible. Returns the argument if un-mapped.  ResolveAddress(address addr.Address) addr.Address } type InitActorCode struct { Constructor(r vmr.</description>
     </item>
     
     <item>
@@ -43,7 +43,9 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_vm/sysactors/reward_actor/</guid>
-      <description>RewardActor is where unminted and unvested Filecoin tokens are kept. At genesis, RewardActor is initiailized with investor accounts, tokens, and vesting schedule in a RewardMap which is a mapping from owner addressws to Reward structs. A Reward struct contains a StartEpoch that keeps track of when this Reward is created, Value that represents the total number of tokens rewarded, and ReleaseRate which is the linear rate of release in the unit of FIL per Epoch.</description>
+      <description>RewardActor is where unminted Filecoin tokens are kept. RewardActor contains a RewardMap which is a mapping from owner addresses to Reward structs.
+Reward struct is created to preserve the flexibility of introducing block reward vesting into the protocol. MintReward creates a new Reward struct and adds it to the RewardMap.
+A Reward struct contains a StartEpoch that keeps track of when this Reward is created, Value that represents the total number of tokens rewarded, and EndEpoch which is when the reward will be fully vested.</description>
     </item>
     
   </channel>

@@ -1,13 +1,15 @@
 package init
 
 import (
+	"bytes"
+
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	autil "github.com/filecoin-project/specs/actors/util"
-	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	cid "github.com/ipfs/go-cid"
 )
 
 type InvocOutput = vmr.InvocOutput
@@ -17,11 +19,11 @@ type Bytes = abi.Bytes
 var AssertMsg = autil.AssertMsg
 
 func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
-	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr)
 	h := rt.AcquireState()
 	st := &InitActorState_I{
-		AddressMap_:  map[addr.Address]addr.ActorID{}, // TODO: HAMT
-		NextID_:      addr.ActorID(addr.FirstNonSingletonActorId),
+		AddressMap_:  map[addr.Address]abi.ActorID{}, // TODO: HAMT
+		NextID_:      abi.ActorID(builtin.FirstNonSingletonActorId),
 		NetworkName_: vmr.NetworkName(),
 	}
 	UpdateRelease(rt, h, st)
@@ -60,8 +62,11 @@ func (a *InitActorCode_I) Exec(rt Runtime, execCodeID abi.ActorCodeID, construct
 		Value_:  rt.ValueReceived(),
 	})
 
-	return rt.ValueReturn(
-		Bytes(addr.Serialize_Address_Compact(idAddr)))
+	var addrBuf bytes.Buffer
+	err := idAddr.MarshalCBOR(&addrBuf)
+	autil.Assert(err == nil)
+
+	return rt.ValueReturn(addrBuf.Bytes())
 }
 
 // This method is disabled until proven necessary.
@@ -75,7 +80,9 @@ func (a *InitActorCode_I) Exec(rt Runtime, execCodeID abi.ActorCodeID, construct
 func (s *InitActorState_I) ResolveAddress(address addr.Address) addr.Address {
 	actorID, ok := s.AddressMap()[address]
 	if ok {
-		return addr.Address_Make_ID(addr.Address_NetworkID_Testnet, actorID)
+		idAddr, err := addr.NewIDAddress(uint64(actorID))
+		autil.Assert(err == nil)
+		return idAddr
 	}
 	return address
 }
@@ -84,7 +91,9 @@ func (s *InitActorState_I) MapAddressToNewID(address addr.Address) addr.Address 
 	actorID := s.NextID_
 	s.NextID_++
 	s.AddressMap()[address] = actorID
-	return addr.Address_Make_ID(addr.Address_NetworkID_Testnet, actorID)
+	idAddr, err := addr.NewIDAddress(uint64(actorID))
+	autil.Assert(err == nil)
+	return idAddr
 }
 
 func _codeIDSupportsExec(callerCodeID abi.ActorCodeID, execCodeID abi.ActorCodeID) bool {
@@ -111,7 +120,7 @@ func _codeIDSupportsExec(callerCodeID abi.ActorCodeID, execCodeID abi.ActorCodeI
 
 func _loadState(rt Runtime) (vmr.ActorStateHandle, InitActorState) {
 	h := rt.AcquireState()
-	stateCID := ipld.CID(h.Take())
+	stateCID := cid.Cid(h.Take())
 	var state InitActorState_I
 	if !rt.IpldGet(stateCID, &state) {
 		rt.AbortAPI("state not found")
@@ -129,6 +138,6 @@ func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st InitActorState) {
 	h.UpdateRelease(newCID)
 }
 
-func (st *InitActorState_I) CID() ipld.CID {
+func (st *InitActorState_I) CID() cid.Cid {
 	panic("TODO")
 }

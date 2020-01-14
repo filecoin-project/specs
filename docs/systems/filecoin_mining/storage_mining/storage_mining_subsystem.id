@@ -3,7 +3,7 @@ import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storag
 import spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 import sminact "github.com/filecoin-project/specs/actors/builtin/storage_miner"
 import abi "github.com/filecoin-project/specs/actors/abi"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import addr "github.com/filecoin-project/go-address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 import blockproducer "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block_producer"
@@ -12,8 +12,8 @@ import storage_proving "github.com/filecoin-project/specs/systems/filecoin_minin
 import node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
-import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+import peer "github.com/libp2p/go-libp2p-core/peer"
 
 type StorageMiningSubsystem struct {
     Node               node_base.FilecoinNode
@@ -43,7 +43,7 @@ type StorageMiningSubsystem struct {
         ownerAddr   addr.Address
         workerAddr  addr.Address
         sectorSize  util.UInt
-        peerId      libp2p.PeerID
+        peerId      peer.ID
         pledgeAmt   abi.TokenAmount
     )
 
@@ -57,11 +57,10 @@ type StorageMiningSubsystem struct {
 
     // call by StorageMiningSubsystem itself in BlockProduction
     PrepareNewTicket(
-        randomness  util.Randomness
+        randomness  abi.RandomnessSeed
         minerAddr   addr.Address
     ) block.Ticket
 
-    PreparePoStChallengeSeed(randomness util.Randomness, minerAddr addr.Address) util.Randomness
     _getStorageMinerActorState(stateTree stateTree.StateTree, minerAddr addr.Address) sminact.StorageMinerActorState
 
     // call by BlockChain when a new block is produced
@@ -72,27 +71,22 @@ type StorageMiningSubsystem struct {
     OnNewRound()
 
     _runMiningCycle()
-    _tryLeaderElection(st stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainPoStVerifyInfo
+    _tryLeaderElection(st stateTree.StateTree, sma sminact.StorageMinerActorState) sector.OnChainElectionPoStVerifyInfo
     _trySurprisePoSt(st stateTree.StateTree, sma sminact.StorageMinerActorState) error
     _submitSurprisePoStMessage(
         state     stateTree.StateTree
-        sPoSt     sector.OnChainPoStVerifyInfo
+        sPoSt     sector.OnChainSurprisePoStVerifyInfo
         gasPrice  abi.TokenAmount
         gasLimit  msg.GasAmount
     ) error
 
     VerifyElectionPoSt(
         header       block.BlockHeader
-        onChainInfo  sector.OnChainPoStVerifyInfo
+        onChainInfo  sector.OnChainElectionPoStVerifyInfo
     ) bool
 
     _verifyElection(
         header       block.BlockHeader
-        onChainInfo  sector.OnChainPoStVerifyInfo
+        onChainInfo  sector.OnChainElectionPoStVerifyInfo
     ) bool
-}
-
-type PoStChallengeSeedInput struct {
-    ticket     util.Randomness
-    minerAddr  addr.Address
 }

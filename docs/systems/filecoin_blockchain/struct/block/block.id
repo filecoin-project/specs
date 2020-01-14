@@ -3,7 +3,7 @@ import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import abi "github.com/filecoin-project/specs/actors/abi"
 import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import addr "github.com/filecoin-project/go-address"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
 type ChainWeight UVarint
@@ -53,11 +53,12 @@ type Block struct {
     SECPMessages  [msg.SignedMessage]
 }
 
-// HACK: Duplicated from posting.id (actual source)
+// HACK: All of the below was duplicated from posting.id
+// in order to get spec to compile. Check the actual source for details
 type ElectionPoStVerifyInfo struct {
     Candidates  [PoStCandidate]
-    Randomness  PoStRandomness
     Proof       PoStProof
+    Randomness  PoStRandomness
 }
 
 type ChallengeTicketsCommitment struct {}  // see sector

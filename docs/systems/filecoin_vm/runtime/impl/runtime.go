@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	acctact "github.com/filecoin-project/specs/actors/builtin/account"
@@ -12,14 +13,16 @@ import (
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	exitcode "github.com/filecoin-project/specs/actors/runtime/exitcode"
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
-	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
+	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
+	cid "github.com/ipfs/go-cid"
+	cbornode "github.com/ipfs/go-ipld-cbor"
+	mh "github.com/multiformats/go-multihash"
 )
 
 type ActorSubstateCID = actor.ActorSubstateCID
@@ -40,9 +43,17 @@ var IMPL_FINISH = util.IMPL_FINISH
 var IMPL_TODO = util.IMPL_TODO
 var TODO = util.TODO
 
+var EmptyCBOR cid.Cid
+
 type RuntimeError struct {
 	ExitCode ExitCode
 	ErrMsg   string
+}
+
+func init() {
+	n, err := cbornode.WrapObject(map[string]struct{}{}, mh.SHA2_256, -1)
+	Assert(err == nil)
+	EmptyCBOR = n.Cid()
 }
 
 func (x *RuntimeError) String() string {
@@ -96,6 +107,7 @@ type VMContext struct {
 	_globalStateInit    st.StateTree
 	_globalStatePending st.StateTree
 	_running            bool
+	_chain              chain.Chain
 	_actorAddress       addr.Address
 	_actorStateAcquired bool
 	// Tracks whether actor substate has changed in order to charge gas just once
@@ -121,6 +133,7 @@ type VMContext struct {
 
 func VMContext_Make(
 	store ipld.GraphStore,
+	chain chain.Chain,
 	toplevelSender addr.Address,
 	toplevelBlockWinner addr.Address,
 	toplevelSenderCallSeqNum actor.CallSeqNum,
@@ -132,6 +145,7 @@ func VMContext_Make(
 
 	return &VMContext{
 		_store:                store,
+		_chain:                chain,
 		_globalStateInit:      globalState,
 		_globalStatePending:   globalState,
 		_running:              false,
@@ -179,10 +193,10 @@ func (rt *VMContext) AbortAPI(msg string) {
 }
 
 func (rt *VMContext) CreateActor(codeID abi.ActorCodeID, address addr.Address) {
-	if !rt._actorAddress.Equals(addr.InitActorAddr) {
+	if rt._actorAddress != builtin.InitActorAddr {
 		rt.AbortAPI("Only InitActor may call rt.CreateActor")
 	}
-	if !address.IsIDType() {
+	if address.Protocol() != addr.ID {
 		rt.AbortAPI("New actor adddress must be an ID-address")
 	}
 
@@ -193,7 +207,7 @@ func (rt *VMContext) _createActor(codeID abi.ActorCodeID, address addr.Address) 
 	// Create empty actor state.
 	actorState := &actor.ActorState_I{
 		CodeID_:     codeID,
-		State_:      actor.ActorSubstateCID(ipld.EmptyCID()),
+		State_:      actor.ActorSubstateCID(EmptyCBOR),
 		Balance_:    abi.TokenAmount(0),
 		CallSeqNum_: 0,
 	}
@@ -206,20 +220,8 @@ func (rt *VMContext) _createActor(codeID abi.ActorCodeID, address addr.Address) 
 }
 
 func (rt *VMContext) DeleteActor(address addr.Address) {
-	ok := false
-
-	// An actor may delete itself.
-	if rt._actorAddress.Equals(address) {
-		ok = true
-	}
-
-	// Special case: StoragePowerActor may delete a StorageMinerActor.
-	addrCodeID, found := rt.GetActorCodeID(address)
-	if found && rt._actorAddress.Equals(addr.StoragePowerActorAddr) && addrCodeID == builtin.StorageMinerActorCodeID {
-		ok = true
-	}
-
-	if !ok {
+	// Only a given actor may delete itself.
+	if rt._actorAddress != address {
 		rt.AbortAPI("Invalid actor deletion request")
 	}
 
@@ -512,6 +514,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 
 	rtInner := VMContext_Make(
 		rtOuter._store,
+		rtOuter._chain,
 		rtOuter._toplevelSender,
 		rtOuter._toplevelBlockWinner,
 		rtOuter._toplevelSenderCallSeqNum,
@@ -565,7 +568,7 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 		return act, targetIdAddr
 	}
 
-	if !targetRaw.IsKeyType() {
+	if targetRaw.Protocol() != addr.SECP256K1 && targetRaw.Protocol() != addr.BLS {
 		// Don't implicitly create an account actor for an address without an associated key.
 		rt._throwError(exitcode.SystemError(exitcode.ActorNotFound))
 	}
@@ -587,10 +590,10 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState,
 }
 
 func (rt *VMContext) _loadInitActorState() initact.InitActorState {
-	initState, ok := rt._globalStatePending.GetActor(addr.InitActorAddr)
+	initState, ok := rt._globalStatePending.GetActor(builtin.InitActorAddr)
 	util.Assert(ok)
 	var initSubState initact.InitActorState_I
-	ok = rt.IpldGet(ipld.CID(initState.State()), &initSubState)
+	ok = rt.IpldGet(cid.Cid(initState.State()), &initSubState)
 	util.Assert(ok)
 	return &initSubState
 }
@@ -599,7 +602,7 @@ func (rt *VMContext) _saveInitActorState(state initact.InitActorState) {
 	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
 	// than the receiver.
 	rt._rtAllocGas(gascost.UpdateActorSubstate)
-	rt._updateActorSubstateInternal(addr.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
+	rt._updateActorSubstateInternal(builtin.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
 }
 
 func (rt *VMContext) _saveAccountActorState(address addr.Address, state acctact.AccountActorState) {
@@ -637,7 +640,7 @@ func (rt *VMContext) SendPropagatingErrors(input InvocInput) InvocOutput {
 }
 
 func (rt *VMContext) SendCatchingErrors(input InvocInput) (InvocOutput, exitcode.ExitCode) {
-	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.CronActorAddr)
 	return rt._sendInternalOutputs(input, CatchErrors)
 }
 
@@ -650,32 +653,26 @@ func (rt *VMContext) ValueReceived() abi.TokenAmount {
 	return rt._valueReceived
 }
 
-func (rt *VMContext) Randomness(tag filcrypto.DomainSeparationTag, epoch abi.ChainEpoch) util.Randomness {
-	IMPL_TODO()
-	panic("")
-}
-
-func (rt *VMContext) RandomnessWithAuxSeed(
-	tag filcrypto.DomainSeparationTag, epoch abi.ChainEpoch, auxSeed util.Serialization) util.Randomness {
-
-	IMPL_TODO()
-	panic("")
+func (rt *VMContext) GetRandomness(epoch abi.ChainEpoch) abi.RandomnessSeed {
+	return rt._chain.RandomnessAtEpoch(epoch)
 }
 
 func (rt *VMContext) NewActorAddress() addr.Address {
-	buf := new(bytes.Buffer)
-	_, err := buf.Write(addr.Serialize_Address(rt._immediateCaller))
+	addrBuf := new(bytes.Buffer)
+
+	err := rt._immediateCaller.MarshalCBOR(addrBuf)
+	util.Assert(err == nil)
+	err = binary.Write(addrBuf, binary.BigEndian, rt._toplevelSenderCallSeqNum)
 	util.Assert(err != nil)
-	err = binary.Write(buf, binary.BigEndian, rt._toplevelSenderCallSeqNum)
-	util.Assert(err != nil)
-	err = binary.Write(buf, binary.BigEndian, rt._internalCallSeqNum)
+	err = binary.Write(addrBuf, binary.BigEndian, rt._internalCallSeqNum)
 	util.Assert(err != nil)
 
-	hash := addr.ActorExecHash(buf.Bytes())
-	return addr.Address_Make_ActorExec(addr.Address_NetworkID_Testnet, hash)
+	newAddr, err := addr.NewActorAddress(addrBuf.Bytes())
+	util.Assert(err == nil)
+	return newAddr
 }
 
-func (rt *VMContext) IpldPut(x ipld.Object) ipld.CID {
+func (rt *VMContext) IpldPut(x ipld.Object) cid.Cid {
 	IMPL_FINISH() // Serialization
 	serialized := []byte{}
 	cid := rt._store.Put(serialized)
@@ -683,7 +680,7 @@ func (rt *VMContext) IpldPut(x ipld.Object) ipld.CID {
 	return cid
 }
 
-func (rt *VMContext) IpldGet(c ipld.CID, o ipld.Object) bool {
+func (rt *VMContext) IpldGet(c cid.Cid, o ipld.Object) bool {
 	serialized, ok := rt._store.Get(c)
 	if ok {
 		rt._rtAllocGas(gascost.IpldGet(len(serialized)))

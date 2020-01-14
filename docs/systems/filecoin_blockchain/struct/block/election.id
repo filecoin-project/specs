@@ -1,6 +1,6 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import addr "github.com/filecoin-project/go-address"
 
 type Ticket struct {
     VRFResult  filcrypto.VRFResult
@@ -13,14 +13,4 @@ type Ticket struct {
         pk              filcrypto.VRFPublicKey
         minerActorAddr  addr.Address
     ) bool
-}
-
-type TicketProductionSeedInput struct {
-    PastTicket  util.Randomness
-    MinerAddr   addr.Address
-}
-
-type TicketDrawingSeedInput struct {
-    PastTicket  util.Randomness
-    Epoch       abi.ChainEpoch
 }

@@ -1,34 +1,25 @@
 package storage_miner
 
 import (
+	"bytes"
 	"math/big"
 
+	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
+	builtin "github.com/filecoin-project/specs/actors/builtin"
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	serde "github.com/filecoin-project/specs/actors/serde"
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
-	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
+	peer "github.com/libp2p/go-libp2p-core/peer"
 )
 
 const epochUndefined = abi.ChainEpoch(-1)
-
-////////////////////////////////////////////////////////////////////////////////
-// Actor methods
-////////////////////////////////////////////////////////////////////////////////
-
-func (a *StorageMinerActorCode_I) GetWorkerVRFKey(rt Runtime) filcrypto.VRFPublicKey {
-	h, st := a.State(rt)
-	ret := st.Info().WorkerVRFKey()
-	Release(rt, h, st)
-	return ret
-}
 
 //////////////////
 // SurprisePoSt //
@@ -36,7 +27,7 @@ func (a *StorageMinerActorCode_I) GetWorkerVRFKey(rt Runtime) filcrypto.VRFPubli
 
 // Called by StoragePowerActor to notify StorageMiner of SurprisePoSt Challenge.
 func (a *StorageMinerActorCode_I) OnSurprisePoStChallenge(rt Runtime) {
-	rt.ValidateImmediateCallerIs(addr.StoragePowerActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.StoragePowerActorAddr)
 
 	h, st := a.State(rt)
 
@@ -59,12 +50,12 @@ func (a *StorageMinerActorCode_I) OnSurprisePoStChallenge(rt Runtime) {
 		numConsecutiveFailures = st.PoStState().As_DetectedFault().NumConsecutiveFailures()
 	}
 
-	IMPL_TODO() // Determine auxiliary seed input to ensure uniqueness
-	challengedSectorsRandomness := rt.RandomnessWithAuxSeed(
-		filcrypto.DomainSeparationTag_SurprisePoStSampleSectors,
-		rt.CurrEpoch()-node_base.SPC_LOOKBACK_POST,
-		addr.Serialize_Address_Compact(rt.CurrReceiver()),
-	)
+	var curRecBuf bytes.Buffer
+	err := rt.CurrReceiver().MarshalCBOR(&curRecBuf)
+	autil.Assert(err == nil)
+
+	randomnessK := rt.GetRandomness(rt.CurrEpoch() - node_base.SPC_LOOKBACK_POST)
+	challengedSectorsRandomness := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_SurprisePoStSampleSectors, randomnessK, rt.CurrReceiver())
 
 	challengedSectors := _surprisePoStSampleChallengedSectors(
 		challengedSectorsRandomness,
@@ -81,7 +72,7 @@ func (a *StorageMinerActorCode_I) OnSurprisePoStChallenge(rt Runtime) {
 }
 
 // Invoked by miner's worker address to submit a response to a pending SurprisePoSt challenge.
-func (a *StorageMinerActorCode_I) SubmitSurprisePoStResponse(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) {
+func (a *StorageMinerActorCode_I) SubmitSurprisePoStResponse(rt Runtime, onChainInfo sector.OnChainSurprisePoStVerifyInfo) {
 	h, st := a.State(rt)
 	rt.ValidateImmediateCallerIs(st.Info().Worker())
 
@@ -95,11 +86,18 @@ func (a *StorageMinerActorCode_I) SubmitSurprisePoStResponse(rt Runtime, onChain
 	a._rtUpdatePoStState(rt, MinerPoStState_New_OK(rt.CurrEpoch()))
 
 	rt.Send(
-		addr.StoragePowerActorAddr,
+		builtin.StoragePowerActorAddr,
 		ai.Method_StoragePowerActor_OnMinerSurprisePoStSuccess,
 		nil,
 		abi.TokenAmount(0),
 	)
+}
+
+// Called by StoragePowerActor.
+func (a *StorageMinerActorCode_I) OnDeleteMiner(rt Runtime) {
+	rt.ValidateImmediateCallerIs(builtin.StoragePowerActorAddr)
+	minerAddr := rt.CurrReceiver()
+	rt.DeleteActor(minerAddr)
 }
 
 //////////////////
@@ -107,10 +105,8 @@ func (a *StorageMinerActorCode_I) SubmitSurprisePoStResponse(rt Runtime, onChain
 //////////////////
 
 // Called by the VM interpreter once an ElectionPoSt has been verified.
-// Assumes the block reward has already been granted to the storage miner actor.
-// This only handles sector management.
 func (a *StorageMinerActorCode_I) OnVerifiedElectionPoSt(rt Runtime) {
-	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr)
 
 	// The receiver must be the miner who produced the block for which this message is created.
 	Assert(rt.ToplevelBlockWinner() == rt.CurrReceiver())
@@ -148,7 +144,7 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 	// Verify deals with StorageMarketActor; abort if this fails.
 	// (Note: committed-capacity sectors contain no deals, so in that case verification will pass trivially.)
 	rt.Send(
-		addr.StorageMarketActorAddr,
+		builtin.StorageMarketActorAddr,
 		ai.Method_StorageMarketActor_OnMinerSectorPreCommit_VerifyDealsOrAbort,
 		serde.MustSerializeParams(
 			info.DealIDs(),
@@ -213,7 +209,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 
 	// Check (and activate) storage deals associated to sector. Abort if checks failed.
 	rt.Send(
-		addr.StorageMarketActorAddr,
+		builtin.StorageMarketActorAddr,
 		ai.Method_StorageMarketActor_OnMinerSectorProveCommit_VerifyDealsOrAbort,
 		serde.MustSerializeParams(
 			preCommitSector.Info().DealIDs(),
@@ -223,7 +219,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	)
 
 	res := rt.SendQuery(
-		addr.StorageMarketActorAddr,
+		builtin.StorageMarketActorAddr,
 		ai.Method_StorageMarketActor_GetWeightForDealSet,
 		serde.MustSerializeParams(
 			preCommitSector.Info().DealIDs(),
@@ -254,7 +250,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	// Notify SPA to update power associated to newly activated sector.
 	storageWeightDesc := a._rtGetStorageWeightDescForSector(rt, info.SectorNumber())
 	rt.Send(
-		addr.StoragePowerActorAddr,
+		builtin.StoragePowerActorAddr,
 		ai.Method_StoragePowerActor_OnSectorProveCommit,
 		serde.MustSerializeParams(
 			storageWeightDesc,
@@ -294,7 +290,7 @@ func (a *StorageMinerActorCode_I) ExtendSectorExpiration(rt Runtime, sectorNumbe
 	storageWeightDescNew.Impl().Duration_ = storageWeightDescPrev.Duration() + extensionLength
 
 	rt.Send(
-		addr.StoragePowerActorAddr,
+		builtin.StoragePowerActorAddr,
 		ai.Method_StoragePowerActor_OnSectorModifyWeightDesc,
 		serde.MustSerializeParams(
 			storageWeightDescPrev,
@@ -325,7 +321,7 @@ func (a *StorageMinerActorCode_I) DeclareTemporaryFaults(rt Runtime, sectorNumbe
 	requiredFee := rt.CurrIndices().StorageMining_TemporaryFaultFee(storageWeightDescs, duration)
 
 	RT_ConfirmFundsReceiptOrAbort_RefundRemainder(rt, requiredFee)
-	rt.SendFunds(addr.BurntFundsActorAddr, requiredFee)
+	rt.SendFunds(builtin.BurntFundsActorAddr, requiredFee)
 
 	effectiveBeginEpoch := rt.CurrEpoch() + indices.StorageMining_DeclaredFaultEffectiveDelay()
 	effectiveEndEpoch := effectiveBeginEpoch + duration
@@ -357,7 +353,7 @@ func (a *StorageMinerActorCode_I) DeclareTemporaryFaults(rt Runtime, sectorNumbe
 //////////
 
 func (a *StorageMinerActorCode_I) OnDeferredCronEvent(rt Runtime, sectorNumbers []sector.SectorNumber) {
-	rt.ValidateImmediateCallerIs(addr.StoragePowerActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.StoragePowerActorAddr)
 
 	for _, sectorNumber := range sectorNumbers {
 		a._rtCheckTemporaryFaultEvents(rt, sectorNumber)
@@ -372,9 +368,9 @@ func (a *StorageMinerActorCode_I) OnDeferredCronEvent(rt Runtime, sectorNumbers 
 /////////////////
 
 func (a *StorageMinerActorCode_I) Constructor(
-	rt Runtime, ownerAddr addr.Address, workerAddr addr.Address, sectorSize sector.SectorSize, peerId libp2p.PeerID) {
+	rt Runtime, ownerAddr addr.Address, workerAddr addr.Address, sectorSize sector.SectorSize, peerId peer.ID) {
 
-	rt.ValidateImmediateCallerIs(addr.StoragePowerActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.StoragePowerActorAddr)
 	h := rt.AcquireState()
 
 	st := &StorageMinerActorState_I{
@@ -406,7 +402,7 @@ func (a *StorageMinerActorCode_I) _rtCheckTemporaryFaultEvents(rt Runtime, secto
 		checkSector.Impl().State_ = SectorState_TemporaryFault
 
 		rt.Send(
-			addr.StoragePowerActorAddr,
+			builtin.StoragePowerActorAddr,
 			ai.Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveBegin,
 			serde.MustSerializeParams(
 				storageWeightDesc,
@@ -423,7 +419,7 @@ func (a *StorageMinerActorCode_I) _rtCheckTemporaryFaultEvents(rt Runtime, secto
 		checkSector.Impl().DeclaredFaultDuration_ = epochUndefined
 
 		rt.Send(
-			addr.StoragePowerActorAddr,
+			builtin.StoragePowerActorAddr,
 			ai.Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveEnd,
 			serde.MustSerializeParams(
 				storageWeightDesc,
@@ -451,7 +447,7 @@ func (a *StorageMinerActorCode_I) _rtCheckSectorExpiry(rt Runtime, sectorNumber 
 	if checkSector.State() == SectorState_PreCommit {
 		if rt.CurrEpoch()-checkSector.PreCommitEpoch() > node_base.MAX_PROVE_COMMIT_SECTOR_EPOCH {
 			a._rtDeleteSectorEntry(rt, sectorNumber)
-			rt.SendFunds(addr.BurntFundsActorAddr, checkSector.PreCommitDeposit())
+			rt.SendFunds(builtin.BurntFundsActorAddr, checkSector.PreCommitDeposit())
 		}
 		return
 	}
@@ -475,7 +471,7 @@ func (a *StorageMinerActorCode_I) _rtTerminateSector(rt Runtime, sectorNumber se
 		// To avoid boundary-case errors in power accounting, make sure we explicitly end
 		// the temporary fault state first, before terminating the sector.
 		rt.Send(
-			addr.StoragePowerActorAddr,
+			builtin.StoragePowerActorAddr,
 			ai.Method_StoragePowerActor_OnSectorTemporaryFaultEffectiveEnd,
 			serde.MustSerializeParams(
 				storageWeightDesc,
@@ -485,7 +481,7 @@ func (a *StorageMinerActorCode_I) _rtTerminateSector(rt Runtime, sectorNumber se
 	}
 
 	rt.Send(
-		addr.StoragePowerActorAddr,
+		builtin.StoragePowerActorAddr,
 		ai.Method_StoragePowerActor_OnSectorTerminate,
 		serde.MustSerializeParams(
 			storageWeightDesc,
@@ -499,7 +495,7 @@ func (a *StorageMinerActorCode_I) _rtTerminateSector(rt Runtime, sectorNumber se
 }
 
 func (a *StorageMinerActorCode_I) _rtCheckSurprisePoStExpiry(rt Runtime) {
-	rt.ValidateImmediateCallerIs(addr.StoragePowerActorAddr)
+	rt.ValidateImmediateCallerIs(builtin.StoragePowerActorAddr)
 
 	h, st := a.State(rt)
 
@@ -536,7 +532,7 @@ func (a *StorageMinerActorCode_I) _rtCheckSurprisePoStExpiry(rt Runtime) {
 	}
 
 	rt.Send(
-		addr.StoragePowerActorAddr,
+		builtin.StoragePowerActorAddr,
 		ai.Method_StoragePowerActor_OnMinerSurprisePoStFailure,
 		serde.MustSerializeParams(
 			numConsecutiveFailures,
@@ -548,7 +544,7 @@ func (a *StorageMinerActorCode_I) _rtEnrollCronEvent(
 	rt Runtime, eventEpoch abi.ChainEpoch, sectorNumbers []sector.SectorNumber) {
 
 	rt.Send(
-		addr.StoragePowerActorAddr,
+		builtin.StoragePowerActorAddr,
 		ai.Method_StoragePowerActor_OnMinerEnrollCronEvent,
 		serde.MustSerializeParams(
 			eventEpoch,
@@ -599,7 +595,7 @@ func (a *StorageMinerActorCode_I) _rtNotifyMarketForTerminatedSectors(rt Runtime
 	Release(rt, h, st)
 
 	rt.Send(
-		addr.StorageMarketActorAddr,
+		builtin.StorageMarketActorAddr,
 		ai.Method_StorageMarketActor_OnMinerSectorsTerminate,
 		serde.MustSerializeParams(
 			dealIDs,
@@ -608,7 +604,7 @@ func (a *StorageMinerActorCode_I) _rtNotifyMarketForTerminatedSectors(rt Runtime
 	)
 }
 
-func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) {
+func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onChainInfo sector.OnChainSurprisePoStVerifyInfo) {
 	h, st := a.State(rt)
 	info := st.Info()
 
@@ -635,41 +631,29 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 	// 	rt.AbortStateMsg("Invalid Surprise PoSt. Tickets do not meet target.")
 	// }
 
-	postRand := &filcrypto.VRFResult_I{
-		Output_: onChainInfo.Randomness(),
-	}
-
-	IMPL_TODO() // Determine auxiliary seed input to ensure uniqueness
-	postRandomnessInput := rt.RandomnessWithAuxSeed(
-		filcrypto.DomainSeparationTag_SurprisePoStVRFRandomnessInput,
-		challengeEpoch-node_base.SPC_LOOKBACK_POST,
-		addr.Serialize_Address_Compact(rt.CurrReceiver()),
-	)
-
-	if !postRand.Verify(postRandomnessInput, info.WorkerVRFKey()) {
-		rt.AbortStateMsg("Invalid Surprise PoSt. Invalid randomness.")
-	}
+	randomnessK := rt.GetRandomness(challengeEpoch - node_base.SPC_LOOKBACK_POST)
+	// regenerate randomness used. The PoSt Verification below will fail if
+	// the same was not used to generate the proof
+	postRandomness := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_SurprisePoStChallengeSeed, randomnessK, rt.CurrReceiver())
 
 	UpdateRelease(rt, h, st)
 
 	// Get public inputs
-	postCfg := sector.PoStCfg_I{
-		Type_:        sector.PoStType_SurprisePoSt,
-		SectorSize_:  info.SectorSize(),
-		WindowCount_: info.WindowCount(),
-		Partitions_:  info.SurprisePoStPartitions(),
-	}
+
+	sectorSize := info.SectorSize()
+	postCfg := filproofs.SurprisePoStCfg(sectorSize)
 
 	pvInfo := sector.PoStVerifyInfo_I{
 		OnChain_:    onChainInfo,
-		PoStCfg_:    &postCfg,
-		Randomness_: onChainInfo.Randomness(),
+		PoStCfg_:    postCfg,
+		Randomness_: sector.PoStRandomness(postRandomness),
+		// EligibleSectors_: FIXME: verification needs these.
 	}
 
-	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{SurprisePoStCfg_: &postCfg})
+	pv := filproofs.MakeSurprisePoStVerifier(postCfg)
 
 	// Verify the PoSt Proof
-	isVerified := sdr.VerifySurprisePoSt(&pvInfo)
+	isVerified := pv.VerifySurprisePoSt(&pvInfo)
 
 	if !isVerified {
 		rt.AbortStateMsg("Surprise PoSt failed to verify")
@@ -683,7 +667,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySealOrAbort(rt Runtime, onChainInfo s
 	Release(rt, h, st)
 
 	pieceInfos, err := sector.Deserialize_PieceInfos(rt.SendQuery(
-		addr.StorageMarketActorAddr,
+		builtin.StorageMarketActorAddr,
 		ai.Method_StorageMarketActor_GetPieceInfosForDealIDs,
 		serde.MustSerializeParams(
 			sectorSize,
@@ -704,11 +688,11 @@ func (a *StorageMinerActorCode_I) _rtVerifySealOrAbort(rt Runtime, onChainInfo s
 
 	sealCfg := sector.SealCfg_I{
 		SectorSize_:  sectorSize,
-		WindowCount_: info.WindowCount(),
+		InstanceCfg_: info.InstanceCfg(),
 		Partitions_:  info.SealPartitions(),
 	}
 
-	minerActorID, err := rt.CurrReceiver().GetID()
+	minerActorID, err := addr.IDFromAddress(rt.CurrReceiver())
 	if err != nil {
 		rt.AbortStateMsg("receiver must be ID address")
 	}
@@ -719,7 +703,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySealOrAbort(rt Runtime, onChainInfo s
 
 	svInfo := sector.SealVerifyInfo_I{
 		SectorID_: &sector.SectorID_I{
-			Miner_:  minerActorID,
+			Miner_:  abi.ActorID(minerActorID),
 			Number_: onChainInfo.SectorNumber(),
 		},
 		OnChain_: onChainInfo,
@@ -732,7 +716,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySealOrAbort(rt Runtime, onChainInfo s
 		UnsealedCID_:           unsealedCID,
 	}
 
-	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{SealCfg_: &sealCfg})
+	sdr := filproofs.WinSDRParams(&sealCfg)
 
 	isVerified := sdr.VerifySeal(&svInfo)
 

@@ -1,12 +1,12 @@
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import abi "github.com/filecoin-project/specs/actors/abi"
+import cid "github.com/ipfs/go-cid"
 
 type Bytes32 Bytes
 type Commitment Bytes32  // TODO
-type UnsealedSectorCID ipld.CID
-type SealedSectorCID ipld.CID
+type UnsealedSectorCID cid.Cid
+type SealedSectorCID cid.Cid
 
 // SectorNumber is a numeric identifier for a sector. It is usually
 // relative to a Miner.
@@ -29,7 +29,7 @@ type SectorSize UInt
 
 // TODO make sure this is globally unique
 type SectorID struct {
-    Miner   addr.ActorID
+    Miner   abi.ActorID
     Number  SectorNumber
 }
 
@@ -84,4 +84,39 @@ type SealedSectorInfo struct {
     Size       SectorSize
     SealCfg
     SealArgs   SealArguments
+}
+
+type RegisteredProof enum {
+    WinStackedDRG32GiBSeal
+    WinStackedDRG32GiBPoSt
+    StackedDRG32GiBSeal
+    StackedDRG32GiBPoSt
+}
+
+type ProofRegistry {UInt: ProofInstance}
+
+type ProofInstance struct {
+    ID           RegisteredProof
+    Type         ProofType
+    Algorithm    ProofAlgorithm
+    CircuitType  ConcreteCircuit
+}
+
+type ProofType enum {
+    SealProof
+    PoStProof
+}
+
+type ProofAlgorithm enum {
+    StackedDRGSeal
+    WinStackedDRGSeal
+    StackedDRGPoSt
+    WinStackedDRGPoSt
+}
+
+type ConcreteCircuit struct {
+    // Name must be globally unique. It will be a hash derived from semantic content of circuit.
+    Name                      string
+    GrothParameterFileName()  string
+    VerifyingKeyFileName()    string
 }

@@ -1,5 +1,5 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import addr "github.com/filecoin-project/go-address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
@@ -37,17 +37,6 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     computeChainWeight(tipset chain.Tipset) block.ChainWeight
 
     StoragePowerConsensusError() StoragePowerConsensusError
-
-    // Randomness methods
-
-    // call by StorageMiningSubsystem during block production
-    GetTicketProductionRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness
-
-    // call by StorageMiningSubsystem in sealing sector
-    GetSealRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness
-
-    // call by StorageMiningSubsystem after sealing
-    GetPoStChallengeRand(chain chain.Chain, epoch abi.ChainEpoch) util.Randomness
 
     GetFinalizedEpoch(currentEpoch abi.ChainEpoch) abi.ChainEpoch
 }

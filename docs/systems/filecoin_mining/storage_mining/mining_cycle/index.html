@@ -1392,7 +1392,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_vm__actor__address" class="menu-item depth-4">
+<a href="../../../../../#appendix__address" class="menu-item depth-2">
     
     
         Address
@@ -1401,7 +1401,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2629,6 +2629,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../../#systems__filecoin_mining__sector__posting" class="menu-item depth-4">
+    
+    
+        Sector PoSting
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
     
     
@@ -3340,6 +3371,68 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-1">
 
     <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        Filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
     
     </li>
 
@@ -4307,6 +4400,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<a href="../../../../../#listings__reserved_ranges" class="menu-item depth-2">
+    
+    
+        Reserved Ranges
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
 <a href="../../../../../#listings__data_structures" class="menu-item depth-2">
     
     
@@ -4697,8 +4821,10 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+(<a href="docs/systems/filecoin_mining/storage_mining/./diagrams/timing.png" target="_blank">open in new tab</a>)
 <br />
-<p style="color: #D74848"><b><i>Something's not right. The <code>./diagrams/timing/timing.png</code> file was not found.</i></b></p>
+<img src="docs/systems/filecoin_mining/storage_mining/./diagrams/timing.png" />
+
 
 
 
@@ -4731,23 +4857,15 @@ https://github.com/alex-shpak/hugo-book
 
 <h4 id="changing-worker-addresses">Changing Worker Addresses</h4>
 
-<p>Note that any change to worker keys after registration (TODO: spec how this works) must be appropriately delayed in relation to randomness lookback for SEALing data (see <a href="https://github.com/filecoin-project/specs/issues/415">this issue</a>).</p>
+<p>Note that any change to worker keys after registration must be appropriately delayed in relation to randomness lookback for SEALing data (see <a href="https://github.com/filecoin-project/specs/issues/415">this issue</a>).</p>
 
 <h3 id="step-1-committing-sectors">Step 1: Committing Sectors</h3>
 
-<p>When the miner has completed their first seal, they should post it on-chain using the <a href="../../../../../#systems__filecoin_mining__storage_mining__storage_miner_actor">Storage Miner Actor</a>&rsquo;s <code>ProveCommitSector</code> function. The miner will need to put up pledge collateral in proportion to the amount of storage they commit on chain. If the miner had zero committed sectors prior to this call, this begins their proving period.</p>
+<p>When the miner has completed their first seal, they should post it on-chain using the <a href="../../../../../#systems__filecoin_mining__storage_mining__storage_miner_actor">Storage Miner Actor</a>&rsquo;s <code>ProveCommitSector</code> function. The miner will need to put up pledge collateral in proportion to the amount of storage they commit on chain. Miner will now gain power for this particular sector upon successful <code>ProveCommitSector</code>.</p>
 
-<p>You can read more about sectors <a href="../../../../../#systems__filecoin_mining__sector___index">here</a>.</p>
+<p>You can read more about sectors <a href="../../../../../#systems__filecoin_mining__sector___index">here</a> and how sector relates to power <a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power">here</a>.</p>
 
-<h3 id="step-2-getting-power">Step 2: Getting Power</h3>
-
-<p>As part of the $<a href="../../../../../#algorithms__post__election_post">Election PoSt</a> process. A miner will be challenged by the blockchain with a surprise PoSt once per proving period on expectation.</p>
-
-<p>The miner&rsquo;s committed sectors will turn into <a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power">Storage Power</a> enabling them to run <a href="../../../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> after the first successful PoSt submission on these committed sectors. If the miner is committing sectors for the first time, a SurprisePoSt will move the sectors from the miner&rsquo;s <code>ProvingSet</code> into the active state, otherwise an ElectionPoSt could also do this.</p>
-
-<p>During this period, the miner may also commit to new sectors, but they will not be included in proofs of space time until the next successful PoSt they submit to the chain.</p>
-
-<h3 id="step-3-running-elections">Step 3: Running Elections</h3>
+<h3 id="step-2-running-elections">Step 2: Running Elections</h3>
 
 <p>Once the miner has power on the network, they can begin to submit <code>ElectionPoSts</code>. To do so, the miner must run a PoSt on a subset of their sectors in every round, using the outputted partial tickets to run leader election.</p>
 
@@ -4765,13 +4883,13 @@ https://github.com/alex-shpak/hugo-book
 
 <h3 id="faults">Faults</h3>
 
-<p>If a miner detects <a href="../../../../../#systems__filecoin_markets__storage_market__faults">Storage Faults</a> among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the <code>DeclareFaults()</code> method of the Storage Miner Actor.</p>
+<p>If a miner detects <a href="../../../../../#systems__filecoin_markets__storage_market__faults">Storage Faults</a> among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the <code>DeclareTemporaryFaults()</code> method of the Storage Miner Actor.</p>
 
-<p>The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of winning Election and SurprisePoSts. By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can reverse the fault by calling <code>RecoverFaults()</code> to add the sector back into the <code>ProvingSet</code> and regain power.</p>
+<p>The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of winning Election and SurprisePoSts. By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can specify how long the duration of their TemporaryFault and pay a TemporaryFaultFee.</p>
 
 <p>A miner will no longer be able to declare faults after being challenged for a SurprisePoSt.</p>
 
-<h3 id="step-4-deal-sector-expiration">Step 4: Deal/Sector Expiration</h3>
+<h3 id="step-3-deal-sector-expiration">Step 3: Deal/Sector Expiration</h3>
 
 <p>In order to stop mining, a miner must complete all of its storage deals. Once all deals in a sector have expired, the sector itself will expire thereby enabling the miner to remove the associated collateral from their account.</p>
 
@@ -4812,10 +4930,9 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="#changing-worker-addresses">Changing Worker Addresses</a></li>
 </ul></li>
 <li><a href="#step-1-committing-sectors">Step 1: Committing Sectors</a></li>
-<li><a href="#step-2-getting-power">Step 2: Getting Power</a></li>
-<li><a href="#step-3-running-elections">Step 3: Running Elections</a></li>
+<li><a href="#step-2-running-elections">Step 2: Running Elections</a></li>
 <li><a href="#faults">Faults</a></li>
-<li><a href="#step-4-deal-sector-expiration">Step 4: Deal/Sector Expiration</a></li>
+<li><a href="#step-3-deal-sector-expiration">Step 3: Deal/Sector Expiration</a></li>
 <li><a href="#future-work">Future Work</a></li>
 </ul></li>
 </ul></li>
