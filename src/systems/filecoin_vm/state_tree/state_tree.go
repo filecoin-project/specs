@@ -2,8 +2,8 @@ package state_tree
 
 import (
 	addr "github.com/filecoin-project/go-address"
+	actor "github.com/filecoin-project/specs/actors"
 	"github.com/filecoin-project/specs/actors/abi"
-	"github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	"github.com/filecoin-project/specs/util"
 	cid "github.com/ipfs/go-cid"
 )

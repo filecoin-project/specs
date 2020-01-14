@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	addr "github.com/filecoin-project/go-address"
+	actor "github.com/filecoin-project/specs/actors"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	acctact "github.com/filecoin-project/specs/actors/builtin/account"
@@ -15,7 +16,6 @@ import (
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
@@ -470,7 +470,7 @@ func _invokeMethodInternal(
 	params abi.MethodParams) (
 	ret InvocOutput, exitCode exitcode.ExitCode, internalCallSeqNumFinal actor.CallSeqNum) {
 
-	if method == actor.MethodSend {
+	if method == builtin.MethodSend {
 		ret = vmr.InvocOutput_Make(nil)
 		return
 	}
@@ -631,7 +631,7 @@ func (rt *VMContext) SendQuery(toAddr addr.Address, methodNum abi.MethodNum, par
 }
 
 func (rt *VMContext) SendFunds(toAddr addr.Address, value abi.TokenAmount) {
-	rt.Send(toAddr, actor.MethodSend, nil, value)
+	rt.Send(toAddr, builtin.MethodSend, nil, value)
 }
 
 func (rt *VMContext) SendPropagatingErrors(input InvocInput) InvocOutput {

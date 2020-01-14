@@ -2,6 +2,7 @@ package interpreter
 
 import (
 	addr "github.com/filecoin-project/go-address"
+	actor "github.com/filecoin-project/specs/actors"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	initact "github.com/filecoin-project/specs/actors/builtin/init"
@@ -12,8 +13,6 @@ import (
 	serde "github.com/filecoin-project/specs/actors/serde"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	vmri "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/impl"
@@ -335,7 +334,7 @@ func _makeBlockRewardMessage(state st.StateTree, minerAddr addr.Address, penalty
 	return &msg.UnsignedMessage_I{
 		From_:       builtin.SystemActorAddr,
 		To_:         builtin.RewardActorAddr,
-		Method_:     ai.Method_RewardActor_AwardBlockReward,
+		Method_:     builtin.Method_RewardActor_AwardBlockReward,
 		Params_:     params,
 		CallSeqNum_: sysActor.CallSeqNum(),
 		Value_:      0,
@@ -351,7 +350,7 @@ func _makeElectionPoStMessage(state st.StateTree, minerActorAddr addr.Address) m
 	return &msg.UnsignedMessage_I{
 		From_:       builtin.SystemActorAddr,
 		To_:         minerActorAddr,
-		Method_:     ai.Method_StorageMinerActor_OnVerifiedElectionPoSt,
+		Method_:     builtin.Method_StorageMinerActor_OnVerifiedElectionPoSt,
 		Params_:     nil,
 		CallSeqNum_: sysActor.CallSeqNum(),
 		Value_:      0,
@@ -367,7 +366,7 @@ func _makeCronTickMessage(state st.StateTree) msg.UnsignedMessage {
 	return &msg.UnsignedMessage_I{
 		From_:       builtin.SystemActorAddr,
 		To_:         builtin.CronActorAddr,
-		Method_:     ai.Method_CronActor_EpochTick,
+		Method_:     builtin.Method_CronActor_EpochTick,
 		Params_:     nil,
 		CallSeqNum_: sysActor.CallSeqNum(),
 		Value_:      0,
