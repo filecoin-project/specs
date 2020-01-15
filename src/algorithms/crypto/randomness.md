@@ -46,12 +46,13 @@ Different uses of randomness require randomness seeds predicated on a variety of
 - `SurprisePoStSelectMiners` -- uses ticket and epoch number
 ...
 
-In all cases, a ticket is used as the base of randomness (see {{<sref tickets>}}), as follows:
+In all cases, a ticket is used as the base of randomness (see {{<sref tickets>}}) and hashed along with appropriate entropy.
+For instance, for use in leader election, the ticket is hashed with the current epoch number (to ensure liveness in the protocol), as follows:
 ```text
 buffer = Bytes{}
-buffer.append(IntToLittleEndianBytes(TicketDrawingDST))
+buffer.append(IntToBigEndianBytes(TicketDrawingDST))
 buffer.append(ticket.Output())
-buffer.append(IntToLittleEndianBytes(epochNumber))
+buffer.append(IntToBigEndianBytes(epochNumber))
 randomness = SHA256(buffer)
 ```
 
@@ -60,7 +61,7 @@ Some randomness seeds need extra entropy in order to ensure values remain unique
  For a given ticket's randomness `ticket_randomness`:
 
 buffer = Bytes{}
-buffer.append(IntToLittleEndianBytes(AppropriateDST))
+buffer.append(IntToBigEndianBytes(AppropriateDST))
 buffer.append(ticket_randomness)
 buffer.append(other needed serialized inputs)
 

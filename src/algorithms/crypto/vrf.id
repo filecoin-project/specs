@@ -14,7 +14,7 @@ type VRFKeyPair struct {
 
 type VRFResult struct {
     Output            Bytes
-    Digest            Bytes
+    Proof             Bytes
     MaxValue()        Bytes
     ValidateSyntax()  bool
 

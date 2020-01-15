@@ -21,8 +21,8 @@ func (self *VRFKeyPair_I) Generate(input util.Bytes) VRFResult {
 	// sig := new(BLS).Sign(input, self.SecretKey)
 	var blsSig util.Bytes
 	ret := &VRFResult_I{
-		Output_: blsSig,
-		Digest_: SHA256(blsSig),
+		Proof_: blsSig,
+		Output_: SHA256(blsSig),
 	}
 	return ret
 }
