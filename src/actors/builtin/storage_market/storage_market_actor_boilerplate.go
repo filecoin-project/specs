@@ -31,11 +31,11 @@ var IMPL_TODO = autil.IMPL_TODO
 var TODO = autil.TODO
 
 func Release(rt Runtime, h vmr.ActorStateHandle, st StorageMarketActorState) {
-	checkCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
+	checkCID := actor.ActorSubstateCID(rt.IpldPut(&st))
 	h.Release(checkCID)
 }
 func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st StorageMarketActorState) {
-	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
+	newCID := actor.ActorSubstateCID(rt.IpldPut(&st))
 	h.UpdateRelease(newCID)
 }
 func DealsAMT_Empty() DealsAMT {
