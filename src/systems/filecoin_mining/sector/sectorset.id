@@ -1,5 +1,7 @@
+import abi "github.com/filecoin-project/specs/actors/abi"
+
 // sector sets
-type SectorSet [SectorID]
+type SectorSet [abi.SectorID]
 type UnsealedSectorSet SectorSet
 type SealedSectorSet SectorSet
 

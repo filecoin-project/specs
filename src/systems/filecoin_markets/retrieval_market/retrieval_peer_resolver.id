@@ -1,5 +1,5 @@
-import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+import abi "github.com/filecoin-project/specs/actors/abi"
 
 type RetrievalPeerResolver struct {
-    GetPeers(PieceCID piece.PieceCID) [RetrievalPeer]
+    GetPeers(PieceCID abi.PieceCID) [RetrievalPeer]
 }

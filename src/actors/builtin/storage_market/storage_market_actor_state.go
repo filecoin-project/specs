@@ -16,7 +16,7 @@ const epochUndefined = abi.ChainEpoch(-1)
 // Deal state operations
 ////////////////////////////////////////////////////////////////////////////////
 
-func (st *StorageMarketActorState_I) _updatePendingDealStates(dealIDs []deal.DealID, epoch abi.ChainEpoch) (
+func (st *StorageMarketActorState_I) _updatePendingDealStates(dealIDs []abi.DealID, epoch abi.ChainEpoch) (
 	amountSlashedTotal abi.TokenAmount) {
 
 	IMPL_FINISH() // BigInt arithmetic
@@ -30,7 +30,7 @@ func (st *StorageMarketActorState_I) _updatePendingDealStates(dealIDs []deal.Dea
 	return
 }
 
-func (st *StorageMarketActorState_I) _updatePendingDealState(dealID deal.DealID, epoch abi.ChainEpoch) (
+func (st *StorageMarketActorState_I) _updatePendingDealState(dealID abi.DealID, epoch abi.ChainEpoch) (
 	amountSlashed abi.TokenAmount) {
 
 	IMPL_FINISH() // BigInt arithmetic
@@ -89,7 +89,7 @@ func (st *StorageMarketActorState_I) _updatePendingDealState(dealID deal.DealID,
 	return
 }
 
-func (st *StorageMarketActorState_I) _deleteDeal(dealID deal.DealID) {
+func (st *StorageMarketActorState_I) _deleteDeal(dealID abi.DealID) {
 	_, dealP := st._getOnChainDealAssert(dealID)
 	delete(st.Deals(), dealID)
 	delete(st.CachedDealIDsByParty()[dealP.Provider()], dealID)
@@ -97,7 +97,7 @@ func (st *StorageMarketActorState_I) _deleteDeal(dealID deal.DealID) {
 }
 
 // Note: only processes deal payments, not deal expiration (even if the deal has expired).
-func (st *StorageMarketActorState_I) _processDealPaymentEpochsElapsed(dealID deal.DealID, numEpochsElapsed abi.ChainEpoch) {
+func (st *StorageMarketActorState_I) _processDealPaymentEpochsElapsed(dealID abi.DealID, numEpochsElapsed abi.ChainEpoch) {
 	deal, dealP := st._getOnChainDealAssert(dealID)
 	Assert(deal.SectorStartEpoch() != epochUndefined)
 
@@ -107,7 +107,7 @@ func (st *StorageMarketActorState_I) _processDealPaymentEpochsElapsed(dealID dea
 	st._transferBalance(dealP.Client(), dealP.Provider(), abi.TokenAmount(totalPayment))
 }
 
-func (st *StorageMarketActorState_I) _processDealSlashed(dealID deal.DealID) (amountSlashed abi.TokenAmount) {
+func (st *StorageMarketActorState_I) _processDealSlashed(dealID abi.DealID) (amountSlashed abi.TokenAmount) {
 	deal, dealP := st._getOnChainDealAssert(dealID)
 	Assert(deal.SectorStartEpoch() != epochUndefined)
 
@@ -130,7 +130,7 @@ func (st *StorageMarketActorState_I) _processDealSlashed(dealID deal.DealID) (am
 // Deal start deadline elapsed without appearing in a proven sector.
 // Delete deal, slash a portion of provider's collateral, and unlock remaining collaterals
 // for both provider and client.
-func (st *StorageMarketActorState_I) _processDealInitTimedOut(dealID deal.DealID) (amountSlashed abi.TokenAmount) {
+func (st *StorageMarketActorState_I) _processDealInitTimedOut(dealID abi.DealID) (amountSlashed abi.TokenAmount) {
 	deal, dealP := st._getOnChainDealAssert(dealID)
 	Assert(deal.SectorStartEpoch() == epochUndefined)
 
@@ -147,7 +147,7 @@ func (st *StorageMarketActorState_I) _processDealInitTimedOut(dealID deal.DealID
 }
 
 // Normal expiration. Delete deal and unlock collaterals for both miner and client.
-func (st *StorageMarketActorState_I) _processDealExpired(dealID deal.DealID) {
+func (st *StorageMarketActorState_I) _processDealExpired(dealID abi.DealID) {
 	deal, dealP := st._getOnChainDealAssert(dealID)
 	Assert(deal.SectorStartEpoch() != epochUndefined)
 
@@ -158,9 +158,9 @@ func (st *StorageMarketActorState_I) _processDealExpired(dealID deal.DealID) {
 	st._deleteDeal(dealID)
 }
 
-func (st *StorageMarketActorState_I) _generateStorageDealID(storageDeal deal.StorageDeal) deal.DealID {
+func (st *StorageMarketActorState_I) _generateStorageDealID(storageDeal deal.StorageDeal) abi.DealID {
 	ret := st.NextID()
-	st.NextID_ = st.NextID_ + deal.DealID(1)
+	st.NextID_ = st.NextID_ + abi.DealID(1)
 	return ret
 }
 
@@ -306,7 +306,7 @@ func _dealGetPaymentRemaining(deal deal.OnChainDeal, epoch abi.ChainEpoch) abi.T
 	return abi.TokenAmount(int(durationRemaining) * int(dealP.StoragePricePerEpoch()))
 }
 
-func (st *StorageMarketActorState_I) _getOnChainDeal(dealID deal.DealID) (
+func (st *StorageMarketActorState_I) _getOnChainDeal(dealID abi.DealID) (
 	deal deal.OnChainDeal, dealP deal.StorageDealProposal, ok bool) {
 
 	var found bool
@@ -320,7 +320,7 @@ func (st *StorageMarketActorState_I) _getOnChainDeal(dealID deal.DealID) (
 	return
 }
 
-func (st *StorageMarketActorState_I) _getOnChainDealAssert(dealID deal.DealID) (
+func (st *StorageMarketActorState_I) _getOnChainDealAssert(dealID abi.DealID) (
 	deal deal.OnChainDeal, dealP deal.StorageDealProposal) {
 
 	var ok bool

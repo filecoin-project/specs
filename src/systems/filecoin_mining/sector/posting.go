@@ -1,3 +1,5 @@
 package sector
 
-type SectorCommitments map[SectorID]Commitment
+import abi "github.com/filecoin-project/specs/actors/abi"
+
+type SectorCommitments map[abi.SectorID]Commitment

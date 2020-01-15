@@ -1,24 +1,10 @@
-import cid "github.com/ipfs/go-cid"
-
-// PieceCID is the main reference to pieces in Filecoin. It is the CID
-// of the Piece.
-type PieceCID cid.Cid
-
-type NumBytes UVarint  // TODO: move into util
-
-// PieceSize is the size of a piece, in bytes
-type PieceSize struct {
-    PayloadSize   NumBytes
-    OverheadSize  NumBytes
-
-    Total()       NumBytes
-}
+import abi "github.com/filecoin-project/specs/actors/abi"
 
 // PieceInfo is an object that describes details about a piece, and allows
 // decoupling storage of this information from the piece itself.
 type PieceInfo struct {
     ID    PieceID
-    Size  PieceSize
+    Size  abi.PieceSize
     // TODO: store which algorithms were used to construct this piece.
 }
 

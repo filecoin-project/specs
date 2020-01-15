@@ -4,7 +4,6 @@ import exitcode "github.com/filecoin-project/specs/actors/runtime/exitcode"
 import addr "github.com/filecoin-project/go-address"
 import indices "github.com/filecoin-project/specs/actors/runtime/indices"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import cid "github.com/ipfs/go-cid"
 
 // Runtime is the VM's internal runtime object.
@@ -126,11 +125,11 @@ type Syscalls interface {
     // Verifies that a signature is valid for an address and plaintext.
     VerifySignature(signature [byte], signer addr.Address, plaintext [byte]) bool
     // Computes an unsealed sector CID (CommD) from its constituent piece CIDs (CommPs) and sizes.
-    ComputeUnsealedSectorCID(sectorSize sector.SectorSize, pieces [sector.PieceInfo]) (sector.UnsealedSectorCID, error)
+    ComputeUnsealedSectorCID(sectorSize abi.SectorSize, pieces [abi.PieceInfo]) (abi.UnsealedSectorCID, error)
     // Verifies a sector seal proof.
-    VerifySeal(sectorSize sector.SectorSize, vi sector.SealVerifyInfo) bool
+    VerifySeal(sectorSize abi.SectorSize, vi abi.SealVerifyInfo) bool
     // Verifies a proof of spacetime.
-    VerifyPoSt(sectorSize sector.SectorSize, vi sector.PoStVerifyInfo) bool
+    VerifyPoSt(sectorSize abi.SectorSize, vi abi.PoStVerifyInfo) bool
 }
 
 type InvocInput struct {

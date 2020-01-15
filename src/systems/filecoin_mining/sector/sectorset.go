@@ -1,25 +1,27 @@
 package sector
 
+import abi "github.com/filecoin-project/specs/actors/abi"
+
 // TODO
-func (css *CompactSectorSet) SectorsOn() []SectorNumber {
-	var sectorNo []SectorNumber
+func (css *CompactSectorSet) SectorsOn() []abi.SectorNumber {
+	var sectorNo []abi.SectorNumber
 	return sectorNo
 }
 
 // TODO
-func (css *CompactSectorSet) SectorsOff() []SectorNumber {
-	var sectorNo []SectorNumber
+func (css *CompactSectorSet) SectorsOff() []abi.SectorNumber {
+	var sectorNo []abi.SectorNumber
 	return sectorNo
 }
 
 // TODO
-func (css *CompactSectorSet) Add(sectorNo SectorNumber) CompactSectorSet {
+func (css *CompactSectorSet) Add(sectorNo abi.SectorNumber) CompactSectorSet {
 	var newCompactSectorSet CompactSectorSet
 	return newCompactSectorSet
 }
 
 // TODO
-func (css *CompactSectorSet) Remove(sectorNo SectorNumber) CompactSectorSet {
+func (css *CompactSectorSet) Remove(sectorNo abi.SectorNumber) CompactSectorSet {
 	var newCompactSectorSet CompactSectorSet
 	return newCompactSectorSet
 }
@@ -37,6 +39,6 @@ func (css *CompactSectorSet) Extend(css2 CompactSectorSet) CompactSectorSet {
 }
 
 // TODO
-func (css *CompactSectorSet) Contain(sectorNo SectorNumber) bool {
+func (css *CompactSectorSet) Contain(sectorNo abi.SectorNumber) bool {
 	return false
 }

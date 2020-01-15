@@ -5,11 +5,11 @@ import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_
 
 // TODO import this from StorageMarket
 type SectorIndex struct {
-    BySectorID     {sector.SectorID: sector.SectorInfo}
-    ByUnsealedCID  {sector.UnsealedSectorCID: sector.SectorInfo}
-    BySealedCID    {sector.SealedSectorCID: sector.SectorInfo}
+    BySectorID     {abi.SectorID: sector.SectorInfo}
+    ByUnsealedCID  {abi.UnsealedSectorCID: sector.SectorInfo}
+    BySealedCID    {abi.SealedSectorCID: sector.SectorInfo}
     ByPieceID      {piece.PieceID: sector.SectorInfo}
-    ByDealID       {deal.DealID: sector.SectorInfo}
+    ByDealID       {abi.DealID: sector.SectorInfo}
 }
 
 type SectorIndexerSubsystem struct {
@@ -27,8 +27,8 @@ type SectorIndexerSubsystem struct {
 
     // SectorsExpiredAtEpoch returns the set of sectors that expire
     // at a particular epoch.
-    SectorsExpiredAtEpoch(epoch abi.ChainEpoch) [sector.SectorID]
+    SectorsExpiredAtEpoch(epoch abi.ChainEpoch) [abi.SectorID]
 
     // removeSectors removes the given sectorIDs from storage.
-    removeSectors(sectorIDs [sector.SectorID])
+    removeSectors(sectorIDs [abi.SectorID])
 }

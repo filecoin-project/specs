@@ -1,6 +1,5 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
 import addr "github.com/filecoin-project/go-address"
-import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import peer "github.com/libp2p/go-libp2p-core/peer"
 
 type RetrievalClientDealState struct {
@@ -31,14 +30,14 @@ type RetrievalClientSubscriber struct {
 
 type RetrievalClient struct {
     // V0
-    FindProviders(pieceCID piece.PieceCID) [RetrievalPeer]
+    FindProviders(pieceCID abi.PieceCID) [RetrievalPeer]
     Query(
         p         RetrievalPeer
-        pieceCID  piece.PieceCID
+        pieceCID  abi.PieceCID
         params    RetrievalQueryParams
     ) RetrievalQueryResponse
     Retrieve(
-        pieceCID      piece.PieceCID
+        pieceCID      abi.PieceCID
         params        RetrievalParams
         totalFunds    abi.TokenAmount
         miner         peer.ID

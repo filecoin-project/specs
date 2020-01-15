@@ -3,7 +3,6 @@ package util
 import (
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 )
 
 // Create a new entry in the balance table, with the specified initial balance.
@@ -114,17 +113,17 @@ func DealIDQueue_Empty() DealIDQueue {
 	}
 }
 
-func (x *DealIDQueue_I) Enqueue(dealID deal.DealID) {
+func (x *DealIDQueue_I) Enqueue(dealID abi.DealID) {
 	nextIndex := x.EndIndex()
 	x.Values()[nextIndex] = dealID
 	x.EndIndex_ = nextIndex + 1
 }
 
-func (x *DealIDQueue_I) Dequeue() (dealID deal.DealID, ok bool) {
+func (x *DealIDQueue_I) Dequeue() (dealID abi.DealID, ok bool) {
 	AssertMsg(x.StartIndex() <= x.EndIndex(), "index %d > end %d", x.StartIndex(), x.EndIndex())
 
 	if x.StartIndex() == x.EndIndex() {
-		dealID = deal.DealID(-1)
+		dealID = abi.DealID(-1)
 		ok = false
 		return
 	} else {
