@@ -55,7 +55,7 @@ func init() {
 func _registerBuiltinActors() {
 	// TODO
 
-	cron := &cronact.CronActorCode_I{}
+	cron := &cronact.CronActor{}
 
 	RegisterActor(builtin.InitActorCodeID, &initact.InitActor{})
 	RegisterActor(builtin.CronActorCodeID, cron)
@@ -65,13 +65,13 @@ func _registerBuiltinActors() {
 
 	// wire in CRON actions.
 	// TODO: move this to CronActor's constructor method
-	cron.Entries_ = append(cron.Entries_, &cronact.CronTableEntry_I{
-		ToAddr_:    builtin.StoragePowerActorAddr,
-		MethodNum_: builtin.Method_StoragePowerActor_OnEpochTickEnd,
+	cron.Entries = append(cron.Entries, cronact.CronTableEntry{
+		ToAddr:    builtin.StoragePowerActorAddr,
+		MethodNum: builtin.Method_StoragePowerActor_OnEpochTickEnd,
 	})
 
-	cron.Entries_ = append(cron.Entries_, &cronact.CronTableEntry_I{
-		ToAddr_:    builtin.StorageMarketActorAddr,
-		MethodNum_: builtin.Method_StorageMarketActor_OnEpochTickEnd,
+	cron.Entries = append(cron.Entries, cronact.CronTableEntry{
+		ToAddr:    builtin.StorageMarketActorAddr,
+		MethodNum: builtin.Method_StorageMarketActor_OnEpochTickEnd,
 	})
 }
