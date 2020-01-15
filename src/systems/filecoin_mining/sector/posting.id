@@ -2,37 +2,6 @@ type PartialTicket Bytes  // 32 bytes
 type ChallengeTicketsCommitment Bytes
 type PoStRandomness Bytes
 
-// type PoStCfg struct {
-//     InstanceCfg PoStInstanceCfg
-//     ProofInstance
-// }
-
-// New proof ProofInstances can add new cfg types if needed.
-type PoStInstanceCfg union {
-    PoStCfgV1
-    PoStCfgVBogus
-}
-
-type PoStCfgV1 struct {
-    Type                PoStType
-    Nodes               UInt
-    Partitions          UInt
-    LeafChallengeCount  UInt
-    ChallengeRangeSize  UInt
-}
-
-type PoStCfgVBogus struct {
-    Type                 PoStType
-    Nodes                UInt
-    Partitions           UInt
-    QuantumMonkeyBrains  UInt
-}
-
-type PoStType enum {
-    ElectionPoSt
-    SurprisePoSt
-}
-
 // TODO: refactor these types to get rid of the squishy optional fields.
 type PoStVerifyInfo struct {
     Randomness       PoStRandomness
@@ -78,6 +47,6 @@ type PoStProof struct {//<curve, system> {
 }
 
 type PrivatePoStCandidateProof struct {
-    Algorithm     ProofAlgorithm
-    Externalized  Bytes
+    RegisteredProof
+    Externalized Bytes
 }

@@ -27,7 +27,7 @@ func (pg *PoStGenerator_I) GeneratePoStCandidates(challengeSeed sector.PoStRando
 
 	// For now, dodge this by passing the whole SectorStore. Once we decide how we want to represent this, we can narrow the call.
 
-	return filproofs.GenerateElectionPoStCandidates(pg.PoStCfg(), challengeSeed, sectors, candidateCount, pg.SectorStore())
+	return filproofs.GenerateElectionPoStCandidates(challengeSeed, sectors, candidateCount, pg.SectorStore())
 }
 
 func (pg *PoStGenerator_I) CreateElectionPoStProof(randomness sector.PoStRandomness, witness sector.PoStWitness) []sector.PoStProof {
@@ -37,15 +37,15 @@ func (pg *PoStGenerator_I) CreateElectionPoStProof(randomness sector.PoStRandomn
 		privateProofs = append(privateProofs, candidate.PrivateProof())
 	}
 
-	return filproofs.CreateElectionPoStProof(pg.PoStCfg(), privateProofs, randomness)
+	return filproofs.CreateElectionPoStProof(privateProofs, randomness)
 }
 
-func (pg *PoStGenerator_I) CreateSurprisePoStProof(postCfg sector.PoStInstanceCfg, randomness sector.PoStRandomness, witness sector.PoStWitness) []sector.PoStProof {
+func (pg *PoStGenerator_I) CreateSurprisePoStProof(randomness sector.PoStRandomness, witness sector.PoStWitness) []sector.PoStProof {
 	var privateProofs []sector.PrivatePoStCandidateProof
 
 	for _, candidate := range witness.Candidates() {
 		privateProofs = append(privateProofs, candidate.PrivateProof())
 	}
 
-	return filproofs.CreateSurprisePoStProof(pg.PoStCfg(), privateProofs, randomness)
+	return filproofs.CreateSurprisePoStProof(privateProofs, randomness)
 }

@@ -10,7 +10,8 @@ import (
 	"github.com/ipfs/go-cid"
 )
 
-func WinSDRParams(c sector.SealInstanceCfg) *WinStackedDRG_I {
+func WinSDRParams(registeredProof sector.RegisteredProof) *WinStackedDRG_I {
+	c := RegisteredProofInstance(registeredProof).Cfg().As_SealCfg()
 	cfg := c.As_WinStackedDRGCfgV1()
 	// TODO: Bridge constants with orient model.
 	const LAYERS = 10
@@ -382,7 +383,7 @@ func (sdr *WinStackedDRG_I) _verifyOfflineCircuitProof(commD sector.UnsealedSect
 ////////////////////////////////////////////////////////////////////////////////
 // PoSt
 
-func (sdr *WinStackedDRG_I) _generateCandidate(postCfg sector.PoStInstanceCfg, randomness sector.PoStRandomness, aux sector.PersistentProofAux, sectorID sector.SectorID, sectorChallengeIndex UInt) sector.PoStCandidate {
+func (sdr *WinStackedDRG_I) _generateCandidate(postCfg PoStInstanceCfg, randomness sector.PoStRandomness, aux sector.PersistentProofAux, sectorID sector.SectorID, sectorChallengeIndex UInt) sector.PoStCandidate {
 	cfg := postCfg.As_PoStCfgV1()
 
 	nodes := int(cfg.Nodes())
@@ -410,16 +411,20 @@ func (sdr *WinStackedDRG_I) _generateCandidate(postCfg sector.PoStInstanceCfg, r
 		InclusionProofs: inclusionProofs,
 	}
 
+	var registeredProof sector.RegisteredProof
+
+	// FIXME: Need to get registeredProof!
+
 	candidate := sector.PoStCandidate_I{
 		PartialTicket_:  partialTicket,
-		PrivateProof_:   privateProof.externalize(sector.ProofAlgorithm_WinStackedDRGSeal),
+		PrivateProof_:   privateProof.externalize(registeredProof),
 		SectorID_:       sectorID,
 		ChallengeIndex_: sectorChallengeIndex,
 	}
 	return &candidate
 }
 
-func (sdr *WinStackedDRG_I) VerifyInternalPrivateCandidateProof(postCfg sector.PoStInstanceCfg, p *InternalPrivateCandidateProof, challengeSeed sector.PoStRandomness, candidate sector.PoStCandidate, commRLast Commitment) bool {
+func (sdr *WinStackedDRG_I) VerifyInternalPrivateCandidateProof(postCfg PoStInstanceCfg, p *InternalPrivateCandidateProof, challengeSeed sector.PoStRandomness, candidate sector.PoStCandidate, commRLast Commitment) bool {
 	cfg := postCfg.As_PoStCfgV1()
 	util.Assert(candidate.PrivateProof() == nil)
 	nodes := int(cfg.Nodes())
@@ -478,7 +483,7 @@ func (sdr *WinStackedDRG_I) VerifyInternalPrivateCandidateProof(postCfg sector.P
 	return true
 }
 
-func (sdr *WinStackedDRG_I) VerifyPrivatePoStProof(cfg sector.PoStInstanceCfg, privateProof PrivatePoStProof, candidates []sector.PoStCandidate, sectorIDs []sector.SectorID, sectorCommitments sector.SectorCommitments) bool {
+func (sdr *WinStackedDRG_I) VerifyPrivatePoStProof(cfg PoStInstanceCfg, privateProof PrivatePoStProof, candidates []sector.PoStCandidate, sectorIDs []sector.SectorID, sectorCommitments sector.SectorCommitments) bool {
 	// This is safe by construction.
 	challengeSeed := privateProof.ChallengeSeed
 
@@ -504,7 +509,7 @@ func (sdr *WinStackedDRG_I) VerifyPrivatePoStProof(cfg sector.PoStInstanceCfg, p
 	return true
 }
 
-func (sdr *WinStackedDRG_I) _createPoStCircuitProof(postCfg sector.PoStInstanceCfg, privateProof PrivatePoStProof) sector.PoStProof {
+func (sdr *WinStackedDRG_I) _createPoStCircuitProof(privateProof PrivatePoStProof) sector.PoStProof {
 	panic("TODO")
 
 	var proofBytes []byte

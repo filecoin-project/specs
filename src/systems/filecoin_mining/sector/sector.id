@@ -93,38 +93,3 @@ type RegisteredProof enum {
     StackedDRG32GiBSeal  // = 3
     StackedDRG32GiBPoSt  // = 4
 }
-
-type ProofRegistry {UInt: ProofInstance}
-
-type ProofInstance struct {
-    ID           RegisteredProof
-    Type         ProofType
-    Algorithm    ProofAlgorithm
-    CircuitType  ConcreteCircuit
-    Partitions   UInt
-    Cfg          ProofCfg
-}
-
-type ProofCfg union {
-    SealCfg  SealInstanceCfg
-    PoStCfg  PoStInstanceCfg
-}
-
-type ProofType enum {
-    SealProof
-    PoStProof
-}
-
-type ProofAlgorithm enum {
-    StackedDRGSeal
-    WinStackedDRGSeal
-    StackedDRGPoSt
-    WinStackedDRGPoSt
-}
-
-type ConcreteCircuit struct {
-    // Name must be globally unique. It will be a hash derived from semantic content of circuit.
-    Name                      string
-    GrothParameterFileName()  string
-    VerifyingKeyFileName()    string
-}

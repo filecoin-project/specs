@@ -15,11 +15,6 @@ type SectorStore struct {
     // returns an error.
     GetSectorFiles(id sector.SectorID) union {f SectorFiles, err error}
 
-    GetSectorSealAlgorithm(id sector.SectorID) union {a sector.ProofAlgorithm, err error}
-
-    // TODO: This needs to be called when a sector is sealed with the algorithm that was used.
-    SetSectorSealAlgorithm(id sector.SectorID, a sector.ProofAlgorithm) error
-
     // Get information, including a merkle tree file/path, needed to generate PoSt for a sector.
     GetSectorPersistentProofAux(id sector.SectorID) sector.PersistentProofAux
 
