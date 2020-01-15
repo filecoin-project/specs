@@ -5,9 +5,9 @@ import (
 
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
+	crypto "github.com/filecoin-project/specs/actors/crypto"
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	autil "github.com/filecoin-project/specs/actors/util"
-	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 )
 
@@ -82,11 +82,11 @@ func (st *StoragePowerActorState_I) _selectMinersToSurprise(challengeCount int, 
 
 	selectedMiners := make([]addr.Address, 0)
 	for chall := 0; chall < challengeCount; chall++ {
-		minerIndex := filcrypto.RandomInt(randomness, chall, ptSize)
+		minerIndex := crypto.RandomInt(randomness, chall, ptSize)
 		potentialChallengee := allMiners[minerIndex]
 		// skip dups
 		for addrInArray(potentialChallengee, selectedMiners) {
-			minerIndex := filcrypto.RandomInt(randomness, chall, ptSize)
+			minerIndex := crypto.RandomInt(randomness, chall, ptSize)
 			potentialChallengee = allMiners[minerIndex]
 		}
 		selectedMiners = append(selectedMiners, potentialChallengee)

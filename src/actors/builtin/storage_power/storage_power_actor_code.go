@@ -6,11 +6,11 @@ import (
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
+	crypto "github.com/filecoin-project/specs/actors/crypto"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	serde "github.com/filecoin-project/specs/actors/serde"
 	autil "github.com/filecoin-project/specs/actors/util"
-	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 )
 
@@ -313,7 +313,7 @@ func (a *StoragePowerActorCode_I) _rtInitiateNewSurprisePoStChallenges(rt Runtim
 
 	// sample the actor addresses
 	minerSelectionSeed := rt.GetRandomness(rt.CurrEpoch())
-	randomness := filcrypto.DeriveRandWithEpoch(filcrypto.DomainSeparationTag_SurprisePoStSelectMiners, minerSelectionSeed, int(rt.CurrEpoch()))
+	randomness := crypto.DeriveRandWithEpoch(crypto.DomainSeparationTag_SurprisePoStSelectMiners, minerSelectionSeed, int(rt.CurrEpoch()))
 
 	IMPL_FINISH() // BigInt arithmetic (not floating-point)
 	challengeCount := math.Ceil(float64(len(st.PowerTable())) / float64(provingPeriod))
