@@ -19,6 +19,17 @@ Rig:
   describe(rig_storage_read_mibs, "Sequential read speed (MiB/s)")
   describe(rig_storage_write_mibs, "Sequential write speed (MiB/s)")
 
+  describe(rig_storage_unit_cost, "Cost of a single storage unit", dollar)
+  describe(rig_storage_unit_gb, "Amount of storage in a storage unit", gb)
+  describe(rig_storage_unit_gib, "Amount of storage in a storage unit", gib)
+  describe(rig_storage_unit_pib, "Amount of storage in a storage unit", pib)
+  describe(rig_storage_cost_gib, "Cost of 1GB", dollar)
+  describe(rig_storage_cost_pib, "Cost of 1PB", dollar)
+
+  rig_storage_unit_gib = rig_storage_unit_gb * gb_to_gib 
+  rig_storage_cost_gib = rig_storage_unit_cost / rig_storage_unit_gib
+  rig_storage_cost_pib = rig_storage_cost_gib * gib_in_pib
+
   describe(rig_gpu_cost, "Cost of a GPU", dollar)
   describe(rig_cpu_cost, "Cost of a CPU", dollar)
   describe(rig_gpu_cost_secs, "Cost of a GPU per second", dollar)
@@ -38,6 +49,7 @@ Rig:
 
   rig_gpu_cost_secs = rig_gpu_cost / (rig_gpu_lifetime_years * secs_in_year)
   rig_cpu_core_cost = rig_cpu_cost / rig_cores
+  rig_cpu_cost_secs = rig_cpu_cost / (rig_cpu_lifetime_years * secs_in_year)
   rig_cpu_core_cost_secs = rig_cpu_core_cost / (rig_cpu_lifetime_years * secs_in_year)
 
 Crypto:
@@ -68,6 +80,7 @@ Utils:
   describe(b_in_mib, "Number of bytes in a MiB")
   describe(b_in_kib, "Number of bytes in a KiB")
   describe(gib_in_tib, "Number of GiB in a TiB")
+  describe(gib_in_pib, "Number of GiB in a PiB")
   describe(gb_to_gib, "Ratio between GB and GiB")
   describe(mb_to_mib, "Ratio between MB and MiB")
 
@@ -77,6 +90,7 @@ Utils:
   b_in_gib = (1024 * 1024 * 1024)
   b_in_mib = (1024 * 1024)
   gib_in_tib = 1024
+  gib_in_pib = 1024 * 1024
   b_in_kib = 1024
   secs_in_month = (24 * 60 * 60 * 30)
   secs_in_year = (24  * 60 * 60 * 365)
@@ -482,17 +496,22 @@ ProofOfReplication:
 
   Cost:
     describe(porep_cost, "Cost of a seal proof", dollar)
-    describe(porep_snark_cost, "Cost of a snark proof", dollar)
-    describe(porep_commit_cost, "Cost of generating merkle trees", dollar)
-    describe(porep_decoding_cost, "Cost of decoding a sector", dollar)
-    describe(porep_encoding_cost, "Cost of decoding a sector", dollar)
+    describe(porep_cost_snark, "Cost of a snark proof", dollar)
+    describe(porep_cost_commit, "Cost of generating merkle trees", dollar)
+    describe(porep_cost_decoding, "Cost of decoding a sector", dollar)
+    describe(porep_cost_encoding, "Cost of decoding a sector", dollar)
+    describe(porep_cost_gib, "Cost of sealing 1 GiB", dollar)
+    describe(porep_cost_pib, "Cost of sealing 1 PiB", dollar)
 
-    porep_commit_cost = porep_commit_time * rig_cpu_core_cost_secs
-    porep_encoding_cost = encoding_time * rig_cpu_core_cost_secs
-    porep_snark_cost = porep_snark_time * rig_gpu_cost_secs
+    porep_cost_commit = porep_commit_time * rig_cpu_core_cost_secs
+    porep_cost_snark = porep_snark_time * rig_gpu_cost_secs
+    porep_cost = porep_cost_commit + porep_cost_encoding + porep_cost_snark
+    porep_cost_gib = porep_cost / sector_size_gib
+    porep_cost_pib = porep_cost_gib * gib_in_pib
 
-    porep_cost = porep_commit_cost + porep_encoding_cost + porep_snark_cost
-    porep_decoding_cost = decoding_time * rig_cpu_core_cost_secs
+    EncodingCost (StackedSDRParameters):
+      porep_cost_encoding = encoding_time * rig_cpu_core_cost_secs
+      porep_cost_decoding = decoding_time * rig_cpu_core_cost_secs
 
   SNARK:
     describe(porep_snark_constraints, "Constraints for a PoRep", constraints)

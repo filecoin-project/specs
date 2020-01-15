@@ -244,21 +244,10 @@ viewof utility_cols = checkbox({
 })
 
 table_constraints(
-  solved_many
-    .filter(d => {
-      return (
-        d.proof_name == "0.2_0.038" && d.hash_name == "sha_pedersen"
-      )
-        ||
-      (
-          d.proof_name == "0.2_0.049" && d.hash_name == "poseidon"
-      )
-    })
-    .map(d => Object.assign({}, d, {porep_time_parallel: +d.porep_time_parallel})),
+  solved_many,
   ['proof_name', 'graph_parents', 'window_size_mib', 'hash_name', 'utility'].concat(utility_cols),
   [],
-  // 'utility'
-  'porep_time_parallel'
+  'utility'
 )
 
 md`## Graphs`
@@ -354,9 +343,9 @@ md`### PoRep cost`
 viewof porep_cost_ruler = chooser(solved_many, 'porep_cost', 2)
 
 bar_chart(solved_many, 'porep_cost', [
-  'porep_commit_cost',
-  'porep_encoding_cost',
-  'porep_snark_cost'
+  'porep_cost_commit',
+  'porep_cost_encoding',
+  'porep_cost_snark'
 ], ['proof_name', 'graph_parents', 'window_size_mib', 'hash_name'], {
   filter: d => d < Math.pow(10, porep_cost_ruler),
   yrule: Math.pow(10, porep_cost_ruler)
@@ -597,15 +586,31 @@ combos = {
   return makeQuery([constants])
     .add(stackedReplicas)
     .add(stackedSDRParams)
-    .extend([poseidon, sha_pedersen])
-    .extend(range(0.005, 0.06, 0.001).map(d => ({
-      sdr_delta: d,
-    })))
+    .add({ rig_storage_unit_cost: 46, rig_storage_unit_gb: 3000})
+    .extend([
+      Object.assign({ sdr_delta: 0.038 }, sha_pedersen),
+      Object.assign({ sdr_delta: 0.038 }, poseidon),
+      Object.assign({ sdr_delta: 0.049 }, poseidon)
+    ])
     .add({ spacegap: 0.2})
     .add({ drg_parents: 6 })
     .add({ sector_size_mib: 32 * 1024 })
     .compile()
 }
+
+// combos = {
+//   return makeQuery([constants])
+//     .add(stackedReplicas)
+//     .add(stackedSDRParams)
+//     .extend([poseidon, sha_pedersen])
+//     .extend(range(0.005, 0.06, 0.001).map(d => ({
+//       sdr_delta: d,
+//     })))
+//     .add({ spacegap: 0.2})
+//     .add({ drg_parents: 6 })
+//     .add({ sector_size_mib: 32 * 1024 })
+//     .compile()
+// }
 
 // combos = {
 //   return makeQuery([constants])
@@ -636,7 +641,6 @@ utility_fun = (data) => ev(utility_raw, data)
 
 solved_many = solved_many_pre
   .filter(d => d !== null)
-  // .filter(d => window_size_mib_config.some(c => d['window_size_mib'] === +c))
   .map(d => {
     const utility = utility_fun(d)
     return Object.assign({}, d, {utility: utility})
