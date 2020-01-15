@@ -29,15 +29,15 @@ var PROOFS ProofRegistry = ProofRegistry(map[util.UInt]ProofInstance{util.UInt(R
 		CircuitType_: &ConcreteCircuit_I{
 			Name_: "HASHOFCIRCUITDEFINITION2",
 		},
-		Cfg_: ProofCfg_Make_PoStCfg(&PoStInstanceCfg_I {}),
+		Cfg_: ProofCfg_Make_PoStCfg(&PoStInstanceCfg_I{}),
 		// FIXME: integrate
-	// return sector.PoStInstanceCfg_Make_PoStCfgV1(&sector.PoStCfgV1_I{
-	// 	Type_:               pType,
-	// 	Nodes_:              nodes,
-	// 	Partitions_:         partitions,
-	// 	LeafChallengeCount_: POST_LEAF_CHALLENGE_COUNT,
-	// 	ChallengeRangeSize_: POST_CHALLENGE_RANGE_SIZE,
-	// }).Impl()
+		// return sector.PoStInstanceCfg_Make_PoStCfgV1(&sector.PoStCfgV1_I{
+		// 	Type_:               pType,
+		// 	Nodes_:              nodes,
+		// 	Partitions_:         partitions,
+		// 	LeafChallengeCount_: POST_LEAF_CHALLENGE_COUNT,
+		// 	ChallengeRangeSize_: POST_CHALLENGE_RANGE_SIZE,
+		// }).Impl()
 
 	},
 	util.UInt(RegisteredProof_StackedDRG32GiBSeal): &ProofInstance_I{

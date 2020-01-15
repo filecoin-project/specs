@@ -38,15 +38,7 @@ const POST_CHALLENGE_RANGE_SIZE = 1
 const GIB_32 = 32 * 1024 * 1024 * 1024
 
 func PoStCfg(pType sector.PoStType, sectorSize sector.SectorSize, partitions UInt) sector.RegisteredProof {
-	nodes := UInt(sectorSize / NODE_SIZE)
-
-	return sector.PoStInstanceCfg_Make_PoStCfgV1(&sector.PoStCfgV1_I{
-		Type_:               pType,
-		Nodes_:              nodes,
-		Partitions_:         partitions,
-		LeafChallengeCount_: POST_LEAF_CHALLENGE_COUNT,
-		ChallengeRangeSize_: POST_CHALLENGE_RANGE_SIZE,
-	}).Impl()
+	return sector.RegisteredProof_WinStackedDRG32GiBPoSt
 }
 
 func MakeSealVerifier(registeredProof sector.RegisteredProof) *SealVerifier_I {
@@ -55,11 +47,11 @@ func MakeSealVerifier(registeredProof sector.RegisteredProof) *SealVerifier_I {
 	}
 }
 
-func SurprisePoStCfg(sectorSize sector.SectorSize) *sector.PoStInstanceCfg_I {
+func SurprisePoStCfg(sectorSize sector.SectorSize) sector.RegisteredProof {
 	return PoStCfg(sector.PoStType_SurprisePoSt, sectorSize, SURPRISE_POST_PARTITIONS)
 }
 
-func ElectionPoStCfg(sectorSize sector.SectorSize) *sector.PoStInstanceCfg_I {
+func ElectionPoStCfg(sectorSize sector.SectorSize) sector.RegisteredProof {
 	return PoStCfg(sector.PoStType_ElectionPoSt, sectorSize, ELECTION_POST_PARTITIONS)
 }
 
