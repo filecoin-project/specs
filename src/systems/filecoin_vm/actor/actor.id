@@ -5,7 +5,6 @@ import abi "github.com/filecoin-project/specs/actors/abi"
 import actor "github.com/filecoin-project/specs/actors"
 import cid "github.com/ipfs/go-cid"
 
-
 // Actor is a base computation object in the Filecoin VM. Similar
 // to Actors in the Actor Model (programming), or Objects in Object-
 // Oriented Programming, or Ethereum Contracts in the EVM.
