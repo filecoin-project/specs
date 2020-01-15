@@ -5,12 +5,10 @@ import (
 	abi "github.com/filecoin-project/specs/actors/abi"
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	actor_util "github.com/filecoin-project/specs/actors/util"
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 )
 
-func (st *StorageMinerActorState_I) _getSectorOnChainInfo(sectorNo sector.SectorNumber) (info SectorOnChainInfo, ok bool) {
+func (st *StorageMinerActorState_I) _getSectorOnChainInfo(sectorNo abi.SectorNumber) (info SectorOnChainInfo, ok bool) {
 	sectorInfo, found := st.Sectors()[sectorNo]
 	if !found {
 		return nil, false
@@ -18,7 +16,7 @@ func (st *StorageMinerActorState_I) _getSectorOnChainInfo(sectorNo sector.Sector
 	return sectorInfo, true
 }
 
-func (st *StorageMinerActorState_I) _getSectorDealIDsAssert(sectorNo sector.SectorNumber) deal.DealIDs {
+func (st *StorageMinerActorState_I) _getSectorDealIDsAssert(sectorNo abi.SectorNumber) abi.DealIDs {
 	sectorInfo, found := st._getSectorOnChainInfo(sectorNo)
 	Assert(found)
 	return sectorInfo.Info().DealIDs()
@@ -34,7 +32,7 @@ func SectorNumberSetHAMT_Empty() SectorNumberSetHAMT {
 	panic("")
 }
 
-func (st *StorageMinerActorState_I) GetStorageWeightDescForSectorMaybe(sectorNumber sector.SectorNumber) (ret SectorStorageWeightDesc, ok bool) {
+func (st *StorageMinerActorState_I) GetStorageWeightDescForSectorMaybe(sectorNumber abi.SectorNumber) (ret SectorStorageWeightDesc, ok bool) {
 	sectorInfo, found := st.Sectors()[sectorNumber]
 	if !found {
 		ret = nil
@@ -51,13 +49,13 @@ func (st *StorageMinerActorState_I) GetStorageWeightDescForSectorMaybe(sectorNum
 	return
 }
 
-func (st *StorageMinerActorState_I) _getStorageWeightDescForSector(sectorNumber sector.SectorNumber) SectorStorageWeightDesc {
+func (st *StorageMinerActorState_I) _getStorageWeightDescForSector(sectorNumber abi.SectorNumber) SectorStorageWeightDesc {
 	ret, found := st.GetStorageWeightDescForSectorMaybe(sectorNumber)
 	Assert(found)
 	return ret
 }
 
-func (st *StorageMinerActorState_I) _getStorageWeightDescsForSectors(sectorNumbers []sector.SectorNumber) []SectorStorageWeightDesc {
+func (st *StorageMinerActorState_I) _getStorageWeightDescsForSectors(sectorNumbers []abi.SectorNumber) []SectorStorageWeightDesc {
 	ret := []SectorStorageWeightDesc{}
 	for _, sectorNumber := range sectorNumbers {
 		ret = append(ret, st._getStorageWeightDescForSector(sectorNumber))
@@ -73,7 +71,7 @@ func MinerPoStState_New_OK(lastSuccessfulPoSt abi.ChainEpoch) MinerPoStState {
 
 func MinerPoStState_New_Challenged(
 	surpriseChallengeEpoch abi.ChainEpoch,
-	challengedSectors []sector.SectorNumber,
+	challengedSectors []abi.SectorNumber,
 	numConsecutiveFailures int,
 ) MinerPoStState {
 	return MinerPoStState_Make_Challenged(&MinerPoStState_Challenged_I{
@@ -109,7 +107,7 @@ func (x *SectorOnChainInfo_I) EffectiveFaultEndEpoch() abi.ChainEpoch {
 }
 
 func MinerInfo_New(
-	ownerAddr addr.Address, workerAddr addr.Address, sectorSize sector.SectorSize, peerId peer.ID) MinerInfo {
+	ownerAddr addr.Address, workerAddr addr.Address, sectorSize abi.SectorSize, peerId peer.ID) MinerInfo {
 
 	ret := &MinerInfo_I{
 		Owner_:      ownerAddr,
@@ -123,13 +121,13 @@ func MinerInfo_New(
 	return ret
 }
 
-func (st *StorageMinerActorState_I) VerifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool {
+func (st *StorageMinerActorState_I) VerifySurprisePoStMeetsTargetReq(candidate abi.PoStCandidate) bool {
 	// TODO: Determine what should be the acceptance criterion for sector numbers proven in SurprisePoSt proofs.
 	TODO()
 	panic("")
 }
 
-func SectorNumberSetHAMT_Items(x SectorNumberSetHAMT) []sector.SectorNumber {
+func SectorNumberSetHAMT_Items(x SectorNumberSetHAMT) []abi.SectorNumber {
 	IMPL_FINISH()
 	panic("")
 }

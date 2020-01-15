@@ -14,7 +14,7 @@ type ClientLocalDealInfo struct {
     State           StorageDealStatus
     MinerPeerID     peer.ID
     MinerWorker     addr.Address
-    DealID          deal.DealID
+    DealID          abi.DealID
     PublishMessage  &message.SignedMessage
 }
 

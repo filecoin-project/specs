@@ -3,13 +3,11 @@ package indices
 import (
 	abi "github.com/filecoin-project/specs/actors/abi"
 	actor_util "github.com/filecoin-project/specs/actors/util"
-	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	util "github.com/filecoin-project/specs/util"
+	"math/big"
 )
 
-var PARAM_FINISH = util.PARAM_FINISH
+var PARAM_FINISH = actor_util.PARAM_FINISH
 
 func StorageDeal_ProviderInitTimedOutSlashAmount(deal deal.OnChainDeal) abi.TokenAmount {
 	// placeholder
@@ -18,7 +16,7 @@ func StorageDeal_ProviderInitTimedOutSlashAmount(deal deal.OnChainDeal) abi.Toke
 }
 
 func (inds *Indices_I) StorageDeal_DurationBounds(
-	pieceSize piece.PieceSize,
+	pieceSize abi.PieceSize,
 	startEpoch abi.ChainEpoch,
 ) (minDuration abi.ChainEpoch, maxDuration abi.ChainEpoch) {
 
@@ -30,7 +28,7 @@ func (inds *Indices_I) StorageDeal_DurationBounds(
 }
 
 func (inds *Indices_I) StorageDeal_StoragePricePerEpochBounds(
-	pieceSize piece.PieceSize,
+	pieceSize abi.PieceSize,
 	startEpoch abi.ChainEpoch,
 	endEpoch abi.ChainEpoch,
 ) (minPrice abi.TokenAmount, maxPrice abi.TokenAmount) {
@@ -41,7 +39,7 @@ func (inds *Indices_I) StorageDeal_StoragePricePerEpochBounds(
 }
 
 func (inds *Indices_I) StorageDeal_ProviderCollateralBounds(
-	pieceSize piece.PieceSize,
+	pieceSize abi.PieceSize,
 	startEpoch abi.ChainEpoch,
 	endEpoch abi.ChainEpoch,
 ) (minProviderCollateral abi.TokenAmount, maxProviderCollateral abi.TokenAmount) {
@@ -52,7 +50,7 @@ func (inds *Indices_I) StorageDeal_ProviderCollateralBounds(
 }
 
 func (inds *Indices_I) StorageDeal_ClientCollateralBounds(
-	pieceSize piece.PieceSize,
+	pieceSize abi.PieceSize,
 	startEpoch abi.ChainEpoch,
 	endEpoch abi.ChainEpoch,
 ) (minClientCollateral abi.TokenAmount, maxClientCollateral abi.TokenAmount) {
@@ -63,7 +61,7 @@ func (inds *Indices_I) StorageDeal_ClientCollateralBounds(
 }
 
 func (inds *Indices_I) SectorWeight(
-	sectorSize sector.SectorSize,
+	sectorSize abi.SectorSize,
 	startEpoch abi.ChainEpoch,
 	endEpoch abi.ChainEpoch,
 	dealWeight deal.DealWeight,
@@ -79,13 +77,13 @@ func (inds *Indices_I) PledgeCollateralReq(minerNominalPower abi.StoragePower) a
 	panic("")
 }
 
-func (inds *Indices_I) SectorWeightProportion(minerActiveSectorWeight abi.SectorWeight) util.BigInt {
+func (inds *Indices_I) SectorWeightProportion(minerActiveSectorWeight abi.SectorWeight) big.Int {
 	// return proportion of SectorWeight for miner
 	PARAM_FINISH()
 	panic("")
 }
 
-func (inds *Indices_I) PledgeCollateralProportion(minerPledgeCollateral abi.TokenAmount) util.BigInt {
+func (inds *Indices_I) PledgeCollateralProportion(minerPledgeCollateral abi.TokenAmount) big.Int {
 	// return proportion of Pledge Collateral for miner
 	PARAM_FINISH()
 	panic("")
@@ -104,7 +102,7 @@ func (inds *Indices_I) StoragePower(
 
 func (inds *Indices_I) StoragePowerProportion(
 	minerStoragePower abi.StoragePower,
-) util.BigInt {
+) big.Int {
 	PARAM_FINISH()
 	panic("")
 }
@@ -145,7 +143,7 @@ func (inds *Indices_I) StoragePower_PledgeSlashForSurprisePoStFailure(
 }
 
 func (inds *Indices_I) StorageMining_PreCommitDeposit(
-	sectorSize sector.SectorSize,
+	sectorSize abi.SectorSize,
 	expirationEpoch abi.ChainEpoch,
 ) abi.TokenAmount {
 	PARAM_FINISH()

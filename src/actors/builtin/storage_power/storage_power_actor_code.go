@@ -11,7 +11,6 @@ import (
 	serde "github.com/filecoin-project/specs/actors/serde"
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 )
 
@@ -63,7 +62,7 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Add
 	rt.SendFunds(recipientAddr, amountExtracted)
 }
 
-func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Address, sectorSize sector.SectorSize, peerId peer.ID) addr.Address {
+func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Address, sectorSize abi.SectorSize, peerId peer.ID) addr.Address {
 	vmr.RT_ValidateImmediateCallerIsSignable(rt)
 	ownerAddr := rt.ImmediateCaller()
 
@@ -189,7 +188,7 @@ func (a *StoragePowerActorCode_I) OnMinerSurprisePoStFailure(rt Runtime, numCons
 	}
 }
 
-func (a *StoragePowerActorCode_I) OnMinerEnrollCronEvent(rt Runtime, eventEpoch abi.ChainEpoch, sectorNumbers []sector.SectorNumber) {
+func (a *StoragePowerActorCode_I) OnMinerEnrollCronEvent(rt Runtime, eventEpoch abi.ChainEpoch, sectorNumbers []abi.SectorNumber) {
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 	minerEvent := &autil.MinerEvent_I{
