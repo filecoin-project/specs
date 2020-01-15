@@ -7,6 +7,7 @@ import (
 	storage_miner "github.com/filecoin-project/specs/actors/builtin/storage_miner"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	actor_util "github.com/filecoin-project/specs/actors/util"
+	cid "github.com/ipfs/go-cid"
 )
 
 type DealWeight DealWeight
@@ -15,12 +16,12 @@ type StorageMarketActor struct{}
 
 func (a *StorageMarketActor) State(rt Runtime) (vmr.ActorStateHandle, StorageMarketActorState) {
 	h := rt.AcquireState()
-	var state StorageMarketActorState_I
+	var state StorageMarketActorState
 	stateCID := cid.Cid(h.Take())
 	if !rt.IpldGet(stateCID, &state) {
 		rt.AbortAPI("state not found")
 	}
-	return h, &state
+	return h, state
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -58,9 +59,9 @@ func (a *StorageMarketActor) WithdrawBalance(rt Runtime, entryAddr addr.Address,
 
 	minBalance := st._getLockedReqBalanceInternal(entryAddr)
 	newTable, amountExtracted, ok := actor_util.BalanceTable_WithExtractPartial(
-		st.EscrowTable(), entryAddr, amountRequested, minBalance)
+		st.EscrowTable, entryAddr, amountRequested, minBalance)
 	Assert(ok)
-	st.Impl().EscrowTable_ = newTable
+	st.EscrowTable = newTable
 
 	UpdateRelease(rt, h, st)
 
@@ -77,13 +78,13 @@ func (a *StorageMarketActor) AddBalance(rt Runtime, entryAddr addr.Address) {
 	st._rtAbortIfAddressEntryDoesNotExist(rt, entryAddr)
 
 	msgValue := rt.ValueReceived()
-	newTable, ok := actor_util.BalanceTable_WithAdd(st.EscrowTable(), entryAddr, msgValue)
+	newTable, ok := actor_util.BalanceTable_WithAdd(st.EscrowTable, entryAddr, msgValue)
 	if !ok {
 		// Entry not found; create implicitly.
-		newTable, ok = actor_util.BalanceTable_WithNewAddressEntry(st.EscrowTable(), entryAddr, msgValue)
+		newTable, ok = actor_util.BalanceTable_WithNewAddressEntry(st.EscrowTable, entryAddr, msgValue)
 		Assert(ok)
 	}
-	st.Impl().EscrowTable_ = newTable
+	st.EscrowTable = newTable
 
 	UpdateRelease(rt, h, st)
 }
@@ -129,15 +130,15 @@ func (a *StorageMarketActor) PublishStorageDeals(rt Runtime, newStorageDeals []S
 			SectorStartEpoch_: epochUndefined,
 		}
 
-		st.Deals()[id] = onchainDeal
+		st.Deals[id] = onchainDeal
 
-		if _, found := st.CachedExpirationsPending()[p.EndEpoch()]; !found {
-			st.CachedExpirationsPending()[p.EndEpoch()] = actor_util.DealIDQueue_Empty()
+		if _, found := st.CachedExpirationsPending[p.EndEpoch()]; !found {
+			st.CachedExpirationsPending[p.EndEpoch()] = actor_util.DealIDQueue_Empty()
 		}
-		st.CachedExpirationsPending()[p.EndEpoch()].Enqueue(id)
+		st.CachedExpirationsPending[p.EndEpoch()].Enqueue(id)
 	}
 
-	st.Impl().CurrEpochNumDealsPublished_ += len(newStorageDeals)
+	st.CurrEpochNumDealsPublished += len(newStorageDeals)
 
 	UpdateRelease(rt, h, st)
 
@@ -173,7 +174,7 @@ func (a *StorageMarketActor) UpdateDealsOnSectorProveCommit(rt Runtime, dealIDs 
 	for _, dealID := range dealIDs.Items {
 		deal, _ := st._rtGetOnChainDealOrAbort(rt, dealID)
 		_rtAbortIfDealInvalidForNewSectorSeal(rt, minerAddr, sectorInfo.Expiration(), deal)
-		st.Deals()[dealID].Impl().SectorStartEpoch_ = rt.CurrEpoch()
+		st.Deals[dealID].Impl().SectorStartEpoch_ = rt.CurrEpoch()
 	}
 
 	UpdateRelease(rt, h, st)
@@ -238,7 +239,7 @@ func (a *StorageMarketActor) OnMinerSectorsTerminate(rt Runtime, dealIDs abi.Dea
 		// Note: we do not perform the balance transfers here, but rather simply record the flag
 		// to indicate that _processDealSlashed should be called when the deferred state computation
 		// is performed.
-		st.Deals()[dealID].Impl().SlashEpoch_ = rt.CurrEpoch()
+		st.Deals[dealID].Impl().SlashEpoch_ = rt.CurrEpoch()
 	}
 
 	UpdateRelease(rt, h, st)
@@ -265,13 +266,13 @@ func (a *StorageMarketActor) OnEpochTickEnd(rt Runtime) {
 	// current epoch) of deals dequeued, whichever comes first.
 
 	const DEAL_PROC_AMORTIZED_SCALE_FACTOR = 2
-	numDequeuedTarget := st.CurrEpochNumDealsPublished() * DEAL_PROC_AMORTIZED_SCALE_FACTOR
+	numDequeuedTarget := st.CurrEpochNumDealsPublished * DEAL_PROC_AMORTIZED_SCALE_FACTOR
 
 	numDequeued := 0
 	extractedDealIDs := []abi.DealID{}
 
 	for {
-		if st.CachedExpirationsNextProcEpoch() > rt.CurrEpoch() {
+		if st.CachedExpirationsNextProcEpoch > rt.CurrEpoch() {
 			break
 		}
 
@@ -279,9 +280,9 @@ func (a *StorageMarketActor) OnEpochTickEnd(rt Runtime) {
 			break
 		}
 
-		queue, found := st.CachedExpirationsPending()[st.CachedExpirationsNextProcEpoch()]
+		queue, found := st.CachedExpirationsPending[st.CachedExpirationsNextProcEpoch]
 		if !found {
-			st.Impl().CachedExpirationsNextProcEpoch_ += 1
+			st.CachedExpirationsNextProcEpoch += 1
 			continue
 		}
 
@@ -293,7 +294,7 @@ func (a *StorageMarketActor) OnEpochTickEnd(rt Runtime) {
 				break
 			}
 			numDequeued += 1
-			if _, found := st.Deals()[dealID]; found {
+			if _, found := st.Deals[dealID]; found {
 				// May have already processed expiration, independently, via _rtUpdatePendingDealStatesForParty.
 				// If not, add it to the list to be processed.
 				extractedDealIDs = append(extractedDealIDs, dealID)
@@ -305,14 +306,14 @@ func (a *StorageMarketActor) OnEpochTickEnd(rt Runtime) {
 			break
 		}
 
-		delete(st.CachedExpirationsPending(), st.CachedExpirationsNextProcEpoch())
-		st.Impl().CachedExpirationsNextProcEpoch_ += 1
+		delete(st.CachedExpirationsPending, st.CachedExpirationsNextProcEpoch)
+		st.CachedExpirationsNextProcEpoch += 1
 	}
 
 	amountSlashedTotal := st._updatePendingDealStates(extractedDealIDs, rt.CurrEpoch())
 
 	// Reset for next epoch.
-	st.Impl().CurrEpochNumDealsPublished_ = 0
+	st.CurrEpochNumDealsPublished = 0
 
 	UpdateRelease(rt, h, st)
 
@@ -323,14 +324,14 @@ func (a *StorageMarketActor) Constructor(rt Runtime) {
 	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr)
 	h := rt.AcquireState()
 
-	st := &StorageMarketActorState_I{
-		Deals_:                          DealsAMT_Empty(),
-		EscrowTable_:                    actor_util.BalanceTableHAMT_Empty(),
-		LockedReqTable_:                 actor_util.BalanceTableHAMT_Empty(),
-		NextID_:                         abi.DealID(0),
-		CachedDealIDsByParty_:           CachedDealIDsByPartyHAMT_Empty(),
-		CachedExpirationsPending_:       CachedExpirationsPendingHAMT_Empty(),
-		CachedExpirationsNextProcEpoch_: abi.ChainEpoch(0),
+	st := StorageMarketActorState{
+		Deals:                          DealsAMT_Empty(),
+		EscrowTable:                    actor_util.BalanceTableHAMT_Empty(),
+		LockedReqTable:                 actor_util.BalanceTableHAMT_Empty(),
+		NextID:                         abi.DealID(0),
+		CachedDealIDsByParty:           CachedDealIDsByPartyHAMT_Empty(),
+		CachedExpirationsPending:       CachedExpirationsPendingHAMT_Empty(),
+		CachedExpirationsNextProcEpoch: abi.ChainEpoch(0),
 	}
 
 	UpdateRelease(rt, h, st)
