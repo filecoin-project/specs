@@ -46,13 +46,21 @@ Different uses of randomness require randomness seeds predicated on a variety of
 - `SurprisePoStSelectMiners` -- uses ticket and epoch number
 ...
 
-In all cases, a ticket is used as the base of randomness (see {{<sref tickets>}}). In order to make randomness seed creation uniform, the protocol derives all such seeds in the same way, as follows (also see {{<sref tickets>}}):
+In all cases, a ticket is used as the base of randomness (see {{<sref tickets>}}), as follows:
 ```text
- For a given ticket's randomness ticket_randomness:
+buffer = Bytes{}
+buffer.append(IntToLittleEndianBytes(TicketDrawingDST))
+buffer.append(ticket.Output())
+buffer.append(IntToLittleEndianBytes(epochNumber))
+randomness = SHA256(buffer)
+```
+
+Some randomness seeds need extra entropy in order to ensure values remain unique across miners and use cases. In such cases, the protocol derives such seeds as follows (also see {{<sref tickets>}}):
+```text
+ For a given ticket's randomness `ticket_randomness`:
 
 buffer = Bytes{}
-buffer.append(IntToBigEndianBytes(AppropriateDST))
-buffer.append(-1) // a flag to be used in cases where FIL might need longer randomness outputs. Currently unused
+buffer.append(IntToLittleEndianBytes(AppropriateDST))
 buffer.append(ticket_randomness)
 buffer.append(other needed serialized inputs)
 

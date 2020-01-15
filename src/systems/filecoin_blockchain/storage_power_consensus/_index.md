@@ -58,8 +58,6 @@ Each of these ticket uses may require drawing tickets at different chain epochs,
 
 In Filecoin, every block header contains a single ticket.
 
-You can find the Ticket data structure {{<sref data_structures "here">}}.
-
 ### Comparing Tickets in a Tipset
 
 Whenever comparing tickets is evoked in Filecoin, for instance when discussing selecting the "min ticket" in a Tipset, the comparison is that of the little endian representation of the ticket's VFOutput bytes.
