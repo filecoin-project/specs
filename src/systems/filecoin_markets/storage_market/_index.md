@@ -1,6 +1,6 @@
 ---
 menuTitle: Storage Market
-statusIcon: 🔁
+statusIcon: ✅
 title: "Storage Market in Filecoin"
 entries:
 - storage_deal
