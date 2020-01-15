@@ -61,7 +61,7 @@ func _registerBuiltinActors() {
 	RegisterActor(builtin.CronActorCodeID, cron)
 	RegisterActor(builtin.AccountActorCodeID, &accact.AccountActor{})
 	RegisterActor(builtin.StoragePowerActorCodeID, &spowact.StoragePowerActor{})
-	RegisterActor(builtin.StorageMarketActorCodeID, &smarkact.StorageMarketActorCode_I{})
+	RegisterActor(builtin.StorageMarketActorCodeID, &smarkact.StorageMarketActor{})
 
 	// wire in CRON actions.
 	// TODO: move this to CronActor's constructor method
