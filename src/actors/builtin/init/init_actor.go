@@ -18,6 +18,36 @@ type Bytes = abi.Bytes
 
 var AssertMsg = autil.AssertMsg
 
+type InitActorState struct {
+	// responsible for create new actors
+	AddressMap  map[addr.Address]abi.ActorID
+	NextID      abi.ActorID
+	NetworkName string
+}
+
+func (s *InitActorState) ResolveAddress(address addr.Address) addr.Address {
+	actorID, ok := s.AddressMap[address]
+	if ok {
+		idAddr, err := addr.NewIDAddress(uint64(actorID))
+		autil.Assert(err == nil)
+		return idAddr
+	}
+	return address
+}
+
+func (s *InitActorState) MapAddressToNewID(address addr.Address) addr.Address {
+	actorID := s.NextID
+	s.NextID++
+	s.AddressMap[address] = actorID
+	idAddr, err := addr.NewIDAddress(uint64(actorID))
+	autil.Assert(err == nil)
+	return idAddr
+}
+
+func (st *InitActorState) CID() cid.Cid {
+	panic("TODO")
+}
+
 type InitActor struct{}
 
 func (a *InitActor) Constructor(rt Runtime) InvocOutput {
@@ -78,44 +108,6 @@ func (a *InitActor) Exec(rt Runtime, execCodeID abi.ActorCodeID, constructorPara
 //	Release(rt, h, st)
 //	return rt.ValueReturn(Bytes(addr.Serialize_ActorID(actorID)))
 //}
-
-type InitActorState struct {
-	// responsible for create new actors
-	AddressMap  map[addr.Address]abi.ActorID
-	NextID      abi.ActorID
-	NetworkName string
-}
-
-func (s *InitActorState) ResolveAddress(address addr.Address) addr.Address {
-	actorID, ok := s.AddressMap[address]
-	if ok {
-		idAddr, err := addr.NewIDAddress(uint64(actorID))
-		autil.Assert(err == nil)
-		return idAddr
-	}
-	return address
-}
-
-func (s *InitActorState) MapAddressToNewID(address addr.Address) addr.Address {
-	actorID := s.NextID
-	s.NextID++
-	s.AddressMap[address] = actorID
-	idAddr, err := addr.NewIDAddress(uint64(actorID))
-	autil.Assert(err == nil)
-	return idAddr
-}
-
-func (st *InitActorState) CID() cid.Cid {
-	panic("TODO")
-}
-
-func Deserialize_InitActorState(Bytes) (InitActorState, error) {
-	panic("TODO")
-}
-
-func Deserialize_InitActorState_Assert(Bytes) InitActorState {
-	panic("TODO")
-}
 
 func _codeIDSupportsExec(callerCodeID abi.ActorCodeID, execCodeID abi.ActorCodeID) bool {
 	if execCodeID == builtin.AccountActorCodeID {
