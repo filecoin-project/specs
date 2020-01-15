@@ -40,7 +40,7 @@ func (pg *PoStGenerator_I) CreateElectionPoStProof(randomness sector.PoStRandomn
 	return filproofs.CreateElectionPoStProof(pg.PoStCfg(), privateProofs, randomness)
 }
 
-func (pg *PoStGenerator_I) CreateSurprisePoStProof(postCfg sector.PoStCfg, randomness sector.PoStRandomness, witness sector.PoStWitness) []sector.PoStProof {
+func (pg *PoStGenerator_I) CreateSurprisePoStProof(postCfg sector.PoStInstanceCfg, randomness sector.PoStRandomness, witness sector.PoStWitness) []sector.PoStProof {
 	var privateProofs []sector.PrivatePoStCandidateProof
 
 	for _, candidate := range witness.Candidates() {

@@ -291,7 +291,6 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 
 	pvInfo := sector.PoStVerifyInfo_I{
 		OnChain_:    onChainInfo,
-		PoStCfg_:    postCfg,
 		Randomness_: onChainInfo.Randomness(),
 	}
 
