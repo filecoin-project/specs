@@ -20,45 +20,52 @@ var IMPL_FINISH = autil.IMPL_FINISH
 var IMPL_TODO = autil.IMPL_TODO
 var TODO = autil.TODO
 
-////////////////////////////////////////////////////////////////////////////////
-// Boilerplate
-////////////////////////////////////////////////////////////////////////////////
+type VestingFunction int64
 
-func (a *RewardActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, RewardActorState) {
-	h := rt.AcquireState()
-	stateCID := cid.Cid(h.Take())
-	var state RewardActorState_I
-	if !rt.IpldGet(stateCID, &state) {
-		rt.AbortAPI("state not found")
-	}
-	return h, &state
-}
-func UpdateReleaseRewardActorState(rt Runtime, h vmr.ActorStateHandle, st RewardActorState) {
-	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
-	h.UpdateRelease(newCID)
-}
-func (st *RewardActorState_I) CID() cid.Cid {
-	panic("TODO")
+const (
+	None VestingFunction = iota
+	Linear
+	// TODO: potential options
+	// PieceWise
+	// Quadratic
+	// Exponential
+)
+
+type Reward struct {
+	VestingFunction
+	StartEpoch      abi.ChainEpoch
+	EndEpoch        abi.ChainEpoch
+	Value           abi.TokenAmount
+	AmountWithdrawn abi.TokenAmount
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-func (r *Reward_I) AmountVested(elapsedEpoch abi.ChainEpoch) abi.TokenAmount {
-	switch r.VestingFunction() {
-	case VestingFunction_None:
-		return r.Value()
-	case VestingFunction_Linear:
+func (r *Reward) AmountVested(elapsedEpoch abi.ChainEpoch) abi.TokenAmount {
+	switch r.VestingFunction {
+	case None:
+		return r.Value
+	case Linear:
 		TODO() // BigInt
-		vestedProportion := math.Max(1.0, float64(elapsedEpoch)/float64(r.StartEpoch()-r.EndEpoch()))
-		return abi.TokenAmount(uint64(r.Value()) * uint64(vestedProportion))
+		vestedProportion := math.Max(1.0, float64(elapsedEpoch)/float64(r.StartEpoch-r.EndEpoch))
+		return abi.TokenAmount(uint64(r.Value) * uint64(vestedProportion))
 	default:
 		return abi.TokenAmount(0)
 	}
 }
 
-func (st *RewardActorState_I) _withdrawReward(rt vmr.Runtime, ownerAddr addr.Address) abi.TokenAmount {
+// ownerAddr to a collection of Reward
+// TODO: AMT
+type RewardBalanceAMT map[addr.Address][]Reward
 
-	rewards, found := st.RewardMap()[ownerAddr]
+type RewardActorState struct {
+	RewardMap RewardBalanceAMT
+}
+
+func (st *RewardActorState) CID() cid.Cid {
+	panic("TODO")
+}
+
+func (st *RewardActorState) _withdrawReward(rt vmr.Runtime, ownerAddr addr.Address) abi.TokenAmount {
+	rewards, found := st.RewardMap[ownerAddr]
 	if !found {
 		rt.AbortStateMsg("ra._withdrawReward: ownerAddr not found in RewardMap.")
 	}
@@ -67,36 +74,60 @@ func (st *RewardActorState_I) _withdrawReward(rt vmr.Runtime, ownerAddr addr.Add
 	indicesToRemove := make([]int, len(rewards))
 
 	for i, r := range rewards {
-		elapsedEpoch := rt.CurrEpoch() - r.StartEpoch()
+		elapsedEpoch := rt.CurrEpoch() - r.StartEpoch
 		unlockedReward := r.AmountVested(elapsedEpoch)
-		withdrawableReward := unlockedReward - r.AmountWithdrawn()
+		withdrawableReward := unlockedReward - r.AmountWithdrawn
 
 		if withdrawableReward < 0 {
 			rt.AbortStateMsg("ra._withdrawReward: negative withdrawableReward.")
 		}
 
-		r.Impl().AmountWithdrawn_ = unlockedReward // modify rewards in place
+		r.AmountWithdrawn = unlockedReward // modify rewards in place
 		rewardToWithdrawTotal += withdrawableReward
 
-		if r.AmountWithdrawn() == r.Value() {
+		if r.AmountWithdrawn == r.Value {
 			indicesToRemove = append(indicesToRemove, i)
 		}
 	}
 
 	updatedRewards := removeIndices(rewards, indicesToRemove)
-	st.RewardMap()[ownerAddr] = updatedRewards
+	st.RewardMap[ownerAddr] = updatedRewards
 
 	return rewardToWithdrawTotal
 }
 
-func (a *RewardActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
-	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr)
+type RewardActor struct{}
 
+func (a *RewardActor) Constructor(rt vmr.Runtime) InvocOutput {
+	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr)
 	// initialize Reward Map with investor accounts
 	panic("TODO")
 }
 
-func (a *RewardActorCode_I) AwardBlockReward(
+func (a *RewardActor) State(rt Runtime) (vmr.ActorStateHandle, RewardActorState) {
+	h := rt.AcquireState()
+	stateCID := cid.Cid(h.Take())
+	var state RewardActorState
+	if !rt.IpldGet(stateCID, &state) {
+		rt.AbortAPI("state not found")
+	}
+	return h, state
+}
+
+func (a *RewardActor) WithdrawReward(rt vmr.Runtime) {
+	vmr.RT_ValidateImmediateCallerIsSignable(rt)
+	ownerAddr := rt.ImmediateCaller()
+
+	h, st := a.State(rt)
+
+	// withdraw available funds from RewardMap
+	withdrawableReward := st._withdrawReward(rt, ownerAddr)
+	UpdateReleaseRewardActorState(rt, h, st)
+
+	rt.SendFunds(ownerAddr, withdrawableReward)
+}
+
+func (a *RewardActor) AwardBlockReward(
 	rt vmr.Runtime,
 	miner addr.Address,
 	penalty abi.TokenAmount,
@@ -129,34 +160,26 @@ func (a *RewardActorCode_I) AwardBlockReward(
 	h, st := a.State(rt)
 	if actualReward > 0 {
 		// put Reward into RewardMap
-		newReward := &Reward_I{
-			StartEpoch_:      rt.CurrEpoch(),
-			EndEpoch_:        rt.CurrEpoch(),
-			Value_:           actualReward,
-			AmountWithdrawn_: abi.TokenAmount(0),
-			VestingFunction_: VestingFunction_None,
+		newReward := &Reward{
+			StartEpoch:      rt.CurrEpoch(),
+			EndEpoch:        rt.CurrEpoch(),
+			Value:           actualReward,
+			AmountWithdrawn: abi.TokenAmount(0),
+			VestingFunction: None,
 		}
-		rewards, found := st.RewardMap()[miner]
+		rewards, found := st.RewardMap[miner]
 		if !found {
 			rewards = make([]Reward, 0)
 		}
-		rewards = append(rewards, newReward)
-		st.Impl().RewardMap_[miner] = rewards
+		rewards = append(rewards, *newReward)
+		st.RewardMap[miner] = rewards
 	}
 	UpdateReleaseRewardActorState(rt, h, st)
 }
 
-func (a *RewardActorCode_I) WithdrawReward(rt vmr.Runtime) {
-	vmr.RT_ValidateImmediateCallerIsSignable(rt)
-	ownerAddr := rt.ImmediateCaller()
-
-	h, st := a.State(rt)
-
-	// withdraw available funds from RewardMap
-	withdrawableReward := st._withdrawReward(rt, ownerAddr)
-	UpdateReleaseRewardActorState(rt, h, st)
-
-	rt.SendFunds(ownerAddr, withdrawableReward)
+func UpdateReleaseRewardActorState(rt Runtime, h vmr.ActorStateHandle, st RewardActorState) {
+	newCID := actor.ActorSubstateCID(rt.IpldPut(&st))
+	h.UpdateRelease(newCID)
 }
 
 func removeIndices(rewards []Reward, indices []int) []Reward {
