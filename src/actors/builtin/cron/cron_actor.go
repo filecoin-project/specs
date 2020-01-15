@@ -10,6 +10,7 @@ import (
 type CronActorState struct{}
 
 type CronActor struct {
+	// TODO move Entries into the CronActorState struct
 	Entries []CronTableEntry
 }
 
