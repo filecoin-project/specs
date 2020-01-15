@@ -57,7 +57,7 @@ func _registerBuiltinActors() {
 
 	cron := &cronact.CronActorCode_I{}
 
-	RegisterActor(builtin.InitActorCodeID, &initact.InitActorCode_I{})
+	RegisterActor(builtin.InitActorCodeID, &initact.InitActor{})
 	RegisterActor(builtin.CronActorCodeID, cron)
 	RegisterActor(builtin.AccountActorCodeID, &accact.AccountActorCode_I{})
 	RegisterActor(builtin.StoragePowerActorCodeID, &spowact.StoragePowerActorCode_I{})
