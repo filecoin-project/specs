@@ -11,7 +11,6 @@ import (
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	serde "github.com/filecoin-project/specs/actors/serde"
 	autil "github.com/filecoin-project/specs/actors/util"
-	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 )
 
@@ -50,7 +49,7 @@ func (a *StorageMinerActorCode_I) OnSurprisePoStChallenge(rt Runtime) {
 	err := rt.CurrReceiver().MarshalCBOR(&curRecBuf)
 	autil.Assert(err == nil)
 
-	randomnessK := rt.GetRandomness(rt.CurrEpoch() - node_base.SPC_LOOKBACK_POST)
+	randomnessK := rt.GetRandomness(rt.CurrEpoch() - builtin.SPC_LOOKBACK_POST)
 	challengedSectorsRandomness := crypto.DeriveRandWithMinerAddr(crypto.DomainSeparationTag_SurprisePoStSampleSectors, randomnessK, rt.CurrReceiver())
 
 	challengedSectors := _surprisePoStSampleChallengedSectors(
@@ -164,7 +163,7 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info SectorPreComm
 	UpdateRelease(rt, h, st)
 
 	// Request deferred Cron check for PreCommit expiry check.
-	expiryBound := rt.CurrEpoch() + node_base.MAX_PROVE_COMMIT_SECTOR_EPOCH + 1
+	expiryBound := rt.CurrEpoch() + builtin.MAX_PROVE_COMMIT_SECTOR_EPOCH + 1
 	a._rtEnrollCronEvent(rt, expiryBound, []abi.SectorNumber{info.SectorNumber()})
 
 	if info.Expiration() <= rt.CurrEpoch() {
@@ -184,7 +183,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info SectorProve
 		rt.AbortArgMsg("Sector not valid or not in PreCommit state")
 	}
 
-	if rt.CurrEpoch() > preCommitSector.PreCommitEpoch()+node_base.MAX_PROVE_COMMIT_SECTOR_EPOCH || rt.CurrEpoch() < preCommitSector.PreCommitEpoch()+node_base.MIN_PROVE_COMMIT_SECTOR_EPOCH {
+	if rt.CurrEpoch() > preCommitSector.PreCommitEpoch()+builtin.MAX_PROVE_COMMIT_SECTOR_EPOCH || rt.CurrEpoch() < preCommitSector.PreCommitEpoch()+builtin.MIN_PROVE_COMMIT_SECTOR_EPOCH {
 		rt.AbortStateMsg("Invalid ProveCommitSector epoch")
 	}
 
@@ -442,7 +441,7 @@ func (a *StorageMinerActorCode_I) _rtCheckSectorExpiry(rt Runtime, sectorNumber 
 	}
 
 	if checkSector.State() == SectorState_PreCommit {
-		if rt.CurrEpoch()-checkSector.PreCommitEpoch() > node_base.MAX_PROVE_COMMIT_SECTOR_EPOCH {
+		if rt.CurrEpoch()-checkSector.PreCommitEpoch() > builtin.MAX_PROVE_COMMIT_SECTOR_EPOCH {
 			a._rtDeleteSectorEntry(rt, sectorNumber)
 			rt.SendFunds(builtin.BurntFundsActorAddr, checkSector.PreCommitDeposit())
 		}
@@ -627,7 +626,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 	// 	rt.AbortStateMsg("Invalid Surprise PoSt. Tickets do not meet target.")
 	// }
 
-	randomnessK := rt.GetRandomness(challengeEpoch - node_base.SPC_LOOKBACK_POST)
+	randomnessK := rt.GetRandomness(challengeEpoch - builtin.SPC_LOOKBACK_POST)
 	// regenerate randomness used. The PoSt Verification below will fail if
 	// the same was not used to generate the proof
 	postRandomness := crypto.DeriveRandWithMinerAddr(crypto.DomainSeparationTag_SurprisePoStChallengeSeed, randomnessK, rt.CurrReceiver())

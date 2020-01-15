@@ -5,16 +5,16 @@ import (
 
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
+	builtin "github.com/filecoin-project/specs/actors/builtin"
 	crypto "github.com/filecoin-project/specs/actors/crypto"
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	autil "github.com/filecoin-project/specs/actors/util"
-	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 )
 
 func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(minerPower abi.StoragePower) bool {
 
 	// if miner is larger than min power requirement, we're set
-	if minerPower >= node_base.MIN_MINER_SIZE_STOR {
+	if minerPower >= builtin.MIN_MINER_SIZE_STOR {
 		return true
 	}
 
@@ -24,7 +24,7 @@ func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(mine
 	}
 
 	// else if none do, check whether in MIN_MINER_SIZE_TARG miners
-	if len(st.PowerTable()) <= node_base.MIN_MINER_SIZE_TARG {
+	if len(st.PowerTable()) <= builtin.MIN_MINER_SIZE_TARG {
 		// miner should pass
 		return true
 	}
@@ -35,7 +35,7 @@ func (st *StoragePowerActorState_I) _minerNominalPowerMeetsConsensusMinimum(mine
 		minerSizes = append(minerSizes, v)
 	}
 	sort.Slice(minerSizes, func(i, j int) bool { return int(i) > int(j) })
-	return minerPower >= minerSizes[node_base.MIN_MINER_SIZE_TARG-1]
+	return minerPower >= minerSizes[builtin.MIN_MINER_SIZE_TARG-1]
 }
 
 func (st *StoragePowerActorState_I) _slashPledgeCollateral(
@@ -210,7 +210,7 @@ func (st *StoragePowerActorState_I) _getPledgeSlashForConsensusFault(currPledge 
 func _getConsensusFaultSlasherReward(elapsedEpoch abi.ChainEpoch, collateralToSlash abi.TokenAmount) abi.TokenAmount {
 	TODO()
 	// BigInt Operation
-	// var growthRate = node_base.SLASHER_SHARE_GROWTH_RATE_NUM / node_base.SLASHER_SHARE_GROWTH_RATE_DENOM
+	// var growthRate = builtin.SLASHER_SHARE_GROWTH_RATE_NUM / builtin.SLASHER_SHARE_GROWTH_RATE_DENOM
 	// var multiplier = growthRate^elapsedEpoch
 	// var slasherProportion = min(INITIAL_SLASHER_SHARE * multiplier, 1.0)
 	// return collateralToSlash * slasherProportion
