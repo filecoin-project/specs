@@ -199,6 +199,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		SealedCID_:        preCommitSector.Info().SealedCID(),
 		SealEpoch_:        preCommitSector.Info().SealEpoch(),
 		InteractiveEpoch_: info.InteractiveEpoch(),
+		RegisteredProof_:  info.RegisteredProof(),
 		Proof_:            info.Proof(),
 		DealIDs_:          preCommitSector.Info().DealIDs(),
 		SectorNumber_:     preCommitSector.Info().SectorNumber(),
