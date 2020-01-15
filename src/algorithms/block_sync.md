@@ -27,11 +27,11 @@ type BlockSyncRequest struct {
 ```sh
 type Options enum {
     # Include only blocks
-    | Blocks 0
+    | Blocks 1
     # Include only messages
-    | Messages 1
+    | Messages 2
     # Include messages and blocks
-    | BlocksAndMessages 2
+    | BlocksAndMessages 3
 }
 
 type BlockSyncResponse struct {
