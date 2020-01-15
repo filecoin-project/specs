@@ -20,7 +20,7 @@ var IMPL_FINISH = autil.IMPL_FINISH
 var IMPL_TODO = autil.IMPL_TODO
 var TODO = autil.TODO
 
-type VestingFunction int
+type VestingFunction int64
 
 const (
 	None VestingFunction = iota
@@ -53,6 +53,7 @@ func (r *Reward) AmountVested(elapsedEpoch abi.ChainEpoch) abi.TokenAmount {
 }
 
 // ownerAddr to a collection of Reward
+// TODO: AMT
 type RewardBalanceAMT map[addr.Address][]Reward
 
 type RewardActorState struct {
