@@ -45,7 +45,7 @@ func LoadActor(id abi.ActorCodeID) (vmr.ActorCode, error) {
 
 // init is called in Go during initialization of a program.
 // this is an idiomatic way to do this. Implementations should approach this
-// howevery they wish. The point is to initialize a static registry with
+// however they wish. The point is to initialize a static registry with
 // built in pure types that have the code for each actor. Once we have
 // a way to load code from the StateTree, use that instead.
 func init() {
@@ -59,7 +59,7 @@ func _registerBuiltinActors() {
 
 	RegisterActor(builtin.InitActorCodeID, &initact.InitActorCode_I{})
 	RegisterActor(builtin.CronActorCodeID, cron)
-	RegisterActor(builtin.AccountActorCodeID, &accact.AccountActorCode_I{})
+	RegisterActor(builtin.AccountActorCodeID, &accact.AccountActor{})
 	RegisterActor(builtin.StoragePowerActorCodeID, &spowact.StoragePowerActorCode_I{})
 	RegisterActor(builtin.StorageMarketActorCodeID, &smarkact.StorageMarketActorCode_I{})
 
