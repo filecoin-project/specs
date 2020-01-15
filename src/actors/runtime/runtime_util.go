@@ -8,7 +8,6 @@ import (
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 )
 
 // TODO: most of this file doesn't need to be part of runtime, just generic actor shared code.

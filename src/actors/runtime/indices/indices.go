@@ -4,6 +4,7 @@ import (
 	abi "github.com/filecoin-project/specs/actors/abi"
 	actor_util "github.com/filecoin-project/specs/actors/util"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
+	"math/big"
 )
 
 var PARAM_FINISH = actor_util.PARAM_FINISH
@@ -76,13 +77,13 @@ func (inds *Indices_I) PledgeCollateralReq(minerNominalPower abi.StoragePower) a
 	panic("")
 }
 
-func (inds *Indices_I) SectorWeightProportion(minerActiveSectorWeight abi.SectorWeight) abi.SectorWeight {
+func (inds *Indices_I) SectorWeightProportion(minerActiveSectorWeight abi.SectorWeight) big.Int {
 	// return proportion of SectorWeight for miner
 	PARAM_FINISH()
 	panic("")
 }
 
-func (inds *Indices_I) PledgeCollateralProportion(minerPledgeCollateral abi.TokenAmount) abi.TokenAmount {
+func (inds *Indices_I) PledgeCollateralProportion(minerPledgeCollateral abi.TokenAmount) big.Int {
 	// return proportion of Pledge Collateral for miner
 	PARAM_FINISH()
 	panic("")
@@ -101,7 +102,7 @@ func (inds *Indices_I) StoragePower(
 
 func (inds *Indices_I) StoragePowerProportion(
 	minerStoragePower abi.StoragePower,
-) abi.StoragePower {
+) big.Int {
 	PARAM_FINISH()
 	panic("")
 }
