@@ -99,7 +99,6 @@ type MinerInfo struct {
 
     // Amount of space in each sector committed to the network by this miner.
     SectorSize              sector.SectorSize
-    RegisteredProof         sector.RegisteredProof
     SealPartitions          UVarint
     ElectionPoStPartitions  UVarint
     SurprisePoStPartitions  UVarint

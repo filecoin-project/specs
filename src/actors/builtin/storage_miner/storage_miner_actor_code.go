@@ -11,7 +11,6 @@ import (
 	serde "github.com/filecoin-project/specs/actors/serde"
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
@@ -606,9 +605,8 @@ func (a *StorageMinerActorCode_I) _rtNotifyMarketForTerminatedSectors(rt Runtime
 
 func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onChainInfo sector.OnChainSurprisePoStVerifyInfo) {
 	h, st := a.State(rt)
-	info := st.Info()
-
 	Assert(st.PoStState().Is_Challenged())
+	sectorSize := st.Info().SectorSize()
 	challengeEpoch := st.PoStState().As_Challenged().SurpriseChallengeEpoch()
 	challengedSectors := st.PoStState().As_Challenged().ChallengedSectors()
 
@@ -640,19 +638,14 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 
 	// Get public inputs
 
-	sectorSize := info.SectorSize()
-	postCfg := filproofs.SurprisePoStCfg(sectorSize)
-
 	pvInfo := sector.PoStVerifyInfo_I{
 		OnChain_:    onChainInfo,
 		Randomness_: sector.PoStRandomness(postRandomness),
 		// EligibleSectors_: FIXME: verification needs these.
 	}
 
-	pv := filproofs.MakeSurprisePoStVerifier(postCfg)
-
 	// Verify the PoSt Proof
-	isVerified := pv.VerifySurprisePoSt(&pvInfo)
+	isVerified := rt.Syscalls().VerifyPoSt(sectorSize, &pvInfo)
 
 	if !isVerified {
 		rt.AbortStateMsg("Surprise PoSt failed to verify")
@@ -683,9 +676,10 @@ func (a *StorageMinerActorCode_I) _rtVerifySealOrAbort(rt Runtime, onChainInfo s
 		totalPieceSize += pieceSize
 	}
 
-	unsealedCID, _ := filproofs.ComputeUnsealedSectorCIDFromPieceInfos(sectorSize, pieceInfos.Items())
-
-	sealCfg := sector.RegisteredProofInstance(info.RegisteredProof()).Cfg().As_SealCfg()
+	unsealedCID, err := rt.Syscalls().ComputeUnsealedSectorCID(sectorSize, pieceInfos.Items())
+	if err != nil {
+		rt.AbortStateMsg("invalid sector piece infos")
+	}
 
 	minerActorID, err := addr.IDFromAddress(rt.CurrReceiver())
 	if err != nil {
@@ -707,9 +701,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySealOrAbort(rt Runtime, onChainInfo s
 		UnsealedCID_:           unsealedCID,
 	}
 
-	sdr := filproofs.WinSDRParams(sealCfg)
-
-	isVerified := sdr.VerifySeal(&svInfo)
+	isVerified := rt.Syscalls().VerifySeal(sectorSize, &svInfo)
 
 	if !isVerified {
 		rt.AbortStateMsg("Sector seal failed to verify")
