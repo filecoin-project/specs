@@ -21,7 +21,7 @@ type ActorState struct {
     // Expected sequence number of the next message sent by this actor.
     // Initially zero, incremented when an account actor originates a top-level message.
     // Always zero for other abi.
-    CallSeqNum actor.CallSeqNum
+    CallSeqNum  actor.CallSeqNum
 }
 
 type ActorSystemStateCID cid.Cid
