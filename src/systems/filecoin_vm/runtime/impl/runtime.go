@@ -593,17 +593,17 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actstate.ActorSta
 func (rt *VMContext) _loadInitActorState() initact.InitActorState {
 	initState, ok := rt._globalStatePending.GetActor(builtin.InitActorAddr)
 	util.Assert(ok)
-	var initSubState initact.InitActorState_I
+	var initSubState initact.InitActorState
 	ok = rt.IpldGet(cid.Cid(initState.State()), &initSubState)
 	util.Assert(ok)
-	return &initSubState
+	return initSubState
 }
 
 func (rt *VMContext) _saveInitActorState(state initact.InitActorState) {
 	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
 	// than the receiver.
 	rt._rtAllocGas(gascost.UpdateActorSubstate)
-	rt._updateActorSubstateInternal(builtin.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
+	rt._updateActorSubstateInternal(builtin.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(&state)))
 }
 
 func (rt *VMContext) _saveAccountActorState(address addr.Address, state acctact.AccountActorState) {
