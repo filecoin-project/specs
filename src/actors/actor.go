@@ -22,6 +22,6 @@ type CallSeqNum int64
 
 type ActorSubstateCID cid.Cid
 
-func (x ActorSubstateCID) Ref() *ActorSubstateCID {
-	return &x
+func (x ActorSubstateCID) Ref() ActorSubstateCID {
+	return x
 }

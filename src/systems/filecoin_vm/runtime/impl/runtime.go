@@ -709,8 +709,10 @@ func (rt *VMContext) AcquireState() ActorStateHandle {
 
 	state, ok := rt._globalStatePending.GetActor(rt._actorAddress)
 	util.Assert(ok)
+
+	stateRef := state.State().Ref()
 	return &ActorStateHandle_I{
-		_initValue: state.State().Ref(),
+		_initValue: &stateRef,
 		_rt:        rt,
 	}
 }
