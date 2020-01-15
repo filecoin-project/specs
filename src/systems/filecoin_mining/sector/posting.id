@@ -2,10 +2,10 @@ type PartialTicket Bytes  // 32 bytes
 type ChallengeTicketsCommitment Bytes
 type PoStRandomness Bytes
 
-type PoStCfg struct {
-    InstanceCfg PoStInstanceCfg
-    ProofInstance
-}
+// type PoStCfg struct {
+//     InstanceCfg PoStInstanceCfg
+//     ProofInstance
+// }
 
 // New proof ProofInstances can add new cfg types if needed.
 type PoStInstanceCfg union {
@@ -35,7 +35,6 @@ type PoStType enum {
 
 // TODO: refactor these types to get rid of the squishy optional fields.
 type PoStVerifyInfo struct {
-    PoStCfg
     Randomness       PoStRandomness
     CommR            SealedSectorCID
     OnChain          OnChainPoStVerifyInfo
@@ -56,15 +55,18 @@ type OnChainPoStVerifyInfo interface {
 }
 
 type OnChainElectionPoStVerifyInfo struct {
-    Candidates  [PoStCandidate]
-    Proofs      [PoStProof]
-    Randomness  PoStRandomness
+    // There should be one RegisteredProof for each PoSt Candi
+    RegisteredProofs  [RegisteredProof]
+    Candidates        [PoStCandidate]
+    Proofs            [PoStProof]
+    Randomness        PoStRandomness
 }
 
 type OnChainSurprisePoStVerifyInfo struct {
-    Candidates  [PoStCandidate]
-    Proofs      [PoStProof]
-    CommT       ChallengeTicketsCommitment
+    RegisteredProof
+    Candidates       [PoStCandidate]
+    Proofs           [PoStProof]
+    CommT            ChallengeTicketsCommitment
 }
 
 type PoStWitness struct {
@@ -72,8 +74,7 @@ type PoStWitness struct {
 }
 
 type PoStProof struct {//<curve, system> {
-    Type PoStType
-    ProofInstance
+    ProofBytes Bytes
 }
 
 type PrivatePoStCandidateProof struct {
