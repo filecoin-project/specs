@@ -3,10 +3,8 @@ package storage_market
 import (
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
-	vmr "github.com/filecoin-project/specs/actors/runtime"
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	actor_util "github.com/filecoin-project/specs/actors/util"
-	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 )
 
@@ -277,17 +275,12 @@ func _rtDealProposalIsInternallyValid(rt Runtime, dealP deal.StorageDealProposal
 	}
 
 	IMPL_FINISH()
-	// Get signature public key of client account actor.
-	var pk filcrypto.PublicKey
-
-	IMPL_FINISH()
 	// Determine which subset of DealProposal to use as the message to be signed by the client.
-	var m filcrypto.Message
+	var m []byte
 
 	// Note: we do not verify the provider signature here, since this is implicit in the
 	// authenticity of the on-chain message publishing the deal.
-	sig := dealP.ClientSignature()
-	sigVerified := vmr.RT_VerifySignature(rt, pk, sig, m)
+	sigVerified := rt.Syscalls().VerifySignature(dealP.ClientSignature().Sig(), dealP.Client(), m)
 	if !sigVerified {
 		return false
 	}

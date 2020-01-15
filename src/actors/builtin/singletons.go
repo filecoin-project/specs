@@ -2,7 +2,7 @@ package builtin
 
 import (
 	addr "github.com/filecoin-project/go-address"
-	util "github.com/filecoin-project/specs/util"
+	autil "github.com/filecoin-project/specs/actors/util"
 )
 
 // Addresses for singleton system actors.
@@ -22,6 +22,6 @@ const FirstNonSingletonActorId = 100
 
 func mustMakeAddress(id uint64) addr.Address {
 	address, err := addr.NewIDAddress(id)
-	util.Assert(err == nil)
+	autil.AssertNoError(err)
 	return address
 }

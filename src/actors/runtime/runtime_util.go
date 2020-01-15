@@ -7,7 +7,6 @@ import (
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	autil "github.com/filecoin-project/specs/actors/util"
-	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 )
 
 // TODO: most of this file doesn't need to be part of runtime, just generic actor shared code.
@@ -132,9 +131,4 @@ func RT_ConfirmFundsReceiptOrAbort_RefundRemainder(rt Runtime, fundsRequired abi
 	if rt.ValueReceived() > fundsRequired {
 		rt.SendFunds(rt.ImmediateCaller(), rt.ValueReceived()-fundsRequired)
 	}
-}
-
-func RT_VerifySignature(rt Runtime, pk filcrypto.PublicKey, sig filcrypto.Signature, m filcrypto.Message) bool {
-	ret := rt.Compute(ComputeFunctionID_VerifySignature, []interface{}{pk, sig, m})
-	return ret.(bool)
 }

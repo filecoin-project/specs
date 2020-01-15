@@ -7,10 +7,10 @@ import (
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
+	crypto "github.com/filecoin-project/specs/actors/crypto"
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	serde "github.com/filecoin-project/specs/actors/serde"
 	autil "github.com/filecoin-project/specs/actors/util"
-	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 )
@@ -51,7 +51,7 @@ func (a *StorageMinerActorCode_I) OnSurprisePoStChallenge(rt Runtime) {
 	autil.Assert(err == nil)
 
 	randomnessK := rt.GetRandomness(rt.CurrEpoch() - node_base.SPC_LOOKBACK_POST)
-	challengedSectorsRandomness := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_SurprisePoStSampleSectors, randomnessK, rt.CurrReceiver())
+	challengedSectorsRandomness := crypto.DeriveRandWithMinerAddr(crypto.DomainSeparationTag_SurprisePoStSampleSectors, randomnessK, rt.CurrReceiver())
 
 	challengedSectors := _surprisePoStSampleChallengedSectors(
 		challengedSectorsRandomness,
@@ -630,7 +630,7 @@ func (a *StorageMinerActorCode_I) _rtVerifySurprisePoStOrAbort(rt Runtime, onCha
 	randomnessK := rt.GetRandomness(challengeEpoch - node_base.SPC_LOOKBACK_POST)
 	// regenerate randomness used. The PoSt Verification below will fail if
 	// the same was not used to generate the proof
-	postRandomness := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_SurprisePoStChallengeSeed, randomnessK, rt.CurrReceiver())
+	postRandomness := crypto.DeriveRandWithMinerAddr(crypto.DomainSeparationTag_SurprisePoStChallengeSeed, randomnessK, rt.CurrReceiver())
 
 	UpdateRelease(rt, h, st)
 
