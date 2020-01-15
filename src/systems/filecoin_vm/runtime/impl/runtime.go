@@ -16,6 +16,7 @@ import (
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
+	actstate "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
@@ -205,7 +206,7 @@ func (rt *VMContext) CreateActor(codeID abi.ActorCodeID, address addr.Address) {
 
 func (rt *VMContext) _createActor(codeID abi.ActorCodeID, address addr.Address) {
 	// Create empty actor state.
-	actorState := &actor.ActorState{
+	actorState := &actstate.ActorState_I{
 		CodeID_:     codeID,
 		State_:      actor.ActorSubstateCID(EmptyCBOR),
 		Balance_:    abi.TokenAmount(0),
@@ -213,7 +214,7 @@ func (rt *VMContext) _createActor(codeID abi.ActorCodeID, address addr.Address) 
 	}
 
 	// Put it in the state tree.
-	actorStateCID := actor.ActorSystemStateCID(rt.IpldPut(actorState))
+	actorStateCID := actstate.ActorSystemStateCID(rt.IpldPut(actorState))
 	rt._updateActorSystemStateInternal(address, actorStateCID)
 
 	rt._rtAllocGas(gascost.ExecNewActor)
@@ -233,7 +234,7 @@ func (rt *VMContext) _deleteActor(address addr.Address) {
 	rt._rtAllocGas(gascost.DeleteActor)
 }
 
-func (rt *VMContext) _updateActorSystemStateInternal(actorAddress addr.Address, newStateCID actor.ActorSystemStateCID) {
+func (rt *VMContext) _updateActorSystemStateInternal(actorAddress addr.Address, newStateCID actstate.ActorSystemStateCID) {
 	newGlobalStatePending, err := rt._globalStatePending.Impl().WithActorSystemState(rt._actorAddress, newStateCID)
 	if err != nil {
 		panic("Error in runtime implementation: failed to update actor system state")
@@ -559,7 +560,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 // If it doesn't exist, and the message is a simple value send to a pubkey-style address,
 // creates the receiver as an account actor in the returned state.
 // Aborts otherwise.
-func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState, addr.Address) {
+func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actstate.ActorState, addr.Address) {
 	// Resolve the target address via the InitActor, and attempt to load state.
 	initSubState := rt._loadInitActorState()
 	targetIdAddr := initSubState.ResolveAddress(targetRaw)

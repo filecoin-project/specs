@@ -1,6 +1,6 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
 import addr "github.com/filecoin-project/go-address"
-import actor "github.com/filecoin-project/specs/actors"
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 
 import cid "github.com/ipfs/go-cid"
 

@@ -13,6 +13,7 @@ import (
 	serde "github.com/filecoin-project/specs/actors/serde"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
+	actstate "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	vmri "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/impl"
@@ -275,7 +276,7 @@ func _applyMessageBuiltinAssert(store ipld.GraphStore, tree st.StateTree, chain 
 	return retTree
 }
 
-func _applyMessageInternal(store ipld.GraphStore, tree st.StateTree, chain chain.Chain, sender actor.ActorState, senderAddr addr.Address, invoc vmr.InvocInput,
+func _applyMessageInternal(store ipld.GraphStore, tree st.StateTree, chain chain.Chain, sender actstate.ActorState, senderAddr addr.Address, invoc vmr.InvocInput,
 	gasRemainingInit msg.GasAmount, topLevelBlockWinner addr.Address) (vmri.MessageReceipt, st.StateTree) {
 
 	rt := vmri.VMContext_Make(
