@@ -1,7 +1,0 @@
-import addr "github.com/filecoin-project/go-address"
-
-type AccountActorCode struct {}
-
-type AccountActorState struct {
-    Address addr.Address
-}
