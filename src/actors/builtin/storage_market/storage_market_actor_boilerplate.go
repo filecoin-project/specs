@@ -5,7 +5,6 @@ import (
 	abi "github.com/filecoin-project/specs/actors/abi"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	autil "github.com/filecoin-project/specs/actors/util"
-	cid "github.com/ipfs/go-cid"
 )
 
 type BalanceTableHAMT = autil.BalanceTableHAMT
@@ -31,15 +30,6 @@ var IMPL_FINISH = autil.IMPL_FINISH
 var IMPL_TODO = autil.IMPL_TODO
 var TODO = autil.TODO
 
-func (a *StorageMarketActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, StorageMarketActorState) {
-	h := rt.AcquireState()
-	var state StorageMarketActorState_I
-	stateCID := cid.Cid(h.Take())
-	if !rt.IpldGet(stateCID, &state) {
-		rt.AbortAPI("state not found")
-	}
-	return h, &state
-}
 func Release(rt Runtime, h vmr.ActorStateHandle, st StorageMarketActorState) {
 	checkCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
 	h.Release(checkCID)
@@ -48,11 +38,6 @@ func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st StorageMarketActorStat
 	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
 	h.UpdateRelease(newCID)
 }
-func (st *StorageMarketActorState_I) CID() cid.Cid {
-	IMPL_FINISH()
-	panic("")
-}
-
 func DealsAMT_Empty() DealsAMT {
 	IMPL_FINISH()
 	panic("")
