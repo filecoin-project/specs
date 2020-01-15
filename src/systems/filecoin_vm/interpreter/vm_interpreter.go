@@ -2,7 +2,6 @@ package interpreter
 
 import (
 	addr "github.com/filecoin-project/go-address"
-	actor "github.com/filecoin-project/specs/actors"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	initact "github.com/filecoin-project/specs/actors/builtin/init"
@@ -285,7 +284,7 @@ func _applyMessageInternal(store ipld.GraphStore, tree st.StateTree, chain chain
 		senderAddr,
 		topLevelBlockWinner,
 		sender.CallSeqNum(),
-		actor.CallSeqNum(0),
+		actstate.CallSeqNum(0),
 		tree,
 		senderAddr,
 		abi.TokenAmount(0),

@@ -121,11 +121,11 @@ type VMContext struct {
 	_toplevelSender      addr.Address
 	_toplevelBlockWinner addr.Address
 	// Top-level call sequence number of the "From" actor in the initial on-chain message.
-	_toplevelSenderCallSeqNum actor.CallSeqNum
+	_toplevelSenderCallSeqNum actstate.CallSeqNum
 	// Sequence number representing the total number of calls (to any actor, any method)
 	// during the current top-level message execution.
 	// Note: resets with every top-level message, and therefore not necessarily monotonic.
-	_internalCallSeqNum actor.CallSeqNum
+	_internalCallSeqNum actstate.CallSeqNum
 	_valueReceived      abi.TokenAmount
 	_gasRemaining       msg.GasAmount
 	_numValidateCalls   int
@@ -137,8 +137,8 @@ func VMContext_Make(
 	chain chain.Chain,
 	toplevelSender addr.Address,
 	toplevelBlockWinner addr.Address,
-	toplevelSenderCallSeqNum actor.CallSeqNum,
-	internalCallSeqNum actor.CallSeqNum,
+	toplevelSenderCallSeqNum actstate.CallSeqNum,
+	internalCallSeqNum actstate.CallSeqNum,
 	globalState st.StateTree,
 	actorAddress addr.Address,
 	valueReceived abi.TokenAmount,
@@ -469,7 +469,7 @@ func _invokeMethodInternal(
 	actorCode vmr.ActorCode,
 	method abi.MethodNum,
 	params abi.MethodParams) (
-	ret InvocOutput, exitCode exitcode.ExitCode, internalCallSeqNumFinal actor.CallSeqNum) {
+	ret InvocOutput, exitCode exitcode.ExitCode, internalCallSeqNumFinal actstate.CallSeqNum) {
 
 	if method == builtin.MethodSend {
 		ret = vmr.InvocOutput_Make(nil)
