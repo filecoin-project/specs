@@ -1,4 +1,4 @@
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import actor "github.com/filecoin-project/specs/actors"
 import abi "github.com/filecoin-project/specs/actors/abi"
 import exitcode "github.com/filecoin-project/specs/actors/runtime/exitcode"
 import addr "github.com/filecoin-project/go-address"

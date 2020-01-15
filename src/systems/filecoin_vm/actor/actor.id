@@ -2,6 +2,7 @@
 // The VM uses this to execute abi.
 
 import abi "github.com/filecoin-project/specs/actors/abi"
+import actor "github.com/filecoin-project/specs/actors"
 import cid "github.com/ipfs/go-cid"
 
 // CallSeqNum is an invocation (Call) sequence (Seq) number (Num).
@@ -20,11 +21,6 @@ import cid "github.com/ipfs/go-cid"
 //
 type CallSeqNum UVarint
 
-// Code is a serialized object that contains the code for an Actor.
-// Until we accept external user-provided contracts, this is the
-// serialized code for the actor in the Filecoin Specification.
-type Code Bytes
-
 // Actor is a base computation object in the Filecoin VM. Similar
 // to Actors in the Actor Model (programming), or Objects in Object-
 // Oriented Programming, or Ethereum Contracts in the EVM.
@@ -34,7 +30,7 @@ type ActorState struct {
     // Identifies the code this actor executes.
     CodeID      abi.ActorCodeID
     // CID of the root of optional actor-specific sub-state.
-    State       ActorSubstateCID
+    State       actor.ActorSubstateCID
     // Balance of tokens held by this actor.
     Balance     abi.TokenAmount
     // Expected sequence number of the next message sent by this actor.
@@ -44,7 +40,6 @@ type ActorState struct {
 }
 
 type ActorSystemStateCID cid.Cid
-type ActorSubstateCID cid.Cid
 
 // ActorState represents the on-chain storage actors keep. This type is a
 // union of concrete types, for each of the Actors:
