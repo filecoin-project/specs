@@ -1,10 +1,7 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
 import autil "github.com/filecoin-project/specs/actors/util"
 import address "github.com/filecoin-project/go-address"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-import sealing "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import peer "github.com/libp2p/go-libp2p-core/peer"
 
 type MinerPoStState union {
@@ -18,7 +15,7 @@ type MinerPoStState union {
     // and as a result, the system has fallen back to proving storage via SurprisePoSt.
     Challenged struct {
         SurpriseChallengeEpoch  abi.ChainEpoch
-        ChallengedSectors       [sector.SectorNumber]
+        ChallengedSectors       [abi.SectorNumber]
         NumConsecutiveFailures  int
     }
 
@@ -39,7 +36,7 @@ type SectorState enum {
 
 type SectorOnChainInfo struct {
     State                       SectorState
-    Info                        sealing.SectorPreCommitInfo  // Also contains Expiration field.
+    Info                        SectorPreCommitInfo  // Also contains Expiration field.
     PreCommitDeposit            abi.TokenAmount
     PreCommitEpoch              abi.ChainEpoch
     ActivationEpoch             abi.ChainEpoch  // -1 if still in PreCommit state.
@@ -55,9 +52,25 @@ type SectorOnChainInfo struct {
     Is_TemporaryFault()         bool
 }
 
-type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
+type SectorPreCommitInfo struct {
+    SectorNumber  abi.SectorNumber
+    SealedCID     abi.SealedSectorCID  // CommR
+    SealEpoch     abi.ChainEpoch
+    DealIDs       abi.DealIDs
+    Expiration    abi.ChainEpoch
+}
 
-type SectorNumberSetHAMT {sector.SectorNumber: bool}
+type SectorProveCommitInfo struct {
+    SectorNumber      abi.SectorNumber
+    RegisteredProof   abi.RegisteredProof
+    Proof             abi.SealProof
+    InteractiveEpoch  abi.ChainEpoch
+    Expiration        abi.ChainEpoch
+}
+
+type SectorsAMT {abi.SectorNumber: SectorOnChainInfo}
+
+type SectorNumberSetHAMT {abi.SectorNumber: bool}
 
 // Balance of a StorageMinerActor should equal exactly the sum of PreCommit deposits
 // that are not yet returned or burned.
@@ -67,13 +80,13 @@ type StorageMinerActorState struct {
     ProvingSet  SectorNumberSetHAMT
     Info        MinerInfo
 
-    GetStorageWeightDescForSectorMaybe(sectorNumber sector.SectorNumber) (ret autil.SectorStorageWeightDesc, ok bool)
-    _getStorageWeightDescForSector(sectorNumber sector.SectorNumber) autil.SectorStorageWeightDesc
-    _getStorageWeightDescsForSectors(sectorNumbers [sector.SectorNumber]) [autil.SectorStorageWeightDesc]
+    GetStorageWeightDescForSectorMaybe(sectorNumber abi.SectorNumber) (ret autil.SectorStorageWeightDesc, ok bool)
+    _getStorageWeightDescForSector(sectorNumber abi.SectorNumber) autil.SectorStorageWeightDesc
+    _getStorageWeightDescsForSectors(sectorNumbers [abi.SectorNumber]) [autil.SectorStorageWeightDesc]
 
-    _getSectorDealIDsAssert(sectorNumber sector.SectorNumber) deal.DealIDs
+    _getSectorDealIDsAssert(sectorNumber abi.SectorNumber) abi.DealIDs
 
-    VerifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool
+    VerifySurprisePoStMeetsTargetReq(candidate abi.PoStCandidate) bool
 }
 
 type StorageMinerActorCode struct {
@@ -98,8 +111,7 @@ type MinerInfo struct {
     PeerId                  peer.ID
 
     // Amount of space in each sector committed to the network by this miner.
-    SectorSize              sector.SectorSize
-    InstanceCfg             sector.SealInstanceCfg
+    SectorSize              abi.SectorSize
     SealPartitions          UVarint
     ElectionPoStPartitions  UVarint
     SurprisePoStPartitions  UVarint

@@ -4966,8 +4966,7 @@ it will be created as an account actor.</p>
 	<span class="nx">serde</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/serde&#34;</span>
 	<span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 	<span class="nx">chain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain&#34;</span>
-	<span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-	<span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
+	<span class="nx">actstate</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 	<span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 	<span class="nx">gascost</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost&#34;</span>
 	<span class="nx">vmri</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/impl&#34;</span>
@@ -5230,7 +5229,7 @@ it will be created as an account actor.</p>
 	<span class="k">return</span> <span class="nx">retTree</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">_applyMessageInternal</span><span class="p">(</span><span class="nx">store</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">GraphStore</span><span class="p">,</span> <span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">chain</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">sender</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span><span class="p">,</span> <span class="nx">senderAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">invoc</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">,</span>
+<span class="kd">func</span> <span class="nf">_applyMessageInternal</span><span class="p">(</span><span class="nx">store</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">GraphStore</span><span class="p">,</span> <span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">chain</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">sender</span> <span class="nx">actstate</span><span class="p">.</span><span class="nx">ActorState</span><span class="p">,</span> <span class="nx">senderAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">invoc</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">,</span>
 	<span class="nx">gasRemainingInit</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">topLevelBlockWinner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmri</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">,</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="nx">rt</span> <span class="o">:=</span> <span class="nx">vmri</span><span class="p">.</span><span class="nf">VMContext_Make</span><span class="p">(</span>
@@ -5239,7 +5238,7 @@ it will be created as an account actor.</p>
 		<span class="nx">senderAddr</span><span class="p">,</span>
 		<span class="nx">topLevelBlockWinner</span><span class="p">,</span>
 		<span class="nx">sender</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
-		<span class="nx">actor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+		<span class="nx">actstate</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
 		<span class="nx">tree</span><span class="p">,</span>
 		<span class="nx">senderAddr</span><span class="p">,</span>
 		<span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
@@ -5289,7 +5288,7 @@ it will be created as an account actor.</p>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
 		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">,</span>
 		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">builtin</span><span class="p">.</span><span class="nx">RewardActorAddr</span><span class="p">,</span>
-		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_RewardActor_AwardBlockReward</span><span class="p">,</span>
+		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_RewardActor_AwardBlockReward</span><span class="p">,</span>
 		<span class="nx">Params_</span><span class="p">:</span>     <span class="nx">params</span><span class="p">,</span>
 		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">sysActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
 		<span class="nx">Value_</span><span class="p">:</span>      <span class="mi">0</span><span class="p">,</span>
@@ -5305,7 +5304,7 @@ it will be created as an account actor.</p>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
 		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">,</span>
 		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">minerActorAddr</span><span class="p">,</span>
-		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StorageMinerActor_OnVerifiedElectionPoSt</span><span class="p">,</span>
+		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_StorageMinerActor_OnVerifiedElectionPoSt</span><span class="p">,</span>
 		<span class="nx">Params_</span><span class="p">:</span>     <span class="kc">nil</span><span class="p">,</span>
 		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">sysActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
 		<span class="nx">Value_</span><span class="p">:</span>      <span class="mi">0</span><span class="p">,</span>
@@ -5321,7 +5320,7 @@ it will be created as an account actor.</p>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
 		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">,</span>
 		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">builtin</span><span class="p">.</span><span class="nx">CronActorAddr</span><span class="p">,</span>
-		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_CronActor_EpochTick</span><span class="p">,</span>
+		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_CronActor_EpochTick</span><span class="p">,</span>
 		<span class="nx">Params_</span><span class="p">:</span>     <span class="kc">nil</span><span class="p">,</span>
 		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">sysActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
 		<span class="nx">Value_</span><span class="p">:</span>      <span class="mi">0</span><span class="p">,</span>
@@ -5374,7 +5373,6 @@ it will be created as an account actor.</p>
 	<span class="nx">smarkact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_market&#34;</span>
 	<span class="nx">spowact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_power&#34;</span>
 	<span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
-	<span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
 <span class="p">)</span>
 
 <span class="kd">var</span> <span class="p">(</span>
@@ -5431,12 +5429,12 @@ it will be created as an account actor.</p>
 </span><span class="c1"></span>	<span class="c1">// TODO: move this to CronActor&#39;s constructor method
 </span><span class="c1"></span>	<span class="nx">cron</span><span class="p">.</span><span class="nx">Entries_</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Entries_</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">cronact</span><span class="p">.</span><span class="nx">CronTableEntry_I</span><span class="p">{</span>
 		<span class="nx">ToAddr_</span><span class="p">:</span>    <span class="nx">builtin</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
-		<span class="nx">MethodNum_</span><span class="p">:</span> <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_OnEpochTickEnd</span><span class="p">,</span>
+		<span class="nx">MethodNum_</span><span class="p">:</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_OnEpochTickEnd</span><span class="p">,</span>
 	<span class="p">})</span>
 
 	<span class="nx">cron</span><span class="p">.</span><span class="nx">Entries_</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Entries_</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">cronact</span><span class="p">.</span><span class="nx">CronTableEntry_I</span><span class="p">{</span>
 		<span class="nx">ToAddr_</span><span class="p">:</span>    <span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMarketActorAddr</span><span class="p">,</span>
-		<span class="nx">MethodNum_</span><span class="p">:</span> <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StorageMarketActor_OnEpochTickEnd</span><span class="p">,</span>
+		<span class="nx">MethodNum_</span><span class="p">:</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_StorageMarketActor_OnEpochTickEnd</span><span class="p">,</span>
 	<span class="p">})</span>
 <span class="p">}</span>
 </code></pre></div>

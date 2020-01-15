@@ -4807,40 +4807,15 @@ and serves to make storage conform to a set of expectations.</p>
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
+<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
-<span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
-<span class="kn">import</span> <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Bytes32</span> <span class="nx">Bytes</span>
 <span class="kd">type</span> <span class="nx">Commitment</span> <span class="nx">Bytes32</span>  <span class="c1">// TODO
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">UnsealedSectorCID</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
-<span class="kd">type</span> <span class="nx">SealedSectorCID</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
-
-<span class="c1">// SectorNumber is a numeric identifier for a sector. It is usually
-</span><span class="c1">// relative to a Miner.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorNumber</span> <span class="nx">UInt</span>
-
+</span><span class="c1"></span>
 <span class="kd">type</span> <span class="nx">FaultSet</span> <span class="nx">CompactSectorSet</span>
 <span class="kd">type</span> <span class="nx">StorageFaultType</span> <span class="kt">int</span>
-
-<span class="c1">// SectorSize indicates one of a set of possible sizes in the network.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorSize</span> <span class="nx">UInt</span>
-
-<span class="c1">// Ideally, SectorSize would be an enum
-</span><span class="c1">// type SectorSize enum {
-</span><span class="c1">//   1KiB = UInt 1024
-</span><span class="c1">//   1MiB = Uint 1048576
-</span><span class="c1">//   1GiB = Uint 1073741824
-</span><span class="c1">//   1TiB = Uint 1099511627776
-</span><span class="c1">//   1PiB = Uint 1125899906842624
-</span><span class="c1">// }
-</span><span class="c1"></span>
-<span class="c1">// TODO make sure this is globally unique
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorID</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Miner</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorID</span>
-    <span class="nx">Number</span>  <span class="nx">SectorNumber</span>
-<span class="p">}</span>
 
 <span class="c1">// SectorInDetail describes all the bits of information associated
 </span><span class="c1">// with each sector.
@@ -4849,11 +4824,11 @@ and serves to make storage conform to a set of expectations.</p>
 </span><span class="c1">//
 </span><span class="c1">// NOTE: do not use this struct. It is for illustrative purposes only.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorInDetail</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ID</span>    <span class="nx">SectorID</span>
-    <span class="nx">Size</span>  <span class="nx">SectorSize</span>
+    <span class="nx">ID</span>    <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span>
+    <span class="nx">Size</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span>
 
     <span class="nx">Unsealed</span> <span class="kd">struct</span> <span class="p">{</span>
-        <span class="nx">CID</span>     <span class="nx">UnsealedSectorCID</span>
+        <span class="nx">CID</span>     <span class="nx">abi</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span>
         <span class="nx">Deals</span>   <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">]</span>
         <span class="nx">Pieces</span>  <span class="p">[</span><span class="nx">piece</span><span class="p">.</span><span class="nx">Piece</span><span class="p">]</span>
         <span class="c1">// Pieces Tree&lt;Piece&gt; // some tree for proofs
@@ -4861,66 +4836,57 @@ and serves to make storage conform to a set of expectations.</p>
     <span class="p">}</span>
 
     <span class="nx">Sealed</span> <span class="kd">struct</span> <span class="p">{</span>
-        <span class="nx">CID</span> <span class="nx">SealedSectorCID</span>
+        <span class="nx">CID</span>              <span class="nx">abi</span><span class="p">.</span><span class="nx">SealedSectorCID</span>
         <span class="nx">Bytes</span>
-        <span class="nx">SealCfg</span>
+        <span class="nx">RegisteredProof</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
 <span class="c1">// SectorInfo is an object that gathers all the information miners know about their
 </span><span class="c1">// sectors. This is meant to be used for a local index.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ID</span>                  <span class="nx">SectorID</span>
+    <span class="nx">ID</span>                  <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span>
     <span class="nx">UnsealedInfo</span>        <span class="nx">UnsealedSectorInfo</span>
     <span class="nx">SealedInfo</span>          <span class="nx">SealedSectorInfo</span>
-    <span class="nx">SealVerifyInfo</span>
+    <span class="nx">SealVerifyInfo</span>      <span class="nx">abi</span><span class="p">.</span><span class="nx">SealVerifyInfo</span>
     <span class="nx">PersistentProofAux</span>
 <span class="p">}</span>
 
 <span class="c1">// UnsealedSectorInfo is an object that tracks the relevant data to keep in a sector
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">UnsealedSectorInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">UnsealedCID</span>  <span class="nx">UnsealedSectorCID</span>  <span class="c1">// CommD
-</span><span class="c1"></span>    <span class="nx">Size</span>         <span class="nx">SectorSize</span>
+    <span class="nx">UnsealedCID</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span>  <span class="c1">// CommD
+</span><span class="c1"></span>    <span class="nx">Size</span>         <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span>
     <span class="nx">PieceCount</span>   <span class="nx">UVarint</span>  <span class="c1">// number of pieces in this sector (can get it from len(Pieces) too)
 </span><span class="c1"></span>    <span class="nx">Pieces</span>       <span class="p">[</span><span class="nx">piece</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">]</span>  <span class="c1">// wont get externalized easy, -- it&#39;s big
-</span><span class="c1"></span>    <span class="nx">SealCfg</span>  <span class="c1">// this will be here as well. it&#39;s determined.
 </span><span class="c1"></span>    <span class="c1">// Deals       [deal.StorageDeal]
 </span><span class="c1"></span><span class="p">}</span>
 
 <span class="c1">// SealedSectorInfo keeps around information about a sector that has been sealed.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealedSectorInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">SealedCID</span>  <span class="nx">SealedSectorCID</span>
-    <span class="nx">Size</span>       <span class="nx">SectorSize</span>
-    <span class="nx">SealCfg</span>
+    <span class="nx">SealedCID</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">SealedSectorCID</span>
+    <span class="nx">Size</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span>
     <span class="nx">SealArgs</span>   <span class="nx">SealArguments</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">RegisteredProof</span> <span class="nx">enum</span> <span class="p">{</span>
-    <span class="nx">WinStackedDRG32GiBSeal</span>
-    <span class="nx">WinStackedDRG32GiBPoSt</span>
-    <span class="nx">StackedDRG32GiBSeal</span>
-    <span class="nx">StackedDRG32GiBPoSt</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">ProofRegistry</span> <span class="p">{</span><span class="nx">UInt</span><span class="p">:</span> <span class="nx">ProofInstance</span><span class="p">}</span>
+<span class="kd">type</span> <span class="nx">ProofRegistry</span> <span class="p">{</span><span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof</span><span class="p">:</span> <span class="nx">ProofInstance</span><span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ProofInstance</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ID</span>           <span class="nx">RegisteredProof</span>
+    <span class="nx">ID</span>           <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof</span>
     <span class="nx">Type</span>         <span class="nx">ProofType</span>
-    <span class="nx">Algorithm</span>    <span class="nx">ProofAlgorithm</span>
+    <span class="nx">Algorithm</span>    <span class="nx">abi</span><span class="p">.</span><span class="nx">ProofAlgorithm</span>
     <span class="nx">CircuitType</span>  <span class="nx">ConcreteCircuit</span>
+    <span class="nx">Partitions</span>   <span class="nx">UInt</span>
+    <span class="nx">Cfg</span>          <span class="nx">ProofCfg</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ProofCfg</span> <span class="nx">union</span> <span class="p">{</span>
+    <span class="nx">SealCfg</span>  <span class="nx">SealInstanceCfg</span>
+    <span class="nx">PoStCfg</span>  <span class="nx">PoStInstanceCfg</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ProofType</span> <span class="nx">enum</span> <span class="p">{</span>
     <span class="nx">SealProof</span>
     <span class="nx">PoStProof</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">ProofAlgorithm</span> <span class="nx">enum</span> <span class="p">{</span>
-    <span class="nx">StackedDRGSeal</span>
-    <span class="nx">WinStackedDRGSeal</span>
-    <span class="nx">StackedDRGPoSt</span>
-    <span class="nx">WinStackedDRGPoSt</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ConcreteCircuit</span> <span class="kd">struct</span> <span class="p">{</span>

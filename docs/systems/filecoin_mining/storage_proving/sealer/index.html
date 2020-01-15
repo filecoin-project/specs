@@ -4769,25 +4769,26 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
+<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
-<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
 
 <span class="kd">type</span> <span class="nx">SealInputs</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">SectorID</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
-    <span class="nx">SealCfg</span>       <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCfg</span>
-    <span class="nx">MinerID</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">RandomSeed</span>    <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span>
-    <span class="nx">UnsealedPath</span>  <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
-    <span class="nx">SealedPath</span>    <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
-    <span class="nx">DealIDs</span>       <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
+    <span class="nx">RegisteredProof</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof</span>  <span class="c1">// FIXME: Ensure this is provided.
+</span><span class="c1"></span>    <span class="nx">SectorID</span>         <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span>
+    <span class="nx">SealCfg</span>          <span class="nx">sector</span><span class="p">.</span><span class="nx">SealInstanceCfg</span>
+    <span class="nx">MinerID</span>          <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">RandomSeed</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">SealRandomness</span>
+    <span class="nx">UnsealedPath</span>     <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">SealedPath</span>       <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">DealIDs</span>          <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">CreateSealProofInputs</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">SectorID</span>               <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
-    <span class="nx">SealCfg</span>                <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCfg</span>
-    <span class="nx">InteractiveRandomSeed</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">InteractiveSealRandomness</span>
+    <span class="nx">SectorID</span>               <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span>
+    <span class="nx">SealCfg</span>                <span class="nx">sector</span><span class="p">.</span><span class="nx">SealInstanceCfg</span>
+    <span class="nx">InteractiveRandomSeed</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">InteractiveSealRandomness</span>
     <span class="nx">SealedPaths</span>            <span class="p">[</span><span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">]</span>
     <span class="nx">SealOutputs</span>
 <span class="p">}</span>
@@ -4797,7 +4798,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">CreateSealProofOutputs</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">SealInfo</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SealVerifyInfo</span>
+    <span class="nx">SealInfo</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">SealVerifyInfo</span>
     <span class="nx">ProofAux</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PersistentProofAux</span>
 <span class="p">}</span>
 

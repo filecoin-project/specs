@@ -11,8 +11,6 @@ import (
 	serde "github.com/filecoin-project/specs/actors/serde"
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 )
 
@@ -64,14 +62,14 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Add
 	rt.SendFunds(recipientAddr, amountExtracted)
 }
 
-func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Address, sectorSize sector.SectorSize, peerId peer.ID) addr.Address {
+func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Address, sectorSize abi.SectorSize, peerId peer.ID) addr.Address {
 	vmr.RT_ValidateImmediateCallerIsSignable(rt)
 	ownerAddr := rt.ImmediateCaller()
 
 	newMinerAddr, err := addr.NewFromBytes(
 		rt.Send(
 			builtin.InitActorAddr,
-			ai.Method_InitActor_Exec,
+			builtin.Method_InitActor_Exec,
 			serde.MustSerializeParams(
 				builtin.StorageMinerActorCodeID,
 				ownerAddr,
@@ -190,7 +188,7 @@ func (a *StoragePowerActorCode_I) OnMinerSurprisePoStFailure(rt Runtime, numCons
 	}
 }
 
-func (a *StoragePowerActorCode_I) OnMinerEnrollCronEvent(rt Runtime, eventEpoch abi.ChainEpoch, sectorNumbers []sector.SectorNumber) {
+func (a *StoragePowerActorCode_I) OnMinerEnrollCronEvent(rt Runtime, eventEpoch abi.ChainEpoch, sectorNumbers []abi.SectorNumber) {
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 	minerEvent := &autil.MinerEvent_I{
@@ -326,7 +324,7 @@ func (a *StoragePowerActorCode_I) _rtInitiateNewSurprisePoStChallenges(rt Runtim
 	for _, addr := range surprisedMiners {
 		rt.Send(
 			addr,
-			ai.Method_StorageMinerActor_OnSurprisePoStChallenge,
+			builtin.Method_StorageMinerActor_OnSurprisePoStChallenge,
 			nil,
 			abi.TokenAmount(0))
 	}
@@ -353,7 +351,7 @@ func (a *StoragePowerActorCode_I) _rtProcessDeferredCronEvents(rt Runtime) {
 	for _, minerEvent := range minerEventsRetain {
 		rt.Send(
 			minerEvent.MinerAddr(),
-			ai.Method_StorageMinerActor_OnDeferredCronEvent,
+			builtin.Method_StorageMinerActor_OnDeferredCronEvent,
 			serde.MustSerializeParams(
 				minerEvent.Sectors(),
 			),
@@ -398,7 +396,7 @@ func (a *StoragePowerActorCode_I) _rtDeleteMinerActor(rt Runtime, minerAddr addr
 
 	rt.Send(
 		minerAddr,
-		ai.Method_StorageMinerActor_OnDeleteMiner,
+		builtin.Method_StorageMinerActor_OnDeleteMiner,
 		serde.MustSerializeParams(),
 		abi.TokenAmount(0),
 	)

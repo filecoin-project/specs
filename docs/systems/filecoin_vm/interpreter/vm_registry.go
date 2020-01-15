@@ -11,7 +11,6 @@ import (
 	smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
 	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
-	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 )
 
 var (
@@ -68,11 +67,11 @@ func _registerBuiltinActors() {
 	// TODO: move this to CronActor's constructor method
 	cron.Entries_ = append(cron.Entries_, &cronact.CronTableEntry_I{
 		ToAddr_:    builtin.StoragePowerActorAddr,
-		MethodNum_: ai.Method_StoragePowerActor_OnEpochTickEnd,
+		MethodNum_: builtin.Method_StoragePowerActor_OnEpochTickEnd,
 	})
 
 	cron.Entries_ = append(cron.Entries_, &cronact.CronTableEntry_I{
 		ToAddr_:    builtin.StorageMarketActorAddr,
-		MethodNum_: ai.Method_StorageMarketActor_OnEpochTickEnd,
+		MethodNum_: builtin.Method_StorageMarketActor_OnEpochTickEnd,
 	})
 }

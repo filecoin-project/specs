@@ -4771,6 +4771,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// The VM uses this to execute abi.
 </span><span class="c1"></span>
 <span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
+<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
 <span class="kn">import</span> <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 
 <span class="c1">// CallSeqNum is an invocation (Call) sequence (Seq) number (Num).
@@ -4789,11 +4790,6 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">//
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">CallSeqNum</span> <span class="nx">UVarint</span>
 
-<span class="c1">// Code is a serialized object that contains the code for an Actor.
-</span><span class="c1">// Until we accept external user-provided contracts, this is the
-</span><span class="c1">// serialized code for the actor in the Filecoin Specification.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Code</span> <span class="nx">Bytes</span>
-
 <span class="c1">// Actor is a base computation object in the Filecoin VM. Similar
 </span><span class="c1">// to Actors in the Actor Model (programming), or Objects in Object-
 </span><span class="c1">// Oriented Programming, or Ethereum Contracts in the EVM.
@@ -4803,7 +4799,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// Identifies the code this actor executes.
 </span><span class="c1"></span>    <span class="nx">CodeID</span>      <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span>
     <span class="c1">// CID of the root of optional actor-specific sub-state.
-</span><span class="c1"></span>    <span class="nx">State</span>       <span class="nx">ActorSubstateCID</span>
+</span><span class="c1"></span>    <span class="nx">State</span>       <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorSubstateCID</span>
     <span class="c1">// Balance of tokens held by this actor.
 </span><span class="c1"></span>    <span class="nx">Balance</span>     <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="c1">// Expected sequence number of the next message sent by this actor.
@@ -4813,7 +4809,6 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ActorSystemStateCID</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
-<span class="kd">type</span> <span class="nx">ActorSubstateCID</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
 
 <span class="c1">// ActorState represents the on-chain storage actors keep. This type is a
 </span><span class="c1">// union of concrete types, for each of the Actors:
@@ -4863,7 +4858,6 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">actor</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 	<span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 <span class="p">)</span>
@@ -4874,20 +4868,8 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">Serialization</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
 
-<span class="kd">const</span> <span class="p">(</span>
-	<span class="nx">MethodSend</span>        <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">MethodNum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-	<span class="nx">MethodConstructor</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">MethodNum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-
-	<span class="c1">// TODO: remove this once canonical method numbers are finalized
-</span><span class="c1"></span>	<span class="nx">MethodPlaceholder</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">MethodNum</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">)</span>
-<span class="p">)</span>
-
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">ActorState_I</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">ActorSubstateCID</span><span class="p">)</span> <span class="nf">Ref</span><span class="p">()</span> <span class="o">*</span><span class="nx">ActorSubstateCID</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">x</span>
 <span class="p">}</span>
 </code></pre></div>
 

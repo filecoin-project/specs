@@ -4784,7 +4784,6 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
-<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 <span class="kn">import</span> <span class="nx">peer</span> <span class="s">&#34;github.com/libp2p/go-libp2p-core/peer&#34;</span>
 
 <span class="kd">type</span> <span class="nx">RetrievalClientDealState</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4815,14 +4814,14 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">RetrievalClient</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// V0
-</span><span class="c1"></span>    <span class="nf">FindProviders</span><span class="p">(</span><span class="nx">pieceCID</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span><span class="p">)</span> <span class="p">[</span><span class="nx">RetrievalPeer</span><span class="p">]</span>
+</span><span class="c1"></span>    <span class="nf">FindProviders</span><span class="p">(</span><span class="nx">pieceCID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceCID</span><span class="p">)</span> <span class="p">[</span><span class="nx">RetrievalPeer</span><span class="p">]</span>
     <span class="nf">Query</span><span class="p">(</span>
         <span class="nx">p</span>         <span class="nx">RetrievalPeer</span>
-        <span class="nx">pieceCID</span>  <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>
+        <span class="nx">pieceCID</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceCID</span>
         <span class="nx">params</span>    <span class="nx">RetrievalQueryParams</span>
     <span class="p">)</span> <span class="nx">RetrievalQueryResponse</span>
     <span class="nf">Retrieve</span><span class="p">(</span>
-        <span class="nx">pieceCID</span>      <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>
+        <span class="nx">pieceCID</span>      <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceCID</span>
         <span class="nx">params</span>        <span class="nx">RetrievalParams</span>
         <span class="nx">totalFunds</span>    <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
         <span class="nx">miner</span>         <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>

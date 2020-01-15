@@ -4776,7 +4776,6 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
 <span class="kn">import</span> <span class="nx">dt</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/data_transfer&#34;</span>
-<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">peer</span> <span class="s">&#34;github.com/libp2p/go-libp2p-core/peer&#34;</span>
 <span class="kn">import</span> <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 
@@ -4793,8 +4792,8 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nx">PayloadID</span>     <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
 
-    <span class="nx">DealID</span>        <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
-    <span class="nx">SectorID</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>  <span class="c1">// Set when State &gt;= DealStaged
+    <span class="nx">DealID</span>        <span class="nx">abi</span><span class="p">.</span><span class="nx">DealID</span>
+    <span class="nx">SectorID</span>      <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span>  <span class="c1">// Set when State &gt;= DealStaged
 </span><span class="c1"></span><span class="p">}</span>
 
 <span class="c1">// The interface provided for storage providers

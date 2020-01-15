@@ -4795,7 +4795,6 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 <span class="kn">import</span> <span class="nx">chain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain&#34;</span>
 <span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 <span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
-<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">blockchain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&#34;</span>
 <span class="kn">import</span> <span class="nx">spowact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_power&#34;</span>
 <span class="kn">import</span> <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
@@ -4812,7 +4811,7 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 
     <span class="nf">IsWinningPartialTicket</span><span class="p">(</span>
         <span class="nx">st</span>                 <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
-        <span class="nx">partialTicket</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span>
+        <span class="nx">partialTicket</span>      <span class="nx">abi</span><span class="p">.</span><span class="nx">PartialTicket</span>
         <span class="nx">sectorUtilization</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span>
         <span class="nx">numSectors</span>         <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
     <span class="p">)</span> <span class="kt">bool</span>
@@ -5023,9 +5022,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_mining</span>
 
-<span class="c1">// import sectoridx &#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector_index&#34;
-</span><span class="c1">// import actor &#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;
-</span><span class="c1"></span><span class="kn">import</span> <span class="p">(</span>
+<span class="kn">import</span> <span class="p">(</span>
 	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
 	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 	<span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin&#34;</span>
@@ -5037,8 +5034,6 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="nx">filproofs</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto/filproofs&#34;</span>
 	<span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 	<span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
-	<span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
-	<span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
 	<span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 	<span class="nx">stateTree</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
@@ -5070,7 +5065,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="nx">unsignedCreationMessage</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
 		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">ownerAddr</span><span class="p">,</span>
 		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">builtin</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
-		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_CreateMiner</span><span class="p">,</span>
+		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_CreateMiner</span><span class="p">,</span>
 		<span class="nx">Params_</span><span class="p">:</span>     <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span><span class="nx">ownerAddr</span><span class="p">,</span> <span class="nx">workerAddr</span><span class="p">,</span> <span class="nx">peerId</span><span class="p">),</span>
 		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">ownerActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
 		<span class="nx">Value_</span><span class="p">:</span>      <span class="nx">pledgeAmt</span><span class="p">,</span>
@@ -5133,7 +5128,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 </span><span class="c1"></span>			<span class="nx">randomness1</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_blockchain</span><span class="p">().</span><span class="nf">BestChain</span><span class="p">().</span><span class="nf">GetTicketProductionRandSeed</span><span class="p">(</span><span class="nx">sms</span><span class="p">.</span><span class="nf">_blockchain</span><span class="p">().</span><span class="nf">LatestEpoch</span><span class="p">())</span>
 			<span class="nx">newTicket</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">PrepareNewTicket</span><span class="p">(</span><span class="nx">randomness1</span><span class="p">,</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">Node</span><span class="p">().</span><span class="nf">Repository</span><span class="p">().</span><span class="nf">KeyStore</span><span class="p">().</span><span class="nf">MinerAddress</span><span class="p">())</span>
 
-			<span class="nx">sms</span><span class="p">.</span><span class="nf">_blockProducer</span><span class="p">().</span><span class="nf">GenerateBlock</span><span class="p">(</span><span class="nx">ePoSt</span><span class="p">,</span> <span class="nx">newTicket</span><span class="p">,</span> <span class="nx">chainHead</span><span class="p">,</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">Node</span><span class="p">().</span><span class="nf">Repository</span><span class="p">().</span><span class="nf">KeyStore</span><span class="p">().</span><span class="nf">MinerAddress</span><span class="p">())</span>
+			<span class="nx">sms</span><span class="p">.</span><span class="nf">_blockProducer</span><span class="p">().</span><span class="nf">GenerateBlock</span><span class="p">(</span><span class="o">*</span><span class="nx">ePoSt</span><span class="p">,</span> <span class="nx">newTicket</span><span class="p">,</span> <span class="nx">chainHead</span><span class="p">,</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">Node</span><span class="p">().</span><span class="nf">Repository</span><span class="p">().</span><span class="nf">KeyStore</span><span class="p">().</span><span class="nf">MinerAddress</span><span class="p">())</span>
 		<span class="p">}</span>
 	<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">sma</span><span class="p">.</span><span class="nf">PoStState</span><span class="p">().</span><span class="nf">Is_Challenged</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nx">sPoSt</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_trySurprisePoSt</span><span class="p">(</span><span class="nx">chainHead</span><span class="p">.</span><span class="nf">StateTree</span><span class="p">(),</span> <span class="nx">sma</span><span class="p">)</span>
@@ -5141,11 +5136,11 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 		<span class="kd">var</span> <span class="nx">gasLimit</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span>
 		<span class="kd">var</span> <span class="nx">gasPrice</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 		<span class="nx">util</span><span class="p">.</span><span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="s">&#34;read from consts (in this case user set param)&#34;</span><span class="p">)</span>
-		<span class="nx">sms</span><span class="p">.</span><span class="nf">_submitSurprisePoStMessage</span><span class="p">(</span><span class="nx">chainHead</span><span class="p">.</span><span class="nf">StateTree</span><span class="p">(),</span> <span class="nx">sPoSt</span><span class="p">,</span> <span class="nx">gasPrice</span><span class="p">,</span> <span class="nx">gasLimit</span><span class="p">)</span>
+		<span class="nx">sms</span><span class="p">.</span><span class="nf">_submitSurprisePoStMessage</span><span class="p">(</span><span class="nx">chainHead</span><span class="p">.</span><span class="nf">StateTree</span><span class="p">(),</span> <span class="o">*</span><span class="nx">sPoSt</span><span class="p">,</span> <span class="nx">gasPrice</span><span class="p">,</span> <span class="nx">gasLimit</span><span class="p">)</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">_tryLeaderElection</span><span class="p">(</span><span class="nx">currState</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">sma</span> <span class="nx">sminact</span><span class="p">.</span><span class="nx">StorageMinerActorState</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainElectionPoStVerifyInfo</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">_tryLeaderElection</span><span class="p">(</span><span class="nx">currState</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">sma</span> <span class="nx">sminact</span><span class="p">.</span><span class="nx">StorageMinerActorState</span><span class="p">)</span> <span class="o">*</span><span class="nx">abi</span><span class="p">.</span><span class="nx">OnChainElectionPoStVerifyInfo</span> <span class="p">{</span>
 	<span class="c1">// Randomness for ElectionPoSt
 </span><span class="c1"></span>
 	<span class="nx">randomnessK</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_blockchain</span><span class="p">().</span><span class="nf">BestChain</span><span class="p">().</span><span class="nf">GetPoStChallengeRandSeed</span><span class="p">(</span><span class="nx">sms</span><span class="p">.</span><span class="nf">_blockchain</span><span class="p">().</span><span class="nf">LatestEpoch</span><span class="p">())</span>
@@ -5155,7 +5150,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 	<span class="c1">// TODO: add how sectors are actually stored in the SMS proving set
 </span><span class="c1"></span>	<span class="nx">util</span><span class="p">.</span><span class="nf">TODO</span><span class="p">()</span>
-	<span class="nx">provingSet</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="nx">provingSet</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 	<span class="nx">candidates</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">StorageProving</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">GenerateElectionPoStCandidates</span><span class="p">(</span><span class="nx">postRandomness</span><span class="p">,</span> <span class="nx">provingSet</span><span class="p">)</span>
 
@@ -5163,20 +5158,20 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 		<span class="k">return</span> <span class="kc">nil</span> <span class="c1">// fail to generate post candidates
 </span><span class="c1"></span>	<span class="p">}</span>
 
-	<span class="nx">winningCandidates</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="nx">winningCandidates</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 	<span class="kd">var</span> <span class="nx">numMinerSectors</span> <span class="kt">uint64</span>
 	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// update
 </span><span class="c1"></span>	<span class="c1">// numMinerSectors := uint64(len(sma.SectorTable().Impl().ActiveSectors_.SectorsOn()))
 </span><span class="c1"></span>
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">candidate</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">candidates</span> <span class="p">{</span>
-		<span class="nx">sectorNum</span> <span class="o">:=</span> <span class="nx">candidate</span><span class="p">.</span><span class="nf">SectorID</span><span class="p">().</span><span class="nf">Number</span><span class="p">()</span>
+		<span class="nx">sectorNum</span> <span class="o">:=</span> <span class="nx">candidate</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">.</span><span class="nx">Number</span>
 		<span class="nx">sectorWeightDesc</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">sma</span><span class="p">.</span><span class="nf">GetStorageWeightDescForSectorMaybe</span><span class="p">(</span><span class="nx">sectorNum</span><span class="p">)</span>
 		<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 			<span class="k">return</span> <span class="kc">nil</span>
 		<span class="p">}</span>
 		<span class="nx">sectorPower</span> <span class="o">:=</span> <span class="nx">indices</span><span class="p">.</span><span class="nf">ConsensusPowerForStorageWeight</span><span class="p">(</span><span class="nx">sectorWeightDesc</span><span class="p">)</span>
-		<span class="k">if</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_consensus</span><span class="p">().</span><span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">currState</span><span class="p">,</span> <span class="nx">candidate</span><span class="p">.</span><span class="nf">PartialTicket</span><span class="p">(),</span> <span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">numMinerSectors</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_consensus</span><span class="p">().</span><span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">currState</span><span class="p">,</span> <span class="nx">candidate</span><span class="p">.</span><span class="nx">PartialTicket</span><span class="p">,</span> <span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">numMinerSectors</span><span class="p">)</span> <span class="p">{</span>
 			<span class="nx">winningCandidates</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">winningCandidates</span><span class="p">,</span> <span class="nx">candidate</span><span class="p">)</span>
 		<span class="p">}</span>
 	<span class="p">}</span>
@@ -5187,10 +5182,10 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 	<span class="nx">postProofs</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">StorageProving</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">CreateElectionPoStProof</span><span class="p">(</span><span class="nx">postRandomness</span><span class="p">,</span> <span class="nx">winningCandidates</span><span class="p">)</span>
 
-	<span class="nx">electionPoSt</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainElectionPoStVerifyInfo_I</span><span class="p">{</span>
-		<span class="nx">Candidates_</span><span class="p">:</span> <span class="nx">winningCandidates</span><span class="p">,</span>
-		<span class="nx">Randomness_</span><span class="p">:</span> <span class="nx">postRandomness</span><span class="p">,</span>
-		<span class="nx">Proofs_</span><span class="p">:</span>     <span class="nx">postProofs</span><span class="p">,</span>
+	<span class="nx">electionPoSt</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">abi</span><span class="p">.</span><span class="nx">OnChainElectionPoStVerifyInfo</span><span class="p">{</span>
+		<span class="nx">Candidates</span><span class="p">:</span> <span class="nx">winningCandidates</span><span class="p">,</span>
+		<span class="nx">Randomness</span><span class="p">:</span> <span class="nx">postRandomness</span><span class="p">,</span>
+		<span class="nx">Proofs</span><span class="p">:</span>     <span class="nx">postProofs</span><span class="p">,</span>
 	<span class="p">}</span>
 
 	<span class="k">return</span> <span class="nx">electionPoSt</span>
@@ -5257,7 +5252,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="k">return</span> <span class="nx">st</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">VerifyElectionPoSt</span><span class="p">(</span><span class="nx">inds</span> <span class="nx">indices</span><span class="p">.</span><span class="nx">Indices</span><span class="p">,</span> <span class="nx">header</span> <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainElectionPoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">VerifyElectionPoSt</span><span class="p">(</span><span class="nx">inds</span> <span class="nx">indices</span><span class="p">.</span><span class="nx">Indices</span><span class="p">,</span> <span class="nx">header</span> <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">OnChainElectionPoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="nx">sma</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_getStorageMinerActorState</span><span class="p">(</span><span class="nx">header</span><span class="p">.</span><span class="nf">ParentState</span><span class="p">(),</span> <span class="nx">header</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
 	<span class="nx">spa</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_getStoragePowerActorState</span><span class="p">(</span><span class="nx">header</span><span class="p">.</span><span class="nf">ParentState</span><span class="p">())</span>
 
@@ -5273,12 +5268,12 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="p">}</span>
 
 	<span class="c1">// 2. verify no duplicate tickets included
-</span><span class="c1"></span>	<span class="nx">challengeIndices</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="nx">util</span><span class="p">.</span><span class="nx">UInt</span><span class="p">]</span><span class="kt">bool</span><span class="p">)</span>
-	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">tix</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">Candidates</span><span class="p">()</span> <span class="p">{</span>
-		<span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">challengeIndices</span><span class="p">[</span><span class="nx">tix</span><span class="p">.</span><span class="nf">ChallengeIndex</span><span class="p">()];</span> <span class="nx">ok</span> <span class="p">{</span>
+</span><span class="c1"></span>	<span class="nx">challengeIndices</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">int64</span><span class="p">]</span><span class="kt">bool</span><span class="p">)</span>
+	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">tix</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nx">Candidates</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">challengeIndices</span><span class="p">[</span><span class="nx">tix</span><span class="p">.</span><span class="nx">ChallengeIndex</span><span class="p">];</span> <span class="nx">ok</span> <span class="p">{</span>
 			<span class="k">return</span> <span class="kc">false</span>
 		<span class="p">}</span>
-		<span class="nx">challengeIndices</span><span class="p">[</span><span class="nx">tix</span><span class="p">.</span><span class="nf">ChallengeIndex</span><span class="p">()]</span> <span class="p">=</span> <span class="kc">true</span>
+		<span class="nx">challengeIndices</span><span class="p">[</span><span class="nx">tix</span><span class="p">.</span><span class="nx">ChallengeIndex</span><span class="p">]</span> <span class="p">=</span> <span class="kc">true</span>
 	<span class="p">}</span>
 
 	<span class="c1">// 3. Verify partialTicket values are appropriate
@@ -5293,7 +5288,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="nx">input</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">DeriveRandWithMinerAddr</span><span class="p">(</span><span class="nx">filcrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_ElectionPoStChallengeSeed</span><span class="p">,</span> <span class="nx">randomness</span><span class="p">,</span> <span class="nx">header</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
 
 	<span class="nx">postRand</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFResult_I</span><span class="p">{</span>
-		<span class="nx">Output_</span><span class="p">:</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(),</span>
+		<span class="nx">Output_</span><span class="p">:</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span>
 	<span class="p">}</span>
 
 	<span class="c1">// TODO if the workerAddress is secp then payload will be the blake2b hash of its public key
@@ -5312,21 +5307,21 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 	<span class="nx">postCfg</span> <span class="o">:=</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">ElectionPoStCfg</span><span class="p">(</span><span class="nx">sectorSize</span><span class="p">)</span>
 
-	<span class="nx">pvInfo</span> <span class="o">:=</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStVerifyInfo_I</span><span class="p">{</span>
-		<span class="nx">OnChain_</span><span class="p">:</span>    <span class="nx">onChainInfo</span><span class="p">,</span>
-		<span class="nx">PoStCfg_</span><span class="p">:</span>    <span class="nx">postCfg</span><span class="p">,</span>
-		<span class="nx">Randomness_</span><span class="p">:</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(),</span>
+	<span class="nx">pvInfo</span> <span class="o">:=</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStVerifyInfo</span><span class="p">{</span>
+		<span class="nx">Candidates</span><span class="p">:</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nx">Candidates</span><span class="p">,</span>
+		<span class="nx">Proofs</span><span class="p">:</span>     <span class="nx">onChainInfo</span><span class="p">.</span><span class="nx">Proofs</span><span class="p">,</span>
+		<span class="nx">Randomness</span><span class="p">:</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span>
 	<span class="p">}</span>
 
 	<span class="nx">pv</span> <span class="o">:=</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">MakeElectionPoStVerifier</span><span class="p">(</span><span class="nx">postCfg</span><span class="p">)</span>
 
 	<span class="c1">// 5. Verify the PoSt Proof
-</span><span class="c1"></span>	<span class="nx">isPoStVerified</span> <span class="o">:=</span> <span class="nx">pv</span><span class="p">.</span><span class="nf">VerifyElectionPoSt</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">pvInfo</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">isPoStVerified</span> <span class="o">:=</span> <span class="nx">pv</span><span class="p">.</span><span class="nf">VerifyElectionPoSt</span><span class="p">(</span><span class="nx">pvInfo</span><span class="p">)</span>
 
 	<span class="k">return</span> <span class="nx">isPoStVerified</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">_verifyElection</span><span class="p">(</span><span class="nx">header</span> <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainElectionPoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">_verifyElection</span><span class="p">(</span><span class="nx">header</span> <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">OnChainElectionPoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="nx">st</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_getStorageMinerActorState</span><span class="p">(</span><span class="nx">header</span><span class="p">.</span><span class="nf">ParentState</span><span class="p">(),</span> <span class="nx">header</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
 
 	<span class="kd">var</span> <span class="nx">numMinerSectors</span> <span class="kt">uint64</span>
@@ -5334,21 +5329,21 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="c1">// TODO: Decide whether to sample sectors uniformly for EPoSt (the cleanest),
 </span><span class="c1"></span>	<span class="c1">// or to sample weighted by nominal power.
 </span><span class="c1"></span>
-	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">info</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nf">Candidates</span><span class="p">()</span> <span class="p">{</span>
-		<span class="nx">sectorNum</span> <span class="o">:=</span> <span class="nx">info</span><span class="p">.</span><span class="nf">SectorID</span><span class="p">().</span><span class="nf">Number</span><span class="p">()</span>
+	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">info</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">onChainInfo</span><span class="p">.</span><span class="nx">Candidates</span> <span class="p">{</span>
+		<span class="nx">sectorNum</span> <span class="o">:=</span> <span class="nx">info</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">.</span><span class="nx">Number</span>
 		<span class="nx">sectorWeightDesc</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">GetStorageWeightDescForSectorMaybe</span><span class="p">(</span><span class="nx">sectorNum</span><span class="p">)</span>
 		<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 			<span class="k">return</span> <span class="kc">false</span>
 		<span class="p">}</span>
 		<span class="nx">sectorPower</span> <span class="o">:=</span> <span class="nx">indices</span><span class="p">.</span><span class="nf">ConsensusPowerForStorageWeight</span><span class="p">(</span><span class="nx">sectorWeightDesc</span><span class="p">)</span>
-		<span class="k">if</span> <span class="p">!</span><span class="nx">sms</span><span class="p">.</span><span class="nf">_consensus</span><span class="p">().</span><span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">header</span><span class="p">.</span><span class="nf">ParentState</span><span class="p">(),</span> <span class="nx">info</span><span class="p">.</span><span class="nf">PartialTicket</span><span class="p">(),</span> <span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">numMinerSectors</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="p">!</span><span class="nx">sms</span><span class="p">.</span><span class="nf">_consensus</span><span class="p">().</span><span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">header</span><span class="p">.</span><span class="nf">ParentState</span><span class="p">(),</span> <span class="nx">info</span><span class="p">.</span><span class="nx">PartialTicket</span><span class="p">,</span> <span class="nx">sectorPower</span><span class="p">,</span> <span class="nx">numMinerSectors</span><span class="p">)</span> <span class="p">{</span>
 			<span class="k">return</span> <span class="kc">false</span>
 		<span class="p">}</span>
 	<span class="p">}</span>
 	<span class="k">return</span> <span class="kc">true</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">_trySurprisePoSt</span><span class="p">(</span><span class="nx">currState</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">sma</span> <span class="nx">sminact</span><span class="p">.</span><span class="nx">StorageMinerActorState</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainSurprisePoStVerifyInfo</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">_trySurprisePoSt</span><span class="p">(</span><span class="nx">currState</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">sma</span> <span class="nx">sminact</span><span class="p">.</span><span class="nx">StorageMinerActorState</span><span class="p">)</span> <span class="o">*</span><span class="nx">abi</span><span class="p">.</span><span class="nx">OnChainSurprisePoStVerifyInfo</span> <span class="p">{</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">sma</span><span class="p">.</span><span class="nf">PoStState</span><span class="p">().</span><span class="nf">Is_Challenged</span><span class="p">()</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="kc">nil</span>
 	<span class="p">}</span>
@@ -5361,34 +5356,34 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 	<span class="c1">// TODO: add how sectors are actually stored in the SMS proving set
 </span><span class="c1"></span>	<span class="nx">util</span><span class="p">.</span><span class="nf">TODO</span><span class="p">()</span>
-	<span class="nx">provingSet</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="nx">provingSet</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-	<span class="nx">candidates</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">StorageProving</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">GenerateSurprisePoStCandidates</span><span class="p">(</span><span class="nx">sector</span><span class="p">.</span><span class="nf">PoStRandomness</span><span class="p">(</span><span class="nx">postRandomness</span><span class="p">),</span> <span class="nx">provingSet</span><span class="p">)</span>
+	<span class="nx">candidates</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">StorageProving</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">GenerateSurprisePoStCandidates</span><span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nf">PoStRandomness</span><span class="p">(</span><span class="nx">postRandomness</span><span class="p">),</span> <span class="nx">provingSet</span><span class="p">)</span>
 
 	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">candidates</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="p">{</span>
 		<span class="c1">// Error. Will fail this surprise post and must then redeclare faults
 </span><span class="c1"></span>		<span class="k">return</span> <span class="kc">nil</span> <span class="c1">// fail to generate post candidates
 </span><span class="c1"></span>	<span class="p">}</span>
 
-	<span class="nx">winningCandidates</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="nx">winningCandidates</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">candidate</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">candidates</span> <span class="p">{</span>
 		<span class="k">if</span> <span class="nx">sma</span><span class="p">.</span><span class="nf">VerifySurprisePoStMeetsTargetReq</span><span class="p">(</span><span class="nx">candidate</span><span class="p">)</span> <span class="p">{</span>
 			<span class="nx">winningCandidates</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">winningCandidates</span><span class="p">,</span> <span class="nx">candidate</span><span class="p">)</span>
 		<span class="p">}</span>
 	<span class="p">}</span>
 
-	<span class="nx">postProofs</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">StorageProving</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">CreateSurprisePoStProof</span><span class="p">(</span><span class="nx">sector</span><span class="p">.</span><span class="nf">PoStRandomness</span><span class="p">(</span><span class="nx">postRandomness</span><span class="p">),</span> <span class="nx">winningCandidates</span><span class="p">)</span>
+	<span class="nx">postProofs</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">StorageProving</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">CreateSurprisePoStProof</span><span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nf">PoStRandomness</span><span class="p">(</span><span class="nx">postRandomness</span><span class="p">),</span> <span class="nx">winningCandidates</span><span class="p">)</span>
 
 	<span class="c1">// var ctc sector.ChallengeTicketsCommitment // TODO: proofs to fix when complete
-</span><span class="c1"></span>	<span class="nx">surprisePoSt</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainSurprisePoStVerifyInfo_I</span><span class="p">{</span>
+</span><span class="c1"></span>	<span class="nx">surprisePoSt</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">abi</span><span class="p">.</span><span class="nx">OnChainSurprisePoStVerifyInfo</span><span class="p">{</span>
 		<span class="c1">// CommT_:      ctc,
-</span><span class="c1"></span>		<span class="nx">Candidates_</span><span class="p">:</span> <span class="nx">winningCandidates</span><span class="p">,</span>
-		<span class="nx">Proofs_</span><span class="p">:</span>     <span class="nx">postProofs</span><span class="p">,</span>
+</span><span class="c1"></span>		<span class="nx">Candidates</span><span class="p">:</span> <span class="nx">winningCandidates</span><span class="p">,</span>
+		<span class="nx">Proofs</span><span class="p">:</span>     <span class="nx">postProofs</span><span class="p">,</span>
 	<span class="p">}</span>
 	<span class="k">return</span> <span class="nx">surprisePoSt</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">_submitSurprisePoStMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">sPoSt</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainSurprisePoStVerifyInfo</span><span class="p">,</span> <span class="nx">gasPrice</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">gasLimit</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">_submitSurprisePoStMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">sPoSt</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">OnChainSurprisePoStVerifyInfo</span><span class="p">,</span> <span class="nx">gasPrice</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">gasLimit</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
 	<span class="c1">// TODO if workerAddr is not a secp key (e.g. BLS) then this will need to be handled differently
 </span><span class="c1"></span>	<span class="nx">workerAddr</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">NewSecp256k1Address</span><span class="p">(</span><span class="nx">sms</span><span class="p">.</span><span class="nf">Node</span><span class="p">().</span><span class="nf">Repository</span><span class="p">().</span><span class="nf">KeyStore</span><span class="p">().</span><span class="nf">WorkerKey</span><span class="p">().</span><span class="nf">VRFPublicKey</span><span class="p">())</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
@@ -5399,7 +5394,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="nx">unsignedCreationMessage</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
 		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">sms</span><span class="p">.</span><span class="nf">Node</span><span class="p">().</span><span class="nf">Repository</span><span class="p">().</span><span class="nf">KeyStore</span><span class="p">().</span><span class="nf">MinerAddress</span><span class="p">(),</span>
 		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">sms</span><span class="p">.</span><span class="nf">Node</span><span class="p">().</span><span class="nf">Repository</span><span class="p">().</span><span class="nf">KeyStore</span><span class="p">().</span><span class="nf">MinerAddress</span><span class="p">(),</span>
-		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StorageMinerActor_SubmitSurprisePoStResponse</span><span class="p">,</span>
+		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_StorageMinerActor_SubmitSurprisePoStResponse</span><span class="p">,</span>
 		<span class="nx">Params_</span><span class="p">:</span>     <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span><span class="nx">sPoSt</span><span class="p">),</span>
 		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">worker</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
 		<span class="nx">Value_</span><span class="p">:</span>      <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
@@ -5456,7 +5451,6 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 <span class="kn">import</span> <span class="nx">chain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain&#34;</span>
 <span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 <span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
-<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">blockchain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&#34;</span>
 <span class="kn">import</span> <span class="nx">spowact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_power&#34;</span>
 <span class="kn">import</span> <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
@@ -5473,7 +5467,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
     <span class="nf">IsWinningPartialTicket</span><span class="p">(</span>
         <span class="nx">st</span>                 <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
-        <span class="nx">partialTicket</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span>
+        <span class="nx">partialTicket</span>      <span class="nx">abi</span><span class="p">.</span><span class="nx">PartialTicket</span>
         <span class="nx">sectorUtilization</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span>
         <span class="nx">numSectors</span>         <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
     <span class="p">)</span> <span class="kt">bool</span>
@@ -5532,7 +5526,6 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 	<span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 	<span class="nx">chain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain&#34;</span>
-	<span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 	<span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
 	<span class="nx">stateTree</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
@@ -5556,7 +5549,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="k">return</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">ec</span><span class="p">().</span><span class="nf">ComputeChainWeight</span><span class="p">(</span><span class="nx">tipset</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">inds</span> <span class="nx">inds</span><span class="p">.</span><span class="nx">Indices</span><span class="p">,</span> <span class="nx">partialTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span><span class="p">,</span> <span class="nx">sectorUtilization</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">inds</span> <span class="nx">inds</span><span class="p">.</span><span class="nx">Indices</span><span class="p">,</span> <span class="nx">partialTicket</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PartialTicket</span><span class="p">,</span> <span class="nx">sectorUtilization</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 
 	<span class="c1">// finalize the partial ticket
 </span><span class="c1"></span>	<span class="nx">challengeTicket</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">SHA256</span><span class="p">(</span><span class="nx">partialTicket</span><span class="p">)</span>

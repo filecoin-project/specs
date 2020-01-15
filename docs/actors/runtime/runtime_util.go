@@ -6,17 +6,14 @@ import (
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
+	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
-	util "github.com/filecoin-project/specs/util"
 )
 
 // TODO: most of this file doesn't need to be part of runtime, just generic actor shared code.
 
-var Assert = util.Assert
-var IMPL_TODO = util.IMPL_TODO
-
-type Any = util.Any
+var Assert = autil.Assert
+var IMPL_TODO = autil.IMPL_TODO
 
 // Name should be set per unique filecoin network
 var Name = "mainnet"
@@ -78,7 +75,7 @@ func InvocInput_Make(to addr.Address, method abi.MethodNum, params abi.MethodPar
 	}
 }
 
-func InvocOutput_Make(returnValue util.Bytes) InvocOutput {
+func InvocOutput_Make(returnValue []byte) InvocOutput {
 	return &InvocOutput_I{
 		ReturnValue_: returnValue,
 	}
@@ -98,15 +95,15 @@ func RT_Address_Is_StorageMiner(rt Runtime, minerAddr addr.Address) bool {
 }
 
 func RT_GetMinerAccountsAssert(rt Runtime, minerAddr addr.Address) (ownerAddr addr.Address, workerAddr addr.Address) {
-	raw := rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetOwnerAddr, nil)
+	raw := rt.SendQuery(minerAddr, builtin.Method_StorageMinerActor_GetOwnerAddr, nil)
 	r := bytes.NewReader(raw)
 	err := ownerAddr.UnmarshalCBOR(r)
-	util.Assert(err == nil)
+	autil.AssertNoError(err)
 
-	raw = rt.SendQuery(minerAddr, ai.Method_StorageMinerActor_GetWorkerAddr, nil)
+	raw = rt.SendQuery(minerAddr, builtin.Method_StorageMinerActor_GetWorkerAddr, nil)
 	r = bytes.NewReader(raw)
 	err = workerAddr.UnmarshalCBOR(r)
-	util.Assert(err == nil)
+	autil.AssertNoError(err)
 
 	return
 }
@@ -138,6 +135,6 @@ func RT_ConfirmFundsReceiptOrAbort_RefundRemainder(rt Runtime, fundsRequired abi
 }
 
 func RT_VerifySignature(rt Runtime, pk filcrypto.PublicKey, sig filcrypto.Signature, m filcrypto.Message) bool {
-	ret := rt.Compute(ComputeFunctionID_VerifySignature, []Any{pk, sig, m})
+	ret := rt.Compute(ComputeFunctionID_VerifySignature, []interface{}{pk, sig, m})
 	return ret.(bool)
 }

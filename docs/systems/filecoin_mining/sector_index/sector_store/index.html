@@ -4767,7 +4767,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
+<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 <span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
 
@@ -4782,27 +4783,27 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// GetSectorFile returns the file for a given sector id.
 </span><span class="c1"></span>    <span class="c1">// If the SectorID does not have any sector files associated yet, GetSectorFiles
 </span><span class="c1"></span>    <span class="c1">// returns an error.
-</span><span class="c1"></span>    <span class="nf">GetSectorFiles</span><span class="p">(</span><span class="nx">id</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">f</span> <span class="nx">SectorFiles</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+</span><span class="c1"></span>    <span class="nf">GetSectorFiles</span><span class="p">(</span><span class="nx">id</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">f</span> <span class="nx">SectorFiles</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 
-    <span class="nf">GetSectorSealAlgorithm</span><span class="p">(</span><span class="nx">id</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">a</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">ProofAlgorithm</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+    <span class="nf">GetSectorSealAlgorithm</span><span class="p">(</span><span class="nx">id</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">a</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ProofAlgorithm</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 
     <span class="c1">// TODO: This needs to be called when a sector is sealed with the algorithm that was used.
-</span><span class="c1"></span>    <span class="nf">SetSectorSealAlgorithm</span><span class="p">(</span><span class="nx">id</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">a</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">ProofAlgorithm</span><span class="p">)</span> <span class="kt">error</span>
+</span><span class="c1"></span>    <span class="nf">SetSectorSealAlgorithm</span><span class="p">(</span><span class="nx">id</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">a</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ProofAlgorithm</span><span class="p">)</span> <span class="kt">error</span>
 
     <span class="c1">// Get information, including a merkle tree file/path, needed to generate PoSt for a sector.
-</span><span class="c1"></span>    <span class="nf">GetSectorPersistentProofAux</span><span class="p">(</span><span class="nx">id</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PersistentProofAux</span>
+</span><span class="c1"></span>    <span class="nf">GetSectorPersistentProofAux</span><span class="p">(</span><span class="nx">id</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PersistentProofAux</span>
 
-    <span class="nf">StoreSectorPersistentProofAux</span><span class="p">(</span><span class="nx">id</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">proofAux</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PersistentProofAux</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">proofAux</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PersistentProofAux</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+    <span class="nf">StoreSectorPersistentProofAux</span><span class="p">(</span><span class="nx">id</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">proofAux</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PersistentProofAux</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">proofAux</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PersistentProofAux</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 
     <span class="c1">// CreateSectorFiles allocates two sector files, one for unsealed and one for
 </span><span class="c1"></span>    <span class="c1">// sealed sector.
-</span><span class="c1"></span>    <span class="nf">CreateSectorFiles</span><span class="p">(</span><span class="nx">id</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">f</span> <span class="nx">SectorFiles</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+</span><span class="c1"></span>    <span class="nf">CreateSectorFiles</span><span class="p">(</span><span class="nx">id</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">f</span> <span class="nx">SectorFiles</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 <span class="p">}</span>
 
 <span class="c1">// SectorFiles is a datastructure that groups two file objects and a sectorID.
 </span><span class="c1">// These files are where unsealed and sealed sectors should go.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorFiles</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">SectorID</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
+    <span class="nx">SectorID</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span>
     <span class="nx">Unsealed</span>  <span class="nx">file</span><span class="p">.</span><span class="nx">File</span>
     <span class="nx">Sealed</span>    <span class="nx">file</span><span class="p">.</span><span class="nx">File</span>
 <span class="p">}</span>

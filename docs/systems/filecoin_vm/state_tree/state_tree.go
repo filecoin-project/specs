@@ -2,8 +2,9 @@ package state_tree
 
 import (
 	addr "github.com/filecoin-project/go-address"
+	actor "github.com/filecoin-project/specs/actors"
 	"github.com/filecoin-project/specs/actors/abi"
-	"github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	actstate "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	"github.com/filecoin-project/specs/util"
 	cid "github.com/ipfs/go-cid"
 )
@@ -17,7 +18,7 @@ func (st *StateTree_I) RootCID() cid.Cid {
 	panic("")
 }
 
-func (st *StateTree_I) GetActor(a addr.Address) (actor.ActorState, bool) {
+func (st *StateTree_I) GetActor(a addr.Address) (actstate.ActorState, bool) {
 	as, found := st.ActorStates()[a]
 	return as, found
 }
@@ -38,7 +39,7 @@ func (st *StateTree_I) WithDeleteActorSystemState(a addr.Address) StateTree {
 	panic("")
 }
 
-func (st *StateTree_I) WithActorSystemState(a addr.Address, actorState actor.ActorSystemStateCID) (StateTree, error) {
+func (st *StateTree_I) WithActorSystemState(a addr.Address, actorState actstate.ActorSystemStateCID) (StateTree, error) {
 	IMPL_FINISH()
 	panic("")
 }
@@ -48,7 +49,7 @@ func (st *StateTree_I) WithFundsTransfer(from addr.Address, to addr.Address, amo
 	panic("")
 }
 
-func (st *StateTree_I) WithNewAccountActor(a addr.Address) (StateTree, actor.ActorState, error) {
+func (st *StateTree_I) WithNewAccountActor(a addr.Address) (StateTree, actstate.ActorState, error) {
 	IMPL_FINISH()
 	panic("")
 }

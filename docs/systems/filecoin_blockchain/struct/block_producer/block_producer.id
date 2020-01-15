@@ -1,7 +1,7 @@
+import abi "github.com/filecoin-project/specs/actors/abi"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import addr "github.com/filecoin-project/go-address"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 import cid "github.com/ipfs/go-cid"
 
@@ -11,7 +11,7 @@ type BlockProducer struct {
     // and then get back the messages and call AssembleBlock
     // TODO minerAddr is of type StorageMiner.Address
     GenerateBlock(
-        ePoStInfo  sector.OnChainElectionPoStVerifyInfo
+        ePoStInfo  abi.OnChainElectionPoStVerifyInfo
         newTicket  block.Ticket
         chainHead  chain.Tipset
         minerAddr  addr.Address
@@ -19,7 +19,7 @@ type BlockProducer struct {
 
     // call by BlockProducer itself after getting back messages
     AssembleBlock(
-        ePoStInfo  sector.OnChainElectionPoStVerifyInfo
+        ePoStInfo  abi.OnChainElectionPoStVerifyInfo
         T0         block.Ticket
         tipset     chain.Tipset
         minerAddr  addr.Address

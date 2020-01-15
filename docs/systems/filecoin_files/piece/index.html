@@ -4805,27 +4805,13 @@ piece data structures.</p>
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
-
-<span class="c1">// PieceCID is the main reference to pieces in Filecoin. It is the CID
-</span><span class="c1">// of the Piece.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PieceCID</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
-
-<span class="kd">type</span> <span class="nx">NumBytes</span> <span class="nx">UVarint</span>  <span class="c1">// TODO: move into util
-</span><span class="c1"></span>
-<span class="c1">// PieceSize is the size of a piece, in bytes
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PieceSize</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PayloadSize</span>   <span class="nx">NumBytes</span>
-    <span class="nx">OverheadSize</span>  <span class="nx">NumBytes</span>
-
-    <span class="nf">Total</span><span class="p">()</span>       <span class="nx">NumBytes</span>
-<span class="p">}</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 
 <span class="c1">// PieceInfo is an object that describes details about a piece, and allows
 </span><span class="c1">// decoupling storage of this information from the piece itself.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">PieceInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">ID</span>    <span class="nx">PieceID</span>
-    <span class="nx">Size</span>  <span class="nx">PieceSize</span>
+    <span class="nx">Size</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceSize</span>
     <span class="c1">// TODO: store which algorithms were used to construct this piece.
 </span><span class="c1"></span><span class="p">}</span>
 

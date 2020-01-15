@@ -4,10 +4,10 @@ import (
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
+	storage_miner "github.com/filecoin-project/specs/actors/builtin/storage_miner"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	actor_util "github.com/filecoin-project/specs/actors/util"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -120,13 +120,14 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 }
 
 // Note: in the case of a capacity-commitment sector (one with zero deals), this function should succeed vacuously.
-func (a *StorageMarketActorCode_I) VerifyDealsOnSectorPreCommit(rt Runtime, dealIDs deal.DealIDs, sectorInfo sector.SectorPreCommitInfo) {
+// TODO: replace SectorPreCommitInfo parameter with just the expiration
+func (a *StorageMarketActorCode_I) VerifyDealsOnSectorPreCommit(rt Runtime, dealIDs abi.DealIDs, sectorInfo storage_miner.SectorPreCommitInfo) {
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
 
-	for _, dealID := range dealIDs.Items() {
+	for _, dealID := range dealIDs.Items {
 		deal, _ := st._rtGetOnChainDealOrAbort(rt, dealID)
 		_rtAbortIfDealInvalidForNewSectorSeal(rt, minerAddr, sectorInfo.Expiration(), deal)
 	}
@@ -134,13 +135,14 @@ func (a *StorageMarketActorCode_I) VerifyDealsOnSectorPreCommit(rt Runtime, deal
 	Release(rt, h, st)
 }
 
-func (a *StorageMarketActorCode_I) UpdateDealsOnSectorProveCommit(rt Runtime, dealIDs deal.DealIDs, sectorInfo sector.SectorProveCommitInfo) {
+// TODO: replace SectorProveCommitInfo parameter with just the expiration
+func (a *StorageMarketActorCode_I) UpdateDealsOnSectorProveCommit(rt Runtime, dealIDs abi.DealIDs, sectorInfo storage_miner.SectorProveCommitInfo) {
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
 
-	for _, dealID := range dealIDs.Items() {
+	for _, dealID := range dealIDs.Items {
 		deal, _ := st._rtGetOnChainDealOrAbort(rt, dealID)
 		_rtAbortIfDealInvalidForNewSectorSeal(rt, minerAddr, sectorInfo.Expiration(), deal)
 		st.Deals()[dealID].Impl().SectorStartEpoch_ = rt.CurrEpoch()
@@ -149,27 +151,27 @@ func (a *StorageMarketActorCode_I) UpdateDealsOnSectorProveCommit(rt Runtime, de
 	UpdateRelease(rt, h, st)
 }
 
-func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, dealIDs deal.DealIDs) sector.PieceInfos {
+func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, dealIDs abi.DealIDs) abi.PieceInfos {
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 
-	ret := []sector.PieceInfo{}
+	ret := []abi.PieceInfo{}
 
 	h, st := a.State(rt)
 
-	for _, dealID := range dealIDs.Items() {
+	for _, dealID := range dealIDs.Items {
 		_, dealP := st._rtGetOnChainDealOrAbort(rt, dealID)
-		ret = append(ret, sector.PieceInfo_I{
-			PieceCID_: dealP.PieceCID(),
-			Size_:     uint64(dealP.PieceSize().Total()),
-		}.Ref())
+		ret = append(ret, abi.PieceInfo{
+			PieceCID: dealP.PieceCID(),
+			Size:     dealP.PieceSize().Total(),
+		})
 	}
 
 	Release(rt, h, st)
 
-	return &sector.PieceInfos_I{Items_: ret}
+	return abi.PieceInfos{Items: ret}
 }
 
-func (a *StorageMarketActorCode_I) GetWeightForDealSet(rt Runtime, dealIDs deal.DealIDs) deal.DealWeight {
+func (a *StorageMarketActorCode_I) GetWeightForDealSet(rt Runtime, dealIDs abi.DealIDs) deal.DealWeight {
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 
@@ -178,7 +180,7 @@ func (a *StorageMarketActorCode_I) GetWeightForDealSet(rt Runtime, dealIDs deal.
 
 	h, st := a.State(rt)
 
-	for _, dealID := range dealIDs.Items() {
+	for _, dealID := range dealIDs.Items {
 		_, dealP := st._getOnChainDealAssert(dealID)
 		Assert(dealP.Provider() == minerAddr)
 
@@ -191,13 +193,13 @@ func (a *StorageMarketActorCode_I) GetWeightForDealSet(rt Runtime, dealIDs deal.
 	return deal.DealWeight(ret)
 }
 
-func (a *StorageMarketActorCode_I) OnMinerSectorsTerminate(rt Runtime, dealIDs deal.DealIDs) {
+func (a *StorageMarketActorCode_I) OnMinerSectorsTerminate(rt Runtime, dealIDs abi.DealIDs) {
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
 
-	for _, dealID := range dealIDs.Items() {
+	for _, dealID := range dealIDs.Items {
 		_, dealP := st._rtGetOnChainDealOrAbort(rt, dealID)
 		Assert(dealP.Provider() == minerAddr)
 
@@ -234,7 +236,7 @@ func (a *StorageMarketActorCode_I) OnEpochTickEnd(rt Runtime) {
 	numDequeuedTarget := st.CurrEpochNumDealsPublished() * DEAL_PROC_AMORTIZED_SCALE_FACTOR
 
 	numDequeued := 0
-	extractedDealIDs := []deal.DealID{}
+	extractedDealIDs := []abi.DealID{}
 
 	for {
 		if st.CachedExpirationsNextProcEpoch() > rt.CurrEpoch() {
@@ -293,7 +295,7 @@ func (a *StorageMarketActorCode_I) Constructor(rt Runtime) {
 		Deals_:                          DealsAMT_Empty(),
 		EscrowTable_:                    actor_util.BalanceTableHAMT_Empty(),
 		LockedReqTable_:                 actor_util.BalanceTableHAMT_Empty(),
-		NextID_:                         deal.DealID(0),
+		NextID_:                         abi.DealID(0),
 		CachedDealIDsByParty_:           CachedDealIDsByPartyHAMT_Empty(),
 		CachedExpirationsPending_:       CachedExpirationsPendingHAMT_Empty(),
 		CachedExpirationsNextProcEpoch_: abi.ChainEpoch(0),
@@ -314,7 +316,7 @@ func (st *StorageMarketActorState_I) _rtUpdatePendingDealStatesForParty(rt Runti
 
 	cachedRes, ok := st.CachedDealIDsByParty()[addr]
 	Assert(ok)
-	extractedDealIDs := []deal.DealID{}
+	extractedDealIDs := []abi.DealID{}
 	for cachedDealID := range cachedRes {
 		extractedDealIDs = append(extractedDealIDs, cachedDealID)
 	}
@@ -407,7 +409,7 @@ func _rtAbortIfDealFailsParamBounds(rt Runtime, dealP deal.StorageDealProposal) 
 	}
 }
 
-func (st *StorageMarketActorState_I) _rtGetOnChainDealOrAbort(rt Runtime, dealID deal.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal) {
+func (st *StorageMarketActorState_I) _rtGetOnChainDealOrAbort(rt Runtime, dealID abi.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal) {
 	var found bool
 	deal, dealP, found = st._getOnChainDeal(dealID)
 	if !found {

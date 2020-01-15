@@ -1,20 +1,18 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
 import addr "github.com/filecoin-project/go-address"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type BalanceTableHAMT {addr.Address: abi.TokenAmount}
 
-type DealIDSetHAMT {deal.DealID: bool}
-type IntToDealIDHAMT {Int: deal.DealID}
+type DealIDSetHAMT {abi.DealID: bool}
+type IntToDealIDHAMT {Int: abi.DealID}
 
 type DealIDQueue struct {
     Values      IntToDealIDHAMT
     StartIndex  Int
     EndIndex    Int
 
-    Enqueue(dealID deal.DealID)
-    Dequeue() (dealID deal.DealID, ok bool)
+    Enqueue(dealID abi.DealID)
+    Dequeue() (dealID abi.DealID, ok bool)
 }
 
 type MinerSetHAMT {addr.Address: bool}
@@ -23,13 +21,13 @@ type ActorIDSetHAMT {abi.ActorID: bool}
 
 type MinerEvent struct {
     MinerAddr  addr.Address
-    Sectors    [sector.SectorNumber]  // Empty for global events, such as SurprisePoSt expiration.
+    Sectors    [abi.SectorNumber]  // Empty for global events, such as SurprisePoSt expiration.
 }
 
 type MinerEventSetHAMT {MinerEvent: bool}
 
 type SectorStorageWeightDesc struct {
-    SectorSize  sector.SectorSize
+    SectorSize  abi.SectorSize
     Duration    abi.ChainEpoch
     DealWeight  BigInt
 }

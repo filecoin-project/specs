@@ -4,13 +4,15 @@ import (
 	"bytes"
 	big "math/big"
 
+	abi "github.com/filecoin-project/specs/actors/abi"
 	file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	util "github.com/filecoin-project/specs/util"
 	"github.com/ipfs/go-cid"
 )
 
-func WinSDRParams(cfg sector.SealCfg) *WinStackedDRG_I {
+func WinSDRParams(c sector.SealInstanceCfg) *WinStackedDRG_I {
+	cfg := c.As_WinStackedDRGCfgV1()
 	// TODO: Bridge constants with orient model.
 	const LAYERS = 10
 	const OFFLINE_CHALLENGES = 6666
@@ -74,7 +76,7 @@ func WinSDRParams(cfg sector.SealCfg) *WinStackedDRG_I {
 		Curve_: &EllipticCurve_I{
 			FieldModulus_: *FIELD_MODULUS,
 		},
-		Cfg_: cfg,
+		Cfg_: c,
 	}
 }
 
@@ -102,7 +104,8 @@ func (sdr *WinStackedDRG_I) WindowExpander() *ExpanderGraph_I {
 	}
 }
 
-func (sdr *WinStackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness sector.SealRandomness) SealSetupArtifacts {
+func (sdr *WinStackedDRG_I) Seal(registeredProof abi.RegisteredProof, sid abi.SectorID, data []byte, randomness abi.SealRandomness) SealSetupArtifacts {
+
 	windowCount := int(sdr.WindowCount())
 	nodeSize := int(sdr.NodeSize())
 	nodes := int(sdr.Nodes())
@@ -154,7 +157,7 @@ func (sdr *WinStackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness se
 	return &result
 }
 
-func (sdr *WinStackedDRG_I) _generateWindowKey(sealSeed sector.SealSeed, windowIndex int, sid sector.SectorID, commD sector.UnsealedSectorCID, nodes int, randomness sector.SealRandomness) [][]byte {
+func (sdr *WinStackedDRG_I) _generateWindowKey(sealSeed sector.SealSeed, windowIndex int, sid abi.SectorID, commD abi.UnsealedSectorCID, nodes int, randomness abi.SealRandomness) [][]byte {
 	nodeSize := int(sdr.NodeSize())
 	curveModulus := sdr.Curve().FieldModulus()
 	layers := int(sdr.Layers())
@@ -173,7 +176,7 @@ func (sdr *WinStackedDRG_I) GenerateCommitments(replica []byte, windowKeyLayers 
 	return commC, commQ, commRLast, commR, commCTreePath, commQTreePath, commRLastTreePath
 }
 
-func (sdr *WinStackedDRG_I) CreateSealProof(challengeSeed sector.InteractiveSealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
+func (sdr *WinStackedDRG_I) CreateSealProof(challengeSeed abi.InteractiveSealRandomness, aux sector.ProofAuxTmp) abi.SealProof {
 	privateProof := sdr.CreatePrivateSealProof(challengeSeed, aux)
 
 	// Sanity check: newly-created proofs must pass verification.
@@ -182,7 +185,7 @@ func (sdr *WinStackedDRG_I) CreateSealProof(challengeSeed sector.InteractiveSeal
 	return sdr.CreateOfflineCircuitProof(privateProof, aux)
 }
 
-func (sdr *WinStackedDRG_I) CreatePrivateSealProof(randomness sector.InteractiveSealRandomness, aux sector.ProofAuxTmp) (privateProof PrivateOfflineProof) {
+func (sdr *WinStackedDRG_I) CreatePrivateSealProof(randomness abi.InteractiveSealRandomness, aux sector.ProofAuxTmp) (privateProof PrivateOfflineProof) {
 	sealSeed := aux.Seed()
 	nodeSize := UInt(sdr.NodeSize())
 	wrapperChallenges, windowChallenges := sdr._generateOfflineChallenges(sealSeed, randomness, sdr.Challenges(), sdr.WindowChallenges())
@@ -193,7 +196,7 @@ func (sdr *WinStackedDRG_I) CreatePrivateSealProof(randomness sector.Interactive
 	qTree := LoadMerkleTree(aux.CommQTreePath())
 
 	windows := int(sdr.WindowCount())
-	windowSize := int(uint64(sdr.Cfg().SectorSize()) / UInt(sdr.WindowCount()))
+	windowSize := int(uint64(sdr.Cfg().As_WinStackedDRGCfgV1().SectorSize()) / UInt(sdr.WindowCount()))
 
 	for c := range windowChallenges {
 		columnProofs := createColumnProofs(sdr.WindowDrg(), sdr.WindowExpander(), UInt(c), nodeSize, columnTree, aux, windows, windowSize)
@@ -215,10 +218,10 @@ func (sdr *WinStackedDRG_I) CreatePrivateSealProof(randomness sector.Interactive
 // NOTE: Verification of a private proof is exactly the computation we will prove we have performed in a zk-SNARK.
 // If we can verifiably prove that we have performed the verification of a private proof, then we need not reveal the proof itself.
 // Since the zk-SNARK circuit proof is much smaller than the private proof, this allows us to save space on the chain (at the cost of increased computation to generate the zk-SNARK proof).
-func (sdr *WinStackedDRG_I) VerifyPrivateSealProof(privateProof PrivateOfflineProof, sealSeed sector.SealSeed, randomness sector.InteractiveSealRandomness, commD Commitment, commR sector.SealedSectorCID) bool {
+func (sdr *WinStackedDRG_I) VerifyPrivateSealProof(privateProof PrivateOfflineProof, sealSeed sector.SealSeed, randomness abi.InteractiveSealRandomness, commD Commitment, commR abi.SealedSectorCID) bool {
 	nodeSize := int(sdr.NodeSize())
 	windowCount := int(sdr.WindowCount())
-	windowSize := int(UInt(sdr.Cfg().SectorSize()) / UInt(sdr.WindowCount())) // TOOD: Make this a function.
+	windowSize := int(UInt(sdr.Cfg().As_WinStackedDRGCfgV1().SectorSize()) / UInt(sdr.WindowCount())) // TOOD: Make this a function.
 	layers := int(sdr.Layers())
 	curveModulus := sdr.Curve().FieldModulus()
 	windowChallenges, wrapperChallenges := sdr._generateOfflineChallenges(sealSeed, randomness, sdr.Challenges(), sdr.WindowChallenges())
@@ -336,30 +339,22 @@ func (sdr *WinStackedDRG_I) VerifyPrivateSealProof(privateProof PrivateOfflinePr
 	return true
 }
 
-func (sdr *WinStackedDRG_I) CreateOfflineCircuitProof(proof PrivateOfflineProof, aux sector.ProofAuxTmp) sector.SealProof {
+func (sdr *WinStackedDRG_I) CreateOfflineCircuitProof(proof PrivateOfflineProof, aux sector.ProofAuxTmp) abi.SealProof {
 	// partitions := sdr.Partitions()
 	// publicInputs := GeneratePublicInputs()
 
 	panic("TODO")
-	var bytes []byte
+	var proofBytes []byte
+	panic("TODO")
 
-	var registeredProof sector.RegisteredProof
-
-	switch sdr.Cfg().SectorSize() {
-	case GIB_32:
-		registeredProof = sector.RegisteredProof_WinStackedDRG32GiBSeal
+	sealProof := abi.SealProof{
+		ProofBytes: proofBytes,
 	}
 
-	sealProof := sector.SealProof_I{
-		// TODO: This must also depend on the sector size if more than one size is in the spec.
-		ProofInstance_: sector.PROOFS[UInt(registeredProof)],
-		ProofBytes_:    bytes,
-	}
-
-	return &sealProof
+	return sealProof
 }
 
-func (sdr *WinStackedDRG_I) _generateOfflineChallenges(sealSeed sector.SealSeed, randomness sector.InteractiveSealRandomness, wrapperChallengeCount WinStackedDRGChallenges, windowChallengeCount WinStackedDRGWindowChallenges) (windowChallenges []UInt, wrapperChallenges []UInt) {
+func (sdr *WinStackedDRG_I) _generateOfflineChallenges(sealSeed sector.SealSeed, randomness abi.InteractiveSealRandomness, wrapperChallengeCount WinStackedDRGChallenges, windowChallengeCount WinStackedDRGWindowChallenges) (windowChallenges []UInt, wrapperChallenges []UInt) {
 	wrapperChallenges = generateOfflineChallenges(int(sdr.Nodes()), sealSeed, randomness, int(wrapperChallengeCount))
 	windowChallenges = generateOfflineChallenges(int(sdr.WindowDRGCfg().Nodes()), sealSeed, randomness, int(windowChallengeCount))
 
@@ -369,18 +364,18 @@ func (sdr *WinStackedDRG_I) _generateOfflineChallenges(sealSeed sector.SealSeed,
 ////////////////////////////////////////////////////////////////////////////////
 // Seal Verification
 
-func (sdr *WinStackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
-	onChain := sv.OnChain()
-	sealProof := onChain.Proof()
-	commR := sector.SealedSectorCID(onChain.SealedCID())
-	commD := sector.UnsealedSectorCID(sv.UnsealedCID())
-	sealSeed := computeSealSeed(sv.SectorID(), sv.Randomness(), commD)
+func (sdr *WinStackedDRG_I) VerifySeal(sv abi.SealVerifyInfo) bool {
+	onChain := sv.OnChain
+	sealProof := onChain.Proof
+	commR := abi.SealedSectorCID(onChain.SealedCID)
+	commD := abi.UnsealedSectorCID(sv.UnsealedCID)
+	sealSeed := computeSealSeed(sv.SectorID, sv.Randomness, commD)
 
-	wrapperChallenges, windowChallenges := sdr._generateOfflineChallenges(sealSeed, sv.InteractiveRandomness(), sdr.Challenges(), sdr.WindowChallenges())
+	wrapperChallenges, windowChallenges := sdr._generateOfflineChallenges(sealSeed, sv.InteractiveRandomness, sdr.Challenges(), sdr.WindowChallenges())
 	return sdr._verifyOfflineCircuitProof(commD, commR, sealSeed, windowChallenges, wrapperChallenges, sealProof)
 }
 
-func (sdr *WinStackedDRG_I) _verifyOfflineCircuitProof(commD sector.UnsealedSectorCID, commR sector.SealedSectorCID, sealSeed sector.SealSeed, windowChallenges []UInt, wrapperChallenges []UInt, sv sector.SealProof) bool {
+func (sdr *WinStackedDRG_I) _verifyOfflineCircuitProof(commD abi.UnsealedSectorCID, commR abi.SealedSectorCID, sealSeed sector.SealSeed, windowChallenges []UInt, wrapperChallenges []UInt, sv abi.SealProof) bool {
 	//publicInputs := GeneratePublicInputs()
 	panic("TODO")
 }
@@ -388,8 +383,8 @@ func (sdr *WinStackedDRG_I) _verifyOfflineCircuitProof(commD sector.UnsealedSect
 ////////////////////////////////////////////////////////////////////////////////
 // PoSt
 
-func (sdr *WinStackedDRG_I) _generateCandidate(postCfg sector.PoStCfg, randomness sector.PoStRandomness, aux sector.PersistentProofAux, sectorID sector.SectorID, sectorChallengeIndex UInt) sector.PoStCandidate {
-	cfg := postCfg.InstanceCfg().As_PoStCfgV1()
+func (sdr *WinStackedDRG_I) _generateCandidate(postCfg sector.PoStInstanceCfg, randomness abi.PoStRandomness, aux sector.PersistentProofAux, sectorID abi.SectorID, sectorChallengeIndex uint64) abi.PoStCandidate {
+	cfg := postCfg.As_PoStCfgV1()
 
 	nodes := int(cfg.Nodes())
 	leafChallengeCount := int(cfg.LeafChallengeCount())
@@ -416,23 +411,23 @@ func (sdr *WinStackedDRG_I) _generateCandidate(postCfg sector.PoStCfg, randomnes
 		InclusionProofs: inclusionProofs,
 	}
 
-	candidate := sector.PoStCandidate_I{
-		PartialTicket_:  partialTicket,
-		PrivateProof_:   privateProof.externalize(sector.ProofAlgorithm_WinStackedDRGSeal),
-		SectorID_:       sectorID,
-		ChallengeIndex_: sectorChallengeIndex,
+	candidate := abi.PoStCandidate{
+		PartialTicket:  partialTicket,
+		PrivateProof:   privateProof.externalize(abi.ProofAlgorithm_WinStackedDRGSeal),
+		SectorID:       sectorID,
+		ChallengeIndex: int64(sectorChallengeIndex),
 	}
-	return &candidate
+	return candidate
 }
 
-func (sdr *WinStackedDRG_I) VerifyInternalPrivateCandidateProof(postCfg sector.PoStCfg, p *InternalPrivateCandidateProof, challengeSeed sector.PoStRandomness, candidate sector.PoStCandidate, commRLast Commitment) bool {
-	cfg := postCfg.InstanceCfg().As_PoStCfgV1()
-	util.Assert(candidate.PrivateProof() == nil)
+func (sdr *WinStackedDRG_I) VerifyInternalPrivateCandidateProof(postCfg sector.PoStInstanceCfg, p *InternalPrivateCandidateProof, challengeSeed abi.PoStRandomness, candidate abi.PoStCandidate, commRLast Commitment) bool {
+	cfg := postCfg.As_PoStCfgV1()
+	//util.Assert(candidate.PrivateProof == nil)
 	nodes := int(cfg.Nodes())
 	challengeRangeSize := int(cfg.ChallengeRangeSize())
 
-	sectorID := candidate.SectorID()
-	claimedPartialTicket := candidate.PartialTicket()
+	sectorID := candidate.SectorID
+	claimedPartialTicket := candidate.PartialTicket
 
 	allInclusionProofs := p.InclusionProofs
 
@@ -467,7 +462,7 @@ func (sdr *WinStackedDRG_I) VerifyInternalPrivateCandidateProof(postCfg sector.P
 
 	// Check all inclusion proofs.
 	for i := 0; i < int(cfg.LeafChallengeCount()); i++ {
-		leafChallenge := generateLeafChallenge(challengeSeed, candidate.ChallengeIndex(), i, nodes, challengeRangeSize)
+		leafChallenge := generateLeafChallenge(challengeSeed, UInt(candidate.ChallengeIndex), i, nodes, challengeRangeSize)
 		for j := 0; j < challengeRangeSize; j++ {
 			leafIndex := leafChallenge + UInt(j)
 			proof := next()
@@ -484,7 +479,7 @@ func (sdr *WinStackedDRG_I) VerifyInternalPrivateCandidateProof(postCfg sector.P
 	return true
 }
 
-func (sdr *WinStackedDRG_I) VerifyPrivatePoStProof(cfg sector.PoStCfg, privateProof PrivatePoStProof, candidates []sector.PoStCandidate, sectorIDs []sector.SectorID, sectorCommitments sector.SectorCommitments) bool {
+func (sdr *WinStackedDRG_I) VerifyPrivatePoStProof(cfg sector.PoStInstanceCfg, privateProof PrivatePoStProof, candidates []abi.PoStCandidate, sectorIDs []abi.SectorID, sectorCommitments sector.SectorCommitments) bool {
 	// This is safe by construction.
 	challengeSeed := privateProof.ChallengeSeed
 
@@ -492,7 +487,7 @@ func (sdr *WinStackedDRG_I) VerifyPrivatePoStProof(cfg sector.PoStCfg, privatePr
 		proof := newInternalPrivateProof(p)
 
 		candidate := candidates[i]
-		ci := candidate.ChallengeIndex()
+		ci := candidate.ChallengeIndex
 		expectedSectorID := sectorIDs[ci]
 
 		challengedSectorID := generateSectorChallenge(challengeSeed, i, sectorIDs)
@@ -510,15 +505,15 @@ func (sdr *WinStackedDRG_I) VerifyPrivatePoStProof(cfg sector.PoStCfg, privatePr
 	return true
 }
 
-func (sdr *WinStackedDRG_I) _createPoStCircuitProof(postCfg sector.PoStCfg, privateProof PrivatePoStProof) sector.PoStProof {
+func (sdr *WinStackedDRG_I) _createPoStCircuitProof(postCfg sector.PoStInstanceCfg, privateProof PrivatePoStProof) abi.PoStProof {
 	panic("TODO")
 
-	cfg := postCfg.InstanceCfg().As_PoStCfgV1()
+	var proofBytes []byte
+	panic("TODO")
 
-	postProof := sector.PoStProof_I{
-		Type_:          cfg.Type(),
-		ProofInstance_: postCfg.ProofInstance(),
+	postProof := abi.PoStProof{
+		ProofBytes: proofBytes,
 	}
 
-	return &postProof
+	return postProof
 }

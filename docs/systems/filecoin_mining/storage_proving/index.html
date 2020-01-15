@@ -4769,7 +4769,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">poster</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&#34;</span>
 <span class="kn">import</span> <span class="nx">sealer</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/sealer&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
@@ -4778,8 +4778,8 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">SectorSealer</span>   <span class="nx">sealer</span><span class="p">.</span><span class="nx">SectorSealer</span>
     <span class="nx">PoStGenerator</span>  <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStGenerator</span>
 
-    <span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">,</span> <span class="nx">pieceInfos</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">])</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">ok</span> <span class="kt">bool</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
-    <span class="nf">ComputeUnsealedSectorCID</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">UInt</span><span class="p">,</span> <span class="nx">pieceInfos</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">])</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">unsealedSectorCID</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+    <span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">,</span> <span class="nx">pieceInfos</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">])</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">ok</span> <span class="kt">bool</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+    <span class="nf">ComputeUnsealedSectorCID</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">UInt</span><span class="p">,</span> <span class="nx">pieceInfos</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">])</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">unsealedSectorCID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 
     <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span>
 
@@ -4787,24 +4787,24 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// GetPieceInclusionProof(pieceRef CID) union { PieceInclusionProofs, error }
 </span><span class="c1"></span>
     <span class="nf">GenerateElectionPoStCandidates</span><span class="p">(</span>
-        <span class="nx">challengeSeed</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span>
-        <span class="nx">sectorIDs</span>      <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">]</span>
-    <span class="p">)</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
+        <span class="nx">challengeSeed</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span>
+        <span class="nx">sectorIDs</span>      <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">]</span>
+    <span class="p">)</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
 
     <span class="nf">GenerateSurprisePoStCandidates</span><span class="p">(</span>
-        <span class="nx">challengeSeed</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span>
-        <span class="nx">sectorIDs</span>      <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">]</span>
-    <span class="p">)</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
+        <span class="nx">challengeSeed</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span>
+        <span class="nx">sectorIDs</span>      <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">]</span>
+    <span class="p">)</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
 
     <span class="nf">CreateElectionPoStProof</span><span class="p">(</span>
-        <span class="nx">challengeSeed</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span>
-        <span class="nx">candidates</span>     <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
-    <span class="p">)</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span><span class="p">]</span>
+        <span class="nx">challengeSeed</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span>
+        <span class="nx">candidates</span>     <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
+    <span class="p">)</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span><span class="p">]</span>
 
     <span class="nf">CreateSurprisePoStProof</span><span class="p">(</span>
-        <span class="nx">challengeSeed</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span>
-        <span class="nx">candidates</span>     <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
-    <span class="p">)</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span><span class="p">]</span>
+        <span class="nx">challengeSeed</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span>
+        <span class="nx">candidates</span>     <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
+    <span class="p">)</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
 

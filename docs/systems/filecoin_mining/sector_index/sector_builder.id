@@ -1,5 +1,5 @@
+import abi "github.com/filecoin-project/specs/actors/abi"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-// import smkt "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 
 // SectorBuilder accumulates deals, keeping track of their
@@ -8,7 +8,7 @@ import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_
 // will return a sector.
 
 type StageDealResponse struct {
-    SectorID sector.SectorID
+    SectorID abi.SectorID
 }
 
 type SectorBuilder struct {

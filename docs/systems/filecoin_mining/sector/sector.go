@@ -1,6 +1,7 @@
 package sector
 
 import (
+	abi "github.com/filecoin-project/specs/actors/abi"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -14,39 +15,43 @@ const (
 	TerminatedFault
 )
 
-var PROOFS ProofRegistry = ProofRegistry(map[util.UInt]ProofInstance{util.UInt(RegisteredProof_WinStackedDRG32GiBSeal): &ProofInstance_I{
-	ID_:        RegisteredProof_WinStackedDRG32GiBSeal,
+var PROOFS ProofRegistry = ProofRegistry(map[abi.RegisteredProof]ProofInstance{abi.RegisteredProof_WinStackedDRG32GiBSeal: &ProofInstance_I{
+	ID_:        abi.RegisteredProof_WinStackedDRG32GiBSeal,
 	Type_:      ProofType_SealProof,
-	Algorithm_: ProofAlgorithm_WinStackedDRGSeal,
+	Algorithm_: abi.ProofAlgorithm_WinStackedDRGSeal,
 	CircuitType_: &ConcreteCircuit_I{
 		Name_: "HASHOFCIRCUITDEFINITION1",
 	},
 },
-	util.UInt(RegisteredProof_WinStackedDRG32GiBPoSt): &ProofInstance_I{
-		ID_:        RegisteredProof_WinStackedDRG32GiBPoSt,
+	abi.RegisteredProof_WinStackedDRG32GiBPoSt: &ProofInstance_I{
+		ID_:        abi.RegisteredProof_WinStackedDRG32GiBPoSt,
 		Type_:      ProofType_PoStProof,
-		Algorithm_: ProofAlgorithm_WinStackedDRGPoSt,
+		Algorithm_: abi.ProofAlgorithm_WinStackedDRGPoSt,
 		CircuitType_: &ConcreteCircuit_I{
 			Name_: "HASHOFCIRCUITDEFINITION2",
 		},
 	},
-	util.UInt(RegisteredProof_StackedDRG32GiBSeal): &ProofInstance_I{
-		ID_:        RegisteredProof_StackedDRG32GiBSeal,
+	abi.RegisteredProof_StackedDRG32GiBSeal: &ProofInstance_I{
+		ID_:        abi.RegisteredProof_StackedDRG32GiBSeal,
 		Type_:      ProofType_SealProof,
-		Algorithm_: ProofAlgorithm_StackedDRGSeal,
+		Algorithm_: abi.ProofAlgorithm_StackedDRGSeal,
 		CircuitType_: &ConcreteCircuit_I{
 			Name_: "HASHOFCIRCUITDEFINITION3",
 		},
 	},
-	util.UInt(RegisteredProof_StackedDRG32GiBPoSt): &ProofInstance_I{
-		ID_:        RegisteredProof_StackedDRG32GiBPoSt,
+	abi.RegisteredProof_StackedDRG32GiBPoSt: &ProofInstance_I{
+		ID_:        abi.RegisteredProof_StackedDRG32GiBPoSt,
 		Type_:      ProofType_PoStProof,
-		Algorithm_: ProofAlgorithm_StackedDRGPoSt,
+		Algorithm_: abi.ProofAlgorithm_StackedDRGPoSt,
 		CircuitType_: &ConcreteCircuit_I{
 			Name_: "HASHOFCIRCUITDEFINITION4",
 		},
 	},
 })
+
+func RegisteredProofInstance(r abi.RegisteredProof) ProofInstance {
+	return PROOFS[r]
+}
 
 func (c *ConcreteCircuit_I) GrothParameterFileName() string {
 	return c.Name() + ".params"

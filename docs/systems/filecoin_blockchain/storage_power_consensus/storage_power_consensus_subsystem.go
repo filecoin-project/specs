@@ -11,7 +11,6 @@ import (
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
@@ -35,7 +34,7 @@ func (spc *StoragePowerConsensusSubsystem_I) ComputeChainWeight(tipset chain.Tip
 	return spc.ec().ComputeChainWeight(tipset)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree stateTree.StateTree, inds inds.Indices, partialTicket sector.PartialTicket, sectorUtilization abi.StoragePower, numSectors util.UVarint) bool {
+func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree stateTree.StateTree, inds inds.Indices, partialTicket abi.PartialTicket, sectorUtilization abi.StoragePower, numSectors util.UVarint) bool {
 
 	// finalize the partial ticket
 	challengeTicket := filcrypto.SHA256(partialTicket)

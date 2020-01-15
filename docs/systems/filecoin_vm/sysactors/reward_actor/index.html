@@ -4845,13 +4845,12 @@ https://github.com/alex-shpak/hugo-book
     <span class="s">&#34;math&#34;</span>
 
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
+    <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
     <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
     <span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin&#34;</span>
     <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
     <span class="nx">serde</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/serde&#34;</span>
     <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
-    <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-    <span class="nx">ai</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces&#34;</span>
     <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 <span class="p">)</span>
 
@@ -4962,7 +4961,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="c1">// Send fund to SPA for collateral
 </span><span class="c1"></span>        <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
             <span class="nx">builtin</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
-            <span class="nx">ai</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_AddBalance</span><span class="p">,</span>
+            <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_AddBalance</span><span class="p">,</span>
             <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span><span class="nx">miner</span><span class="p">),</span>
             <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">rewardToGarnish</span><span class="p">),</span>
         <span class="p">)</span>

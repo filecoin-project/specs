@@ -2,7 +2,7 @@ package runtime
 
 import (
 	abi "github.com/filecoin-project/specs/actors/abi"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	actor "github.com/filecoin-project/specs/actors/builtin"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	util "github.com/filecoin-project/specs/util"
 )

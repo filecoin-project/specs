@@ -12,20 +12,17 @@ import (
 
 	abi "github.com/filecoin-project/specs/actors/abi"
 	file "github.com/filecoin-project/specs/systems/filecoin_files/file"
-	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 	util "github.com/filecoin-project/specs/util"
-	"github.com/ipfs/go-cid"
+	cid "github.com/ipfs/go-cid"
 )
 
 type Bytes32 []byte
 type UInt = util.UInt
-type PieceInfo = sector.PieceInfo
+type PieceInfo = abi.PieceInfo
 type Label Bytes32
 type Commitment = sector.Commitment
-
-type PrivatePostCandidateProof = sector.PrivatePoStCandidateProof
 
 const WRAPPER_LAYER_WINDOW_INDEX = -1
 
@@ -37,54 +34,41 @@ const POST_CHALLENGE_RANGE_SIZE = 1
 
 const GIB_32 = 32 * 1024 * 1024 * 1024
 
-func PoStCfg(pType sector.PoStType, sectorSize sector.SectorSize, partitions UInt) *sector.PoStCfg_I {
+func PoStCfg(pType sector.PoStType, sectorSize abi.SectorSize, partitions UInt) *sector.PoStInstanceCfg_I {
 	nodes := UInt(sectorSize / NODE_SIZE)
 
-	var registeredProof sector.RegisteredProof
-
-	switch pType {
-	case sector.PoStType_ElectionPoSt:
-		registeredProof = sector.RegisteredProof_WinStackedDRG32GiBPoSt
-	case sector.PoStType_SurprisePoSt:
-		registeredProof = sector.RegisteredProof_WinStackedDRG32GiBPoSt
-
-	}
-
-	return &sector.PoStCfg_I{
-		InstanceCfg_: sector.PoStInstanceCfg_Make_PoStCfgV1(&sector.PoStCfgV1_I{
-			Type_:               pType,
-			Nodes_:              nodes,
-			Partitions_:         partitions,
-			LeafChallengeCount_: POST_LEAF_CHALLENGE_COUNT,
-			ChallengeRangeSize_: POST_CHALLENGE_RANGE_SIZE,
-		}),
-		ProofInstance_: sector.PROOFS[UInt(registeredProof)],
-	}
+	return sector.PoStInstanceCfg_Make_PoStCfgV1(&sector.PoStCfgV1_I{
+		Type_:               pType,
+		Nodes_:              nodes,
+		Partitions_:         partitions,
+		LeafChallengeCount_: POST_LEAF_CHALLENGE_COUNT,
+		ChallengeRangeSize_: POST_CHALLENGE_RANGE_SIZE,
+	}).Impl()
 }
 
-func MakeSealVerifier(cfg sector.SealCfg) *SealVerifier_I {
+func MakeSealVerifier(cfg sector.SealInstanceCfg) *SealVerifier_I {
 	return &SealVerifier_I{
 		SealCfg_: cfg,
 	}
 }
 
-func SurprisePoStCfg(sectorSize sector.SectorSize) *sector.PoStCfg_I {
+func SurprisePoStCfg(sectorSize abi.SectorSize) *sector.PoStInstanceCfg_I {
 	return PoStCfg(sector.PoStType_SurprisePoSt, sectorSize, SURPRISE_POST_PARTITIONS)
 }
 
-func ElectionPoStCfg(sectorSize sector.SectorSize) *sector.PoStCfg_I {
+func ElectionPoStCfg(sectorSize abi.SectorSize) *sector.PoStInstanceCfg_I {
 	return PoStCfg(sector.PoStType_ElectionPoSt, sectorSize, ELECTION_POST_PARTITIONS)
 }
 
-func MakeElectionPoStVerifier(cfg sector.PoStCfg) *PoStVerifier_I {
+func MakeElectionPoStVerifier(cfg sector.PoStInstanceCfg) *PoStVerifier_I {
 	return &PoStVerifier_I{
-		ElectionPoStCfg_: cfg,
+		PoStCfg_: cfg,
 	}
 }
 
-func MakeSurprisePoStVerifier(cfg sector.PoStCfg) *PoStVerifier_I {
+func MakeSurprisePoStVerifier(cfg sector.PoStInstanceCfg) *PoStVerifier_I {
 	return &PoStVerifier_I{
-		SurprisePoStCfg_: cfg,
+		PoStCfg_: cfg,
 	}
 }
 
@@ -176,9 +160,9 @@ func getProverID(minerID abi.ActorID) []byte {
 	panic("TODO")
 }
 
-func computeSealSeed(sid sector.SectorID, randomness sector.SealRandomness, commD sector.UnsealedSectorCID) sector.SealSeed {
-	proverId := getProverID(sid.Miner())
-	sectorNumber := sid.Number()
+func computeSealSeed(sid abi.SectorID, randomness abi.SealRandomness, commD abi.UnsealedSectorCID) sector.SealSeed {
+	proverId := getProverID(sid.Miner)
+	sectorNumber := sid.Number
 
 	var preimage []byte
 	preimage = append(preimage, proverId...)
@@ -448,7 +432,7 @@ func (proof *SDRColumnProof) Verify(root []byte, challenge UInt) bool {
 	return proof.InclusionProof.Verify(root, challenge)
 }
 
-func generateOfflineChallenges(challengeRange int, sealSeed sector.SealSeed, randomness sector.InteractiveSealRandomness, challengeCount int) []UInt {
+func generateOfflineChallenges(challengeRange int, sealSeed sector.SealSeed, randomness abi.InteractiveSealRandomness, challengeCount int) []UInt {
 	var challenges []UInt
 	challengeRangeSize := challengeRange - 1 // Never challenge the first node.
 	challengeModulus := new(big.Int)
@@ -493,15 +477,15 @@ func addEncode(data []byte, key []byte, modulus *big.Int, nodeSize int) []byte {
 ////////////////////////////////////////////////////////////////////////////////
 // Seal Verification
 
-func (sv *SealVerifier_I) VerifySeal(svi sector.SealVerifyInfo) bool {
-	switch svi.SealCfg().ProofInstance().ID() {
-	case sector.RegisteredProof_WinStackedDRG32GiBSeal:
+func (sv *SealVerifier_I) VerifySeal(svi abi.SealVerifyInfo) bool {
+	switch svi.OnChain.RegisteredProof {
+	case abi.RegisteredProof_WinStackedDRG32GiBSeal:
 		{
-			sdr := WinSDRParams(svi.SealCfg())
+			sdr := WinSDRParams(sector.RegisteredProofInstance(svi.OnChain.RegisteredProof).Cfg().As_SealCfg())
 
 			return sdr.VerifySeal(svi)
 		}
-	case sector.RegisteredProof_StackedDRG32GiBSeal:
+	case abi.RegisteredProof_StackedDRG32GiBSeal:
 		{
 			panic("TODO")
 		}
@@ -510,15 +494,15 @@ func (sv *SealVerifier_I) VerifySeal(svi sector.SealVerifyInfo) bool {
 	return false
 }
 
-func ComputeUnsealedSectorCIDFromPieceInfos(sectorSize sector.SectorSize, pieceInfos []PieceInfo) (unsealedCID sector.UnsealedSectorCID, err error) {
+func ComputeUnsealedSectorCIDFromPieceInfos(sectorSize abi.SectorSize, pieceInfos []PieceInfo) (unsealedCID abi.UnsealedSectorCID, err error) {
 	rootPieceInfo := computeRootPieceInfo(pieceInfos)
-	rootSize := rootPieceInfo.Size()
+	rootSize := uint64(rootPieceInfo.Size)
 
 	if rootSize != uint64(sectorSize) {
 		return unsealedCID, errors.New("Wrong sector size.")
 	}
 
-	return UnsealedSectorCID(AsBytes_PieceCID(rootPieceInfo.PieceCID())), nil
+	return UnsealedSectorCID(rootPieceInfo.PieceCID.Bytes()), nil
 }
 
 func computeRootPieceInfo(pieceInfos []PieceInfo) PieceInfo {
@@ -543,7 +527,7 @@ func computeRootPieceInfo(pieceInfos []PieceInfo) PieceInfo {
 		return stack[len(stack)-1]
 	}
 	reduce1 := func() bool {
-		if len(stack) > 1 && peek().Size() == peek2().Size() {
+		if len(stack) > 1 && peek().Size == peek2().Size {
 			right := pop()
 			left := pop()
 			joined := joinPieceInfos(left, right)
@@ -566,11 +550,11 @@ func computeRootPieceInfo(pieceInfos []PieceInfo) PieceInfo {
 
 	// Consume the remainder.
 	for _, pieceInfo := range pieceInfos[1:] {
-		// TODO: Assert that pieceInfo.Size() is a power of 2.
+		// TODO: Assert that pieceInfo.Size is a power of 2.
 
 		// Add padding until top of stack is large enough to receive current pieceInfo.
-		for peek().Size() < pieceInfo.Size() {
-			shiftReduce(zeroPadding(peek().Size()))
+		for peek().Size < pieceInfo.Size {
+			shiftReduce(zeroPadding(peek().Size))
 		}
 
 		// Add the current piece.
@@ -579,39 +563,39 @@ func computeRootPieceInfo(pieceInfos []PieceInfo) PieceInfo {
 
 	// Add any necessary final padding.
 	for len(stack) > 1 {
-		shiftReduce(zeroPadding(peek().Size()))
+		shiftReduce(zeroPadding(peek().Size))
 	}
 	util.Assert(len(stack) == 1)
 
 	return pop()
 }
 
-func zeroPadding(size UInt) PieceInfo {
-	return &sector.PieceInfo_I{
-		Size_: size,
+func zeroPadding(size int64) PieceInfo {
+	return abi.PieceInfo{
+		Size: size,
 		// CommP_: FIXME: Implement.
 	}
 }
 
 func joinPieceInfos(left PieceInfo, right PieceInfo) PieceInfo {
-	util.Assert(left.Size() == right.Size())
+	util.Assert(left.Size == right.Size)
 
 	// FIXME: make this whole function generic?
 	// Note: cid.Bytes() isn't actually the payload data that we want input to the binary hash function, for more
 	// information see discussion: https://filecoinproject.slack.com/archives/CHMNDCK9P/p1578629688082700
-	sectorPieceCID, err := cid.Cast(BinaryHash_SHA256Hash(cid.Cid(left.PieceCID()).Bytes(), cid.Cid(right.PieceCID()).Bytes()))
+	sectorPieceCID, err := cid.Cast(BinaryHash_SHA256Hash(cid.Cid(left.PieceCID).Bytes(), cid.Cid(right.PieceCID).Bytes()))
 	util.Assert(err == nil)
 
-	return &sector.PieceInfo_I{
-		Size_:     left.Size() + right.Size(),
-		PieceCID_: piece.PieceCID(sectorPieceCID),
+	return abi.PieceInfo{
+		Size:     left.Size + right.Size,
+		PieceCID: abi.PieceCID(sectorPieceCID),
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // PoSt
 
-func getChallengedSectors(cfg sector.PoStCfg, sectorIDs []sector.SectorID, randomness sector.PoStRandomness, eligibleSectors []sector.SectorID, candidateCount int) (sectors []sector.SectorID) {
+func getChallengedSectors(cfg sector.PoStInstanceCfg, sectorIDs []abi.SectorID, randomness abi.PoStRandomness, eligibleSectors []abi.SectorID, candidateCount int) (sectors []abi.SectorID) {
 	for i := 0; i < candidateCount; i++ {
 		sector := generateSectorChallenge(randomness, i, sectorIDs)
 		sectors = append(sectors, sector)
@@ -620,7 +604,7 @@ func getChallengedSectors(cfg sector.PoStCfg, sectorIDs []sector.SectorID, rando
 	return sectors
 }
 
-func generateSectorChallenge(randomness sector.PoStRandomness, n int, sectorIDs []sector.SectorID) (sector sector.SectorID) {
+func generateSectorChallenge(randomness abi.PoStRandomness, n int, sectorIDs []abi.SectorID) (sector abi.SectorID) {
 	preimage := append(randomness, littleEndianBytesFromInt(n, 8)...)
 	hash := SHA256Hash(preimage)
 	sectorChallenge := bigIntFromLittleEndianBytes(hash)
@@ -632,7 +616,7 @@ func generateSectorChallenge(randomness sector.PoStRandomness, n int, sectorIDs 
 	return sectorIDs[int(sectorIndex.Uint64())]
 }
 
-func generateLeafChallenge(randomness sector.PoStRandomness, sectorChallengeIndex UInt, leafChallengeIndex int, nodes int, challengeRangeSize int) UInt {
+func generateLeafChallenge(randomness abi.PoStRandomness, sectorChallengeIndex UInt, leafChallengeIndex int, nodes int, challengeRangeSize int) UInt {
 	preimage := append(randomness, littleEndianBytesFromUInt(sectorChallengeIndex, 8)...)
 	preimage = append(preimage, littleEndianBytesFromInt(leafChallengeIndex, 8)...)
 	hash := SHA256Hash(preimage)
@@ -647,39 +631,39 @@ func generateLeafChallenge(randomness sector.PoStRandomness, sectorChallengeInde
 	return leafChallenge.Uint64()
 }
 
-func generateCandidate(algorithm sector.ProofAlgorithm, cfg sector.PoStCfg, randomness sector.PoStRandomness, aux sector.PersistentProofAux, sectorID sector.SectorID, sectorChallengeIndex UInt) sector.PoStCandidate {
-	var candidate sector.PoStCandidate
+func generateCandidate(algorithm abi.ProofAlgorithm, cfg sector.PoStInstanceCfg, randomness abi.PoStRandomness, aux sector.PersistentProofAux, sectorID abi.SectorID, sectorChallengeIndex UInt) abi.PoStCandidate {
+	var candidate abi.PoStCandidate
 	switch algorithm {
-	case sector.ProofAlgorithm_StackedDRGSeal:
+	case abi.ProofAlgorithm_StackedDRGSeal:
 		panic("TODO")
-	case sector.ProofAlgorithm_WinStackedDRGSeal:
+	case abi.ProofAlgorithm_WinStackedDRGSeal:
 		sdr := WinStackedDRG_I{}
 		candidate = sdr._generateCandidate(cfg, randomness, aux, sectorID, sectorChallengeIndex)
 	}
 	return candidate
 }
 
-func computePartialTicket(randomness sector.PoStRandomness, sectorID sector.SectorID, data []byte) sector.PartialTicket {
+func computePartialTicket(randomness abi.PoStRandomness, sectorID abi.SectorID, data []byte) abi.PartialTicket {
 	preimage := randomness
-	preimage = append(preimage, getProverID(sectorID.Miner())...)
-	preimage = append(preimage, littleEndianBytesFromUInt(UInt(sectorID.Number()), 8)...)
+	preimage = append(preimage, getProverID(sectorID.Miner)...)
+	preimage = append(preimage, littleEndianBytesFromUInt(UInt(sectorID.Number), 8)...)
 	preimage = append(preimage, data...)
-	partialTicket := sector.PartialTicket(HashBytes_PedersenHash(preimage))
+	partialTicket := abi.PartialTicket(HashBytes_PedersenHash(preimage))
 
 	return partialTicket
 }
 
-type PoStCandidatesMap map[sector.ProofAlgorithm][]sector.PoStCandidate
+type PoStCandidatesMap map[abi.ProofAlgorithm][]abi.PoStCandidate
 
-func CreatePoStProof(cfg sector.PoStCfg, privateCandidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) []sector.PoStProof {
-	var proofsMap map[sector.ProofAlgorithm][]PrivatePostCandidateProof
+func CreatePoStProof(cfg sector.PoStInstanceCfg, privateCandidateProofs []abi.PrivatePoStCandidateProof, challengeSeed abi.PoStRandomness) []abi.PoStProof {
+	var proofsMap map[abi.ProofAlgorithm][]abi.PrivatePoStCandidateProof
 
 	for _, proof := range privateCandidateProofs {
-		algorithm := proof.Algorithm()
+		algorithm := proof.Algorithm
 		proofsMap[algorithm] = append(proofsMap[algorithm], proof)
 	}
 
-	var circuitProofs []sector.PoStProof
+	var circuitProofs []abi.PoStProof
 	for algorithm, proofs := range proofsMap {
 		privateProof := createPrivatePoStProof(algorithm, proofs, challengeSeed)
 		circuitProof := createPoStCircuitProof(cfg, algorithm, privateProof)
@@ -690,12 +674,12 @@ func CreatePoStProof(cfg sector.PoStCfg, privateCandidateProofs []PrivatePostCan
 }
 
 type PrivatePoStProof struct {
-	Algorithm       sector.ProofAlgorithm
-	ChallengeSeed   sector.PoStRandomness
-	CandidateProofs []PrivatePostCandidateProof
+	Algorithm       abi.ProofAlgorithm
+	ChallengeSeed   abi.PoStRandomness
+	CandidateProofs []abi.PrivatePoStCandidateProof
 }
 
-func createPrivatePoStProof(algorithm sector.ProofAlgorithm, candidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) PrivatePoStProof {
+func createPrivatePoStProof(algorithm abi.ProofAlgorithm, candidateProofs []abi.PrivatePoStCandidateProof, challengeSeed abi.PoStRandomness) PrivatePoStProof {
 	// TODO: Verify that all candidateProofs share algorithm.
 	return PrivatePoStProof{
 		Algorithm:       algorithm,
@@ -710,32 +694,32 @@ type InternalPrivateCandidateProof struct {
 
 // This exists because we need to pass private proofs out of filproofs for winner selection.
 // Actually implementing it would (will?) be tedious, since it means doing the same for InclusionProofs.
-func (p *InternalPrivateCandidateProof) externalize(algorithm sector.ProofAlgorithm) sector.PrivatePoStCandidateProof {
-	return &sector.PrivatePoStCandidateProof_I{
-		Algorithm_:    algorithm,
-		Externalized_: []byte{}, // Unimplemented.
+func (p *InternalPrivateCandidateProof) externalize(algorithm abi.ProofAlgorithm) abi.PrivatePoStCandidateProof {
+	return abi.PrivatePoStCandidateProof{
+		Algorithm:    algorithm,
+		Externalized: []byte{}, // Unimplemented.
 	}
 }
 
 // This is the inverse of InternalPrivateCandidateProof.externalize and equally tedious.
-func newInternalPrivateProof(externalPrivateProof PrivatePostCandidateProof) InternalPrivateCandidateProof {
+func newInternalPrivateProof(externalPrivateProof abi.PrivatePoStCandidateProof) InternalPrivateCandidateProof {
 	return InternalPrivateCandidateProof{}
 }
 
-func createPoStCircuitProof(postCfg sector.PoStCfg, algorithm sector.ProofAlgorithm, privateProof PrivatePoStProof) (proof sector.PoStProof) {
+func createPoStCircuitProof(postCfg sector.PoStInstanceCfg, algorithm abi.ProofAlgorithm, privateProof PrivatePoStProof) (proof abi.PoStProof) {
 	switch algorithm {
-	case sector.ProofAlgorithm_WinStackedDRGSeal:
+	case abi.ProofAlgorithm_WinStackedDRGSeal:
 		sdr := WinStackedDRG_I{}
 		proof = sdr._createPoStCircuitProof(postCfg, privateProof)
 	}
 	return proof
 }
 
-func (pv *PoStVerifier_I) _verifyPoStProof(sv sector.PoStVerifyInfo) bool {
+func (pv *PoStVerifier_I) _verifyPoStProof(sv abi.PoStVerifyInfo) bool {
 	// commT := sv.CommT()
 	// candidates := sv.Candidates()
 	// randomness := sv.Randomness()
-	// postProof := sv.OnChain.Proof()
+	// postProofs := sv.OnChain.Proofs()
 
 	// Verify circuit proof.
 	panic("TODO")
@@ -744,7 +728,7 @@ func (pv *PoStVerifier_I) _verifyPoStProof(sv sector.PoStVerifyInfo) bool {
 ////////////////////////////////////////////////////////////////////////////////
 // General PoSt
 
-func generatePoStCandidates(cfg sector.PoStCfg, challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorID, candidateCount int, sectorStore sector_index.SectorStore) (candidates []sector.PoStCandidate) {
+func generatePoStCandidates(cfg sector.PoStInstanceCfg, challengeSeed abi.PoStRandomness, eligibleSectors []abi.SectorID, candidateCount int, sectorStore sector_index.SectorStore) (candidates []abi.PoStCandidate) {
 	challengedSectors := getChallengedSectors(cfg, eligibleSectors, challengeSeed, eligibleSectors, candidateCount)
 
 	for i, sectorID := range challengedSectors {
@@ -762,29 +746,29 @@ func generatePoStCandidates(cfg sector.PoStCfg, challengeSeed sector.PoStRandomn
 ////////////////////////////////////////////////////////////////////////////////
 // Election PoSt
 
-func GenerateElectionPoStCandidates(cfg sector.PoStCfg, challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorID, candidateCount int, sectorStore sector_index.SectorStore) (candidates []sector.PoStCandidate) {
+func GenerateElectionPoStCandidates(cfg sector.PoStInstanceCfg, challengeSeed abi.PoStRandomness, eligibleSectors []abi.SectorID, candidateCount int, sectorStore sector_index.SectorStore) (candidates []abi.PoStCandidate) {
 	return generatePoStCandidates(cfg, challengeSeed, eligibleSectors, candidateCount, sectorStore)
 }
 
-func CreateElectionPoStProof(cfg sector.PoStCfg, privateCandidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) []sector.PoStProof {
+func CreateElectionPoStProof(cfg sector.PoStInstanceCfg, privateCandidateProofs []abi.PrivatePoStCandidateProof, challengeSeed abi.PoStRandomness) []abi.PoStProof {
 	return CreatePoStProof(cfg, privateCandidateProofs, challengeSeed)
 }
 
-func (pv *PoStVerifier_I) VerifyElectionPoSt(sv sector.PoStVerifyInfo) bool {
+func (pv *PoStVerifier_I) VerifyElectionPoSt(sv abi.PoStVerifyInfo) bool {
 	return pv._verifyPoStProof(sv)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Surprise PoSt
 
-func GenerateSurprisePoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorID, candidateCount int, sectorStore sector_index.SectorStore) []sector.PoStCandidate {
+func GenerateSurprisePoStCandidates(challengeSeed abi.PoStRandomness, eligibleSectors []abi.SectorID, candidateCount int, sectorStore sector_index.SectorStore) []abi.PoStCandidate {
 	panic("TODO")
 }
 
-func CreateSurprisePoStProof(cfg sector.PoStCfg, privateCandidateProofs []PrivatePostCandidateProof, challengeSeed sector.PoStRandomness) []sector.PoStProof {
+func CreateSurprisePoStProof(cfg sector.PoStInstanceCfg, privateCandidateProofs []abi.PrivatePoStCandidateProof, challengeSeed abi.PoStRandomness) []abi.PoStProof {
 	return CreatePoStProof(cfg, privateCandidateProofs, challengeSeed)
 }
 
-func (pv *PoStVerifier_I) VerifySurprisePoSt(sv sector.PoStVerifyInfo) bool {
+func (pv *PoStVerifier_I) VerifySurprisePoSt(sv abi.PoStVerifyInfo) bool {
 	return pv._verifyPoStProof(sv)
 }

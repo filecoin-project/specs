@@ -4,13 +4,12 @@ import (
 	"math"
 
 	addr "github.com/filecoin-project/go-address"
+	actor "github.com/filecoin-project/specs/actors"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	serde "github.com/filecoin-project/specs/actors/serde"
 	autil "github.com/filecoin-project/specs/actors/util"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	cid "github.com/ipfs/go-cid"
 )
 
@@ -121,7 +120,7 @@ func (a *RewardActorCode_I) AwardBlockReward(
 		// Send fund to SPA for collateral
 		rt.Send(
 			builtin.StoragePowerActorAddr,
-			ai.Method_StoragePowerActor_AddBalance,
+			builtin.Method_StoragePowerActor_AddBalance,
 			serde.MustSerializeParams(miner),
 			abi.TokenAmount(rewardToGarnish),
 		)

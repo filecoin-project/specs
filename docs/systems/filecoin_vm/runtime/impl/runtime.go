@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	addr "github.com/filecoin-project/go-address"
+	actor "github.com/filecoin-project/specs/actors"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	acctact "github.com/filecoin-project/specs/actors/builtin/account"
@@ -15,7 +16,7 @@ import (
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	actstate "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
@@ -120,11 +121,11 @@ type VMContext struct {
 	_toplevelSender      addr.Address
 	_toplevelBlockWinner addr.Address
 	// Top-level call sequence number of the "From" actor in the initial on-chain message.
-	_toplevelSenderCallSeqNum actor.CallSeqNum
+	_toplevelSenderCallSeqNum actstate.CallSeqNum
 	// Sequence number representing the total number of calls (to any actor, any method)
 	// during the current top-level message execution.
 	// Note: resets with every top-level message, and therefore not necessarily monotonic.
-	_internalCallSeqNum actor.CallSeqNum
+	_internalCallSeqNum actstate.CallSeqNum
 	_valueReceived      abi.TokenAmount
 	_gasRemaining       msg.GasAmount
 	_numValidateCalls   int
@@ -136,8 +137,8 @@ func VMContext_Make(
 	chain chain.Chain,
 	toplevelSender addr.Address,
 	toplevelBlockWinner addr.Address,
-	toplevelSenderCallSeqNum actor.CallSeqNum,
-	internalCallSeqNum actor.CallSeqNum,
+	toplevelSenderCallSeqNum actstate.CallSeqNum,
+	internalCallSeqNum actstate.CallSeqNum,
 	globalState st.StateTree,
 	actorAddress addr.Address,
 	valueReceived abi.TokenAmount,
@@ -205,7 +206,7 @@ func (rt *VMContext) CreateActor(codeID abi.ActorCodeID, address addr.Address) {
 
 func (rt *VMContext) _createActor(codeID abi.ActorCodeID, address addr.Address) {
 	// Create empty actor state.
-	actorState := &actor.ActorState_I{
+	actorState := &actstate.ActorState_I{
 		CodeID_:     codeID,
 		State_:      actor.ActorSubstateCID(EmptyCBOR),
 		Balance_:    abi.TokenAmount(0),
@@ -213,7 +214,7 @@ func (rt *VMContext) _createActor(codeID abi.ActorCodeID, address addr.Address) 
 	}
 
 	// Put it in the state tree.
-	actorStateCID := actor.ActorSystemStateCID(rt.IpldPut(actorState))
+	actorStateCID := actstate.ActorSystemStateCID(rt.IpldPut(actorState))
 	rt._updateActorSystemStateInternal(address, actorStateCID)
 
 	rt._rtAllocGas(gascost.ExecNewActor)
@@ -233,7 +234,7 @@ func (rt *VMContext) _deleteActor(address addr.Address) {
 	rt._rtAllocGas(gascost.DeleteActor)
 }
 
-func (rt *VMContext) _updateActorSystemStateInternal(actorAddress addr.Address, newStateCID actor.ActorSystemStateCID) {
+func (rt *VMContext) _updateActorSystemStateInternal(actorAddress addr.Address, newStateCID actstate.ActorSystemStateCID) {
 	newGlobalStatePending, err := rt._globalStatePending.Impl().WithActorSystemState(rt._actorAddress, newStateCID)
 	if err != nil {
 		panic("Error in runtime implementation: failed to update actor system state")
@@ -468,9 +469,9 @@ func _invokeMethodInternal(
 	actorCode vmr.ActorCode,
 	method abi.MethodNum,
 	params abi.MethodParams) (
-	ret InvocOutput, exitCode exitcode.ExitCode, internalCallSeqNumFinal actor.CallSeqNum) {
+	ret InvocOutput, exitCode exitcode.ExitCode, internalCallSeqNumFinal actstate.CallSeqNum) {
 
-	if method == actor.MethodSend {
+	if method == builtin.MethodSend {
 		ret = vmr.InvocOutput_Make(nil)
 		return
 	}
@@ -559,7 +560,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 // If it doesn't exist, and the message is a simple value send to a pubkey-style address,
 // creates the receiver as an account actor in the returned state.
 // Aborts otherwise.
-func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actor.ActorState, addr.Address) {
+func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actstate.ActorState, addr.Address) {
 	// Resolve the target address via the InitActor, and attempt to load state.
 	initSubState := rt._loadInitActorState()
 	targetIdAddr := initSubState.ResolveAddress(targetRaw)
@@ -631,7 +632,7 @@ func (rt *VMContext) SendQuery(toAddr addr.Address, methodNum abi.MethodNum, par
 }
 
 func (rt *VMContext) SendFunds(toAddr addr.Address, value abi.TokenAmount) {
-	rt.Send(toAddr, actor.MethodSend, nil, value)
+	rt.Send(toAddr, builtin.MethodSend, nil, value)
 }
 
 func (rt *VMContext) SendPropagatingErrors(input InvocInput) InvocOutput {
@@ -708,8 +709,10 @@ func (rt *VMContext) AcquireState() ActorStateHandle {
 
 	state, ok := rt._globalStatePending.GetActor(rt._actorAddress)
 	util.Assert(ok)
+
+	stateRef := state.State().Ref()
 	return &ActorStateHandle_I{
-		_initValue: state.State().Ref(),
+		_initValue: &stateRef,
 		_rt:        rt,
 	}
 }

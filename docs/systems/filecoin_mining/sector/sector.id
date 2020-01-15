@@ -1,37 +1,12 @@
+import abi "github.com/filecoin-project/specs/actors/abi"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-import abi "github.com/filecoin-project/specs/actors/abi"
-import cid "github.com/ipfs/go-cid"
 
 type Bytes32 Bytes
 type Commitment Bytes32  // TODO
-type UnsealedSectorCID cid.Cid
-type SealedSectorCID cid.Cid
-
-// SectorNumber is a numeric identifier for a sector. It is usually
-// relative to a Miner.
-type SectorNumber UInt
 
 type FaultSet CompactSectorSet
 type StorageFaultType int
-
-// SectorSize indicates one of a set of possible sizes in the network.
-type SectorSize UInt
-
-// Ideally, SectorSize would be an enum
-// type SectorSize enum {
-//   1KiB = UInt 1024
-//   1MiB = Uint 1048576
-//   1GiB = Uint 1073741824
-//   1TiB = Uint 1099511627776
-//   1PiB = Uint 1125899906842624
-// }
-
-// TODO make sure this is globally unique
-type SectorID struct {
-    Miner   abi.ActorID
-    Number  SectorNumber
-}
 
 // SectorInDetail describes all the bits of information associated
 // with each sector.
@@ -40,11 +15,11 @@ type SectorID struct {
 //
 // NOTE: do not use this struct. It is for illustrative purposes only.
 type SectorInDetail struct {
-    ID    SectorID
-    Size  SectorSize
+    ID    abi.SectorID
+    Size  abi.SectorSize
 
     Unsealed struct {
-        CID     UnsealedSectorCID
+        CID     abi.UnsealedSectorCID
         Deals   [deal.StorageDeal]
         Pieces  [piece.Piece]
         // Pieces Tree<Piece> // some tree for proofs
@@ -52,66 +27,57 @@ type SectorInDetail struct {
     }
 
     Sealed struct {
-        CID SealedSectorCID
+        CID              abi.SealedSectorCID
         Bytes
-        SealCfg
+        RegisteredProof  abi.RegisteredProof
     }
 }
 
 // SectorInfo is an object that gathers all the information miners know about their
 // sectors. This is meant to be used for a local index.
 type SectorInfo struct {
-    ID                  SectorID
+    ID                  abi.SectorID
     UnsealedInfo        UnsealedSectorInfo
     SealedInfo          SealedSectorInfo
-    SealVerifyInfo
+    SealVerifyInfo      abi.SealVerifyInfo
     PersistentProofAux
 }
 
 // UnsealedSectorInfo is an object that tracks the relevant data to keep in a sector
 type UnsealedSectorInfo struct {
-    UnsealedCID  UnsealedSectorCID  // CommD
-    Size         SectorSize
+    UnsealedCID  abi.UnsealedSectorCID  // CommD
+    Size         abi.SectorSize
     PieceCount   UVarint  // number of pieces in this sector (can get it from len(Pieces) too)
     Pieces       [piece.PieceInfo]  // wont get externalized easy, -- it's big
-    SealCfg  // this will be here as well. it's determined.
     // Deals       [deal.StorageDeal]
 }
 
 // SealedSectorInfo keeps around information about a sector that has been sealed.
 type SealedSectorInfo struct {
-    SealedCID  SealedSectorCID
-    Size       SectorSize
-    SealCfg
+    SealedCID  abi.SealedSectorCID
+    Size       abi.SectorSize
     SealArgs   SealArguments
 }
 
-type RegisteredProof enum {
-    WinStackedDRG32GiBSeal
-    WinStackedDRG32GiBPoSt
-    StackedDRG32GiBSeal
-    StackedDRG32GiBPoSt
-}
-
-type ProofRegistry {UInt: ProofInstance}
+type ProofRegistry {abi.RegisteredProof: ProofInstance}
 
 type ProofInstance struct {
-    ID           RegisteredProof
+    ID           abi.RegisteredProof
     Type         ProofType
-    Algorithm    ProofAlgorithm
+    Algorithm    abi.ProofAlgorithm
     CircuitType  ConcreteCircuit
+    Partitions   UInt
+    Cfg          ProofCfg
+}
+
+type ProofCfg union {
+    SealCfg  SealInstanceCfg
+    PoStCfg  PoStInstanceCfg
 }
 
 type ProofType enum {
     SealProof
     PoStProof
-}
-
-type ProofAlgorithm enum {
-    StackedDRGSeal
-    WinStackedDRGSeal
-    StackedDRGPoSt
-    WinStackedDRGPoSt
 }
 
 type ConcreteCircuit struct {

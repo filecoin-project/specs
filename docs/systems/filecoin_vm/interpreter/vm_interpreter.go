@@ -12,8 +12,7 @@ import (
 	serde "github.com/filecoin-project/specs/actors/serde"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
+	actstate "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 	vmri "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/impl"
@@ -276,7 +275,7 @@ func _applyMessageBuiltinAssert(store ipld.GraphStore, tree st.StateTree, chain 
 	return retTree
 }
 
-func _applyMessageInternal(store ipld.GraphStore, tree st.StateTree, chain chain.Chain, sender actor.ActorState, senderAddr addr.Address, invoc vmr.InvocInput,
+func _applyMessageInternal(store ipld.GraphStore, tree st.StateTree, chain chain.Chain, sender actstate.ActorState, senderAddr addr.Address, invoc vmr.InvocInput,
 	gasRemainingInit msg.GasAmount, topLevelBlockWinner addr.Address) (vmri.MessageReceipt, st.StateTree) {
 
 	rt := vmri.VMContext_Make(
@@ -285,7 +284,7 @@ func _applyMessageInternal(store ipld.GraphStore, tree st.StateTree, chain chain
 		senderAddr,
 		topLevelBlockWinner,
 		sender.CallSeqNum(),
-		actor.CallSeqNum(0),
+		actstate.CallSeqNum(0),
 		tree,
 		senderAddr,
 		abi.TokenAmount(0),
@@ -335,7 +334,7 @@ func _makeBlockRewardMessage(state st.StateTree, minerAddr addr.Address, penalty
 	return &msg.UnsignedMessage_I{
 		From_:       builtin.SystemActorAddr,
 		To_:         builtin.RewardActorAddr,
-		Method_:     ai.Method_RewardActor_AwardBlockReward,
+		Method_:     builtin.Method_RewardActor_AwardBlockReward,
 		Params_:     params,
 		CallSeqNum_: sysActor.CallSeqNum(),
 		Value_:      0,
@@ -351,7 +350,7 @@ func _makeElectionPoStMessage(state st.StateTree, minerActorAddr addr.Address) m
 	return &msg.UnsignedMessage_I{
 		From_:       builtin.SystemActorAddr,
 		To_:         minerActorAddr,
-		Method_:     ai.Method_StorageMinerActor_OnVerifiedElectionPoSt,
+		Method_:     builtin.Method_StorageMinerActor_OnVerifiedElectionPoSt,
 		Params_:     nil,
 		CallSeqNum_: sysActor.CallSeqNum(),
 		Value_:      0,
@@ -367,7 +366,7 @@ func _makeCronTickMessage(state st.StateTree) msg.UnsignedMessage {
 	return &msg.UnsignedMessage_I{
 		From_:       builtin.SystemActorAddr,
 		To_:         builtin.CronActorAddr,
-		Method_:     ai.Method_CronActor_EpochTick,
+		Method_:     builtin.Method_CronActor_EpochTick,
 		Params_:     nil,
 		CallSeqNum_: sysActor.CallSeqNum(),
 		Value_:      0,

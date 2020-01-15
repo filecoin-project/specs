@@ -4781,12 +4781,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
 <span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
-<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 
-<span class="kd">type</span> <span class="nx">DealID</span> <span class="nx">Int</span>
-<span class="kd">type</span> <span class="nx">DealIDs</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Items</span> <span class="p">[</span><span class="nx">DealID</span><span class="p">]</span>
-<span class="p">}</span>
 <span class="kd">type</span> <span class="nx">DealWeight</span> <span class="kt">int</span>  <span class="c1">// should be BigInt
 </span><span class="c1"></span>
 <span class="c1">// Note: Deal Collateral is only released and returned to clients and miners
@@ -4798,8 +4793,8 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// Note: ClientCollateralPerEpoch may not be needed and removed pending future confirmation.
 </span><span class="c1">// There will be a Minimum value for both client and provider deal collateral.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageDealProposal</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PieceCID</span>                      <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>  <span class="c1">// 35 bytes CommP
-</span><span class="c1"></span>    <span class="nx">PieceSize</span>                     <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceSize</span>
+    <span class="nx">PieceCID</span>                      <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceCID</span>  <span class="c1">// CommP
+</span><span class="c1"></span>    <span class="nx">PieceSize</span>                     <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceSize</span>
     <span class="nx">Client</span>                        <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
     <span class="nx">Provider</span>                      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
     <span class="nx">ClientSignature</span>               <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span>
@@ -4834,7 +4829,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">OnChainDeal</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ID</span>                <span class="nx">DealID</span>
+    <span class="nx">ID</span>                <span class="nx">abi</span><span class="p">.</span><span class="nx">DealID</span>
     <span class="nx">Deal</span>              <span class="nx">StorageDeal</span>
     <span class="nx">SectorStartEpoch</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if not yet included in proven sector
 </span><span class="c1"></span>    <span class="nx">LastUpdatedEpoch</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if deal state never updated

@@ -4770,13 +4770,9 @@ exhaustive list):</p>
 
 <h2 id="messages">Messages</h2>
 
-<p>To generate a signature for the <a href="../../../../#systems__filecoin_vm__message___index">Message</a> type,
-first serialize it, then hash the serialized bytes with SHA256. Then, take
-the 32 byte digest output the hash and compute the signature over it.</p>
+<p>To generate a signature for the <a href="../../../../#systems__filecoin_vm__message___index">Message</a> type, compute the signature over the message&rsquo;s CID (taken as a byte array).</p>
 
-<p><strong>Note</strong>: for each specific use of a signature scheme, it is recommended to use
-a domain separation tag to treat the hash function as an independent random
-oracle. These tags are indicated in the relevant places throughout the specs.
+<p><strong>Note</strong>: for each specific use of a signature scheme, it is recommended to use a domain separation tag to treat the hash function as an independent random oracle. These tags are indicated in the relevant places throughout the specs.
 Read more about this in <a href="../../../../#algorithms__crypto__randomness">Randomness</a>.</p>
 
 <h2 id="signature-types">Signature Types</h2>

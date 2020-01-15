@@ -4774,11 +4774,11 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="c1">// TODO import this from StorageMarket
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorIndex</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">BySectorID</span>     <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">:</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorInfo</span><span class="p">}</span>
-    <span class="nx">ByUnsealedCID</span>  <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">:</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorInfo</span><span class="p">}</span>
-    <span class="nx">BySealedCID</span>    <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SealedSectorCID</span><span class="p">:</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorInfo</span><span class="p">}</span>
+    <span class="nx">BySectorID</span>     <span class="p">{</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">:</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorInfo</span><span class="p">}</span>
+    <span class="nx">ByUnsealedCID</span>  <span class="p">{</span><span class="nx">abi</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">:</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorInfo</span><span class="p">}</span>
+    <span class="nx">BySealedCID</span>    <span class="p">{</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SealedSectorCID</span><span class="p">:</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorInfo</span><span class="p">}</span>
     <span class="nx">ByPieceID</span>      <span class="p">{</span><span class="nx">piece</span><span class="p">.</span><span class="nx">PieceID</span><span class="p">:</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorInfo</span><span class="p">}</span>
-    <span class="nx">ByDealID</span>       <span class="p">{</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">:</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorInfo</span><span class="p">}</span>
+    <span class="nx">ByDealID</span>       <span class="p">{</span><span class="nx">abi</span><span class="p">.</span><span class="nx">DealID</span><span class="p">:</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorInfo</span><span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SectorIndexerSubsystem</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4796,10 +4796,10 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>
     <span class="c1">// SectorsExpiredAtEpoch returns the set of sectors that expire
 </span><span class="c1"></span>    <span class="c1">// at a particular epoch.
-</span><span class="c1"></span>    <span class="nf">SectorsExpiredAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">]</span>
+</span><span class="c1"></span>    <span class="nf">SectorsExpiredAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">]</span>
 
     <span class="c1">// removeSectors removes the given sectorIDs from storage.
-</span><span class="c1"></span>    <span class="nf">removeSectors</span><span class="p">(</span><span class="nx">sectorIDs</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">])</span>
+</span><span class="c1"></span>    <span class="nf">removeSectors</span><span class="p">(</span><span class="nx">sectorIDs</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">])</span>
 <span class="p">}</span>
 </code></pre></div>
 

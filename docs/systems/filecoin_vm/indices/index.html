@@ -4770,8 +4770,6 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
-<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
-<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
 
 <span class="c1">// Data in Indices are populated at instantiation with data from the state tree
@@ -4797,18 +4795,18 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">StorageDeal_ProviderInitTimedOutSlashAmount</span><span class="p">(</span><span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
     <span class="nf">StorageDeal_DurationBounds</span><span class="p">(</span>
-        <span class="nx">pieceSize</span>   <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceSize</span>
+        <span class="nx">pieceSize</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceSize</span>
         <span class="nx">startEpoch</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="p">)</span> <span class="p">(</span><span class="nx">minDuration</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">maxDuration</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
 
     <span class="nf">StorageDeal_StoragePricePerEpochBounds</span><span class="p">(</span>
-        <span class="nx">pieceSize</span>   <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceSize</span>
+        <span class="nx">pieceSize</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceSize</span>
         <span class="nx">startEpoch</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
         <span class="nx">endEpoch</span>    <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="p">)</span> <span class="p">(</span><span class="nx">minPrice</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">maxPrice</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
 
     <span class="nf">StorageDeal_ProviderCollateralBounds</span><span class="p">(</span>
-        <span class="nx">pieceSize</span>   <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceSize</span>
+        <span class="nx">pieceSize</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceSize</span>
         <span class="nx">startEpoch</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
         <span class="nx">endEpoch</span>    <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="p">)</span> <span class="p">(</span>
@@ -4817,7 +4815,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">)</span>
 
     <span class="nf">StorageDeal_ClientCollateralBounds</span><span class="p">(</span>
-        <span class="nx">pieceSize</span>   <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceSize</span>
+        <span class="nx">pieceSize</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceSize</span>
         <span class="nx">startEpoch</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
         <span class="nx">endEpoch</span>    <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="p">)</span> <span class="p">(</span>
@@ -4826,7 +4824,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">)</span>
 
     <span class="nf">SectorWeight</span><span class="p">(</span>
-        <span class="nx">sectorSize</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSize</span>
+        <span class="nx">sectorSize</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span>
         <span class="nx">startEpoch</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
         <span class="nx">endEpoch</span>    <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
         <span class="nx">dealWeight</span>  <span class="nx">deal</span><span class="p">.</span><span class="nx">DealWeight</span>
@@ -4862,7 +4860,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
     <span class="nf">StorageMining_PreCommitDeposit</span><span class="p">(</span>
-        <span class="nx">sectorSize</span>       <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSize</span>
+        <span class="nx">sectorSize</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span>
         <span class="nx">expirationEpoch</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
@@ -4918,13 +4916,11 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="p">(</span>
 	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 	<span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
-	<span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 	<span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
-	<span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
-	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+	<span class="s">&#34;math/big&#34;</span>
 <span class="p">)</span>
 
-<span class="kd">var</span> <span class="nx">PARAM_FINISH</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">PARAM_FINISH</span>
+<span class="kd">var</span> <span class="nx">PARAM_FINISH</span> <span class="p">=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">PARAM_FINISH</span>
 
 <span class="kd">func</span> <span class="nf">StorageDeal_ProviderInitTimedOutSlashAmount</span><span class="p">(</span><span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 	<span class="c1">// placeholder
@@ -4933,7 +4929,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">Indices_I</span><span class="p">)</span> <span class="nf">StorageDeal_DurationBounds</span><span class="p">(</span>
-	<span class="nx">pieceSize</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceSize</span><span class="p">,</span>
+	<span class="nx">pieceSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceSize</span><span class="p">,</span>
 	<span class="nx">startEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
 <span class="p">)</span> <span class="p">(</span><span class="nx">minDuration</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">maxDuration</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">{</span>
 
@@ -4945,7 +4941,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">Indices_I</span><span class="p">)</span> <span class="nf">StorageDeal_StoragePricePerEpochBounds</span><span class="p">(</span>
-	<span class="nx">pieceSize</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceSize</span><span class="p">,</span>
+	<span class="nx">pieceSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceSize</span><span class="p">,</span>
 	<span class="nx">startEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
 	<span class="nx">endEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
 <span class="p">)</span> <span class="p">(</span><span class="nx">minPrice</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">maxPrice</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
@@ -4956,7 +4952,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">Indices_I</span><span class="p">)</span> <span class="nf">StorageDeal_ProviderCollateralBounds</span><span class="p">(</span>
-	<span class="nx">pieceSize</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceSize</span><span class="p">,</span>
+	<span class="nx">pieceSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceSize</span><span class="p">,</span>
 	<span class="nx">startEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
 	<span class="nx">endEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
 <span class="p">)</span> <span class="p">(</span><span class="nx">minProviderCollateral</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">maxProviderCollateral</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
@@ -4967,7 +4963,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">Indices_I</span><span class="p">)</span> <span class="nf">StorageDeal_ClientCollateralBounds</span><span class="p">(</span>
-	<span class="nx">pieceSize</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceSize</span><span class="p">,</span>
+	<span class="nx">pieceSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceSize</span><span class="p">,</span>
 	<span class="nx">startEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
 	<span class="nx">endEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
 <span class="p">)</span> <span class="p">(</span><span class="nx">minClientCollateral</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">maxClientCollateral</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
@@ -4978,7 +4974,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">Indices_I</span><span class="p">)</span> <span class="nf">SectorWeight</span><span class="p">(</span>
-	<span class="nx">sectorSize</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span>
+	<span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span>
 	<span class="nx">startEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
 	<span class="nx">endEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
 	<span class="nx">dealWeight</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealWeight</span><span class="p">,</span>
@@ -4994,13 +4990,13 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">Indices_I</span><span class="p">)</span> <span class="nf">SectorWeightProportion</span><span class="p">(</span><span class="nx">minerActiveSectorWeight</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorWeight</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">BigInt</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">Indices_I</span><span class="p">)</span> <span class="nf">SectorWeightProportion</span><span class="p">(</span><span class="nx">minerActiveSectorWeight</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorWeight</span><span class="p">)</span> <span class="nx">big</span><span class="p">.</span><span class="nx">Int</span> <span class="p">{</span>
 	<span class="c1">// return proportion of SectorWeight for miner
 </span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">Indices_I</span><span class="p">)</span> <span class="nf">PledgeCollateralProportion</span><span class="p">(</span><span class="nx">minerPledgeCollateral</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">BigInt</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">Indices_I</span><span class="p">)</span> <span class="nf">PledgeCollateralProportion</span><span class="p">(</span><span class="nx">minerPledgeCollateral</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">big</span><span class="p">.</span><span class="nx">Int</span> <span class="p">{</span>
 	<span class="c1">// return proportion of Pledge Collateral for miner
 </span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
@@ -5019,7 +5015,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">Indices_I</span><span class="p">)</span> <span class="nf">StoragePowerProportion</span><span class="p">(</span>
 	<span class="nx">minerStoragePower</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span>
-<span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">BigInt</span> <span class="p">{</span>
+<span class="p">)</span> <span class="nx">big</span><span class="p">.</span><span class="nx">Int</span> <span class="p">{</span>
 	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
@@ -5060,7 +5056,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">Indices_I</span><span class="p">)</span> <span class="nf">StorageMining_PreCommitDeposit</span><span class="p">(</span>
-	<span class="nx">sectorSize</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span>
+	<span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span>
 	<span class="nx">expirationEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
 <span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 	<span class="nf">PARAM_FINISH</span><span class="p">()</span>

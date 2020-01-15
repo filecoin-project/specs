@@ -4,11 +4,11 @@ import (
 	"bytes"
 
 	addr "github.com/filecoin-project/go-address"
+	actor "github.com/filecoin-project/specs/actors"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	autil "github.com/filecoin-project/specs/actors/util"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	cid "github.com/ipfs/go-cid"
 )
 
@@ -57,7 +57,7 @@ func (a *InitActorCode_I) Exec(rt Runtime, execCodeID abi.ActorCodeID, construct
 	// Exec to fail too.
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     idAddr,
-		Method_: actor.MethodConstructor,
+		Method_: builtin.MethodConstructor,
 		Params_: constructorParams,
 		Value_:  rt.ValueReceived(),
 	})

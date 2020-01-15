@@ -1,4 +1,4 @@
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import actor "github.com/filecoin-project/specs/actors"
 import abi "github.com/filecoin-project/specs/actors/abi"
 import exitcode "github.com/filecoin-project/specs/actors/runtime/exitcode"
 import addr "github.com/filecoin-project/go-address"
@@ -116,6 +116,20 @@ type Runtime interface {
     IpldGet(c cid.Cid, o ipld.Object) bool
     // Serializes and stores an object, returning its CID.
     IpldPut(x ipld.Object) cid.Cid
+
+    // Provides the system call interface.
+    Syscalls() Syscalls
+}
+
+type Syscalls interface {
+    // Verifies that a signature is valid for an address and plaintext.
+    VerifySignature(signature [byte], signer addr.Address, plaintext [byte]) bool
+    // Computes an unsealed sector CID (CommD) from its constituent piece CIDs (CommPs) and sizes.
+    ComputeUnsealedSectorCID(sectorSize abi.SectorSize, pieces [abi.PieceInfo]) (abi.UnsealedSectorCID, error)
+    // Verifies a sector seal proof.
+    VerifySeal(sectorSize abi.SectorSize, vi abi.SealVerifyInfo) bool
+    // Verifies a proof of spacetime.
+    VerifyPoSt(sectorSize abi.SectorSize, vi abi.PoStVerifyInfo) bool
 }
 
 type InvocInput struct {

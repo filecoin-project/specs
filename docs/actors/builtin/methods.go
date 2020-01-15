@@ -1,24 +1,32 @@
-package actor_interfaces
+package builtin
 
 import (
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	abi "github.com/filecoin-project/specs/actors/abi"
 )
 
 const (
-	Method_InitActor_Exec = actor.MethodPlaceholder + iota
+	MethodSend        = abi.MethodNum(0)
+	MethodConstructor = abi.MethodNum(1)
+
+	// TODO: remove this once canonical method numbers are finalized
+	MethodPlaceholder = abi.MethodNum(1 << 30)
+)
+
+const (
+	Method_InitActor_Exec = MethodPlaceholder + iota
 	Method_InitActor_GetActorIDForAddress
 )
 
 const (
-	Method_CronActor_EpochTick = actor.MethodPlaceholder + iota
+	Method_CronActor_EpochTick = MethodPlaceholder + iota
 )
 
 const (
-	Method_RewardActor_AwardBlockReward = actor.MethodPlaceholder + iota
+	Method_RewardActor_AwardBlockReward = MethodPlaceholder + iota
 )
 
 const (
-	Method_MultiSigActor_Propose = actor.MethodPlaceholder + iota
+	Method_MultiSigActor_Propose = MethodPlaceholder + iota
 	Method_MultiSigActor_Approve
 	Method_MultiSigActor_AddAuthorizedParty
 	Method_MultiSigActor_RemoveAuthorizedParty
@@ -28,7 +36,7 @@ const (
 
 const (
 	// Proxy cron tick method (via StoragePowerActor)
-	Method_StorageMinerActor_OnDeferredCronEvent = actor.MethodPlaceholder + iota
+	Method_StorageMinerActor_OnDeferredCronEvent = MethodPlaceholder + iota
 
 	// User-callable methods
 	Method_StorageMinerActor_PreCommitSector
@@ -53,7 +61,7 @@ const (
 
 const (
 	// Cron tick method
-	Method_StorageMarketActor_OnEpochTickEnd = actor.MethodPlaceholder + iota
+	Method_StorageMarketActor_OnEpochTickEnd = MethodPlaceholder + iota
 
 	// User-callable methods
 	Method_StorageMarketActor_AddBalance
@@ -72,7 +80,7 @@ const (
 
 const (
 	// Cron tick method
-	Method_StoragePowerActor_OnEpochTickEnd = actor.MethodPlaceholder + iota
+	Method_StoragePowerActor_OnEpochTickEnd = MethodPlaceholder + iota
 
 	// User-callable methods
 	Method_StoragePowerActor_AddBalance

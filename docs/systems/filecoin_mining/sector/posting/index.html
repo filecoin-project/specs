@@ -4767,14 +4767,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">PartialTicket</span> <span class="nx">Bytes</span>  <span class="c1">// 32 bytes
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">ChallengeTicketsCommitment</span> <span class="nx">Bytes</span>
-<span class="kd">type</span> <span class="nx">PoStRandomness</span> <span class="nx">Bytes</span>
-
-<span class="kd">type</span> <span class="nx">PoStCfg</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">InstanceCfg</span> <span class="nx">PoStInstanceCfg</span>
-    <span class="nx">ProofInstance</span>
-<span class="p">}</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 
 <span class="c1">// New proof ProofInstances can add new cfg types if needed.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStInstanceCfg</span> <span class="nx">union</span> <span class="p">{</span>
@@ -4802,52 +4795,8 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">SurprisePoSt</span>
 <span class="p">}</span>
 
-<span class="c1">// TODO: refactor these types to get rid of the squishy optional fields.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PoStCfg</span>
-    <span class="nx">Randomness</span>       <span class="nx">PoStRandomness</span>
-    <span class="nx">CommR</span>            <span class="nx">SealedSectorCID</span>
-    <span class="nx">OnChain</span>          <span class="nx">OnChainPoStVerifyInfo</span>
-    <span class="nx">EligibleSectors</span>  <span class="p">{</span><span class="nx">SectorID</span><span class="p">:</span> <span class="nx">SealedSectorCID</span><span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">PoStCandidate</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PartialTicket</span>  <span class="c1">// Optional —  will eventually be omitted for SurprisePoSt verification, needed for now.
-</span><span class="c1"></span>    <span class="nx">PrivateProof</span>    <span class="nx">PrivatePoStCandidateProof</span>  <span class="c1">// Optional — should be ommitted for verification.
-</span><span class="c1"></span>    <span class="nx">SectorID</span>
-    <span class="nx">ChallengeIndex</span>  <span class="nx">UInt</span>
-<span class="p">}</span>
-
-<span class="c1">// implemented by both OnChainElectionPoStVerifyInfo and OnChainSurprisePoStVerifyInfo
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">OnChainPoStVerifyInfo</span> <span class="kd">interface</span> <span class="p">{</span>
-    <span class="nf">Candidates</span><span class="p">()</span>  <span class="p">[</span><span class="nx">PoStCandidate</span><span class="p">]</span>
-    <span class="nf">Proofs</span><span class="p">()</span>      <span class="p">[</span><span class="nx">PoStProof</span><span class="p">]</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">OnChainElectionPoStVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Candidates</span>  <span class="p">[</span><span class="nx">PoStCandidate</span><span class="p">]</span>
-    <span class="nx">Proofs</span>      <span class="p">[</span><span class="nx">PoStProof</span><span class="p">]</span>
-    <span class="nx">Randomness</span>  <span class="nx">PoStRandomness</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">OnChainSurprisePoStVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Candidates</span>  <span class="p">[</span><span class="nx">PoStCandidate</span><span class="p">]</span>
-    <span class="nx">Proofs</span>      <span class="p">[</span><span class="nx">PoStProof</span><span class="p">]</span>
-    <span class="nx">CommT</span>       <span class="nx">ChallengeTicketsCommitment</span>
-<span class="p">}</span>
-
 <span class="kd">type</span> <span class="nx">PoStWitness</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Candidates</span> <span class="p">[</span><span class="nx">PoStCandidate</span><span class="p">]</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">PoStProof</span> <span class="kd">struct</span> <span class="p">{</span><span class="c1">//&lt;curve, system&gt; {
-</span><span class="c1"></span>    <span class="nx">Type</span> <span class="nx">PoStType</span>
-    <span class="nx">ProofInstance</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">PrivatePoStCandidateProof</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Algorithm</span>     <span class="nx">ProofAlgorithm</span>
-    <span class="nx">Externalized</span>  <span class="nx">Bytes</span>
+    <span class="nx">Candidates</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
 
