@@ -18,19 +18,51 @@ type Bytes = abi.Bytes
 
 var AssertMsg = autil.AssertMsg
 
-func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
+type InitActorState struct {
+	// responsible for create new actors
+	AddressMap  map[addr.Address]abi.ActorID
+	NextID      abi.ActorID
+	NetworkName string
+}
+
+func (s *InitActorState) ResolveAddress(address addr.Address) addr.Address {
+	actorID, ok := s.AddressMap[address]
+	if ok {
+		idAddr, err := addr.NewIDAddress(uint64(actorID))
+		autil.Assert(err == nil)
+		return idAddr
+	}
+	return address
+}
+
+func (s *InitActorState) MapAddressToNewID(address addr.Address) addr.Address {
+	actorID := s.NextID
+	s.NextID++
+	s.AddressMap[address] = actorID
+	idAddr, err := addr.NewIDAddress(uint64(actorID))
+	autil.Assert(err == nil)
+	return idAddr
+}
+
+func (st *InitActorState) CID() cid.Cid {
+	panic("TODO")
+}
+
+type InitActor struct{}
+
+func (a *InitActor) Constructor(rt Runtime) InvocOutput {
 	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr)
 	h := rt.AcquireState()
-	st := &InitActorState_I{
-		AddressMap_:  map[addr.Address]abi.ActorID{}, // TODO: HAMT
-		NextID_:      abi.ActorID(builtin.FirstNonSingletonActorId),
-		NetworkName_: vmr.NetworkName(),
+	st := InitActorState{
+		AddressMap:  map[addr.Address]abi.ActorID{}, // TODO: HAMT
+		NextID:      abi.ActorID(builtin.FirstNonSingletonActorId),
+		NetworkName: vmr.NetworkName(),
 	}
 	UpdateRelease(rt, h, st)
 	return rt.ValueReturn(nil)
 }
 
-func (a *InitActorCode_I) Exec(rt Runtime, execCodeID abi.ActorCodeID, constructorParams abi.MethodParams) InvocOutput {
+func (a *InitActor) Exec(rt Runtime, execCodeID abi.ActorCodeID, constructorParams abi.MethodParams) InvocOutput {
 	rt.ValidateImmediateCallerAcceptAny()
 	callerCodeID, ok := rt.GetActorCodeID(rt.ImmediateCaller())
 	AssertMsg(ok, "no code for actor at %s", rt.ImmediateCaller())
@@ -72,29 +104,10 @@ func (a *InitActorCode_I) Exec(rt Runtime, execCodeID abi.ActorCodeID, construct
 // This method is disabled until proven necessary.
 //func (a *InitActorCode_I) GetActorIDForAddress(rt Runtime, address addr.Address) InvocOutput {
 //	h, st := _loadState(rt)
-//	actorID := st.AddressMap()[address]
+//	actorID := st.AddressMap[address]
 //	Release(rt, h, st)
 //	return rt.ValueReturn(Bytes(addr.Serialize_ActorID(actorID)))
 //}
-
-func (s *InitActorState_I) ResolveAddress(address addr.Address) addr.Address {
-	actorID, ok := s.AddressMap()[address]
-	if ok {
-		idAddr, err := addr.NewIDAddress(uint64(actorID))
-		autil.Assert(err == nil)
-		return idAddr
-	}
-	return address
-}
-
-func (s *InitActorState_I) MapAddressToNewID(address addr.Address) addr.Address {
-	actorID := s.NextID_
-	s.NextID_++
-	s.AddressMap()[address] = actorID
-	idAddr, err := addr.NewIDAddress(uint64(actorID))
-	autil.Assert(err == nil)
-	return idAddr
-}
 
 func _codeIDSupportsExec(callerCodeID abi.ActorCodeID, execCodeID abi.ActorCodeID) bool {
 	if execCodeID == builtin.AccountActorCodeID {
@@ -121,23 +134,19 @@ func _codeIDSupportsExec(callerCodeID abi.ActorCodeID, execCodeID abi.ActorCodeI
 func _loadState(rt Runtime) (vmr.ActorStateHandle, InitActorState) {
 	h := rt.AcquireState()
 	stateCID := cid.Cid(h.Take())
-	var state InitActorState_I
+	var state InitActorState
 	if !rt.IpldGet(stateCID, &state) {
 		rt.AbortAPI("state not found")
 	}
-	return h, &state
+	return h, state
 }
 
 func Release(rt Runtime, h vmr.ActorStateHandle, st InitActorState) {
-	checkCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
+	checkCID := actor.ActorSubstateCID(rt.IpldPut(&st))
 	h.Release(checkCID)
 }
 
 func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st InitActorState) {
-	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
+	newCID := actor.ActorSubstateCID(rt.IpldPut(&st))
 	h.UpdateRelease(newCID)
-}
-
-func (st *InitActorState_I) CID() cid.Cid {
-	panic("TODO")
 }
