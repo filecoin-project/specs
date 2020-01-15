@@ -37,7 +37,7 @@ const POST_CHALLENGE_RANGE_SIZE = 1
 
 const GIB_32 = 32 * 1024 * 1024 * 1024
 
-func PoStCfg(pType sector.PoStType, sectorSize sector.SectorSize, partitions UInt) *sector.PoStInstanceCfg_I {
+func PoStCfg(pType sector.PoStType, sectorSize sector.SectorSize, partitions UInt) sector.RegisteredProof {
 	nodes := UInt(sectorSize / NODE_SIZE)
 
 	return sector.PoStInstanceCfg_Make_PoStCfgV1(&sector.PoStCfgV1_I{
@@ -49,9 +49,9 @@ func PoStCfg(pType sector.PoStType, sectorSize sector.SectorSize, partitions UIn
 	}).Impl()
 }
 
-func MakeSealVerifier(cfg sector.SealInstanceCfg) *SealVerifier_I {
+func MakeSealVerifier(registeredProof sector.RegisteredProof) *SealVerifier_I {
 	return &SealVerifier_I{
-		SealCfg_: cfg,
+		SealCfg_: sector.RegisteredProofInstance(registeredProof).Cfg().As_SealCfg(),
 	}
 }
 
@@ -63,9 +63,9 @@ func ElectionPoStCfg(sectorSize sector.SectorSize) *sector.PoStInstanceCfg_I {
 	return PoStCfg(sector.PoStType_ElectionPoSt, sectorSize, ELECTION_POST_PARTITIONS)
 }
 
-func MakeElectionPoStVerifier(cfg sector.PoStInstanceCfg) *PoStVerifier_I {
+func MakeElectionPoStVerifier(registeredProof sector.RegisteredProof) *PoStVerifier_I {
 	return &PoStVerifier_I{
-		PoStCfg_: cfg,
+		PoStCfg_: sector.RegisteredProofInstance(registeredProof).Cfg().As_PoStCfg(),
 	}
 }
 
