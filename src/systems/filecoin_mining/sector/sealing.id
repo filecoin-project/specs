@@ -72,6 +72,7 @@ type SectorPreCommitInfo struct {
 
 type SectorProveCommitInfo struct {
     SectorNumber
+    RegisteredProof
     Proof             SealProof
     InteractiveEpoch  abi.ChainEpoch
     Expiration        abi.ChainEpoch
