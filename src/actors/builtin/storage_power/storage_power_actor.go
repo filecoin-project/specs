@@ -91,7 +91,7 @@ func (a *StoragePowerActor) CreateMiner(rt Runtime, workerAddr addr.Address, sec
 				peerId,
 			),
 			abi.TokenAmount(0),
-		).ReturnValue(),
+		).ReturnValue,
 	)
 	autil.Assert(err == nil)
 

@@ -66,17 +66,17 @@ func CallerPattern_MakeAcceptAny() CallerPattern {
 }
 
 func InvocInput_Make(to addr.Address, method abi.MethodNum, params abi.MethodParams, value abi.TokenAmount) InvocInput {
-	return &InvocInput_I{
-		To_:     to,
-		Method_: method,
-		Params_: params,
-		Value_:  value,
+	return InvocInput{
+		To:     to,
+		Method: method,
+		Params: params,
+		Value:  value,
 	}
 }
 
 func InvocOutput_Make(returnValue []byte) InvocOutput {
-	return &InvocOutput_I{
-		ReturnValue_: returnValue,
+	return InvocOutput{
+		ReturnValue: returnValue,
 	}
 }
 
