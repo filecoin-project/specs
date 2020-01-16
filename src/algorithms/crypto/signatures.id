@@ -9,8 +9,8 @@ type SigKeyPair struct {
 }
 
 type Signature struct {
-    Sig   SignatureBytes  @(internal)
     Type  SigType         @(internal)
+    Sig   SignatureBytes  @(internal)
 }
 
 type SigType enum {

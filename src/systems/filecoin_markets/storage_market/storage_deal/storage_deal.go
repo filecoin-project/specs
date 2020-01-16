@@ -7,12 +7,6 @@ import util "github.com/filecoin-project/specs/util"
 var IMPL_FINISH = util.IMPL_FINISH
 var TODO = util.TODO
 
-func (d *StorageDeal_I) Proposal() StorageDealProposal {
-	// extract from d.ProposalMessage
-	TODO()
-	panic("")
-}
-
 func (p *StorageDealProposal_I) Duration() abi.ChainEpoch {
 	return (p.EndEpoch() - p.StartEpoch())
 }

@@ -280,7 +280,7 @@ func _rtDealProposalIsInternallyValid(rt Runtime, dealP deal.StorageDealProposal
 
 	// Note: we do not verify the provider signature here, since this is implicit in the
 	// authenticity of the on-chain message publishing the deal.
-	sigVerified := rt.Syscalls().VerifySignature(dealP.ClientSignature().Sig(), dealP.Client(), m)
+	sigVerified := rt.Syscalls().VerifySignature(dealP.ClientSignature(), dealP.Client(), m)
 	if !sigVerified {
 		return false
 	}
