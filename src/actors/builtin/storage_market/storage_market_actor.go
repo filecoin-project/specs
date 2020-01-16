@@ -10,7 +10,7 @@ import (
 	cid "github.com/ipfs/go-cid"
 )
 
-type DealWeight DealWeight
+type DealWeight int64
 
 type StorageMarketActor struct{}
 
