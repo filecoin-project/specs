@@ -21,15 +21,14 @@ type StorageMinerActorState struct {
 }
 
 type MinerPoStState struct {
-	// If > 0 miner is in an OK state.
-	// The miner has passed either an ElectionPoSt or a SurprisePoSt
-	// sufficiently recently.
+	// Epoch of the last succesful PoSt, either election post or surprise post.
 	LastSuccessfulPoSt abi.ChainEpoch
 
 	// If >= 0 miner has been challenged and not yet responded successfully.
 	// SurprisePoSt challenge state: The miner has not submitted timely ElectionPoSts,
 	// and as a result, the system has fallen back to proving storage via SurprisePoSt.
-	SurpriseChallengeEpoch abi.ChainEpoch // int64 so this can be -1 for the case when the last successfully PoSt > 0
+	//  `epochUndefined` if not currently challeneged.
+	SurpriseChallengeEpoch abi.ChainEpoch
 
 	// Not empty iff the miner is challenged.
 	ChallengedSectors []abi.SectorNumber
@@ -42,15 +41,15 @@ type MinerPoStState struct {
 }
 
 func (mps *MinerPoStState) Is_Challenged() bool {
-	return len(mps.ChallengedSectors) > 0
+	return mps.SurpriseChallengeEpoch != epochUndefined
 }
 
 func (mps *MinerPoStState) Is_OK() bool {
-	return int64(mps.LastSuccessfulPoSt) > 0
+	return !mps.Is_Challenged() && !mps.Is_DetectedFault()
 }
 
 func (mps *MinerPoStState) Is_DetectedFault() bool {
-	panic("TODO")
+	return mps.NumConsecutiveFailures > 0
 }
 
 type SectorState int64
@@ -174,39 +173,6 @@ func (st *StorageMinerActorState) _getStorageWeightDescsForSectors(sectorNumbers
 		ret = append(ret, st._getStorageWeightDescForSector(sectorNumber))
 	}
 	return ret
-}
-
-func MinerPoStState_New_OK(lastSuccessfulPoSt abi.ChainEpoch) MinerPoStState {
-	panic("TODO")
-	/*
-		return MinerPoStState_Make_OK(&MinerPoStState_OK_I{
-			LastSuccessfulPoSt_: lastSuccessfulPoSt,
-		})
-	*/
-}
-
-func MinerPoStState_New_Challenged(
-	surpriseChallengeEpoch abi.ChainEpoch,
-	challengedSectors []abi.SectorNumber,
-	numConsecutiveFailures int64,
-) MinerPoStState {
-	panic("TODO")
-	/*
-		return MinerPoStState_Make_Challenged(&MinerPoStState_Challenged_I{
-			SurpriseChallengeEpoch_: surpriseChallengeEpoch,
-			ChallengedSectors_:      challengedSectors,
-			NumConsecutiveFailures_: numConsecutiveFailures,
-		})
-	*/
-}
-
-func MinerPoStState_New_DetectedFault(numConsecutiveFailures int64) MinerPoStState {
-	panic("TODO")
-	/*
-		return MinerPoStState_Make_DetectedFault(&MinerPoStState_DetectedFault_I{
-			NumConsecutiveFailures_: numConsecutiveFailures,
-		})
-	*/
 }
 
 func (x *SectorOnChainInfo) Is_TemporaryFault() bool {

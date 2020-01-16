@@ -49,14 +49,9 @@ func (a *StorageMinerActor) OnSurprisePoStChallenge(rt Runtime) {
 
 	// Do not challenge if the last successful PoSt was recent enough.
 	noChallengePeriod := indices.StorageMining_PoStNoChallengePeriod()
-	if st.PoStState.Is_OK() && st.PoStState.LastSuccessfulPoSt >= rt.CurrEpoch()-noChallengePeriod {
+	if st.PoStState.LastSuccessfulPoSt >= rt.CurrEpoch()-noChallengePeriod {
 		Release(rt, h, st)
 		return
-	}
-
-	var numConsecutiveFailures int64
-	if st.PoStState.Is_DetectedFault() {
-		numConsecutiveFailures = st.PoStState.NumConsecutiveFailures
 	}
 
 	var curRecBuf bytes.Buffer
@@ -71,7 +66,12 @@ func (a *StorageMinerActor) OnSurprisePoStChallenge(rt Runtime) {
 		SectorNumberSetHAMT_Items(st.ProvingSet),
 	)
 
-	st.PoStState = MinerPoStState_New_Challenged(rt.CurrEpoch(), challengedSectors, numConsecutiveFailures)
+	st.PoStState = MinerPoStState{
+		LastSuccessfulPoSt:     st.PoStState.LastSuccessfulPoSt,
+		SurpriseChallengeEpoch: rt.CurrEpoch(),
+		ChallengedSectors:      challengedSectors,
+		NumConsecutiveFailures: st.PoStState.NumConsecutiveFailures,
+	}
 
 	UpdateRelease(rt, h, st)
 
@@ -92,7 +92,14 @@ func (a *StorageMinerActor) SubmitSurprisePoStResponse(rt Runtime, onChainInfo a
 	Release(rt, h, st)
 
 	a._rtVerifySurprisePoStOrAbort(rt, &onChainInfo)
-	a._rtUpdatePoStState(rt, MinerPoStState_New_OK(rt.CurrEpoch()))
+
+	newPostSt := MinerPoStState{
+		LastSuccessfulPoSt:     rt.CurrEpoch(),
+		SurpriseChallengeEpoch: epochUndefined,
+		ChallengedSectors:      nil,
+		NumConsecutiveFailures: 0,
+	}
+	a._rtUpdatePoStState(rt, newPostSt)
 
 	rt.Send(
 		builtin.StoragePowerActorAddr,
@@ -127,7 +134,13 @@ func (a *StorageMinerActor) OnVerifiedElectionPoSt(rt Runtime) {
 	// Advance the timestamp of the most recent PoSt success, provided the miner is currently
 	// in normal state. (Cannot do this if SurprisePoSt mechanism already underway.)
 	if updateSuccessEpoch {
-		a._rtUpdatePoStState(rt, MinerPoStState_New_OK(rt.CurrEpoch()))
+		newPostSt := MinerPoStState{
+			LastSuccessfulPoSt:     rt.CurrEpoch(),
+			SurpriseChallengeEpoch: st.PoStState.SurpriseChallengeEpoch, // expected to be undef because PoStState is OK
+			ChallengedSectors:      st.PoStState.ChallengedSectors,      // expected to be empty
+			NumConsecutiveFailures: st.PoStState.NumConsecutiveFailures, // expected to be 0
+		}
+		a._rtUpdatePoStState(rt, newPostSt)
 	}
 }
 
@@ -383,9 +396,16 @@ func (a *StorageMinerActor) Constructor(
 	rt.ValidateImmediateCallerIs(builtin.StoragePowerActorAddr)
 	h := rt.AcquireState()
 
+	initPostState := MinerPoStState{
+		LastSuccessfulPoSt:     epochUndefined,
+		SurpriseChallengeEpoch: epochUndefined,
+		ChallengedSectors:      nil,
+		NumConsecutiveFailures: 0,
+	}
+
 	st := &StorageMinerActorState{
 		Sectors:    SectorsAMT_Empty(),
-		PoStState:  MinerPoStState_New_OK(rt.CurrEpoch()),
+		PoStState:  initPostState,
 		ProvingSet: SectorNumberSetHAMT_Empty(),
 		Info:       MinerInfo_New(ownerAddr, workerAddr, sectorSize, peerId),
 	}
@@ -537,7 +557,13 @@ func (a *StorageMinerActor) _rtCheckSurprisePoStExpiry(rt Runtime) {
 	} else {
 		// Increment count of consecutive failures, and continue.
 		h, st = a.State(rt)
-		st.PoStState = MinerPoStState_New_DetectedFault(numConsecutiveFailures)
+
+		st.PoStState = MinerPoStState{
+			LastSuccessfulPoSt:     st.PoStState.LastSuccessfulPoSt,
+			SurpriseChallengeEpoch: epochUndefined,
+			ChallengedSectors:      nil,
+			NumConsecutiveFailures: numConsecutiveFailures,
+		}
 		UpdateRelease(rt, h, st)
 	}
 
