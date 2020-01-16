@@ -1,13 +1,14 @@
 package exitcode
 
-type SystemErrorCode int
-type UserDefinedErrorCode int
+type ExitCode int64
 
 const (
 	// TODO: remove once canonical error codes are finalized
-	SystemErrorCode_Placeholder      = SystemErrorCode(-(1 << 30))
-	UserDefinedErrorCode_Placeholder = UserDefinedErrorCode(-(1 << 30))
+	SystemErrorCode_Placeholder      = ExitCode(-(1 << 30))
+	UserDefinedErrorCode_Placeholder = ExitCode(-(1 << 30))
 )
+
+const Ok = ExitCode(0)
 
 // TODO: assign all of these.
 const (
@@ -65,38 +66,26 @@ const (
 	InsufficientPledgeCollateral
 )
 
-func OK() ExitCode {
-	return ExitCode_Make_Success(&ExitCode_Success_I{})
+func (x ExitCode) IsSuccess() bool {
+	return x == Ok
 }
 
-func SystemError(x SystemErrorCode) ExitCode {
-	return ExitCode_Make_SystemError(ExitCode_SystemError(x))
-}
-
-func (x *ExitCode_I) IsSuccess() bool {
-	return x.Which() == ExitCode_Case_Success
-}
-
-func (x *ExitCode_I) IsError() bool {
+func (x ExitCode) IsError() bool {
 	return !x.IsSuccess()
 }
 
-func (x *ExitCode_I) AllowsStateUpdate() bool {
+func (x ExitCode) AllowsStateUpdate() bool {
 	return x.IsSuccess()
 }
 
-func (x *ExitCode_I) Equals(ExitCode) bool {
-	panic("")
+func OK() ExitCode {
+	return Ok
 }
 
 func EnsureErrorCode(x ExitCode) ExitCode {
 	if !x.IsError() {
 		// Throwing an error with a non-error exit code is itself an error
-		x = SystemError(RuntimeAPIError)
+		x = (RuntimeAPIError)
 	}
 	return x
-}
-
-func UserDefinedError(e UserDefinedErrorCode) ExitCode {
-	return ExitCode_Make_UserDefinedError(ExitCode_UserDefinedError(e))
 }
