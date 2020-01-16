@@ -135,7 +135,8 @@ func (a *StorageMarketActor) PublishStorageDeals(rt Runtime, newStorageDeals []S
 		if _, found := st.CachedExpirationsPending[p.EndEpoch]; !found {
 			st.CachedExpirationsPending[p.EndEpoch] = actor_util.DealIDQueue_Empty()
 		}
-		st.CachedExpirationsPending[p.EndEpoch].Enqueue(id)
+		cep := st.CachedExpirationsPending[p.EndEpoch]
+		cep.Enqueue(id)
 	}
 
 	st.CurrEpochNumDealsPublished += len(newStorageDeals)

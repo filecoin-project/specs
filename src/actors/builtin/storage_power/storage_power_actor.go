@@ -204,9 +204,9 @@ func (a *StoragePowerActor) OnMinerSurprisePoStFailure(rt Runtime, numConsecutiv
 func (a *StoragePowerActor) OnMinerEnrollCronEvent(rt Runtime, eventEpoch abi.ChainEpoch, sectorNumbers []abi.SectorNumber) {
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
-	minerEvent := &autil.MinerEvent_I{
-		MinerAddr_: minerAddr,
-		Sectors_:   sectorNumbers,
+	minerEvent := &autil.MinerEvent{
+		MinerAddress: minerAddr,
+		MinerSectors: sectorNumbers,
 	}
 
 	h, st := a.State(rt)
@@ -354,7 +354,7 @@ func (a *StoragePowerActor) _rtProcessDeferredCronEvents(rt Runtime) {
 	delete(st.CachedDeferredCronEvents, epoch)
 	UpdateRelease(rt, h, st)
 
-	minerEventsRetain := []autil.MinerEvent{}
+	minerEventsRetain := []autil.MinerEventInterface{}
 	for minerEvent := range minerEvents {
 		if _, found := st.PowerTable[minerEvent.MinerAddr()]; found {
 			minerEventsRetain = append(minerEventsRetain, minerEvent)

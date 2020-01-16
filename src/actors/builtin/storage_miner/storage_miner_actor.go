@@ -310,7 +310,7 @@ func (a *StorageMinerActor) ExtendSectorExpiration(rt Runtime, sectorNumber abi.
 	UpdateRelease(rt, h, st)
 
 	storageWeightDescNew := storageWeightDescPrev
-	storageWeightDescNew.Impl().Duration_ = storageWeightDescPrev.Duration() + extensionLength
+	storageWeightDescNew.Duration = storageWeightDescPrev.Duration + extensionLength
 
 	rt.Send(
 		builtin.StoragePowerActorAddr,
@@ -328,7 +328,7 @@ func (a *StorageMinerActor) TerminateSector(rt Runtime, sectorNumber abi.SectorN
 	rt.ValidateImmediateCallerIs(st.Info.Worker)
 	Release(rt, h, st)
 
-	a._rtTerminateSector(rt, sectorNumber, autil.SectorTerminationType_UserTermination)
+	a._rtTerminateSector(rt, sectorNumber, autil.UserTermination)
 }
 
 ////////////
@@ -485,7 +485,7 @@ func (a *StorageMinerActor) _rtCheckSectorExpiry(rt Runtime, sectorNumber abi.Se
 	// Note: the following test may be false, if sector expiration has been extended by the worker
 	// in the interim after the Cron request was enrolled.
 	if rt.CurrEpoch() >= checkSector.Info.Expiration {
-		a._rtTerminateSector(rt, sectorNumber, autil.SectorTerminationType_NormalExpiration)
+		a._rtTerminateSector(rt, sectorNumber, autil.NormalExpiration)
 	}
 }
 

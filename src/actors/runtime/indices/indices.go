@@ -126,7 +126,7 @@ func (inds *Indices_I) GetCurrBlockRewardRewardForMiner(
 // TerminationFault
 func (inds *Indices_I) StoragePower_PledgeSlashForSectorTermination(
 	storageWeightDesc actor_util.SectorStorageWeightDesc,
-	terminationType actor_util.SectorTerminationType,
+	terminationType actor_util.SectorTermination,
 ) abi.TokenAmount {
 	PARAM_FINISH()
 	panic("")

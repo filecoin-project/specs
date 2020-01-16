@@ -7,7 +7,7 @@ import (
 )
 
 type SectorStorageWeightDesc = autil.SectorStorageWeightDesc
-type SectorTerminationType = autil.SectorTerminationType
+type SectorTerminationType = autil.SectorTermination
 
 var RT_ConfirmFundsReceiptOrAbort_RefundRemainder = vmr.RT_ConfirmFundsReceiptOrAbort_RefundRemainder
 
