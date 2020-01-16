@@ -41,14 +41,14 @@ var PROOFS ProofRegistry = ProofRegistry(map[util.UInt]ProofInstance{util.UInt(a
 	ID_:   abi.RegisteredProof_WinStackedDRG32GiBSeal,
 	Type_: ProofType_SealProof,
 	CircuitType_: &ConcreteCircuit_I{
-		Name_: "HASHOFCIRCUITDEFINITION1",
+		Name_: "HASHOFCIRCUITPARAMETERS1",
 	},
 },
 	util.UInt(abi.RegisteredProof_WinStackedDRG32GiBPoSt): &ProofInstance_I{
 		ID_:   abi.RegisteredProof_WinStackedDRG32GiBPoSt,
 		Type_: ProofType_PoStProof,
 		CircuitType_: &ConcreteCircuit_I{
-			Name_: "HASHOFCIRCUITDEFINITION2",
+			Name_: "HASHOFCIRCUITPARAMETERS2",
 		},
 		Cfg_: ProofCfg_Make_PoStCfg(&PoStInstanceCfg_I{}),
 		// FIXME: integrate
@@ -65,14 +65,14 @@ var PROOFS ProofRegistry = ProofRegistry(map[util.UInt]ProofInstance{util.UInt(a
 		ID_:   abi.RegisteredProof_StackedDRG32GiBSeal,
 		Type_: ProofType_SealProof,
 		CircuitType_: &ConcreteCircuit_I{
-			Name_: "HASHOFCIRCUITDEFINITION3",
+			Name_: "HASHOFCIRCUITPARAMETERS3",
 		},
 	},
 	util.UInt(abi.RegisteredProof_StackedDRG32GiBPoSt): &ProofInstance_I{
 		ID_:   abi.RegisteredProof_StackedDRG32GiBPoSt,
 		Type_: ProofType_PoStProof,
 		CircuitType_: &ConcreteCircuit_I{
-			Name_: "HASHOFCIRCUITDEFINITION4",
+			Name_: "HASHOFCIRCUITPARAMETERS4",
 		},
 	},
 })
