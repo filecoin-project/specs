@@ -156,7 +156,7 @@ func (a *StorageMarketActor) VerifyDealsOnSectorPreCommit(rt Runtime, dealIDs ab
 
 	for _, dealID := range dealIDs.Items {
 		deal, _ := st._rtGetOnChainDealOrAbort(rt, dealID)
-		_rtAbortIfDealInvalidForNewSectorSeal(rt, minerAddr, sectorInfo.Expiration(), deal)
+		_rtAbortIfDealInvalidForNewSectorSeal(rt, minerAddr, sectorInfo.Expiration, deal)
 	}
 
 	Release(rt, h, st)
@@ -173,7 +173,7 @@ func (a *StorageMarketActor) UpdateDealsOnSectorProveCommit(rt Runtime, dealIDs 
 
 	for _, dealID := range dealIDs.Items {
 		deal, _ := st._rtGetOnChainDealOrAbort(rt, dealID)
-		_rtAbortIfDealInvalidForNewSectorSeal(rt, minerAddr, sectorInfo.Expiration(), deal)
+		_rtAbortIfDealInvalidForNewSectorSeal(rt, minerAddr, sectorInfo.Expiration, deal)
 		st.Deals[dealID].Impl().SectorStartEpoch_ = rt.CurrEpoch()
 	}
 

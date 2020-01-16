@@ -251,8 +251,9 @@ func _lookupMinerOwner(store ipld.GraphStore, tree st.StateTree, minerAddr addr.
 	// - paying rewards to the miner actor instead of owner (with some miner->owner withdrawal mechanism)
 	// - resolving all miner->owner mappings in the state before invoking interpreter (e.g. during validation) and passing them in
 	// - including the owner address in block headers (and requiring it match the block's miner as part of semantic validation)
-	minerSubState := sminact.Deserialize_StorageMinerActorState_Assert(serialized)
-	return minerSubState.Info().Owner()
+	var minerSubState sminact.StorageMinerActorState
+	serde.MustDeserialize(serialized, &minerSubState)
+	return minerSubState.Info.Owner
 }
 
 func _applyMessageBuiltinAssert(store ipld.GraphStore, tree st.StateTree, chain chain.Chain, message msg.UnsignedMessage, minerAddr addr.Address) st.StateTree {

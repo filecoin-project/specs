@@ -135,7 +135,7 @@ func (inds *Indices_I) StoragePower_PledgeSlashForSectorTermination(
 // DetectedFault
 func (inds *Indices_I) StoragePower_PledgeSlashForSurprisePoStFailure(
 	minerClaimedPower abi.StoragePower,
-	numConsecutiveFailures int,
+	numConsecutiveFailures int64,
 ) abi.TokenAmount {
 	PARAM_FINISH()
 	panic("")
@@ -187,7 +187,7 @@ func StorageMining_SurprisePoStProvingPeriod() abi.ChainEpoch {
 	panic("")
 }
 
-func StoragePower_SurprisePoStMaxConsecutiveFailures() int {
+func StoragePower_SurprisePoStMaxConsecutiveFailures() int64 {
 	PARAM_FINISH()
 	panic("")
 }

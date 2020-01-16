@@ -100,7 +100,7 @@ func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 	chainHead := sms._blockchain().BestChain().HeadTipset()
 	sma := sms._getStorageMinerActorState(chainHead.StateTree(), sms.Node().Repository().KeyStore().MinerAddress())
 
-	if sma.PoStState().Is_OK() {
+	if sma.PoStState.Is_OK() {
 		ePoSt := sms._tryLeaderElection(chainHead.StateTree(), sma)
 		if ePoSt != nil {
 			// Randomness for ticket generation in block production
@@ -109,7 +109,7 @@ func (sms *StorageMiningSubsystem_I) _runMiningCycle() {
 
 			sms._blockProducer().GenerateBlock(*ePoSt, newTicket, chainHead, sms.Node().Repository().KeyStore().MinerAddress())
 		}
-	} else if sma.PoStState().Is_Challenged() {
+	} else if sma.PoStState.Is_Challenged() {
 		sPoSt := sms._trySurprisePoSt(chainHead.StateTree(), sma)
 
 		var gasLimit msg.GasAmount
@@ -201,11 +201,8 @@ func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateT
 	// fix conversion to bytes
 	util.IMPL_TODO(substate)
 	var serializedSubstate Serialization
-	st, err := sminact.Deserialize_StorageMinerActorState(serializedSubstate)
-
-	if err == nil {
-		panic("Deserialization error")
-	}
+	var st sminact.StorageMinerActorState
+	serde.MustDeserialize(serializedSubstate, &st)
 	return st
 }
 
@@ -270,7 +267,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 	// TODO if the workerAddress is secp then payload will be the blake2b hash of its public key
 	// and we will need to recover the entire public key from worker before handing off to Verify
 	// example of recover code: https://github.com/ipsn/go-secp256k1/blob/master/secp256.go#L93
-	workerKey := sma.Info().Worker().Payload()
+	workerKey := sma.Info.Worker.Payload()
 	// Verify VRF output from appropriate input corresponds to randomness used
 	if !postRand.Verify(input, filcrypto.VRFPublicKey(workerKey)) {
 		return false
@@ -278,8 +275,8 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 
 	// A proof must be a valid snark proof with the correct public inputs
 	// 5. Get public inputs
-	info := sma.Info()
-	sectorSize := info.SectorSize()
+	info := sma.Info
+	sectorSize := info.SectorSize
 
 	postCfg := filproofs.ElectionPoStCfg(sectorSize)
 
@@ -320,12 +317,12 @@ func (sms *StorageMiningSubsystem_I) _verifyElection(header block.BlockHeader, o
 }
 
 func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateTree, sma sminact.StorageMinerActorState) *abi.OnChainSurprisePoStVerifyInfo {
-	if !sma.PoStState().Is_Challenged() {
+	if !sma.PoStState.Is_Challenged() {
 		return nil
 	}
 
 	// get randomness for SurprisePoSt
-	challEpoch := sma.PoStState().As_Challenged().SurpriseChallengeEpoch()
+	challEpoch := sma.PoStState.SurpriseChallengeEpoch
 	randomnessK := sms._blockchain().BestChain().GetPoStChallengeRandSeed(challEpoch)
 	// unlike with ElectionPoSt no need to use a VRF
 	postRandomness := acrypto.DeriveRandWithMinerAddr(acrypto.DomainSeparationTag_SurprisePoStChallengeSeed, randomnessK, sms.Node().Repository().KeyStore().MinerAddress())
