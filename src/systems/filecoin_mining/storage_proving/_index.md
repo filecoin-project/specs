@@ -1,6 +1,6 @@
 ---
 title: Storage Proving
-statusIcon: 🔁
+statusIcon: ✅
 entries:
 - sealer
 - poster

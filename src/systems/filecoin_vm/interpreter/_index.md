@@ -1,6 +1,6 @@
 ---
 menuTitle: Interpreter
-statusIcon: ⚠️
+statusIcon: 🔁
 title: VM Interpreter - Message Invocation (Outside VM)
 ---
 
