@@ -1,7 +1,7 @@
 package exitcode
 
-type SystemErrorCode int
-type UserDefinedErrorCode int
+type SystemErrorCode int64
+type UserDefinedErrorCode int64
 
 const (
 	// TODO: remove once canonical error codes are finalized
@@ -65,27 +65,41 @@ const (
 	InsufficientPledgeCollateral
 )
 
+type ExitCode struct {
+	Success          struct{}
+	SystemError      SystemErrorCode
+	UserDefinedError UserDefinedErrorCode
+}
+
 func OK() ExitCode {
-	return ExitCode_Make_Success(&ExitCode_Success_I{})
+	return ExitCode{
+		Success:          struct{}{},
+		SystemError:      0,
+		UserDefinedError: 0,
+	}
 }
 
 func SystemError(x SystemErrorCode) ExitCode {
-	return ExitCode_Make_SystemError(ExitCode_SystemError(x))
+	return ExitCode{
+		Success:          struct{}{},
+		SystemError:      x,
+		UserDefinedError: 0,
+	}
 }
 
-func (x *ExitCode_I) IsSuccess() bool {
-	return x.Which() == ExitCode_Case_Success
+func (x *ExitCode) IsSuccess() bool {
+	return x.Success == struct{}{} && x.SystemError == 0 && x.UserDefinedError == 0
 }
 
-func (x *ExitCode_I) IsError() bool {
+func (x *ExitCode) IsError() bool {
 	return !x.IsSuccess()
 }
 
-func (x *ExitCode_I) AllowsStateUpdate() bool {
+func (x *ExitCode) AllowsStateUpdate() bool {
 	return x.IsSuccess()
 }
 
-func (x *ExitCode_I) Equals(ExitCode) bool {
+func (x *ExitCode) Equals(ExitCode) bool {
 	panic("")
 }
 
@@ -98,5 +112,9 @@ func EnsureErrorCode(x ExitCode) ExitCode {
 }
 
 func UserDefinedError(e UserDefinedErrorCode) ExitCode {
-	return ExitCode_Make_UserDefinedError(ExitCode_UserDefinedError(e))
+	return ExitCode{
+		Success:          struct{}{},
+		SystemError:      0,
+		UserDefinedError: e,
+	}
 }
