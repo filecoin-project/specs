@@ -109,10 +109,11 @@ type OnChainSurprisePoStVerifyInfo struct {
 	RegisteredProof
 	Candidates []PoStCandidate
 	Proofs     []PoStProof
-	CommT      ChallengeTicketsCommitment
+	// CommT      ChallengeTicketsCommitment // Potential future optimization.
 }
 
 type PoStCandidate struct {
+	RegisteredProof
 	PartialTicket  PartialTicket             // Optional —  will eventually be omitted for SurprisePoSt verification, needed for now.
 	PrivateProof   PrivatePoStCandidateProof // Optional — should be ommitted for verification.
 	SectorID       SectorID
@@ -124,15 +125,6 @@ type PoStProof struct { //<curve, system> {
 }
 
 type PrivatePoStCandidateProof struct {
-	Algorithm    ProofAlgorithm
+	RegisteredProof
 	Externalized Bytes
 }
-
-type ProofAlgorithm int64
-
-const (
-	ProofAlgorithm_StackedDRGSeal    = ProofAlgorithm(1)
-	ProofAlgorithm_WinStackedDRGSeal = ProofAlgorithm(2)
-	ProofAlgorithm_StackedDRGPoSt    = ProofAlgorithm(3)
-	ProofAlgorithm_WinStackedDRGPoSt = ProofAlgorithm(4)
-)
