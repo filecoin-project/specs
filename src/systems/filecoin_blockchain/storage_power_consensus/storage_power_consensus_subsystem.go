@@ -41,7 +41,7 @@ func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree st
 	// finalize the partial ticket
 	challengeTicket := acrypto.SHA256(abi.Bytes(partialTicket))
 
-	networkPower := inds.TotalNetworkEffectivePower
+	networkPower := inds.TotalNetworkEffectivePower()
 
 	sectorsSampled := uint64(math.Ceil(float64(node_base.EPOST_SAMPLE_RATE_NUM/node_base.EPOST_SAMPLE_RATE_DENOM) * float64(numSectors)))
 
