@@ -223,11 +223,8 @@ func (sms *StorageMiningSubsystem_I) _getStoragePowerActorState(stateTree stateT
 	// fix conversion to bytes
 	util.IMPL_TODO(substate)
 	var serializedSubstate util.Serialization
-	st, err := spowact.Deserialize_StoragePowerActorState(serializedSubstate)
-
-	if err == nil {
-		panic("Deserialization error")
-	}
+	var st spowact.StoragePowerActorState
+	serde.MustDeserialize(serializedSubstate, &st)
 	return st
 }
 
@@ -235,7 +232,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 	sma := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
 	spa := sms._getStoragePowerActorState(header.ParentState())
 
-	pow, found := spa.PowerTable()[header.Miner()]
+	pow, found := spa.PowerTable[header.Miner()]
 	if !found {
 		return false
 	}

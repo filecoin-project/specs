@@ -9,6 +9,7 @@ import (
 	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 	acrypto "github.com/filecoin-project/specs/actors/crypto"
 	inds "github.com/filecoin-project/specs/actors/runtime/indices"
+	serde "github.com/filecoin-project/specs/actors/serde"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
@@ -59,11 +60,8 @@ func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTre
 	// fix conversion to bytes
 	util.IMPL_FINISH(substate)
 	var serializedSubstate util.Serialization
-	st, err := spowact.Deserialize_StoragePowerActorState(serializedSubstate)
-
-	if err == nil {
-		panic("Deserialization error")
-	}
+	var st spowact.StoragePowerActorState
+	serde.MustDeserialize(serializedSubstate, &st)
 	return st
 }
 
