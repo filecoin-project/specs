@@ -1,5 +1,6 @@
 import actor "github.com/filecoin-project/specs/actors"
 import abi "github.com/filecoin-project/specs/actors/abi"
+import crypto "github.com/filecoin-project/specs/actors/crypto"
 import exitcode "github.com/filecoin-project/specs/actors/runtime/exitcode"
 import addr "github.com/filecoin-project/go-address"
 import indices "github.com/filecoin-project/specs/actors/runtime/indices"
@@ -122,7 +123,11 @@ type Runtime interface {
 
 type Syscalls interface {
     // Verifies that a signature is valid for an address and plaintext.
-    VerifySignature(signature [byte], signer addr.Address, plaintext [byte]) bool
+    VerifySignature(
+        signature  crypto.Signature
+        signer     addr.Address
+        plaintext  [byte]
+    ) bool
     // Computes an unsealed sector CID (CommD) from its constituent piece CIDs (CommPs) and sizes.
     ComputeUnsealedSectorCID(sectorSize abi.SectorSize, pieces [abi.PieceInfo]) (abi.UnsealedSectorCID, error)
     // Verifies a sector seal proof.
