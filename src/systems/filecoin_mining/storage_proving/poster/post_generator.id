@@ -1,5 +1,4 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 
 type UInt64 UInt
@@ -24,12 +23,12 @@ type PoStGenerator struct {
 
     CreateElectionPoStProof(
         randomness  abi.PoStRandomness
-        witness     sector.PoStWitness
+        witness     [abi.PoStCandidate]
     ) [abi.PoStProof]
 
     CreateSurprisePoStProof(
         randomness  abi.PoStRandomness
-        witness     sector.PoStWitness
+        witness     [abi.PoStCandidate]
     ) [abi.PoStProof]
 
     // FIXME: Verification shouldn't require a PoStGenerator. Move this.

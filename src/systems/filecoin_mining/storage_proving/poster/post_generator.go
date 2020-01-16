@@ -3,7 +3,6 @@ package poster
 import (
 	abi "github.com/filecoin-project/specs/actors/abi"
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -30,20 +29,20 @@ func (pg *PoStGenerator_I) GeneratePoStCandidates(challengeSeed abi.PoStRandomne
 	return filproofs.GenerateElectionPoStCandidates(challengeSeed, sectors, candidateCount, pg.SectorStore())
 }
 
-func (pg *PoStGenerator_I) CreateElectionPoStProof(randomness abi.PoStRandomness, witness sector.PoStWitness) []abi.PoStProof {
+func (pg *PoStGenerator_I) CreateElectionPoStProof(randomness abi.PoStRandomness, postCandidates []abi.PoStCandidate) []abi.PoStProof {
 	var privateProofs []abi.PrivatePoStCandidateProof
 
-	for _, candidate := range witness.Candidates() {
+	for _, candidate := range postCandidates {
 		privateProofs = append(privateProofs, candidate.PrivateProof)
 	}
 
 	return filproofs.CreateElectionPoStProof(privateProofs, randomness)
 }
 
-func (pg *PoStGenerator_I) CreateSurprisePoStProof(randomness abi.PoStRandomness, witness sector.PoStWitness) []abi.PoStProof {
+func (pg *PoStGenerator_I) CreateSurprisePoStProof(randomness abi.PoStRandomness, postCandidates []abi.PoStCandidate) []abi.PoStProof {
 	var privateProofs []abi.PrivatePoStCandidateProof
 
-	for _, candidate := range witness.Candidates() {
+	for _, candidate := range postCandidates {
 		privateProofs = append(privateProofs, candidate.PrivateProof)
 	}
 

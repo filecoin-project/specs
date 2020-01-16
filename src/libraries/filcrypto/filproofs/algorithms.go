@@ -711,7 +711,7 @@ func computePartialTicket(randomness abi.PoStRandomness, sectorID abi.SectorID, 
 	return partialTicket
 }
 
-type PoStCandidatesMap map[abi.ProofAlgorithm][]abi.PoStCandidate
+type PoStCandidatesMap map[ProofAlgorithm][]abi.PoStCandidate
 
 func CreatePoStProof(privateCandidateProofs []PrivatePostCandidateProof, challengeSeed abi.PoStRandomness) []abi.PoStProof {
 	var proofsMap map[RegisteredProof][]PrivatePostCandidateProof

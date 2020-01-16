@@ -3,7 +3,6 @@ package storage_proving
 import (
 	abi "github.com/filecoin-project/specs/actors/abi"
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -38,12 +37,8 @@ func (sps *StorageProvingSubsystem_I) GenerateElectionPoStCandidates(challengeSe
 }
 
 func (sps *StorageProvingSubsystem_I) CreateElectionPoStProof(challengeSeed abi.PoStRandomness, candidates []abi.PoStCandidate) []abi.PoStProof {
-	witness := &sector.PoStWitness_I{
-		Candidates_: candidates,
-	}
-
 	var poster = sps.PoStGenerator()
-	return poster.CreateElectionPoStProof(challengeSeed, witness)
+	return poster.CreateElectionPoStProof(challengeSeed, candidates)
 }
 
 // TODO also return error
@@ -56,10 +51,6 @@ func (sps *StorageProvingSubsystem_I) GenerateSurprisePoStCandidates(challengeSe
 }
 
 func (sps *StorageProvingSubsystem_I) CreateSurprisePoStProof(challengeSeed abi.PoStRandomness, candidates []abi.PoStCandidate) []abi.PoStProof {
-	witness := &sector.PoStWitness_I{
-		Candidates_: candidates,
-	}
-
 	var poster = sps.PoStGenerator()
-	return poster.CreateSurprisePoStProof(challengeSeed, witness)
+	return poster.CreateSurprisePoStProof(challengeSeed, candidates)
 }

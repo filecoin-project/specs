@@ -1,54 +1,5 @@
-import abi "github.com/filecoin-project/specs/actors/abi"
+//import abi "github.com/filecoin-project/specs/actors/abi"
 
-type PartialTicket Bytes  // 32 bytes
-type ChallengeTicketsCommitment Bytes
-type PoStRandomness Bytes
-
-// TODO: refactor these types to get rid of the squishy optional fields.
-type PoStVerifyInfo struct {
-    Randomness       PoStRandomness
-    CommR            abi.SealedSectorCID
-    OnChain          OnChainPoStVerifyInfo
-    EligibleSectors  {abi.SectorID: abi.SealedSectorCID}
-}
-
-type PoStCandidate struct {
-    PartialTicket  // Optional —  will eventually be omitted for SurprisePoSt verification, needed for now.
-    PrivateProof    PrivatePoStCandidateProof  // Optional — should be ommitted for verification.
-    SectorID        abi.SectorID
-    ChallengeIndex  UInt
-}
-
-// implemented by both OnChainElectionPoStVerifyInfo and OnChainSurprisePoStVerifyInfo
-type OnChainPoStVerifyInfo interface {
-    Candidates()  [PoStCandidate]
-    Proofs()      [PoStProof]
-}
-
-type OnChainElectionPoStVerifyInfo struct {
-    // There should be one RegisteredProof for each PoSt Candi
-    RegisteredProofs  [abi.RegisteredProof]
-    Candidates        [PoStCandidate]
-    Proofs            [PoStProof]
-    Randomness        PoStRandomness
-}
-
-type OnChainSurprisePoStVerifyInfo struct {
-    RegisteredProof  abi.RegisteredProof
-    Candidates       [PoStCandidate]
-    Proofs           [PoStProof]
-    CommT            ChallengeTicketsCommitment
-}
-
-type PoStWitness struct {
-    Candidates [abi.PoStCandidate]
-}
-
-type PoStProof struct {//<curve, system> {
-    ProofBytes Bytes
-}
-
-type PrivatePoStCandidateProof struct {
-    RegisteredProof  abi.RegisteredProof
-    Externalized     Bytes
-}
+// type PoStWitness struct {
+//     Candidates [abi.PoStCandidate]
+// }

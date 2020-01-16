@@ -109,7 +109,7 @@ type OnChainSurprisePoStVerifyInfo struct {
 	RegisteredProof
 	Candidates []PoStCandidate
 	Proofs     []PoStProof
-	CommT      ChallengeTicketsCommitment
+	// CommT      ChallengeTicketsCommitment // Potential future optimization.
 }
 
 type PoStCandidate struct {
@@ -128,13 +128,3 @@ type PrivatePoStCandidateProof struct {
 	RegisteredProof
 	Externalized Bytes
 }
-
-// FIXME: Can these die?
-type ProofAlgorithm int64
-
-const (
-	ProofAlgorithm_StackedDRGSeal    = ProofAlgorithm(1)
-	ProofAlgorithm_WinStackedDRGSeal = ProofAlgorithm(2)
-	ProofAlgorithm_StackedDRGPoSt    = ProofAlgorithm(3)
-	ProofAlgorithm_WinStackedDRGPoSt = ProofAlgorithm(4)
-)
