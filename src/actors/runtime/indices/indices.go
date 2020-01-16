@@ -70,7 +70,7 @@ type Indices interface {
 	) abi.TokenAmount
 	StoragePower_PledgeSlashForSectorTermination(
 		storageWeightDesc actor_util.SectorStorageWeightDesc,
-		terminationType actor_util.SectorTerminationType,
+		terminationType actor_util.SectorTermination,
 	) abi.TokenAmount
 	StoragePower_PledgeSlashForSurprisePoStFailure(
 		minerClaimedPower abi.StoragePower,
