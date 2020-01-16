@@ -5,15 +5,50 @@ import (
 	abi "github.com/filecoin-project/specs/actors/abi"
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	actor_util "github.com/filecoin-project/specs/actors/util"
+	cid "github.com/ipfs/go-cid"
 )
 
 const epochUndefined = abi.ChainEpoch(-1)
+
+// TODO AMT
+type DealsAMT map[abi.DealID]OnChainDeal
+
+// TODO AMT
+type CachedDealIDsByPartyHAMT map[addr.Address]actor_util.DealIDSetHAMT
+
+// TODO AMT
+type CachedExpirationsPendingHAMT map[abi.ChainEpoch]DealIDQueue
+
+type StorageMarketActorState struct {
+	Deals DealsAMT
+
+	// Total amount held in escrow, indexed by actor address (including both locked and unlocked amounts).
+	EscrowTable actor_util.BalanceTableHAMT
+
+	// Amount locked, indexed by actor address.
+	// Note: the amounts in this table do not affect the overall amount in escrow:
+	// only the _portion_ of the total escrow amount that is locked.
+	LockedReqTable actor_util.BalanceTableHAMT
+
+	NextID abi.DealID
+
+	// Metadata cached for efficient iteration over deals.
+	CachedDealIDsByParty           CachedDealIDsByPartyHAMT
+	CachedExpirationsPending       CachedExpirationsPendingHAMT
+	CachedExpirationsNextProcEpoch abi.ChainEpoch
+	CurrEpochNumDealsPublished     int
+}
+
+func (st *StorageMarketActorState) CID() cid.Cid {
+	IMPL_FINISH()
+	panic("")
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Deal state operations
 ////////////////////////////////////////////////////////////////////////////////
 
-func (st *StorageMarketActorState_I) _updatePendingDealStates(dealIDs []abi.DealID, epoch abi.ChainEpoch) (
+func (st *StorageMarketActorState) _updatePendingDealStates(dealIDs []abi.DealID, epoch abi.ChainEpoch) (
 	amountSlashedTotal abi.TokenAmount) {
 
 	IMPL_FINISH() // BigInt arithmetic
@@ -27,7 +62,7 @@ func (st *StorageMarketActorState_I) _updatePendingDealStates(dealIDs []abi.Deal
 	return
 }
 
-func (st *StorageMarketActorState_I) _updatePendingDealState(dealID abi.DealID, epoch abi.ChainEpoch) (
+func (st *StorageMarketActorState) _updatePendingDealState(dealID abi.DealID, epoch abi.ChainEpoch) (
 	amountSlashed abi.TokenAmount) {
 
 	IMPL_FINISH() // BigInt arithmetic
@@ -82,19 +117,19 @@ func (st *StorageMarketActorState_I) _updatePendingDealState(dealID abi.DealID, 
 		return
 	}
 
-	st.Deals()[dealID].Impl().LastUpdatedEpoch_ = epoch
+	st.Deals[dealID].Impl().LastUpdatedEpoch_ = epoch
 	return
 }
 
-func (st *StorageMarketActorState_I) _deleteDeal(dealID abi.DealID) {
+func (st *StorageMarketActorState) _deleteDeal(dealID abi.DealID) {
 	_, dealP := st._getOnChainDealAssert(dealID)
-	delete(st.Deals(), dealID)
-	delete(st.CachedDealIDsByParty()[dealP.Provider()], dealID)
-	delete(st.CachedDealIDsByParty()[dealP.Client()], dealID)
+	delete(st.Deals, dealID)
+	delete(st.CachedDealIDsByParty[dealP.Provider()], dealID)
+	delete(st.CachedDealIDsByParty[dealP.Client()], dealID)
 }
 
 // Note: only processes deal payments, not deal expiration (even if the deal has expired).
-func (st *StorageMarketActorState_I) _processDealPaymentEpochsElapsed(dealID abi.DealID, numEpochsElapsed abi.ChainEpoch) {
+func (st *StorageMarketActorState) _processDealPaymentEpochsElapsed(dealID abi.DealID, numEpochsElapsed abi.ChainEpoch) {
 	deal, dealP := st._getOnChainDealAssert(dealID)
 	Assert(deal.SectorStartEpoch() != epochUndefined)
 
@@ -104,7 +139,7 @@ func (st *StorageMarketActorState_I) _processDealPaymentEpochsElapsed(dealID abi
 	st._transferBalance(dealP.Client(), dealP.Provider(), abi.TokenAmount(totalPayment))
 }
 
-func (st *StorageMarketActorState_I) _processDealSlashed(dealID abi.DealID) (amountSlashed abi.TokenAmount) {
+func (st *StorageMarketActorState) _processDealSlashed(dealID abi.DealID) (amountSlashed abi.TokenAmount) {
 	deal, dealP := st._getOnChainDealAssert(dealID)
 	Assert(deal.SectorStartEpoch() != epochUndefined)
 
@@ -127,7 +162,7 @@ func (st *StorageMarketActorState_I) _processDealSlashed(dealID abi.DealID) (amo
 // Deal start deadline elapsed without appearing in a proven sector.
 // Delete deal, slash a portion of provider's collateral, and unlock remaining collaterals
 // for both provider and client.
-func (st *StorageMarketActorState_I) _processDealInitTimedOut(dealID abi.DealID) (amountSlashed abi.TokenAmount) {
+func (st *StorageMarketActorState) _processDealInitTimedOut(dealID abi.DealID) (amountSlashed abi.TokenAmount) {
 	deal, dealP := st._getOnChainDealAssert(dealID)
 	Assert(deal.SectorStartEpoch() == epochUndefined)
 
@@ -144,7 +179,7 @@ func (st *StorageMarketActorState_I) _processDealInitTimedOut(dealID abi.DealID)
 }
 
 // Normal expiration. Delete deal and unlock collaterals for both miner and client.
-func (st *StorageMarketActorState_I) _processDealExpired(dealID abi.DealID) {
+func (st *StorageMarketActorState) _processDealExpired(dealID abi.DealID) {
 	deal, dealP := st._getOnChainDealAssert(dealID)
 	Assert(deal.SectorStartEpoch() != epochUndefined)
 
@@ -155,9 +190,9 @@ func (st *StorageMarketActorState_I) _processDealExpired(dealID abi.DealID) {
 	st._deleteDeal(dealID)
 }
 
-func (st *StorageMarketActorState_I) _generateStorageDealID(storageDeal StorageDeal) abi.DealID {
-	ret := st.NextID()
-	st.NextID_ = st.NextID_ + abi.DealID(1)
+func (st *StorageMarketActorState) _generateStorageDealID(storageDeal StorageDeal) abi.DealID {
+	ret := st.NextID
+	st.NextID = st.NextID + abi.DealID(1)
 	return ret
 }
 
@@ -165,30 +200,30 @@ func (st *StorageMarketActorState_I) _generateStorageDealID(storageDeal StorageD
 // Balance table operations
 ////////////////////////////////////////////////////////////////////////////////
 
-func (st *StorageMarketActorState_I) _addressEntryExists(address addr.Address) bool {
-	_, foundEscrow := actor_util.BalanceTable_GetEntry(st.EscrowTable(), address)
-	_, foundLocked := actor_util.BalanceTable_GetEntry(st.LockedReqTable(), address)
+func (st *StorageMarketActorState) _addressEntryExists(address addr.Address) bool {
+	_, foundEscrow := actor_util.BalanceTable_GetEntry(st.EscrowTable, address)
+	_, foundLocked := actor_util.BalanceTable_GetEntry(st.LockedReqTable, address)
 	// Check that the tables are consistent (i.e. the address is found in one
 	// if and only if it is found in the other).
 	Assert(foundEscrow == foundLocked)
 	return foundEscrow
 }
 
-func (st *StorageMarketActorState_I) _getTotalEscrowBalanceInternal(a addr.Address) abi.TokenAmount {
+func (st *StorageMarketActorState) _getTotalEscrowBalanceInternal(a addr.Address) abi.TokenAmount {
 	Assert(st._addressEntryExists(a))
-	ret, ok := actor_util.BalanceTable_GetEntry(st.EscrowTable(), a)
+	ret, ok := actor_util.BalanceTable_GetEntry(st.EscrowTable, a)
 	Assert(ok)
 	return ret
 }
 
-func (st *StorageMarketActorState_I) _getLockedReqBalanceInternal(a addr.Address) abi.TokenAmount {
+func (st *StorageMarketActorState) _getLockedReqBalanceInternal(a addr.Address) abi.TokenAmount {
 	Assert(st._addressEntryExists(a))
-	ret, ok := actor_util.BalanceTable_GetEntry(st.LockedReqTable(), a)
+	ret, ok := actor_util.BalanceTable_GetEntry(st.LockedReqTable, a)
 	Assert(ok)
 	return ret
 }
 
-func (st *StorageMarketActorState_I) _lockBalanceMaybe(addr addr.Address, amount abi.TokenAmount) (
+func (st *StorageMarketActorState) _lockBalanceMaybe(addr addr.Address, amount abi.TokenAmount) (
 	lockBalanceOK bool) {
 
 	Assert(amount >= 0)
@@ -200,24 +235,24 @@ func (st *StorageMarketActorState_I) _lockBalanceMaybe(addr addr.Address, amount
 		return
 	}
 
-	newLockedReqTable, ok := actor_util.BalanceTable_WithAdd(st.LockedReqTable(), addr, amount)
+	newLockedReqTable, ok := actor_util.BalanceTable_WithAdd(st.LockedReqTable, addr, amount)
 	Assert(ok)
-	st.Impl().LockedReqTable_ = newLockedReqTable
+	st.LockedReqTable = newLockedReqTable
 
 	lockBalanceOK = true
 	return
 }
 
-func (st *StorageMarketActorState_I) _unlockBalance(
+func (st *StorageMarketActorState) _unlockBalance(
 	addr addr.Address, unlockAmountRequested abi.TokenAmount) {
 
 	Assert(unlockAmountRequested >= 0)
 	Assert(st._addressEntryExists(addr))
 
-	st.Impl().LockedReqTable_ = st._tableWithDeductBalanceExact(st.LockedReqTable(), addr, unlockAmountRequested)
+	st.LockedReqTable = st._tableWithDeductBalanceExact(st.LockedReqTable, addr, unlockAmountRequested)
 }
 
-func (st *StorageMarketActorState_I) _tableWithAddBalance(
+func (st *StorageMarketActorState) _tableWithAddBalance(
 	table actor_util.BalanceTableHAMT, toAddr addr.Address, amountToAdd abi.TokenAmount) actor_util.BalanceTableHAMT {
 
 	Assert(amountToAdd >= 0)
@@ -227,7 +262,7 @@ func (st *StorageMarketActorState_I) _tableWithAddBalance(
 	return newTable
 }
 
-func (st *StorageMarketActorState_I) _tableWithDeductBalanceExact(
+func (st *StorageMarketActorState) _tableWithDeductBalanceExact(
 	table actor_util.BalanceTableHAMT, fromAddr addr.Address, amountRequested abi.TokenAmount) actor_util.BalanceTableHAMT {
 
 	Assert(amountRequested >= 0)
@@ -240,24 +275,74 @@ func (st *StorageMarketActorState_I) _tableWithDeductBalanceExact(
 }
 
 // move funds from locked in client to available in provider
-func (st *StorageMarketActorState_I) _transferBalance(
+func (st *StorageMarketActorState) _transferBalance(
 	fromAddr addr.Address, toAddr addr.Address, transferAmountRequested abi.TokenAmount) {
 
 	Assert(transferAmountRequested >= 0)
 	Assert(st._addressEntryExists(fromAddr))
 	Assert(st._addressEntryExists(toAddr))
 
-	st.Impl().EscrowTable_ = st._tableWithDeductBalanceExact(st.EscrowTable(), fromAddr, transferAmountRequested)
-	st.Impl().LockedReqTable_ = st._tableWithDeductBalanceExact(st.LockedReqTable(), fromAddr, transferAmountRequested)
-	st.Impl().EscrowTable_ = st._tableWithAddBalance(st.EscrowTable(), toAddr, transferAmountRequested)
+	st.EscrowTable = st._tableWithDeductBalanceExact(st.EscrowTable, fromAddr, transferAmountRequested)
+	st.LockedReqTable = st._tableWithDeductBalanceExact(st.LockedReqTable, fromAddr, transferAmountRequested)
+	st.EscrowTable = st._tableWithAddBalance(st.EscrowTable, toAddr, transferAmountRequested)
 }
 
-func (st *StorageMarketActorState_I) _slashBalance(addr addr.Address, slashAmount abi.TokenAmount) {
+func (st *StorageMarketActorState) _slashBalance(addr addr.Address, slashAmount abi.TokenAmount) {
 	Assert(st._addressEntryExists(addr))
 	Assert(slashAmount >= 0)
 
-	st.Impl().EscrowTable_ = st._tableWithDeductBalanceExact(st.EscrowTable(), addr, slashAmount)
-	st.Impl().LockedReqTable_ = st._tableWithDeductBalanceExact(st.LockedReqTable(), addr, slashAmount)
+	st.EscrowTable = st._tableWithDeductBalanceExact(st.EscrowTable, addr, slashAmount)
+	st.LockedReqTable = st._tableWithDeductBalanceExact(st.LockedReqTable, addr, slashAmount)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Method utility functions
+////////////////////////////////////////////////////////////////////////////////
+
+func (st *StorageMarketActorState) _rtAbortIfAddressEntryDoesNotExist(rt Runtime, entryAddr addr.Address) {
+	if !st._addressEntryExists(entryAddr) {
+		rt.AbortArgMsg("Address entry does not exist")
+	}
+}
+
+func (st *StorageMarketActorState) _rtUpdatePendingDealStatesForParty(rt Runtime, addr addr.Address) (
+	amountSlashedTotal abi.TokenAmount) {
+
+	// For consistency with OnEpochTickEnd, only process updates up to the end of the _previous_ epoch.
+	epoch := rt.CurrEpoch() - 1
+
+	cachedRes, ok := st.CachedDealIDsByParty[addr]
+	Assert(ok)
+	extractedDealIDs := []abi.DealID{}
+	for cachedDealID := range cachedRes {
+		extractedDealIDs = append(extractedDealIDs, cachedDealID)
+	}
+
+	amountSlashedTotal = st._updatePendingDealStates(extractedDealIDs, epoch)
+	return
+}
+
+func (st *StorageMarketActorState) _rtGetOnChainDealOrAbort(rt Runtime, dealID abi.DealID) (deal OnChainDeal, dealP StorageDealProposal) {
+	var found bool
+	deal, dealP, found = st._getOnChainDeal(dealID)
+	if !found {
+		rt.AbortStateMsg("dealID not found in Deals.")
+	}
+	return
+}
+
+func (st *StorageMarketActorState) _rtLockBalanceOrAbort(rt Runtime, addr addr.Address, amount abi.TokenAmount) {
+	if amount < 0 {
+		rt.AbortArgMsg("Negative amount")
+	}
+
+	st._rtAbortIfAddressEntryDoesNotExist(rt, addr)
+
+	ok := st._lockBalanceMaybe(addr, amount)
+
+	if !ok {
+		rt.AbortFundsMsg("Insufficient funds available to lock.")
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -298,11 +383,11 @@ func _dealGetPaymentRemaining(deal OnChainDeal, epoch abi.ChainEpoch) abi.TokenA
 	return abi.TokenAmount(int(durationRemaining) * int(dealP.StoragePricePerEpoch()))
 }
 
-func (st *StorageMarketActorState_I) _getOnChainDeal(dealID abi.DealID) (
+func (st *StorageMarketActorState) _getOnChainDeal(dealID abi.DealID) (
 	deal OnChainDeal, dealP StorageDealProposal, ok bool) {
 
 	var found bool
-	deal, found = st.Deals()[dealID]
+	deal, found = st.Deals[dealID]
 	if found {
 		dealP = deal.Deal().Proposal()
 	} else {
@@ -312,7 +397,7 @@ func (st *StorageMarketActorState_I) _getOnChainDeal(dealID abi.DealID) (
 	return
 }
 
-func (st *StorageMarketActorState_I) _getOnChainDealAssert(dealID abi.DealID) (
+func (st *StorageMarketActorState) _getOnChainDealAssert(dealID abi.DealID) (
 	deal OnChainDeal, dealP StorageDealProposal) {
 
 	var ok bool
