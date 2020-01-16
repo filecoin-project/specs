@@ -136,6 +136,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, chain chain.Chain,
 		retReceipt = vmri.MessageReceipt_Make(invocOutput, exitCode, vmiGasUsed)
 	}
 
+	// TODO move this to a package with a less redundant name
 	_applyError := func(tree st.StateTree, errExitCode exitcode.ExitCode, senderResolveSpec SenderResolveSpec) {
 		_applyReturn(tree, vmr.InvocOutput_Make(nil), errExitCode, senderResolveSpec)
 	}
