@@ -1,25 +1,138 @@
 package storage_miner
 
 import (
+	"math/big"
+
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
-	actor_util "github.com/filecoin-project/specs/actors/util"
+	autil "github.com/filecoin-project/specs/actors/util"
+	cid "github.com/ipfs/go-cid"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 )
 
-func (st *StorageMinerActorState_I) _getSectorOnChainInfo(sectorNo abi.SectorNumber) (info SectorOnChainInfo, ok bool) {
-	sectorInfo, found := st.Sectors()[sectorNo]
+// Balance of a StorageMinerActor should equal exactly the sum of PreCommit deposits
+// that are not yet returned or burned.
+type StorageMinerActorState struct {
+	Sectors    SectorsAMT
+	PoStState  MinerPoStState
+	ProvingSet SectorNumberSetHAMT
+	Info       MinerInfo
+}
+
+type MinerPoStState struct {
+	// If > 0 miner is in an OK state.
+	// The miner has passed either an ElectionPoSt or a SurprisePoSt
+	// sufficiently recently.
+	LastSuccessfulPoSt abi.ChainEpoch
+
+	// If >= 0 miner has been challenged and not yet responded successfully.
+	// SurprisePoSt challenge state: The miner has not submitted timely ElectionPoSts,
+	// and as a result, the system has fallen back to proving storage via SurprisePoSt.
+	SurpriseChallengeEpoch abi.ChainEpoch // int64 so this can be -1 for the case when the last successfully PoSt > 0
+
+	// Not empty iff the miner is challenged.
+	ChallengedSectors []abi.SectorNumber
+
+	// Number of surprised post challenges that have been failed since last successful PoSt.
+	// Indicates that the claimed storage power may not actually be proven. Recovery can proceed by
+	// submitting a correct response to a subsequent SurprisePoSt challenge, up until
+	// the limit of number of consecutive failures.
+	NumConsecutiveFailures int64
+}
+
+func (mps *MinerPoStState) Is_Challenged() bool {
+	return len(mps.ChallengedSectors) > 0
+}
+
+func (mps *MinerPoStState) Is_OK() bool {
+	return int64(mps.LastSuccessfulPoSt) > 0
+}
+
+func (mps *MinerPoStState) Is_DetectedFault() bool {
+	panic("TODO")
+}
+
+type SectorState int64
+
+const (
+	PreCommit SectorState = iota
+	Active
+	TemporaryFault
+)
+
+type SectorOnChainInfo struct {
+	State                 SectorState
+	Info                  SectorPreCommitInfo // Also contains Expiration field.
+	PreCommitDeposit      abi.TokenAmount
+	PreCommitEpoch        abi.ChainEpoch
+	ActivationEpoch       abi.ChainEpoch // -1 if still in PreCommit state.
+	DeclaredFaultEpoch    abi.ChainEpoch // -1 if not currently declared faulted.
+	DeclaredFaultDuration abi.ChainEpoch // -1 if not currently declared faulted.
+	DealWeight            big.Int        // -1 if not yet validated with StorageMarketActor.
+}
+
+type SectorPreCommitInfo struct {
+	SectorNumber abi.SectorNumber
+	SealedCID    abi.SealedSectorCID // CommR
+	SealEpoch    abi.ChainEpoch
+	DealIDs      abi.DealIDs
+	Expiration   abi.ChainEpoch
+}
+
+type SectorProveCommitInfo struct {
+	SectorNumber     abi.SectorNumber
+	RegisteredProof  abi.RegisteredProof
+	Proof            abi.SealProof
+	InteractiveEpoch abi.ChainEpoch
+	Expiration       abi.ChainEpoch
+}
+
+// TODO AMT
+type SectorsAMT map[abi.SectorNumber]SectorOnChainInfo
+
+// TODO HAMT
+type SectorNumberSetHAMT map[abi.SectorNumber]bool
+
+type MinerInfo struct {
+	// Account that owns this miner.
+	// - Income and returned collateral are paid to this address.
+	// - This address is also allowed to change the worker address for the miner.
+	Owner addr.Address // Must be an ID-address.
+
+	// Worker account for this miner.
+	// This will be the key that is used to sign blocks created by this miner, and
+	// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
+	// other day to day miner activities.
+	Worker       addr.Address // Must be an ID-address.
+	WorkerVRFKey addr.Address // Must be a SECP or BLS address
+
+	// Libp2p identity that should be used when connecting to this miner.
+	PeerId peer.ID
+
+	// Amount of space in each sector committed to the network by this miner.
+	SectorSize             abi.SectorSize
+	SealPartitions         int64
+	ElectionPoStPartitions int64
+	SurprisePoStPartitions int64
+}
+
+func (st *StorageMinerActorState) CID() cid.Cid {
+	panic("TODO")
+}
+
+func (st *StorageMinerActorState) _getSectorOnChainInfo(sectorNo abi.SectorNumber) (info SectorOnChainInfo, ok bool) {
+	sectorInfo, found := st.Sectors[sectorNo]
 	if !found {
-		return nil, false
+		return SectorOnChainInfo{}, false
 	}
 	return sectorInfo, true
 }
 
-func (st *StorageMinerActorState_I) _getSectorDealIDsAssert(sectorNo abi.SectorNumber) abi.DealIDs {
+func (st *StorageMinerActorState) _getSectorDealIDsAssert(sectorNo abi.SectorNumber) abi.DealIDs {
 	sectorInfo, found := st._getSectorOnChainInfo(sectorNo)
 	Assert(found)
-	return sectorInfo.Info().DealIDs()
+	return sectorInfo.Info.DealIDs
 }
 
 func SectorsAMT_Empty() SectorsAMT {
@@ -32,30 +145,30 @@ func SectorNumberSetHAMT_Empty() SectorNumberSetHAMT {
 	panic("")
 }
 
-func (st *StorageMinerActorState_I) GetStorageWeightDescForSectorMaybe(sectorNumber abi.SectorNumber) (ret SectorStorageWeightDesc, ok bool) {
-	sectorInfo, found := st.Sectors()[sectorNumber]
+func (st *StorageMinerActorState) GetStorageWeightDescForSectorMaybe(sectorNumber abi.SectorNumber) (ret SectorStorageWeightDesc, ok bool) {
+	sectorInfo, found := st.Sectors[sectorNumber]
 	if !found {
 		ret = nil
 		ok = false
 		return
 	}
 
-	ret = &actor_util.SectorStorageWeightDesc_I{
-		SectorSize_: st.Info().SectorSize(),
-		DealWeight_: sectorInfo.DealWeight(),
-		Duration_:   sectorInfo.Info().Expiration() - sectorInfo.ActivationEpoch(),
+	ret = &autil.SectorStorageWeightDesc_I{
+		SectorSize_: st.Info.SectorSize,
+		DealWeight_: sectorInfo.DealWeight,
+		Duration_:   sectorInfo.Info.Expiration - sectorInfo.ActivationEpoch,
 	}
 	ok = true
 	return
 }
 
-func (st *StorageMinerActorState_I) _getStorageWeightDescForSector(sectorNumber abi.SectorNumber) SectorStorageWeightDesc {
+func (st *StorageMinerActorState) _getStorageWeightDescForSector(sectorNumber abi.SectorNumber) SectorStorageWeightDesc {
 	ret, found := st.GetStorageWeightDescForSectorMaybe(sectorNumber)
 	Assert(found)
 	return ret
 }
 
-func (st *StorageMinerActorState_I) _getStorageWeightDescsForSectors(sectorNumbers []abi.SectorNumber) []SectorStorageWeightDesc {
+func (st *StorageMinerActorState) _getStorageWeightDescsForSectors(sectorNumbers []abi.SectorNumber) []SectorStorageWeightDesc {
 	ret := []SectorStorageWeightDesc{}
 	for _, sectorNumber := range sectorNumbers {
 		ret = append(ret, st._getStorageWeightDescForSector(sectorNumber))
@@ -64,64 +177,75 @@ func (st *StorageMinerActorState_I) _getStorageWeightDescsForSectors(sectorNumbe
 }
 
 func MinerPoStState_New_OK(lastSuccessfulPoSt abi.ChainEpoch) MinerPoStState {
-	return MinerPoStState_Make_OK(&MinerPoStState_OK_I{
-		LastSuccessfulPoSt_: lastSuccessfulPoSt,
-	})
+	panic("TODO")
+	/*
+		return MinerPoStState_Make_OK(&MinerPoStState_OK_I{
+			LastSuccessfulPoSt_: lastSuccessfulPoSt,
+		})
+	*/
 }
 
 func MinerPoStState_New_Challenged(
 	surpriseChallengeEpoch abi.ChainEpoch,
 	challengedSectors []abi.SectorNumber,
-	numConsecutiveFailures int,
+	numConsecutiveFailures int64,
 ) MinerPoStState {
-	return MinerPoStState_Make_Challenged(&MinerPoStState_Challenged_I{
-		SurpriseChallengeEpoch_: surpriseChallengeEpoch,
-		ChallengedSectors_:      challengedSectors,
-		NumConsecutiveFailures_: numConsecutiveFailures,
-	})
+	panic("TODO")
+	/*
+		return MinerPoStState_Make_Challenged(&MinerPoStState_Challenged_I{
+			SurpriseChallengeEpoch_: surpriseChallengeEpoch,
+			ChallengedSectors_:      challengedSectors,
+			NumConsecutiveFailures_: numConsecutiveFailures,
+		})
+	*/
 }
 
-func MinerPoStState_New_DetectedFault(numConsecutiveFailures int) MinerPoStState {
-	return MinerPoStState_Make_DetectedFault(&MinerPoStState_DetectedFault_I{
-		NumConsecutiveFailures_: numConsecutiveFailures,
-	})
+func MinerPoStState_New_DetectedFault(numConsecutiveFailures int64) MinerPoStState {
+	panic("TODO")
+	/*
+		return MinerPoStState_Make_DetectedFault(&MinerPoStState_DetectedFault_I{
+			NumConsecutiveFailures_: numConsecutiveFailures,
+		})
+	*/
 }
 
-func (x *SectorOnChainInfo_I) Is_TemporaryFault() bool {
-	ret := (x.State() == SectorState_TemporaryFault)
+func (x *SectorOnChainInfo) Is_TemporaryFault() bool {
+	ret := (x.State == TemporaryFault)
 	if ret {
-		Assert(x.DeclaredFaultEpoch() != epochUndefined)
-		Assert(x.DeclaredFaultDuration() != epochUndefined)
+		Assert(x.DeclaredFaultEpoch != epochUndefined)
+		Assert(x.DeclaredFaultDuration != epochUndefined)
 	}
 	return ret
 }
 
-func (x *SectorOnChainInfo_I) EffectiveFaultBeginEpoch() abi.ChainEpoch {
+// Must be significantly larger than DeclaredFaultEpoch, since otherwise it may be possible
+// to declare faults adaptively in order to exempt challenged sectors.
+func (x *SectorOnChainInfo) EffectiveFaultBeginEpoch() abi.ChainEpoch {
 	Assert(x.Is_TemporaryFault())
-	return x.DeclaredFaultEpoch() + indices.StorageMining_DeclaredFaultEffectiveDelay()
+	return x.DeclaredFaultEpoch + indices.StorageMining_DeclaredFaultEffectiveDelay()
 }
 
-func (x *SectorOnChainInfo_I) EffectiveFaultEndEpoch() abi.ChainEpoch {
+func (x *SectorOnChainInfo) EffectiveFaultEndEpoch() abi.ChainEpoch {
 	Assert(x.Is_TemporaryFault())
-	return x.EffectiveFaultBeginEpoch() + x.DeclaredFaultDuration()
+	return x.EffectiveFaultBeginEpoch() + x.DeclaredFaultDuration
 }
 
 func MinerInfo_New(
 	ownerAddr addr.Address, workerAddr addr.Address, sectorSize abi.SectorSize, peerId peer.ID) MinerInfo {
 
-	ret := &MinerInfo_I{
-		Owner_:      ownerAddr,
-		Worker_:     workerAddr,
-		PeerId_:     peerId,
-		SectorSize_: sectorSize,
+	ret := &MinerInfo{
+		Owner:      ownerAddr,
+		Worker:     workerAddr,
+		PeerId:     peerId,
+		SectorSize: sectorSize,
 	}
 
 	TODO() // TODO: determine how to generate/validate VRF key and initialize other fields
 
-	return ret
+	return *ret
 }
 
-func (st *StorageMinerActorState_I) VerifySurprisePoStMeetsTargetReq(candidate abi.PoStCandidate) bool {
+func (st *StorageMinerActorState) VerifySurprisePoStMeetsTargetReq(candidate abi.PoStCandidate) bool {
 	// TODO: Determine what should be the acceptance criterion for sector numbers proven in SurprisePoSt proofs.
 	TODO()
 	panic("")
