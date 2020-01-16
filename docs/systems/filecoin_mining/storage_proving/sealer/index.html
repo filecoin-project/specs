@@ -4775,9 +4775,9 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
 
 <span class="kd">type</span> <span class="nx">SealInputs</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">SectorSize</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span>
     <span class="nx">RegisteredProof</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof</span>  <span class="c1">// FIXME: Ensure this is provided.
 </span><span class="c1"></span>    <span class="nx">SectorID</span>         <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span>
-    <span class="nx">SealCfg</span>          <span class="nx">sector</span><span class="p">.</span><span class="nx">SealInstanceCfg</span>
     <span class="nx">MinerID</span>          <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
     <span class="nx">RandomSeed</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">SealRandomness</span>
     <span class="nx">UnsealedPath</span>     <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
@@ -4787,7 +4787,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">CreateSealProofInputs</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SectorID</span>               <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span>
-    <span class="nx">SealCfg</span>                <span class="nx">sector</span><span class="p">.</span><span class="nx">SealInstanceCfg</span>
+    <span class="nx">RegisteredProof</span>        <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof</span>
     <span class="nx">InteractiveRandomSeed</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">InteractiveSealRandomness</span>
     <span class="nx">SealedPaths</span>            <span class="p">[</span><span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">]</span>
     <span class="nx">SealOutputs</span>

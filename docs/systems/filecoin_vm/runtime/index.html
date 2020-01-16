@@ -4784,10 +4784,10 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
 <span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
+<span class="kn">import</span> <span class="nx">crypto</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime/exitcode&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
 <span class="kn">import</span> <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime/indices&#34;</span>
-<span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 <span class="kn">import</span> <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 
 <span class="c1">// Runtime is the VM&#39;s internal runtime object.
@@ -4897,9 +4897,9 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">DeleteActor</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
 
     <span class="c1">// Retrieves and deserializes an object from the store into o. Returns whether successful.
-</span><span class="c1"></span>    <span class="nf">IpldGet</span><span class="p">(</span><span class="nx">c</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span><span class="p">,</span> <span class="nx">o</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">Object</span><span class="p">)</span> <span class="kt">bool</span>
+</span><span class="c1"></span>    <span class="nf">IpldGet</span><span class="p">(</span><span class="nx">c</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span><span class="p">,</span> <span class="nx">o</span> <span class="kd">interface</span> <span class="p">{})</span> <span class="kt">bool</span>
     <span class="c1">// Serializes and stores an object, returning its CID.
-</span><span class="c1"></span>    <span class="nf">IpldPut</span><span class="p">(</span><span class="nx">x</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">Object</span><span class="p">)</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
+</span><span class="c1"></span>    <span class="nf">IpldPut</span><span class="p">(</span><span class="nx">x</span> <span class="kd">interface</span> <span class="p">{})</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
 
     <span class="c1">// Provides the system call interface.
 </span><span class="c1"></span>    <span class="nf">Syscalls</span><span class="p">()</span> <span class="nx">Syscalls</span>
@@ -4907,7 +4907,11 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">Syscalls</span> <span class="kd">interface</span> <span class="p">{</span>
     <span class="c1">// Verifies that a signature is valid for an address and plaintext.
-</span><span class="c1"></span>    <span class="nf">VerifySignature</span><span class="p">(</span><span class="nx">signature</span> <span class="p">[</span><span class="kt">byte</span><span class="p">],</span> <span class="nx">signer</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">plaintext</span> <span class="p">[</span><span class="kt">byte</span><span class="p">])</span> <span class="kt">bool</span>
+</span><span class="c1"></span>    <span class="nf">VerifySignature</span><span class="p">(</span>
+        <span class="nx">signature</span>  <span class="nx">crypto</span><span class="p">.</span><span class="nx">Signature</span>
+        <span class="nx">signer</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+        <span class="nx">plaintext</span>  <span class="p">[</span><span class="kt">byte</span><span class="p">]</span>
+    <span class="p">)</span> <span class="kt">bool</span>
     <span class="c1">// Computes an unsealed sector CID (CommD) from its constituent piece CIDs (CommPs) and sizes.
 </span><span class="c1"></span>    <span class="nf">ComputeUnsealedSectorCID</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">pieces</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">])</span> <span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
     <span class="c1">// Verifies a sector seal proof.
@@ -5548,10 +5552,10 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>	<span class="nx">rt</span><span class="p">.</span><span class="nf">_createActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">AccountActorCodeID</span><span class="p">,</span> <span class="nx">newIdAddr</span><span class="p">)</span>
 
 	<span class="c1">// Initialize account actor substate with it&#39;s pubkey address.
-</span><span class="c1"></span>	<span class="nx">substate</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">acctact</span><span class="p">.</span><span class="nx">AccountActorState_I</span><span class="p">{</span>
-		<span class="nx">Address_</span><span class="p">:</span> <span class="nx">targetRaw</span><span class="p">,</span>
+</span><span class="c1"></span>	<span class="nx">substate</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">acctact</span><span class="p">.</span><span class="nx">AccountActorState</span><span class="p">{</span>
+		<span class="nx">Address</span><span class="p">:</span> <span class="nx">targetRaw</span><span class="p">,</span>
 	<span class="p">}</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_saveAccountActorState</span><span class="p">(</span><span class="nx">newIdAddr</span><span class="p">,</span> <span class="nx">substate</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_saveAccountActorState</span><span class="p">(</span><span class="nx">newIdAddr</span><span class="p">,</span> <span class="o">*</span><span class="nx">substate</span><span class="p">)</span>
 	<span class="nx">act</span><span class="p">,</span> <span class="nx">_</span> <span class="p">=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">newIdAddr</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">act</span><span class="p">,</span> <span class="nx">newIdAddr</span>
 <span class="p">}</span>
@@ -5559,24 +5563,24 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_loadInitActorState</span><span class="p">()</span> <span class="nx">initact</span><span class="p">.</span><span class="nx">InitActorState</span> <span class="p">{</span>
 	<span class="nx">initState</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">InitActorAddr</span><span class="p">)</span>
 	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
-	<span class="kd">var</span> <span class="nx">initSubState</span> <span class="nx">initact</span><span class="p">.</span><span class="nx">InitActorState_I</span>
+	<span class="kd">var</span> <span class="nx">initSubState</span> <span class="nx">initact</span><span class="p">.</span><span class="nx">InitActorState</span>
 	<span class="nx">ok</span> <span class="p">=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nx">cid</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="nx">initState</span><span class="p">.</span><span class="nf">State</span><span class="p">()),</span> <span class="o">&amp;</span><span class="nx">initSubState</span><span class="p">)</span>
 	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
-	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">initSubState</span>
+	<span class="k">return</span> <span class="nx">initSubState</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_saveInitActorState</span><span class="p">(</span><span class="nx">state</span> <span class="nx">initact</span><span class="p">.</span><span class="nx">InitActorState</span><span class="p">)</span> <span class="p">{</span>
 	<span class="c1">// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
 </span><span class="c1"></span>	<span class="c1">// than the receiver.
 </span><span class="c1"></span>	<span class="nx">rt</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nx">UpdateActorSubstate</span><span class="p">)</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_updateActorSubstateInternal</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">InitActorAddr</span><span class="p">,</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">state</span><span class="p">.</span><span class="nf">Impl</span><span class="p">())))</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_updateActorSubstateInternal</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">InitActorAddr</span><span class="p">,</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">state</span><span class="p">)))</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_saveAccountActorState</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">state</span> <span class="nx">acctact</span><span class="p">.</span><span class="nx">AccountActorState</span><span class="p">)</span> <span class="p">{</span>
 	<span class="c1">// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
 </span><span class="c1"></span>	<span class="c1">// than the receiver.
 </span><span class="c1"></span>	<span class="nx">rt</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nx">UpdateActorSubstate</span><span class="p">)</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_updateActorSubstateInternal</span><span class="p">(</span><span class="nx">address</span><span class="p">,</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">state</span><span class="p">.</span><span class="nf">Impl</span><span class="p">())))</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_updateActorSubstateInternal</span><span class="p">(</span><span class="nx">address</span><span class="p">,</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">state</span><span class="p">)))</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_sendInternalOutputs</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">,</span> <span class="nx">errSpec</span> <span class="nx">ErrorHandlingSpec</span><span class="p">)</span> <span class="p">(</span><span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span> <span class="p">{</span>

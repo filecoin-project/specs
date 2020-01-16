@@ -4767,38 +4767,12 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
-
-<span class="c1">// New proof ProofInstances can add new cfg types if needed.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStInstanceCfg</span> <span class="nx">union</span> <span class="p">{</span>
-    <span class="nx">PoStCfgV1</span>
-    <span class="nx">PoStCfgVBogus</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">PoStCfgV1</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Type</span>                <span class="nx">PoStType</span>
-    <span class="nx">Nodes</span>               <span class="nx">UInt</span>
-    <span class="nx">Partitions</span>          <span class="nx">UInt</span>
-    <span class="nx">LeafChallengeCount</span>  <span class="nx">UInt</span>
-    <span class="nx">ChallengeRangeSize</span>  <span class="nx">UInt</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">PoStCfgVBogus</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Type</span>                 <span class="nx">PoStType</span>
-    <span class="nx">Nodes</span>                <span class="nx">UInt</span>
-    <span class="nx">Partitions</span>           <span class="nx">UInt</span>
-    <span class="nx">QuantumMonkeyBrains</span>  <span class="nx">UInt</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">PoStType</span> <span class="nx">enum</span> <span class="p">{</span>
-    <span class="nx">ElectionPoSt</span>
-    <span class="nx">SurprisePoSt</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">PoStWitness</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Candidates</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
-<span class="p">}</span>
-</code></pre></div>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">//import abi &#34;github.com/filecoin-project/specs/actors/abi&#34;
+</span><span class="c1"></span>
+<span class="c1">// type PoStWitness struct {
+</span><span class="c1">//     Candidates [abi.PoStCandidate]
+</span><span class="c1">// }
+</span></code></pre></div>
 
 
 

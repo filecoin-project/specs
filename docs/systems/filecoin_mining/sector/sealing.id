@@ -8,16 +8,6 @@ type Path struct {}  // TODO
 //    SealSeedHash(MinerID, SectorNumber, SealRandomness, abi.UnsealedSectorCID)
 type SealSeed Bytes
 
-// New proof ProofInstances can add new cfg types if needed.
-type SealInstanceCfg union {
-    WinStackedDRGCfgV1
-}
-
-type WinStackedDRGCfgV1 struct {
-    SectorSize   abi.SectorSize
-    WindowCount  UInt
-}
-
 // SealCommitment is the information kept in the state tree about a sector.
 // SealCommitment is a subset of OnChainSealVerifyInfo.
 type SealCommitment struct {
@@ -56,7 +46,6 @@ type ProofAuxTmp struct {
 
 type SealArguments struct {
     RegisteredProof  abi.RegisteredProof
-    Algorithm        abi.ProofAlgorithm
     OutputArtifacts  SealOutputArtifacts
 }
 

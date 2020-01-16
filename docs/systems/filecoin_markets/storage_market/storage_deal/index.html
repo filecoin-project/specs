@@ -4774,71 +4774,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
-<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
-<span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
-
-<span class="kd">type</span> <span class="nx">DealWeight</span> <span class="kt">int</span>  <span class="c1">// should be BigInt
-</span><span class="c1"></span>
-<span class="c1">// Note: Deal Collateral is only released and returned to clients and miners
-</span><span class="c1">// when the storage deal stops counting towards power. In the current iteration,
-</span><span class="c1">// it will be released when the sector containing the storage deals expires,
-</span><span class="c1">// even though some storage deals can expire earlier than the sector does.
-</span><span class="c1">// Collaterals are denominated in PerEpoch to incur a cost for self dealing or
-</span><span class="c1">// minimal deals that last for a long time.
-</span><span class="c1">// Note: ClientCollateralPerEpoch may not be needed and removed pending future confirmation.
-</span><span class="c1">// There will be a Minimum value for both client and provider deal collateral.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageDealProposal</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PieceCID</span>                      <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceCID</span>  <span class="c1">// CommP
-</span><span class="c1"></span>    <span class="nx">PieceSize</span>                     <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceSize</span>
-    <span class="nx">Client</span>                        <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">Provider</span>                      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">ClientSignature</span>               <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span>
-
-    <span class="c1">// Nominal start epoch. Deal payment is linear between StartEpoch and EndEpoch,
-</span><span class="c1"></span>    <span class="c1">// with total amount StoragePricePerEpoch * (EndEpoch - StartEpoch).
-</span><span class="c1"></span>    <span class="c1">// Storage deal must appear in a sealed (proven) sector no later than StartEpoch,
-</span><span class="c1"></span>    <span class="c1">// otherwise it is invalid.
-</span><span class="c1"></span>    <span class="nx">StartEpoch</span>                    <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">EndEpoch</span>                      <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">StoragePricePerEpoch</span>          <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
-
-    <span class="nx">ProviderCollateral</span>            <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nx">ClientCollateral</span>              <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
-
-    <span class="nf">Duration</span><span class="p">()</span>                    <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>        <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>  <span class="c1">// EndEpoch - StartEpoch
-</span><span class="c1"></span>    <span class="nf">TotalStorageFee</span><span class="p">()</span>             <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// StoragePricePerEpoch * Duration
-</span><span class="c1"></span>    <span class="nf">ClientBalanceRequirement</span><span class="p">()</span>    <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// ClientCollateral + TotalStorageFee
-</span><span class="c1"></span>    <span class="nf">ProviderBalanceRequirement</span><span class="p">()</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// ProviderCollateral
-</span><span class="c1"></span>
-    <span class="nf">CID</span><span class="p">()</span>                         <span class="o">&amp;</span><span class="nx">StorageDealProposal</span>
-<span class="p">}</span>
-
-<span class="c1">// Everything in this struct will go on chain
-</span><span class="c1">// We are enforcing that StorageProvider calls PublishStorageDeal to get back a StorageDeal struct
-</span><span class="c1">// Provider&#39;s signature is implicit in the onchain call
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageDeal</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">Proposal</span><span class="p">()</span>      <span class="nx">StorageDealProposal</span>  <span class="c1">// can extract proposal from the message
-</span><span class="c1"></span>    <span class="nx">PublishMessage</span>  <span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span>  <span class="c1">// counter signature is implicit in the message
-</span><span class="c1"></span>
-    <span class="nf">CID</span><span class="p">()</span>           <span class="o">&amp;</span><span class="nx">StorageDeal</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">OnChainDeal</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ID</span>                <span class="nx">abi</span><span class="p">.</span><span class="nx">DealID</span>
-    <span class="nx">Deal</span>              <span class="nx">StorageDeal</span>
-    <span class="nx">SectorStartEpoch</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if not yet included in proven sector
-</span><span class="c1"></span>    <span class="nx">LastUpdatedEpoch</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if deal state never updated
-</span><span class="c1"></span>    <span class="nx">SlashEpoch</span>        <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// -1 if deal never slashed
-</span><span class="c1"></span><span class="p">}</span>
-</code></pre></div>
-
-
-
+<p style="color: #D74848"><b><i>Something's not right. The <code>storage_deal.id</code> file was not found.</i></b></p>
 
 
 </article>

@@ -4770,7 +4770,6 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
-<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
 
 <span class="c1">// Data in Indices are populated at instantiation with data from the state tree
 </span><span class="c1">// Indices itself has no state tree or access to the runtime
@@ -4792,7 +4791,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">LastEpochReward</span>             <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
     <span class="c1">// these methods produce policy output based on user state/action
-</span><span class="c1"></span>    <span class="nf">StorageDeal_ProviderInitTimedOutSlashAmount</span><span class="p">(</span><span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
+</span><span class="c1"></span>    <span class="nf">StorageDeal_ProviderInitTimedOutSlashAmount</span><span class="p">(</span><span class="nx">providerCollateral</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
     <span class="nf">StorageDeal_DurationBounds</span><span class="p">(</span>
         <span class="nx">pieceSize</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceSize</span>
@@ -4827,7 +4826,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">sectorSize</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span>
         <span class="nx">startEpoch</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
         <span class="nx">endEpoch</span>    <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">dealWeight</span>  <span class="nx">deal</span><span class="p">.</span><span class="nx">DealWeight</span>
+        <span class="nx">dealWeight</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">DealWeight</span>
     <span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorWeight</span>
 
     <span class="nf">PledgeCollateralReq</span><span class="p">(</span>
@@ -4916,16 +4915,15 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="p">(</span>
 	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 	<span class="nx">actor_util</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
-	<span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
 	<span class="s">&#34;math/big&#34;</span>
 <span class="p">)</span>
 
 <span class="kd">var</span> <span class="nx">PARAM_FINISH</span> <span class="p">=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">PARAM_FINISH</span>
 
-<span class="kd">func</span> <span class="nf">StorageDeal_ProviderInitTimedOutSlashAmount</span><span class="p">(</span><span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">StorageDeal_ProviderInitTimedOutSlashAmount</span><span class="p">(</span><span class="nx">providerCollateral</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 	<span class="c1">// placeholder
 </span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
-	<span class="k">return</span> <span class="nx">deal</span><span class="p">.</span><span class="nf">Deal</span><span class="p">().</span><span class="nf">Proposal</span><span class="p">().</span><span class="nf">ProviderBalanceRequirement</span><span class="p">()</span>
+	<span class="k">return</span> <span class="nx">providerCollateral</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">Indices_I</span><span class="p">)</span> <span class="nf">StorageDeal_DurationBounds</span><span class="p">(</span>
@@ -4977,7 +4975,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span>
 	<span class="nx">startEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
 	<span class="nx">endEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
-	<span class="nx">dealWeight</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealWeight</span><span class="p">,</span>
+	<span class="nx">dealWeight</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">DealWeight</span><span class="p">,</span>
 <span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorWeight</span> <span class="p">{</span>
 	<span class="c1">// for every sector, given its size, start, end, and deals within the sector
 </span><span class="c1"></span>	<span class="c1">// assign sector power for the duration of its lifetime

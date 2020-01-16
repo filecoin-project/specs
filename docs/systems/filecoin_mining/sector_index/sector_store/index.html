@@ -4785,11 +4785,6 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// returns an error.
 </span><span class="c1"></span>    <span class="nf">GetSectorFiles</span><span class="p">(</span><span class="nx">id</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">f</span> <span class="nx">SectorFiles</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 
-    <span class="nf">GetSectorSealAlgorithm</span><span class="p">(</span><span class="nx">id</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">a</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ProofAlgorithm</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
-
-    <span class="c1">// TODO: This needs to be called when a sector is sealed with the algorithm that was used.
-</span><span class="c1"></span>    <span class="nf">SetSectorSealAlgorithm</span><span class="p">(</span><span class="nx">id</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">a</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ProofAlgorithm</span><span class="p">)</span> <span class="kt">error</span>
-
     <span class="c1">// Get information, including a merkle tree file/path, needed to generate PoSt for a sector.
 </span><span class="c1"></span>    <span class="nf">GetSectorPersistentProofAux</span><span class="p">(</span><span class="nx">id</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PersistentProofAux</span>
 

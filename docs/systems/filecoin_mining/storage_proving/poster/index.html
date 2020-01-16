@@ -4770,7 +4770,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
-<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">sector_index</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector_index&#34;</span>
 
 <span class="kd">type</span> <span class="nx">UInt64</span> <span class="nx">UInt</span>
@@ -4785,8 +4784,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">PoStGenerator</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PoStCfg</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStInstanceCfg</span>
-    <span class="nx">SectorStore</span>  <span class="nx">sector_index</span><span class="p">.</span><span class="nx">SectorStore</span>
+    <span class="nx">SectorStore</span> <span class="nx">sector_index</span><span class="p">.</span><span class="nx">SectorStore</span>
 
     <span class="nf">GeneratePoStCandidates</span><span class="p">(</span>
         <span class="nx">challengeSeed</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span>
@@ -4796,12 +4794,12 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nf">CreateElectionPoStProof</span><span class="p">(</span>
         <span class="nx">randomness</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span>
-        <span class="nx">witness</span>     <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStWitness</span>
+        <span class="nx">witness</span>     <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
     <span class="p">)</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span><span class="p">]</span>
 
     <span class="nf">CreateSurprisePoStProof</span><span class="p">(</span>
         <span class="nx">randomness</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span>
-        <span class="nx">witness</span>     <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStWitness</span>
+        <span class="nx">witness</span>     <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
     <span class="p">)</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span><span class="p">]</span>
 
     <span class="c1">// FIXME: Verification shouldn&#39;t require a PoStGenerator. Move this.
@@ -4841,7 +4839,6 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="p">(</span>
 	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 	<span class="nx">filproofs</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto/filproofs&#34;</span>
-	<span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
@@ -4865,27 +4862,27 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>
 	<span class="c1">// For now, dodge this by passing the whole SectorStore. Once we decide how we want to represent this, we can narrow the call.
 </span><span class="c1"></span>
-	<span class="k">return</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">GenerateElectionPoStCandidates</span><span class="p">(</span><span class="nx">pg</span><span class="p">.</span><span class="nf">PoStCfg</span><span class="p">(),</span> <span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">sectors</span><span class="p">,</span> <span class="nx">candidateCount</span><span class="p">,</span> <span class="nx">pg</span><span class="p">.</span><span class="nf">SectorStore</span><span class="p">())</span>
+	<span class="k">return</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">GenerateElectionPoStCandidates</span><span class="p">(</span><span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">sectors</span><span class="p">,</span> <span class="nx">candidateCount</span><span class="p">,</span> <span class="nx">pg</span><span class="p">.</span><span class="nf">SectorStore</span><span class="p">())</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">pg</span> <span class="o">*</span><span class="nx">PoStGenerator_I</span><span class="p">)</span> <span class="nf">CreateElectionPoStProof</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">witness</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStWitness</span><span class="p">)</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">pg</span> <span class="o">*</span><span class="nx">PoStGenerator_I</span><span class="p">)</span> <span class="nf">CreateElectionPoStProof</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">postCandidates</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">)</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
 	<span class="kd">var</span> <span class="nx">privateProofs</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PrivatePoStCandidateProof</span>
 
-	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">candidate</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">witness</span><span class="p">.</span><span class="nf">Candidates</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">candidate</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">postCandidates</span> <span class="p">{</span>
 		<span class="nx">privateProofs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">privateProofs</span><span class="p">,</span> <span class="nx">candidate</span><span class="p">.</span><span class="nx">PrivateProof</span><span class="p">)</span>
 	<span class="p">}</span>
 
-	<span class="k">return</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">CreateElectionPoStProof</span><span class="p">(</span><span class="nx">pg</span><span class="p">.</span><span class="nf">PoStCfg</span><span class="p">(),</span> <span class="nx">privateProofs</span><span class="p">,</span> <span class="nx">randomness</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">CreateElectionPoStProof</span><span class="p">(</span><span class="nx">privateProofs</span><span class="p">,</span> <span class="nx">randomness</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">pg</span> <span class="o">*</span><span class="nx">PoStGenerator_I</span><span class="p">)</span> <span class="nf">CreateSurprisePoStProof</span><span class="p">(</span><span class="nx">postCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStInstanceCfg</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">witness</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStWitness</span><span class="p">)</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">pg</span> <span class="o">*</span><span class="nx">PoStGenerator_I</span><span class="p">)</span> <span class="nf">CreateSurprisePoStProof</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">postCandidates</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">)</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
 	<span class="kd">var</span> <span class="nx">privateProofs</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PrivatePoStCandidateProof</span>
 
-	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">candidate</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">witness</span><span class="p">.</span><span class="nf">Candidates</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">candidate</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">postCandidates</span> <span class="p">{</span>
 		<span class="nx">privateProofs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">privateProofs</span><span class="p">,</span> <span class="nx">candidate</span><span class="p">.</span><span class="nx">PrivateProof</span><span class="p">)</span>
 	<span class="p">}</span>
 
-	<span class="k">return</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">CreateSurprisePoStProof</span><span class="p">(</span><span class="nx">pg</span><span class="p">.</span><span class="nf">PoStCfg</span><span class="p">(),</span> <span class="nx">privateProofs</span><span class="p">,</span> <span class="nx">randomness</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">CreateSurprisePoStProof</span><span class="p">(</span><span class="nx">privateProofs</span><span class="p">,</span> <span class="nx">randomness</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 

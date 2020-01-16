@@ -4769,7 +4769,7 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
-<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
+<span class="kn">import</span> <span class="nx">smarkact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_market&#34;</span>
 
 <span class="c1">// SectorBuilder accumulates deals, keeping track of their
 </span><span class="c1">// sector configuration requirements and the piece sizes.
@@ -4785,10 +4785,10 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// These include the info for the relevant pieces.
 </span><span class="c1"></span>    <span class="c1">// This builder just accumulates deals, keeping track of their
 </span><span class="c1"></span>    <span class="c1">// sector configuration requirements, and the piece sizes.
-</span><span class="c1"></span>    <span class="nx">DealsToSeal</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">]</span>
+</span><span class="c1"></span>    <span class="nx">DealsToSeal</span> <span class="p">[</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">]</span>
 
     <span class="c1">// StageDeal adds a deal to be packed into a sector.
-</span><span class="c1"></span>    <span class="nf">StageDeal</span><span class="p">(</span><span class="nx">d</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="nx">StageDealResponse</span>
+</span><span class="c1"></span>    <span class="nf">StageDeal</span><span class="p">(</span><span class="nx">d</span> <span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="nx">StageDealResponse</span>
 
     <span class="c1">// NextSector returns an UnsealedSectorInfo, which includes the (ordered) set of
 </span><span class="c1"></span>    <span class="c1">// pieces, and the SealCfg. An error may be returned if SectorBuilder is not

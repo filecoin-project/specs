@@ -4905,10 +4905,10 @@ seal the sector, and tell the Storage Market Actor that the deal is in a sector,
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
-<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
 <span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">message</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 <span class="kn">import</span> <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
+<span class="kn">import</span> <span class="nx">smarkact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_market&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StorageDealStatus</span> <span class="kt">uint64</span>
 
@@ -4953,7 +4953,7 @@ seal the sector, and tell the Storage Market Actor that the deal is in a sector,
 </span><span class="c1">// a storage provider on the storage deal protocol to propose a storage deal
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">DealProtocolRequest</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// The deal being proposed
-</span><span class="c1"></span>    <span class="nx">DealProposal</span>  <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
+</span><span class="c1"></span>    <span class="nx">DealProposal</span>  <span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
     <span class="c1">// root of the data to be transferred
 </span><span class="c1"></span>    <span class="nx">Payload</span>       <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
 <span class="p">}</span>
@@ -4963,7 +4963,7 @@ seal the sector, and tell the Storage Market Actor that the deal is in a sector,
 </span><span class="c1">// deal proposal
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">DealProtocolResponse</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// The CID of the storage deal proposal 
-</span><span class="c1"></span>    <span class="nx">Proposal</span>        <span class="o">&amp;</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
+</span><span class="c1"></span>    <span class="nx">Proposal</span>        <span class="o">&amp;</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
 
     <span class="c1">// Status of deal
 </span><span class="c1"></span>    <span class="nx">State</span>           <span class="nx">StorageDealStatus</span>
@@ -4975,7 +4975,7 @@ seal the sector, and tell the Storage Market Actor that the deal is in a sector,
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageDataTransferVoucher</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Proposal</span> <span class="o">&amp;</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
+    <span class="nx">Proposal</span> <span class="o">&amp;</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
 <span class="p">}</span>
 </code></pre></div>
 

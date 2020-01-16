@@ -4763,20 +4763,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
-
-<span class="kd">type</span> <span class="nx">AccountActorCode</span> <span class="kd">struct</span> <span class="p">{}</span>
-
-<span class="kd">type</span> <span class="nx">AccountActorState</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-<span class="p">}</span>
-</code></pre></div>
-
-
-
+<p style="color: #D74848"><b><i>Something's not right. The <code>/docs/actors/builtin/account/account_actor.id</code> file was not found.</i></b></p>
 
 
 
@@ -4800,6 +4787,7 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">account</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
     <span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin&#34;</span>
     <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
     <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
@@ -4807,13 +4795,19 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="p">=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">AccountActorCode_I</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+<span class="kd">type</span> <span class="nx">AccountActor</span> <span class="kd">struct</span><span class="p">{}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">AccountActor</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
     <span class="c1">// Nothing. intentionally left blank.
 </span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
     <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SuccessReturn</span><span class="p">()</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">AccountActorState_I</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span> <span class="p">{</span>
+<span class="kd">type</span> <span class="nx">AccountActorState</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">AccountActorState</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span> <span class="p">{</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>

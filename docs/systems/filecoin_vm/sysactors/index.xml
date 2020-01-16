@@ -16,7 +16,8 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_vm/sysactors/account_actor/</guid>
-      <description> import addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; type AccountActorCode struct {} type AccountActorState struct { Address addr.Address }  package account import ( builtin &amp;#34;github.com/filecoin-project/specs/actors/builtin&amp;#34; vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; cid &amp;#34;github.com/ipfs/go-cid&amp;#34; ) type InvocOutput = vmr.InvocOutput func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput { // Nothing. intentionally left blank. 	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr) return rt.SuccessReturn() } func (st *AccountActorState_I) CID() cid.Cid { panic(&amp;#34;TODO&amp;#34;) }  </description>
+      <description> Something&#39;s not right. The /docs/actors/builtin/account/account_actor.id file was not found.
+package account import ( addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; builtin &amp;#34;github.com/filecoin-project/specs/actors/builtin&amp;#34; vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; cid &amp;#34;github.com/ipfs/go-cid&amp;#34; ) type InvocOutput = vmr.InvocOutput type AccountActor struct{} func (a *AccountActor) Constructor(rt vmr.Runtime) InvocOutput { // Nothing. intentionally left blank. 	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr) return rt.SuccessReturn() } type AccountActorState struct { Address addr.Address } func (AccountActorState) CID() cid.Cid { panic(&amp;#34;TODO&amp;#34;) }  </description>
     </item>
     
     <item>
@@ -25,7 +26,8 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_vm/sysactors/cron_actor/</guid>
-      <description>import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; import addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; type CronActorState struct { // Cron has no internal state } type CronTableEntry struct { ToAddr addr.Address MethodNum abi.MethodNum } type CronActorCode struct { // Entries is a set of actors (and corresponding methods) to call during EpochTick.  // This can be done a bunch of ways. We do it this way here to make it easy to add  // a handler to Cron elsewhere in the spec code.</description>
+      <description>Something&#39;s not right. The /docs/actors/builtin/cron/cron_actor.id file was not found.
+package cron import ( addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; builtin &amp;#34;github.com/filecoin-project/specs/actors/builtin&amp;#34; vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; ) type CronActorState struct{} type CronActor struct { // TODO move Entries into the CronActorState struct 	Entries []CronTableEntry } type CronTableEntry struct { ToAddr addr.Address MethodNum abi.MethodNum } func (a *CronActor) Constructor(rt vmr.Runtime) vmr.InvocOutput { // Nothing. intentionally left blank. 	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr) return rt.SuccessReturn() } func (a *CronActor) EpochTick(rt vmr.</description>
     </item>
     
     <item>
@@ -34,7 +36,8 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_vm/sysactors/init_actor/</guid>
-      <description>import addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: abi.ActorID} NextID abi.ActorID NetworkName string // Allocates a new ID and maps another address to it. Returns the ID-address.  MapAddressToNewID(address addr.Address) addr.Address // Resolves an address to an ID-address, if possible. Returns the argument if un-mapped.  ResolveAddress(address addr.Address) addr.Address } type InitActorCode struct { Constructor(r vmr.</description>
+      <description>Something&#39;s not right. The /docs/actors/builtin/init/init_actor.id file was not found.
+package init import ( &amp;#34;bytes&amp;#34; addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; actor &amp;#34;github.com/filecoin-project/specs/actors&amp;#34; abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; builtin &amp;#34;github.com/filecoin-project/specs/actors/builtin&amp;#34; vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; autil &amp;#34;github.com/filecoin-project/specs/actors/util&amp;#34; cid &amp;#34;github.com/ipfs/go-cid&amp;#34; ) type InvocOutput = vmr.InvocOutput type Runtime = vmr.Runtime type Bytes = abi.Bytes var AssertMsg = autil.AssertMsg type InitActorState struct { // responsible for create new actors 	AddressMap map[addr.Address]abi.ActorID NextID abi.ActorID NetworkName string } func (s *InitActorState) ResolveAddress(address addr.Address) addr.Address { actorID, ok := s.</description>
     </item>
     
     <item>

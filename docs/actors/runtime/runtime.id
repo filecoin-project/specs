@@ -1,9 +1,9 @@
 import actor "github.com/filecoin-project/specs/actors"
 import abi "github.com/filecoin-project/specs/actors/abi"
+import crypto "github.com/filecoin-project/specs/actors/crypto"
 import exitcode "github.com/filecoin-project/specs/actors/runtime/exitcode"
 import addr "github.com/filecoin-project/go-address"
 import indices "github.com/filecoin-project/specs/actors/runtime/indices"
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import cid "github.com/ipfs/go-cid"
 
 // Runtime is the VM's internal runtime object.
@@ -113,9 +113,9 @@ type Runtime interface {
     DeleteActor(address addr.Address)
 
     // Retrieves and deserializes an object from the store into o. Returns whether successful.
-    IpldGet(c cid.Cid, o ipld.Object) bool
+    IpldGet(c cid.Cid, o interface {}) bool
     // Serializes and stores an object, returning its CID.
-    IpldPut(x ipld.Object) cid.Cid
+    IpldPut(x interface {}) cid.Cid
 
     // Provides the system call interface.
     Syscalls() Syscalls
@@ -123,7 +123,11 @@ type Runtime interface {
 
 type Syscalls interface {
     // Verifies that a signature is valid for an address and plaintext.
-    VerifySignature(signature [byte], signer addr.Address, plaintext [byte]) bool
+    VerifySignature(
+        signature  crypto.Signature
+        signer     addr.Address
+        plaintext  [byte]
+    ) bool
     // Computes an unsealed sector CID (CommD) from its constituent piece CIDs (CommPs) and sizes.
     ComputeUnsealedSectorCID(sectorSize abi.SectorSize, pieces [abi.PieceInfo]) (abi.UnsealedSectorCID, error)
     // Verifies a sector seal proof.

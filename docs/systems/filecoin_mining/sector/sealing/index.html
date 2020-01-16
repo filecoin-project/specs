@@ -4779,16 +4779,6 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">//    SealSeedHash(MinerID, SectorNumber, SealRandomness, abi.UnsealedSectorCID)
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealSeed</span> <span class="nx">Bytes</span>
 
-<span class="c1">// New proof ProofInstances can add new cfg types if needed.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealInstanceCfg</span> <span class="nx">union</span> <span class="p">{</span>
-    <span class="nx">WinStackedDRGCfgV1</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">WinStackedDRGCfgV1</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">SectorSize</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span>
-    <span class="nx">WindowCount</span>  <span class="nx">UInt</span>
-<span class="p">}</span>
-
 <span class="c1">// SealCommitment is the information kept in the state tree about a sector.
 </span><span class="c1">// SealCommitment is a subset of OnChainSealVerifyInfo.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealCommitment</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4827,7 +4817,6 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">SealArguments</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">RegisteredProof</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof</span>
-    <span class="nx">Algorithm</span>        <span class="nx">abi</span><span class="p">.</span><span class="nx">ProofAlgorithm</span>
     <span class="nx">OutputArtifacts</span>  <span class="nx">SealOutputArtifacts</span>
 <span class="p">}</span>
 

@@ -25,7 +25,8 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_vm/sysactors/account_actor/</guid>
-      <description> import addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; type AccountActorCode struct {} type AccountActorState struct { Address addr.Address }  package account import ( builtin &amp;#34;github.com/filecoin-project/specs/actors/builtin&amp;#34; vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; cid &amp;#34;github.com/ipfs/go-cid&amp;#34; ) type InvocOutput = vmr.InvocOutput func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput { // Nothing. intentionally left blank. 	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr) return rt.SuccessReturn() } func (st *AccountActorState_I) CID() cid.Cid { panic(&amp;#34;TODO&amp;#34;) }  </description>
+      <description> Something&#39;s not right. The /docs/actors/builtin/account/account_actor.id file was not found.
+package account import ( addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; builtin &amp;#34;github.com/filecoin-project/specs/actors/builtin&amp;#34; vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; cid &amp;#34;github.com/ipfs/go-cid&amp;#34; ) type InvocOutput = vmr.InvocOutput type AccountActor struct{} func (a *AccountActor) Constructor(rt vmr.Runtime) InvocOutput { // Nothing. intentionally left blank. 	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr) return rt.SuccessReturn() } type AccountActorState struct { Address addr.Address } func (AccountActorState) CID() cid.Cid { panic(&amp;#34;TODO&amp;#34;) }  </description>
     </item>
     
     <item>
@@ -129,7 +130,8 @@ The response contains the requested chain in reverse iteration order.</descripti
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_vm/sysactors/cron_actor/</guid>
-      <description>import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; import addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; type CronActorState struct { // Cron has no internal state } type CronTableEntry struct { ToAddr addr.Address MethodNum abi.MethodNum } type CronActorCode struct { // Entries is a set of actors (and corresponding methods) to call during EpochTick.  // This can be done a bunch of ways. We do it this way here to make it easy to add  // a handler to Cron elsewhere in the spec code.</description>
+      <description>Something&#39;s not right. The /docs/actors/builtin/cron/cron_actor.id file was not found.
+package cron import ( addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; builtin &amp;#34;github.com/filecoin-project/specs/actors/builtin&amp;#34; vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; ) type CronActorState struct{} type CronActor struct { // TODO move Entries into the CronActorState struct 	Entries []CronTableEntry } type CronTableEntry struct { ToAddr addr.Address MethodNum abi.MethodNum } func (a *CronActor) Constructor(rt vmr.Runtime) vmr.InvocOutput { // Nothing. intentionally left blank. 	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr) return rt.SuccessReturn() } func (a *CronActor) EpochTick(rt vmr.</description>
     </item>
     
     <item>
@@ -334,7 +336,8 @@ All Systems, as defined in this document, require the following:
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_vm/sysactors/init_actor/</guid>
-      <description>import addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: abi.ActorID} NextID abi.ActorID NetworkName string // Allocates a new ID and maps another address to it. Returns the ID-address.  MapAddressToNewID(address addr.Address) addr.Address // Resolves an address to an ID-address, if possible. Returns the argument if un-mapped.  ResolveAddress(address addr.Address) addr.Address } type InitActorCode struct { Constructor(r vmr.</description>
+      <description>Something&#39;s not right. The /docs/actors/builtin/init/init_actor.id file was not found.
+package init import ( &amp;#34;bytes&amp;#34; addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; actor &amp;#34;github.com/filecoin-project/specs/actors&amp;#34; abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; builtin &amp;#34;github.com/filecoin-project/specs/actors/builtin&amp;#34; vmr &amp;#34;github.com/filecoin-project/specs/actors/runtime&amp;#34; autil &amp;#34;github.com/filecoin-project/specs/actors/util&amp;#34; cid &amp;#34;github.com/ipfs/go-cid&amp;#34; ) type InvocOutput = vmr.InvocOutput type Runtime = vmr.Runtime type Bytes = abi.Bytes var AssertMsg = autil.AssertMsg type InitActorState struct { // responsible for create new actors 	AddressMap map[addr.Address]abi.ActorID NextID abi.ActorID NetworkName string } func (s *InitActorState) ResolveAddress(address addr.Address) addr.Address { actorID, ok := s.</description>
     </item>
     
     <item>
@@ -580,7 +583,7 @@ A Reward struct contains a StartEpoch that keeps track of when this Reward is cr
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/sector_index/sector_builder/</guid>
-      <description>import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&amp;#34; // SectorBuilder accumulates deals, keeping track of their // sector configuration requirements and the piece sizes. // Once there is a sector ready to be sealed, NextSector // will return a sector.  type StageDealResponse struct { SectorID abi.SectorID } type SectorBuilder struct { // DealsToSeal keeps a set of StorageDeal objects.  // These include the info for the relevant pieces.</description>
+      <description>import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import smarkact &amp;#34;github.com/filecoin-project/specs/actors/builtin/storage_market&amp;#34; // SectorBuilder accumulates deals, keeping track of their // sector configuration requirements and the piece sizes. // Once there is a sector ready to be sealed, NextSector // will return a sector.  type StageDealResponse struct { SectorID abi.SectorID } type SectorBuilder struct { // DealsToSeal keeps a set of StorageDeal objects.  // These include the info for the relevant pieces.</description>
     </item>
     
     <item>
@@ -589,7 +592,7 @@ A Reward struct contains a StartEpoch that keeps track of when this Reward is cr
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/sector/posting/</guid>
-      <description> import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; // New proof ProofInstances can add new cfg types if needed. type PoStInstanceCfg union { PoStCfgV1 PoStCfgVBogus } type PoStCfgV1 struct { Type PoStType Nodes UInt Partitions UInt LeafChallengeCount UInt ChallengeRangeSize UInt } type PoStCfgVBogus struct { Type PoStType Nodes UInt Partitions UInt QuantumMonkeyBrains UInt } type PoStType enum { ElectionPoSt SurprisePoSt } type PoStWitness struct { Candidates [abi.PoStCandidate] }  </description>
+      <description> //import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34;  // type PoStWitness struct { // Candidates [abi.PoStCandidate] // }  </description>
     </item>
     
     <item>
@@ -608,7 +611,7 @@ Something&#39;s not right. The sector_sealer.id file was not found.</description
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/sector/sealing/</guid>
-      <description>import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import file &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; type Path struct {} // TODO  // SealSeed is unique to each Sector // SealSeed is: // SealSeedHash(MinerID, SectorNumber, SealRandomness, abi.UnsealedSectorCID) type SealSeed Bytes // New proof ProofInstances can add new cfg types if needed. type SealInstanceCfg union { WinStackedDRGCfgV1 } type WinStackedDRGCfgV1 struct { SectorSize abi.SectorSize WindowCount UInt } // SealCommitment is the information kept in the state tree about a sector.</description>
+      <description>import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import file &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; type Path struct {} // TODO  // SealSeed is unique to each Sector // SealSeed is: // SealSeedHash(MinerID, SectorNumber, SealRandomness, abi.UnsealedSectorCID) type SealSeed Bytes // SealCommitment is the information kept in the state tree about a sector. // SealCommitment is a subset of OnChainSealVerifyInfo. type SealCommitment struct { SealedCID abi.SealedSectorCID // CommR  DealIDs abi.DealIDs Expiration abi.ChainEpoch } // PersistentProofAux is meta data required to generate certain proofs // for a sector, for example PoSt.</description>
     </item>
     
     <item>
@@ -717,7 +720,7 @@ Introduction Background on Proof-of-Replication Proof-of-Replication enables a p
       <guid>/docs/systems/filecoin_markets/storage_market/storage_client/</guid>
       <description>The StorageClient is a module that discovers miners, determines their asks, and proposes deals to StorageProviders. It also tracks deals as they move through the deal flow. Note that any address registered as a StorageMarketParticipant with the StorageMarketActor can be used with the StorageClient. A single participant can be a client, provider, or both at the same time.
 &amp;ndash;
-import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&amp;#34; import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; import message &amp;#34;github.</description>
+import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; import message &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&amp;#34; import peer &amp;#34;github.</description>
     </item>
     
     <item>
@@ -755,7 +758,7 @@ A deal has the following states:
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/storage_mining/storage_miner_actor/</guid>
-      <description>StorageMinerActor interface import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import autil &amp;#34;github.com/filecoin-project/specs/actors/util&amp;#34; import address &amp;#34;github.com/filecoin-project/go-address&amp;#34; import filcrypto &amp;#34;github.com/filecoin-project/specs/algorithms/crypto&amp;#34; import peer &amp;#34;github.com/libp2p/go-libp2p-core/peer&amp;#34; type MinerPoStState union { // Normal operation: The miner has passed either an ElectionPoSt or a SurprisePoSt  // sufficiently recently.  OK struct { LastSuccessfulPoSt abi.ChainEpoch } // SurprisePoSt challenge state: The miner has not submitted timely ElectionPoSts,  // and as a result, the system has fallen back to proving storage via SurprisePoSt.</description>
+      <description>StorageMinerActor interface import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import autil &amp;#34;github.com/filecoin-project/specs/actors/util&amp;#34; import address &amp;#34;github.com/filecoin-project/go-address&amp;#34; import peer &amp;#34;github.com/libp2p/go-libp2p-core/peer&amp;#34; type MinerPoStState union { // Normal operation: The miner has passed either an ElectionPoSt or a SurprisePoSt  // sufficiently recently.  OK struct { LastSuccessfulPoSt abi.ChainEpoch } // SurprisePoSt challenge state: The miner has not submitted timely ElectionPoSts,  // and as a result, the system has fallen back to proving storage via SurprisePoSt.</description>
     </item>
     
     <item>
@@ -783,7 +786,8 @@ Active Miner Mining Cycle In order to mine blocks on the Filecoin blockchain a m
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_blockchain/storage_power_consensus/storage_power_actor/</guid>
-      <description>StoragePowerActor interface import actor_util &amp;#34;github.com/filecoin-project/specs/actors/util&amp;#34; import addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; type PowerTableHAMT {addr.Address: abi.StoragePower} // TODO: convert address to ActorID  type MinerEventsHAMT {abi.ChainEpoch: actor_util.MinerEventSetHAMT} type StoragePowerActorState struct { TotalNetworkPower abi.StoragePower PowerTable PowerTableHAMT EscrowTable actor_util.BalanceTableHAMT // Metadata cached for efficient processing of sector/challenge events.  CachedDeferredCronEvents MinerEventsHAMT PoStDetectedFaultMiners actor_util.MinerSetHAMT ClaimedPower PowerTableHAMT NominalPower PowerTableHAMT NumMinersMeetingMinPower int _slashPledgeCollateral(address addr.Address, amount abi.TokenAmount) abi.TokenAmount _selectMinersToSurprise(challengeCount int, randomness abi.Randomness) [addr.Address] _addClaimedPowerForSector( minerAddr addr.Address storageWeightDesc SectorStorageWeightDesc ) _deductClaimedPowerForSectorAssert( minerAddr addr.</description>
+      <description>StoragePowerActor interface Something&#39;s not right. The /docs/actors/builtin/storage_power/storage_power_actor.id file was not found.
+StoragePowerActorState implementation package storage_power import ( &amp;#34;sort&amp;#34; addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; builtin &amp;#34;github.com/filecoin-project/specs/actors/builtin&amp;#34; crypto &amp;#34;github.com/filecoin-project/specs/actors/crypto&amp;#34; indices &amp;#34;github.com/filecoin-project/specs/actors/runtime/indices&amp;#34; autil &amp;#34;github.com/filecoin-project/specs/actors/util&amp;#34; cid &amp;#34;github.com/ipfs/go-cid&amp;#34; ) // TODO: HAMT type PowerTableHAMT map[addr.Address]abi.StoragePower // TODO: convert address to ActorID  // TODO: HAMT type MinerEventsHAMT map[abi.ChainEpoch]autil.MinerEventSetHAMT type StoragePowerActorState struct { TotalNetworkPower abi.StoragePower PowerTable PowerTableHAMT EscrowTable autil.BalanceTableHAMT // Metadata cached for efficient processing of sector/challenge events.</description>
     </item>
     
     <item>

@@ -86,7 +86,7 @@ type WinStackedDRG struct {
     // invariant: DRGCfg.Nodes == ExpanderGraphCfg.Nodes
     Curve                   EllipticCurve
     RegisteredProof         abi.RegisteredProof
-    Cfg                     sector.SealInstanceCfg
+    Cfg                     SealInstanceCfg
 
     Drg()                   DRG
     Expander()              ExpanderGraph
@@ -152,11 +152,11 @@ type WinStackedDRG struct {
 }
 
 type SealVerifier struct {
-    SealCfg sector.SealInstanceCfg
+    SealCfg SealInstanceCfg
 }
 
 type PoStVerifier struct {
-    PoStCfg sector.PoStInstanceCfg
+    PoStCfg PoStInstanceCfg
 }
 
 type DRGCfg struct {
@@ -224,4 +224,76 @@ type InclusionProof struct {
     LeafIndex()  UInt
     Root()       Commitment
     Verify(root Bytes, challenge UInt) bool
+}
+
+type ProofRegistry {UInt: ProofInstance}
+
+type ProofInstance struct {
+    // FIXME: move some or all of these types into filproofs.
+    ID           abi.RegisteredProof
+    Type         ProofType
+    Algorithm    ProofAlgorithm
+    CircuitType  ConcreteCircuit
+    Partitions   UInt
+    Cfg          ProofCfg
+}
+
+type ConcreteCircuit struct {
+    // Name must be globally unique. It will be a hash derived from semantic content of circuit.
+    Name                      string
+    GrothParameterFileName()  string
+    VerifyingKeyFileName()    string
+}
+
+type ProofCfg union {
+    SealCfg  SealInstanceCfg
+    PoStCfg  PoStInstanceCfg
+}
+
+type ProofType enum {
+    SealProof
+    PoStProof
+}
+
+type ProofAlgorithm enum {
+    StackedDRGSeal
+    WinStackedDRGSeal
+    StackedDRGPoSt
+    WinStackedDRGPoSt
+}
+
+// New proof ProofInstances can add new cfg types if needed.
+type SealInstanceCfg union {
+    WinStackedDRGCfgV1
+}
+
+type WinStackedDRGCfgV1 struct {
+    SectorSize   abi.SectorSize
+    WindowCount  UInt
+}
+
+// New proof ProofInstances can add new cfg types if needed.
+type PoStInstanceCfg union {
+    PoStCfgV1
+    PoStCfgVBogus
+}
+
+type PoStCfgV1 struct {
+    Type                PoStType
+    Nodes               UInt
+    Partitions          UInt
+    LeafChallengeCount  UInt
+    ChallengeRangeSize  UInt
+}
+
+type PoStCfgVBogus struct {
+    Type                 PoStType
+    Nodes                UInt
+    Partitions           UInt
+    QuantumMonkeyBrains  UInt
+}
+
+type PoStType enum {
+    ElectionPoSt
+    SurprisePoSt
 }

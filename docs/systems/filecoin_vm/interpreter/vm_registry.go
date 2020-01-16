@@ -45,7 +45,7 @@ func LoadActor(id abi.ActorCodeID) (vmr.ActorCode, error) {
 
 // init is called in Go during initialization of a program.
 // this is an idiomatic way to do this. Implementations should approach this
-// howevery they wish. The point is to initialize a static registry with
+// however they wish. The point is to initialize a static registry with
 // built in pure types that have the code for each actor. Once we have
 // a way to load code from the StateTree, use that instead.
 func init() {
@@ -55,23 +55,23 @@ func init() {
 func _registerBuiltinActors() {
 	// TODO
 
-	cron := &cronact.CronActorCode_I{}
+	cron := &cronact.CronActor{}
 
-	RegisterActor(builtin.InitActorCodeID, &initact.InitActorCode_I{})
+	RegisterActor(builtin.InitActorCodeID, &initact.InitActor{})
 	RegisterActor(builtin.CronActorCodeID, cron)
-	RegisterActor(builtin.AccountActorCodeID, &accact.AccountActorCode_I{})
-	RegisterActor(builtin.StoragePowerActorCodeID, &spowact.StoragePowerActorCode_I{})
+	RegisterActor(builtin.AccountActorCodeID, &accact.AccountActor{})
+	RegisterActor(builtin.StoragePowerActorCodeID, &spowact.StoragePowerActor{})
 	RegisterActor(builtin.StorageMarketActorCodeID, &smarkact.StorageMarketActorCode_I{})
 
 	// wire in CRON actions.
 	// TODO: move this to CronActor's constructor method
-	cron.Entries_ = append(cron.Entries_, &cronact.CronTableEntry_I{
-		ToAddr_:    builtin.StoragePowerActorAddr,
-		MethodNum_: builtin.Method_StoragePowerActor_OnEpochTickEnd,
+	cron.Entries = append(cron.Entries, cronact.CronTableEntry{
+		ToAddr:    builtin.StoragePowerActorAddr,
+		MethodNum: builtin.Method_StoragePowerActor_OnEpochTickEnd,
 	})
 
-	cron.Entries_ = append(cron.Entries_, &cronact.CronTableEntry_I{
-		ToAddr_:    builtin.StorageMarketActorAddr,
-		MethodNum_: builtin.Method_StorageMarketActor_OnEpochTickEnd,
+	cron.Entries = append(cron.Entries, cronact.CronTableEntry{
+		ToAddr:    builtin.StorageMarketActorAddr,
+		MethodNum: builtin.Method_StorageMarketActor_OnEpochTickEnd,
 	})
 }

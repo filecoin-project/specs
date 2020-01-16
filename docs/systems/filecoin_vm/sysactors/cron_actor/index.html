@@ -4763,38 +4763,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
-<span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
-
-<span class="kd">type</span> <span class="nx">CronActorState</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// Cron has no internal state
-</span><span class="c1"></span><span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">CronTableEntry</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ToAddr</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">MethodNum</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">CronActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// Entries is a set of actors (and corresponding methods) to call during EpochTick.
-</span><span class="c1"></span>    <span class="c1">// This can be done a bunch of ways. We do it this way here to make it easy to add
-</span><span class="c1"></span>    <span class="c1">// a handler to Cron elsewhere in the spec code. How to do this is implementation
-</span><span class="c1"></span>    <span class="c1">// specific.
-</span><span class="c1"></span>    <span class="nx">Entries</span> <span class="p">[</span><span class="nx">CronTableEntry</span><span class="p">]</span>
-
-    <span class="c1">// EpochTick executes built-in periodic actions, run at every Epoch.
-</span><span class="c1"></span>    <span class="c1">// EpochTick(r) is called after all other messages in the epoch have been applied.
-</span><span class="c1"></span>    <span class="c1">// This can be seen as an implicit last message.
-</span><span class="c1"></span>    <span class="nf">EpochTick</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div>
-
-
-
+<p style="color: #D74848"><b><i>Something's not right. The <code>/docs/actors/builtin/cron/cron_actor.id</code> file was not found.</i></b></p>
 
 
 
@@ -4818,26 +4787,39 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">cron</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
     <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
     <span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin&#34;</span>
     <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
 <span class="p">)</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">CronActorCode_I</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span> <span class="p">{</span>
+<span class="kd">type</span> <span class="nx">CronActorState</span> <span class="kd">struct</span><span class="p">{}</span>
+
+<span class="kd">type</span> <span class="nx">CronActor</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// TODO move Entries into the CronActorState struct
+</span><span class="c1"></span>    <span class="nx">Entries</span> <span class="p">[]</span><span class="nx">CronTableEntry</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">CronTableEntry</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ToAddr</span>    <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">MethodNum</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">CronActor</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span> <span class="p">{</span>
     <span class="c1">// Nothing. intentionally left blank.
 </span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
     <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SuccessReturn</span><span class="p">()</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">CronActorCode_I</span><span class="p">)</span> <span class="nf">EpochTick</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">CronActor</span><span class="p">)</span> <span class="nf">EpochTick</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span> <span class="p">{</span>
     <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
 
     <span class="c1">// a.Entries is basically a static registry for now, loaded
 </span><span class="c1"></span>    <span class="c1">// in the interpreter static registry.
-</span><span class="c1"></span>    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">entry</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">a</span><span class="p">.</span><span class="nf">Entries</span><span class="p">()</span> <span class="p">{</span>
+</span><span class="c1"></span>    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">entry</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Entries</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
-            <span class="nx">To_</span><span class="p">:</span>     <span class="nx">entry</span><span class="p">.</span><span class="nf">ToAddr</span><span class="p">(),</span>
-            <span class="nx">Method_</span><span class="p">:</span> <span class="nx">entry</span><span class="p">.</span><span class="nf">MethodNum</span><span class="p">(),</span>
+            <span class="nx">To_</span><span class="p">:</span>     <span class="nx">entry</span><span class="p">.</span><span class="nx">ToAddr</span><span class="p">,</span>
+            <span class="nx">Method_</span><span class="p">:</span> <span class="nx">entry</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span>
             <span class="nx">Params_</span><span class="p">:</span> <span class="kc">nil</span><span class="p">,</span>
             <span class="nx">Value_</span><span class="p">:</span>  <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
         <span class="p">})</span>

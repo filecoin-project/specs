@@ -4775,7 +4775,6 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
 <span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
-<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">peer</span> <span class="s">&#34;github.com/libp2p/go-libp2p-core/peer&#34;</span>
 
 <span class="kd">type</span> <span class="nx">MinerPoStState</span> <span class="nx">union</span> <span class="p">{</span>
@@ -4879,8 +4878,8 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
 </span><span class="c1"></span>    <span class="c1">// other day to day miner activities.
 </span><span class="c1"></span>    <span class="nx">Worker</span>                  <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>  <span class="c1">// Must be an ID-address.
-</span><span class="c1"></span>    <span class="nx">WorkerVRFKey</span>            <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span>
-
+</span><span class="c1"></span>    <span class="nx">WorkerVRFKey</span>            <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>  <span class="c1">// Must be a SECP or BLS address
+</span><span class="c1"></span>
     <span class="c1">// Libp2p identity that should be used when connecting to this miner.
 </span><span class="c1"></span>    <span class="nx">PeerId</span>                  <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
 
@@ -5086,11 +5085,10 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
     <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
     <span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin&#34;</span>
+    <span class="nx">crypto</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/crypto&#34;</span>
     <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime/indices&#34;</span>
     <span class="nx">serde</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/serde&#34;</span>
     <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
-    <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
-    <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
     <span class="nx">peer</span> <span class="s">&#34;github.com/libp2p/go-libp2p-core/peer&#34;</span>
 <span class="p">)</span>
 
@@ -5129,8 +5127,8 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">err</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrReceiver</span><span class="p">().</span><span class="nf">MarshalCBOR</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">curRecBuf</span><span class="p">)</span>
     <span class="nx">autil</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
 
-    <span class="nx">randomnessK</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">GetRandomness</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="o">-</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">SPC_LOOKBACK_POST</span><span class="p">)</span>
-    <span class="nx">challengedSectorsRandomness</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">DeriveRandWithMinerAddr</span><span class="p">(</span><span class="nx">filcrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_SurprisePoStSampleSectors</span><span class="p">,</span> <span class="nx">randomnessK</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrReceiver</span><span class="p">())</span>
+    <span class="nx">randomnessK</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">GetRandomness</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="o">-</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">SPC_LOOKBACK_POST</span><span class="p">)</span>
+    <span class="nx">challengedSectorsRandomness</span> <span class="o">:=</span> <span class="nx">crypto</span><span class="p">.</span><span class="nf">DeriveRandWithMinerAddr</span><span class="p">(</span><span class="nx">crypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_SurprisePoStSampleSectors</span><span class="p">,</span> <span class="nx">randomnessK</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrReceiver</span><span class="p">())</span>
 
     <span class="nx">challengedSectors</span> <span class="o">:=</span> <span class="nf">_surprisePoStSampleChallengedSectors</span><span class="p">(</span>
         <span class="nx">challengedSectorsRandomness</span><span class="p">,</span>
@@ -5243,7 +5241,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
     <span class="c1">// Request deferred Cron check for PreCommit expiry check.
-</span><span class="c1"></span>    <span class="nx">expiryBound</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="o">+</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">MAX_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span class="c1"></span>    <span class="nx">expiryBound</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="o">+</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">MAX_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="nx">a</span><span class="p">.</span><span class="nf">_rtEnrollCronEvent</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">expiryBound</span><span class="p">,</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">{</span><span class="nx">info</span><span class="p">.</span><span class="nf">SectorNumber</span><span class="p">()})</span>
 
     <span class="k">if</span> <span class="nx">info</span><span class="p">.</span><span class="nf">Expiration</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="p">{</span>
@@ -5263,7 +5261,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;Sector not valid or not in PreCommit state&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">preCommitSector</span><span class="p">.</span><span class="nf">PreCommitEpoch</span><span class="p">()</span><span class="o">+</span><span class="nx">node_base</span><span class="p">.</span><span class="nx">MAX_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="o">||</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">preCommitSector</span><span class="p">.</span><span class="nf">PreCommitEpoch</span><span class="p">()</span><span class="o">+</span><span class="nx">node_base</span><span class="p">.</span><span class="nx">MIN_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">preCommitSector</span><span class="p">.</span><span class="nf">PreCommitEpoch</span><span class="p">()</span><span class="o">+</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">MAX_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="o">||</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">preCommitSector</span><span class="p">.</span><span class="nf">PreCommitEpoch</span><span class="p">()</span><span class="o">+</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">MIN_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Invalid ProveCommitSector epoch&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
@@ -5521,7 +5519,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="nx">checkSector</span><span class="p">.</span><span class="nf">State</span><span class="p">()</span> <span class="o">==</span> <span class="nx">SectorState_PreCommit</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span><span class="o">-</span><span class="nx">checkSector</span><span class="p">.</span><span class="nf">PreCommitEpoch</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">MAX_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span><span class="o">-</span><span class="nx">checkSector</span><span class="p">.</span><span class="nf">PreCommitEpoch</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">MAX_PROVE_COMMIT_SECTOR_EPOCH</span> <span class="p">{</span>
             <span class="nx">a</span><span class="p">.</span><span class="nf">_rtDeleteSectorEntry</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">sectorNumber</span><span class="p">)</span>
             <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">checkSector</span><span class="p">.</span><span class="nf">PreCommitDeposit</span><span class="p">())</span>
         <span class="p">}</span>
@@ -5706,10 +5704,10 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">//     rt.AbortStateMsg(&#34;Invalid Surprise PoSt. Tickets do not meet target.&#34;)
 </span><span class="c1"></span>    <span class="c1">// }
 </span><span class="c1"></span>
-    <span class="nx">randomnessK</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">GetRandomness</span><span class="p">(</span><span class="nx">challengeEpoch</span> <span class="o">-</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">SPC_LOOKBACK_POST</span><span class="p">)</span>
+    <span class="nx">randomnessK</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">GetRandomness</span><span class="p">(</span><span class="nx">challengeEpoch</span> <span class="o">-</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">SPC_LOOKBACK_POST</span><span class="p">)</span>
     <span class="c1">// regenerate randomness used. The PoSt Verification below will fail if
 </span><span class="c1"></span>    <span class="c1">// the same was not used to generate the proof
-</span><span class="c1"></span>    <span class="nx">postRandomness</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">DeriveRandWithMinerAddr</span><span class="p">(</span><span class="nx">filcrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_SurprisePoStChallengeSeed</span><span class="p">,</span> <span class="nx">randomnessK</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrReceiver</span><span class="p">())</span>
+</span><span class="c1"></span>    <span class="nx">postRandomness</span> <span class="o">:=</span> <span class="nx">crypto</span><span class="p">.</span><span class="nf">DeriveRandWithMinerAddr</span><span class="p">(</span><span class="nx">crypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_SurprisePoStChallengeSeed</span><span class="p">,</span> <span class="nx">randomnessK</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrReceiver</span><span class="p">())</span>
 
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 

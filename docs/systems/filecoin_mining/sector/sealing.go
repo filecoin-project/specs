@@ -1,7 +1,5 @@
 package sector
 
-import abi "github.com/filecoin-project/specs/actors/abi"
-
 // NOTE: It's fairly unclear how any of this should interface/cooperate with filcrypto/filproofs.
 // Leaving now to preserve some historical intent for later refactoring.
 
@@ -18,13 +16,3 @@ var SealSeedHash = SHA256
 // 	h := SealSeedHash(buf)
 // 	return SealSeed(h)
 // }
-
-func (cfg *SealInstanceCfg_I) SectorSize() abi.SectorSize {
-	switch cfg.Which() {
-	case SealInstanceCfg_Case_WinStackedDRGCfgV1:
-		{
-			return cfg.As_WinStackedDRGCfgV1().SectorSize()
-		}
-	}
-	panic("TODO")
-}

@@ -582,10 +582,10 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actstate.ActorSta
 	rt._createActor(builtin.AccountActorCodeID, newIdAddr)
 
 	// Initialize account actor substate with it's pubkey address.
-	substate := &acctact.AccountActorState_I{
-		Address_: targetRaw,
+	substate := &acctact.AccountActorState{
+		Address: targetRaw,
 	}
-	rt._saveAccountActorState(newIdAddr, substate)
+	rt._saveAccountActorState(newIdAddr, *substate)
 	act, _ = rt._globalStatePending.GetActor(newIdAddr)
 	return act, newIdAddr
 }
@@ -593,24 +593,24 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actstate.ActorSta
 func (rt *VMContext) _loadInitActorState() initact.InitActorState {
 	initState, ok := rt._globalStatePending.GetActor(builtin.InitActorAddr)
 	util.Assert(ok)
-	var initSubState initact.InitActorState_I
+	var initSubState initact.InitActorState
 	ok = rt.IpldGet(cid.Cid(initState.State()), &initSubState)
 	util.Assert(ok)
-	return &initSubState
+	return initSubState
 }
 
 func (rt *VMContext) _saveInitActorState(state initact.InitActorState) {
 	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
 	// than the receiver.
 	rt._rtAllocGas(gascost.UpdateActorSubstate)
-	rt._updateActorSubstateInternal(builtin.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
+	rt._updateActorSubstateInternal(builtin.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(&state)))
 }
 
 func (rt *VMContext) _saveAccountActorState(address addr.Address, state acctact.AccountActorState) {
 	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
 	// than the receiver.
 	rt._rtAllocGas(gascost.UpdateActorSubstate)
-	rt._updateActorSubstateInternal(address, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
+	rt._updateActorSubstateInternal(address, actor.ActorSubstateCID(rt.IpldPut(state)))
 }
 
 func (rt *VMContext) _sendInternalOutputs(input InvocInput, errSpec ErrorHandlingSpec) (InvocOutput, exitcode.ExitCode) {

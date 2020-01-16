@@ -5189,7 +5189,8 @@ it will be created as an account actor.</p>
 	<span class="nx">initState</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">InitActorAddr</span><span class="p">)</span>
 	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="nx">serialized</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">store</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="nx">cid</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="nx">initState</span><span class="p">.</span><span class="nf">State</span><span class="p">()))</span>
-	<span class="nx">initSubState</span> <span class="o">:=</span> <span class="nx">initact</span><span class="p">.</span><span class="nf">Deserialize_InitActorState_Assert</span><span class="p">(</span><span class="nx">serialized</span><span class="p">)</span>
+	<span class="kd">var</span> <span class="nx">initSubState</span> <span class="nx">initact</span><span class="p">.</span><span class="nx">InitActorState</span>
+	<span class="nx">serde</span><span class="p">.</span><span class="nf">MustDeserialize</span><span class="p">(</span><span class="nx">serialized</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">initSubState</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">initSubState</span><span class="p">.</span><span class="nf">ResolveAddress</span><span class="p">(</span><span class="nx">address</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5407,7 +5408,7 @@ it will be created as an account actor.</p>
 
 <span class="c1">// init is called in Go during initialization of a program.
 </span><span class="c1">// this is an idiomatic way to do this. Implementations should approach this
-</span><span class="c1">// howevery they wish. The point is to initialize a static registry with
+</span><span class="c1">// however they wish. The point is to initialize a static registry with
 </span><span class="c1">// built in pure types that have the code for each actor. Once we have
 </span><span class="c1">// a way to load code from the StateTree, use that instead.
 </span><span class="c1"></span><span class="kd">func</span> <span class="nf">init</span><span class="p">()</span> <span class="p">{</span>
@@ -5417,24 +5418,24 @@ it will be created as an account actor.</p>
 <span class="kd">func</span> <span class="nf">_registerBuiltinActors</span><span class="p">()</span> <span class="p">{</span>
 	<span class="c1">// TODO
 </span><span class="c1"></span>
-	<span class="nx">cron</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">cronact</span><span class="p">.</span><span class="nx">CronActorCode_I</span><span class="p">{}</span>
+	<span class="nx">cron</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">cronact</span><span class="p">.</span><span class="nx">CronActor</span><span class="p">{}</span>
 
-	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">InitActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">initact</span><span class="p">.</span><span class="nx">InitActorCode_I</span><span class="p">{})</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">InitActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">initact</span><span class="p">.</span><span class="nx">InitActor</span><span class="p">{})</span>
 	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">CronActorCodeID</span><span class="p">,</span> <span class="nx">cron</span><span class="p">)</span>
-	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">AccountActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">accact</span><span class="p">.</span><span class="nx">AccountActorCode_I</span><span class="p">{})</span>
-	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StoragePowerActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">spowact</span><span class="p">.</span><span class="nx">StoragePowerActorCode_I</span><span class="p">{})</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">AccountActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">accact</span><span class="p">.</span><span class="nx">AccountActor</span><span class="p">{})</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StoragePowerActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">spowact</span><span class="p">.</span><span class="nx">StoragePowerActor</span><span class="p">{})</span>
 	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMarketActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageMarketActorCode_I</span><span class="p">{})</span>
 
 	<span class="c1">// wire in CRON actions.
 </span><span class="c1"></span>	<span class="c1">// TODO: move this to CronActor&#39;s constructor method
-</span><span class="c1"></span>	<span class="nx">cron</span><span class="p">.</span><span class="nx">Entries_</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Entries_</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">cronact</span><span class="p">.</span><span class="nx">CronTableEntry_I</span><span class="p">{</span>
-		<span class="nx">ToAddr_</span><span class="p">:</span>    <span class="nx">builtin</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
-		<span class="nx">MethodNum_</span><span class="p">:</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_OnEpochTickEnd</span><span class="p">,</span>
+</span><span class="c1"></span>	<span class="nx">cron</span><span class="p">.</span><span class="nx">Entries</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Entries</span><span class="p">,</span> <span class="nx">cronact</span><span class="p">.</span><span class="nx">CronTableEntry</span><span class="p">{</span>
+		<span class="nx">ToAddr</span><span class="p">:</span>    <span class="nx">builtin</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
+		<span class="nx">MethodNum</span><span class="p">:</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_OnEpochTickEnd</span><span class="p">,</span>
 	<span class="p">})</span>
 
-	<span class="nx">cron</span><span class="p">.</span><span class="nx">Entries_</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Entries_</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">cronact</span><span class="p">.</span><span class="nx">CronTableEntry_I</span><span class="p">{</span>
-		<span class="nx">ToAddr_</span><span class="p">:</span>    <span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMarketActorAddr</span><span class="p">,</span>
-		<span class="nx">MethodNum_</span><span class="p">:</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_StorageMarketActor_OnEpochTickEnd</span><span class="p">,</span>
+	<span class="nx">cron</span><span class="p">.</span><span class="nx">Entries</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Entries</span><span class="p">,</span> <span class="nx">cronact</span><span class="p">.</span><span class="nx">CronTableEntry</span><span class="p">{</span>
+		<span class="nx">ToAddr</span><span class="p">:</span>    <span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMarketActorAddr</span><span class="p">,</span>
+		<span class="nx">MethodNum</span><span class="p">:</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_StorageMarketActor_OnEpochTickEnd</span><span class="p">,</span>
 	<span class="p">})</span>
 <span class="p">}</span>
 </code></pre></div>

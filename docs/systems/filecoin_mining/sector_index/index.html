@@ -4770,7 +4770,7 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
-<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
+<span class="kn">import</span> <span class="nx">smarkact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_market&#34;</span>
 
 <span class="c1">// TODO import this from StorageMarket
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorIndex</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4789,7 +4789,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// AddNewDeal is called by StorageMiningSubsystem after the StorageMarket
 </span><span class="c1"></span>    <span class="c1">// has made a deal. AddNewDeal returns an error when:
 </span><span class="c1"></span>    <span class="c1">// - there is no capacity to store more deals and their pieces
-</span><span class="c1"></span>    <span class="nf">AddNewDeal</span><span class="p">(</span><span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="nx">StageDealResponse</span>
+</span><span class="c1"></span>    <span class="nf">AddNewDeal</span><span class="p">(</span><span class="nx">deal</span> <span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="nx">StageDealResponse</span>
 
     <span class="c1">// bring back if needed.
 </span><span class="c1"></span>    <span class="c1">// OnNewTipset(chain Chain, epoch abi.Epoch) struct {}

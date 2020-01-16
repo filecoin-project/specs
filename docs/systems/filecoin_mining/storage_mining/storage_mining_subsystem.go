@@ -4,14 +4,15 @@ import (
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
+	smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
 	sminact "github.com/filecoin-project/specs/actors/builtin/storage_miner"
 	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
+	acrypto "github.com/filecoin-project/specs/actors/crypto"
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	serde "github.com/filecoin-project/specs/actors/serde"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
@@ -71,7 +72,7 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 	return storageMinerAddr, nil
 }
 
-func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
+func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal smarkact.StorageDeal) {
 	sms.SectorIndex().AddNewDeal(deal)
 	// stagedDealResponse := sms.SectorIndex().AddNewDeal(deal)
 	// TODO: way within a node to notify different components
@@ -81,7 +82,7 @@ func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
 	// })
 }
 
-func (sms *StorageMiningSubsystem_I) CommitSectorError() deal.StorageDeal {
+func (sms *StorageMiningSubsystem_I) CommitSectorError() smarkact.StorageDeal {
 	panic("TODO")
 }
 
@@ -122,7 +123,7 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection(currState stateTree.Stat
 	// Randomness for ElectionPoSt
 
 	randomnessK := sms._blockchain().BestChain().GetPoStChallengeRandSeed(sms._blockchain().LatestEpoch())
-	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_ElectionPoStChallengeSeed, randomnessK, sms.Node().Repository().KeyStore().MinerAddress())
+	input := acrypto.DeriveRandWithMinerAddr(acrypto.DomainSeparationTag_ElectionPoStChallengeSeed, randomnessK, sms.Node().Repository().KeyStore().MinerAddress())
 	// Use VRF to generate secret randomness
 	postRandomness := sms.Node().Repository().KeyStore().WorkerKey().Impl().Generate(input).Output()
 
@@ -175,7 +176,7 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness abi.RandomnessS
 	// take the VRFResult of that ticket as input, specifying the personalization (see data structures)
 	// append the miner actor address for the miner generifying this in order to prevent miners with the same
 	// worker keys from generating the same randomness (given the VRF)
-	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_TicketProduction, randomness, minerActorAddr)
+	input := acrypto.DeriveRandWithMinerAddr(acrypto.DomainSeparationTag_TicketProduction, randomness, minerActorAddr)
 
 	// run through VRF
 	vrfRes := sms.Node().Repository().KeyStore().WorkerKey().Impl().Generate(input)
@@ -222,11 +223,8 @@ func (sms *StorageMiningSubsystem_I) _getStoragePowerActorState(stateTree stateT
 	// fix conversion to bytes
 	util.IMPL_TODO(substate)
 	var serializedSubstate util.Serialization
-	st, err := spowact.Deserialize_StoragePowerActorState(serializedSubstate)
-
-	if err == nil {
-		panic("Deserialization error")
-	}
+	var st spowact.StoragePowerActorState
+	serde.MustDeserialize(serializedSubstate, &st)
 	return st
 }
 
@@ -234,7 +232,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 	sma := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
 	spa := sms._getStoragePowerActorState(header.ParentState())
 
-	pow, found := spa.PowerTable()[header.Miner()]
+	pow, found := spa.PowerTable[header.Miner()]
 	if !found {
 		return false
 	}
@@ -263,7 +261,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 	// 4. Verify appropriate randomness
 	// TODO: fix away from BestChain()... every block should track its own chain up to its own production.
 	randomness := sms._blockchain().BestChain().GetPoStChallengeRandSeed(header.Epoch())
-	input := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_ElectionPoStChallengeSeed, randomness, header.Miner())
+	input := acrypto.DeriveRandWithMinerAddr(acrypto.DomainSeparationTag_ElectionPoStChallengeSeed, randomness, header.Miner())
 
 	postRand := &filcrypto.VRFResult_I{
 		Output_: onChainInfo.Randomness,
@@ -330,7 +328,7 @@ func (sms *StorageMiningSubsystem_I) _trySurprisePoSt(currState stateTree.StateT
 	challEpoch := sma.PoStState().As_Challenged().SurpriseChallengeEpoch()
 	randomnessK := sms._blockchain().BestChain().GetPoStChallengeRandSeed(challEpoch)
 	// unlike with ElectionPoSt no need to use a VRF
-	postRandomness := filcrypto.DeriveRandWithMinerAddr(filcrypto.DomainSeparationTag_SurprisePoStChallengeSeed, randomnessK, sms.Node().Repository().KeyStore().MinerAddress())
+	postRandomness := acrypto.DeriveRandWithMinerAddr(acrypto.DomainSeparationTag_SurprisePoStChallengeSeed, randomnessK, sms.Node().Repository().KeyStore().MinerAddress())
 
 	// TODO: add how sectors are actually stored in the SMS proving set
 	util.TODO()

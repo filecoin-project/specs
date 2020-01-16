@@ -4772,20 +4772,20 @@ https://github.com/alex-shpak/hugo-book
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
-<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal&#34;</span>
 <span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
 <span class="kn">import</span> <span class="nx">dt</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/data_transfer&#34;</span>
 <span class="kn">import</span> <span class="nx">peer</span> <span class="s">&#34;github.com/libp2p/go-libp2p-core/peer&#34;</span>
 <span class="kn">import</span> <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
+<span class="kn">import</span> <span class="nx">smarkact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_market&#34;</span>
 
 <span class="c1">// ProviderLocalDealInfo is the information that a storage provider tracks locally about
 </span><span class="c1">// a deal. It contains not only the storage proposal but the state of the deal
 </span><span class="c1">// as it moves throught the system. It is persisted to local storage and updated 
 </span><span class="c1">// as the deal goes through stages leading up to its being published (and afterward)
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ProviderLocalDealInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ProposalCid</span>   <span class="o">&amp;</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
-    <span class="nx">Proposal</span>      <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
+    <span class="nx">ProposalCid</span>   <span class="o">&amp;</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
+    <span class="nx">Proposal</span>      <span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
     <span class="nx">MinerPeerID</span>   <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
     <span class="nx">ClientPeerID</span>  <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
     <span class="nx">Status</span>        <span class="nx">StorageDealStatus</span>
@@ -4804,7 +4804,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">ListAsks</span><span class="p">(</span><span class="nx">addrress</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">[</span><span class="nx">StorageAsk</span><span class="p">]</span>
 
     <span class="c1">// ListDeals lists on-chain deals associated with this provider
-</span><span class="c1"></span>    <span class="nf">ListDeals</span><span class="p">()</span>            <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">],</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">ListDeals</span><span class="p">()</span>            <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">],</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// ListIncompleteDeals lists deals that are in progress or rejected
 </span><span class="c1"></span>    <span class="nf">ListIncompleteDeals</span><span class="p">()</span>  <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">ProviderLocalDealInfo</span><span class="p">],</span> <span class="kt">error</span><span class="p">)</span>

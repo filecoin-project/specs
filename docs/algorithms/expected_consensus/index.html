@@ -4998,6 +4998,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="p">(</span>
 	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
 	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
+	<span class="nx">acrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/crypto&#34;</span>
 	<span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
@@ -5007,13 +5008,12 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">tix</span> <span class="o">*</span><span class="nx">Ticket_I</span><span class="p">)</span> <span class="nf">Verify</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-
-	<span class="nx">input</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">DeriveRandWithMinerAddr</span><span class="p">(</span><span class="nx">filcrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_TicketProduction</span><span class="p">,</span> <span class="nx">randomness</span><span class="p">,</span> <span class="nx">minerActorAddr</span><span class="p">)</span>
+	<span class="nx">input</span> <span class="o">:=</span> <span class="nx">acrypto</span><span class="p">.</span><span class="nf">DeriveRandWithMinerAddr</span><span class="p">(</span><span class="nx">acrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_TicketProduction</span><span class="p">,</span> <span class="nx">randomness</span><span class="p">,</span> <span class="nx">minerActorAddr</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">tix</span><span class="p">.</span><span class="nx">VRFResult_</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">pk</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">tix</span> <span class="o">*</span><span class="nx">Ticket_I</span><span class="p">)</span> <span class="nf">DrawRandomness</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">DeriveRandWithEpoch</span><span class="p">(</span><span class="nx">filcrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_TicketDrawing</span><span class="p">,</span> <span class="nx">tix</span><span class="p">.</span><span class="nf">Output</span><span class="p">(),</span> <span class="nb">int</span><span class="p">(</span><span class="nx">epoch</span><span class="p">))</span>
+	<span class="k">return</span> <span class="nx">acrypto</span><span class="p">.</span><span class="nf">DeriveRandWithEpoch</span><span class="p">(</span><span class="nx">acrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_TicketDrawing</span><span class="p">,</span> <span class="nx">tix</span><span class="p">.</span><span class="nf">Output</span><span class="p">(),</span> <span class="nb">int</span><span class="p">(</span><span class="nx">epoch</span><span class="p">))</span>
 <span class="p">}</span>
 </code></pre></div>
 

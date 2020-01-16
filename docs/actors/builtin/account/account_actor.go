@@ -1,6 +1,7 @@
 package account
 
 import (
+	addr "github.com/filecoin-project/go-address"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	cid "github.com/ipfs/go-cid"
@@ -8,12 +9,18 @@ import (
 
 type InvocOutput = vmr.InvocOutput
 
-func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
+type AccountActor struct{}
+
+func (a *AccountActor) Constructor(rt vmr.Runtime) InvocOutput {
 	// Nothing. intentionally left blank.
 	rt.ValidateImmediateCallerIs(builtin.SystemActorAddr)
 	return rt.SuccessReturn()
 }
 
-func (st *AccountActorState_I) CID() cid.Cid {
+type AccountActorState struct {
+	Address addr.Address
+}
+
+func (AccountActorState) CID() cid.Cid {
 	panic("TODO")
 }

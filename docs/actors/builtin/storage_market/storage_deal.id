@@ -1,9 +1,6 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
 import addr "github.com/filecoin-project/go-address"
-import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-
-type DealWeight int  // should be BigInt
+import acrypto "github.com/filecoin-project/specs/actors/crypto"
 
 // Note: Deal Collateral is only released and returned to clients and miners
 // when the storage deal stops counting towards power. In the current iteration,
@@ -18,7 +15,7 @@ type StorageDealProposal struct {
     PieceSize                     abi.PieceSize
     Client                        addr.Address
     Provider                      addr.Address
-    ClientSignature               filcrypto.Signature
+    ClientSignature               acrypto.Signature
 
     // Nominal start epoch. Deal payment is linear between StartEpoch and EndEpoch,
     // with total amount StoragePricePerEpoch * (EndEpoch - StartEpoch).
@@ -40,13 +37,11 @@ type StorageDealProposal struct {
 }
 
 // Everything in this struct will go on chain
-// We are enforcing that StorageProvider calls PublishStorageDeal to get back a StorageDeal struct
-// Provider's signature is implicit in the onchain call
+// Provider's signature is implicit in the message containing this structure.
 type StorageDeal struct {
-    Proposal()      StorageDealProposal  // can extract proposal from the message
-    PublishMessage  msg.SignedMessage  // counter signature is implicit in the message
+    Proposal  StorageDealProposal
 
-    CID()           &StorageDeal
+    CID()     &StorageDeal
 }
 
 type OnChainDeal struct {

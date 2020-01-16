@@ -16,7 +16,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/sector/posting/</guid>
-      <description> import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; // New proof ProofInstances can add new cfg types if needed. type PoStInstanceCfg union { PoStCfgV1 PoStCfgVBogus } type PoStCfgV1 struct { Type PoStType Nodes UInt Partitions UInt LeafChallengeCount UInt ChallengeRangeSize UInt } type PoStCfgVBogus struct { Type PoStType Nodes UInt Partitions UInt QuantumMonkeyBrains UInt } type PoStType enum { ElectionPoSt SurprisePoSt } type PoStWitness struct { Candidates [abi.PoStCandidate] }  </description>
+      <description> //import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34;  // type PoStWitness struct { // Candidates [abi.PoStCandidate] // }  </description>
     </item>
     
     <item>
@@ -25,7 +25,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/sector/sealing/</guid>
-      <description>import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import file &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; type Path struct {} // TODO  // SealSeed is unique to each Sector // SealSeed is: // SealSeedHash(MinerID, SectorNumber, SealRandomness, abi.UnsealedSectorCID) type SealSeed Bytes // New proof ProofInstances can add new cfg types if needed. type SealInstanceCfg union { WinStackedDRGCfgV1 } type WinStackedDRGCfgV1 struct { SectorSize abi.SectorSize WindowCount UInt } // SealCommitment is the information kept in the state tree about a sector.</description>
+      <description>import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import file &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; type Path struct {} // TODO  // SealSeed is unique to each Sector // SealSeed is: // SealSeedHash(MinerID, SectorNumber, SealRandomness, abi.UnsealedSectorCID) type SealSeed Bytes // SealCommitment is the information kept in the state tree about a sector. // SealCommitment is a subset of OnChainSealVerifyInfo. type SealCommitment struct { SealedCID abi.SealedSectorCID // CommR  DealIDs abi.DealIDs Expiration abi.ChainEpoch } // PersistentProofAux is meta data required to generate certain proofs // for a sector, for example PoSt.</description>
     </item>
     
     <item>

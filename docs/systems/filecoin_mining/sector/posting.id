@@ -1,31 +1,5 @@
-import abi "github.com/filecoin-project/specs/actors/abi"
+//import abi "github.com/filecoin-project/specs/actors/abi"
 
-// New proof ProofInstances can add new cfg types if needed.
-type PoStInstanceCfg union {
-    PoStCfgV1
-    PoStCfgVBogus
-}
-
-type PoStCfgV1 struct {
-    Type                PoStType
-    Nodes               UInt
-    Partitions          UInt
-    LeafChallengeCount  UInt
-    ChallengeRangeSize  UInt
-}
-
-type PoStCfgVBogus struct {
-    Type                 PoStType
-    Nodes                UInt
-    Partitions           UInt
-    QuantumMonkeyBrains  UInt
-}
-
-type PoStType enum {
-    ElectionPoSt
-    SurprisePoSt
-}
-
-type PoStWitness struct {
-    Candidates [abi.PoStCandidate]
-}
+// type PoStWitness struct {
+//     Candidates [abi.PoStCandidate]
+// }

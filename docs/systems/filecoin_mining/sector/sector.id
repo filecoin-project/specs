@@ -1,6 +1,6 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
+import smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
 
 type Bytes32 Bytes
 type Commitment Bytes32  // TODO
@@ -20,7 +20,7 @@ type SectorInDetail struct {
 
     Unsealed struct {
         CID     abi.UnsealedSectorCID
-        Deals   [deal.StorageDeal]
+        Deals   [smarkact.StorageDeal]
         Pieces  [piece.Piece]
         // Pieces Tree<Piece> // some tree for proofs
         Bytes
@@ -49,7 +49,7 @@ type UnsealedSectorInfo struct {
     Size         abi.SectorSize
     PieceCount   UVarint  // number of pieces in this sector (can get it from len(Pieces) too)
     Pieces       [piece.PieceInfo]  // wont get externalized easy, -- it's big
-    // Deals       [deal.StorageDeal]
+    // Deals       [smarkact.StorageDeal]
 }
 
 // SealedSectorInfo keeps around information about a sector that has been sealed.
@@ -57,32 +57,4 @@ type SealedSectorInfo struct {
     SealedCID  abi.SealedSectorCID
     Size       abi.SectorSize
     SealArgs   SealArguments
-}
-
-type ProofRegistry {abi.RegisteredProof: ProofInstance}
-
-type ProofInstance struct {
-    ID           abi.RegisteredProof
-    Type         ProofType
-    Algorithm    abi.ProofAlgorithm
-    CircuitType  ConcreteCircuit
-    Partitions   UInt
-    Cfg          ProofCfg
-}
-
-type ProofCfg union {
-    SealCfg  SealInstanceCfg
-    PoStCfg  PoStInstanceCfg
-}
-
-type ProofType enum {
-    SealProof
-    PoStProof
-}
-
-type ConcreteCircuit struct {
-    // Name must be globally unique. It will be a hash derived from semantic content of circuit.
-    Name                      string
-    GrothParameterFileName()  string
-    VerifyingKeyFileName()    string
 }

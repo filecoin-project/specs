@@ -3,11 +3,8 @@ package storage_market
 import (
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
-	vmr "github.com/filecoin-project/specs/actors/runtime"
 	indices "github.com/filecoin-project/specs/actors/runtime/indices"
 	actor_util "github.com/filecoin-project/specs/actors/util"
-	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 )
 
 const epochUndefined = abi.ChainEpoch(-1)
@@ -136,7 +133,7 @@ func (st *StorageMarketActorState_I) _processDealInitTimedOut(dealID abi.DealID)
 
 	st._unlockBalance(dealP.Client(), dealP.ClientBalanceRequirement())
 
-	amountSlashed = indices.StorageDeal_ProviderInitTimedOutSlashAmount(deal)
+	amountSlashed = indices.StorageDeal_ProviderInitTimedOutSlashAmount(deal.Deal().Proposal().ProviderCollateral())
 	amountRemaining := dealP.ProviderBalanceRequirement() - amountSlashed
 
 	st._slashBalance(dealP.Provider(), amountSlashed)
@@ -158,7 +155,7 @@ func (st *StorageMarketActorState_I) _processDealExpired(dealID abi.DealID) {
 	st._deleteDeal(dealID)
 }
 
-func (st *StorageMarketActorState_I) _generateStorageDealID(storageDeal deal.StorageDeal) abi.DealID {
+func (st *StorageMarketActorState_I) _generateStorageDealID(storageDeal StorageDeal) abi.DealID {
 	ret := st.NextID()
 	st.NextID_ = st.NextID_ + abi.DealID(1)
 	return ret
@@ -267,7 +264,7 @@ func (st *StorageMarketActorState_I) _slashBalance(addr addr.Address, slashAmoun
 // State utility functions
 ////////////////////////////////////////////////////////////////////////////////
 
-func _rtDealProposalIsInternallyValid(rt Runtime, dealP deal.StorageDealProposal) bool {
+func _rtDealProposalIsInternallyValid(rt Runtime, dealP StorageDealProposal) bool {
 	if dealP.EndEpoch() <= dealP.StartEpoch() {
 		return false
 	}
@@ -277,17 +274,12 @@ func _rtDealProposalIsInternallyValid(rt Runtime, dealP deal.StorageDealProposal
 	}
 
 	IMPL_FINISH()
-	// Get signature public key of client account actor.
-	var pk filcrypto.PublicKey
-
-	IMPL_FINISH()
 	// Determine which subset of DealProposal to use as the message to be signed by the client.
-	var m filcrypto.Message
+	var m []byte
 
 	// Note: we do not verify the provider signature here, since this is implicit in the
 	// authenticity of the on-chain message publishing the deal.
-	sig := dealP.ClientSignature()
-	sigVerified := vmr.RT_VerifySignature(rt, pk, sig, m)
+	sigVerified := rt.Syscalls().VerifySignature(dealP.ClientSignature(), dealP.Client(), m)
 	if !sigVerified {
 		return false
 	}
@@ -295,7 +287,7 @@ func _rtDealProposalIsInternallyValid(rt Runtime, dealP deal.StorageDealProposal
 	return true
 }
 
-func _dealGetPaymentRemaining(deal deal.OnChainDeal, epoch abi.ChainEpoch) abi.TokenAmount {
+func _dealGetPaymentRemaining(deal OnChainDeal, epoch abi.ChainEpoch) abi.TokenAmount {
 	dealP := deal.Deal().Proposal()
 	Assert(epoch <= dealP.EndEpoch())
 
@@ -307,7 +299,7 @@ func _dealGetPaymentRemaining(deal deal.OnChainDeal, epoch abi.ChainEpoch) abi.T
 }
 
 func (st *StorageMarketActorState_I) _getOnChainDeal(dealID abi.DealID) (
-	deal deal.OnChainDeal, dealP deal.StorageDealProposal, ok bool) {
+	deal OnChainDeal, dealP StorageDealProposal, ok bool) {
 
 	var found bool
 	deal, found = st.Deals()[dealID]
@@ -321,7 +313,7 @@ func (st *StorageMarketActorState_I) _getOnChainDeal(dealID abi.DealID) (
 }
 
 func (st *StorageMarketActorState_I) _getOnChainDealAssert(dealID abi.DealID) (
-	deal deal.OnChainDeal, dealP deal.StorageDealProposal) {
+	deal OnChainDeal, dealP StorageDealProposal) {
 
 	var ok bool
 	deal, dealP, ok = st._getOnChainDeal(dealID)

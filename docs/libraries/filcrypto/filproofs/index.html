@@ -4891,7 +4891,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// invariant: DRGCfg.Nodes == ExpanderGraphCfg.Nodes
 </span><span class="c1"></span>    <span class="nx">Curve</span>                   <span class="nx">EllipticCurve</span>
     <span class="nx">RegisteredProof</span>         <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof</span>
-    <span class="nx">Cfg</span>                     <span class="nx">sector</span><span class="p">.</span><span class="nx">SealInstanceCfg</span>
+    <span class="nx">Cfg</span>                     <span class="nx">SealInstanceCfg</span>
 
     <span class="nf">Drg</span><span class="p">()</span>                   <span class="nx">DRG</span>
     <span class="nf">Expander</span><span class="p">()</span>              <span class="nx">ExpanderGraph</span>
@@ -4957,11 +4957,11 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SealVerifier</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">SealCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealInstanceCfg</span>
+    <span class="nx">SealCfg</span> <span class="nx">SealInstanceCfg</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">PoStVerifier</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PoStCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStInstanceCfg</span>
+    <span class="nx">PoStCfg</span> <span class="nx">PoStInstanceCfg</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">DRGCfg</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -5030,6 +5030,78 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">Root</span><span class="p">()</span>       <span class="nx">Commitment</span>
     <span class="nf">Verify</span><span class="p">(</span><span class="nx">root</span> <span class="nx">Bytes</span><span class="p">,</span> <span class="nx">challenge</span> <span class="nx">UInt</span><span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ProofRegistry</span> <span class="p">{</span><span class="nx">UInt</span><span class="p">:</span> <span class="nx">ProofInstance</span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ProofInstance</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// FIXME: move some or all of these types into filproofs.
+</span><span class="c1"></span>    <span class="nx">ID</span>           <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof</span>
+    <span class="nx">Type</span>         <span class="nx">ProofType</span>
+    <span class="nx">Algorithm</span>    <span class="nx">ProofAlgorithm</span>
+    <span class="nx">CircuitType</span>  <span class="nx">ConcreteCircuit</span>
+    <span class="nx">Partitions</span>   <span class="nx">UInt</span>
+    <span class="nx">Cfg</span>          <span class="nx">ProofCfg</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ConcreteCircuit</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// Name must be globally unique. It will be a hash derived from semantic content of circuit.
+</span><span class="c1"></span>    <span class="nx">Name</span>                      <span class="kt">string</span>
+    <span class="nf">GrothParameterFileName</span><span class="p">()</span>  <span class="kt">string</span>
+    <span class="nf">VerifyingKeyFileName</span><span class="p">()</span>    <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ProofCfg</span> <span class="nx">union</span> <span class="p">{</span>
+    <span class="nx">SealCfg</span>  <span class="nx">SealInstanceCfg</span>
+    <span class="nx">PoStCfg</span>  <span class="nx">PoStInstanceCfg</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ProofType</span> <span class="nx">enum</span> <span class="p">{</span>
+    <span class="nx">SealProof</span>
+    <span class="nx">PoStProof</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ProofAlgorithm</span> <span class="nx">enum</span> <span class="p">{</span>
+    <span class="nx">StackedDRGSeal</span>
+    <span class="nx">WinStackedDRGSeal</span>
+    <span class="nx">StackedDRGPoSt</span>
+    <span class="nx">WinStackedDRGPoSt</span>
+<span class="p">}</span>
+
+<span class="c1">// New proof ProofInstances can add new cfg types if needed.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealInstanceCfg</span> <span class="nx">union</span> <span class="p">{</span>
+    <span class="nx">WinStackedDRGCfgV1</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">WinStackedDRGCfgV1</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">SectorSize</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span>
+    <span class="nx">WindowCount</span>  <span class="nx">UInt</span>
+<span class="p">}</span>
+
+<span class="c1">// New proof ProofInstances can add new cfg types if needed.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStInstanceCfg</span> <span class="nx">union</span> <span class="p">{</span>
+    <span class="nx">PoStCfgV1</span>
+    <span class="nx">PoStCfgVBogus</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">PoStCfgV1</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Type</span>                <span class="nx">PoStType</span>
+    <span class="nx">Nodes</span>               <span class="nx">UInt</span>
+    <span class="nx">Partitions</span>          <span class="nx">UInt</span>
+    <span class="nx">LeafChallengeCount</span>  <span class="nx">UInt</span>
+    <span class="nx">ChallengeRangeSize</span>  <span class="nx">UInt</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">PoStCfgVBogus</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Type</span>                 <span class="nx">PoStType</span>
+    <span class="nx">Nodes</span>                <span class="nx">UInt</span>
+    <span class="nx">Partitions</span>           <span class="nx">UInt</span>
+    <span class="nx">QuantumMonkeyBrains</span>  <span class="nx">UInt</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">PoStType</span> <span class="nx">enum</span> <span class="p">{</span>
+    <span class="nx">ElectionPoSt</span>
+    <span class="nx">SurprisePoSt</span>
+<span class="p">}</span>
 </code></pre></div>
 
 
@@ -5081,6 +5153,9 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">PieceInfo</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceInfo</span>
 <span class="kd">type</span> <span class="nx">Label</span> <span class="nx">Bytes32</span>
 <span class="kd">type</span> <span class="nx">Commitment</span> <span class="p">=</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span>
+<span class="kd">type</span> <span class="nx">PrivatePostCandidateProof</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PrivatePoStCandidateProof</span>
+<span class="kd">type</span> <span class="nx">SectorSize</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span>
+<span class="kd">type</span> <span class="nx">RegisteredProof</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof</span>
 
 <span class="kd">const</span> <span class="nx">WRAPPER_LAYER_WINDOW_INDEX</span> <span class="p">=</span> <span class="o">-</span><span class="mi">1</span>
 
@@ -5092,41 +5167,95 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">const</span> <span class="nx">GIB_32</span> <span class="p">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span>
 
-<span class="kd">func</span> <span class="nf">PoStCfg</span><span class="p">(</span><span class="nx">pType</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStType</span><span class="p">,</span> <span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">partitions</span> <span class="nx">UInt</span><span class="p">)</span> <span class="o">*</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStInstanceCfg_I</span> <span class="p">{</span>
-	<span class="nx">nodes</span> <span class="o">:=</span> <span class="nf">UInt</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="o">/</span> <span class="nx">NODE_SIZE</span><span class="p">)</span>
+<span class="kd">var</span> <span class="nx">PROOFS</span> <span class="nx">ProofRegistry</span> <span class="p">=</span> <span class="nf">ProofRegistry</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="nx">util</span><span class="p">.</span><span class="nx">UInt</span><span class="p">]</span><span class="nx">ProofInstance</span><span class="p">{</span><span class="nx">util</span><span class="p">.</span><span class="nf">UInt</span><span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof_WinStackedDRG32GiBSeal</span><span class="p">):</span> <span class="o">&amp;</span><span class="nx">ProofInstance_I</span><span class="p">{</span>
+	<span class="nx">ID_</span><span class="p">:</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof_WinStackedDRG32GiBSeal</span><span class="p">,</span>
+	<span class="nx">Type_</span><span class="p">:</span> <span class="nx">ProofType_SealProof</span><span class="p">,</span>
+	<span class="nx">CircuitType_</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ConcreteCircuit_I</span><span class="p">{</span>
+		<span class="nx">Name_</span><span class="p">:</span> <span class="s">&#34;HASHOFCIRCUITPARAMETERS1&#34;</span><span class="p">,</span>
+	<span class="p">},</span>
+<span class="p">},</span>
+	<span class="nx">util</span><span class="p">.</span><span class="nf">UInt</span><span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof_WinStackedDRG32GiBPoSt</span><span class="p">):</span> <span class="o">&amp;</span><span class="nx">ProofInstance_I</span><span class="p">{</span>
+		<span class="nx">ID_</span><span class="p">:</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof_WinStackedDRG32GiBPoSt</span><span class="p">,</span>
+		<span class="nx">Type_</span><span class="p">:</span> <span class="nx">ProofType_PoStProof</span><span class="p">,</span>
+		<span class="nx">CircuitType_</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ConcreteCircuit_I</span><span class="p">{</span>
+			<span class="nx">Name_</span><span class="p">:</span> <span class="s">&#34;HASHOFCIRCUITPARAMETERS2&#34;</span><span class="p">,</span>
+		<span class="p">},</span>
+		<span class="nx">Cfg_</span><span class="p">:</span> <span class="nf">ProofCfg_Make_PoStCfg</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">PoStInstanceCfg_I</span><span class="p">{}),</span>
+		<span class="c1">// FIXME: integrate
+</span><span class="c1"></span>		<span class="c1">// return sector.PoStInstanceCfg_Make_PoStCfgV1(&amp;sector.PoStCfgV1_I{
+</span><span class="c1"></span>		<span class="c1">// 	Type_:               pType,
+</span><span class="c1"></span>		<span class="c1">// 	Nodes_:              nodes,
+</span><span class="c1"></span>		<span class="c1">// 	Partitions_:         partitions,
+</span><span class="c1"></span>		<span class="c1">// 	LeafChallengeCount_: POST_LEAF_CHALLENGE_COUNT,
+</span><span class="c1"></span>		<span class="c1">// 	ChallengeRangeSize_: POST_CHALLENGE_RANGE_SIZE,
+</span><span class="c1"></span>		<span class="c1">// }).Impl()
+</span><span class="c1"></span>
+	<span class="p">},</span>
+	<span class="nx">util</span><span class="p">.</span><span class="nf">UInt</span><span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof_StackedDRG32GiBSeal</span><span class="p">):</span> <span class="o">&amp;</span><span class="nx">ProofInstance_I</span><span class="p">{</span>
+		<span class="nx">ID_</span><span class="p">:</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof_StackedDRG32GiBSeal</span><span class="p">,</span>
+		<span class="nx">Type_</span><span class="p">:</span> <span class="nx">ProofType_SealProof</span><span class="p">,</span>
+		<span class="nx">CircuitType_</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ConcreteCircuit_I</span><span class="p">{</span>
+			<span class="nx">Name_</span><span class="p">:</span> <span class="s">&#34;HASHOFCIRCUITPARAMETERS3&#34;</span><span class="p">,</span>
+		<span class="p">},</span>
+	<span class="p">},</span>
+	<span class="nx">util</span><span class="p">.</span><span class="nf">UInt</span><span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof_StackedDRG32GiBPoSt</span><span class="p">):</span> <span class="o">&amp;</span><span class="nx">ProofInstance_I</span><span class="p">{</span>
+		<span class="nx">ID_</span><span class="p">:</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof_StackedDRG32GiBPoSt</span><span class="p">,</span>
+		<span class="nx">Type_</span><span class="p">:</span> <span class="nx">ProofType_PoStProof</span><span class="p">,</span>
+		<span class="nx">CircuitType_</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ConcreteCircuit_I</span><span class="p">{</span>
+			<span class="nx">Name_</span><span class="p">:</span> <span class="s">&#34;HASHOFCIRCUITPARAMETERS4&#34;</span><span class="p">,</span>
+		<span class="p">},</span>
+	<span class="p">},</span>
+<span class="p">})</span>
 
-	<span class="k">return</span> <span class="nx">sector</span><span class="p">.</span><span class="nf">PoStInstanceCfg_Make_PoStCfgV1</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfgV1_I</span><span class="p">{</span>
-		<span class="nx">Type_</span><span class="p">:</span>               <span class="nx">pType</span><span class="p">,</span>
-		<span class="nx">Nodes_</span><span class="p">:</span>              <span class="nx">nodes</span><span class="p">,</span>
-		<span class="nx">Partitions_</span><span class="p">:</span>         <span class="nx">partitions</span><span class="p">,</span>
-		<span class="nx">LeafChallengeCount_</span><span class="p">:</span> <span class="nx">POST_LEAF_CHALLENGE_COUNT</span><span class="p">,</span>
-		<span class="nx">ChallengeRangeSize_</span><span class="p">:</span> <span class="nx">POST_CHALLENGE_RANGE_SIZE</span><span class="p">,</span>
-	<span class="p">}).</span><span class="nf">Impl</span><span class="p">()</span>
+<span class="kd">func</span> <span class="nf">RegisteredProofInstance</span><span class="p">(</span><span class="nx">r</span> <span class="nx">RegisteredProof</span><span class="p">)</span> <span class="nx">ProofInstance</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">PROOFS</span><span class="p">[</span><span class="nx">util</span><span class="p">.</span><span class="nf">UInt</span><span class="p">(</span><span class="nx">r</span><span class="p">)]</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">MakeSealVerifier</span><span class="p">(</span><span class="nx">cfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealInstanceCfg</span><span class="p">)</span> <span class="o">*</span><span class="nx">SealVerifier_I</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">ConcreteCircuit_I</span><span class="p">)</span> <span class="nf">GrothParameterFileName</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">c</span><span class="p">.</span><span class="nf">Name</span><span class="p">()</span> <span class="o">+</span> <span class="s">&#34;.params&#34;</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">ConcreteCircuit_I</span><span class="p">)</span> <span class="nf">VerifyingKeyFileName</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">c</span><span class="p">.</span><span class="nf">Name</span><span class="p">()</span> <span class="o">+</span> <span class="s">&#34;.vk&#34;</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">cfg</span> <span class="o">*</span><span class="nx">SealInstanceCfg_I</span><span class="p">)</span> <span class="nf">SectorSize</span><span class="p">()</span> <span class="nx">SectorSize</span> <span class="p">{</span>
+	<span class="k">switch</span> <span class="nx">cfg</span><span class="p">.</span><span class="nf">Which</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">case</span> <span class="nx">SealInstanceCfg_Case_WinStackedDRGCfgV1</span><span class="p">:</span>
+		<span class="p">{</span>
+			<span class="k">return</span> <span class="nx">cfg</span><span class="p">.</span><span class="nf">As_WinStackedDRGCfgV1</span><span class="p">().</span><span class="nf">SectorSize</span><span class="p">()</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">PoStCfg</span><span class="p">(</span><span class="nx">pType</span> <span class="nx">PoStType</span><span class="p">,</span> <span class="nx">sectorSize</span> <span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">partitions</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">RegisteredProof</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof_WinStackedDRG32GiBPoSt</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">MakeSealVerifier</span><span class="p">(</span><span class="nx">registeredProof</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof</span><span class="p">)</span> <span class="o">*</span><span class="nx">SealVerifier_I</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">SealVerifier_I</span><span class="p">{</span>
-		<span class="nx">SealCfg_</span><span class="p">:</span> <span class="nx">cfg</span><span class="p">,</span>
+		<span class="nx">SealCfg_</span><span class="p">:</span> <span class="nf">RegisteredProofInstance</span><span class="p">(</span><span class="nx">registeredProof</span><span class="p">).</span><span class="nf">Cfg</span><span class="p">().</span><span class="nf">As_SealCfg</span><span class="p">(),</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">SurprisePoStCfg</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">)</span> <span class="o">*</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStInstanceCfg_I</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nf">PoStCfg</span><span class="p">(</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStType_SurprisePoSt</span><span class="p">,</span> <span class="nx">sectorSize</span><span class="p">,</span> <span class="nx">SURPRISE_POST_PARTITIONS</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">SurprisePoStCfg</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">SectorSize</span><span class="p">)</span> <span class="nx">RegisteredProof</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nf">PoStCfg</span><span class="p">(</span><span class="nx">PoStType_SurprisePoSt</span><span class="p">,</span> <span class="nx">sectorSize</span><span class="p">,</span> <span class="nx">SURPRISE_POST_PARTITIONS</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">ElectionPoStCfg</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">)</span> <span class="o">*</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStInstanceCfg_I</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nf">PoStCfg</span><span class="p">(</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStType_ElectionPoSt</span><span class="p">,</span> <span class="nx">sectorSize</span><span class="p">,</span> <span class="nx">ELECTION_POST_PARTITIONS</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">ElectionPoStCfg</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">SectorSize</span><span class="p">)</span> <span class="nx">RegisteredProof</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nf">PoStCfg</span><span class="p">(</span><span class="nx">PoStType_ElectionPoSt</span><span class="p">,</span> <span class="nx">sectorSize</span><span class="p">,</span> <span class="nx">ELECTION_POST_PARTITIONS</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">MakeElectionPoStVerifier</span><span class="p">(</span><span class="nx">cfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStInstanceCfg</span><span class="p">)</span> <span class="o">*</span><span class="nx">PoStVerifier_I</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">MakeElectionPoStVerifier</span><span class="p">(</span><span class="nx">registeredProof</span> <span class="nx">RegisteredProof</span><span class="p">)</span> <span class="o">*</span><span class="nx">PoStVerifier_I</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">PoStVerifier_I</span><span class="p">{</span>
-		<span class="nx">PoStCfg_</span><span class="p">:</span> <span class="nx">cfg</span><span class="p">,</span>
+		<span class="nx">PoStCfg_</span><span class="p">:</span> <span class="nf">RegisteredProofInstance</span><span class="p">(</span><span class="nx">registeredProof</span><span class="p">).</span><span class="nf">Cfg</span><span class="p">().</span><span class="nf">As_PoStCfg</span><span class="p">(),</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">MakeSurprisePoStVerifier</span><span class="p">(</span><span class="nx">cfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStInstanceCfg</span><span class="p">)</span> <span class="o">*</span><span class="nx">PoStVerifier_I</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">MakeSurprisePoStVerifier</span><span class="p">(</span><span class="nx">registeredProof</span> <span class="nx">RegisteredProof</span><span class="p">)</span> <span class="o">*</span><span class="nx">PoStVerifier_I</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">PoStVerifier_I</span><span class="p">{</span>
-		<span class="nx">PoStCfg_</span><span class="p">:</span> <span class="nx">cfg</span><span class="p">,</span>
+		<span class="nx">PoStCfg_</span><span class="p">:</span> <span class="nf">RegisteredProofInstance</span><span class="p">(</span><span class="nx">registeredProof</span><span class="p">).</span><span class="nf">Cfg</span><span class="p">().</span><span class="nf">As_PoStCfg</span><span class="p">(),</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
@@ -5539,7 +5668,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">switch</span> <span class="nx">svi</span><span class="p">.</span><span class="nx">OnChain</span><span class="p">.</span><span class="nx">RegisteredProof</span> <span class="p">{</span>
 	<span class="k">case</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof_WinStackedDRG32GiBSeal</span><span class="p">:</span>
 		<span class="p">{</span>
-			<span class="nx">sdr</span> <span class="o">:=</span> <span class="nf">WinSDRParams</span><span class="p">(</span><span class="nx">sector</span><span class="p">.</span><span class="nf">RegisteredProofInstance</span><span class="p">(</span><span class="nx">svi</span><span class="p">.</span><span class="nx">OnChain</span><span class="p">.</span><span class="nx">RegisteredProof</span><span class="p">).</span><span class="nf">Cfg</span><span class="p">().</span><span class="nf">As_SealCfg</span><span class="p">())</span>
+			<span class="nx">sdr</span> <span class="o">:=</span> <span class="nf">WinSDRParams</span><span class="p">(</span><span class="nx">svi</span><span class="p">.</span><span class="nx">OnChain</span><span class="p">.</span><span class="nx">RegisteredProof</span><span class="p">)</span>
 
 			<span class="k">return</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">svi</span><span class="p">)</span>
 		<span class="p">}</span>
@@ -5653,7 +5782,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1">// PoSt
 </span><span class="c1"></span>
-<span class="kd">func</span> <span class="nf">getChallengedSectors</span><span class="p">(</span><span class="nx">cfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStInstanceCfg</span><span class="p">,</span> <span class="nx">sectorIDs</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">eligibleSectors</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">candidateCount</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="nx">sectors</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">getChallengedSectors</span><span class="p">(</span><span class="nx">sectorIDs</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">eligibleSectors</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">candidateCount</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="nx">sectors</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">)</span> <span class="p">{</span>
 	<span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">candidateCount</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
 		<span class="nx">sector</span> <span class="o">:=</span> <span class="nf">generateSectorChallenge</span><span class="p">(</span><span class="nx">randomness</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">sectorIDs</span><span class="p">)</span>
 		<span class="nx">sectors</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">sectors</span><span class="p">,</span> <span class="nx">sector</span><span class="p">)</span>
@@ -5689,16 +5818,17 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">leafChallenge</span><span class="p">.</span><span class="nf">Uint64</span><span class="p">()</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">generateCandidate</span><span class="p">(</span><span class="nx">algorithm</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ProofAlgorithm</span><span class="p">,</span> <span class="nx">cfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStInstanceCfg</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">aux</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PersistentProofAux</span><span class="p">,</span> <span class="nx">sectorID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">sectorChallengeIndex</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">generateCandidate</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">aux</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PersistentProofAux</span><span class="p">,</span> <span class="nx">sectorID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">sectorChallengeIndex</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span> <span class="p">{</span>
 	<span class="kd">var</span> <span class="nx">candidate</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span>
-	<span class="k">switch</span> <span class="nx">algorithm</span> <span class="p">{</span>
-	<span class="k">case</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ProofAlgorithm_StackedDRGSeal</span><span class="p">:</span>
-		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-	<span class="k">case</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ProofAlgorithm_WinStackedDRGSeal</span><span class="p">:</span>
-		<span class="nx">sdr</span> <span class="o">:=</span> <span class="nx">WinStackedDRG_I</span><span class="p">{}</span>
-		<span class="nx">candidate</span> <span class="p">=</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">_generateCandidate</span><span class="p">(</span><span class="nx">cfg</span><span class="p">,</span> <span class="nx">randomness</span><span class="p">,</span> <span class="nx">aux</span><span class="p">,</span> <span class="nx">sectorID</span><span class="p">,</span> <span class="nx">sectorChallengeIndex</span><span class="p">)</span>
-	<span class="p">}</span>
-	<span class="k">return</span> <span class="nx">candidate</span>
+
+	<span class="c1">// switch algorithm {
+</span><span class="c1"></span>	<span class="c1">// case ProofAlgorithm_StackedDRGSeal:
+</span><span class="c1"></span>	<span class="c1">// 	panic(&#34;TODO&#34;)
+</span><span class="c1"></span>	<span class="c1">// case ProofAlgorithm_WinStackedDRGSeal:
+</span><span class="c1"></span>	<span class="c1">// 	sdr := WinStackedDRG_I{}
+</span><span class="c1"></span>	<span class="c1">// 	candidate = sdr._generateCandidate(cfg, randomness, aux, sectorID, sectorChallengeIndex)
+</span><span class="c1"></span>	<span class="c1">// }
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nx">candidate</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">computePartialTicket</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">sectorID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PartialTicket</span> <span class="p">{</span>
@@ -5711,20 +5841,20 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">partialTicket</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">PoStCandidatesMap</span> <span class="kd">map</span><span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ProofAlgorithm</span><span class="p">][]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span>
+<span class="kd">type</span> <span class="nx">PoStCandidatesMap</span> <span class="kd">map</span><span class="p">[</span><span class="nx">ProofAlgorithm</span><span class="p">][]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span>
 
-<span class="kd">func</span> <span class="nf">CreatePoStProof</span><span class="p">(</span><span class="nx">cfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStInstanceCfg</span><span class="p">,</span> <span class="nx">privateCandidateProofs</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PrivatePoStCandidateProof</span><span class="p">,</span> <span class="nx">challengeSeed</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">)</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
-	<span class="kd">var</span> <span class="nx">proofsMap</span> <span class="kd">map</span><span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ProofAlgorithm</span><span class="p">][]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PrivatePoStCandidateProof</span>
+<span class="kd">func</span> <span class="nf">CreatePoStProof</span><span class="p">(</span><span class="nx">privateCandidateProofs</span> <span class="p">[]</span><span class="nx">PrivatePostCandidateProof</span><span class="p">,</span> <span class="nx">challengeSeed</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">)</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
+	<span class="kd">var</span> <span class="nx">proofsMap</span> <span class="kd">map</span><span class="p">[</span><span class="nx">RegisteredProof</span><span class="p">][]</span><span class="nx">PrivatePostCandidateProof</span>
 
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">proof</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">privateCandidateProofs</span> <span class="p">{</span>
-		<span class="nx">algorithm</span> <span class="o">:=</span> <span class="nx">proof</span><span class="p">.</span><span class="nx">Algorithm</span>
-		<span class="nx">proofsMap</span><span class="p">[</span><span class="nx">algorithm</span><span class="p">]</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">proofsMap</span><span class="p">[</span><span class="nx">algorithm</span><span class="p">],</span> <span class="nx">proof</span><span class="p">)</span>
+		<span class="nx">registeredProof</span> <span class="o">:=</span> <span class="nx">proof</span><span class="p">.</span><span class="nx">RegisteredProof</span>
+		<span class="nx">proofsMap</span><span class="p">[</span><span class="nx">registeredProof</span><span class="p">]</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">proofsMap</span><span class="p">[</span><span class="nx">registeredProof</span><span class="p">],</span> <span class="nx">proof</span><span class="p">)</span>
 	<span class="p">}</span>
 
 	<span class="kd">var</span> <span class="nx">circuitProofs</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span>
-	<span class="k">for</span> <span class="nx">algorithm</span><span class="p">,</span> <span class="nx">proofs</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">proofsMap</span> <span class="p">{</span>
-		<span class="nx">privateProof</span> <span class="o">:=</span> <span class="nf">createPrivatePoStProof</span><span class="p">(</span><span class="nx">algorithm</span><span class="p">,</span> <span class="nx">proofs</span><span class="p">,</span> <span class="nx">challengeSeed</span><span class="p">)</span>
-		<span class="nx">circuitProof</span> <span class="o">:=</span> <span class="nf">createPoStCircuitProof</span><span class="p">(</span><span class="nx">cfg</span><span class="p">,</span> <span class="nx">algorithm</span><span class="p">,</span> <span class="nx">privateProof</span><span class="p">)</span>
+	<span class="k">for</span> <span class="nx">registeredProof</span><span class="p">,</span> <span class="nx">proofs</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">proofsMap</span> <span class="p">{</span>
+		<span class="nx">privateProof</span> <span class="o">:=</span> <span class="nf">createPrivatePoStProof</span><span class="p">(</span><span class="nx">registeredProof</span><span class="p">,</span> <span class="nx">proofs</span><span class="p">,</span> <span class="nx">challengeSeed</span><span class="p">)</span>
+		<span class="nx">circuitProof</span> <span class="o">:=</span> <span class="nf">createPoStCircuitProof</span><span class="p">(</span><span class="nx">registeredProof</span><span class="p">,</span> <span class="nx">privateProof</span><span class="p">)</span>
 		<span class="nx">circuitProofs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">circuitProofs</span><span class="p">,</span> <span class="nx">circuitProof</span><span class="p">)</span>
 	<span class="p">}</span>
 
@@ -5732,15 +5862,15 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">PrivatePoStProof</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">Algorithm</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">ProofAlgorithm</span>
+	<span class="nx">RegisteredProof</span> <span class="nx">RegisteredProof</span>
 	<span class="nx">ChallengeSeed</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span>
-	<span class="nx">CandidateProofs</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PrivatePoStCandidateProof</span>
+	<span class="nx">CandidateProofs</span> <span class="p">[]</span><span class="nx">PrivatePostCandidateProof</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">createPrivatePoStProof</span><span class="p">(</span><span class="nx">algorithm</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ProofAlgorithm</span><span class="p">,</span> <span class="nx">candidateProofs</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PrivatePoStCandidateProof</span><span class="p">,</span> <span class="nx">challengeSeed</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">)</span> <span class="nx">PrivatePoStProof</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">createPrivatePoStProof</span><span class="p">(</span><span class="nx">registeredProof</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof</span><span class="p">,</span> <span class="nx">candidateProofs</span> <span class="p">[]</span><span class="nx">PrivatePostCandidateProof</span><span class="p">,</span> <span class="nx">challengeSeed</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">)</span> <span class="nx">PrivatePoStProof</span> <span class="p">{</span>
 	<span class="c1">// TODO: Verify that all candidateProofs share algorithm.
 </span><span class="c1"></span>	<span class="k">return</span> <span class="nx">PrivatePoStProof</span><span class="p">{</span>
-		<span class="nx">Algorithm</span><span class="p">:</span>       <span class="nx">algorithm</span><span class="p">,</span>
+		<span class="nx">RegisteredProof</span><span class="p">:</span> <span class="nx">registeredProof</span><span class="p">,</span>
 		<span class="nx">ChallengeSeed</span><span class="p">:</span>   <span class="nx">challengeSeed</span><span class="p">,</span>
 		<span class="nx">CandidateProofs</span><span class="p">:</span> <span class="nx">candidateProofs</span><span class="p">,</span>
 	<span class="p">}</span>
@@ -5752,10 +5882,11 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="c1">// This exists because we need to pass private proofs out of filproofs for winner selection.
 </span><span class="c1">// Actually implementing it would (will?) be tedious, since it means doing the same for InclusionProofs.
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">InternalPrivateCandidateProof</span><span class="p">)</span> <span class="nf">externalize</span><span class="p">(</span><span class="nx">algorithm</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ProofAlgorithm</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PrivatePoStCandidateProof</span> <span class="p">{</span>
+</span><span class="c1"></span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">InternalPrivateCandidateProof</span><span class="p">)</span> <span class="nf">externalize</span><span class="p">(</span><span class="nx">registeredProof</span> <span class="nx">RegisteredProof</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PrivatePoStCandidateProof</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PrivatePoStCandidateProof</span><span class="p">{</span>
-		<span class="nx">Algorithm</span><span class="p">:</span>    <span class="nx">algorithm</span><span class="p">,</span>
-		<span class="nx">Externalized</span><span class="p">:</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">{},</span> <span class="c1">// Unimplemented.
+		<span class="nx">RegisteredProof</span><span class="p">:</span> <span class="nx">registeredProof</span><span class="p">,</span>
+		<span class="nx">Externalized</span><span class="p">:</span>    <span class="p">[]</span><span class="kt">byte</span><span class="p">{},</span> <span class="c1">// Unimplemented.
 </span><span class="c1"></span>	<span class="p">}</span>
 <span class="p">}</span>
 
@@ -5764,12 +5895,15 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">InternalPrivateCandidateProof</span><span class="p">{}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">createPoStCircuitProof</span><span class="p">(</span><span class="nx">postCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStInstanceCfg</span><span class="p">,</span> <span class="nx">algorithm</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ProofAlgorithm</span><span class="p">,</span> <span class="nx">privateProof</span> <span class="nx">PrivatePoStProof</span><span class="p">)</span> <span class="p">(</span><span class="nx">proof</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">switch</span> <span class="nx">algorithm</span> <span class="p">{</span>
-	<span class="k">case</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ProofAlgorithm_WinStackedDRGSeal</span><span class="p">:</span>
+<span class="kd">func</span> <span class="nf">createPoStCircuitProof</span><span class="p">(</span><span class="nx">registeredProof</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof</span><span class="p">,</span> <span class="nx">privateProof</span> <span class="nx">PrivatePoStProof</span><span class="p">)</span> <span class="p">(</span><span class="nx">proof</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">switch</span> <span class="nx">registeredProof</span> <span class="p">{</span>
+	<span class="k">case</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof_WinStackedDRG32GiBPoSt</span><span class="p">:</span>
 		<span class="nx">sdr</span> <span class="o">:=</span> <span class="nx">WinStackedDRG_I</span><span class="p">{}</span>
-		<span class="nx">proof</span> <span class="p">=</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">_createPoStCircuitProof</span><span class="p">(</span><span class="nx">postCfg</span><span class="p">,</span> <span class="nx">privateProof</span><span class="p">)</span>
+		<span class="nx">proof</span> <span class="p">=</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">_createPoStCircuitProof</span><span class="p">(</span><span class="nx">privateProof</span><span class="p">)</span>
+	<span class="k">case</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof_StackedDRG32GiBPoSt</span><span class="p">:</span>
+		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
+
 	<span class="k">return</span> <span class="nx">proof</span>
 <span class="p">}</span>
 
@@ -5786,14 +5920,13 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1">// General PoSt
 </span><span class="c1"></span>
-<span class="kd">func</span> <span class="nf">generatePoStCandidates</span><span class="p">(</span><span class="nx">cfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStInstanceCfg</span><span class="p">,</span> <span class="nx">challengeSeed</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">eligibleSectors</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">candidateCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">sectorStore</span> <span class="nx">sector_index</span><span class="p">.</span><span class="nx">SectorStore</span><span class="p">)</span> <span class="p">(</span><span class="nx">candidates</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">challengedSectors</span> <span class="o">:=</span> <span class="nf">getChallengedSectors</span><span class="p">(</span><span class="nx">cfg</span><span class="p">,</span> <span class="nx">eligibleSectors</span><span class="p">,</span> <span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">eligibleSectors</span><span class="p">,</span> <span class="nx">candidateCount</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">generatePoStCandidates</span><span class="p">(</span><span class="nx">challengeSeed</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">eligibleSectors</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">candidateCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">sectorStore</span> <span class="nx">sector_index</span><span class="p">.</span><span class="nx">SectorStore</span><span class="p">)</span> <span class="p">(</span><span class="nx">candidates</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">challengedSectors</span> <span class="o">:=</span> <span class="nf">getChallengedSectors</span><span class="p">(</span><span class="nx">eligibleSectors</span><span class="p">,</span> <span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">eligibleSectors</span><span class="p">,</span> <span class="nx">candidateCount</span><span class="p">)</span>
 
 	<span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">sectorID</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">challengedSectors</span> <span class="p">{</span>
 		<span class="nx">proofAux</span> <span class="o">:=</span> <span class="nx">sectorStore</span><span class="p">.</span><span class="nf">GetSectorPersistentProofAux</span><span class="p">(</span><span class="nx">sectorID</span><span class="p">)</span>
-		<span class="nx">sealAlgorithm</span> <span class="o">:=</span> <span class="nx">sectorStore</span><span class="p">.</span><span class="nf">GetSectorSealAlgorithm</span><span class="p">(</span><span class="nx">sectorID</span><span class="p">).</span><span class="nf">As_a</span><span class="p">()</span>
 
-		<span class="nx">candidate</span> <span class="o">:=</span> <span class="nf">generateCandidate</span><span class="p">(</span><span class="nx">sealAlgorithm</span><span class="p">,</span> <span class="nx">cfg</span><span class="p">,</span> <span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">proofAux</span><span class="p">,</span> <span class="nx">sectorID</span><span class="p">,</span> <span class="nf">UInt</span><span class="p">(</span><span class="nx">i</span><span class="p">))</span>
+		<span class="nx">candidate</span> <span class="o">:=</span> <span class="nf">generateCandidate</span><span class="p">(</span><span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">proofAux</span><span class="p">,</span> <span class="nx">sectorID</span><span class="p">,</span> <span class="nf">UInt</span><span class="p">(</span><span class="nx">i</span><span class="p">))</span>
 
 		<span class="nx">candidates</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">candidates</span><span class="p">,</span> <span class="nx">candidate</span><span class="p">)</span>
 	<span class="p">}</span>
@@ -5804,12 +5937,12 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1">// Election PoSt
 </span><span class="c1"></span>
-<span class="kd">func</span> <span class="nf">GenerateElectionPoStCandidates</span><span class="p">(</span><span class="nx">cfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStInstanceCfg</span><span class="p">,</span> <span class="nx">challengeSeed</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">eligibleSectors</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">candidateCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">sectorStore</span> <span class="nx">sector_index</span><span class="p">.</span><span class="nx">SectorStore</span><span class="p">)</span> <span class="p">(</span><span class="nx">candidates</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nf">generatePoStCandidates</span><span class="p">(</span><span class="nx">cfg</span><span class="p">,</span> <span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">eligibleSectors</span><span class="p">,</span> <span class="nx">candidateCount</span><span class="p">,</span> <span class="nx">sectorStore</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">GenerateElectionPoStCandidates</span><span class="p">(</span><span class="nx">challengeSeed</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">eligibleSectors</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">candidateCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">sectorStore</span> <span class="nx">sector_index</span><span class="p">.</span><span class="nx">SectorStore</span><span class="p">)</span> <span class="p">(</span><span class="nx">candidates</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nf">generatePoStCandidates</span><span class="p">(</span><span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">eligibleSectors</span><span class="p">,</span> <span class="nx">candidateCount</span><span class="p">,</span> <span class="nx">sectorStore</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">CreateElectionPoStProof</span><span class="p">(</span><span class="nx">cfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStInstanceCfg</span><span class="p">,</span> <span class="nx">privateCandidateProofs</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PrivatePoStCandidateProof</span><span class="p">,</span> <span class="nx">challengeSeed</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">)</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nf">CreatePoStProof</span><span class="p">(</span><span class="nx">cfg</span><span class="p">,</span> <span class="nx">privateCandidateProofs</span><span class="p">,</span> <span class="nx">challengeSeed</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">CreateElectionPoStProof</span><span class="p">(</span><span class="nx">privateCandidateProofs</span> <span class="p">[]</span><span class="nx">PrivatePostCandidateProof</span><span class="p">,</span> <span class="nx">challengeSeed</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">)</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nf">CreatePoStProof</span><span class="p">(</span><span class="nx">privateCandidateProofs</span><span class="p">,</span> <span class="nx">challengeSeed</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">pv</span> <span class="o">*</span><span class="nx">PoStVerifier_I</span><span class="p">)</span> <span class="nf">VerifyElectionPoSt</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
@@ -5823,8 +5956,8 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">CreateSurprisePoStProof</span><span class="p">(</span><span class="nx">cfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStInstanceCfg</span><span class="p">,</span> <span class="nx">privateCandidateProofs</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PrivatePoStCandidateProof</span><span class="p">,</span> <span class="nx">challengeSeed</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">)</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nf">CreatePoStProof</span><span class="p">(</span><span class="nx">cfg</span><span class="p">,</span> <span class="nx">privateCandidateProofs</span><span class="p">,</span> <span class="nx">challengeSeed</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">CreateSurprisePoStProof</span><span class="p">(</span><span class="nx">privateCandidateProofs</span> <span class="p">[]</span><span class="nx">PrivatePostCandidateProof</span><span class="p">,</span> <span class="nx">challengeSeed</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">)</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nf">CreatePoStProof</span><span class="p">(</span><span class="nx">privateCandidateProofs</span><span class="p">,</span> <span class="nx">challengeSeed</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">pv</span> <span class="o">*</span><span class="nx">PoStVerifier_I</span><span class="p">)</span> <span class="nf">VerifySurprisePoSt</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
