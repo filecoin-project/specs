@@ -160,7 +160,7 @@ func VMContext_Make(
 		_valueReceived:            valueReceived,
 		_gasRemaining:             gasRemaining,
 		_numValidateCalls:         0,
-		_output:                   nil,
+		_output:                   vmr.InvocOutput{},
 	}
 }
 
@@ -499,15 +499,15 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 
 	initGasRemaining := rtOuter._gasRemaining
 
-	rtOuter._rtAllocGas(gascost.InvokeMethod(input.Value(), input.Method()))
+	rtOuter._rtAllocGas(gascost.InvokeMethod(input.Value, input.Method))
 
-	receiver, receiverAddr := rtOuter._resolveReceiver(input.To())
+	receiver, receiverAddr := rtOuter._resolveReceiver(input.To)
 	receiverCode, err := loadActorCode(receiver.CodeID())
 	if err != nil {
 		rtOuter._throwError(exitcode.ActorCodeNotFound)
 	}
 
-	err = rtOuter._transferFunds(rtOuter._actorAddress, receiverAddr, input.Value())
+	err = rtOuter._transferFunds(rtOuter._actorAddress, receiverAddr, input.Value)
 	if err != nil {
 		rtOuter._throwError(exitcode.InsufficientFunds_System)
 	}
@@ -521,15 +521,15 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 		rtOuter._internalCallSeqNum+1,
 		rtOuter._globalStatePending,
 		receiverAddr,
-		input.Value(),
+		input.Value,
 		rtOuter._gasRemaining,
 	)
 
 	invocOutput, exitCode, internalCallSeqNumFinal := _invokeMethodInternal(
 		rtInner,
 		receiverCode,
-		input.Method(),
-		input.Params(),
+		input.Method,
+		input.Params,
 	)
 
 	_gasAmountAssertValid(rtOuter._gasRemaining.Subtract(rtInner._gasRemaining))
@@ -625,7 +625,7 @@ func (rt *VMContext) Send(
 
 func (rt *VMContext) SendQuery(toAddr addr.Address, methodNum abi.MethodNum, params abi.MethodParams) util.Serialization {
 	invocOutput := rt.Send(toAddr, methodNum, params, abi.TokenAmount(0))
-	ret := invocOutput.ReturnValue()
+	ret := invocOutput.ReturnValue
 	Assert(ret != nil)
 	return ret
 }

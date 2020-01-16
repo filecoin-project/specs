@@ -87,11 +87,11 @@ func (a *InitActor) Exec(rt Runtime, execCodeID abi.ActorCodeID, constructorPara
 
 	// Invoke constructor. If construction fails, the error should propagate and cause
 	// Exec to fail too.
-	rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:     idAddr,
-		Method_: builtin.MethodConstructor,
-		Params_: constructorParams,
-		Value_:  rt.ValueReceived(),
+	rt.SendPropagatingErrors(vmr.InvocInput{
+		To:     idAddr,
+		Method: builtin.MethodConstructor,
+		Params: constructorParams,
+		Value:  rt.ValueReceived(),
 	})
 
 	var addrBuf bytes.Buffer

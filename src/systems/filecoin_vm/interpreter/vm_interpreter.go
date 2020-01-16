@@ -320,11 +320,11 @@ func _gasToFIL(gas msg.GasAmount, price abi.TokenAmount) abi.TokenAmount {
 }
 
 func _makeInvocInput(message msg.UnsignedMessage) vmr.InvocInput {
-	return &vmr.InvocInput_I{
-		To_:     message.To(), // Receiver address is resolved during execution.
-		Method_: message.Method(),
-		Params_: message.Params(),
-		Value_:  message.Value(),
+	return vmr.InvocInput{
+		To:     message.To(), // Receiver address is resolved during execution.
+		Method: message.Method(),
+		Params: message.Params(),
+		Value:  message.Value(),
 	}
 }
 

@@ -31,11 +31,11 @@ func (a *CronActor) EpochTick(rt vmr.Runtime) vmr.InvocOutput {
 	// a.Entries is basically a static registry for now, loaded
 	// in the interpreter static registry.
 	for _, entry := range a.Entries {
-		rt.SendCatchingErrors(&vmr.InvocInput_I{
-			To_:     entry.ToAddr,
-			Method_: entry.MethodNum,
-			Params_: nil,
-			Value_:  abi.TokenAmount(0),
+		rt.SendCatchingErrors(vmr.InvocInput{
+			To:     entry.ToAddr,
+			Method: entry.MethodNum,
+			Params: nil,
+			Value:  abi.TokenAmount(0),
 		})
 	}
 
