@@ -4,6 +4,7 @@ import (
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
+	smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
 	sminact "github.com/filecoin-project/specs/actors/builtin/storage_miner"
 	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 	acrypto "github.com/filecoin-project/specs/actors/crypto"
@@ -12,7 +13,6 @@ import (
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
@@ -72,7 +72,7 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 	return storageMinerAddr, nil
 }
 
-func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
+func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal smarkact.StorageDeal) {
 	sms.SectorIndex().AddNewDeal(deal)
 	// stagedDealResponse := sms.SectorIndex().AddNewDeal(deal)
 	// TODO: way within a node to notify different components
@@ -82,7 +82,7 @@ func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
 	// })
 }
 
-func (sms *StorageMiningSubsystem_I) CommitSectorError() deal.StorageDeal {
+func (sms *StorageMiningSubsystem_I) CommitSectorError() smarkact.StorageDeal {
 	panic("TODO")
 }
 

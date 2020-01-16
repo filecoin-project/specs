@@ -2,8 +2,6 @@ import abi "github.com/filecoin-project/specs/actors/abi"
 import addr "github.com/filecoin-project/go-address"
 import acrypto "github.com/filecoin-project/specs/actors/crypto"
 
-type DealWeight int  // should be BigInt
-
 // Note: Deal Collateral is only released and returned to clients and miners
 // when the storage deal stops counting towards power. In the current iteration,
 // it will be released when the sector containing the storage deals expires,

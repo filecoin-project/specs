@@ -1,11 +1,6 @@
-package storage_deal
+package storage_market
 
 import abi "github.com/filecoin-project/specs/actors/abi"
-
-import util "github.com/filecoin-project/specs/util"
-
-var IMPL_FINISH = util.IMPL_FINISH
-var TODO = util.TODO
 
 func (p *StorageDealProposal_I) Duration() abi.ChainEpoch {
 	return (p.EndEpoch() - p.StartEpoch())

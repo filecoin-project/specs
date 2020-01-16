@@ -1,11 +1,9 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
 import actor_util "github.com/filecoin-project/specs/actors/util"
 import addr "github.com/filecoin-project/go-address"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 import sminer "github.com/filecoin-project/specs/actors/builtin/storage_miner"
 
-type DealsAMT {abi.DealID: deal.OnChainDeal}
-type DealWeight deal.DealWeight
+type DealsAMT {abi.DealID: OnChainDeal}
 
 type CachedDealIDsByPartyHAMT {addr.Address: actor_util.DealIDSetHAMT}
 type CachedExpirationsPendingHAMT {abi.ChainEpoch: DealIDQueue}
@@ -31,7 +29,7 @@ type StorageMarketActorState struct {
 
     _rtAbortIfAddressEntryDoesNotExist(rt Runtime, entryAddr addr.Address)
     _rtUpdatePendingDealStatesForParty(rt Runtime, addr addr.Address) (amountSlashedTotal abi.TokenAmount)
-    _rtGetOnChainDealOrAbort(rt Runtime, dealID abi.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal)
+    _rtGetOnChainDealOrAbort(rt Runtime, dealID abi.DealID) (deal OnChainDeal, dealP StorageDealProposal)
     _rtLockBalanceOrAbort(rt Runtime, addr addr.Address, amount abi.TokenAmount)
 
     _updatePendingDealStates(dealIDs [abi.DealID], epoch abi.ChainEpoch) (amountSlashedTotal abi.TokenAmount)
@@ -40,14 +38,14 @@ type StorageMarketActorState struct {
     _processDealSlashed(dealID abi.DealID) (amountSlashed abi.TokenAmount)
     _processDealInitTimedOut(dealID abi.DealID) (amountSlashed abi.TokenAmount)
     _processDealExpired(dealID abi.DealID)
-    _generateStorageDealID(storageDeal deal.StorageDeal) abi.DealID
+    _generateStorageDealID(storageDeal StorageDeal) abi.DealID
 
     _getLockedReqBalanceInternal(a addr.Address) abi.TokenAmount
     _lockBalanceMaybe(addr addr.Address, amount abi.TokenAmount) (lockBalanceOK bool)
     _unlockBalance(addr addr.Address, unlockAmountRequested abi.TokenAmount)
 
-    _getOnChainDeal(dealID abi.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal, ok bool)
-    _getOnChainDealAssert(dealID abi.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal)
+    _getOnChainDeal(dealID abi.DealID) (deal OnChainDeal, dealP StorageDealProposal, ok bool)
+    _getOnChainDealAssert(dealID abi.DealID) (deal OnChainDeal, dealP StorageDealProposal)
     _addressEntryExists(address addr.Address) bool
 }
 
@@ -61,7 +59,7 @@ type StorageMarketActorCode struct {
     WithdrawBalance(rt Runtime, amount abi.TokenAmount)
 
     // Publish a new set of storage deals (not yet included in a sector).
-    PublishStorageDeals(rt Runtime, deals [deal.StorageDeal])
+    PublishStorageDeals(rt Runtime, deals [StorageDeal])
 
     // Verify that a given set of storage deals is valid for a sector currently being PreCommitted.
     VerifyDealsOnSectorPreCommit(
@@ -82,7 +80,7 @@ type StorageMarketActorCode struct {
     // The weight is defined as the sum, over all deals in the set, of the product of its size
     // with its duration. This quantity may be an input into the functions specifying block reward,
     // sector power, collateral, and/or other parameters.
-    GetWeightForDealSet(rt Runtime, dealIDs abi.DealIDs) DealWeight
+    GetWeightForDealSet(rt Runtime, dealIDs abi.DealIDs) abi.DealWeight
 
     // Terminate a set of deals in response to their containing sector being terminated.
     // Slash provider collateral, refund client collateral, and refund partial unpaid escrow

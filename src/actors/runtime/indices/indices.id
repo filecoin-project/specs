@@ -1,6 +1,5 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
 import actor_util "github.com/filecoin-project/specs/actors/util"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 
 // Data in Indices are populated at instantiation with data from the state tree
 // Indices itself has no state tree or access to the runtime
@@ -22,7 +21,7 @@ type Indices struct {
     LastEpochReward             abi.TokenAmount
 
     // these methods produce policy output based on user state/action
-    StorageDeal_ProviderInitTimedOutSlashAmount(deal deal.OnChainDeal) abi.TokenAmount
+    StorageDeal_ProviderInitTimedOutSlashAmount(providerCollateral abi.TokenAmount) abi.TokenAmount
 
     StorageDeal_DurationBounds(
         pieceSize   abi.PieceSize
@@ -57,7 +56,7 @@ type Indices struct {
         sectorSize  abi.SectorSize
         startEpoch  abi.ChainEpoch
         endEpoch    abi.ChainEpoch
-        dealWeight  deal.DealWeight
+        dealWeight  abi.DealWeight
     ) abi.SectorWeight
 
     PledgeCollateralReq(
