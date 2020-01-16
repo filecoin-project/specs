@@ -41,11 +41,12 @@ type BlockSyncResponse struct {
 
 type TipSetBundle struct {
   blocks [Blocks]
-  secpMsgs [SignedMessage]
-  secpMsgIncludes [[UInt]]
 
   blsMsgs [Message]
   blsMsgIncludes [[Uint]]
+
+  secpMsgs [SignedMessage]
+  secpMsgIncludes [[UInt]]
 }
 
 type Status enum {
