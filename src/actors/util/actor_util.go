@@ -52,27 +52,13 @@ type MinerSetHAMT map[addr.Address]bool
 
 type ActorIDSetHAMT map[abi.ActorID]bool
 
-type MinerEventInterface interface {
-	MinerAddr() addr.Address
-	Sectors() []abi.SectorNumber
-}
-
 type MinerEvent struct {
-	MinerAddress addr.Address
-	MinerSectors []abi.SectorNumber // Empty for global events, such as SurprisePoSt expiration.
+	MinerAddr addr.Address
+	Sectors   []abi.SectorNumber // Empty for global events, such as SurprisePoSt expiration.
 }
 
-func (m MinerEvent) MinerAddr() addr.Address {
-	return m.MinerAddress
-}
-
-func (m MinerEvent) Sectors() []abi.SectorNumber {
-	return m.MinerSectors
-}
-
-// TODO using an interface in a map is probably a bad idea since different implementations may provide incomparable
-// type, but for now lets do the easy thing
-type MinerEventSetHAMT map[MinerEventInterface]bool
+// TODO HAMT
+type MinerEventSetHAMT []MinerEvent
 
 type SectorStorageWeightDesc struct {
 	SectorSize abi.SectorSize
