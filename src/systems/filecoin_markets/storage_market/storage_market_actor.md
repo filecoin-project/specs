@@ -4,17 +4,17 @@ title: Storage Market Actor
 
 `StorageMarketActor` is responsible for processing and managing on-chain deals. This is also the entry point of all storage deals and data into the system. It maintains a mapping of `StorageDealID` to `StorageDeal` and keeps track of locked balances of `StorageClient` and `StorageProvider`. When a deal is posted on chain through the `StorageMarketActor`, it will first check if both transacting parties have sufficient balances locked up and include the deal on chain. 
 
-# `StorageMarketActor` interface
-
-{{< readfile file="/docs/actors/builtin/storage_market/storage_market_actor.id" code="true" lang="go" >}}
-
 # `StorageMarketActorState` implementation
 
 {{< readfile file="/docs/actors/builtin/storage_market/storage_market_actor_state.go" code="true" lang="go" >}}
 
-# `StorageMarketActorCode` implementation
+# `StorageMarketActor` implementation
 
-{{< readfile file="/docs/actors/builtin/storage_market/storage_market_actor_code.go" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/builtin/storage_market/storage_market_actor.go" code="true" lang="go" >}}
+
+# `StorageMarketActor` implementation
+
+{{< readfile file="/docs/actors/builtin/storage_market/storage_market_actor.go" code="true" lang="go" >}}
 
 
 {{<label storage_deal_collateral>}}
