@@ -136,8 +136,9 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, chain chain.Chain,
 		retReceipt = vmri.MessageReceipt_Make(invocOutput, exitCode, vmiGasUsed)
 	}
 
-	_applyError := func(tree st.StateTree, errExitCode exitcode.SystemErrorCode, senderResolveSpec SenderResolveSpec) {
-		_applyReturn(tree, vmr.InvocOutput_Make(nil), exitcode.SystemError(errExitCode), senderResolveSpec)
+	// TODO move this to a package with a less redundant name
+	_applyError := func(tree st.StateTree, errExitCode exitcode.ExitCode, senderResolveSpec SenderResolveSpec) {
+		_applyReturn(tree, vmr.InvocOutput_Make(nil), errExitCode, senderResolveSpec)
 	}
 
 	// Deduct an amount of gas corresponding to cost about to be incurred, but not necessarily
@@ -184,7 +185,8 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, chain chain.Chain,
 
 	// Check sender balance.
 	gasLimitCost := _gasToFIL(message.GasLimit(), message.GasPrice())
-	networkTxnFee := indicesFromStateTree(inTree).NetworkTransactionFee(
+	tidx := indicesFromStateTree(inTree)
+	networkTxnFee := tidx.NetworkTransactionFee(
 		inTree.GetActorCodeID_Assert(message.To()), message.Method())
 	totalCost := message.Value() + gasLimitCost + networkTxnFee
 	if fromActor.Balance() < totalCost {
@@ -235,7 +237,8 @@ func _resolveSender(store ipld.GraphStore, tree st.StateTree, address addr.Addre
 	initState, ok := tree.GetActor(builtin.InitActorAddr)
 	util.Assert(ok)
 	serialized, ok := store.Get(cid.Cid(initState.State()))
-	initSubState := initact.Deserialize_InitActorState_Assert(serialized)
+	var initSubState initact.InitActorState
+	serde.MustDeserialize(serialized, &initSubState)
 	return initSubState.ResolveAddress(address)
 }
 
@@ -250,8 +253,9 @@ func _lookupMinerOwner(store ipld.GraphStore, tree st.StateTree, minerAddr addr.
 	// - paying rewards to the miner actor instead of owner (with some miner->owner withdrawal mechanism)
 	// - resolving all miner->owner mappings in the state before invoking interpreter (e.g. during validation) and passing them in
 	// - including the owner address in block headers (and requiring it match the block's miner as part of semantic validation)
-	minerSubState := sminact.Deserialize_StorageMinerActorState_Assert(serialized)
-	return minerSubState.Info().Owner()
+	var minerSubState sminact.StorageMinerActorState
+	serde.MustDeserialize(serialized, &minerSubState)
+	return minerSubState.Info.Owner
 }
 
 func _applyMessageBuiltinAssert(store ipld.GraphStore, tree st.StateTree, chain chain.Chain, message msg.UnsignedMessage, minerAddr addr.Address) st.StateTree {
@@ -316,11 +320,11 @@ func _gasToFIL(gas msg.GasAmount, price abi.TokenAmount) abi.TokenAmount {
 }
 
 func _makeInvocInput(message msg.UnsignedMessage) vmr.InvocInput {
-	return &vmr.InvocInput_I{
-		To_:     message.To(), // Receiver address is resolved during execution.
-		Method_: message.Method(),
-		Params_: message.Params(),
-		Value_:  message.Value(),
+	return vmr.InvocInput{
+		To:     message.To(), // Receiver address is resolved during execution.
+		Method: message.Method(),
+		Params: message.Params(),
+		Value:  message.Value(),
 	}
 }
 

@@ -1,6 +1,6 @@
+import abi "github.com/filecoin-project/specs/actors/abi"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-// import smkt "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
+import smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
 
 // SectorBuilder accumulates deals, keeping track of their
 // sector configuration requirements and the piece sizes.
@@ -8,7 +8,7 @@ import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_
 // will return a sector.
 
 type StageDealResponse struct {
-    SectorID sector.SectorID
+    SectorID abi.SectorID
 }
 
 type SectorBuilder struct {
@@ -16,10 +16,10 @@ type SectorBuilder struct {
     // These include the info for the relevant pieces.
     // This builder just accumulates deals, keeping track of their
     // sector configuration requirements, and the piece sizes.
-    DealsToSeal [deal.StorageDeal]
+    DealsToSeal [smarkact.StorageDeal]
 
     // StageDeal adds a deal to be packed into a sector.
-    StageDeal(d deal.StorageDeal) StageDealResponse
+    StageDeal(d smarkact.StorageDeal) StageDealResponse
 
     // NextSector returns an UnsealedSectorInfo, which includes the (ordered) set of
     // pieces, and the SealCfg. An error may be returned if SectorBuilder is not

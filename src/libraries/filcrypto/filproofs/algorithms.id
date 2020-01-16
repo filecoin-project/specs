@@ -1,3 +1,4 @@
+import abi "github.com/filecoin-project/specs/actors/abi"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
@@ -52,7 +53,7 @@ type SealAlgorithmArtifacts struct {
 // per-sector setup artifacts go here
 type SealSetupArtifacts struct {
     CommD              sector.Commitment
-    CommR              sector.SealedSectorCID
+    CommR              abi.SealedSectorCID
     CommC              sector.Commitment
     CommQ              sector.Commitment
     CommRLast          sector.Commitment
@@ -84,8 +85,8 @@ type WinStackedDRG struct {
     WindowExpanderGraphCfg  ExpanderGraphCfg
     // invariant: DRGCfg.Nodes == ExpanderGraphCfg.Nodes
     Curve                   EllipticCurve
-    RegisteredProof         sector.RegisteredProof
-    Cfg                     sector.SealInstanceCfg
+    RegisteredProof         abi.RegisteredProof
+    Cfg                     SealInstanceCfg
 
     Drg()                   DRG
     Expander()              ExpanderGraph
@@ -94,68 +95,68 @@ type WinStackedDRG struct {
     WindowExpander()        ExpanderGraph
 
     Seal(
-        registeredProof  sector.RegisteredProof
-        sid              sector.SectorID
+        registeredProof  abi.RegisteredProof
+        sid              abi.SectorID
         data             Bytes
-        randomness       sector.SealRandomness
+        randomness       abi.SealRandomness
     ) SealSetupArtifacts
     CreateSealProof(
-        challengeSeed  sector.InteractiveSealRandomness
+        challengeSeed  abi.InteractiveSealRandomness
         aux            sector.ProofAuxTmp
-    ) sector.SealProof
+    ) abi.SealProof
     CreatePrivateSealProof(
-        randomness  sector.InteractiveSealRandomness
+        randomness  abi.InteractiveSealRandomness
         aux         sector.ProofAuxTmp
     ) PrivateOfflineProof
 
     CreateOfflineCircuitProof(
         challengeProofs  [OfflineWindowProof]
         aux              sector.ProofAuxTmp
-    ) sector.SealProof
+    ) abi.SealProof
     VerifyPrivateSealProof(
         privateProof  [OfflineWindowProof]
         sealSeeds     [sector.SealSeed]
-        randomness    sector.InteractiveSealRandomness
+        randomness    abi.InteractiveSealRandomness
         commD         Commitment
-        commR         sector.SealedSectorCID
+        commR         abi.SealedSectorCID
     ) bool
-    VerifySeal(sv sector.SealVerifyInfo) bool
+    VerifySeal(sv abi.SealVerifyInfo) bool
 
     GenerateElectionPoStCandidates(
-        challengeSeed    sector.PoStRandomness
-        eligibleSectors  [sector.SectorNumber]
+        challengeSeed    abi.PoStRandomness
+        eligibleSectors  [abi.SectorNumber]
         candidateCount   int
         sectorStore      sectorIndex.SectorStore
-    ) [sector.PoStCandidate]
-    CreateElectionPoStProof(privateProofs [PrivatePoStProof]) sector.PoStProof
-    VerifyElectionPoSt(sv sector.PoStVerifyInfo) bool
+    ) [abi.PoStCandidate]
+    CreateElectionPoStProof(privateProofs [PrivatePoStProof]) abi.PoStProof
+    VerifyElectionPoSt(sv abi.PoStVerifyInfo) bool
 
     GenerateSurprisePoStCandidates(
-        challengeSeed    sector.PoStRandomness
-        eligibleSectors  [sector.SectorNumber]
+        challengeSeed    abi.PoStRandomness
+        eligibleSectors  [abi.SectorNumber]
         candidateCount   int
         sectorStore      sectorIndex.SectorStore
-    ) [sector.PoStCandidate]
-    CreateSurprisePoStProof(privateProofs [PrivatePoStProof]) sector.PoStProof
-    VerifySurprisePoSt(sv sector.PoStVerifyInfo) bool
+    ) [abi.PoStCandidate]
+    CreateSurprisePoStProof(privateProofs [PrivatePoStProof]) abi.PoStProof
+    VerifySurprisePoSt(sv abi.PoStVerifyInfo) bool
     CreatePrivatePoStProof(
-        candidateProofs  [sector.PrivatePoStCandidateProof]
-        challengeSeed    sector.PoStRandomness
+        candidateProofs  [abi.PrivatePoStCandidateProof]
+        challengeSeed    abi.PoStRandomness
         aux              sector.PersistentProofAux
     ) PrivatePoStProof
     VerifyPrivatePoStProof(
         privateProof  PrivatePoStProof
-        candidates    [sector.PoStCandidate]
+        candidates    [abi.PoStCandidate]
         commRLast     sector.Commitment
     ) bool
 }
 
 type SealVerifier struct {
-    SealCfg sector.SealInstanceCfg
+    SealCfg SealInstanceCfg
 }
 
 type PoStVerifier struct {
-    PoStCfg sector.PoStInstanceCfg
+    PoStCfg PoStInstanceCfg
 }
 
 type DRGCfg struct {
@@ -223,4 +224,76 @@ type InclusionProof struct {
     LeafIndex()  UInt
     Root()       Commitment
     Verify(root Bytes, challenge UInt) bool
+}
+
+type ProofRegistry {UInt: ProofInstance}
+
+type ProofInstance struct {
+    // FIXME: move some or all of these types into filproofs.
+    ID           abi.RegisteredProof
+    Type         ProofType
+    Algorithm    ProofAlgorithm
+    CircuitType  ConcreteCircuit
+    Partitions   UInt
+    Cfg          ProofCfg
+}
+
+type ConcreteCircuit struct {
+    // Name must be globally unique. It will be a hash derived from semantic content of circuit.
+    Name                      string
+    GrothParameterFileName()  string
+    VerifyingKeyFileName()    string
+}
+
+type ProofCfg union {
+    SealCfg  SealInstanceCfg
+    PoStCfg  PoStInstanceCfg
+}
+
+type ProofType enum {
+    SealProof
+    PoStProof
+}
+
+type ProofAlgorithm enum {
+    StackedDRGSeal
+    WinStackedDRGSeal
+    StackedDRGPoSt
+    WinStackedDRGPoSt
+}
+
+// New proof ProofInstances can add new cfg types if needed.
+type SealInstanceCfg union {
+    WinStackedDRGCfgV1
+}
+
+type WinStackedDRGCfgV1 struct {
+    SectorSize   abi.SectorSize
+    WindowCount  UInt
+}
+
+// New proof ProofInstances can add new cfg types if needed.
+type PoStInstanceCfg union {
+    PoStCfgV1
+    PoStCfgVBogus
+}
+
+type PoStCfgV1 struct {
+    Type                PoStType
+    Nodes               UInt
+    Partitions          UInt
+    LeafChallengeCount  UInt
+    ChallengeRangeSize  UInt
+}
+
+type PoStCfgVBogus struct {
+    Type                 PoStType
+    Nodes                UInt
+    Partitions           UInt
+    QuantumMonkeyBrains  UInt
+}
+
+type PoStType enum {
+    ElectionPoSt
+    SurprisePoSt
 }

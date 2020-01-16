@@ -4,11 +4,10 @@ import (
 	actor "github.com/filecoin-project/specs/actors"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	autil "github.com/filecoin-project/specs/actors/util"
-	cid "github.com/ipfs/go-cid"
 )
 
 type SectorStorageWeightDesc = autil.SectorStorageWeightDesc
-type SectorTerminationType = autil.SectorTerminationType
+type SectorTerminationType = autil.SectorTermination
 
 var RT_ConfirmFundsReceiptOrAbort_RefundRemainder = vmr.RT_ConfirmFundsReceiptOrAbort_RefundRemainder
 
@@ -28,23 +27,12 @@ var IMPL_FINISH = autil.IMPL_FINISH
 var IMPL_TODO = autil.IMPL_TODO
 var TODO = autil.TODO
 
-func (a *StorageMinerActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, StorageMinerActorState) {
-	h := rt.AcquireState()
-	stateCID := cid.Cid(h.Take())
-	var state StorageMinerActorState_I
-	if !rt.IpldGet(stateCID, &state) {
-		rt.AbortAPI("state not found")
-	}
-	return h, &state
-}
 func Release(rt Runtime, h vmr.ActorStateHandle, st StorageMinerActorState) {
-	checkCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
+	checkCID := actor.ActorSubstateCID(rt.IpldPut(&st))
 	h.Release(checkCID)
 }
+
 func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st StorageMinerActorState) {
-	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
+	newCID := actor.ActorSubstateCID(rt.IpldPut(&st))
 	h.UpdateRelease(newCID)
-}
-func (st *StorageMinerActorState_I) CID() cid.Cid {
-	panic("TODO")
 }

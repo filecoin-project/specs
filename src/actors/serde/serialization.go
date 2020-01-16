@@ -21,6 +21,11 @@ func MustSerializeParams(o ...interface{}) []byte {
 
 // Deserializes a structure or value from CBOR.
 func Deserialize(b []byte, out interface{}) error {
-	autil.TODO("CBOR-deseriaization")
+	autil.TODO("CBOR-deserialization")
 	return nil
+}
+
+func MustDeserialize(b []byte, out interface{}) {
+	err := Deserialize(b, out)
+	autil.AssertMsg(err == nil, "deserialization failed")
 }

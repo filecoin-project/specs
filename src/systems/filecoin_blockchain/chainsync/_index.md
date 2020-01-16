@@ -1,6 +1,6 @@
 ---
 menuTitle: ChainSync
-statusIcon: 🔁
+statusIcon: ✅
 title: ChainSync - synchronizing the Blockchain
 ---
 

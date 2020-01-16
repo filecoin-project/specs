@@ -1,9 +1,9 @@
 package filproofs
 
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import abi "github.com/filecoin-project/specs/actors/abi"
 
-func (fps *FilecoinProofsSubsystem_I) VerifySeal(sealVerifyInfo sector.SealVerifyInfo) bool {
-	cfg := sector.RegisteredProofInstance(sealVerifyInfo.OnChain().RegisteredProof()).Cfg().As_SealCfg()
-	sdr := WinSDRParams(cfg)
+func (fps *FilecoinProofsSubsystem_I) VerifySeal(sealVerifyInfo abi.SealVerifyInfo) bool {
+	registeredProof := sealVerifyInfo.OnChain.RegisteredProof
+	sdr := WinSDRParams(registeredProof)
 	return sdr.VerifySeal(sealVerifyInfo)
 }

@@ -22,7 +22,7 @@ var _computeFunctionDefs = map[ComputeFunctionID]ComputeFunctionDef{}
 
 func init() {
 	// VerifySignature
-	_computeFunctionDefs[vmr.ComputeFunctionID_VerifySignature] = ComputeFunctionDef{
+	_computeFunctionDefs[vmr.Compute_VerifySignature] = ComputeFunctionDef{
 		Body: func(args []Any) Any {
 			if len(args) != 3 {
 				return nil

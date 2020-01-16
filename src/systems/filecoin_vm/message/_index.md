@@ -1,6 +1,6 @@
 ---
 menuTitle: Message
-statusIcon: 🔁
+statusIcon: ✅
 title: VM Message - Actor Method Invocation
 ---
 

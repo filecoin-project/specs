@@ -1,27 +1,27 @@
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 import abi "github.com/filecoin-project/specs/actors/abi"
 import addr "github.com/filecoin-project/go-address"
 import message "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import peer "github.com/libp2p/go-libp2p-core/peer"
 import cid "github.com/ipfs/go-cid"
+import smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
 
 // ClientLocalDealInfo is the information about a storage deal that storage client tracks
 // locally about a deal until it goes on chain. It is persisted to local storage
 // and updated as the deal goes through stages leading up to its being published
 type ClientLocalDealInfo struct {
-    ProposalCid     &deal.StorageDealProposal
-    Proposal        deal.StorageDealProposal
+    ProposalCid     &smarkact.StorageDealProposal
+    Proposal        smarkact.StorageDealProposal
     State           StorageDealStatus
     MinerPeerID     peer.ID
     MinerWorker     addr.Address
-    DealID          deal.DealID
+    DealID          abi.DealID
     PublishMessage  &message.SignedMessage
 }
 
 // ProposeStorageDealResult is the returned data when ProposeStorageDeal
 // is called on a storage client
 type ProposeStorageDealResult struct {
-    ProposalCid &deal.StorageDealProposal
+    ProposalCid &smarkact.StorageDealProposal
 }
 
 type StorageProviderInfo struct {
@@ -35,14 +35,14 @@ type StorageClient struct {
     ListProviders()   (providers [StorageProviderInfo], error)
 
     // ListDeals lists on-chain deals associated with this client
-    ListDeals()       (deals [deal.StorageDeal], error)
+    ListDeals()       (deals [smarkact.StorageDeal], error)
 
     // ListInProgressDeals lists deals that are in progress or rejected
     // - but not on chain
     ListLocalDeals()  (deals [ClientLocalDealInfo], error)
 
     // GetInProgressDeal looks up an in progress deal by proposal CID
-    GetInProgressDeal(proposalCID &deal.StorageDealProposal) (ClientLocalDealInfo, error)
+    GetInProgressDeal(proposalCID &smarkact.StorageDealProposal) (ClientLocalDealInfo, error)
 
     // GetAsk returns the current ask for a storage provider
     GetAsk(info StorageProviderInfo) (StorageAsk, error)

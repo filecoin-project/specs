@@ -6,16 +6,13 @@ import (
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
 	builtin "github.com/filecoin-project/specs/actors/builtin"
-	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	util "github.com/filecoin-project/specs/util"
+	autil "github.com/filecoin-project/specs/actors/util"
 )
 
 // TODO: most of this file doesn't need to be part of runtime, just generic actor shared code.
 
-var Assert = util.Assert
-var IMPL_TODO = util.IMPL_TODO
-
-type Any = util.Any
+var Assert = autil.Assert
+var IMPL_TODO = autil.IMPL_TODO
 
 // Name should be set per unique filecoin network
 var Name = "mainnet"
@@ -69,17 +66,17 @@ func CallerPattern_MakeAcceptAny() CallerPattern {
 }
 
 func InvocInput_Make(to addr.Address, method abi.MethodNum, params abi.MethodParams, value abi.TokenAmount) InvocInput {
-	return &InvocInput_I{
-		To_:     to,
-		Method_: method,
-		Params_: params,
-		Value_:  value,
+	return InvocInput{
+		To:     to,
+		Method: method,
+		Params: params,
+		Value:  value,
 	}
 }
 
-func InvocOutput_Make(returnValue util.Bytes) InvocOutput {
-	return &InvocOutput_I{
-		ReturnValue_: returnValue,
+func InvocOutput_Make(returnValue []byte) InvocOutput {
+	return InvocOutput{
+		ReturnValue: returnValue,
 	}
 }
 
@@ -100,12 +97,12 @@ func RT_GetMinerAccountsAssert(rt Runtime, minerAddr addr.Address) (ownerAddr ad
 	raw := rt.SendQuery(minerAddr, builtin.Method_StorageMinerActor_GetOwnerAddr, nil)
 	r := bytes.NewReader(raw)
 	err := ownerAddr.UnmarshalCBOR(r)
-	util.Assert(err == nil)
+	autil.AssertNoError(err)
 
 	raw = rt.SendQuery(minerAddr, builtin.Method_StorageMinerActor_GetWorkerAddr, nil)
 	r = bytes.NewReader(raw)
 	err = workerAddr.UnmarshalCBOR(r)
-	util.Assert(err == nil)
+	autil.AssertNoError(err)
 
 	return
 }
@@ -134,9 +131,4 @@ func RT_ConfirmFundsReceiptOrAbort_RefundRemainder(rt Runtime, fundsRequired abi
 	if rt.ValueReceived() > fundsRequired {
 		rt.SendFunds(rt.ImmediateCaller(), rt.ValueReceived()-fundsRequired)
 	}
-}
-
-func RT_VerifySignature(rt Runtime, pk filcrypto.PublicKey, sig filcrypto.Signature, m filcrypto.Message) bool {
-	ret := rt.Compute(ComputeFunctionID_VerifySignature, []Any{pk, sig, m})
-	return ret.(bool)
 }

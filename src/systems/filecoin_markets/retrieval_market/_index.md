@@ -1,6 +1,6 @@
 ---
 menuTitle: Retrieval Market
-statusIcon: 🔁
+statusIcon: ✅
 title: "Retrieval Market in Filecoin"
 entries:
 - retrieval_peer_resolver

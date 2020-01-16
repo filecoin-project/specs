@@ -1,5 +1,4 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 
 type UInt64 UInt
@@ -9,33 +8,32 @@ type UInt64 UInt
 // - filproofs - may have to learn about Sectors (and if we move Seal stuff, Deals)
 // - "blockchain/builtins" or something like that - a component in the blockchain that handles storage verification
 type PoStSubmission struct {
-    PostProof   sector.PoStProof
+    PostProof   abi.PoStProof
     ChainEpoch  abi.ChainEpoch
 }
 
 type PoStGenerator struct {
-    PoStCfg      sector.PoStInstanceCfg
-    SectorStore  sector_index.SectorStore
+    SectorStore sector_index.SectorStore
 
     GeneratePoStCandidates(
-        challengeSeed   sector.PoStRandomness
+        challengeSeed   abi.PoStRandomness
         candidateCount  UInt
-        sectors         [sector.SectorID]
-    ) [sector.PoStCandidate]
+        sectors         [abi.SectorID]
+    ) [abi.PoStCandidate]
 
     CreateElectionPoStProof(
-        randomness  sector.PoStRandomness
-        witness     sector.PoStWitness
-    ) [sector.PoStProof]
+        randomness  abi.PoStRandomness
+        witness     [abi.PoStCandidate]
+    ) [abi.PoStProof]
 
     CreateSurprisePoStProof(
-        randomness  sector.PoStRandomness
-        witness     sector.PoStWitness
-    ) [sector.PoStProof]
+        randomness  abi.PoStRandomness
+        witness     [abi.PoStCandidate]
+    ) [abi.PoStProof]
 
     // FIXME: Verification shouldn't require a PoStGenerator. Move this.
     VerifyPoStProof(
-        Proof          sector.PoStProof
-        challengeSeed  sector.PoStRandomness
+        Proof          abi.PoStProof
+        challengeSeed  abi.PoStRandomness
     ) bool
 }

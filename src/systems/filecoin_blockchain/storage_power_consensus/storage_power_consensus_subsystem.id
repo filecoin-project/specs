@@ -4,7 +4,6 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 import spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
 import node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
@@ -21,7 +20,7 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
 
     IsWinningPartialTicket(
         st                 st.StateTree
-        partialTicket      sector.PartialTicket
+        partialTicket      abi.PartialTicket
         sectorUtilization  abi.StoragePower
         numSectors         util.UVarint
     ) bool

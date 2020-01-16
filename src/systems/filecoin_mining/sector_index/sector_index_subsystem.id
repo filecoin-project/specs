@@ -1,15 +1,15 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
+import smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
 
 // TODO import this from StorageMarket
 type SectorIndex struct {
-    BySectorID     {sector.SectorID: sector.SectorInfo}
-    ByUnsealedCID  {sector.UnsealedSectorCID: sector.SectorInfo}
-    BySealedCID    {sector.SealedSectorCID: sector.SectorInfo}
+    BySectorID     {abi.SectorID: sector.SectorInfo}
+    ByUnsealedCID  {abi.UnsealedSectorCID: sector.SectorInfo}
+    BySealedCID    {abi.SealedSectorCID: sector.SectorInfo}
     ByPieceID      {piece.PieceID: sector.SectorInfo}
-    ByDealID       {deal.DealID: sector.SectorInfo}
+    ByDealID       {abi.DealID: sector.SectorInfo}
 }
 
 type SectorIndexerSubsystem struct {
@@ -20,15 +20,15 @@ type SectorIndexerSubsystem struct {
     // AddNewDeal is called by StorageMiningSubsystem after the StorageMarket
     // has made a deal. AddNewDeal returns an error when:
     // - there is no capacity to store more deals and their pieces
-    AddNewDeal(deal deal.StorageDeal) StageDealResponse
+    AddNewDeal(deal smarkact.StorageDeal) StageDealResponse
 
     // bring back if needed.
     // OnNewTipset(chain Chain, epoch abi.Epoch) struct {}
 
     // SectorsExpiredAtEpoch returns the set of sectors that expire
     // at a particular epoch.
-    SectorsExpiredAtEpoch(epoch abi.ChainEpoch) [sector.SectorID]
+    SectorsExpiredAtEpoch(epoch abi.ChainEpoch) [abi.SectorID]
 
     // removeSectors removes the given sectorIDs from storage.
-    removeSectors(sectorIDs [sector.SectorID])
+    removeSectors(sectorIDs [abi.SectorID])
 }

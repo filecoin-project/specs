@@ -1,10 +1,9 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
 import addr "github.com/filecoin-project/go-address"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import message "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import cid "github.com/ipfs/go-cid"
+import smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
 
 type StorageDealStatus uint64
 
@@ -14,7 +13,7 @@ type StorageAsk struct {
     Price             abi.TokenAmount  // attoFIL per GiB per epoch
     Collateral        abi.TokenAmount  // attoFIL per GiB per epoch
 
-    MinPieceSize      piece.PieceSize
+    MinPieceSize      abi.PieceSize
     // address of miner actor for deals
     Miner             addr.Address
     // the epoch at the time this ask was published
@@ -49,7 +48,7 @@ type AskProtocolResponse struct {
 // a storage provider on the storage deal protocol to propose a storage deal
 type DealProtocolRequest struct {
     // The deal being proposed
-    DealProposal  deal.StorageDealProposal
+    DealProposal  smarkact.StorageDealProposal
     // root of the data to be transferred
     Payload       cid.Cid
 }
@@ -59,7 +58,7 @@ type DealProtocolRequest struct {
 // deal proposal
 type DealProtocolResponse struct {
     // The CID of the storage deal proposal 
-    Proposal        &deal.StorageDealProposal
+    Proposal        &smarkact.StorageDealProposal
 
     // Status of deal
     State           StorageDealStatus
@@ -71,5 +70,5 @@ type DealProtocolResponse struct {
 }
 
 type StorageDataTransferVoucher struct {
-    Proposal &deal.StorageDealProposal
+    Proposal &smarkact.StorageDealProposal
 }

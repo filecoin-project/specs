@@ -4,9 +4,8 @@ import (
 	"encoding/binary"
 	big "math/big"
 
+	abi "github.com/filecoin-project/specs/actors/abi"
 	file "github.com/filecoin-project/specs/systems/filecoin_files/file"
-	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -70,19 +69,19 @@ func AsBytes_T(t util.T) []byte {
 	return []byte{}
 }
 
-func AsBytes_UnsealedSectorCID(cid sector.UnsealedSectorCID) []byte {
+func AsBytes_UnsealedSectorCID(cid abi.UnsealedSectorCID) []byte {
 	panic("Unimplemented for UnsealedSectorCID")
 
 	return []byte{}
 }
 
-func AsBytes_SealedSectorCID(CID sector.SealedSectorCID) []byte {
+func AsBytes_SealedSectorCID(CID abi.SealedSectorCID) []byte {
 	panic("Unimplemented for SealedSectorCID")
 
 	return []byte{}
 }
 
-func AsBytes_PieceCID(CID piece.PieceCID) []byte {
+func AsBytes_PieceCID(CID abi.PieceCID) []byte {
 	panic("Unimplemented for PieceCID")
 
 	return []byte{}
@@ -93,7 +92,7 @@ func fromBytes_T(_ interface{}) util.T {
 	return util.T{}
 }
 
-func fromBytes_PieceCID(_ interface{}) piece.PieceCID {
+func fromBytes_PieceCID(_ interface{}) abi.PieceCID {
 	panic("Unimplemented for PieceCID")
 }
 
@@ -125,30 +124,30 @@ func trimToFr32(data []byte) []byte {
 	return data
 }
 
-func UnsealedSectorCID(h SHA256Hash) sector.UnsealedSectorCID {
+func UnsealedSectorCID(h SHA256Hash) abi.UnsealedSectorCID {
 	panic("not implemented -- re-arrange bits")
 }
 
-func SealedSectorCID(h PedersenHash) sector.SealedSectorCID {
+func SealedSectorCID(h PedersenHash) abi.SealedSectorCID {
 	panic("not implemented -- re-arrange bits")
 }
 
-func Commitment_UnsealedSectorCID(cid sector.UnsealedSectorCID) Commitment {
+func Commitment_UnsealedSectorCID(cid abi.UnsealedSectorCID) Commitment {
 	panic("not implemented -- re-arrange bits")
 }
 
-func Commitment_SealedSectorCID(cid sector.SealedSectorCID) Commitment {
+func Commitment_SealedSectorCID(cid abi.SealedSectorCID) Commitment {
 	panic("not implemented -- re-arrange bits")
 }
 
-func ComputeDataCommitment(data []byte) (sector.UnsealedSectorCID, file.Path) {
+func ComputeDataCommitment(data []byte) (abi.UnsealedSectorCID, file.Path) {
 	// TODO: make hash parameterizable
 	hash, path := BuildTree_SHA256Hash(data)
 	return UnsealedSectorCID(hash), path
 }
 
 // Compute CommP or CommD.
-func ComputeUnsealedSectorCID(data []byte) (sector.UnsealedSectorCID, file.Path) {
+func ComputeUnsealedSectorCID(data []byte) (abi.UnsealedSectorCID, file.Path) {
 	// TODO: check that len(data) > minimum piece size and is a power of 2.
 	hash, treePath := BuildTree_SHA256Hash(data)
 	return UnsealedSectorCID(hash), treePath

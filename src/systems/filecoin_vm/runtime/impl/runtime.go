@@ -35,7 +35,6 @@ type InvocOutput = vmr.InvocOutput
 type ActorStateHandle = vmr.ActorStateHandle
 
 var EnsureErrorCode = exitcode.EnsureErrorCode
-var SystemError = exitcode.SystemError
 
 type Bytes = util.Bytes
 
@@ -161,12 +160,12 @@ func VMContext_Make(
 		_valueReceived:            valueReceived,
 		_gasRemaining:             gasRemaining,
 		_numValidateCalls:         0,
-		_output:                   nil,
+		_output:                   vmr.InvocOutput{},
 	}
 }
 
 func (rt *VMContext) AbortArgMsg(msg string) {
-	rt.Abort(exitcode.UserDefinedError(exitcode.InvalidArguments_User), msg)
+	rt.Abort(exitcode.InvalidArguments_User, msg)
 }
 
 func (rt *VMContext) AbortArg() {
@@ -174,7 +173,7 @@ func (rt *VMContext) AbortArg() {
 }
 
 func (rt *VMContext) AbortStateMsg(msg string) {
-	rt.Abort(exitcode.UserDefinedError(exitcode.InconsistentState_User), msg)
+	rt.Abort(exitcode.InconsistentState_User, msg)
 }
 
 func (rt *VMContext) AbortState() {
@@ -182,7 +181,7 @@ func (rt *VMContext) AbortState() {
 }
 
 func (rt *VMContext) AbortFundsMsg(msg string) {
-	rt.Abort(exitcode.UserDefinedError(exitcode.InsufficientFunds_User), msg)
+	rt.Abort(exitcode.InsufficientFunds_User, msg)
 }
 
 func (rt *VMContext) AbortFunds() {
@@ -190,7 +189,7 @@ func (rt *VMContext) AbortFunds() {
 }
 
 func (rt *VMContext) AbortAPI(msg string) {
-	rt.Abort(exitcode.SystemError(exitcode.RuntimeAPIError), msg)
+	rt.Abort(exitcode.RuntimeAPIError, msg)
 }
 
 func (rt *VMContext) CreateActor(codeID abi.ActorCodeID, address addr.Address) {
@@ -274,7 +273,7 @@ func (rt *VMContext) _releaseActorSubstate(checkStateCID ActorSubstateCID) {
 
 func (rt *VMContext) Assert(cond bool) {
 	if !cond {
-		rt.Abort(exitcode.SystemError(exitcode.RuntimeAssertFailure), "Runtime assertion failed")
+		rt.Abort(exitcode.RuntimeAssertFailure, "Runtime assertion failed")
 	}
 }
 
@@ -388,7 +387,7 @@ func (rt *VMContext) _throwErrorFull(exitCode ExitCode, errMsg string) {
 }
 
 func (rt *VMContext) _apiError(errMsg string) {
-	rt._throwErrorFull(exitcode.SystemError(exitcode.RuntimeAPIError), errMsg)
+	rt._throwErrorFull(exitcode.RuntimeAPIError, errMsg)
 }
 
 func _gasAmountAssertValid(x msg.GasAmount) {
@@ -404,7 +403,7 @@ func (rt *VMContext) _rtAllocGas(x msg.GasAmount) {
 	var ok bool
 	rt._gasRemaining, ok = rt._gasRemaining.SubtractIfNonnegative(x)
 	if !ok {
-		rt._throwError(exitcode.SystemError(exitcode.OutOfGas))
+		rt._throwError(exitcode.OutOfGas)
 	}
 }
 
@@ -500,17 +499,17 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 
 	initGasRemaining := rtOuter._gasRemaining
 
-	rtOuter._rtAllocGas(gascost.InvokeMethod(input.Value(), input.Method()))
+	rtOuter._rtAllocGas(gascost.InvokeMethod(input.Value, input.Method))
 
-	receiver, receiverAddr := rtOuter._resolveReceiver(input.To())
+	receiver, receiverAddr := rtOuter._resolveReceiver(input.To)
 	receiverCode, err := loadActorCode(receiver.CodeID())
 	if err != nil {
-		rtOuter._throwError(exitcode.SystemError(exitcode.ActorCodeNotFound))
+		rtOuter._throwError(exitcode.ActorCodeNotFound)
 	}
 
-	err = rtOuter._transferFunds(rtOuter._actorAddress, receiverAddr, input.Value())
+	err = rtOuter._transferFunds(rtOuter._actorAddress, receiverAddr, input.Value)
 	if err != nil {
-		rtOuter._throwError(exitcode.SystemError(exitcode.InsufficientFunds_System))
+		rtOuter._throwError(exitcode.InsufficientFunds_System)
 	}
 
 	rtInner := VMContext_Make(
@@ -522,15 +521,15 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 		rtOuter._internalCallSeqNum+1,
 		rtOuter._globalStatePending,
 		receiverAddr,
-		input.Value(),
+		input.Value,
 		rtOuter._gasRemaining,
 	)
 
 	invocOutput, exitCode, internalCallSeqNumFinal := _invokeMethodInternal(
 		rtInner,
 		receiverCode,
-		input.Method(),
-		input.Params(),
+		input.Method,
+		input.Params,
 	)
 
 	_gasAmountAssertValid(rtOuter._gasRemaining.Subtract(rtInner._gasRemaining))
@@ -540,13 +539,13 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 
 	rtOuter._internalCallSeqNum = internalCallSeqNumFinal
 
-	if exitCode.Equals(exitcode.SystemError(exitcode.OutOfGas)) {
+	if exitCode == exitcode.OutOfGas {
 		// OutOfGas error cannot be caught
 		rtOuter._throwError(exitCode)
 	}
 
 	if errSpec == PropagateErrors && exitCode.IsError() {
-		rtOuter._throwError(exitcode.SystemError(exitcode.MethodSubcallError))
+		rtOuter._throwError(exitcode.MethodSubcallError)
 	}
 
 	if exitCode.AllowsStateUpdate() {
@@ -571,7 +570,7 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actstate.ActorSta
 
 	if targetRaw.Protocol() != addr.SECP256K1 && targetRaw.Protocol() != addr.BLS {
 		// Don't implicitly create an account actor for an address without an associated key.
-		rt._throwError(exitcode.SystemError(exitcode.ActorNotFound))
+		rt._throwError(exitcode.ActorNotFound)
 	}
 
 	// Allocate an ID address from the init actor and map the pubkey To address to it.
@@ -582,10 +581,10 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actstate.ActorSta
 	rt._createActor(builtin.AccountActorCodeID, newIdAddr)
 
 	// Initialize account actor substate with it's pubkey address.
-	substate := &acctact.AccountActorState_I{
-		Address_: targetRaw,
+	substate := &acctact.AccountActorState{
+		Address: targetRaw,
 	}
-	rt._saveAccountActorState(newIdAddr, substate)
+	rt._saveAccountActorState(newIdAddr, *substate)
 	act, _ = rt._globalStatePending.GetActor(newIdAddr)
 	return act, newIdAddr
 }
@@ -593,24 +592,24 @@ func (rt *VMContext) _resolveReceiver(targetRaw addr.Address) (actstate.ActorSta
 func (rt *VMContext) _loadInitActorState() initact.InitActorState {
 	initState, ok := rt._globalStatePending.GetActor(builtin.InitActorAddr)
 	util.Assert(ok)
-	var initSubState initact.InitActorState_I
+	var initSubState initact.InitActorState
 	ok = rt.IpldGet(cid.Cid(initState.State()), &initSubState)
 	util.Assert(ok)
-	return &initSubState
+	return initSubState
 }
 
 func (rt *VMContext) _saveInitActorState(state initact.InitActorState) {
 	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
 	// than the receiver.
 	rt._rtAllocGas(gascost.UpdateActorSubstate)
-	rt._updateActorSubstateInternal(builtin.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
+	rt._updateActorSubstateInternal(builtin.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(&state)))
 }
 
 func (rt *VMContext) _saveAccountActorState(address addr.Address, state acctact.AccountActorState) {
 	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
 	// than the receiver.
 	rt._rtAllocGas(gascost.UpdateActorSubstate)
-	rt._updateActorSubstateInternal(address, actor.ActorSubstateCID(rt.IpldPut(state.Impl())))
+	rt._updateActorSubstateInternal(address, actor.ActorSubstateCID(rt.IpldPut(state)))
 }
 
 func (rt *VMContext) _sendInternalOutputs(input InvocInput, errSpec ErrorHandlingSpec) (InvocOutput, exitcode.ExitCode) {
@@ -626,7 +625,7 @@ func (rt *VMContext) Send(
 
 func (rt *VMContext) SendQuery(toAddr addr.Address, methodNum abi.MethodNum, params abi.MethodParams) util.Serialization {
 	invocOutput := rt.Send(toAddr, methodNum, params, abi.TokenAmount(0))
-	ret := invocOutput.ReturnValue()
+	ret := invocOutput.ReturnValue
 	Assert(ret != nil)
 	return ret
 }

@@ -1,81 +1,19 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
-import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 
 type Path struct {}  // TODO
 
-type SealRandomness Bytes
-type InteractiveSealRandomness Bytes
-
 // SealSeed is unique to each Sector
 // SealSeed is:
-//    SealSeedHash(MinerID, SectorNumber, SealRandomness, UnsealedSectorCID)
+//    SealSeedHash(MinerID, SectorNumber, SealRandomness, abi.UnsealedSectorCID)
 type SealSeed Bytes
-
-// type SealCfg struct {
-//     InstanceCfg    SealInstanceCfg
-//     ProofInstance
-// }
-
-// New proof ProofInstances can add new cfg types if needed.
-type SealInstanceCfg union {
-    WinStackedDRGCfgV1
-}
-
-type WinStackedDRGCfgV1 struct {
-    SectorSize
-    WindowCount UInt
-}
-
-// SealVerifyInfo is the structure of all the information a verifier
-// needs to verify a Seal.
-type SealVerifyInfo struct {
-    SectorID
-    OnChain                OnChainSealVerifyInfo
-    Randomness             SealRandomness
-    InteractiveRandomness  InteractiveSealRandomness
-    UnsealedCID            UnsealedSectorCID  // CommD
-}
-
-// OnChainSealVerifyInfo is the structure of information that must be sent with
-// a message to commit a sector. Most of this information is not needed in the
-// state tree but will be verified in sm.CommitSector. See SealCommitment for
-// data stored on the state tree for each sector.
-type OnChainSealVerifyInfo struct {
-    SealedCID             SealedSectorCID  // CommR
-    SealEpoch             abi.ChainEpoch
-    InteractiveEpoch      abi.ChainEpoch
-    RegisteredProof
-    Proof                 SealProof
-    DealIDs               deal.DealIDs
-    SectorNumber
-
-    IsValidAtSealEpoch()  bool
-}
 
 // SealCommitment is the information kept in the state tree about a sector.
 // SealCommitment is a subset of OnChainSealVerifyInfo.
 type SealCommitment struct {
-    SealedCID   SealedSectorCID  // CommR
-    DealIDs     deal.DealIDs
+    SealedCID   abi.SealedSectorCID  // CommR
+    DealIDs     abi.DealIDs
     Expiration  abi.ChainEpoch
-}
-
-type SectorPreCommitInfo struct {
-    SectorNumber
-    SealedCID     SealedSectorCID  // CommR
-    SealEpoch     abi.ChainEpoch
-    DealIDs       deal.DealIDs
-    Expiration    abi.ChainEpoch
-}
-
-type SectorProveCommitInfo struct {
-    SectorNumber
-    RegisteredProof
-    Proof             SealProof
-    InteractiveEpoch  abi.ChainEpoch
-    Expiration        abi.ChainEpoch
 }
 
 // PersistentProofAux is meta data required to generate certain proofs
@@ -92,12 +30,12 @@ type PersistentProofAux struct {
 }
 
 type ProofAuxTmp struct {
-    RegisteredProof  // FIXME: Make sure this is supplied.
+    RegisteredProof  abi.RegisteredProof  // FIXME: Make sure this is supplied.
     PersistentAux    PersistentProofAux  // TODO: Move this to sealer.SealOutputs.
 
-    SectorID
+    SectorID         abi.SectorID
     CommD            Commitment
-    CommR            SealedSectorCID
+    CommR            abi.SealedSectorCID
     CommDTreePath    file.Path
     CommCTreePath    file.Path
     CommQTreePath    file.Path
@@ -107,13 +45,8 @@ type ProofAuxTmp struct {
 }
 
 type SealArguments struct {
-    RegisteredProof
-    Algorithm        ProofAlgorithm
+    RegisteredProof  abi.RegisteredProof
     OutputArtifacts  SealOutputArtifacts
-}
-
-type SealProof struct {//<curve, system> {
-    ProofBytes Bytes
 }
 
 // TODO: move into proofs lib
@@ -121,14 +54,3 @@ type FilecoinSNARKProof struct {}  //<bls12-381, Groth16>
 
 // TODO
 type SealOutputArtifacts struct {}
-
-// TODO: PieceInfo is the name used by proofs for this struct, but there also exists a piece.PieceInfo type, which is different.
-// We should probably rename one of them, since this is quite confusing. Or, if we can put `PieceCID` into pieces.PieceInfo, we can just use that.
-type PieceInfo struct {
-    Size      UVarint  // Size in nodes. For BLS12-381 (capacity 254 bits), must be >= 16. (16 * 8 = 128)
-    PieceCID  piece.PieceCID
-}
-
-type PieceInfos struct {
-    Items [PieceInfo]
-}

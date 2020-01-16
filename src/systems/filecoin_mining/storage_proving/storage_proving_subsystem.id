@@ -1,4 +1,4 @@
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import abi "github.com/filecoin-project/specs/actors/abi"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 import sealer "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/sealer"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
@@ -7,8 +7,8 @@ type StorageProvingSubsystem struct {
     SectorSealer   sealer.SectorSealer
     PoStGenerator  poster.PoStGenerator
 
-    VerifySeal(sv sector.SealVerifyInfo, pieceInfos [sector.PieceInfo]) union {ok bool, err error}
-    ComputeUnsealedSectorCID(sectorSize UInt, pieceInfos [sector.PieceInfo]) union {unsealedSectorCID sector.UnsealedSectorCID, err error}
+    VerifySeal(sv abi.SealVerifyInfo, pieceInfos [abi.PieceInfo]) union {ok bool, err error}
+    ComputeUnsealedSectorCID(sectorSize UInt, pieceInfos [abi.PieceInfo]) union {unsealedSectorCID abi.UnsealedSectorCID, err error}
 
     ValidateBlock(block block.Block)
 
@@ -16,22 +16,22 @@ type StorageProvingSubsystem struct {
     // GetPieceInclusionProof(pieceRef CID) union { PieceInclusionProofs, error }
 
     GenerateElectionPoStCandidates(
-        challengeSeed  sector.PoStRandomness
-        sectorIDs      [sector.SectorID]
-    ) [sector.PoStCandidate]
+        challengeSeed  abi.PoStRandomness
+        sectorIDs      [abi.SectorID]
+    ) [abi.PoStCandidate]
 
     GenerateSurprisePoStCandidates(
-        challengeSeed  sector.PoStRandomness
-        sectorIDs      [sector.SectorID]
-    ) [sector.PoStCandidate]
+        challengeSeed  abi.PoStRandomness
+        sectorIDs      [abi.SectorID]
+    ) [abi.PoStCandidate]
 
     CreateElectionPoStProof(
-        challengeSeed  sector.PoStRandomness
-        candidates     [sector.PoStCandidate]
-    ) [sector.PoStProof]
+        challengeSeed  abi.PoStRandomness
+        candidates     [abi.PoStCandidate]
+    ) [abi.PoStProof]
 
     CreateSurprisePoStProof(
-        challengeSeed  sector.PoStRandomness
-        candidates     [sector.PoStCandidate]
-    ) [sector.PoStProof]
+        challengeSeed  abi.PoStRandomness
+        candidates     [abi.PoStCandidate]
+    ) [abi.PoStProof]
 }

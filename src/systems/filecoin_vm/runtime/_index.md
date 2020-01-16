@@ -1,6 +1,6 @@
 ---
 menuTitle: Runtime
-statusIcon: ⚠️
+statusIcon: 🔁
 title: VM Runtime Environment (Inside the VM)
 entries:
 - exitcode

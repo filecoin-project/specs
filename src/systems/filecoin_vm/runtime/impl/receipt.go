@@ -15,15 +15,7 @@ type MessageReceipt struct {
 func MessageReceipt_Make(output vmr.InvocOutput, exitCode exitcode.ExitCode, gasUsed msg.GasAmount) MessageReceipt {
 	return MessageReceipt{
 		ExitCode:    exitCode,
-		ReturnValue: output.ReturnValue(),
+		ReturnValue: output.ReturnValue,
 		GasUsed:     gasUsed,
 	}
-}
-
-func MessageReceipt_MakeSystemError(errCode exitcode.SystemErrorCode, gasUsed msg.GasAmount) MessageReceipt {
-	return MessageReceipt_Make(
-		nil,
-		exitcode.SystemError(errCode),
-		gasUsed,
-	)
 }

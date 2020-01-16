@@ -2,17 +2,13 @@
 title: Storage Power Actor
 ---
 
-# `StoragePowerActor` interface
-
-{{< readfile file="/docs/actors/builtin/storage_power/storage_power_actor.id" code="true" lang="go" >}}
-
 # `StoragePowerActorState` implementation
 
 {{< readfile file="/docs/actors/builtin/storage_power/storage_power_actor_state.go" code="true" lang="go" >}}
 
-# `StoragePowerActorCode` implementation
+# `StoragePowerActor` implementation
 
-{{< readfile file="/docs/actors/builtin/storage_power/storage_power_actor_code.go" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/builtin/storage_power/storage_power_actor.go" code="true" lang="go" >}}
 
 {{<label power_table>}}
 # The Power Table
