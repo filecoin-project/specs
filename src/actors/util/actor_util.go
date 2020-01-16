@@ -1,8 +1,79 @@
 package util
 
 import (
+	"math/big"
+
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
+)
+
+type BalanceTableHAMT map[addr.Address]abi.TokenAmount
+
+type DealIDSetHAMT map[abi.DealID]bool
+type IntToDealIDHAMT map[int64]abi.DealID
+
+type DealIDQueue struct {
+	Values     IntToDealIDHAMT
+	StartIndex int64
+	EndIndex   int64
+}
+
+func (x *DealIDQueue) Enqueue(dealID abi.DealID) {
+	nextIndex := x.EndIndex
+	x.Values[nextIndex] = dealID
+	x.EndIndex = nextIndex + 1
+}
+
+func (x *DealIDQueue) Dequeue() (dealID abi.DealID, ok bool) {
+	AssertMsg(x.StartIndex <= x.EndIndex, "index %d > end %d", x.StartIndex, x.EndIndex)
+
+	if x.StartIndex == x.EndIndex {
+		dealID = abi.DealID(-1)
+		ok = false
+		return
+	} else {
+		dealID = x.Values[x.StartIndex]
+		delete(x.Values, x.StartIndex)
+		x.StartIndex += 1
+		ok = true
+		return
+	}
+}
+
+func DealIDQueue_Empty() DealIDQueue {
+	return DealIDQueue{
+		Values:     IntToDealIDHAMT_Empty(),
+		StartIndex: 0,
+		EndIndex:   0,
+	}
+}
+
+type MinerSetHAMT map[addr.Address]bool
+
+type ActorIDSetHAMT map[abi.ActorID]bool
+
+type MinerEvent struct {
+	MinerAddr addr.Address
+	Sectors   []abi.SectorNumber // Empty for global events, such as SurprisePoSt expiration.
+}
+
+// TODO HAMT
+type MinerEventSetHAMT []MinerEvent
+
+type SectorStorageWeightDesc struct {
+	SectorSize abi.SectorSize
+	Duration   abi.ChainEpoch
+	DealWeight big.Int
+}
+
+type SectorTermination int64
+
+// Note: Detected fault termination (due to exceeding the limit of consecutive
+// SurprisePoSt failures) is not listed here, since this does not terminate all
+// sectors individually, but rather the miner as a whole.
+const (
+	NormalExpiration SectorTermination = iota
+	UserTermination
 )
 
 // Create a new entry in the balance table, with the specified initial balance.
@@ -103,36 +174,6 @@ func IntToDealIDHAMT_Empty() IntToDealIDHAMT {
 func DealIDSetHAMT_Empty() DealIDSetHAMT {
 	IMPL_FINISH()
 	panic("")
-}
-
-func DealIDQueue_Empty() DealIDQueue {
-	return &DealIDQueue_I{
-		Values_:     IntToDealIDHAMT_Empty(),
-		StartIndex_: 0,
-		EndIndex_:   0,
-	}
-}
-
-func (x *DealIDQueue_I) Enqueue(dealID abi.DealID) {
-	nextIndex := x.EndIndex()
-	x.Values()[nextIndex] = dealID
-	x.EndIndex_ = nextIndex + 1
-}
-
-func (x *DealIDQueue_I) Dequeue() (dealID abi.DealID, ok bool) {
-	AssertMsg(x.StartIndex() <= x.EndIndex(), "index %d > end %d", x.StartIndex(), x.EndIndex())
-
-	if x.StartIndex() == x.EndIndex() {
-		dealID = abi.DealID(-1)
-		ok = false
-		return
-	} else {
-		dealID = x.Values()[x.StartIndex()]
-		delete(x.Values(), x.StartIndex())
-		x.StartIndex_ += 1
-		ok = true
-		return
-	}
 }
 
 func MinerSetHAMT_Empty() MinerSetHAMT {

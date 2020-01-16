@@ -147,15 +147,15 @@ func SectorNumberSetHAMT_Empty() SectorNumberSetHAMT {
 func (st *StorageMinerActorState) GetStorageWeightDescForSectorMaybe(sectorNumber abi.SectorNumber) (ret SectorStorageWeightDesc, ok bool) {
 	sectorInfo, found := st.Sectors[sectorNumber]
 	if !found {
-		ret = nil
+		ret = autil.SectorStorageWeightDesc{}
 		ok = false
 		return
 	}
 
-	ret = &autil.SectorStorageWeightDesc_I{
-		SectorSize_: st.Info.SectorSize,
-		DealWeight_: sectorInfo.DealWeight,
-		Duration_:   sectorInfo.Info.Expiration - sectorInfo.ActivationEpoch,
+	ret = autil.SectorStorageWeightDesc{
+		SectorSize: st.Info.SectorSize,
+		DealWeight: sectorInfo.DealWeight,
+		Duration:   sectorInfo.Info.Expiration - sectorInfo.ActivationEpoch,
 	}
 	ok = true
 	return

@@ -8,9 +8,9 @@ import (
 
 type BalanceTableHAMT = autil.BalanceTableHAMT
 type SectorStorageWeightDesc = autil.SectorStorageWeightDesc
-type SectorTerminationType = autil.SectorTerminationType
+type SectorTerminationType = autil.SectorTermination
 
-var SectorTerminationType_NormalExpiration = autil.SectorTerminationType_NormalExpiration
+var SectorTerminationType_NormalExpiration = autil.NormalExpiration
 
 var RT_MinerEntry_ValidateCaller_DetermineFundsLocation = vmr.RT_MinerEntry_ValidateCaller_DetermineFundsLocation
 

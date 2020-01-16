@@ -204,16 +204,16 @@ func (a *StoragePowerActor) OnMinerSurprisePoStFailure(rt Runtime, numConsecutiv
 func (a *StoragePowerActor) OnMinerEnrollCronEvent(rt Runtime, eventEpoch abi.ChainEpoch, sectorNumbers []abi.SectorNumber) {
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
-	minerEvent := &autil.MinerEvent_I{
-		MinerAddr_: minerAddr,
-		Sectors_:   sectorNumbers,
+	minerEvent := autil.MinerEvent{
+		MinerAddr: minerAddr,
+		Sectors:   sectorNumbers,
 	}
 
 	h, st := a.State(rt)
 	if _, found := st.CachedDeferredCronEvents[eventEpoch]; !found {
 		st.CachedDeferredCronEvents[eventEpoch] = autil.MinerEventSetHAMT_Empty()
 	}
-	st.CachedDeferredCronEvents[eventEpoch][minerEvent] = true
+	st.CachedDeferredCronEvents[eventEpoch] = append(st.CachedDeferredCronEvents[eventEpoch], minerEvent)
 	UpdateRelease(rt, h, st)
 }
 
@@ -355,18 +355,18 @@ func (a *StoragePowerActor) _rtProcessDeferredCronEvents(rt Runtime) {
 	UpdateRelease(rt, h, st)
 
 	minerEventsRetain := []autil.MinerEvent{}
-	for minerEvent := range minerEvents {
-		if _, found := st.PowerTable[minerEvent.MinerAddr()]; found {
+	for _, minerEvent := range minerEvents {
+		if _, found := st.PowerTable[minerEvent.MinerAddr]; found {
 			minerEventsRetain = append(minerEventsRetain, minerEvent)
 		}
 	}
 
 	for _, minerEvent := range minerEventsRetain {
 		rt.Send(
-			minerEvent.MinerAddr(),
+			minerEvent.MinerAddr,
 			builtin.Method_StorageMinerActor_OnDeferredCronEvent,
 			serde.MustSerializeParams(
-				minerEvent.Sectors(),
+				minerEvent.Sectors,
 			),
 			abi.TokenAmount(0),
 		)
