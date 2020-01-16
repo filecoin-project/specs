@@ -185,7 +185,8 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, chain chain.Chain,
 
 	// Check sender balance.
 	gasLimitCost := _gasToFIL(message.GasLimit(), message.GasPrice())
-	networkTxnFee := indicesFromStateTree(inTree).NetworkTransactionFee(
+	tidx := indicesFromStateTree(inTree)
+	networkTxnFee := tidx.NetworkTransactionFee(
 		inTree.GetActorCodeID_Assert(message.To()), message.Method())
 	totalCost := message.Value() + gasLimitCost + networkTxnFee
 	if fromActor.Balance() < totalCost {
