@@ -103,9 +103,9 @@ func (a *StorageMarketActor) PublishStorageDeals(rt Runtime, newStorageDeals []S
 
 	// All storage deals will be added in an atomic transaction; this operation will be unrolled if any of them fails.
 	for _, newDeal := range newStorageDeals {
-		p := newDeal.Proposal()
+		p := newDeal.Proposal
 
-		if p.Provider() != providerAddr {
+		if p.Provider != providerAddr {
 			rt.AbortArgMsg("Incorrect provider listed in deal")
 		}
 
@@ -116,26 +116,26 @@ func (a *StorageMarketActor) PublishStorageDeals(rt Runtime, newStorageDeals []S
 		//
 		// Note: as an optimization, implementations may cache efficient data structures indicating
 		// which of the following set of updates are redundant and can be skipped.
-		amountSlashedTotal += st._rtUpdatePendingDealStatesForParty(rt, p.Client())
-		amountSlashedTotal += st._rtUpdatePendingDealStatesForParty(rt, p.Provider())
+		amountSlashedTotal += st._rtUpdatePendingDealStatesForParty(rt, p.Client)
+		amountSlashedTotal += st._rtUpdatePendingDealStatesForParty(rt, p.Provider)
 
-		st._rtLockBalanceOrAbort(rt, p.Client(), p.ClientBalanceRequirement())
-		st._rtLockBalanceOrAbort(rt, p.Provider(), p.ProviderBalanceRequirement())
+		st._rtLockBalanceOrAbort(rt, p.Client, p.ClientBalanceRequirement())
+		st._rtLockBalanceOrAbort(rt, p.Provider, p.ProviderBalanceRequirement())
 
 		id := st._generateStorageDealID(newDeal)
 
-		onchainDeal := &OnChainDeal_I{
-			ID_:               id,
-			Deal_:             newDeal,
-			SectorStartEpoch_: epochUndefined,
+		onchainDeal := OnChainDeal{
+			ID:               id,
+			Deal:             newDeal,
+			SectorStartEpoch: epochUndefined,
 		}
 
 		st.Deals[id] = onchainDeal
 
-		if _, found := st.CachedExpirationsPending[p.EndEpoch()]; !found {
-			st.CachedExpirationsPending[p.EndEpoch()] = actor_util.DealIDQueue_Empty()
+		if _, found := st.CachedExpirationsPending[p.EndEpoch]; !found {
+			st.CachedExpirationsPending[p.EndEpoch] = actor_util.DealIDQueue_Empty()
 		}
-		st.CachedExpirationsPending[p.EndEpoch()].Enqueue(id)
+		st.CachedExpirationsPending[p.EndEpoch].Enqueue(id)
 	}
 
 	st.CurrEpochNumDealsPublished += len(newStorageDeals)
@@ -174,7 +174,9 @@ func (a *StorageMarketActor) UpdateDealsOnSectorProveCommit(rt Runtime, dealIDs 
 	for _, dealID := range dealIDs.Items {
 		deal, _ := st._rtGetOnChainDealOrAbort(rt, dealID)
 		_rtAbortIfDealInvalidForNewSectorSeal(rt, minerAddr, sectorInfo.Expiration, deal)
-		st.Deals[dealID].Impl().SectorStartEpoch_ = rt.CurrEpoch()
+		ocd := st.Deals[dealID]
+		ocd.SectorStartEpoch = rt.CurrEpoch()
+		st.Deals[dealID] = ocd
 	}
 
 	UpdateRelease(rt, h, st)
@@ -190,8 +192,8 @@ func (a *StorageMarketActor) GetPieceInfosForDealIDs(rt Runtime, dealIDs abi.Dea
 	for _, dealID := range dealIDs.Items {
 		_, dealP := st._rtGetOnChainDealOrAbort(rt, dealID)
 		ret = append(ret, abi.PieceInfo{
-			PieceCID: dealP.PieceCID(),
-			Size:     dealP.PieceSize().Total(),
+			PieceCID: dealP.PieceCID,
+			Size:     dealP.PieceSize.Total(),
 		})
 	}
 
@@ -215,10 +217,10 @@ func (a *StorageMarketActor) GetWeightForDealSet(rt Runtime, dealIDs abi.DealIDs
 
 	for _, dealID := range dealIDs.Items {
 		_, dealP := st._getOnChainDealAssert(dealID)
-		Assert(dealP.Provider() == minerAddr)
+		Assert(dealP.Provider == minerAddr)
 
 		IMPL_FINISH() // BigInt arithmetic
-		ret += int(dealP.Duration()) * int(dealP.PieceSize().Total())
+		ret += int(dealP.Duration()) * int(dealP.PieceSize.Total())
 	}
 
 	UpdateRelease(rt, h, st)
@@ -234,12 +236,14 @@ func (a *StorageMarketActor) OnMinerSectorsTerminate(rt Runtime, dealIDs abi.Dea
 
 	for _, dealID := range dealIDs.Items {
 		_, dealP := st._rtGetOnChainDealOrAbort(rt, dealID)
-		Assert(dealP.Provider() == minerAddr)
+		Assert(dealP.Provider == minerAddr)
 
 		// Note: we do not perform the balance transfers here, but rather simply record the flag
 		// to indicate that _processDealSlashed should be called when the deferred state computation
 		// is performed.
-		st.Deals[dealID].Impl().SlashEpoch_ = rt.CurrEpoch()
+		ocd := st.Deals[dealID]
+		ocd.SlashEpoch = rt.CurrEpoch()
+		st.Deals[dealID] = ocd
 	}
 
 	UpdateRelease(rt, h, st)
@@ -342,31 +346,31 @@ func (a *StorageMarketActor) Constructor(rt Runtime) {
 ////////////////////////////////////////////////////////////////////////////////
 
 func _rtAbortIfDealAlreadyProven(rt Runtime, deal OnChainDeal) {
-	if deal.SectorStartEpoch() != epochUndefined {
+	if deal.SectorStartEpoch != epochUndefined {
 		rt.AbortStateMsg("Deal has already appeared in proven sector.")
 	}
 }
 
 func _rtAbortIfDealNotFromProvider(rt Runtime, dealP StorageDealProposal, minerAddr addr.Address) {
-	if dealP.Provider() != minerAddr {
+	if dealP.Provider != minerAddr {
 		rt.AbortStateMsg("Deal has incorrect miner as its provider.")
 	}
 }
 
 func _rtAbortIfDealStartElapsed(rt Runtime, dealP StorageDealProposal) {
-	if rt.CurrEpoch() > dealP.StartEpoch() {
+	if rt.CurrEpoch() > dealP.StartEpoch {
 		rt.AbortStateMsg("Deal start epoch has already elapsed.")
 	}
 }
 
 func _rtAbortIfDealEndElapsed(rt Runtime, dealP StorageDealProposal) {
-	if dealP.EndEpoch() > rt.CurrEpoch() {
+	if dealP.EndEpoch > rt.CurrEpoch() {
 		rt.AbortStateMsg("Deal end epoch has already elapsed.")
 	}
 }
 
 func _rtAbortIfDealExceedsSectorLifetime(rt Runtime, dealP StorageDealProposal, sectorExpiration abi.ChainEpoch) {
-	if dealP.EndEpoch() > sectorExpiration {
+	if dealP.EndEpoch > sectorExpiration {
 		rt.AbortStateMsg("Deal would outlive its containing sector.")
 	}
 }
@@ -374,7 +378,7 @@ func _rtAbortIfDealExceedsSectorLifetime(rt Runtime, dealP StorageDealProposal, 
 func _rtAbortIfDealInvalidForNewSectorSeal(
 	rt Runtime, minerAddr addr.Address, sectorExpiration abi.ChainEpoch, deal OnChainDeal) {
 
-	dealP := deal.Deal().Proposal()
+	dealP := deal.Deal.Proposal
 
 	_rtAbortIfDealNotFromProvider(rt, dealP, minerAddr)
 	_rtAbortIfDealAlreadyProven(rt, deal)
@@ -383,7 +387,7 @@ func _rtAbortIfDealInvalidForNewSectorSeal(
 }
 
 func _rtAbortIfNewDealInvalid(rt Runtime, deal StorageDeal) {
-	dealP := deal.Proposal()
+	dealP := deal.Proposal
 
 	if !_rtDealProposalIsInternallyValid(rt, dealP) {
 		rt.AbortStateMsg("Invalid deal proposal.")
@@ -396,25 +400,25 @@ func _rtAbortIfNewDealInvalid(rt Runtime, deal StorageDeal) {
 func _rtAbortIfDealFailsParamBounds(rt Runtime, dealP StorageDealProposal) {
 	inds := rt.CurrIndices()
 
-	minDuration, maxDuration := inds.StorageDeal_DurationBounds(dealP.PieceSize(), dealP.StartEpoch())
+	minDuration, maxDuration := inds.StorageDeal_DurationBounds(dealP.PieceSize, dealP.StartEpoch)
 	if dealP.Duration() < minDuration || dealP.Duration() > maxDuration {
 		rt.AbortStateMsg("Deal duration out of bounds.")
 	}
 
-	minPrice, maxPrice := inds.StorageDeal_StoragePricePerEpochBounds(dealP.PieceSize(), dealP.StartEpoch(), dealP.EndEpoch())
-	if dealP.StoragePricePerEpoch() < minPrice || dealP.StoragePricePerEpoch() > maxPrice {
+	minPrice, maxPrice := inds.StorageDeal_StoragePricePerEpochBounds(dealP.PieceSize, dealP.StartEpoch, dealP.EndEpoch)
+	if dealP.StoragePricePerEpoch < minPrice || dealP.StoragePricePerEpoch > maxPrice {
 		rt.AbortStateMsg("Storage price out of bounds.")
 	}
 
 	minProviderCollateral, maxProviderCollateral := inds.StorageDeal_ProviderCollateralBounds(
-		dealP.PieceSize(), dealP.StartEpoch(), dealP.EndEpoch())
-	if dealP.ProviderCollateral() < minProviderCollateral || dealP.ProviderCollateral() > maxProviderCollateral {
+		dealP.PieceSize, dealP.StartEpoch, dealP.EndEpoch)
+	if dealP.ProviderCollateral < minProviderCollateral || dealP.ProviderCollateral > maxProviderCollateral {
 		rt.AbortStateMsg("Provider collateral out of bounds.")
 	}
 
 	minClientCollateral, maxClientCollateral := inds.StorageDeal_ClientCollateralBounds(
-		dealP.PieceSize(), dealP.StartEpoch(), dealP.EndEpoch())
-	if dealP.ClientCollateral() < minClientCollateral || dealP.ClientCollateral() > maxClientCollateral {
+		dealP.PieceSize, dealP.StartEpoch, dealP.EndEpoch)
+	if dealP.ClientCollateral < minClientCollateral || dealP.ClientCollateral > maxClientCollateral {
 		rt.AbortStateMsg("Client collateral out of bounds.")
 	}
 }
