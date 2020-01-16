@@ -19,11 +19,3 @@ func MessageReceipt_Make(output vmr.InvocOutput, exitCode exitcode.ExitCode, gas
 		GasUsed:     gasUsed,
 	}
 }
-
-func MessageReceipt_MakeSystemError(errCode exitcode.SystemErrorCode, gasUsed msg.GasAmount) MessageReceipt {
-	return MessageReceipt_Make(
-		nil,
-		exitcode.SystemError(errCode),
-		gasUsed,
-	)
-}

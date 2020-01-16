@@ -1,12 +1,11 @@
 package exitcode
 
-type SystemErrorCode int64
-type UserDefinedErrorCode int64
+type ExitCode int64
 
 const (
 	// TODO: remove once canonical error codes are finalized
-	SystemErrorCode_Placeholder      = SystemErrorCode(-(1 << 30))
-	UserDefinedErrorCode_Placeholder = UserDefinedErrorCode(-(1 << 30))
+	SystemErrorCode_Placeholder      = ExitCode(-(1 << 30))
+	UserDefinedErrorCode_Placeholder = ExitCode(-(1 << 30))
 )
 
 // TODO: assign all of these.
@@ -65,56 +64,30 @@ const (
 	InsufficientPledgeCollateral
 )
 
-type ExitCode struct {
-	Success          struct{}
-	SystemError      SystemErrorCode
-	UserDefinedError UserDefinedErrorCode
+func (x ExitCode) IsSuccess() bool {
+	return x == ExitCode(0)
 }
 
-func OK() ExitCode {
-	return ExitCode{
-		Success:          struct{}{},
-		SystemError:      0,
-		UserDefinedError: 0,
-	}
-}
-
-func SystemError(x SystemErrorCode) ExitCode {
-	return ExitCode{
-		Success:          struct{}{},
-		SystemError:      x,
-		UserDefinedError: 0,
-	}
-}
-
-func (x *ExitCode) IsSuccess() bool {
-	return x.Success == struct{}{} && x.SystemError == 0 && x.UserDefinedError == 0
-}
-
-func (x *ExitCode) IsError() bool {
+func (x ExitCode) IsError() bool {
 	return !x.IsSuccess()
 }
 
-func (x *ExitCode) AllowsStateUpdate() bool {
+func (x ExitCode) Equals(e ExitCode) bool {
+	return x == e
+}
+
+func (x ExitCode) AllowsStateUpdate() bool {
 	return x.IsSuccess()
 }
 
-func (x *ExitCode) Equals(ExitCode) bool {
-	panic("")
+func OK() ExitCode {
+	return ExitCode(0)
 }
 
 func EnsureErrorCode(x ExitCode) ExitCode {
 	if !x.IsError() {
 		// Throwing an error with a non-error exit code is itself an error
-		x = SystemError(RuntimeAPIError)
+		x = (RuntimeAPIError)
 	}
 	return x
-}
-
-func UserDefinedError(e UserDefinedErrorCode) ExitCode {
-	return ExitCode{
-		Success:          struct{}{},
-		SystemError:      0,
-		UserDefinedError: e,
-	}
 }
