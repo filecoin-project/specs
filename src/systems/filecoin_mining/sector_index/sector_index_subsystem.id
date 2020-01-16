@@ -1,7 +1,7 @@
 import abi "github.com/filecoin-project/specs/actors/abi"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
-import storage_market "github.com/filecoin-project/specs/actors/builtin/storage_market"
+import smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
 
 // TODO import this from StorageMarket
 type SectorIndex struct {
@@ -20,7 +20,7 @@ type SectorIndexerSubsystem struct {
     // AddNewDeal is called by StorageMiningSubsystem after the StorageMarket
     // has made a deal. AddNewDeal returns an error when:
     // - there is no capacity to store more deals and their pieces
-    AddNewDeal(deal storage_market.StorageDeal) StageDealResponse
+    AddNewDeal(deal smarkact.StorageDeal) StageDealResponse
 
     // bring back if needed.
     // OnNewTipset(chain Chain, epoch abi.Epoch) struct {}

@@ -12,7 +12,7 @@ import node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_
 import stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import peer "github.com/libp2p/go-libp2p-core/peer"
-import storage_market "github.com/filecoin-project/specs/actors/builtin/storage_market"
+import smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
 
 type StorageMiningSubsystem struct {
     Node               node_base.FilecoinNode
@@ -49,7 +49,7 @@ type StorageMiningSubsystem struct {
     // call by StorageMarket.StorageProvider at the start of a deal.
     // Triggers AddNewDeal on SectorIndexer
     // StorageDeal contains DealCID
-    HandleStorageDeal(deal storage_market.StorageDeal)
+    HandleStorageDeal(deal smarkact.StorageDeal)
 
     // call by StorageMinerActor when error in sealing
     CommitSectorError()

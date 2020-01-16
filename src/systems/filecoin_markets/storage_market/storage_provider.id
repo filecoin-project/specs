@@ -4,15 +4,15 @@ import addr "github.com/filecoin-project/go-address"
 import dt "github.com/filecoin-project/specs/systems/filecoin_files/data_transfer"
 import peer "github.com/libp2p/go-libp2p-core/peer"
 import cid "github.com/ipfs/go-cid"
-import storage_market "github.com/filecoin-project/specs/actors/builtin/storage_market"
+import smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
 
 // ProviderLocalDealInfo is the information that a storage provider tracks locally about
 // a deal. It contains not only the storage proposal but the state of the deal
 // as it moves throught the system. It is persisted to local storage and updated 
 // as the deal goes through stages leading up to its being published (and afterward)
 type ProviderLocalDealInfo struct {
-    ProposalCid   &storage_market.StorageDealProposal
-    Proposal      storage_market.StorageDealProposal
+    ProposalCid   &smarkact.StorageDealProposal
+    Proposal      smarkact.StorageDealProposal
     MinerPeerID   peer.ID
     ClientPeerID  peer.ID
     Status        StorageDealStatus
@@ -31,7 +31,7 @@ type StorageProvider struct {
     ListAsks(addrress addr.Address) [StorageAsk]
 
     // ListDeals lists on-chain deals associated with this provider
-    ListDeals()            (deals [storage_market.StorageDeal], error)
+    ListDeals()            (deals [smarkact.StorageDeal], error)
 
     // ListIncompleteDeals lists deals that are in progress or rejected
     ListIncompleteDeals()  (deals [ProviderLocalDealInfo], error)
