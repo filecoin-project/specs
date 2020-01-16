@@ -1,6 +1,6 @@
 ---
 title: Sector
-statusIcon: ✅
+statusIcon: 🔁
 entries:
 - sectorset
 - posting

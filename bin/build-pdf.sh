@@ -29,7 +29,6 @@ files=(
     mining.md
     storage-market.md
     retrieval-market.md
-    payments.md
     faults.md
     zigzag-circuit.md
     zigzag-porep.md

@@ -1,6 +1,6 @@
 ---
 title: Network Interface
-statusIcon: ⚠️
+statusIcon: 🔁
 ---
 
 {{< readfile file="network.id" code="true" lang="go" >}}
