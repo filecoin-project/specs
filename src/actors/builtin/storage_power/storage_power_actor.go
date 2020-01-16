@@ -146,7 +146,8 @@ func (a *StoragePowerActor) OnSectorTerminate(
 	a._rtDeductClaimedPowerForSectorAssert(rt, minerAddr, storageWeightDesc)
 
 	if terminationType != SectorTerminationType_NormalExpiration {
-		amountToSlash := rt.CurrIndices().StoragePower_PledgeSlashForSectorTermination(storageWeightDesc, terminationType)
+		cidx := rt.CurrIndices()
+		amountToSlash := cidx.StoragePower_PledgeSlashForSectorTermination(storageWeightDesc, terminationType)
 		a._rtSlashPledgeCollateral(rt, minerAddr, amountToSlash)
 	}
 }
@@ -196,7 +197,8 @@ func (a *StoragePowerActor) OnMinerSurprisePoStFailure(rt Runtime, numConsecutiv
 	if numConsecutiveFailures > indices.StoragePower_SurprisePoStMaxConsecutiveFailures() {
 		a._rtDeleteMinerActor(rt, minerAddr)
 	} else {
-		amountToSlash := rt.CurrIndices().StoragePower_PledgeSlashForSurprisePoStFailure(minerClaimedPower, numConsecutiveFailures)
+		cidx := rt.CurrIndices()
+		amountToSlash := cidx.StoragePower_PledgeSlashForSurprisePoStFailure(minerClaimedPower, numConsecutiveFailures)
 		a._rtSlashPledgeCollateral(rt, minerAddr, amountToSlash)
 	}
 }
@@ -380,7 +382,8 @@ func (a *StoragePowerActor) _rtGetPledgeCollateralReqForMinerOrAbort(rt Runtime,
 		rt.AbortArgMsg("Miner not found")
 	}
 	Release(rt, h, st)
-	return rt.CurrIndices().PledgeCollateralReq(minerNominalPower)
+	cidx := rt.CurrIndices()
+	return cidx.PledgeCollateralReq(minerNominalPower)
 }
 
 func (a *StoragePowerActor) _rtSlashPledgeCollateral(rt Runtime, minerAddr addr.Address, amountToSlash abi.TokenAmount) {

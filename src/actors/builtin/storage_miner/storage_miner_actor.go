@@ -160,7 +160,8 @@ func (a *StorageMinerActor) PreCommitSector(rt Runtime, info SectorPreCommitInfo
 
 	Release(rt, h, st)
 
-	depositReq := rt.CurrIndices().StorageMining_PreCommitDeposit(st.Info.SectorSize, info.Expiration)
+	cidx := rt.CurrIndices()
+	depositReq := cidx.StorageMining_PreCommitDeposit(st.Info.SectorSize, info.Expiration)
 	RT_ConfirmFundsReceiptOrAbort_RefundRemainder(rt, depositReq)
 
 	// Verify deals with StorageMarketActor; abort if this fails.
@@ -341,7 +342,8 @@ func (a *StorageMinerActor) DeclareTemporaryFaults(rt Runtime, sectorNumbers []a
 	}
 
 	storageWeightDescs := a._rtGetStorageWeightDescsForSectors(rt, sectorNumbers)
-	requiredFee := rt.CurrIndices().StorageMining_TemporaryFaultFee(storageWeightDescs, duration)
+	cidx := rt.CurrIndices()
+	requiredFee := cidx.StorageMining_TemporaryFaultFee(storageWeightDescs, duration)
 
 	RT_ConfirmFundsReceiptOrAbort_RefundRemainder(rt, requiredFee)
 	rt.SendFunds(builtin.BurntFundsActorAddr, requiredFee)

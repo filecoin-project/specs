@@ -1,20 +1,35 @@
 package indices
 
 import (
+	"math/big"
+
 	abi "github.com/filecoin-project/specs/actors/abi"
 	actor_util "github.com/filecoin-project/specs/actors/util"
-	"math/big"
 )
 
 var PARAM_FINISH = actor_util.PARAM_FINISH
 
-func StorageDeal_ProviderInitTimedOutSlashAmount(providerCollateral abi.TokenAmount) abi.TokenAmount {
-	// placeholder
-	PARAM_FINISH()
-	return providerCollateral
+// Data in Indices are populated at instantiation with data from the state tree
+// Indices itself has no state tree or access to the runtime
+// it is a passive data structure that allows for convenience access to network indices
+// and pure functions in implementing economic policies given states
+type Indices struct {
+	// these fields are computed from StateTree upon construction
+	// they are treated as globally available states
+	Epoch                      abi.ChainEpoch
+	NetworkKPI                 big.Int
+	TotalNetworkSectorWeight   abi.SectorWeight
+	TotalPledgeCollateral      abi.TokenAmount
+	TotalNetworkEffectivePower abi.StoragePower // power above minimum miner size
+	TotalNetworkPower          abi.StoragePower // total network power irrespective of meeting minimum miner size
+
+	TotalMinedFIL   abi.TokenAmount
+	TotalUnminedFIL abi.TokenAmount
+	TotalBurnedFIL  abi.TokenAmount
+	LastEpochReward abi.TokenAmount
 }
 
-func (inds *Indices_I) StorageDeal_DurationBounds(
+func (inds *Indices) StorageDeal_DurationBounds(
 	pieceSize abi.PieceSize,
 	startEpoch abi.ChainEpoch,
 ) (minDuration abi.ChainEpoch, maxDuration abi.ChainEpoch) {
@@ -26,7 +41,7 @@ func (inds *Indices_I) StorageDeal_DurationBounds(
 	return
 }
 
-func (inds *Indices_I) StorageDeal_StoragePricePerEpochBounds(
+func (inds *Indices) StorageDeal_StoragePricePerEpochBounds(
 	pieceSize abi.PieceSize,
 	startEpoch abi.ChainEpoch,
 	endEpoch abi.ChainEpoch,
@@ -37,7 +52,7 @@ func (inds *Indices_I) StorageDeal_StoragePricePerEpochBounds(
 	panic("")
 }
 
-func (inds *Indices_I) StorageDeal_ProviderCollateralBounds(
+func (inds *Indices) StorageDeal_ProviderCollateralBounds(
 	pieceSize abi.PieceSize,
 	startEpoch abi.ChainEpoch,
 	endEpoch abi.ChainEpoch,
@@ -48,7 +63,7 @@ func (inds *Indices_I) StorageDeal_ProviderCollateralBounds(
 	panic("")
 }
 
-func (inds *Indices_I) StorageDeal_ClientCollateralBounds(
+func (inds *Indices) StorageDeal_ClientCollateralBounds(
 	pieceSize abi.PieceSize,
 	startEpoch abi.ChainEpoch,
 	endEpoch abi.ChainEpoch,
@@ -59,7 +74,7 @@ func (inds *Indices_I) StorageDeal_ClientCollateralBounds(
 	panic("")
 }
 
-func (inds *Indices_I) SectorWeight(
+func (inds *Indices) SectorWeight(
 	sectorSize abi.SectorSize,
 	startEpoch abi.ChainEpoch,
 	endEpoch abi.ChainEpoch,
@@ -71,24 +86,24 @@ func (inds *Indices_I) SectorWeight(
 	panic("")
 }
 
-func (inds *Indices_I) PledgeCollateralReq(minerNominalPower abi.StoragePower) abi.TokenAmount {
+func (inds *Indices) PledgeCollateralReq(minerNominalPower abi.StoragePower) abi.TokenAmount {
 	PARAM_FINISH()
 	panic("")
 }
 
-func (inds *Indices_I) SectorWeightProportion(minerActiveSectorWeight abi.SectorWeight) big.Int {
+func (inds *Indices) SectorWeightProportion(minerActiveSectorWeight abi.SectorWeight) big.Int {
 	// return proportion of SectorWeight for miner
 	PARAM_FINISH()
 	panic("")
 }
 
-func (inds *Indices_I) PledgeCollateralProportion(minerPledgeCollateral abi.TokenAmount) big.Int {
+func (inds *Indices) PledgeCollateralProportion(minerPledgeCollateral abi.TokenAmount) big.Int {
 	// return proportion of Pledge Collateral for miner
 	PARAM_FINISH()
 	panic("")
 }
 
-func (inds *Indices_I) StoragePower(
+func (inds *Indices) StoragePower(
 	minerActiveSectorWeight abi.SectorWeight,
 	minerInactiveSectorWeight abi.SectorWeight,
 	minerPledgeCollateral abi.TokenAmount,
@@ -99,14 +114,14 @@ func (inds *Indices_I) StoragePower(
 	panic("")
 }
 
-func (inds *Indices_I) StoragePowerProportion(
+func (inds *Indices) StoragePowerProportion(
 	minerStoragePower abi.StoragePower,
 ) big.Int {
 	PARAM_FINISH()
 	panic("")
 }
 
-func (inds *Indices_I) CurrEpochBlockReward() abi.TokenAmount {
+func (inds *Indices) CurrEpochBlockReward() abi.TokenAmount {
 	// total block reward allocated for CurrEpoch
 	// each expected winner get an equal share of this reward
 	// computed as a function of NetworkKPI, LastEpochReward, TotalUnmminedFIL, etc
@@ -114,7 +129,7 @@ func (inds *Indices_I) CurrEpochBlockReward() abi.TokenAmount {
 	panic("")
 }
 
-func (inds *Indices_I) GetCurrBlockRewardRewardForMiner(
+func (inds *Indices) GetCurrBlockRewardRewardForMiner(
 	minerStoragePower abi.StoragePower,
 	minerPledgeCollateral abi.TokenAmount,
 	// TODO extend or eliminate
@@ -124,7 +139,7 @@ func (inds *Indices_I) GetCurrBlockRewardRewardForMiner(
 }
 
 // TerminationFault
-func (inds *Indices_I) StoragePower_PledgeSlashForSectorTermination(
+func (inds *Indices) StoragePower_PledgeSlashForSectorTermination(
 	storageWeightDesc actor_util.SectorStorageWeightDesc,
 	terminationType actor_util.SectorTermination,
 ) abi.TokenAmount {
@@ -133,7 +148,7 @@ func (inds *Indices_I) StoragePower_PledgeSlashForSectorTermination(
 }
 
 // DetectedFault
-func (inds *Indices_I) StoragePower_PledgeSlashForSurprisePoStFailure(
+func (inds *Indices) StoragePower_PledgeSlashForSurprisePoStFailure(
 	minerClaimedPower abi.StoragePower,
 	numConsecutiveFailures int64,
 ) abi.TokenAmount {
@@ -141,7 +156,7 @@ func (inds *Indices_I) StoragePower_PledgeSlashForSurprisePoStFailure(
 	panic("")
 }
 
-func (inds *Indices_I) StorageMining_PreCommitDeposit(
+func (inds *Indices) StorageMining_PreCommitDeposit(
 	sectorSize abi.SectorSize,
 	expirationEpoch abi.ChainEpoch,
 ) abi.TokenAmount {
@@ -149,7 +164,7 @@ func (inds *Indices_I) StorageMining_PreCommitDeposit(
 	panic("")
 }
 
-func (inds *Indices_I) StorageMining_TemporaryFaultFee(
+func (inds *Indices) StorageMining_TemporaryFaultFee(
 	storageWeightDescs []actor_util.SectorStorageWeightDesc,
 	duration abi.ChainEpoch,
 ) abi.TokenAmount {
@@ -157,9 +172,17 @@ func (inds *Indices_I) StorageMining_TemporaryFaultFee(
 	panic("")
 }
 
-func (inds *Indices_I) NetworkTransactionFee(
+func (inds *Indices) NetworkTransactionFee(
 	toActorCodeID abi.ActorCodeID,
 	methodNum abi.MethodNum,
+) abi.TokenAmount {
+	PARAM_FINISH()
+	panic("")
+}
+
+func (inds *Indices) GetCurrBlockRewardForMiner(
+	minerStoragePower abi.StoragePower,
+	minerPledgeCollateral abi.TokenAmount,
 ) abi.TokenAmount {
 	PARAM_FINISH()
 	panic("")
@@ -170,6 +193,12 @@ func ConsensusPowerForStorageWeight(
 ) abi.StoragePower {
 	PARAM_FINISH()
 	panic("")
+}
+
+func StorageDeal_ProviderInitTimedOutSlashAmount(providerCollateral abi.TokenAmount) abi.TokenAmount {
+	// placeholder
+	PARAM_FINISH()
+	return providerCollateral
 }
 
 func StoragePower_ConsensusMinMinerPower() abi.StoragePower {
