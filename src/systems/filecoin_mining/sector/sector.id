@@ -58,31 +58,3 @@ type SealedSectorInfo struct {
     Size       abi.SectorSize
     SealArgs   SealArguments
 }
-
-type ProofRegistry {abi.RegisteredProof: ProofInstance}
-
-type ProofInstance struct {
-    ID           abi.RegisteredProof
-    Type         ProofType
-    Algorithm    abi.ProofAlgorithm
-    CircuitType  ConcreteCircuit
-    Partitions   UInt
-    Cfg          ProofCfg
-}
-
-type ProofCfg union {
-    SealCfg  SealInstanceCfg
-    PoStCfg  PoStInstanceCfg
-}
-
-type ProofType enum {
-    SealProof
-    PoStProof
-}
-
-type ConcreteCircuit struct {
-    // Name must be globally unique. It will be a hash derived from semantic content of circuit.
-    Name                      string
-    GrothParameterFileName()  string
-    VerifyingKeyFileName()    string
-}
