@@ -37,6 +37,8 @@ Status Legend:
 - ✅ **Stable** - Mostly complete, minor things expected to change, no major changes expected.
   - **Implementors:** Ready for you. You can build these parts.
 
+*Note that the status relates to the state of the spec either written out either in english or in code. The goal is for the spec to eventually be fleshed out in both language-sets.*
+
 [<a href="#" onclick="return statusIndicatorsShow();">Show</a> / <a href="#" onclick="return statusIndicatorsHide();">Hide</a> ] status indicators
 
 
