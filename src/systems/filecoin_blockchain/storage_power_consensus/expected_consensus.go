@@ -29,6 +29,7 @@ func (self *ExpectedConsensus_I) IsValidConsensusFault(faults spowact.ConsensusF
 
 	// validation checks before calling this method
 	// - there should be exactly two block headers in proof
+	// - block1 and block2 are two different blocks
 	// - both blocks are mined by the same miner
 	// - block1 is of the same or lower block height as block2
 
