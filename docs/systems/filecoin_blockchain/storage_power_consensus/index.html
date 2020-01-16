@@ -5123,7 +5123,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="nx">chainHead</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_blockchain</span><span class="p">().</span><span class="nf">BestChain</span><span class="p">().</span><span class="nf">HeadTipset</span><span class="p">()</span>
 	<span class="nx">sma</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_getStorageMinerActorState</span><span class="p">(</span><span class="nx">chainHead</span><span class="p">.</span><span class="nf">StateTree</span><span class="p">(),</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">Node</span><span class="p">().</span><span class="nf">Repository</span><span class="p">().</span><span class="nf">KeyStore</span><span class="p">().</span><span class="nf">MinerAddress</span><span class="p">())</span>
 
-	<span class="k">if</span> <span class="nx">sma</span><span class="p">.</span><span class="nf">PoStState</span><span class="p">().</span><span class="nf">Is_OK</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">sma</span><span class="p">.</span><span class="nx">PoStState</span><span class="p">.</span><span class="nf">Is_OK</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nx">ePoSt</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_tryLeaderElection</span><span class="p">(</span><span class="nx">chainHead</span><span class="p">.</span><span class="nf">StateTree</span><span class="p">(),</span> <span class="nx">sma</span><span class="p">)</span>
 		<span class="k">if</span> <span class="nx">ePoSt</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
 			<span class="c1">// Randomness for ticket generation in block production
@@ -5132,7 +5132,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 			<span class="nx">sms</span><span class="p">.</span><span class="nf">_blockProducer</span><span class="p">().</span><span class="nf">GenerateBlock</span><span class="p">(</span><span class="o">*</span><span class="nx">ePoSt</span><span class="p">,</span> <span class="nx">newTicket</span><span class="p">,</span> <span class="nx">chainHead</span><span class="p">,</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">Node</span><span class="p">().</span><span class="nf">Repository</span><span class="p">().</span><span class="nf">KeyStore</span><span class="p">().</span><span class="nf">MinerAddress</span><span class="p">())</span>
 		<span class="p">}</span>
-	<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">sma</span><span class="p">.</span><span class="nf">PoStState</span><span class="p">().</span><span class="nf">Is_Challenged</span><span class="p">()</span> <span class="p">{</span>
+	<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">sma</span><span class="p">.</span><span class="nx">PoStState</span><span class="p">.</span><span class="nf">Is_Challenged</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nx">sPoSt</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_trySurprisePoSt</span><span class="p">(</span><span class="nx">chainHead</span><span class="p">.</span><span class="nf">StateTree</span><span class="p">(),</span> <span class="nx">sma</span><span class="p">)</span>
 
 		<span class="kd">var</span> <span class="nx">gasLimit</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span>
@@ -5224,11 +5224,8 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="c1">// fix conversion to bytes
 </span><span class="c1"></span>	<span class="nx">util</span><span class="p">.</span><span class="nf">IMPL_TODO</span><span class="p">(</span><span class="nx">substate</span><span class="p">)</span>
 	<span class="kd">var</span> <span class="nx">serializedSubstate</span> <span class="nx">Serialization</span>
-	<span class="nx">st</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">sminact</span><span class="p">.</span><span class="nf">Deserialize_StorageMinerActorState</span><span class="p">(</span><span class="nx">serializedSubstate</span><span class="p">)</span>
-
-	<span class="k">if</span> <span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Deserialization error&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
+	<span class="kd">var</span> <span class="nx">st</span> <span class="nx">sminact</span><span class="p">.</span><span class="nx">StorageMinerActorState</span>
+	<span class="nx">serde</span><span class="p">.</span><span class="nf">MustDeserialize</span><span class="p">(</span><span class="nx">serializedSubstate</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">st</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">st</span>
 <span class="p">}</span>
 
@@ -5293,7 +5290,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="c1">// TODO if the workerAddress is secp then payload will be the blake2b hash of its public key
 </span><span class="c1"></span>	<span class="c1">// and we will need to recover the entire public key from worker before handing off to Verify
 </span><span class="c1"></span>	<span class="c1">// example of recover code: https://github.com/ipsn/go-secp256k1/blob/master/secp256.go#L93
-</span><span class="c1"></span>	<span class="nx">workerKey</span> <span class="o">:=</span> <span class="nx">sma</span><span class="p">.</span><span class="nf">Info</span><span class="p">().</span><span class="nf">Worker</span><span class="p">().</span><span class="nf">Payload</span><span class="p">()</span>
+</span><span class="c1"></span>	<span class="nx">workerKey</span> <span class="o">:=</span> <span class="nx">sma</span><span class="p">.</span><span class="nx">Info</span><span class="p">.</span><span class="nx">Worker</span><span class="p">.</span><span class="nf">Payload</span><span class="p">()</span>
 	<span class="c1">// Verify VRF output from appropriate input corresponds to randomness used
 </span><span class="c1"></span>	<span class="k">if</span> <span class="p">!</span><span class="nx">postRand</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">VRFPublicKey</span><span class="p">(</span><span class="nx">workerKey</span><span class="p">))</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="kc">false</span>
@@ -5301,8 +5298,8 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 	<span class="c1">// A proof must be a valid snark proof with the correct public inputs
 </span><span class="c1"></span>	<span class="c1">// 5. Get public inputs
-</span><span class="c1"></span>	<span class="nx">info</span> <span class="o">:=</span> <span class="nx">sma</span><span class="p">.</span><span class="nf">Info</span><span class="p">()</span>
-	<span class="nx">sectorSize</span> <span class="o">:=</span> <span class="nx">info</span><span class="p">.</span><span class="nf">SectorSize</span><span class="p">()</span>
+</span><span class="c1"></span>	<span class="nx">info</span> <span class="o">:=</span> <span class="nx">sma</span><span class="p">.</span><span class="nx">Info</span>
+	<span class="nx">sectorSize</span> <span class="o">:=</span> <span class="nx">info</span><span class="p">.</span><span class="nx">SectorSize</span>
 
 	<span class="nx">postCfg</span> <span class="o">:=</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">ElectionPoStCfg</span><span class="p">(</span><span class="nx">sectorSize</span><span class="p">)</span>
 
@@ -5343,12 +5340,12 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">sms</span> <span class="o">*</span><span class="nx">StorageMiningSubsystem_I</span><span class="p">)</span> <span class="nf">_trySurprisePoSt</span><span class="p">(</span><span class="nx">currState</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">sma</span> <span class="nx">sminact</span><span class="p">.</span><span class="nx">StorageMinerActorState</span><span class="p">)</span> <span class="o">*</span><span class="nx">abi</span><span class="p">.</span><span class="nx">OnChainSurprisePoStVerifyInfo</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="p">!</span><span class="nx">sma</span><span class="p">.</span><span class="nf">PoStState</span><span class="p">().</span><span class="nf">Is_Challenged</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">sma</span><span class="p">.</span><span class="nx">PoStState</span><span class="p">.</span><span class="nf">Is_Challenged</span><span class="p">()</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="kc">nil</span>
 	<span class="p">}</span>
 
 	<span class="c1">// get randomness for SurprisePoSt
-</span><span class="c1"></span>	<span class="nx">challEpoch</span> <span class="o">:=</span> <span class="nx">sma</span><span class="p">.</span><span class="nf">PoStState</span><span class="p">().</span><span class="nf">As_Challenged</span><span class="p">().</span><span class="nf">SurpriseChallengeEpoch</span><span class="p">()</span>
+</span><span class="c1"></span>	<span class="nx">challEpoch</span> <span class="o">:=</span> <span class="nx">sma</span><span class="p">.</span><span class="nx">PoStState</span><span class="p">.</span><span class="nx">SurpriseChallengeEpoch</span>
 	<span class="nx">randomnessK</span> <span class="o">:=</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">_blockchain</span><span class="p">().</span><span class="nf">BestChain</span><span class="p">().</span><span class="nf">GetPoStChallengeRandSeed</span><span class="p">(</span><span class="nx">challEpoch</span><span class="p">)</span>
 	<span class="c1">// unlike with ElectionPoSt no need to use a VRF
 </span><span class="c1"></span>	<span class="nx">postRandomness</span> <span class="o">:=</span> <span class="nx">acrypto</span><span class="p">.</span><span class="nf">DeriveRandWithMinerAddr</span><span class="p">(</span><span class="nx">acrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_SurprisePoStChallengeSeed</span><span class="p">,</span> <span class="nx">randomnessK</span><span class="p">,</span> <span class="nx">sms</span><span class="p">.</span><span class="nf">Node</span><span class="p">().</span><span class="nf">Repository</span><span class="p">().</span><span class="nf">KeyStore</span><span class="p">().</span><span class="nf">MinerAddress</span><span class="p">())</span>

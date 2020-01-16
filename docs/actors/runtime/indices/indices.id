@@ -105,7 +105,7 @@ type Indices struct {
 
     StoragePower_PledgeSlashForSurprisePoStFailure(
         minerClaimedPower       abi.StoragePower
-        numConsecutiveFailures  int
+        numConsecutiveFailures  int64
     ) abi.TokenAmount
 
     StoragePower_ConsensusMinMinerPower() abi.StoragePower

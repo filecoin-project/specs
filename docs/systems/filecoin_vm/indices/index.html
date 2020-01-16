@@ -4875,7 +4875,7 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nf">StoragePower_PledgeSlashForSurprisePoStFailure</span><span class="p">(</span>
         <span class="nx">minerClaimedPower</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span>
-        <span class="nx">numConsecutiveFailures</span>  <span class="kt">int</span>
+        <span class="nx">numConsecutiveFailures</span>  <span class="kt">int64</span>
     <span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
     <span class="nf">StoragePower_ConsensusMinMinerPower</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span>
@@ -5047,7 +5047,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">// DetectedFault
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">Indices_I</span><span class="p">)</span> <span class="nf">StoragePower_PledgeSlashForSurprisePoStFailure</span><span class="p">(</span>
 	<span class="nx">minerClaimedPower</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span>
-	<span class="nx">numConsecutiveFailures</span> <span class="kt">int</span><span class="p">,</span>
+	<span class="nx">numConsecutiveFailures</span> <span class="kt">int64</span><span class="p">,</span>
 <span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
@@ -5099,7 +5099,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">StoragePower_SurprisePoStMaxConsecutiveFailures</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">StoragePower_SurprisePoStMaxConsecutiveFailures</span><span class="p">()</span> <span class="kt">int64</span> <span class="p">{</span>
 	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>

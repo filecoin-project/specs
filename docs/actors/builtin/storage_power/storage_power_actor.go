@@ -179,7 +179,7 @@ func (a *StoragePowerActor) OnMinerSurprisePoStSuccess(rt Runtime) {
 	UpdateRelease(rt, h, st)
 }
 
-func (a *StoragePowerActor) OnMinerSurprisePoStFailure(rt Runtime, numConsecutiveFailures int) {
+func (a *StoragePowerActor) OnMinerSurprisePoStFailure(rt Runtime, numConsecutiveFailures int64) {
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 
