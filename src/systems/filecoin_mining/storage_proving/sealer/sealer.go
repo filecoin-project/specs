@@ -9,9 +9,9 @@ import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunRet_I {
-	cfg := si.SealCfg()
-	sectorSize := si.SealCfg().Impl().SectorSize()
-	sdr := filproofs.WinSDRParams(cfg)
+	registeredProof := si.RegisteredProof()
+	sectorSize := si.SectorSize()
+	sdr := filproofs.WinSDRParams(registeredProof)
 
 	sid := si.SectorID()
 	sectorSizeInt := int(sectorSize)
@@ -73,9 +73,9 @@ func (s *SectorSealer_I) CreateSealProof(si CreateSealProofInputs) *SectorSealer
 	auxTmp := si.SealOutputs().ProofAuxTmp()
 	aux := auxTmp.PersistentAux()
 
-	cfg := si.SealCfg()
+	registeredProof := si.RegisteredProof()
 
-	sdr := filproofs.WinSDRParams(cfg)
+	sdr := filproofs.WinSDRParams(registeredProof)
 	proof := sdr.CreateSealProof(randomSeed, auxTmp)
 
 	onChain := abi.OnChainSealVerifyInfo{

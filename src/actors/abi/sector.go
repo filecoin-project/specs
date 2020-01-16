@@ -113,6 +113,7 @@ type OnChainSurprisePoStVerifyInfo struct {
 }
 
 type PoStCandidate struct {
+	RegisteredProof
 	PartialTicket  PartialTicket             // Optional —  will eventually be omitted for SurprisePoSt verification, needed for now.
 	PrivateProof   PrivatePoStCandidateProof // Optional — should be ommitted for verification.
 	SectorID       SectorID
@@ -124,10 +125,11 @@ type PoStProof struct { //<curve, system> {
 }
 
 type PrivatePoStCandidateProof struct {
-	Algorithm    ProofAlgorithm
+	RegisteredProof
 	Externalized Bytes
 }
 
+// FIXME: Can these die?
 type ProofAlgorithm int64
 
 const (

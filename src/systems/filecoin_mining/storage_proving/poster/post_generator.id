@@ -14,8 +14,7 @@ type PoStSubmission struct {
 }
 
 type PoStGenerator struct {
-    PoStCfg      sector.PoStInstanceCfg
-    SectorStore  sector_index.SectorStore
+    SectorStore sector_index.SectorStore
 
     GeneratePoStCandidates(
         challengeSeed   abi.PoStRandomness

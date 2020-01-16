@@ -4,9 +4,9 @@ import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import addr "github.com/filecoin-project/go-address"
 
 type SealInputs struct {
+    SectorSize       abi.SectorSize
     RegisteredProof  abi.RegisteredProof  // FIXME: Ensure this is provided.
     SectorID         abi.SectorID
-    SealCfg          sector.SealInstanceCfg
     MinerID          addr.Address
     RandomSeed       abi.SealRandomness
     UnsealedPath     file.Path
@@ -16,7 +16,7 @@ type SealInputs struct {
 
 type CreateSealProofInputs struct {
     SectorID               abi.SectorID
-    SealCfg                sector.SealInstanceCfg
+    RegisteredProof        abi.RegisteredProof
     InteractiveRandomSeed  abi.InteractiveSealRandomness
     SealedPaths            [file.Path]
     SealOutputs

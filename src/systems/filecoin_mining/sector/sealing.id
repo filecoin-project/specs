@@ -8,14 +8,31 @@ type Path struct {}  // TODO
 //    SealSeedHash(MinerID, SectorNumber, SealRandomness, abi.UnsealedSectorCID)
 type SealSeed Bytes
 
-// New proof ProofInstances can add new cfg types if needed.
-type SealInstanceCfg union {
-    WinStackedDRGCfgV1
+// SealVerifyInfo is the structure of all the information a verifier
+// needs to verify a Seal.
+type SealVerifyInfo struct {
+    SectorID               abi.SectorID
+
+    OnChain                OnChainSealVerifyInfo
+    Randomness             abi.SealRandomness
+    InteractiveRandomness  abi.InteractiveSealRandomness
+    UnsealedCID            abi.UnsealedSectorCID  // CommD
 }
 
-type WinStackedDRGCfgV1 struct {
-    SectorSize   abi.SectorSize
-    WindowCount  UInt
+// OnChainSealVerifyInfo is the structure of information that must be sent with
+// a message to commit a sector. Most of this information is not needed in the
+// state tree but will be verified in sm.CommitSector. See SealCommitment for
+// data stored on the state tree for each sector.
+type OnChainSealVerifyInfo struct {
+    SealedCID             abi.SealedSectorCID  // CommR
+    SealEpoch             abi.ChainEpoch
+    InteractiveEpoch      abi.ChainEpoch
+    RegisteredProof       abi.RegisteredProof
+    Proof                 abi.SealProof
+    DealIDs               abi.DealIDs
+    SectorNumber          abi.SectorNumber
+
+    IsValidAtSealEpoch()  bool
 }
 
 // SealCommitment is the information kept in the state tree about a sector.
@@ -56,7 +73,6 @@ type ProofAuxTmp struct {
 
 type SealArguments struct {
     RegisteredProof  abi.RegisteredProof
-    Algorithm        abi.ProofAlgorithm
     OutputArtifacts  SealOutputArtifacts
 }
 

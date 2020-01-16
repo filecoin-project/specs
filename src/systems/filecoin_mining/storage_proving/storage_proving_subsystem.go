@@ -10,16 +10,9 @@ import (
 
 func (sps *StorageProvingSubsystem_I) VerifySeal(sv abi.SealVerifyInfo) StorageProvingSubsystem_VerifySeal_FunRet {
 	registeredProof := sv.OnChain.RegisteredProof
-	proofInstance := sector.RegisteredProofInstance(registeredProof)
 
-	var result bool
-
-	// TODO: Presumably this can be done with interfaces or whatever method we intend for such things,
-	// but for now this expresses intent simply enough.
-	switch proofInstance.Algorithm() {
-	case abi.ProofAlgorithm_WinStackedDRGSeal:
-		result = filproofs.WinSDRParams(proofInstance.Cfg().As_SealCfg()).VerifySeal(sv)
-	}
+	verifier := filproofs.MakeSealVerifier(registeredProof)
+	result := verifier.VerifySeal(sv)
 
 	return StorageProvingSubsystem_VerifySeal_FunRet_Make_ok(StorageProvingSubsystem_VerifySeal_FunRet_ok(result)) //,
 }
