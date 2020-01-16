@@ -539,7 +539,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 
 	rtOuter._internalCallSeqNum = internalCallSeqNumFinal
 
-	if exitCode.Equals(exitcode.OutOfGas) {
+	if exitCode == exitcode.OutOfGas {
 		// OutOfGas error cannot be caught
 		rtOuter._throwError(exitCode)
 	}

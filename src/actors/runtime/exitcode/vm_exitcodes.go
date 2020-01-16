@@ -8,6 +8,8 @@ const (
 	UserDefinedErrorCode_Placeholder = ExitCode(-(1 << 30))
 )
 
+const Ok = ExitCode(0)
+
 // TODO: assign all of these.
 const (
 	// ActorNotFound represents a failure to find an actor.
@@ -65,15 +67,11 @@ const (
 )
 
 func (x ExitCode) IsSuccess() bool {
-	return x == ExitCode(0)
+	return x == Ok
 }
 
 func (x ExitCode) IsError() bool {
 	return !x.IsSuccess()
-}
-
-func (x ExitCode) Equals(e ExitCode) bool {
-	return x == e
 }
 
 func (x ExitCode) AllowsStateUpdate() bool {
@@ -81,7 +79,7 @@ func (x ExitCode) AllowsStateUpdate() bool {
 }
 
 func OK() ExitCode {
-	return ExitCode(0)
+	return Ok
 }
 
 func EnsureErrorCode(x ExitCode) ExitCode {
