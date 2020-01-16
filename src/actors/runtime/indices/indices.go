@@ -3,16 +3,15 @@ package indices
 import (
 	abi "github.com/filecoin-project/specs/actors/abi"
 	actor_util "github.com/filecoin-project/specs/actors/util"
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	"math/big"
 )
 
 var PARAM_FINISH = actor_util.PARAM_FINISH
 
-func StorageDeal_ProviderInitTimedOutSlashAmount(deal deal.OnChainDeal) abi.TokenAmount {
+func StorageDeal_ProviderInitTimedOutSlashAmount(providerCollateral abi.TokenAmount) abi.TokenAmount {
 	// placeholder
 	PARAM_FINISH()
-	return deal.Deal().Proposal().ProviderBalanceRequirement()
+	return providerCollateral
 }
 
 func (inds *Indices_I) StorageDeal_DurationBounds(
@@ -64,7 +63,7 @@ func (inds *Indices_I) SectorWeight(
 	sectorSize abi.SectorSize,
 	startEpoch abi.ChainEpoch,
 	endEpoch abi.ChainEpoch,
-	dealWeight deal.DealWeight,
+	dealWeight abi.DealWeight,
 ) abi.SectorWeight {
 	// for every sector, given its size, start, end, and deals within the sector
 	// assign sector power for the duration of its lifetime

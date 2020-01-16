@@ -7,7 +7,6 @@ import (
 	storage_miner "github.com/filecoin-project/specs/actors/builtin/storage_miner"
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	actor_util "github.com/filecoin-project/specs/actors/util"
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -64,7 +63,7 @@ func (a *StorageMarketActorCode_I) AddBalance(rt Runtime, entryAddr addr.Address
 	UpdateRelease(rt, h, st)
 }
 
-func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDeals []deal.StorageDeal) {
+func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDeals []StorageDeal) {
 	IMPL_FINISH() // BigInt arithmetic
 	amountSlashedTotal := abi.TokenAmount(0)
 
@@ -98,7 +97,7 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 
 		id := st._generateStorageDealID(newDeal)
 
-		onchainDeal := &deal.OnChainDeal_I{
+		onchainDeal := &OnChainDeal_I{
 			ID_:               id,
 			Deal_:             newDeal,
 			SectorStartEpoch_: epochUndefined,
@@ -171,7 +170,7 @@ func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, dealIDs a
 	return abi.PieceInfos{Items: ret}
 }
 
-func (a *StorageMarketActorCode_I) GetWeightForDealSet(rt Runtime, dealIDs abi.DealIDs) deal.DealWeight {
+func (a *StorageMarketActorCode_I) GetWeightForDealSet(rt Runtime, dealIDs abi.DealIDs) abi.DealWeight {
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 
@@ -190,7 +189,7 @@ func (a *StorageMarketActorCode_I) GetWeightForDealSet(rt Runtime, dealIDs abi.D
 
 	UpdateRelease(rt, h, st)
 
-	return deal.DealWeight(ret)
+	return abi.DealWeight(ret)
 }
 
 func (a *StorageMarketActorCode_I) OnMinerSectorsTerminate(rt Runtime, dealIDs abi.DealIDs) {
@@ -325,31 +324,31 @@ func (st *StorageMarketActorState_I) _rtUpdatePendingDealStatesForParty(rt Runti
 	return
 }
 
-func _rtAbortIfDealAlreadyProven(rt Runtime, deal deal.OnChainDeal) {
+func _rtAbortIfDealAlreadyProven(rt Runtime, deal OnChainDeal) {
 	if deal.SectorStartEpoch() != epochUndefined {
 		rt.AbortStateMsg("Deal has already appeared in proven sector.")
 	}
 }
 
-func _rtAbortIfDealNotFromProvider(rt Runtime, dealP deal.StorageDealProposal, minerAddr addr.Address) {
+func _rtAbortIfDealNotFromProvider(rt Runtime, dealP StorageDealProposal, minerAddr addr.Address) {
 	if dealP.Provider() != minerAddr {
 		rt.AbortStateMsg("Deal has incorrect miner as its provider.")
 	}
 }
 
-func _rtAbortIfDealStartElapsed(rt Runtime, dealP deal.StorageDealProposal) {
+func _rtAbortIfDealStartElapsed(rt Runtime, dealP StorageDealProposal) {
 	if rt.CurrEpoch() > dealP.StartEpoch() {
 		rt.AbortStateMsg("Deal start epoch has already elapsed.")
 	}
 }
 
-func _rtAbortIfDealEndElapsed(rt Runtime, dealP deal.StorageDealProposal) {
+func _rtAbortIfDealEndElapsed(rt Runtime, dealP StorageDealProposal) {
 	if dealP.EndEpoch() > rt.CurrEpoch() {
 		rt.AbortStateMsg("Deal end epoch has already elapsed.")
 	}
 }
 
-func _rtAbortIfDealExceedsSectorLifetime(rt Runtime, dealP deal.StorageDealProposal, sectorExpiration abi.ChainEpoch) {
+func _rtAbortIfDealExceedsSectorLifetime(rt Runtime, dealP StorageDealProposal, sectorExpiration abi.ChainEpoch) {
 	if dealP.EndEpoch() > sectorExpiration {
 		rt.AbortStateMsg("Deal would outlive its containing sector.")
 	}
@@ -362,7 +361,7 @@ func (st *StorageMarketActorState_I) _rtAbortIfAddressEntryDoesNotExist(rt Runti
 }
 
 func _rtAbortIfDealInvalidForNewSectorSeal(
-	rt Runtime, minerAddr addr.Address, sectorExpiration abi.ChainEpoch, deal deal.OnChainDeal) {
+	rt Runtime, minerAddr addr.Address, sectorExpiration abi.ChainEpoch, deal OnChainDeal) {
 
 	dealP := deal.Deal().Proposal()
 
@@ -372,7 +371,7 @@ func _rtAbortIfDealInvalidForNewSectorSeal(
 	_rtAbortIfDealExceedsSectorLifetime(rt, dealP, sectorExpiration)
 }
 
-func _rtAbortIfNewDealInvalid(rt Runtime, deal deal.StorageDeal) {
+func _rtAbortIfNewDealInvalid(rt Runtime, deal StorageDeal) {
 	dealP := deal.Proposal()
 
 	if !_rtDealProposalIsInternallyValid(rt, dealP) {
@@ -383,7 +382,7 @@ func _rtAbortIfNewDealInvalid(rt Runtime, deal deal.StorageDeal) {
 	_rtAbortIfDealFailsParamBounds(rt, dealP)
 }
 
-func _rtAbortIfDealFailsParamBounds(rt Runtime, dealP deal.StorageDealProposal) {
+func _rtAbortIfDealFailsParamBounds(rt Runtime, dealP StorageDealProposal) {
 	inds := rt.CurrIndices()
 
 	minDuration, maxDuration := inds.StorageDeal_DurationBounds(dealP.PieceSize(), dealP.StartEpoch())
@@ -409,7 +408,7 @@ func _rtAbortIfDealFailsParamBounds(rt Runtime, dealP deal.StorageDealProposal) 
 	}
 }
 
-func (st *StorageMarketActorState_I) _rtGetOnChainDealOrAbort(rt Runtime, dealID abi.DealID) (deal deal.OnChainDeal, dealP deal.StorageDealProposal) {
+func (st *StorageMarketActorState_I) _rtGetOnChainDealOrAbort(rt Runtime, dealID abi.DealID) (deal OnChainDeal, dealP StorageDealProposal) {
 	var found bool
 	deal, dealP, found = st._getOnChainDeal(dealID)
 	if !found {
