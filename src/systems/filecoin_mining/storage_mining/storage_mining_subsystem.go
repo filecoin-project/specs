@@ -1,7 +1,6 @@
 package storage_mining
 
 // import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
-// import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import (
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs/actors/abi"
@@ -15,7 +14,6 @@ import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
@@ -47,7 +45,7 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(
 	unsignedCreationMessage := &msg.UnsignedMessage_I{
 		From_:       ownerAddr,
 		To_:         builtin.StoragePowerActorAddr,
-		Method_:     ai.Method_StoragePowerActor_CreateMiner,
+		Method_:     builtin.Method_StoragePowerActor_CreateMiner,
 		Params_:     serde.MustSerializeParams(ownerAddr, workerAddr, peerId),
 		CallSeqNum_: ownerActor.CallSeqNum(),
 		Value_:      pledgeAmt,
@@ -375,7 +373,7 @@ func (sms *StorageMiningSubsystem_I) _submitSurprisePoStMessage(state stateTree.
 	unsignedCreationMessage := &msg.UnsignedMessage_I{
 		From_:       sms.Node().Repository().KeyStore().MinerAddress(),
 		To_:         sms.Node().Repository().KeyStore().MinerAddress(),
-		Method_:     ai.Method_StorageMinerActor_SubmitSurprisePoStResponse,
+		Method_:     builtin.Method_StorageMinerActor_SubmitSurprisePoStResponse,
 		Params_:     serde.MustSerializeParams(sPoSt),
 		CallSeqNum_: worker.CallSeqNum(),
 		Value_:      abi.TokenAmount(0),
