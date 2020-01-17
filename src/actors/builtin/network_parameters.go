@@ -31,8 +31,11 @@ const DECLARED_FAULT_EFFECTIVE_DELAY = abi.ChainEpoch(20) // placeholder
 const MIN_PROVE_COMMIT_SECTOR_EPOCH = abi.ChainEpoch(5)
 const MAX_PROVE_COMMIT_SECTOR_EPOCH = abi.ChainEpoch(10)
 
-const SPC_LOOKBACK_POST = 1   // cheap to generate, should be set as close to current TS as possible
-const SPC_LOOKBACK_SEAL = 500 // should be approximately the same as finality
+const FINALITY = 500
+const SPC_LOOKBACK_POST = 1 // cheap to generate, should be set as close to current TS as possible
+const SPC_LOOKBACK_SEAL = FINALITY
+
+const MAX_SEAL_TIME_32GIB_WIN_STACKED_SDR = 1 // TODO: Change to a dictionary with RegisteredProofs as the key.
 
 /////////////////////////////////////////////////////////////
 // Storage power

@@ -698,6 +698,13 @@ func (a *StorageMinerActor) _rtVerifySealOrAbort(rt Runtime, onChainInfo *abi.On
 	sectorSize := info.SectorSize
 	Release(rt, h, st)
 
+	// if IsValidAtCommitEpoch(onChainInfo.RegisteredProof, rt.CurrEpoch()) // Ensure proof type is valid at current epoch.
+
+	// Check randomness.
+	if onChainInfo.SealEpoch < (rt.CurrEpoch() - builtin.FINALITY - builtin.MAX_SEAL_TIME_32GIB_WIN_STACKED_SDR) {
+		rt.AbortStateMsg("Seal references ticket from invalid epoch")
+	}
+
 	var pieceInfos abi.PieceInfos
 	err := serde.Deserialize(rt.SendQuery(
 		builtin.StorageMarketActorAddr,
@@ -727,9 +734,8 @@ func (a *StorageMinerActor) _rtVerifySealOrAbort(rt Runtime, onChainInfo *abi.On
 		rt.AbortStateMsg("receiver must be ID address")
 	}
 
-	IMPL_TODO() // Use randomness APIs
-	var svInfoRandomness abi.Randomness
-	var svInfoInteractiveRandomness abi.Randomness
+	svInfoRandomness := rt.GetRandomness(onChainInfo.SealEpoch)
+	svInfoInteractiveRandomness := rt.GetRandomness(onChainInfo.InteractiveEpoch)
 
 	svInfo := abi.SealVerifyInfo{
 		SectorID: abi.SectorID{

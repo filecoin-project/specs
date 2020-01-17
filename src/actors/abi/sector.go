@@ -66,14 +66,12 @@ type SealVerifyInfo struct {
 // data stored on the state tree for each sector.
 type OnChainSealVerifyInfo struct {
 	SealedCID        SealedSectorCID // CommR
-	SealEpoch        ChainEpoch
-	InteractiveEpoch ChainEpoch
+	InteractiveEpoch ChainEpoch      // Used to derive the interactive PoRep challenge.
 	RegisteredProof
 	Proof   SealProof
 	DealIDs DealIDs
 	SectorNumber
-
-	//IsValidAtSealEpoch()  bool
+	SealEpoch ChainEpoch // Used to tie the seal to a chain.
 }
 
 type SealProof struct { //<curve, system> {

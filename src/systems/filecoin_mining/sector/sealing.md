@@ -6,7 +6,7 @@ title: Sector Sealing
 
 ## Drawing randomness for sector commitments
 
-{{<sref ticket_chain "Tickets">}} are used as input to the SEAL above in order to tie Proofs-of-Replication to a given chain, thereby preventing long-range attacks (from another miner in the future trying to reuse SEALs).
+{{<sref ticket_chain "Tickets">}} are used as input to calculation of the ReplicaID in order to tie Proofs-of-Replication to a given chain, thereby preventing long-range attacks (from another miner in the future trying to reuse SEALs).
 
 The ticket has to be drawn from a finalized block in order to prevent the miner from potential losing storage (in case of a chain reorg) even though their storage is intact.
 
@@ -63,3 +63,7 @@ We break this down as follows:
   - (known) finality value (F)
   - (approximate) SEAL time (T)
 - Because T is an approximate value, and to account for network delay and variance in SEAL time across miners, the verifier allows for G offset from the assumed value of `X-F`: `Z-T-F`, hence verifying that the ticket is drawn from the range `[Z-T-F-G, Z-T-F+G]`.
+
+#### In Practice
+
+The Filecoin protocol will include a `MAX_SEAL_TIME` for each sector size and proof type.
