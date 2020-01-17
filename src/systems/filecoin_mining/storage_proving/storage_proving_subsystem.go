@@ -1,7 +1,7 @@
 package storage_proving
 
 import (
-	abi "github.com/filecoin-project/specs/actors/abi"
+	abi "github.com/filecoin-project/specs-actors/actors/abi"
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	util "github.com/filecoin-project/specs/util"

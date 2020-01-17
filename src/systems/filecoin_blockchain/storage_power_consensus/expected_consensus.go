@@ -3,8 +3,8 @@ package storage_power_consensus
 import (
 	"math/big"
 
-	abi "github.com/filecoin-project/specs/actors/abi"
-	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
+	abi "github.com/filecoin-project/specs-actors/actors/abi"
+	spowact "github.com/filecoin-project/specs-actors/actors/builtin/storage_power"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 	util "github.com/filecoin-project/specs/util"

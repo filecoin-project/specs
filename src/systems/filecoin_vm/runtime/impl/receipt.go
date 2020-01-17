@@ -1,8 +1,8 @@
 package impl
 
 import (
-	vmr "github.com/filecoin-project/specs/actors/runtime"
-	exitcode "github.com/filecoin-project/specs/actors/runtime/exitcode"
+	vmr "github.com/filecoin-project/specs-actors/actors/runtime"
+	exitcode "github.com/filecoin-project/specs-actors/actors/runtime/exitcode"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 )
 
