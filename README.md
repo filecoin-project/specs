@@ -40,6 +40,16 @@ make serve
 
 This will write out an HTTP address to check out with your browser. Most likely: http://localhost:1313
 
+### Update actors
+
+The actor code lives in https://github.com/filecoin-project/specs-actors. It is imported:
+
+- into the compilation as a Go module, configured in src/build_go.mod
+- into the webside as a Git submodule at src/actors
+
+To change the code, edit in the home repository and then update *both* the build_go.mod and submodule to point to the new ref.
+You should probably make a release of the specs-actors repo for ease of referring to it as a Go module.
+
 ### Website
 
 ```

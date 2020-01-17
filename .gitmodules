@@ -4,3 +4,6 @@
 [submodule "hugo/themes/book"]
 	path = hugo/themes/book
 	url = https://github.com/alex-shpak/hugo-book
+[submodule "src/actors"]
+	path = src/actors
+	url = https://github.com/filecoin-project/specs-actors.git

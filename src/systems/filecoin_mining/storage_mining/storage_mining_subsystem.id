@@ -1,8 +1,8 @@
 import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
-import spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
-import sminact "github.com/filecoin-project/specs/actors/builtin/storage_miner"
-import abi "github.com/filecoin-project/specs/actors/abi"
+import spowact "github.com/filecoin-project/specs-actors/actors/builtin/storage_power"
+import sminact "github.com/filecoin-project/specs-actors/actors/builtin/storage_miner"
+import abi "github.com/filecoin-project/specs-actors/actors/abi"
 import addr "github.com/filecoin-project/go-address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
@@ -12,7 +12,7 @@ import node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_
 import stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import peer "github.com/libp2p/go-libp2p-core/peer"
-import smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
+import smarkact "github.com/filecoin-project/specs-actors/actors/builtin/storage_market"
 
 type StorageMiningSubsystem struct {
     Node               node_base.FilecoinNode

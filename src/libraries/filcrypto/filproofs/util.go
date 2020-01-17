@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	big "math/big"
 
-	abi "github.com/filecoin-project/specs/actors/abi"
+	abi "github.com/filecoin-project/specs-actors/actors/abi"
 	file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 	util "github.com/filecoin-project/specs/util"
 )

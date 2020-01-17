@@ -19,7 +19,7 @@ A syntactically valid receipt has:
 
 # `vm/runtime` interface
 
-{{< readfile file="/docs/actors/runtime/runtime.id" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/actors/runtime/runtime.go" code="true" lang="go" >}}
 
 # `vm/runtime` implementation
 
@@ -31,6 +31,4 @@ A syntactically valid receipt has:
 
 # Exit codes
 
-{{< readfile file="/docs/actors/runtime/exitcode/vm_exitcodes.id" code="true" lang="go" >}}
-
-{{< readfile file="/docs/actors/runtime/exitcode/vm_exitcodes.go" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/actors/runtime/exitcode/vm_exitcodes.go" code="true" lang="go" >}}

@@ -1,9 +1,9 @@
-import abi "github.com/filecoin-project/specs/actors/abi"
+import abi "github.com/filecoin-project/specs-actors/actors/abi"
 import addr "github.com/filecoin-project/go-address"
 import message "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import peer "github.com/libp2p/go-libp2p-core/peer"
 import cid "github.com/ipfs/go-cid"
-import smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
+import smarkact "github.com/filecoin-project/specs-actors/actors/builtin/storage_market"
 
 // ClientLocalDealInfo is the information about a storage deal that storage client tracks
 // locally about a deal until it goes on chain. It is persisted to local storage

@@ -59,5 +59,5 @@ buffer.append(other needed serialized inputs)
 randomness = SHA256(buffer)
 ```
 
-{{< readfile file="/docs/actors/crypto/randomness.go" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/actors/crypto/randomness.go" code="true" lang="go" >}}
 {{< readfile file="/docs/systems/filecoin_blockchain/struct/chain/chain.go" code="true" lang="go" >}}
