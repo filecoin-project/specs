@@ -6,4 +6,4 @@
 	url = https://github.com/alex-shpak/hugo-book
 [submodule "src/actors"]
 	path = src/actors
-	url = git@github.com:filecoin-project/specs-actors.git
+	url = https://github.com/filecoin-project/specs-actors.git
