@@ -6,6 +6,7 @@ jobs:
       - image: circleci/golang:1.13
     steps:
       - checkout
+      - update_submodules
       - run:
           name: "Test code (Generate, Build, Test)"
           command: make test
@@ -29,3 +30,10 @@ workflows:
     jobs:
       - code
       - website
+
+commands:
+  update_submodules:
+    steps:
+      - run:
+          name: Update submodules
+          command: git submodule update --init --recursive
