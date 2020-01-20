@@ -207,7 +207,7 @@ serve-and-watch: serve watch-hugo
 
 # code generation and building targets
 
-GO_INPUT_FILES=$(shell find src -iname '*.go')
+GO_INPUT_FILES=$(shell find src -iname '*.go' | grep -v ^src/actors)
 GO_OUTPUT_FILES=$(patsubst src/%.go, build/code/%.go, $(GO_INPUT_FILES))
 
 GO_UTIL_INPUT_FILE=tools/codeGen/util/util.go
