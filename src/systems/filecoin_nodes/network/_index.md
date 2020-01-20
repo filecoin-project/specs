@@ -31,6 +31,24 @@ Here is the list of libp2p protocols used by Filecoin.
 - DNSDiscovery: Design and spec needed before implementing
 - HTTPDiscovery: Design and spec needed before implementing
 - Hello:
-	- Hello protocol handles new connections to filecoin nodes.  It is an important part of the discovery process for ambient protocols (like KademliaDHT)
-	- Spec TODO.
-	- No Filecoin specific modifications to the protocol id.
+	- Hello protocol handles new connections to filecoin nodes to facilitate discovery
+	- the protocol string is `fil/hello/1.0.0`. 
+
+# Hello Spec 
+
+## Protocol Flow
+
+`fil/hello` is a filecoin specific protocol built on the libp2p stack.  It consists of two conceptual
+procedures: `hello_connect` and `hello_listen`.   
+
+`hello_listen`: `on new stream` -> `read peer hello msg from stream` -> `write latency message to stream` -> `close stream`
+
+`hello_connect`: `on connected` -> `open stream` -> `write own hello msg to stream` -> `read peer latency msg from stream`  -> `close stream`
+
+where stream and connection operations are all standard libp2p operations.  Nodes running the Hello Protocol should consume the incoming Hello Message and use it to help manage peers and sync the chain.
+
+## Messages
+{{< readfile file="hello.id" code="true" lang="go" >}}
+
+
+When writing the `HelloMessage` to the stream the peer must inspect its current head to provide accurate information.  When writing the `LatencyMessage` to the stream the peer should set `TArrival` immediately upon receipt and `TSent` immediately before writing the message to the stream.

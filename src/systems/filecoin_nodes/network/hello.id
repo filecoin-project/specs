@@ -1,0 +1,16 @@
+import cid "github.com/ipfs/go-cid"
+
+
+// HelloMessage shares information about a peer's chain head
+type HelloMessage struct {
+	HeaviestTipSet       [cid.Cid]
+	HeaviestTipSetWeight BigInt
+	HeaviestTipSetHeight Int
+	GenesisHash          cid.Cid
+}
+
+// LatencyMessage shares information about a peer's network latency
+type LatencyMessage struct {
+	TArrival Int
+	TSent Int
+}
