@@ -3,7 +3,7 @@ menuTitle: IpldStore
 title: "IpldStore - Local Storage for hash-linked data"
 ---
 
-{{< readfile file="../../../../libraries/ipld.id" code="true" lang="go" >}}
+{{< readfile file="../../../../libraries/ipld/ipld.id" code="true" lang="go" >}}
 
 Filecoin datastructures are stored in [IPLD](https://ipld.io) format, a data format akin to json built for storage, retrieval and traversal of hash-linked data DAGs.
 
