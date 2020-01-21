@@ -4719,25 +4719,7 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  <p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<p style="color: #D74848"><b><i>Something's not right. The <code>/docs/actors/builtin/cron/cron_actor.id</code> file was not found.</i></b></p>
-
-
-
+  
 
 
 
@@ -4759,9 +4741,9 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kn">import</span> <span class="p">(</span>
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
-    <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
-    <span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin&#34;</span>
-    <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
+    <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
+    <span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin&#34;</span>
+    <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/runtime&#34;</span>
 <span class="p">)</span>
 
 <span class="kd">type</span> <span class="nx">CronActorState</span> <span class="kd">struct</span><span class="p">{}</span>
@@ -4788,11 +4770,11 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// a.Entries is basically a static registry for now, loaded
 </span><span class="c1"></span>    <span class="c1">// in the interpreter static registry.
 </span><span class="c1"></span>    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">entry</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Entries</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
-            <span class="nx">To_</span><span class="p">:</span>     <span class="nx">entry</span><span class="p">.</span><span class="nx">ToAddr</span><span class="p">,</span>
-            <span class="nx">Method_</span><span class="p">:</span> <span class="nx">entry</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span>
-            <span class="nx">Params_</span><span class="p">:</span> <span class="kc">nil</span><span class="p">,</span>
-            <span class="nx">Value_</span><span class="p">:</span>  <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">{</span>
+            <span class="nx">To</span><span class="p">:</span>     <span class="nx">entry</span><span class="p">.</span><span class="nx">ToAddr</span><span class="p">,</span>
+            <span class="nx">Method</span><span class="p">:</span> <span class="nx">entry</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span>
+            <span class="nx">Params</span><span class="p">:</span> <span class="kc">nil</span><span class="p">,</span>
+            <span class="nx">Value</span><span class="p">:</span>  <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
         <span class="p">})</span>
     <span class="p">}</span>
 
@@ -4803,7 +4785,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-</p>
+
 
 </article>
 

@@ -16,7 +16,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_token/multisig/multisig_actor/</guid>
-      <description>import address &amp;#34;github.com/filecoin-project/go-address&amp;#34; import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; type TxSeqNo UVarint type NumRequired UVarint type EpochDuration UVarint type Epoch UVarint type MultisigActor struct { signers [address.Address] required NumRequired nextTxId TxSeqNo initialBalance abi.TokenAmount startingBlock Epoch unlockDuration EpochDuration // transactions {TxSeqNo: Transaction} // TODO Transaction type does not exist  Construct( signers [address.Address] required NumRequired unlockDuration EpochDuration ) Propose( to address.Address value abi.TokenAmount method string params Bytes ) TxSeqNo Approve(txid TxSeqNo) Cancel(txid TxSeqNo) ClearCompleted() AddSigner(signer address.</description>
+      <description>import address &amp;#34;github.com/filecoin-project/go-address&amp;#34; import abi &amp;#34;github.com/filecoin-project/specs-actors/actors/abi&amp;#34; type TxSeqNo UVarint type NumRequired UVarint type EpochDuration UVarint type Epoch UVarint type MultisigActor struct { signers [address.Address] required NumRequired nextTxId TxSeqNo initialBalance abi.TokenAmount startingBlock Epoch unlockDuration EpochDuration // transactions {TxSeqNo: Transaction} // TODO Transaction type does not exist  Construct( signers [address.Address] required NumRequired unlockDuration EpochDuration ) Propose( to address.Address value abi.TokenAmount method string params Bytes ) TxSeqNo Approve(txid TxSeqNo) Cancel(txid TxSeqNo) ClearCompleted() AddSigner(signer address.</description>
     </item>
     
   </channel>

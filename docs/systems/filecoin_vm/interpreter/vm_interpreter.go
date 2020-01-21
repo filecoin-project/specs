@@ -2,14 +2,14 @@ package interpreter
 
 import (
 	addr "github.com/filecoin-project/go-address"
-	abi "github.com/filecoin-project/specs/actors/abi"
-	builtin "github.com/filecoin-project/specs/actors/builtin"
-	initact "github.com/filecoin-project/specs/actors/builtin/init"
-	sminact "github.com/filecoin-project/specs/actors/builtin/storage_miner"
-	vmr "github.com/filecoin-project/specs/actors/runtime"
-	exitcode "github.com/filecoin-project/specs/actors/runtime/exitcode"
-	indices "github.com/filecoin-project/specs/actors/runtime/indices"
-	serde "github.com/filecoin-project/specs/actors/serde"
+	abi "github.com/filecoin-project/specs-actors/actors/abi"
+	builtin "github.com/filecoin-project/specs-actors/actors/builtin"
+	initact "github.com/filecoin-project/specs-actors/actors/builtin/init"
+	sminact "github.com/filecoin-project/specs-actors/actors/builtin/storage_miner"
+	vmr "github.com/filecoin-project/specs-actors/actors/runtime"
+	exitcode "github.com/filecoin-project/specs-actors/actors/runtime/exitcode"
+	indices "github.com/filecoin-project/specs-actors/actors/runtime/indices"
+	serde "github.com/filecoin-project/specs-actors/actors/serde"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 	actstate "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
@@ -136,8 +136,9 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, chain chain.Chain,
 		retReceipt = vmri.MessageReceipt_Make(invocOutput, exitCode, vmiGasUsed)
 	}
 
-	_applyError := func(tree st.StateTree, errExitCode exitcode.SystemErrorCode, senderResolveSpec SenderResolveSpec) {
-		_applyReturn(tree, vmr.InvocOutput_Make(nil), exitcode.SystemError(errExitCode), senderResolveSpec)
+	// TODO move this to a package with a less redundant name
+	_applyError := func(tree st.StateTree, errExitCode exitcode.ExitCode, senderResolveSpec SenderResolveSpec) {
+		_applyReturn(tree, vmr.InvocOutput_Make(nil), errExitCode, senderResolveSpec)
 	}
 
 	// Deduct an amount of gas corresponding to cost about to be incurred, but not necessarily
@@ -184,7 +185,8 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, chain chain.Chain,
 
 	// Check sender balance.
 	gasLimitCost := _gasToFIL(message.GasLimit(), message.GasPrice())
-	networkTxnFee := indicesFromStateTree(inTree).NetworkTransactionFee(
+	tidx := indicesFromStateTree(inTree)
+	networkTxnFee := tidx.NetworkTransactionFee(
 		inTree.GetActorCodeID_Assert(message.To()), message.Method())
 	totalCost := message.Value() + gasLimitCost + networkTxnFee
 	if fromActor.Balance() < totalCost {
@@ -318,11 +320,11 @@ func _gasToFIL(gas msg.GasAmount, price abi.TokenAmount) abi.TokenAmount {
 }
 
 func _makeInvocInput(message msg.UnsignedMessage) vmr.InvocInput {
-	return &vmr.InvocInput_I{
-		To_:     message.To(), // Receiver address is resolved during execution.
-		Method_: message.Method(),
-		Params_: message.Params(),
-		Value_:  message.Value(),
+	return vmr.InvocInput{
+		To:     message.To(), // Receiver address is resolved during execution.
+		Method: message.Method(),
+		Params: message.Params(),
+		Value:  message.Value(),
 	}
 }
 

@@ -4753,164 +4753,168 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
-<span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
-<span class="kn">import</span> <span class="nx">crypto</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/crypto&#34;</span>
-<span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime/exitcode&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">runtime</span>
+
+<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors&#34;</span>
+<span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
+<span class="kn">import</span> <span class="nx">crypto</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/crypto&#34;</span>
+<span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/runtime/exitcode&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
-<span class="kn">import</span> <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime/indices&#34;</span>
+<span class="kn">import</span> <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/runtime/indices&#34;</span>
 <span class="kn">import</span> <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 
 <span class="c1">// Runtime is the VM&#39;s internal runtime object.
 </span><span class="c1">// this is everything that is accessible to actors, beyond parameters.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">Runtime</span> <span class="kd">interface</span> <span class="p">{</span>
-    <span class="nf">CurrEpoch</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+	<span class="nf">CurrEpoch</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 
-    <span class="c1">// Randomness returns a (pseudo)random string for the given epoch and tag.
-</span><span class="c1"></span>    <span class="nf">GetRandomness</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span>
+	<span class="c1">// Randomness returns a (pseudo)random string for the given epoch and tag.
+</span><span class="c1"></span>	<span class="nf">GetRandomness</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span>
 
-    <span class="c1">// The address of the immediate calling actor.
-</span><span class="c1"></span>    <span class="c1">// Not necessarily the actor in the From field of the initial on-chain Message.
-</span><span class="c1"></span>    <span class="c1">// Always an ID-address.
-</span><span class="c1"></span>    <span class="nf">ImmediateCaller</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">caller</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
-    <span class="nf">ValidateImmediateCallerInSet</span><span class="p">(</span><span class="nx">callers</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">])</span>
-    <span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">type_</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">)</span>
-    <span class="nf">ValidateImmediateCallerAcceptAnyOfTypes</span><span class="p">(</span><span class="nx">types</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">])</span>
-    <span class="nf">ValidateImmediateCallerAcceptAny</span><span class="p">()</span>
-    <span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span><span class="nx">CallerPattern</span><span class="p">)</span>
+	<span class="c1">// The address of the immediate calling actor.
+</span><span class="c1"></span>	<span class="c1">// Not necessarily the actor in the From field of the initial on-chain Message.
+</span><span class="c1"></span>	<span class="c1">// Always an ID-address.
+</span><span class="c1"></span>	<span class="nf">ImmediateCaller</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+	<span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">caller</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
+	<span class="nf">ValidateImmediateCallerInSet</span><span class="p">(</span><span class="nx">callers</span> <span class="p">[]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
+	<span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">type_</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">)</span>
+	<span class="nf">ValidateImmediateCallerAcceptAnyOfTypes</span><span class="p">(</span><span class="nx">types</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">)</span>
+	<span class="nf">ValidateImmediateCallerAcceptAny</span><span class="p">()</span>
+	<span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span><span class="nx">CallerPattern</span><span class="p">)</span>
 
-    <span class="c1">// The address of the actor receiving the message. Always an ID-address.
-</span><span class="c1"></span>    <span class="nf">CurrReceiver</span><span class="p">()</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+	<span class="c1">// The address of the actor receiving the message. Always an ID-address.
+</span><span class="c1"></span>	<span class="nf">CurrReceiver</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
-    <span class="c1">// The actor who mined the block in which the initial on-chain message appears.
-</span><span class="c1"></span>    <span class="c1">// Always an ID-address.
-</span><span class="c1"></span>    <span class="nf">ToplevelBlockWinner</span><span class="p">()</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+	<span class="c1">// The actor who mined the block in which the initial on-chain message appears.
+</span><span class="c1"></span>	<span class="c1">// Always an ID-address.
+</span><span class="c1"></span>	<span class="nf">ToplevelBlockWinner</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
-    <span class="nf">AcquireState</span><span class="p">()</span>         <span class="nx">ActorStateHandle</span>
+	<span class="nf">AcquireState</span><span class="p">()</span> <span class="nx">ActorStateHandle</span>
 
-    <span class="nf">SuccessReturn</span><span class="p">()</span>        <span class="nx">InvocOutput</span>
-    <span class="nf">ValueReturn</span><span class="p">(</span><span class="nx">Bytes</span><span class="p">)</span>     <span class="nx">InvocOutput</span>
+	<span class="nf">SuccessReturn</span><span class="p">()</span> <span class="nx">InvocOutput</span>
+	<span class="nf">ValueReturn</span><span class="p">([]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">InvocOutput</span>
 
-    <span class="c1">// Throw an error indicating a failure condition has occurred, from which the given actor
-</span><span class="c1"></span>    <span class="c1">// code is unable to recover.
-</span><span class="c1"></span>    <span class="nf">Abort</span><span class="p">(</span><span class="nx">errExitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">,</span> <span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span>
+	<span class="c1">// Throw an error indicating a failure condition has occurred, from which the given actor
+</span><span class="c1"></span>	<span class="c1">// code is unable to recover.
+</span><span class="c1"></span>	<span class="nf">Abort</span><span class="p">(</span><span class="nx">errExitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">,</span> <span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span>
 
-    <span class="c1">// Calls Abort with InvalidArguments_User.
-</span><span class="c1"></span>    <span class="nf">AbortArgMsg</span><span class="p">(</span><span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span>
-    <span class="nf">AbortArg</span><span class="p">()</span>
+	<span class="c1">// Calls Abort with InvalidArguments_User.
+</span><span class="c1"></span>	<span class="nf">AbortArgMsg</span><span class="p">(</span><span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span>
+	<span class="nf">AbortArg</span><span class="p">()</span>
 
-    <span class="c1">// Calls Abort with InconsistentState_User.
-</span><span class="c1"></span>    <span class="nf">AbortStateMsg</span><span class="p">(</span><span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span>
-    <span class="nf">AbortState</span><span class="p">()</span>
+	<span class="c1">// Calls Abort with InconsistentState_User.
+</span><span class="c1"></span>	<span class="nf">AbortStateMsg</span><span class="p">(</span><span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span>
+	<span class="nf">AbortState</span><span class="p">()</span>
 
-    <span class="c1">// Calls Abort with InsufficientFunds_User.
-</span><span class="c1"></span>    <span class="nf">AbortFundsMsg</span><span class="p">(</span><span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span>
-    <span class="nf">AbortFunds</span><span class="p">()</span>
+	<span class="c1">// Calls Abort with InsufficientFunds_User.
+</span><span class="c1"></span>	<span class="nf">AbortFundsMsg</span><span class="p">(</span><span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span>
+	<span class="nf">AbortFunds</span><span class="p">()</span>
 
-    <span class="c1">// Calls Abort with RuntimeAPIError.
-</span><span class="c1"></span>    <span class="c1">// For internal use only (not in actor code).
-</span><span class="c1"></span>    <span class="nf">AbortAPI</span><span class="p">(</span><span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span>
+	<span class="c1">// Calls Abort with RuntimeAPIError.
+</span><span class="c1"></span>	<span class="c1">// For internal use only (not in actor code).
+</span><span class="c1"></span>	<span class="nf">AbortAPI</span><span class="p">(</span><span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span>
 
-    <span class="c1">// Check that the given condition is true (and call Abort if not).
-</span><span class="c1"></span>    <span class="nf">Assert</span><span class="p">(</span><span class="kt">bool</span><span class="p">)</span>
+	<span class="c1">// Check that the given condition is true (and call Abort if not).
+</span><span class="c1"></span>	<span class="nf">Assert</span><span class="p">(</span><span class="kt">bool</span><span class="p">)</span>
 
-    <span class="nf">CurrentBalance</span><span class="p">()</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nf">ValueReceived</span><span class="p">()</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
+	<span class="nf">CurrentBalance</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
+	<span class="nf">ValueReceived</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
-    <span class="c1">// Look up the current values of several system-wide economic indices.
-</span><span class="c1"></span>    <span class="nf">CurrIndices</span><span class="p">()</span>     <span class="nx">indices</span><span class="p">.</span><span class="nx">Indices</span>
+	<span class="c1">// Look up the current values of several system-wide economic indices.
+</span><span class="c1"></span>	<span class="nf">CurrIndices</span><span class="p">()</span> <span class="nx">indices</span><span class="p">.</span><span class="nx">Indices</span>
 
-    <span class="c1">// Look up the code ID of a given actor address.
-</span><span class="c1"></span>    <span class="nf">GetActorCodeID</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">ret</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
+	<span class="c1">// Look up the code ID of a given actor address.
+</span><span class="c1"></span>	<span class="nf">GetActorCodeID</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">ret</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
 
-    <span class="c1">// Run a (pure function) computation, consuming the gas cost associated with that function.
-</span><span class="c1"></span>    <span class="c1">// This mechanism is intended to capture the notion of an ABI between the VM and native
-</span><span class="c1"></span>    <span class="c1">// functions, and should be used for any function whose computation is expensive.
-</span><span class="c1"></span>    <span class="nf">Compute</span><span class="p">(</span><span class="nx">ComputeFunctionID</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[</span><span class="nx">util</span><span class="p">.</span><span class="nx">Any</span><span class="p">])</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Any</span>
+	<span class="c1">// Run a (pure function) computation, consuming the gas cost associated with that function.
+</span><span class="c1"></span>	<span class="c1">// This mechanism is intended to capture the notion of an ABI between the VM and native
+</span><span class="c1"></span>	<span class="c1">// functions, and should be used for any function whose computation is expensive.
+</span><span class="c1"></span>	<span class="nf">Compute</span><span class="p">(</span><span class="nx">ComputeFunctionID</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{})</span> <span class="kd">interface</span><span class="p">{}</span>
 
-    <span class="c1">// Sends a message to another actor.
-</span><span class="c1"></span>    <span class="c1">// If the invoked method does not return successfully, this caller will be aborted too.
-</span><span class="c1"></span>    <span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">InvocOutput</span>
-    <span class="nf">Send</span><span class="p">(</span>
-        <span class="nx">toAddr</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">methodNum</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span>
-        <span class="nx">params</span>     <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodParams</span>
-        <span class="nx">value</span>      <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="p">)</span> <span class="nx">InvocOutput</span>
-    <span class="nf">SendQuery</span><span class="p">(</span>
-        <span class="nx">toAddr</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">methodNum</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span>
-        <span class="nx">params</span>     <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodParams</span>
-    <span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
-    <span class="nf">SendFunds</span><span class="p">(</span><span class="nx">toAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
+	<span class="c1">// Sends a message to another actor.
+</span><span class="c1"></span>	<span class="c1">// If the invoked method does not return successfully, this caller will be aborted too.
+</span><span class="c1"></span>	<span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">InvocOutput</span>
+	<span class="nf">Send</span><span class="p">(</span>
+		<span class="nx">toAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
+		<span class="nx">methodNum</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span>
+		<span class="nx">params</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">,</span>
+		<span class="nx">value</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span>
+	<span class="p">)</span> <span class="nx">InvocOutput</span>
+	<span class="nf">SendQuery</span><span class="p">(</span>
+		<span class="nx">toAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
+		<span class="nx">methodNum</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span>
+		<span class="nx">params</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">,</span>
+	<span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span>
+	<span class="nf">SendFunds</span><span class="p">(</span><span class="nx">toAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
 
-    <span class="c1">// Sends a message to another actor, trapping an unsuccessful execution.
-</span><span class="c1"></span>    <span class="c1">// This may only be invoked by the singleton Cron actor.
-</span><span class="c1"></span>    <span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="p">(</span><span class="nx">output</span> <span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">exitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span>
+	<span class="c1">// Sends a message to another actor, trapping an unsuccessful execution.
+</span><span class="c1"></span>	<span class="c1">// This may only be invoked by the singleton Cron actor.
+</span><span class="c1"></span>	<span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="p">(</span><span class="nx">output</span> <span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">exitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span>
 
-    <span class="c1">// Computes an address for a new actor. The returned address is intended to uniquely refer to
-</span><span class="c1"></span>    <span class="c1">// the actor even in the event of a chain re-org (whereas an ID-address might refer to a
-</span><span class="c1"></span>    <span class="c1">// different actor after messages are re-ordered).
-</span><span class="c1"></span>    <span class="c1">// Always an ActorExec address.
-</span><span class="c1"></span>    <span class="nf">NewActorAddress</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+	<span class="c1">// Computes an address for a new actor. The returned address is intended to uniquely refer to
+</span><span class="c1"></span>	<span class="c1">// the actor even in the event of a chain re-org (whereas an ID-address might refer to a
+</span><span class="c1"></span>	<span class="c1">// different actor after messages are re-ordered).
+</span><span class="c1"></span>	<span class="c1">// Always an ActorExec address.
+</span><span class="c1"></span>	<span class="nf">NewActorAddress</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
-    <span class="c1">// Creates an actor in the state tree, with empty state. May only be called by InitActor.
-</span><span class="c1"></span>    <span class="nf">CreateActor</span><span class="p">(</span>
-        <span class="c1">// The new actor&#39;s code identifier.
-</span><span class="c1"></span>        <span class="nx">codeId</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span>
-        <span class="c1">// Address under which the new actor&#39;s state will be stored. Must be an ID-address.
-</span><span class="c1"></span>        <span class="nx">address</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="p">)</span>
+	<span class="c1">// Creates an actor in the state tree, with empty state. May only be called by InitActor.
+</span><span class="c1"></span>	<span class="nf">CreateActor</span><span class="p">(</span>
+		<span class="c1">// The new actor&#39;s code identifier.
+</span><span class="c1"></span>		<span class="nx">codeId</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">,</span>
+		<span class="c1">// Address under which the new actor&#39;s state will be stored. Must be an ID-address.
+</span><span class="c1"></span>		<span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
+	<span class="p">)</span>
 
-    <span class="c1">// Deletes an actor in the state tree. May only be called by the actor itself,
-</span><span class="c1"></span>    <span class="c1">// or by StoragePowerActor in the case of StorageMinerActors.
-</span><span class="c1"></span>    <span class="nf">DeleteActor</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
+	<span class="c1">// Deletes an actor in the state tree. May only be called by the actor itself,
+</span><span class="c1"></span>	<span class="c1">// or by StoragePowerActor in the case of StorageMinerActors.
+</span><span class="c1"></span>	<span class="nf">DeleteActor</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
 
-    <span class="c1">// Retrieves and deserializes an object from the store into o. Returns whether successful.
-</span><span class="c1"></span>    <span class="nf">IpldGet</span><span class="p">(</span><span class="nx">c</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span><span class="p">,</span> <span class="nx">o</span> <span class="kd">interface</span> <span class="p">{})</span> <span class="kt">bool</span>
-    <span class="c1">// Serializes and stores an object, returning its CID.
-</span><span class="c1"></span>    <span class="nf">IpldPut</span><span class="p">(</span><span class="nx">x</span> <span class="kd">interface</span> <span class="p">{})</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
+	<span class="c1">// Retrieves and deserializes an object from the store into o. Returns whether successful.
+</span><span class="c1"></span>	<span class="nf">IpldGet</span><span class="p">(</span><span class="nx">c</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span><span class="p">,</span> <span class="nx">o</span> <span class="kd">interface</span><span class="p">{})</span> <span class="kt">bool</span>
+	<span class="c1">// Serializes and stores an object, returning its CID.
+</span><span class="c1"></span>	<span class="nf">IpldPut</span><span class="p">(</span><span class="nx">x</span> <span class="kd">interface</span><span class="p">{})</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
 
-    <span class="c1">// Provides the system call interface.
-</span><span class="c1"></span>    <span class="nf">Syscalls</span><span class="p">()</span> <span class="nx">Syscalls</span>
+	<span class="c1">// Provides the system call interface.
+</span><span class="c1"></span>	<span class="nf">Syscalls</span><span class="p">()</span> <span class="nx">Syscalls</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">Syscalls</span> <span class="kd">interface</span> <span class="p">{</span>
-    <span class="c1">// Verifies that a signature is valid for an address and plaintext.
-</span><span class="c1"></span>    <span class="nf">VerifySignature</span><span class="p">(</span>
-        <span class="nx">signature</span>  <span class="nx">crypto</span><span class="p">.</span><span class="nx">Signature</span>
-        <span class="nx">signer</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">plaintext</span>  <span class="p">[</span><span class="kt">byte</span><span class="p">]</span>
-    <span class="p">)</span> <span class="kt">bool</span>
-    <span class="c1">// Computes an unsealed sector CID (CommD) from its constituent piece CIDs (CommPs) and sizes.
-</span><span class="c1"></span>    <span class="nf">ComputeUnsealedSectorCID</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">pieces</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">])</span> <span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
-    <span class="c1">// Verifies a sector seal proof.
-</span><span class="c1"></span>    <span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">vi</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
-    <span class="c1">// Verifies a proof of spacetime.
-</span><span class="c1"></span>    <span class="nf">VerifyPoSt</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">vi</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
+	<span class="c1">// Verifies that a signature is valid for an address and plaintext.
+</span><span class="c1"></span>	<span class="nf">VerifySignature</span><span class="p">(</span>
+		<span class="nx">signature</span> <span class="nx">crypto</span><span class="p">.</span><span class="nx">Signature</span><span class="p">,</span>
+		<span class="nx">signer</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
+		<span class="nx">plaintext</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span>
+	<span class="p">)</span> <span class="kt">bool</span>
+	<span class="c1">// Computes an unsealed sector CID (CommD) from its constituent piece CIDs (CommPs) and sizes.
+</span><span class="c1"></span>	<span class="nf">ComputeUnsealedSectorCID</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">pieces</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">)</span> <span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+	<span class="c1">// Verifies a sector seal proof.
+</span><span class="c1"></span>	<span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">vi</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
+	<span class="c1">// Verifies a proof of spacetime.
+</span><span class="c1"></span>	<span class="nf">VerifyPoSt</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">vi</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">InvocInput</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">To</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">Method</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span>
-    <span class="nx">Params</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodParams</span>
-    <span class="nx">Value</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
+	<span class="nx">To</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+	<span class="nx">Method</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span>
+	<span class="nx">Params</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodParams</span>
+	<span class="nx">Value</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ReturnValue</span> <span class="nx">Bytes</span>
+	<span class="nx">ReturnValue</span> <span class="p">[]</span><span class="kt">byte</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ActorStateHandle</span> <span class="kd">interface</span> <span class="p">{</span>
-    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">newStateCID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorSubstateCID</span><span class="p">)</span>
-    <span class="nf">Release</span><span class="p">(</span><span class="nx">checkStateCID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorSubstateCID</span><span class="p">)</span>
-    <span class="nf">Take</span><span class="p">()</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorSubstateCID</span>
+	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">newStateCID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorSubstateCID</span><span class="p">)</span>
+	<span class="nf">Release</span><span class="p">(</span><span class="nx">checkStateCID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorSubstateCID</span><span class="p">)</span>
+	<span class="nf">Take</span><span class="p">()</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorSubstateCID</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">ComputeFunctionID</span> <span class="nx">enum</span> <span class="p">{</span>
-    <span class="nx">VerifySignature</span>
-<span class="p">}</span>
+<span class="kd">type</span> <span class="nx">ComputeFunctionID</span> <span class="kt">int64</span>
+
+<span class="kd">const</span> <span class="p">(</span>
+	<span class="nx">Compute_VerifySignature</span> <span class="p">=</span> <span class="nf">ComputeFunctionID</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="p">)</span>
 </code></pre></div>
 
 
@@ -4947,14 +4951,14 @@ https://github.com/alex-shpak/hugo-book
 	<span class="s">&#34;fmt&#34;</span>
 
 	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
-	<span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
-	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
-	<span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin&#34;</span>
-	<span class="nx">acctact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/account&#34;</span>
-	<span class="nx">initact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/init&#34;</span>
-	<span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
-	<span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime/exitcode&#34;</span>
-	<span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime/indices&#34;</span>
+	<span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors&#34;</span>
+	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
+	<span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin&#34;</span>
+	<span class="nx">acctact</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin/account&#34;</span>
+	<span class="nx">initact</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin/init&#34;</span>
+	<span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/runtime&#34;</span>
+	<span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/runtime/exitcode&#34;</span>
+	<span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/runtime/indices&#34;</span>
 	<span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 	<span class="nx">chain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain&#34;</span>
 	<span class="nx">actstate</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
@@ -4976,7 +4980,6 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">ActorStateHandle</span> <span class="p">=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span>
 
 <span class="kd">var</span> <span class="nx">EnsureErrorCode</span> <span class="p">=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">EnsureErrorCode</span>
-<span class="kd">var</span> <span class="nx">SystemError</span> <span class="p">=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">SystemError</span>
 
 <span class="kd">type</span> <span class="nx">Bytes</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span>
 
@@ -5102,12 +5105,12 @@ https://github.com/alex-shpak/hugo-book
 		<span class="nx">_valueReceived</span><span class="p">:</span>            <span class="nx">valueReceived</span><span class="p">,</span>
 		<span class="nx">_gasRemaining</span><span class="p">:</span>             <span class="nx">gasRemaining</span><span class="p">,</span>
 		<span class="nx">_numValidateCalls</span><span class="p">:</span>         <span class="mi">0</span><span class="p">,</span>
-		<span class="nx">_output</span><span class="p">:</span>                   <span class="kc">nil</span><span class="p">,</span>
+		<span class="nx">_output</span><span class="p">:</span>                   <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span><span class="p">{},</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">AbortArgMsg</span><span class="p">(</span><span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">UserDefinedError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidArguments_User</span><span class="p">),</span> <span class="nx">msg</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidArguments_User</span><span class="p">,</span> <span class="nx">msg</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">AbortArg</span><span class="p">()</span> <span class="p">{</span>
@@ -5115,7 +5118,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">AbortStateMsg</span><span class="p">(</span><span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">UserDefinedError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InconsistentState_User</span><span class="p">),</span> <span class="nx">msg</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InconsistentState_User</span><span class="p">,</span> <span class="nx">msg</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">AbortState</span><span class="p">()</span> <span class="p">{</span>
@@ -5123,7 +5126,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">AbortFundsMsg</span><span class="p">(</span><span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">UserDefinedError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InsufficientFunds_User</span><span class="p">),</span> <span class="nx">msg</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InsufficientFunds_User</span><span class="p">,</span> <span class="nx">msg</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">AbortFunds</span><span class="p">()</span> <span class="p">{</span>
@@ -5131,7 +5134,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">AbortAPI</span><span class="p">(</span><span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">RuntimeAPIError</span><span class="p">),</span> <span class="nx">msg</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">RuntimeAPIError</span><span class="p">,</span> <span class="nx">msg</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">CreateActor</span><span class="p">(</span><span class="nx">codeID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
@@ -5215,7 +5218,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">Assert</span><span class="p">(</span><span class="nx">cond</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">cond</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">RuntimeAssertFailure</span><span class="p">),</span> <span class="s">&#34;Runtime assertion failed&#34;</span><span class="p">)</span>
+		<span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">RuntimeAssertFailure</span><span class="p">,</span> <span class="s">&#34;Runtime assertion failed&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
@@ -5329,7 +5332,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_apiError</span><span class="p">(</span><span class="nx">errMsg</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_throwErrorFull</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">RuntimeAPIError</span><span class="p">),</span> <span class="nx">errMsg</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_throwErrorFull</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">RuntimeAPIError</span><span class="p">,</span> <span class="nx">errMsg</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_gasAmountAssertValid</span><span class="p">(</span><span class="nx">x</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">)</span> <span class="p">{</span>
@@ -5345,7 +5348,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="kd">var</span> <span class="nx">ok</span> <span class="kt">bool</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">,</span> <span class="nx">ok</span> <span class="p">=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">.</span><span class="nf">SubtractIfNonnegative</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">OutOfGas</span><span class="p">))</span>
+		<span class="nx">rt</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">OutOfGas</span><span class="p">)</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
@@ -5441,17 +5444,17 @@ https://github.com/alex-shpak/hugo-book
 
 	<span class="nx">initGasRemaining</span> <span class="o">:=</span> <span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_gasRemaining</span>
 
-	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nf">Value</span><span class="p">(),</span> <span class="nx">input</span><span class="p">.</span><span class="nf">Method</span><span class="p">()))</span>
+	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nx">Value</span><span class="p">,</span> <span class="nx">input</span><span class="p">.</span><span class="nx">Method</span><span class="p">))</span>
 
-	<span class="nx">receiver</span><span class="p">,</span> <span class="nx">receiverAddr</span> <span class="o">:=</span> <span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_resolveReceiver</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nf">To</span><span class="p">())</span>
+	<span class="nx">receiver</span><span class="p">,</span> <span class="nx">receiverAddr</span> <span class="o">:=</span> <span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_resolveReceiver</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nx">To</span><span class="p">)</span>
 	<span class="nx">receiverCode</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">loadActorCode</span><span class="p">(</span><span class="nx">receiver</span><span class="p">.</span><span class="nf">CodeID</span><span class="p">())</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorCodeNotFound</span><span class="p">))</span>
+		<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorCodeNotFound</span><span class="p">)</span>
 	<span class="p">}</span>
 
-	<span class="nx">err</span> <span class="p">=</span> <span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_transferFunds</span><span class="p">(</span><span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">,</span> <span class="nx">receiverAddr</span><span class="p">,</span> <span class="nx">input</span><span class="p">.</span><span class="nf">Value</span><span class="p">())</span>
+	<span class="nx">err</span> <span class="p">=</span> <span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_transferFunds</span><span class="p">(</span><span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">,</span> <span class="nx">receiverAddr</span><span class="p">,</span> <span class="nx">input</span><span class="p">.</span><span class="nx">Value</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InsufficientFunds_System</span><span class="p">))</span>
+		<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InsufficientFunds_System</span><span class="p">)</span>
 	<span class="p">}</span>
 
 	<span class="nx">rtInner</span> <span class="o">:=</span> <span class="nf">VMContext_Make</span><span class="p">(</span>
@@ -5463,15 +5466,15 @@ https://github.com/alex-shpak/hugo-book
 		<span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_internalCallSeqNum</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
 		<span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">,</span>
 		<span class="nx">receiverAddr</span><span class="p">,</span>
-		<span class="nx">input</span><span class="p">.</span><span class="nf">Value</span><span class="p">(),</span>
+		<span class="nx">input</span><span class="p">.</span><span class="nx">Value</span><span class="p">,</span>
 		<span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">,</span>
 	<span class="p">)</span>
 
 	<span class="nx">invocOutput</span><span class="p">,</span> <span class="nx">exitCode</span><span class="p">,</span> <span class="nx">internalCallSeqNumFinal</span> <span class="o">:=</span> <span class="nf">_invokeMethodInternal</span><span class="p">(</span>
 		<span class="nx">rtInner</span><span class="p">,</span>
 		<span class="nx">receiverCode</span><span class="p">,</span>
-		<span class="nx">input</span><span class="p">.</span><span class="nf">Method</span><span class="p">(),</span>
-		<span class="nx">input</span><span class="p">.</span><span class="nf">Params</span><span class="p">(),</span>
+		<span class="nx">input</span><span class="p">.</span><span class="nx">Method</span><span class="p">,</span>
+		<span class="nx">input</span><span class="p">.</span><span class="nx">Params</span><span class="p">,</span>
 	<span class="p">)</span>
 
 	<span class="nf">_gasAmountAssertValid</span><span class="p">(</span><span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">.</span><span class="nf">Subtract</span><span class="p">(</span><span class="nx">rtInner</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">))</span>
@@ -5481,13 +5484,13 @@ https://github.com/alex-shpak/hugo-book
 
 	<span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_internalCallSeqNum</span> <span class="p">=</span> <span class="nx">internalCallSeqNumFinal</span>
 
-	<span class="k">if</span> <span class="nx">exitCode</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">OutOfGas</span><span class="p">))</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">exitCode</span> <span class="o">==</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">OutOfGas</span> <span class="p">{</span>
 		<span class="c1">// OutOfGas error cannot be caught
 </span><span class="c1"></span>		<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitCode</span><span class="p">)</span>
 	<span class="p">}</span>
 
 	<span class="k">if</span> <span class="nx">errSpec</span> <span class="o">==</span> <span class="nx">PropagateErrors</span> <span class="o">&amp;&amp;</span> <span class="nx">exitCode</span><span class="p">.</span><span class="nf">IsError</span><span class="p">()</span> <span class="p">{</span>
-		<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">MethodSubcallError</span><span class="p">))</span>
+		<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">MethodSubcallError</span><span class="p">)</span>
 	<span class="p">}</span>
 
 	<span class="k">if</span> <span class="nx">exitCode</span><span class="p">.</span><span class="nf">AllowsStateUpdate</span><span class="p">()</span> <span class="p">{</span>
@@ -5512,7 +5515,7 @@ https://github.com/alex-shpak/hugo-book
 
 	<span class="k">if</span> <span class="nx">targetRaw</span><span class="p">.</span><span class="nf">Protocol</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">SECP256K1</span> <span class="o">&amp;&amp;</span> <span class="nx">targetRaw</span><span class="p">.</span><span class="nf">Protocol</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">BLS</span> <span class="p">{</span>
 		<span class="c1">// Don&#39;t implicitly create an account actor for an address without an associated key.
-</span><span class="c1"></span>		<span class="nx">rt</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorNotFound</span><span class="p">))</span>
+</span><span class="c1"></span>		<span class="nx">rt</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorNotFound</span><span class="p">)</span>
 	<span class="p">}</span>
 
 	<span class="c1">// Allocate an ID address from the init actor and map the pubkey To address to it.
@@ -5567,7 +5570,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SendQuery</span><span class="p">(</span><span class="nx">toAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">methodNum</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span> <span class="p">{</span>
 	<span class="nx">invocOutput</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span><span class="nx">toAddr</span><span class="p">,</span> <span class="nx">methodNum</span><span class="p">,</span> <span class="nx">params</span><span class="p">,</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">invocOutput</span><span class="p">.</span><span class="nf">ReturnValue</span><span class="p">()</span>
+	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">invocOutput</span><span class="p">.</span><span class="nx">ReturnValue</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ret</span> <span class="o">!=</span> <span class="kc">nil</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">ret</span>
 <span class="p">}</span>
@@ -5698,8 +5701,8 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">impl</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
-	<span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
+	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
+	<span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/runtime&#34;</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="nf">loadActorCode</span><span class="p">(</span><span class="nx">codeID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
@@ -5739,51 +5742,17 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">ExitCode</span> <span class="nx">union</span> <span class="p">{</span>
-    <span class="nf">IsSuccess</span><span class="p">()</span>          <span class="kt">bool</span>
-    <span class="nf">IsError</span><span class="p">()</span>            <span class="kt">bool</span>
-    <span class="nf">AllowsStateUpdate</span><span class="p">()</span>  <span class="kt">bool</span>
-    <span class="nf">Equals</span><span class="p">(</span><span class="nx">ExitCode</span><span class="p">)</span>     <span class="kt">bool</span>
-
-    <span class="nx">Success</span>              <span class="kd">struct</span> <span class="p">{}</span>
-    <span class="nx">SystemError</span>          <span class="nx">SystemErrorCode</span>
-    <span class="nx">UserDefinedError</span>     <span class="nx">UVarint</span>
-<span class="p">}</span>
-</code></pre></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">exitcode</span>
 
-<span class="kd">type</span> <span class="nx">SystemErrorCode</span> <span class="kt">int</span>
-<span class="kd">type</span> <span class="nx">UserDefinedErrorCode</span> <span class="kt">int</span>
+<span class="kd">type</span> <span class="nx">ExitCode</span> <span class="kt">int64</span>
 
 <span class="kd">const</span> <span class="p">(</span>
 	<span class="c1">// TODO: remove once canonical error codes are finalized
-</span><span class="c1"></span>	<span class="nx">SystemErrorCode_Placeholder</span>      <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">))</span>
-	<span class="nx">UserDefinedErrorCode_Placeholder</span> <span class="p">=</span> <span class="nf">UserDefinedErrorCode</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">))</span>
+</span><span class="c1"></span>	<span class="nx">SystemErrorCode_Placeholder</span>      <span class="p">=</span> <span class="nf">ExitCode</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">))</span>
+	<span class="nx">UserDefinedErrorCode_Placeholder</span> <span class="p">=</span> <span class="nf">ExitCode</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">))</span>
 <span class="p">)</span>
+
+<span class="kd">const</span> <span class="nx">Ok</span> <span class="p">=</span> <span class="nf">ExitCode</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="c1">// TODO: assign all of these.
 </span><span class="c1"></span><span class="kd">const</span> <span class="p">(</span>
@@ -5841,40 +5810,28 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">InsufficientPledgeCollateral</span>
 <span class="p">)</span>
 
-<span class="kd">func</span> <span class="nf">OK</span><span class="p">()</span> <span class="nx">ExitCode</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nf">ExitCode_Make_Success</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">ExitCode_Success_I</span><span class="p">{})</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">ExitCode</span><span class="p">)</span> <span class="nf">IsSuccess</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">x</span> <span class="o">==</span> <span class="nx">Ok</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">SystemError</span><span class="p">(</span><span class="nx">x</span> <span class="nx">SystemErrorCode</span><span class="p">)</span> <span class="nx">ExitCode</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nf">ExitCode_Make_SystemError</span><span class="p">(</span><span class="nf">ExitCode_SystemError</span><span class="p">(</span><span class="nx">x</span><span class="p">))</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">ExitCode_I</span><span class="p">)</span> <span class="nf">IsSuccess</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">x</span><span class="p">.</span><span class="nf">Which</span><span class="p">()</span> <span class="o">==</span> <span class="nx">ExitCode_Case_Success</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">ExitCode_I</span><span class="p">)</span> <span class="nf">IsError</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">ExitCode</span><span class="p">)</span> <span class="nf">IsError</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="p">!</span><span class="nx">x</span><span class="p">.</span><span class="nf">IsSuccess</span><span class="p">()</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">ExitCode_I</span><span class="p">)</span> <span class="nf">AllowsStateUpdate</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">ExitCode</span><span class="p">)</span> <span class="nf">AllowsStateUpdate</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">x</span><span class="p">.</span><span class="nf">IsSuccess</span><span class="p">()</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">ExitCode_I</span><span class="p">)</span> <span class="nf">Equals</span><span class="p">(</span><span class="nx">ExitCode</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">OK</span><span class="p">()</span> <span class="nx">ExitCode</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">Ok</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">EnsureErrorCode</span><span class="p">(</span><span class="nx">x</span> <span class="nx">ExitCode</span><span class="p">)</span> <span class="nx">ExitCode</span> <span class="p">{</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">x</span><span class="p">.</span><span class="nf">IsError</span><span class="p">()</span> <span class="p">{</span>
 		<span class="c1">// Throwing an error with a non-error exit code is itself an error
-</span><span class="c1"></span>		<span class="nx">x</span> <span class="p">=</span> <span class="nf">SystemError</span><span class="p">(</span><span class="nx">RuntimeAPIError</span><span class="p">)</span>
+</span><span class="c1"></span>		<span class="nx">x</span> <span class="p">=</span> <span class="p">(</span><span class="nx">RuntimeAPIError</span><span class="p">)</span>
 	<span class="p">}</span>
 	<span class="k">return</span> <span class="nx">x</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">UserDefinedError</span><span class="p">(</span><span class="nx">e</span> <span class="nx">UserDefinedErrorCode</span><span class="p">)</span> <span class="nx">ExitCode</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nf">ExitCode_Make_UserDefinedError</span><span class="p">(</span><span class="nf">ExitCode_UserDefinedError</span><span class="p">(</span><span class="nx">e</span><span class="p">))</span>
 <span class="p">}</span>
 </code></pre></div>
 

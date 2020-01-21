@@ -3,14 +3,14 @@ package interpreter
 import (
 	"errors"
 
-	abi "github.com/filecoin-project/specs/actors/abi"
-	builtin "github.com/filecoin-project/specs/actors/builtin"
-	accact "github.com/filecoin-project/specs/actors/builtin/account"
-	cronact "github.com/filecoin-project/specs/actors/builtin/cron"
-	initact "github.com/filecoin-project/specs/actors/builtin/init"
-	smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
-	spowact "github.com/filecoin-project/specs/actors/builtin/storage_power"
-	vmr "github.com/filecoin-project/specs/actors/runtime"
+	abi "github.com/filecoin-project/specs-actors/actors/abi"
+	builtin "github.com/filecoin-project/specs-actors/actors/builtin"
+	accact "github.com/filecoin-project/specs-actors/actors/builtin/account"
+	cronact "github.com/filecoin-project/specs-actors/actors/builtin/cron"
+	initact "github.com/filecoin-project/specs-actors/actors/builtin/init"
+	smarkact "github.com/filecoin-project/specs-actors/actors/builtin/storage_market"
+	spowact "github.com/filecoin-project/specs-actors/actors/builtin/storage_power"
+	vmr "github.com/filecoin-project/specs-actors/actors/runtime"
 )
 
 var (

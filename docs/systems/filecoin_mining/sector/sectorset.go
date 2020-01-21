@@ -1,6 +1,6 @@
 package sector
 
-import abi "github.com/filecoin-project/specs/actors/abi"
+import abi "github.com/filecoin-project/specs-actors/actors/abi"
 
 // TODO
 func (css *CompactSectorSet) SectorsOn() []abi.SectorNumber {

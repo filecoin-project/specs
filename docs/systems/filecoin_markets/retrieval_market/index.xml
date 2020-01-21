@@ -17,7 +17,7 @@
       
       <guid>/docs/systems/filecoin_markets/retrieval_market/retrieval_client/</guid>
       <description>Client Dependencies The Retrieval Client Depends On The Following Dependencies
- Host: A libp2p host (set setup the libp2p protocols) Filecoin Node: A node implementation to query the chain for pieces and to setup and manage payment channels BlockStore: Same as one used by data transfer module Data Transfer: V1 only &amp;ndash;Module used for transferring payload. Writes to the blockstore.  API import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; import addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; import peer &amp;#34;github.</description>
+ Host: A libp2p host (set setup the libp2p protocols) Filecoin Node: A node implementation to query the chain for pieces and to setup and manage payment channels BlockStore: Same as one used by data transfer module Data Transfer: V1 only &amp;ndash;Module used for transferring payload. Writes to the blockstore.  API import abi &amp;#34;github.com/filecoin-project/specs-actors/actors/abi&amp;#34; import addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; import peer &amp;#34;github.</description>
     </item>
     
     <item>
@@ -28,7 +28,7 @@
       <guid>/docs/systems/filecoin_markets/retrieval_market/retrieval_peer_resolver/</guid>
       <description>The peer resolver is a content routing interface to discover retrieval miners that have a given Piece.
 It can be backed by both a local store of previous storage deals or by querying the chain.
-import abi &amp;#34;github.com/filecoin-project/specs/actors/abi&amp;#34; type RetrievalPeerResolver struct { GetPeers(PieceCID abi.PieceCID) [RetrievalPeer] }  </description>
+import abi &amp;#34;github.com/filecoin-project/specs-actors/actors/abi&amp;#34; type RetrievalPeerResolver struct { GetPeers(PieceCID abi.PieceCID) [RetrievalPeer] }  </description>
     </item>
     
     <item>

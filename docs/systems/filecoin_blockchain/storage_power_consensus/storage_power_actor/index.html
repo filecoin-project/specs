@@ -4721,27 +4721,6 @@ https://github.com/alex-shpak/hugo-book
 <article class="markdown">
   
 
-<h1 id="storagepoweractor-interface"><code>StoragePowerActor</code> interface</h1>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<p style="color: #D74848"><b><i>Something's not right. The <code>/docs/actors/builtin/storage_power/storage_power_actor.id</code> file was not found.</i></b></p>
-
-
-
 <h1 id="storagepoweractorstate-implementation"><code>StoragePowerActorState</code> implementation</h1>
 
 
@@ -4768,11 +4747,11 @@ https://github.com/alex-shpak/hugo-book
     <span class="s">&#34;sort&#34;</span>
 
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
-    <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
-    <span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin&#34;</span>
-    <span class="nx">crypto</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/crypto&#34;</span>
-    <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime/indices&#34;</span>
-    <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
+    <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
+    <span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin&#34;</span>
+    <span class="nx">crypto</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/crypto&#34;</span>
+    <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/runtime/indices&#34;</span>
+    <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/util&#34;</span>
     <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 <span class="p">)</span>
 
@@ -5022,7 +5001,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<h1 id="storagepoweractorcode-implementation"><code>StoragePowerActorCode</code> implementation</h1>
+<h1 id="storagepoweractor-implementation"><code>StoragePowerActor</code> implementation</h1>
 
 
 
@@ -5039,7 +5018,434 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<p style="color: #D74848"><b><i>Something's not right. The <code>/docs/actors/builtin/storage_power/storage_power_actor_code.go</code> file was not found.</i></b></p>
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_power</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="s">&#34;math&#34;</span>
+
+    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
+    <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
+    <span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin&#34;</span>
+    <span class="nx">crypto</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/crypto&#34;</span>
+    <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/runtime&#34;</span>
+    <span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/runtime/indices&#34;</span>
+    <span class="nx">serde</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/serde&#34;</span>
+    <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/util&#34;</span>
+    <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
+    <span class="nx">peer</span> <span class="s">&#34;github.com/libp2p/go-libp2p-core/peer&#34;</span>
+<span class="p">)</span>
+
+<span class="kd">type</span> <span class="nx">ConsensusFaultType</span> <span class="kt">int</span>
+
+<span class="kd">const</span> <span class="p">(</span>
+    <span class="nx">UncommittedPowerFault</span> <span class="nx">ConsensusFaultType</span> <span class="p">=</span> <span class="mi">0</span>
+    <span class="nx">DoubleForkMiningFault</span> <span class="nx">ConsensusFaultType</span> <span class="p">=</span> <span class="mi">1</span>
+    <span class="nx">ParentGrindingFault</span>   <span class="nx">ConsensusFaultType</span> <span class="p">=</span> <span class="mi">2</span>
+    <span class="nx">TimeOffsetMiningFault</span> <span class="nx">ConsensusFaultType</span> <span class="p">=</span> <span class="mi">3</span>
+<span class="p">)</span>
+
+<span class="kd">type</span> <span class="nx">StoragePowerActor</span> <span class="kd">struct</span><span class="p">{}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">State</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">StoragePowerActorState</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
+    <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">cid</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">())</span>
+    <span class="kd">var</span> <span class="nx">state</span> <span class="nx">StoragePowerActorState</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nx">stateCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">state</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;state not found&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">state</span>
+<span class="p">}</span>
+
+<span class="c1">////////////////////////////////////////////////////////////////////////////////
+</span><span class="c1">// Actor methods
+</span><span class="c1">////////////////////////////////////////////////////////////////////////////////
+</span><span class="c1"></span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">AddBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">RT_MinerEntry_ValidateCaller_DetermineFundsLocation</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MinerEntrySpec_MinerOnly</span><span class="p">)</span>
+
+    <span class="nx">msgValue</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReceived</span><span class="p">()</span>
+
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">BalanceTable_WithAdd</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">EscrowTable</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">msgValue</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Escrow operation failed&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nx">EscrowTable</span> <span class="p">=</span> <span class="nx">newTable</span>
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">WithdrawBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amountRequested</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">amountRequested</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;Amount to withdraw must be nonnegative&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="nx">recipientAddr</span> <span class="o">:=</span> <span class="nf">RT_MinerEntry_ValidateCaller_DetermineFundsLocation</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MinerEntrySpec_MinerOnly</span><span class="p">)</span>
+
+    <span class="nx">minBalanceMaintainRequired</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_rtGetPledgeCollateralReqForMinerOrAbort</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
+
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountExtracted</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">BalanceTable_WithExtractPartial</span><span class="p">(</span>
+        <span class="nx">st</span><span class="p">.</span><span class="nx">EscrowTable</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">amountRequested</span><span class="p">,</span> <span class="nx">minBalanceMaintainRequired</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Escrow operation failed&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nx">EscrowTable</span> <span class="p">=</span> <span class="nx">newTable</span>
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">recipientAddr</span><span class="p">,</span> <span class="nx">amountExtracted</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">CreateMiner</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">workerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">peerId</span> <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
+    <span class="nx">vmr</span><span class="p">.</span><span class="nf">RT_ValidateImmediateCallerIsSignable</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">ownerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+
+    <span class="nx">newMinerAddr</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">NewFromBytes</span><span class="p">(</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
+            <span class="nx">builtin</span><span class="p">.</span><span class="nx">InitActorAddr</span><span class="p">,</span>
+            <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_InitActor_Exec</span><span class="p">,</span>
+            <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
+                <span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMinerActorCodeID</span><span class="p">,</span>
+                <span class="nx">ownerAddr</span><span class="p">,</span>
+                <span class="nx">workerAddr</span><span class="p">,</span>
+                <span class="nx">sectorSize</span><span class="p">,</span>
+                <span class="nx">peerId</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="p">).</span><span class="nx">ReturnValue</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="nx">autil</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
+
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">BalanceTable_WithNewAddressEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">EscrowTable</span><span class="p">,</span> <span class="nx">newMinerAddr</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReceived</span><span class="p">())</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nx">EscrowTable</span> <span class="p">=</span> <span class="nx">newTable</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nx">PowerTable</span><span class="p">[</span><span class="nx">newMinerAddr</span><span class="p">]</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nx">ClaimedPower</span><span class="p">[</span><span class="nx">newMinerAddr</span><span class="p">]</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nx">NominalPower</span><span class="p">[</span><span class="nx">newMinerAddr</span><span class="p">]</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nx">newMinerAddr</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">DeleteMiner</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+
+    <span class="nx">minerPledgeBalance</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">BalanceTable_GetEntry</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">EscrowTable</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;Miner address not found&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="nx">minerPledgeBalance</span> <span class="p">&gt;</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Deletion requested for miner with pledge balance still remaining&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="nx">minerPower</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nx">PowerTable</span><span class="p">[</span><span class="nx">minerAddr</span><span class="p">]</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nx">minerPower</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Deletion requested for miner with power still remaining&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+
+    <span class="nx">ownerAddr</span><span class="p">,</span> <span class="nx">workerAddr</span> <span class="o">:=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">RT_GetMinerAccountsAssert</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerInSet</span><span class="p">([]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">{</span><span class="nx">ownerAddr</span><span class="p">,</span> <span class="nx">workerAddr</span><span class="p">})</span>
+
+    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtDeleteMinerActor</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">OnSectorProveCommit</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">storageWeightDesc</span> <span class="nx">SectorStorageWeightDesc</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMinerActorCodeID</span><span class="p">)</span>
+    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtAddPowerForSector</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(),</span> <span class="nx">storageWeightDesc</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">OnSectorTerminate</span><span class="p">(</span>
+    <span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">storageWeightDesc</span> <span class="nx">SectorStorageWeightDesc</span><span class="p">,</span> <span class="nx">terminationType</span> <span class="nx">SectorTerminationType</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMinerActorCodeID</span><span class="p">)</span>
+    <span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtDeductClaimedPowerForSectorAssert</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">storageWeightDesc</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nx">terminationType</span> <span class="o">!=</span> <span class="nx">SectorTerminationType_NormalExpiration</span> <span class="p">{</span>
+        <span class="nx">cidx</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrIndices</span><span class="p">()</span>
+        <span class="nx">amountToSlash</span> <span class="o">:=</span> <span class="nx">cidx</span><span class="p">.</span><span class="nf">StoragePower_PledgeSlashForSectorTermination</span><span class="p">(</span><span class="nx">storageWeightDesc</span><span class="p">,</span> <span class="nx">terminationType</span><span class="p">)</span>
+        <span class="nx">a</span><span class="p">.</span><span class="nf">_rtSlashPledgeCollateral</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">amountToSlash</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">OnSectorTemporaryFaultEffectiveBegin</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">storageWeightDesc</span> <span class="nx">SectorStorageWeightDesc</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMinerActorCodeID</span><span class="p">)</span>
+    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtDeductClaimedPowerForSectorAssert</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(),</span> <span class="nx">storageWeightDesc</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">OnSectorTemporaryFaultEffectiveEnd</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">storageWeightDesc</span> <span class="nx">SectorStorageWeightDesc</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMinerActorCodeID</span><span class="p">)</span>
+    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtAddPowerForSector</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(),</span> <span class="nx">storageWeightDesc</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">OnSectorModifyWeightDesc</span><span class="p">(</span>
+    <span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">storageWeightDescPrev</span> <span class="nx">SectorStorageWeightDesc</span><span class="p">,</span> <span class="nx">storageWeightDescNew</span> <span class="nx">SectorStorageWeightDesc</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMinerActorCodeID</span><span class="p">)</span>
+    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtDeductClaimedPowerForSectorAssert</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(),</span> <span class="nx">storageWeightDescPrev</span><span class="p">)</span>
+    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtAddPowerForSector</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(),</span> <span class="nx">storageWeightDescNew</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">OnMinerSurprisePoStSuccess</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMinerActorCodeID</span><span class="p">)</span>
+    <span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">PoStDetectedFaultMiners</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">_updatePowerEntriesFromClaimedPower</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">OnMinerSurprisePoStFailure</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">numConsecutiveFailures</span> <span class="kt">int64</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMinerActorCodeID</span><span class="p">)</span>
+    <span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+
+    <span class="nx">st</span><span class="p">.</span><span class="nx">PoStDetectedFaultMiners</span><span class="p">[</span><span class="nx">minerAddr</span><span class="p">]</span> <span class="p">=</span> <span class="kc">true</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">_updatePowerEntriesFromClaimedPower</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span>
+
+    <span class="nx">minerClaimedPower</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nx">ClaimedPower</span><span class="p">[</span><span class="nx">minerAddr</span><span class="p">]</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nx">numConsecutiveFailures</span> <span class="p">&gt;</span> <span class="nx">indices</span><span class="p">.</span><span class="nf">StoragePower_SurprisePoStMaxConsecutiveFailures</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">a</span><span class="p">.</span><span class="nf">_rtDeleteMinerActor</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">cidx</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrIndices</span><span class="p">()</span>
+        <span class="nx">amountToSlash</span> <span class="o">:=</span> <span class="nx">cidx</span><span class="p">.</span><span class="nf">StoragePower_PledgeSlashForSurprisePoStFailure</span><span class="p">(</span><span class="nx">minerClaimedPower</span><span class="p">,</span> <span class="nx">numConsecutiveFailures</span><span class="p">)</span>
+        <span class="nx">a</span><span class="p">.</span><span class="nf">_rtSlashPledgeCollateral</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">amountToSlash</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">OnMinerEnrollCronEvent</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">eventEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">sectorNumbers</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMinerActorCodeID</span><span class="p">)</span>
+    <span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+    <span class="nx">minerEvent</span> <span class="o">:=</span> <span class="nx">autil</span><span class="p">.</span><span class="nx">MinerEvent</span><span class="p">{</span>
+        <span class="nx">MinerAddr</span><span class="p">:</span> <span class="nx">minerAddr</span><span class="p">,</span>
+        <span class="nx">Sectors</span><span class="p">:</span>   <span class="nx">sectorNumbers</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nx">CachedDeferredCronEvents</span><span class="p">[</span><span class="nx">eventEpoch</span><span class="p">];</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+        <span class="nx">st</span><span class="p">.</span><span class="nx">CachedDeferredCronEvents</span><span class="p">[</span><span class="nx">eventEpoch</span><span class="p">]</span> <span class="p">=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">MinerEventSetHAMT_Empty</span><span class="p">()</span>
+    <span class="p">}</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nx">CachedDeferredCronEvents</span><span class="p">[</span><span class="nx">eventEpoch</span><span class="p">]</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">CachedDeferredCronEvents</span><span class="p">[</span><span class="nx">eventEpoch</span><span class="p">],</span> <span class="nx">minerEvent</span><span class="p">)</span>
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">ReportVerifiedConsensusFault</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">slasheeAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">faultEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">faultType</span> <span class="nx">ConsensusFaultType</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">TODO</span><span class="p">()</span>
+    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+    <span class="c1">// TODO: The semantics here are quite delicate:
+</span><span class="c1"></span>    <span class="c1">//
+</span><span class="c1"></span>    <span class="c1">// - (proof []block.Block) can&#39;t be validated in isolation; we must query the runtime to confirm
+</span><span class="c1"></span>    <span class="c1">//   that at least one of the blocks provided actually appeared in the current chain.
+</span><span class="c1"></span>    <span class="c1">// - We must prevent duplicate slashes on the same offense, taking into account that the blocks
+</span><span class="c1"></span>    <span class="c1">//   may appear in different orders.
+</span><span class="c1"></span>    <span class="c1">// - We must determine how to reward multiple reporters of the same fault within a single epoch.
+</span><span class="c1"></span>    <span class="c1">//
+</span><span class="c1"></span>    <span class="c1">// Deferring to followup after these security/mechanism design questions have been resolved.
+</span><span class="c1"></span>    <span class="c1">// Previous notes:
+</span><span class="c1"></span>    <span class="c1">//
+</span><span class="c1"></span>    <span class="c1">// validation checks to be done in runtime before calling this method
+</span><span class="c1"></span>    <span class="c1">// - there should be exactly two block headers in proof
+</span><span class="c1"></span>    <span class="c1">// - both blocks are mined by the same miner
+</span><span class="c1"></span>    <span class="c1">// - first block is of the same or lower block height as the second block
+</span><span class="c1"></span>    <span class="c1">//
+</span><span class="c1"></span>    <span class="c1">// Use EC&#39;s IsValidConsensusFault method to validate the proof
+</span><span class="c1"></span>
+    <span class="c1">// this method assumes that ConsensusFault has been checked in runtime
+</span><span class="c1"></span>    <span class="nx">slasherAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+
+    <span class="nx">claimedPower</span><span class="p">,</span> <span class="nx">powerOk</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nx">ClaimedPower</span><span class="p">[</span><span class="nx">slasheeAddr</span><span class="p">]</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">powerOk</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa.ReportConsensusFault: miner to slash has been slashed&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">claimedPower</span> <span class="p">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="nx">currPledge</span><span class="p">,</span> <span class="nx">pledgeOk</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getCurrPledgeForMiner</span><span class="p">(</span><span class="nx">slasheeAddr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">pledgeOk</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa.ReportConsensusFault: miner to slash has no pledge&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">currPledge</span> <span class="p">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1">// elapsed epoch from the latter block which committed the fault
+</span><span class="c1"></span>    <span class="nx">elapsedEpoch</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="o">-</span> <span class="nx">faultEpoch</span>
+    <span class="k">if</span> <span class="nx">elapsedEpoch</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;spa.ReportConsensusFault: invalid block&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="nx">collateralToSlash</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getPledgeSlashForConsensusFault</span><span class="p">(</span><span class="nx">currPledge</span><span class="p">,</span> <span class="nx">faultType</span><span class="p">)</span>
+    <span class="nx">slasherReward</span> <span class="o">:=</span> <span class="nf">_getConsensusFaultSlasherReward</span><span class="p">(</span><span class="nx">elapsedEpoch</span><span class="p">,</span> <span class="nx">collateralToSlash</span><span class="p">)</span>
+
+    <span class="c1">// request slasherReward to be deducted from EscrowTable
+</span><span class="c1"></span>    <span class="nx">amountToSlasher</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_slashPledgeCollateral</span><span class="p">(</span><span class="nx">slasherAddr</span><span class="p">,</span> <span class="nx">slasherReward</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">slasherReward</span> <span class="o">==</span> <span class="nx">amountToSlasher</span><span class="p">)</span>
+
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+
+    <span class="c1">// reward slasher
+</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">slasherAddr</span><span class="p">,</span> <span class="nx">amountToSlasher</span><span class="p">)</span>
+
+    <span class="c1">// burn the rest of pledge collateral
+</span><span class="c1"></span>    <span class="c1">// delete miner from power table
+</span><span class="c1"></span>    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtDeleteMinerActor</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">slasheeAddr</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// Called by Cron.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">OnEpochTickEnd</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">CronActorAddr</span><span class="p">)</span>
+
+    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtInitiateNewSurprisePoStChallenges</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtProcessDeferredCronEvents</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
+    <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
+
+    <span class="nx">st</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">StoragePowerActorState</span><span class="p">{</span>
+        <span class="nx">TotalNetworkPower</span><span class="p">:</span>        <span class="nx">abi</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">PowerTable</span><span class="p">:</span>               <span class="nf">PowerTableHAMT_Empty</span><span class="p">(),</span>
+        <span class="nx">EscrowTable</span><span class="p">:</span>              <span class="nx">autil</span><span class="p">.</span><span class="nf">BalanceTableHAMT_Empty</span><span class="p">(),</span>
+        <span class="nx">CachedDeferredCronEvents</span><span class="p">:</span> <span class="nf">MinerEventsHAMT_Empty</span><span class="p">(),</span>
+        <span class="nx">PoStDetectedFaultMiners</span><span class="p">:</span>  <span class="nx">autil</span><span class="p">.</span><span class="nf">MinerSetHAMT_Empty</span><span class="p">(),</span>
+        <span class="nx">ClaimedPower</span><span class="p">:</span>             <span class="nf">PowerTableHAMT_Empty</span><span class="p">(),</span>
+        <span class="nx">NominalPower</span><span class="p">:</span>             <span class="nf">PowerTableHAMT_Empty</span><span class="p">(),</span>
+        <span class="nx">NumMinersMeetingMinPower</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="o">*</span><span class="nx">st</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">////////////////////////////////////////////////////////////////////////////////
+</span><span class="c1">// Method utility functions
+</span><span class="c1">////////////////////////////////////////////////////////////////////////////////
+</span><span class="c1"></span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">_rtAddPowerForSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">storageWeightDesc</span> <span class="nx">SectorStorageWeightDesc</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">_addClaimedPowerForSector</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">storageWeightDesc</span><span class="p">)</span>
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">_rtDeductClaimedPowerForSectorAssert</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">storageWeightDesc</span> <span class="nx">SectorStorageWeightDesc</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">_deductClaimedPowerForSectorAssert</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">storageWeightDesc</span><span class="p">)</span>
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">_rtInitiateNewSurprisePoStChallenges</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">provingPeriod</span> <span class="o">:=</span> <span class="nx">indices</span><span class="p">.</span><span class="nf">StorageMining_SurprisePoStProvingPeriod</span><span class="p">()</span>
+
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+
+    <span class="c1">// sample the actor addresses
+</span><span class="c1"></span>    <span class="nx">minerSelectionSeed</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">GetRandomness</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">())</span>
+    <span class="nx">randomness</span> <span class="o">:=</span> <span class="nx">crypto</span><span class="p">.</span><span class="nf">DeriveRandWithEpoch</span><span class="p">(</span><span class="nx">crypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_SurprisePoStSelectMiners</span><span class="p">,</span> <span class="nx">minerSelectionSeed</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()))</span>
+
+    <span class="nf">IMPL_FINISH</span><span class="p">()</span> <span class="c1">// BigInt arithmetic (not floating-point)
+</span><span class="c1"></span>    <span class="nx">challengeCount</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Ceil</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">PowerTable</span><span class="p">))</span> <span class="o">/</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">provingPeriod</span><span class="p">))</span>
+    <span class="nx">surprisedMiners</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_selectMinersToSurprise</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">challengeCount</span><span class="p">),</span> <span class="nx">randomness</span><span class="p">)</span>
+
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">addr</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">surprisedMiners</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
+            <span class="nx">addr</span><span class="p">,</span>
+            <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_StorageMinerActor_OnSurprisePoStChallenge</span><span class="p">,</span>
+            <span class="kc">nil</span><span class="p">,</span>
+            <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">_rtProcessDeferredCronEvents</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">epoch</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span>
+
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">minerEvents</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nx">CachedDeferredCronEvents</span><span class="p">[</span><span class="nx">epoch</span><span class="p">]</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+        <span class="k">return</span>
+    <span class="p">}</span>
+    <span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">CachedDeferredCronEvents</span><span class="p">,</span> <span class="nx">epoch</span><span class="p">)</span>
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+
+    <span class="nx">minerEventsRetain</span> <span class="o">:=</span> <span class="p">[]</span><span class="nx">autil</span><span class="p">.</span><span class="nx">MinerEvent</span><span class="p">{}</span>
+    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">minerEvent</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">minerEvents</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nx">PowerTable</span><span class="p">[</span><span class="nx">minerEvent</span><span class="p">.</span><span class="nx">MinerAddr</span><span class="p">];</span> <span class="nx">found</span> <span class="p">{</span>
+            <span class="nx">minerEventsRetain</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">minerEventsRetain</span><span class="p">,</span> <span class="nx">minerEvent</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">minerEvent</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">minerEventsRetain</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
+            <span class="nx">minerEvent</span><span class="p">.</span><span class="nx">MinerAddr</span><span class="p">,</span>
+            <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_StorageMinerActor_OnDeferredCronEvent</span><span class="p">,</span>
+            <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span>
+                <span class="nx">minerEvent</span><span class="p">.</span><span class="nx">Sectors</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">_rtGetPledgeCollateralReqForMinerOrAbort</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">minerNominalPower</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nx">NominalPower</span><span class="p">[</span><span class="nx">minerAddr</span><span class="p">]</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;Miner not found&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+    <span class="nx">cidx</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrIndices</span><span class="p">()</span>
+    <span class="k">return</span> <span class="nx">cidx</span><span class="p">.</span><span class="nf">PledgeCollateralReq</span><span class="p">(</span><span class="nx">minerNominalPower</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">_rtSlashPledgeCollateral</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amountToSlash</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">amountSlashed</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_slashPledgeCollateral</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">amountToSlash</span><span class="p">)</span>
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">amountSlashed</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StoragePowerActor</span><span class="p">)</span> <span class="nf">_rtDeleteMinerActor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+
+    <span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">PowerTable</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">ClaimedPower</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">NominalPower</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">PoStDetectedFaultMiners</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
+
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">amountSlashed</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">BalanceTable_WithExtractAll</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">EscrowTable</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+    <span class="nx">newTable</span><span class="p">,</span> <span class="nx">ok</span> <span class="p">=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">BalanceTable_WithDeletedAddressEntry</span><span class="p">(</span><span class="nx">newTable</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
+    <span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nx">EscrowTable</span> <span class="p">=</span> <span class="nx">newTable</span>
+
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
+        <span class="nx">minerAddr</span><span class="p">,</span>
+        <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_StorageMinerActor_OnDeleteMiner</span><span class="p">,</span>
+        <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(),</span>
+        <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendFunds</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">amountSlashed</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
 
 
 
@@ -5102,9 +5508,8 @@ https://github.com/alex-shpak/hugo-book
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
 <ul>
-<li><a href="#storagepoweractor-interface"><code>StoragePowerActor</code> interface</a></li>
 <li><a href="#storagepoweractorstate-implementation"><code>StoragePowerActorState</code> implementation</a></li>
-<li><a href="#storagepoweractorcode-implementation"><code>StoragePowerActorCode</code> implementation</a></li>
+<li><a href="#storagepoweractor-implementation"><code>StoragePowerActor</code> implementation</a></li>
 <li><a href="#the-power-table">The Power Table</a></li>
 <li><a href="#pledge-collateral">Pledge Collateral</a></li>
 </ul>

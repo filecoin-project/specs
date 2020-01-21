@@ -11,6 +11,24 @@
     
     
     <item>
+      <title></title>
+      <link>/docs/actors/contributing/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/actors/contributing/</guid>
+      <description>Contributing Please read the spec process. Please file PRs on github with fixes.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>/docs/orient/viz/readme/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/orient/viz/readme/</guid>
+      <description> Ubercalc visualizations Install  Install orient Install obs  Usage # Run these commands from the root folder of the spec repo on two different terminals $ ORIENT_CACHE_DIR=/absolute/path/to/cache ./orient/bin/orient web --system=src/orient/rational-calc.orient --port=8000 $ obs serve 8081 src/orient/viz  </description>
+    </item>
+    
+    <item>
       <title>Filecoin Parameters</title>
       <link>/docs/content/appendix/orient/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>

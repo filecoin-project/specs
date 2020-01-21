@@ -4857,7 +4857,7 @@ it will be created as an account actor.</p>
 <span class="kn">import</span> <span class="nx">vmri</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/impl&#34;</span>
 <span class="kn">import</span> <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
 <span class="kn">import</span> <span class="nx">chain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain&#34;</span>
-<span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
+<span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
 
 <span class="kd">type</span> <span class="nx">UInt64</span> <span class="nx">UInt</span>
 
@@ -4927,14 +4927,14 @@ it will be created as an account actor.</p>
 
 <span class="kn">import</span> <span class="p">(</span>
 	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
-	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
-	<span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin&#34;</span>
-	<span class="nx">initact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/init&#34;</span>
-	<span class="nx">sminact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_miner&#34;</span>
-	<span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
-	<span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime/exitcode&#34;</span>
-	<span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime/indices&#34;</span>
-	<span class="nx">serde</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/serde&#34;</span>
+	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
+	<span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin&#34;</span>
+	<span class="nx">initact</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin/init&#34;</span>
+	<span class="nx">sminact</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin/storage_miner&#34;</span>
+	<span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/runtime&#34;</span>
+	<span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/runtime/exitcode&#34;</span>
+	<span class="nx">indices</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/runtime/indices&#34;</span>
+	<span class="nx">serde</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/serde&#34;</span>
 	<span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 	<span class="nx">chain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain&#34;</span>
 	<span class="nx">actstate</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
@@ -5061,8 +5061,9 @@ it will be created as an account actor.</p>
 		<span class="nx">retReceipt</span> <span class="p">=</span> <span class="nx">vmri</span><span class="p">.</span><span class="nf">MessageReceipt_Make</span><span class="p">(</span><span class="nx">invocOutput</span><span class="p">,</span> <span class="nx">exitCode</span><span class="p">,</span> <span class="nx">vmiGasUsed</span><span class="p">)</span>
 	<span class="p">}</span>
 
-	<span class="nx">_applyError</span> <span class="o">:=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">errExitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">SystemErrorCode</span><span class="p">,</span> <span class="nx">senderResolveSpec</span> <span class="nx">SenderResolveSpec</span><span class="p">)</span> <span class="p">{</span>
-		<span class="nf">_applyReturn</span><span class="p">(</span><span class="nx">tree</span><span class="p">,</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="kc">nil</span><span class="p">),</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">errExitCode</span><span class="p">),</span> <span class="nx">senderResolveSpec</span><span class="p">)</span>
+	<span class="c1">// TODO move this to a package with a less redundant name
+</span><span class="c1"></span>	<span class="nx">_applyError</span> <span class="o">:=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">errExitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">,</span> <span class="nx">senderResolveSpec</span> <span class="nx">SenderResolveSpec</span><span class="p">)</span> <span class="p">{</span>
+		<span class="nf">_applyReturn</span><span class="p">(</span><span class="nx">tree</span><span class="p">,</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="kc">nil</span><span class="p">),</span> <span class="nx">errExitCode</span><span class="p">,</span> <span class="nx">senderResolveSpec</span><span class="p">)</span>
 	<span class="p">}</span>
 
 	<span class="c1">// Deduct an amount of gas corresponding to cost about to be incurred, but not necessarily
@@ -5109,7 +5110,8 @@ it will be created as an account actor.</p>
 
 	<span class="c1">// Check sender balance.
 </span><span class="c1"></span>	<span class="nx">gasLimitCost</span> <span class="o">:=</span> <span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(),</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">())</span>
-	<span class="nx">networkTxnFee</span> <span class="o">:=</span> <span class="nf">indicesFromStateTree</span><span class="p">(</span><span class="nx">inTree</span><span class="p">).</span><span class="nf">NetworkTransactionFee</span><span class="p">(</span>
+	<span class="nx">tidx</span> <span class="o">:=</span> <span class="nf">indicesFromStateTree</span><span class="p">(</span><span class="nx">inTree</span><span class="p">)</span>
+	<span class="nx">networkTxnFee</span> <span class="o">:=</span> <span class="nx">tidx</span><span class="p">.</span><span class="nf">NetworkTransactionFee</span><span class="p">(</span>
 		<span class="nx">inTree</span><span class="p">.</span><span class="nf">GetActorCodeID_Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">()),</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Method</span><span class="p">())</span>
 	<span class="nx">totalCost</span> <span class="o">:=</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Value</span><span class="p">()</span> <span class="o">+</span> <span class="nx">gasLimitCost</span> <span class="o">+</span> <span class="nx">networkTxnFee</span>
 	<span class="k">if</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">Balance</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">totalCost</span> <span class="p">{</span>
@@ -5243,11 +5245,11 @@ it will be created as an account actor.</p>
 </span><span class="c1"></span><span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_makeInvocInput</span><span class="p">(</span><span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">)</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
-		<span class="nx">To_</span><span class="p">:</span>     <span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">(),</span> <span class="c1">// Receiver address is resolved during execution.
-</span><span class="c1"></span>		<span class="nx">Method_</span><span class="p">:</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Method</span><span class="p">(),</span>
-		<span class="nx">Params_</span><span class="p">:</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Params</span><span class="p">(),</span>
-		<span class="nx">Value_</span><span class="p">:</span>  <span class="nx">message</span><span class="p">.</span><span class="nf">Value</span><span class="p">(),</span>
+	<span class="k">return</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">{</span>
+		<span class="nx">To</span><span class="p">:</span>     <span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">(),</span> <span class="c1">// Receiver address is resolved during execution.
+</span><span class="c1"></span>		<span class="nx">Method</span><span class="p">:</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Method</span><span class="p">(),</span>
+		<span class="nx">Params</span><span class="p">:</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Params</span><span class="p">(),</span>
+		<span class="nx">Value</span><span class="p">:</span>  <span class="nx">message</span><span class="p">.</span><span class="nf">Value</span><span class="p">(),</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
@@ -5338,14 +5340,14 @@ it will be created as an account actor.</p>
 <span class="kn">import</span> <span class="p">(</span>
 	<span class="s">&#34;errors&#34;</span>
 
-	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
-	<span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin&#34;</span>
-	<span class="nx">accact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/account&#34;</span>
-	<span class="nx">cronact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/cron&#34;</span>
-	<span class="nx">initact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/init&#34;</span>
-	<span class="nx">smarkact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_market&#34;</span>
-	<span class="nx">spowact</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin/storage_power&#34;</span>
-	<span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
+	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
+	<span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin&#34;</span>
+	<span class="nx">accact</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin/account&#34;</span>
+	<span class="nx">cronact</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin/cron&#34;</span>
+	<span class="nx">initact</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin/init&#34;</span>
+	<span class="nx">smarkact</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin/storage_market&#34;</span>
+	<span class="nx">spowact</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin/storage_power&#34;</span>
+	<span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/runtime&#34;</span>
 <span class="p">)</span>
 
 <span class="kd">var</span> <span class="p">(</span>

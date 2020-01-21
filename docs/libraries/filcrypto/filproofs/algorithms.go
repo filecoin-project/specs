@@ -10,7 +10,7 @@ import (
 	"encoding/binary"
 	big "math/big"
 
-	abi "github.com/filecoin-project/specs/actors/abi"
+	abi "github.com/filecoin-project/specs-actors/actors/abi"
 	file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"

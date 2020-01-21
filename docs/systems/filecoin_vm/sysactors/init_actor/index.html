@@ -4719,25 +4719,7 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  <p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<p style="color: #D74848"><b><i>Something's not right. The <code>/docs/actors/builtin/init/init_actor.id</code> file was not found.</i></b></p>
-
-
-
+  
 
 
 
@@ -4761,11 +4743,11 @@ https://github.com/alex-shpak/hugo-book
     <span class="s">&#34;bytes&#34;</span>
 
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
-    <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/actors&#34;</span>
-    <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/abi&#34;</span>
-    <span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/builtin&#34;</span>
-    <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/runtime&#34;</span>
-    <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs/actors/util&#34;</span>
+    <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors&#34;</span>
+    <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
+    <span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin&#34;</span>
+    <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/runtime&#34;</span>
+    <span class="nx">autil</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/util&#34;</span>
     <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 <span class="p">)</span>
 
@@ -4844,11 +4826,11 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="c1">// Invoke constructor. If construction fails, the error should propagate and cause
 </span><span class="c1"></span>    <span class="c1">// Exec to fail too.
-</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
-        <span class="nx">To_</span><span class="p">:</span>     <span class="nx">idAddr</span><span class="p">,</span>
-        <span class="nx">Method_</span><span class="p">:</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">MethodConstructor</span><span class="p">,</span>
-        <span class="nx">Params_</span><span class="p">:</span> <span class="nx">constructorParams</span><span class="p">,</span>
-        <span class="nx">Value_</span><span class="p">:</span>  <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReceived</span><span class="p">(),</span>
+</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">{</span>
+        <span class="nx">To</span><span class="p">:</span>     <span class="nx">idAddr</span><span class="p">,</span>
+        <span class="nx">Method</span><span class="p">:</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">MethodConstructor</span><span class="p">,</span>
+        <span class="nx">Params</span><span class="p">:</span> <span class="nx">constructorParams</span><span class="p">,</span>
+        <span class="nx">Value</span><span class="p">:</span>  <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReceived</span><span class="p">(),</span>
     <span class="p">})</span>
 
     <span class="kd">var</span> <span class="nx">addrBuf</span> <span class="nx">bytes</span><span class="p">.</span><span class="nx">Buffer</span>
@@ -4912,7 +4894,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-</p>
+
 
 </article>
 

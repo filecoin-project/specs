@@ -1,5 +1,5 @@
 import address "github.com/filecoin-project/go-address"
-import abi "github.com/filecoin-project/specs/actors/abi"
+import abi "github.com/filecoin-project/specs-actors/actors/abi"
 
 type TxSeqNo UVarint
 type NumRequired UVarint

@@ -4738,6 +4738,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+
+
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Node</span> <span class="nx">libp2p</span><span class="p">.</span><span class="nx">Node</span>
@@ -4791,11 +4793,70 @@ https://github.com/alex-shpak/hugo-book
 <li>Hello:
 
 <ul>
-<li>Hello protocol handles new connections to filecoin nodes.  It is an important part of the discovery process for ambient protocols (like KademliaDHT)</li>
-<li>Spec TODO.</li>
-<li>No Filecoin specific modifications to the protocol id.</li>
+<li>Hello protocol handles new connections to filecoin nodes to facilitate discovery</li>
+<li>the protocol string is <code>fil/hello/1.0.0</code>.</li>
 </ul></li>
 </ul>
+
+<h1 id="hello-spec">Hello Spec</h1>
+
+<h2 id="protocol-flow">Protocol Flow</h2>
+
+<p><code>fil/hello</code> is a filecoin specific protocol built on the libp2p stack.  It consists of two conceptual
+procedures: <code>hello_connect</code> and <code>hello_listen</code>.</p>
+
+<p><code>hello_listen</code>: <code>on new stream</code> -&gt; <code>read peer hello msg from stream</code> -&gt; <code>write latency message to stream</code> -&gt; <code>close stream</code></p>
+
+<p><code>hello_connect</code>: <code>on connected</code> -&gt; <code>open stream</code> -&gt; <code>write own hello msg to stream</code> -&gt; <code>read peer latency msg from stream</code>  -&gt; <code>close stream</code></p>
+
+<p>where stream and connection operations are all standard libp2p operations.  Nodes running the Hello Protocol should consume the incoming Hello Message and use it to help manage peers and sync the chain.</p>
+
+<h2 id="messages">Messages</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
+
+<span class="c1">// HelloMessage shares information about a peer&#39;s chain head
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">HelloMessage</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">HeaviestTipSet</span>        <span class="p">[</span><span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span><span class="p">]</span>
+    <span class="nx">HeaviestTipSetWeight</span>  <span class="nx">BigInt</span>
+    <span class="nx">HeaviestTipSetHeight</span>  <span class="nx">Int</span>
+    <span class="nx">GenesisHash</span>           <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
+<span class="p">}</span>
+
+<span class="c1">// LatencyMessage shares information about a peer&#39;s network latency
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">LatencyMessage</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// Measured in unix nanoseconds 
+</span><span class="c1"></span>    <span class="nx">TArrival</span>  <span class="nx">Int</span>
+    <span class="c1">// Measured in unix nanoseconds
+</span><span class="c1"></span>    <span class="nx">TSent</span>     <span class="nx">Int</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
+
+
+
+<p>When writing the <code>HelloMessage</code> to the stream the peer must inspect its current head to provide accurate information.  When writing the <code>LatencyMessage</code> to the stream the peer should set <code>TArrival</code> immediately upon receipt and <code>TSent</code> immediately before writing the message to the stream.</p>
 </article>
 
       
@@ -4805,6 +4866,18 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#hello-spec">Hello Spec</a>
+<ul>
+<li><a href="#protocol-flow">Protocol Flow</a></li>
+<li><a href="#messages">Messages</a></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
 
 
 
