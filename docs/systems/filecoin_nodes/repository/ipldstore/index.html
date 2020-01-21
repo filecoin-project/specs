@@ -4735,7 +4735,30 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<p style="color: #D74848"><b><i>Something's not right. The <code>../../../../libraries/ipld.id</code> file was not found.</i></b></p>
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// imported as ipld.Object
+</span><span class="c1"></span>
+<span class="kn">import</span> <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
+
+<span class="kd">type</span> <span class="nx">Object</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nf">CID</span><span class="p">()</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
+
+    <span class="c1">// Populate(v interface{}) error
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">GraphStore</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// Retrieves a serialized value from the store by CID. Returns the value and whether it was found.
+</span><span class="c1"></span>    <span class="nf">Get</span><span class="p">(</span><span class="nx">c</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span><span class="p">)</span> <span class="p">(</span><span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="kt">bool</span><span class="p">)</span>
+
+    <span class="c1">// Puts a serialized value in the store, returning the CID.
+</span><span class="c1"></span>    <span class="nf">Put</span><span class="p">(</span><span class="nx">value</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">)</span> <span class="p">(</span><span class="nx">c</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
 
 
 
