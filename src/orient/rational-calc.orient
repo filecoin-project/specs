@@ -384,7 +384,7 @@ ProofOfReplication:
     commd_time_parallel = commd_time / rig_cores
 
     commq_time = commr_time
-    porep_commit_time = commr_time + commq_time + commc_time
+    porep_commit_time = commr_time + commd_time + commc_time
     porep_commit_time_parallel = porep_commit_time / rig_cores 
     porep_commit_time_mins = porep_commit_time / 60
 
@@ -496,6 +496,7 @@ ProofOfReplication:
 
   Cost:
     describe(porep_cost, "Cost of a seal proof", dollar)
+
     describe(porep_cost_snark, "Cost of a snark proof", dollar)
     describe(porep_cost_commit, "Cost of generating merkle trees", dollar)
     describe(porep_cost_decoding, "Cost of decoding a sector", dollar)
