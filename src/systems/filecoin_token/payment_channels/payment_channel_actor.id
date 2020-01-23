@@ -1,8 +1,48 @@
-type Voucher struct {}
-type VouchersApprovalResponse struct {}
-type PieceInclusionProof struct {}
+import abi "github.com/filecoin-project/specs-actors/actors/abi"
+import addr "github.com/filecoin-project/go-address"
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 
-type PaymentChannelActor struct {
-    RedeemVoucherWithApproval(voucher Voucher)
-    RedeemVoucherWithPIP(voucher Voucher, pip PieceInclusionProof)
+type PaymentChannelActorState struct {
+    From            addr.Address
+    To              addr.Address
+
+    ToSend          util.UVarint
+
+    ClosingAt       abi.ChainEpoch
+    MinCloseHeight  abi.ChainEpoch
+
+    LaneStates      {uint64: &LaneState}
+}
+
+type LaneNonce uint64
+
+type LaneState struct {
+    Closed    bool
+    Redeemed  abi.TokenAmount
+    Nonce     LaneNonce
+}
+
+type SignedVoucher struct {
+    TimeLock        uint64
+    SecretPreimage  util.Bytes
+    VerifMethod     &ModVerifyParams
+    Nonce           LaneNonce
+    Amount          abi.TokenAmount
+    MinCloseHeight  abi.ChainEpoch
+
+    Merges          [LaneNonce]
+
+    Signature       filcrypto.Signature
+}
+
+type ModVerifyParams struct {
+    Actor   addr.Address
+    Method  uint64
+    Data    [byte]
+}
+
+type UpdateChannelStateParams struct {
+    Sv      SignedVoucher
+    Secret  [byte]
+    Proof   [byte]
 }
