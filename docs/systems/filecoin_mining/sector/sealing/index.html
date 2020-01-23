@@ -2272,10 +2272,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-    </li>
-
-    <li>
-    
       
 
 
@@ -4805,7 +4801,7 @@ https://github.com/alex-shpak/hugo-book
 
 <h2 id="drawing-randomness-for-sector-commitments">Drawing randomness for sector commitments</h2>
 
-<p><a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__ticket_chain">Tickets</a> are used as input to the SEAL above in order to tie Proofs-of-Replication to a given chain, thereby preventing long-range attacks (from another miner in the future trying to reuse SEALs).</p>
+<p><a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__ticket_chain">Tickets</a> are used as input to calculation of the ReplicaID in order to tie Proofs-of-Replication to a given chain, thereby preventing long-range attacks (from another miner in the future trying to reuse SEALs).</p>
 
 <p>The ticket has to be drawn from a finalized block in order to prevent the miner from potential losing storage (in case of a chain reorg) even though their storage is intact.</p>
 
@@ -4872,6 +4868,10 @@ G and T will be selected using these.</p>
 <li>Because T is an approximate value, and to account for network delay and variance in SEAL time across miners, the verifier allows for G offset from the assumed value of <code>X-F</code>: <code>Z-T-F</code>, hence verifying that the ticket is drawn from the range <code>[Z-T-F-G, Z-T-F+G]</code>.</li>
 </ul>
 
+<h4 id="in-practice">In Practice</h4>
+
+<p>The Filecoin protocol will include a <code>MAX_SEAL_TIME</code> for each sector size and proof type.</p>
+
 </article>
 
       
@@ -4894,6 +4894,7 @@ G and T will be selected using these.</p>
 <li><a href="#picking-a-ticket-to-seal">Picking a Ticket to Seal</a></li>
 <li><a href="#verifying-a-seal-s-ticket">Verifying a Seal&rsquo;s ticket</a></li>
 <li><a href="#in-detail">In Detail</a></li>
+<li><a href="#in-practice">In Practice</a></li>
 </ul></li>
 </ul></li>
 </ul></li>

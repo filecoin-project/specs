@@ -2273,10 +2273,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-    </li>
-
-    <li>
-    
       
 
 
@@ -4750,8 +4746,8 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">RegisteredProof</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof</span>  <span class="c1">// FIXME: Ensure this is provided.
 </span><span class="c1"></span>    <span class="nx">SectorID</span>         <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span>
     <span class="nx">MinerID</span>          <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">RandomSeed</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">SealRandomness</span>
-    <span class="nx">UnsealedPath</span>     <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">RandomSeed</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">SealRandomness</span>  <span class="c1">// This should be derived from SEAL_EPOCH = CURRENT_EPOCH - FINALITY.
+</span><span class="c1"></span>    <span class="nx">UnsealedPath</span>     <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
     <span class="nx">SealedPath</span>       <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
     <span class="nx">DealIDs</span>          <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
 <span class="p">}</span>

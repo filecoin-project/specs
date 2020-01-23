@@ -2277,10 +2277,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-    </li>
-
-    <li>
-    
       
 
 
@@ -4896,9 +4892,9 @@ https://github.com/alex-shpak/hugo-book
   <img id="spec-logo" src="./docs/filspeclogo.png" />
   <div id="spec-version">
     protocol version: <span id="protocol-version-number">v0.1.0</span><br />
-    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">f2f90b4d</span>
+    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">0db4c615</span>
     <br />
-    last published: <span id="spec-version-date">2020-01-23_03:53:50Z</span>
+    last published: <span id="spec-version-date">2020-01-23_21:26:38Z</span>
   </div>
 </div>
 
@@ -6129,8 +6125,6 @@ function statusIndicatorsHide() {
     </div>
 </div>
 
-                
-            
                 
             
                 
@@ -21297,8 +21291,6 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
                 
             
                 
-            
-                
                   
 
 
@@ -21531,8 +21523,6 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
   
 
   
-
-  
     
 
 
@@ -21585,6 +21575,39 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 
 
 
+<div id="systems__filecoin_token__payment_channels__payment_channels"></div>
+
+<p>Payment Channels are used in the Filecoin <a href="./#systems__filecoin_markets__retrieval_market___index">Retrieval Market</a> in order to enable efficient off-chain payments and accounting between parties for what are expected to be series of microtransactions, specifically those occuring as part of retrieval market data retrieval.</p>
+
+<p>Note that the following provides a high-level overview of payment channels and an accompanying interface. The lotus implementation of <a href="https://github.com/filecoin-project/lotus/blob/master/chain/types/voucher.go">vouchers</a> and<a href="https://github.com/filecoin-project/lotus/tree/master/paych">payment channels</a> are also good reeferences.</p>
+
+<p>You can also read more about the <a href="./#systems__filecoin_token__payment_channels__payment_channel_actor">Filecoin payment channel actor interface</a>.</p>
+
+<p>In short, the payment channel actor can be used to open long-lived, flexible payment channels between users. Each channel can be funded by adding to their balance.
+The goal of the payment channel actor is to enable a series of off-chain microtransactions to be reconciled on-chain at a later time with fewer messages. Accordingly, the expectation is <code>From</code> will send to <code>To</code> vouchers of successively greater <code>Value</code> and increasing <code>Nonce</code>s. When they choose to, <code>To</code> can <code>Update</code> the channel to update the balance available <code>ToSend</code> to them in the channel, and can choose to <code>Collect</code> this balance at any time (incurring a gas cost).
+The channel is split into <code>lane</code>s created as part of updating the channel state with a payment <code>voucher</code>. Each lane has an associated <code>nonce</code> and amount of tokens it can be <code>redeemed</code> for. These lanes allow for a lot of accounting between parties to be done off chain and reconciled via single updates to the payment channel, merging these lanes to arrive at a desired outcome.</p>
+
+<p>Over the course of a transaction cycle, each party to the payment channel can send the other <code>voucher</code>s. The payment channel&rsquo;s  <code>From</code> account holder will send a signed voucher with a given nonce to the <code>To</code> account holder. The latter can use the voucher to <code>redeem</code> part of the lane&rsquo;s value, merging other lanes into it as needed.</p>
+
+<p>For instance if <code>From</code> sends <code>To</code> the following vouchers (voucher_val, voucher_nonce) for a lane with 100 to be redeemed: (10, 1), (20, 2), (30, 3), then <code>To</code> could choose to redeem (30, 3) bringing the lane&rsquo;s value to 70 (100 - 30). They could not redeem (10, 1) or (20, 2) thereafter. They could however redeem (20, 2) for 20, and then (30, 3) for 10 (30 - 20) thereafter.</p>
+
+<p>The multiple lanes enable two parties to use a single payment channel to adjudicate multiple independent sets of payments.</p>
+
+<p>Vouchers are signed by the sender and authenticated using a <code>Secret</code>, <code>PreImage</code> pair provided by the paying party. If the <code>PreImage</code> is indeed a pre-image of the <code>Secret</code> when used as input to some given algorithm (typically a one-way function like a hash), the <code>Voucher</code> is valid. The <code>Voucher</code> itself contains the <code>PreImage</code> but not the <code>Secret</code> (communicated separately to the receiving party). This enables multi-hop payments since an intermediary cannot redeem a voucher on their own. They can also be used to update the minimum height at which a channel will be closed. Likewise, vouchers can have <code>TimeLock</code>s to prevent their being used too early, likewise a channel can have a <code>MinCloseHeight</code> to prevent it being closed prematurely (e.g. before the recipient has collected funds) by the sender.</p>
+
+<p>Once their transactions have completed, either party can choose to <code>Close</code> the channel, the recipient can then <code>Collect</code> the <code>ToPay</code> amount from the channel. <code>From</code> will be refunded the remaining balance in the channel.</p>
+
+<p>So we have:</p>
+
+<ul>
+<li>[off-chain] - Two parties agree to a series of transactions (for instance as part of file retrieval) with party <strong>A</strong> paying party <strong>B</strong> up to some <strong>total</strong> sum of Filecoin over time.</li>
+<li>[on-chain] - The <a href="./#systems__filecoin_token__payment_channels__payment_channel_actor">Payment Channel Actor</a> is used called by A to open a payment channel <code>from</code> A <code>to</code> B and a lane is opened to increase the <code>balance</code> of the channel, triggering a transaction between A and the payment channel actor.
+At any time, A can open new lanes to increase the total balance available in the channel (e.g. if A and B choose to do more transactions together).</li>
+<li>[off-chain] - Throughout the transaction cycle (e.g. on every piece of data sent via a retrieval deal), party A sends a voucher to party B enabling B to redeem more payment from the payment lanes, and incentivizing B to continue providing a service (e.g. sending more data along).</li>
+<li>[on-chain] - At regular intervals, B can <code>Update</code> the payment channel balance available <code>ToSend</code> with the vouchers received (past their <code>timeLock</code>), decreasing the remaining <code>Value</code> of the payment channel.</li>
+<li>[on-chain] - At the end of the cycle, past the <code>MinCloseHeight</code>, A can choose to <code>Close</code> the payment channel.</li>
+<li>[on-chain] - B can choose to <code>Collect</code> the amount <code>ToSend</code> triggering a payment between the payment channel actor and B.</li>
+</ul>
 
 
 </div>
@@ -21643,6 +21666,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 
 
 
+<div id="systems__filecoin_token__payment_channels__payment_channel_actor__payment_channel_actor"></div>
 
 
 
@@ -21660,20 +21684,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 
 
 
-
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Voucher</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">VouchersApprovalResponse</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">PieceInclusionProof</span> <span class="kd">struct</span> <span class="p">{}</span>
-
-<span class="kd">type</span> <span class="nx">PaymentChannelActor</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">RedeemVoucherWithApproval</span><span class="p">(</span><span class="nx">voucher</span> <span class="nx">Voucher</span><span class="p">)</span>
-    <span class="nf">RedeemVoucherWithPIP</span><span class="p">(</span><span class="nx">voucher</span> <span class="nx">Voucher</span><span class="p">,</span> <span class="nx">pip</span> <span class="nx">PieceInclusionProof</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div>
-
-
-
+<p style="color: #D74848"><b><i>Something's not right. The <code>payment_channel_actor.id</code> file was not found.</i></b></p>
 
 
 
@@ -24584,7 +24595,7 @@ and serves to make storage conform to a set of expectations.</p>
 
 <h6 id="drawing-randomness-for-sector-commitments">Drawing randomness for sector commitments</h6>
 
-<p><a href="./#systems__filecoin_blockchain__storage_power_consensus__ticket_chain">Tickets</a> are used as input to the SEAL above in order to tie Proofs-of-Replication to a given chain, thereby preventing long-range attacks (from another miner in the future trying to reuse SEALs).</p>
+<p><a href="./#systems__filecoin_blockchain__storage_power_consensus__ticket_chain">Tickets</a> are used as input to calculation of the ReplicaID in order to tie Proofs-of-Replication to a given chain, thereby preventing long-range attacks (from another miner in the future trying to reuse SEALs).</p>
 
 <p>The ticket has to be drawn from a finalized block in order to prevent the miner from potential losing storage (in case of a chain reorg) even though their storage is intact.</p>
 
@@ -24650,6 +24661,10 @@ G and T will be selected using these.</p>
 </ul></li>
 <li>Because T is an approximate value, and to account for network delay and variance in SEAL time across miners, the verifier allows for G offset from the assumed value of <code>X-F</code>: <code>Z-T-F</code>, hence verifying that the ticket is drawn from the range <code>[Z-T-F-G, Z-T-F+G]</code>.</li>
 </ul>
+
+<h6 id="in-practice">In Practice</h6>
+
+<p>The Filecoin protocol will include a <code>MAX_SEAL_TIME</code> for each sector size and proof type.</p>
 
 
 </div>
@@ -25244,8 +25259,8 @@ G and T will be selected using these.</p>
     <span class="nx">RegisteredProof</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">RegisteredProof</span>  <span class="c1">// FIXME: Ensure this is provided.
 </span><span class="c1"></span>    <span class="nx">SectorID</span>         <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span>
     <span class="nx">MinerID</span>          <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">RandomSeed</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">SealRandomness</span>
-    <span class="nx">UnsealedPath</span>     <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">RandomSeed</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">SealRandomness</span>  <span class="c1">// This should be derived from SEAL_EPOCH = CURRENT_EPOCH - FINALITY.
+</span><span class="c1"></span>    <span class="nx">UnsealedPath</span>     <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
     <span class="nx">SealedPath</span>       <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
     <span class="nx">DealIDs</span>          <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
 <span class="p">}</span>
