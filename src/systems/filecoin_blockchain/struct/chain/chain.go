@@ -2,7 +2,6 @@ package chain
 
 import (
 	abi "github.com/filecoin-project/specs-actors/actors/abi"
-	builtin "github.com/filecoin-project/specs-actors/actors/builtin"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 )
 
@@ -27,9 +26,9 @@ func (chain *Chain_I) GetTicketProductionRandSeed(epoch abi.ChainEpoch) abi.Rand
 }
 
 func (chain *Chain_I) GetSealRandSeed(epoch abi.ChainEpoch) abi.RandomnessSeed {
-	return chain.RandomnessAtEpoch(epoch - builtin.SPC_LOOKBACK_SEAL)
+	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_SEAL)
 }
 
 func (chain *Chain_I) GetPoStChallengeRandSeed(epoch abi.ChainEpoch) abi.RandomnessSeed {
-	return chain.RandomnessAtEpoch(epoch - builtin.SPC_LOOKBACK_POST)
+	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_POST)
 }

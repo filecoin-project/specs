@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	addr "github.com/filecoin-project/go-address"
-	actor "github.com/filecoin-project/specs-actors/actors"
 	abi "github.com/filecoin-project/specs-actors/actors/abi"
+	big "github.com/filecoin-project/specs-actors/actors/abi/big"
 	builtin "github.com/filecoin-project/specs-actors/actors/builtin"
 	acctact "github.com/filecoin-project/specs-actors/actors/builtin/account"
 	initact "github.com/filecoin-project/specs-actors/actors/builtin/init"
@@ -26,15 +26,10 @@ import (
 	mh "github.com/multiformats/go-multihash"
 )
 
-type ActorSubstateCID = actor.ActorSubstateCID
+type ActorSubstateCID = cid.Cid
 type ExitCode = exitcode.ExitCode
-type CallerPattern = vmr.CallerPattern
 type Runtime = vmr.Runtime
-type InvocInput = vmr.InvocInput
-type InvocOutput = vmr.InvocOutput
-type ActorStateHandle = vmr.ActorStateHandle
-
-var EnsureErrorCode = exitcode.EnsureErrorCode
+type StateHandle = vmr.StateHandle
 
 type Bytes = util.Bytes
 
@@ -44,6 +39,13 @@ var IMPL_TODO = util.IMPL_TODO
 var TODO = util.TODO
 
 var EmptyCBOR cid.Cid
+
+type InvocInput struct {
+	To     addr.Address
+	Method abi.MethodNum
+	Params abi.MethodParams
+	Value  abi.TokenAmount
+}
 
 type RuntimeError struct {
 	ExitCode ExitCode
@@ -65,7 +67,6 @@ func (x *RuntimeError) String() string {
 }
 
 func RuntimeError_Make(exitCode ExitCode, errMsg string) *RuntimeError {
-	exitCode = EnsureErrorCode(exitCode)
 	return &RuntimeError{
 		ExitCode: exitCode,
 		ErrMsg:   errMsg,
@@ -92,7 +93,7 @@ func (h *ActorStateHandle_I) Release(checkStateCID ActorSubstateCID) {
 
 func (h *ActorStateHandle_I) Take() ActorSubstateCID {
 	if h._initValue == nil {
-		h._rt._apiError("Must call Take() only once on actor substate object")
+		h._rt.Abort(exitcode.SysErrorIllegalActor, "Must call Take() only once on actor substate object")
 	}
 	ret := *h._initValue
 	h._initValue = nil
@@ -128,7 +129,7 @@ type VMContext struct {
 	_valueReceived      abi.TokenAmount
 	_gasRemaining       msg.GasAmount
 	_numValidateCalls   int
-	_output             vmr.InvocOutput
+	_output             []byte
 }
 
 func VMContext_Make(
@@ -160,44 +161,20 @@ func VMContext_Make(
 		_valueReceived:            valueReceived,
 		_gasRemaining:             gasRemaining,
 		_numValidateCalls:         0,
-		_output:                   vmr.InvocOutput{},
+		_output:                   []byte{},
 	}
 }
 
-func (rt *VMContext) AbortArgMsg(msg string) {
-	rt.Abort(exitcode.InvalidArguments_User, msg)
-}
-
-func (rt *VMContext) AbortArg() {
-	rt.AbortArgMsg("Invalid arguments")
-}
-
 func (rt *VMContext) AbortStateMsg(msg string) {
-	rt.Abort(exitcode.InconsistentState_User, msg)
-}
-
-func (rt *VMContext) AbortState() {
-	rt.AbortStateMsg("Inconsistent state")
-}
-
-func (rt *VMContext) AbortFundsMsg(msg string) {
-	rt.Abort(exitcode.InsufficientFunds_User, msg)
-}
-
-func (rt *VMContext) AbortFunds() {
-	rt.AbortFundsMsg("Insufficient funds")
-}
-
-func (rt *VMContext) AbortAPI(msg string) {
-	rt.Abort(exitcode.RuntimeAPIError, msg)
+	rt.Abort(exitcode.ErrPlaceholder, msg)
 }
 
 func (rt *VMContext) CreateActor(codeID abi.ActorCodeID, address addr.Address) {
 	if rt._actorAddress != builtin.InitActorAddr {
-		rt.AbortAPI("Only InitActor may call rt.CreateActor")
+		rt.Abort(exitcode.SysErrorIllegalArgument, "Only InitActor may call rt.CreateActor")
 	}
 	if address.Protocol() != addr.ID {
-		rt.AbortAPI("New actor adddress must be an ID-address")
+		rt.Abort(exitcode.SysErrorIllegalArgument, "New actor adddress must be an ID-address")
 	}
 
 	rt._createActor(codeID, address)
@@ -207,8 +184,8 @@ func (rt *VMContext) _createActor(codeID abi.ActorCodeID, address addr.Address) 
 	// Create empty actor state.
 	actorState := &actstate.ActorState_I{
 		CodeID_:     codeID,
-		State_:      actor.ActorSubstateCID(EmptyCBOR),
-		Balance_:    abi.TokenAmount(0),
+		State_:      cid.Cid(EmptyCBOR),
+		Balance_:    abi.TokenAmount(big.Zero()),
 		CallSeqNum_: 0,
 	}
 
@@ -222,7 +199,7 @@ func (rt *VMContext) _createActor(codeID abi.ActorCodeID, address addr.Address) 
 func (rt *VMContext) DeleteActor(address addr.Address) {
 	// Only a given actor may delete itself.
 	if rt._actorAddress != address {
-		rt.AbortAPI("Invalid actor deletion request")
+		rt.Abort(exitcode.SysErrorIllegalArgument, "Invalid actor deletion request")
 	}
 
 	rt._deleteActor(address)
@@ -241,7 +218,7 @@ func (rt *VMContext) _updateActorSystemStateInternal(actorAddress addr.Address, 
 	rt._globalStatePending = newGlobalStatePending
 }
 
-func (rt *VMContext) _updateActorSubstateInternal(actorAddress addr.Address, newStateCID actor.ActorSubstateCID) {
+func (rt *VMContext) _updateActorSubstateInternal(actorAddress addr.Address, newStateCID cid.Cid) {
 	newGlobalStatePending, err := rt._globalStatePending.Impl().WithActorSubstate(rt._actorAddress, newStateCID)
 	if err != nil {
 		panic("Error in runtime implementation: failed to update actor substate")
@@ -265,22 +242,16 @@ func (rt *VMContext) _releaseActorSubstate(checkStateCID ActorSubstateCID) {
 	util.Assert(ok)
 	prevStateCID := prevState.State()
 	if !ActorSubstateCID_Equals(prevStateCID, checkStateCID) {
-		rt.AbortAPI("State CID differs upon release call")
+		rt.Abort(exitcode.SysErrorIllegalArgument, "State CID differs upon release call")
 	}
 
 	rt._actorStateAcquired = false
 }
 
-func (rt *VMContext) Assert(cond bool) {
-	if !cond {
-		rt.Abort(exitcode.RuntimeAssertFailure, "Runtime assertion failed")
-	}
-}
-
 func (rt *VMContext) _checkActorStateAcquiredFlag(expected bool) {
 	rt._checkRunning()
 	if rt._actorStateAcquired != expected {
-		rt._apiError("State updates and message sends must be disjoint")
+		rt.Abort(exitcode.SysIllegalActor, "State updates and message sends must be disjoint")
 	}
 }
 
@@ -293,7 +264,9 @@ func (rt *VMContext) _checkActorStateNotAcquired() {
 }
 
 func (rt *VMContext) Abort(errExitCode exitcode.ExitCode, errMsg string) {
-	errExitCode = exitcode.EnsureErrorCode(errExitCode)
+	if errExitCode.IsSuccess() {
+		errExitCode = exitcode.SysErrorIllegalActor
+	}
 	rt._throwErrorFull(errExitCode, errMsg)
 }
 
@@ -309,59 +282,17 @@ func (rt *VMContext) ToplevelBlockWinner() addr.Address {
 	return rt._toplevelBlockWinner
 }
 
-func (rt *VMContext) ValidateImmediateCallerMatches(
-	callerExpectedPattern CallerPattern) {
-
-	rt._checkRunning()
-	rt._checkNumValidateCalls(0)
-	caller := rt.ImmediateCaller()
-	if !callerExpectedPattern.Matches(caller) {
-		rt.AbortAPI("Method invoked by incorrect caller")
-	}
-	rt._numValidateCalls += 1
+func (rt *VMContext) ValidateImmediateCallerIs(addrs ...addr.Address) {
+	// TODO check caller address is in addrs
 }
 
-func CallerPattern_MakeAcceptAnyOfTypes(rt *VMContext, types []abi.ActorCodeID) CallerPattern {
-	return CallerPattern{
-		Matches: func(y addr.Address) bool {
-			codeID, ok := rt.GetActorCodeID(y)
-			if !ok {
-				panic("Internal runtime error: actor not found")
-			}
-
-			for _, type_ := range types {
-				if codeID == type_ {
-					return true
-				}
-			}
-			return false
-		},
-	}
-}
-
-func (rt *VMContext) ValidateImmediateCallerIs(callerExpected addr.Address) {
-	rt.ValidateImmediateCallerMatches(vmr.CallerPattern_MakeSingleton(callerExpected))
-}
-
-func (rt *VMContext) ValidateImmediateCallerInSet(callersExpected []addr.Address) {
-	rt.ValidateImmediateCallerMatches(vmr.CallerPattern_MakeSet(callersExpected))
-}
-
-func (rt *VMContext) ValidateImmediateCallerAcceptAnyOfType(type_ abi.ActorCodeID) {
-	rt.ValidateImmediateCallerAcceptAnyOfTypes([]abi.ActorCodeID{type_})
-}
-
-func (rt *VMContext) ValidateImmediateCallerAcceptAnyOfTypes(types []abi.ActorCodeID) {
-	rt.ValidateImmediateCallerMatches(CallerPattern_MakeAcceptAnyOfTypes(rt, types))
-}
-
-func (rt *VMContext) ValidateImmediateCallerAcceptAny() {
-	rt.ValidateImmediateCallerMatches(vmr.CallerPattern_MakeAcceptAny())
+func (rt *VMContext) ValidateImmediateCallerType(types ...abi.ActorCodeID) {
+ 	// TODO check caller code type is in types
 }
 
 func (rt *VMContext) _checkNumValidateCalls(x int) {
 	if rt._numValidateCalls != x {
-		rt.AbortAPI("Method must validate caller identity exactly once")
+		rt.Abort(exitcode.SysErrorIllegalArgument, "Method must validate caller identity exactly once")
 	}
 }
 
@@ -370,13 +301,6 @@ func (rt *VMContext) _checkRunning() {
 		panic("Internal runtime error: actor API called with no actor code running")
 	}
 }
-func (rt *VMContext) SuccessReturn() InvocOutput {
-	return vmr.InvocOutput_Make(nil)
-}
-
-func (rt *VMContext) ValueReturn(value util.Bytes) InvocOutput {
-	return vmr.InvocOutput_Make(value)
-}
 
 func (rt *VMContext) _throwError(exitCode ExitCode) {
 	rt._throwErrorFull(exitCode, "")
@@ -384,10 +308,6 @@ func (rt *VMContext) _throwError(exitCode ExitCode) {
 
 func (rt *VMContext) _throwErrorFull(exitCode ExitCode, errMsg string) {
 	panic(RuntimeError_Make(exitCode, errMsg))
-}
-
-func (rt *VMContext) _apiError(errMsg string) {
-	rt._throwErrorFull(exitcode.RuntimeAPIError, errMsg)
 }
 
 func _gasAmountAssertValid(x msg.GasAmount) {
@@ -602,14 +522,14 @@ func (rt *VMContext) _saveInitActorState(state initact.InitActorState) {
 	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
 	// than the receiver.
 	rt._rtAllocGas(gascost.UpdateActorSubstate)
-	rt._updateActorSubstateInternal(builtin.InitActorAddr, actor.ActorSubstateCID(rt.IpldPut(&state)))
+	rt._updateActorSubstateInternal(builtin.InitActorAddr, cid.Cid(rt.IpldPut(&state)))
 }
 
 func (rt *VMContext) _saveAccountActorState(address addr.Address, state acctact.AccountActorState) {
 	// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
 	// than the receiver.
 	rt._rtAllocGas(gascost.UpdateActorSubstate)
-	rt._updateActorSubstateInternal(address, actor.ActorSubstateCID(rt.IpldPut(state)))
+	rt._updateActorSubstateInternal(address, cid.Cid(rt.IpldPut(state)))
 }
 
 func (rt *VMContext) _sendInternalOutputs(input InvocInput, errSpec ErrorHandlingSpec) (InvocOutput, exitcode.ExitCode) {
@@ -672,7 +592,7 @@ func (rt *VMContext) NewActorAddress() addr.Address {
 	return newAddr
 }
 
-func (rt *VMContext) IpldPut(x ipld.Object) cid.Cid {
+func (rt *VMContext) IpldPut(x interface{}) cid.Cid {
 	IMPL_FINISH() // Serialization
 	serialized := []byte{}
 	cid := rt._store.Put(serialized)
@@ -680,7 +600,7 @@ func (rt *VMContext) IpldPut(x ipld.Object) cid.Cid {
 	return cid
 }
 
-func (rt *VMContext) IpldGet(c cid.Cid, o ipld.Object) bool {
+func (rt *VMContext) IpldGet(c cid.Cid, o interface{}) bool {
 	serialized, ok := rt._store.Get(c)
 	if ok {
 		rt._rtAllocGas(gascost.IpldGet(len(serialized)))
@@ -701,7 +621,7 @@ func (rt *VMContext) CurrIndices() indices.Indices {
 	panic("")
 }
 
-func (rt *VMContext) AcquireState() ActorStateHandle {
+func (rt *VMContext) AcquireState() StateHandle {
 	rt._checkRunning()
 	rt._checkActorStateNotAcquired()
 	rt._actorStateAcquired = true
@@ -714,14 +634,4 @@ func (rt *VMContext) AcquireState() ActorStateHandle {
 		_initValue: &stateRef,
 		_rt:        rt,
 	}
-}
-
-func (rt *VMContext) Compute(f ComputeFunctionID, args []util.Any) Any {
-	def, found := _computeFunctionDefs[f]
-	if !found {
-		rt.AbortAPI("Function definition in rt.Compute() not found")
-	}
-	gasCost := def.GasCostFn(args)
-	rt._rtAllocGas(gasCost)
-	return def.Body(args)
 }

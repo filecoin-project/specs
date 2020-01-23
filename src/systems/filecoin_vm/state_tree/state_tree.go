@@ -2,7 +2,6 @@ package state_tree
 
 import (
 	addr "github.com/filecoin-project/go-address"
-	actor "github.com/filecoin-project/specs-actors/actors"
 	"github.com/filecoin-project/specs-actors/actors/abi"
 	actstate "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	"github.com/filecoin-project/specs/util"
@@ -29,7 +28,7 @@ func (st *StateTree_I) GetActorCodeID_Assert(a addr.Address) abi.ActorCodeID {
 	return ret.CodeID()
 }
 
-func (st *StateTree_I) WithActorSubstate(a addr.Address, actorState actor.ActorSubstateCID) (StateTree, error) {
+func (st *StateTree_I) WithActorSubstate(a addr.Address, actorState cid.Cid) (StateTree, error) {
 	IMPL_FINISH()
 	panic("")
 }

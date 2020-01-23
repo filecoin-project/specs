@@ -26,3 +26,5 @@ const SPOST_SAMPLE_RATE_DENOM = 50 // placeholder
 
 const FINALITY = 500          // placeholder
 const SPC_LOOKBACK_TICKET = 1 // we chain blocks together one after the other
+const SPC_LOOKBACK_SEAL = FINALITY   // must match value provided to actors
+const SPC_LOOKBACK_POST = 1   // must match value provided to actors
