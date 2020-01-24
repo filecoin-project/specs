@@ -8,7 +8,7 @@ type SealInputs struct {
     RegisteredProof  abi.RegisteredProof  // FIXME: Ensure this is provided.
     SectorID         abi.SectorID
     MinerID          addr.Address
-    RandomSeed       abi.SealRandomness
+    RandomSeed       abi.SealRandomness  // This should be derived from SEAL_EPOCH = CURRENT_EPOCH - FINALITY.
     UnsealedPath     file.Path
     SealedPath       file.Path
     DealIDs          [abi.DealID]
