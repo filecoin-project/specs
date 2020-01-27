@@ -19,7 +19,7 @@ type Node struct {
 
 (For details on IPLD Schemas, see the [IPLD Schema Spec (draft)](https://github.com/ipld/specs/blob/dcbfb25468092be796bab90e90e3f2535fdeddc7/schema/representations.md))
 
-We use DAG-CBOR for serialization, and blake2b-256 for hashing.
+We use DAG-CBOR for serialization, and SHA256 for hashing.
 
 # Construction
 

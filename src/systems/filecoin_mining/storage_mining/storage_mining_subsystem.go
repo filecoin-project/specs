@@ -264,9 +264,6 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(inds indices.Indices, he
 		Output_: onChainInfo.Randomness,
 	}
 
-	// TODO if the workerAddress is secp then payload will be the blake2b hash of its public key
-	// and we will need to recover the entire public key from worker before handing off to Verify
-	// example of recover code: https://github.com/ipsn/go-secp256k1/blob/master/secp256.go#L93
 	workerKey := sma.Info.Worker.Payload()
 	// Verify VRF output from appropriate input corresponds to randomness used
 	if !postRand.Verify(input, filcrypto.VRFPublicKey(workerKey)) {

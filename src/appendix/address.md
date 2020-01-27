@@ -108,7 +108,7 @@ const (
 
 ### Protocol 1: libsecpk1 Elliptic Curve Public Keys
 
-**Protocol 1** addresses represent secp256k1 public encryption keys. The payload field contains the [Blake2b 160](https://blake2.net/) hash of the public key.
+**Protocol 1** addresses represent secp256k1 public encryption keys. The payload field contains the SHA256 hash of the public key.
 
 **Bytes**
 
@@ -116,7 +116,7 @@ const (
 |----------|---------------------|
 | protocol |        payload      |
 |----------|---------------------|
-|    1     | blake2b-160(PubKey) |
+|    1     | SHA256(PubKey) |
 ```
 
 **String**
@@ -125,7 +125,7 @@ const (
 |------------|----------|---------------------|----------|
 |  network   | protocol |      payload        | checksum |
 |------------|----------|---------------------|----------|
-| 'f' or 't' |    '1'   | blake2b-160(PubKey) |  4 bytes |
+| 'f' or 't' |    '1'   | SHA256(PubKey) 	  |  4 bytes |
                   base32[................................]
 ```
 
@@ -181,7 +181,7 @@ The payload represents the data specified by the protocol. All payloads except t
 
 ## Checksum
 
-Filecoin checksums are calculated over the address protocol and payload using blake2b-4. Checksums are base32 encoded and only added to an address when encoding to a string. Addresses following the ID Protocol do not have a checksum.
+Filecoin checksums are calculated over the address protocol and payload using SHA256. Checksums are base32 encoded and only added to an address when encoding to a string. Addresses following the ID Protocol do not have a checksum.
 
 
 ## Expected Methods
@@ -292,12 +292,12 @@ func Decode(a string) Address {
 
 ### Checksum()
 
-Checksum produces a byte array by taking the blake2b-4 hash of an address protocol and payload.
+Checksum produces a byte array by taking the SHA256 hash of an address protocol and payload.
 
 ```go
 
 func Checksum(a Address) [4]byte {
-	blake2b4(a.Protocol + a.Payload)
+	SHA256(a.Protocol + a.Payload)
 }
 ```
 
