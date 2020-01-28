@@ -90,6 +90,9 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, tipset chai
 			seenMsgs[_msgCID(m)] = struct{}{}
 		}
 
+		// transfer gas reward from BurntFundsActor to RewardActor
+		_withTransferFundsAssert(outTree, builtin.BurntFundsActorAddr, builtin.RewardActorAddr, minerGasRewardTotal)
+
 		// Pay block reward.
 		rewardMessage := _makeBlockRewardMessage(outTree, minerAddr, minerPenaltyTotal, minerGasRewardTotal)
 		outTree = _applyMessageBuiltinAssert(store, outTree, chainRand, rewardMessage, minerAddr)
@@ -324,9 +327,6 @@ func _makeBlockRewardMessage(state st.StateTree, minerAddr addr.Address, penalty
 
 	sysActor, ok := state.GetActor(builtin.SystemActorAddr)
 	Assert(ok)
-
-	// transfer gas reward from BurntFundsActor to RewardActor
-	_withTransferFundsAssert(state, builtin.BurntFundsActorAddr, builtin.RewardActorAddr, gasReward)
 
 	return &msg.UnsignedMessage_I{
 		From_:       builtin.SystemActorAddr,
