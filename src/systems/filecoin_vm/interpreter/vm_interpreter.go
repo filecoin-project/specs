@@ -5,7 +5,6 @@ import (
 	abi "github.com/filecoin-project/specs-actors/actors/abi"
 	builtin "github.com/filecoin-project/specs-actors/actors/builtin"
 	initact "github.com/filecoin-project/specs-actors/actors/builtin/init"
-	sminact "github.com/filecoin-project/specs-actors/actors/builtin/storage_miner"
 	vmr "github.com/filecoin-project/specs-actors/actors/runtime"
 	exitcode "github.com/filecoin-project/specs-actors/actors/runtime/exitcode"
 	indices "github.com/filecoin-project/specs-actors/actors/runtime/indices"
@@ -57,6 +56,9 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, tipset chai
 		minerPenaltyTotal := abi.TokenAmount(0)
 		var minerPenaltyCurr abi.TokenAmount
 
+		minerGasRewardTotal := abi.TokenAmount(0)
+		var minerGasRewardCurr abi.TokenAmount
+
 		// Process BLS messages from the block.
 		for _, m := range blk.BLSMessages() {
 			_, found := seenMsgs[_msgCID(m)]
@@ -64,8 +66,10 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, tipset chai
 				continue
 			}
 			onChainMessageLen := len(msg.Serialize_UnsignedMessage(m))
-			outTree, receipt, minerPenaltyCurr = vmi.ApplyMessage(outTree, chainRand, m, onChainMessageLen, minerAddr)
+			outTree, receipt, minerPenaltyCurr, minerGasRewardCurr = vmi.ApplyMessage(outTree, chainRand, m, onChainMessageLen, minerAddr)
 			minerPenaltyTotal += minerPenaltyCurr
+			minerGasRewardTotal += minerGasRewardCurr
+
 			receipts = append(receipts, receipt)
 			seenMsgs[_msgCID(m)] = struct{}{}
 		}
@@ -78,14 +82,16 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, tipset chai
 				continue
 			}
 			onChainMessageLen := len(msg.Serialize_SignedMessage(sm))
-			outTree, receipt, minerPenaltyCurr = vmi.ApplyMessage(outTree, chainRand, m, onChainMessageLen, minerAddr)
+			outTree, receipt, minerPenaltyCurr, minerGasRewardCurr = vmi.ApplyMessage(outTree, chainRand, m, onChainMessageLen, minerAddr)
 			minerPenaltyTotal += minerPenaltyCurr
+			minerGasRewardTotal += minerGasRewardCurr
+
 			receipts = append(receipts, receipt)
 			seenMsgs[_msgCID(m)] = struct{}{}
 		}
 
 		// Pay block reward.
-		rewardMessage := _makeBlockRewardMessage(outTree, minerAddr, minerPenaltyTotal)
+		rewardMessage := _makeBlockRewardMessage(outTree, minerAddr, minerPenaltyTotal, minerGasRewardTotal)
 		outTree = _applyMessageBuiltinAssert(store, outTree, chainRand, rewardMessage, minerAddr)
 	}
 
@@ -98,12 +104,10 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, tipset chai
 }
 
 func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, chain chain.Chain, message msg.UnsignedMessage, onChainMessageSize int, minerAddr addr.Address) (
-	retTree st.StateTree, retReceipt vmri.MessageReceipt, retMinerPenalty abi.TokenAmount) {
+	retTree st.StateTree, retReceipt vmri.MessageReceipt, retMinerPenalty abi.TokenAmount, retMinerGasReward abi.TokenAmount) {
 
 	store := vmi.Node().Repository().StateStore()
 	senderAddr := _resolveSender(store, inTree, message.From())
-	minerOwner := _lookupMinerOwner(store, inTree, minerAddr)
-	Assert(minerOwner.Protocol() == addr.ID)
 
 	vmiGasRemaining := message.GasLimit()
 	vmiGasUsed := msg.GasAmount_Zero()
@@ -122,11 +126,12 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, chain chain.Chain,
 			Assert(!message.GasLimit().LessThan(vmiGasUsed))
 			Assert(message.GasLimit().Equals(vmiGasUsed.Add(vmiGasRemaining)))
 			tree = _withTransferFundsAssert(tree, builtin.BurntFundsActorAddr, senderAddr, vmiGasRemainingFIL)
-			tree = _withTransferFundsAssert(tree, builtin.BurntFundsActorAddr, minerOwner, vmiGasUsedFIL)
+			retMinerGasReward = vmiGasUsedFIL
 			retMinerPenalty = abi.TokenAmount(0)
 
 		case SenderResolveSpec_Invalid:
 			retMinerPenalty = vmiGasUsedFIL
+			retMinerGasReward = abi.TokenAmount(0)
 
 		default:
 			Assert(false)
@@ -242,22 +247,6 @@ func _resolveSender(store ipld.GraphStore, tree st.StateTree, address addr.Addre
 	return initSubState.ResolveAddress(address)
 }
 
-// Get the owner account address associated to a given miner actor.
-func _lookupMinerOwner(store ipld.GraphStore, tree st.StateTree, minerAddr addr.Address) addr.Address {
-	initState, ok := tree.GetActor(minerAddr)
-	util.Assert(ok)
-	serialized, ok := store.Get(cid.Cid(initState.State()))
-	// This tiny coupling between the VM and the storage miner actor is unfortunate.
-	// It could be avoided by:
-	// - paying gas rewards via the RewardActor, which can do the miner->owner lookup
-	// - paying rewards to the miner actor instead of owner (with some miner->owner withdrawal mechanism)
-	// - resolving all miner->owner mappings in the state before invoking interpreter (e.g. during validation) and passing them in
-	// - including the owner address in block headers (and requiring it match the block's miner as part of semantic validation)
-	var minerSubState sminact.StorageMinerActorState
-	serde.MustDeserialize(serialized, &minerSubState)
-	return minerSubState.Info.Owner
-}
-
 func _applyMessageBuiltinAssert(store ipld.GraphStore, tree st.StateTree, chain chain.Chain, message msg.UnsignedMessage, minerAddr addr.Address) st.StateTree {
 	senderAddr := message.From()
 	Assert(senderAddr == builtin.SystemActorAddr)
@@ -329,12 +318,16 @@ func _makeInvocInput(message msg.UnsignedMessage) vmr.InvocInput {
 }
 
 // Builds a message for paying block reward to a miner's owner.
-func _makeBlockRewardMessage(state st.StateTree, minerAddr addr.Address, penalty abi.TokenAmount) msg.UnsignedMessage {
+func _makeBlockRewardMessage(state st.StateTree, minerAddr addr.Address, penalty abi.TokenAmount, gasReward abi.TokenAmount) msg.UnsignedMessage {
 	params := serde.MustSerializeParams(minerAddr, penalty)
 	TODO() // serialize other inputs to BlockRewardMessage or get this from query in RewardActor
 
 	sysActor, ok := state.GetActor(builtin.SystemActorAddr)
 	Assert(ok)
+
+	// transfer gas reward from BurntFundsActor to RewardActor
+	_withTransferFundsAssert(state, builtin.BurntFundsActorAddr, builtin.RewardActorAddr, gasReward)
+
 	return &msg.UnsignedMessage_I{
 		From_:       builtin.SystemActorAddr,
 		To_:         builtin.RewardActorAddr,
