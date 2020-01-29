@@ -4719,6 +4719,14 @@ https://github.com/alex-shpak/hugo-book
 
 <p>A Filecoin address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. This address encodes information about the network to which an actor belongs, the specific type of address encoding, the address payload itself, and a checksum. The goal of this format is to provide a robust address format that is both easy to use and resistant to errors.</p>
 
+<p>Note that each <code>ActorAddress</code> in the protocol contains a unique <code>ActorID</code> given to it by the <code>InitActor</code>. Throughout the protocol, actors are referenced by their ID-addresses. ID-addresses are computable from IDs (using <code>makeIdAddress(id)</code>), and vice versa (using the <code>AddressMap</code> to go from addr to ID).</p>
+
+<p>Most actors have an alternative address which is not their key in the state tree, but is resolved to their ID-address during message processing.</p>
+
+<p>Accounts have a public key-based address (e.g. to receive funds), and non-singleton actors have a temporary reorg-proof address.</p>
+
+<p>An account actor&rsquo;s crypto-address (for signature verification) is found by looking up its actor state, keyed by the canonical ID-address. There is no map from ID-address to pubkey address.</p>
+
 <p>The reference implementation is <a href="https://github.com/filecoin-project/go-address">https://github.com/filecoin-project/go-address</a></p>
 
 <h1 id="design-criteria">Design criteria</h1>
