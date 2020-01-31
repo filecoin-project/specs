@@ -108,25 +108,25 @@ const (
 
 ### Protocol 1: libsecpk1 Elliptic Curve Public Keys
 
-**Protocol 1** addresses represent secp256k1 public encryption keys. The payload field contains the [Blake2b 160](https://blake2.net/) hash of the public key.
+**Protocol 1** addresses represent secp256k1 public encryption keys. The payload field contains the [Blake2b 160](https://blake2.net/) hash of the **uncompressed** public key (65 bytes).
 
 **Bytes**
 
 ```
-|----------|---------------------|
-| protocol |        payload      |
-|----------|---------------------|
-|    1     | blake2b-160(PubKey) |
+|----------|----------------------------------|
+| protocol |               payload            |
+|----------|----------------------------------|
+|    1     | blake2b-160( PubKey [65 bytes] ) |
 ```
 
 **String**
 
 ```
-|------------|----------|---------------------|----------|
-|  network   | protocol |      payload        | checksum |
-|------------|----------|---------------------|----------|
-| 'f' or 't' |    '1'   | blake2b-160(PubKey) |  4 bytes |
-                  base32[................................]
+|------------|----------|--------------------------------|----------|
+|  network   | protocol |      payload                   | checksum |
+|------------|----------|--------------------------------|----------|
+| 'f' or 't' |    '1'   | blake2b-160(PubKey [65 bytes]) |  4 bytes |
+                  base32[...........................................]
 ```
 
 ### Protocol 2: Actor
