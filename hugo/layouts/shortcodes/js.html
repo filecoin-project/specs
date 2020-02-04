@@ -38,7 +38,7 @@
   };
 
   fillSingleCodeRef = (x, isTokenDef) => {
-    let origKey = x.innerText;
+    let origKey = x.textContent;
     let key = origKey;
     let newKey = structRefs[key];
     if (newKey !== undefined) {
@@ -54,7 +54,7 @@
   };
 
   fillCodeRefs = (xs, parent) => {
-    if (xs.length == 0 && parent.innerText.length != 0) {
+    if (xs.length == 0 && parent.textContent.length != 0) {
       fillSingleCodeRef(parent);
       return;
     }
