@@ -10,30 +10,74 @@ entries:
 
 Payment Channels are used in the Filecoin {{<sref retrieval_market>}} in order to enable efficient off-chain payments and accounting between parties for what are expected to be series of microtransactions, specifically those occuring as part of retrieval market data retrieval.
 
-Note that the following provides a high-level overview of payment channels and an accompanying interface. The lotus implementation of [vouchers](https://github.com/filecoin-project/lotus/blob/master/chain/types/voucher.go) and[payment channels](https://github.com/filecoin-project/lotus/tree/master/paych) are also good reeferences.
+The lotus implementation of [vouchers](https://github.com/filecoin-project/lotus/blob/master/chain/types/voucher.go) and [payment channels](https://github.com/filecoin-project/lotus/tree/master/paych) are also good references.
 
 You can also read more about the {{<sref payment_channel_actor "Filecoin payment channel actor interface">}}.
 
-In short, the payment channel actor can be used to open long-lived, flexible payment channels between users. Each channel can be funded by adding to their balance. 
-The goal of the payment channel actor is to enable a series of off-chain microtransactions to be reconciled on-chain at a later time with fewer messages. Accordingly, the expectation is `From` will send to `To` vouchers of successively greater `Value` and increasing `Nonce`s. When they choose to, `To` can `Update` the channel to update the balance available `ToSend` to them in the channel, and can choose to `Collect` this balance at any time (incurring a gas cost).
-The channel is split into `lane`s created as part of updating the channel state with a payment `voucher`. Each lane has an associated `nonce` and amount of tokens it can be `redeemed` for. These lanes allow for a lot of accounting between parties to be done off chain and reconciled via single updates to the payment channel, merging these lanes to arrive at a desired outcome.
+In short, the payment channel actor can be used to open long-lived, flexible (and two-way) payment channels between users. Each channel can be funded by adding to their balance. 
 
-Over the course of a transaction cycle, each party to the payment channel can send the other `voucher`s. The payment channel's  `From` account holder will send a signed voucher with a given nonce to the `To` account holder. The latter can use the voucher to `redeem` part of the lane's value, merging other lanes into it as needed.
+### Payment Channels
 
-For instance if `From` sends `To` the following vouchers (voucher_val, voucher_nonce) for a lane with 100 to be redeemed: (10, 1), (20, 2), (30, 3), then `To` could choose to redeem (30, 3) bringing the lane's value to 70 (100 - 30). They could not redeem (10, 1) or (20, 2) thereafter. They could however redeem (20, 2) for 20, and then (30, 3) for 10 (30 - 20) thereafter.
+In order for the Filecoin Markets to work in a timely manner, we need to be able to have off-chain payments. This is a solved problem (at least, for our purposes in v0). Payment channels have been implemented and used in bitcoin, ethereum and many other networks.
 
-The multiple lanes enable two parties to use a single payment channel to adjudicate multiple independent sets of payments.
+The basic premise is this: User A wants to be able to send many small payments to user B. So user A locks up money in a contract that says "this money will only go to user B, and the unclaimed amount will be returned to user A after a set time period". Once that money is locked up, user A can send user B signed transactions that user B can cash out at any time.
 
-Vouchers are signed by the sender and authenticated using a `Secret`, `PreImage` pair provided by the paying party. If the `PreImage` is indeed a pre-image of the `Secret` when used as input to some given algorithm (typically a one-way function like a hash), the `Voucher` is valid. The `Voucher` itself contains the `PreImage` but not the `Secret` (communicated separately to the receiving party). This enables multi-hop payments since an intermediary cannot redeem a voucher on their own. They can also be used to update the minimum height at which a channel will be closed. Likewise, vouchers can have `TimeLock`s to prevent their being used too early, likewise a channel can have a `MinCloseHeight` to prevent it being closed prematurely (e.g. before the recipient has collected funds) by the sender.
+For example:
 
-Once their transactions have completed, either party can choose to `Close` the channel, the recipient can then `Collect` the `ToPay` amount from the channel. `From` will be refunded the remaining balance in the channel.
+- User A locks up 10 FIL to B
+- User B does something for A
+- User A sends `SignedVoucher{Channel, 1 FIL}` to B
+- User B does something for user A
+- User A sends `SignedVoucher{Channel, 2 FIL}` to B
 
-So we have:
+At this point, B has two signed messages from A, but the contract is set up such that it can only be cashed out once. So if B decided to cash out, they would obviously select the message with the higher value. Also, once B cashes out, they must not accept any more payments from A on that same channel.
 
-- \[off-chain\] - Two parties agree to a series of transactions (for instance as part of file retrieval) with party **A** paying party **B** up to some **total** sum of Filecoin over time.
-- \[on-chain\] - The {{<sref payment_channel_actor>}} is used called by A to open a payment channel `from` A `to` B and a lane is opened to increase the `balance` of the channel, triggering a transaction between A and the payment channel actor.
-At any time, A can open new lanes to increase the total balance available in the channel (e.g. if A and B choose to do more transactions together).
-- \[off-chain\] - Throughout the transaction cycle (e.g. on every piece of data sent via a retrieval deal), party A sends a voucher to party B enabling B to redeem more payment from the payment lanes, and incentivizing B to continue providing a service (e.g. sending more data along).
-- \[on-chain\] - At regular intervals, B can `Update` the payment channel balance available `ToSend` with the vouchers received (past their `timeLock`), decreasing the remaining `Value` of the payment channel.
-- \[on-chain\] - At the end of the cycle, past the `MinCloseHeight`, A can choose to `Close` the payment channel.
-- \[on-chain\] - B can choose to `Collect` the amount `ToSend` triggering a payment between the payment channel actor and B.
+### Multi-Lane Payment Channel
+
+The filecoin storage market may require a way to do incremental payments between two parties, over time, for multiple different transactions. The primary motivating usecase for this is to provide payment for file storage over time, for each file stored. An additional requirement is the ability to have less than one message on chain per transaction 'lane', meaning that payments for multiple files should be aggregateable (Note: its okay if this aggregation is an interactive process).
+
+Let's say that `A` wants to make such an arrangement with `B`. `A` should create the payment channel with enough funds to cover all potential transactions. Then `A` decides to start the first transaction, so they send a signed voucher for the payment channel on 'lane 1', for 2 FIL. They can then send more updates on lane 1 as needed. Then, at some point `A` decides to start another independent transaction to `B`, so they send a voucher on 'lane 2'. The voucher for lane 2 can be cashed out independently of lane 1. However, `B` can ask `A` to 'reconcile' the two payment channels for them into a single update. This update could contain a value, and a list of lanes to merge. Cashing out that reconciled update would invalidate the other lanes, meaning `B` couldn't also cash in those. The single update would be much smaller, and therefore cheaper to settle.
+
+Lane state can be easily tracked on-chain with a compact bitfield.
+
+### Payment Channel Reconciliation
+
+In a situation where peers A and B  have several different payment channels between them, the scenario may frequently come up where A has multiple payment channel updates from B to apply. Submitting each of these individually would cost a noticeable amount in fees, and put excess unnecessary load on the chain. To remedy this, A can contact B and ask them for a single payment channel update for the combined value of all the updates they have (minus some fee to incent B to actually want to do this). This aggregated update would contain a list of the IDs of the other payment channels that it is superceding so that A cannot also cash out on the originals.
+
+### Payment Reconciliation
+
+The filecoin storage market will (likely) have many independent payments between the same parties. These payments will be secured through payment channels, set up initially on chain, but utilized almost entirely off-chain. The point at which they need to touch the chain is when miners wish to cash out their earnings. A naive solution to this problem would have miners perform one on-chain action per file stored for a particular client. This would not scale well. Instead, we need a system where the miner and client can have some additional off-chain communication and end up with the miner submitting only a single message to the chain.
+
+### Future Work
+
+The Payment Reconciliation Protocol is a libp2p service run by all participants wanting to participate in payment reconciliation. When Alice has a set of payments from Bob that she is ready to cash out, Alice can send a `ReconcileRequest` to Bob, containing the following information:
+
+```sh
+type ReconcileRequest struct {
+	vouchers [Vouchers]
+	reqVal TokenAmount
+}
+```
+
+The Vouchers should all be valid vouchers from Bob to Alice, on the same payment channel, and they should all be ready to be cashed in. `ReqVal` is a token amount less than or equal to the sum of all the values in the given vouchers. Generally, this value will be between the total sum of the vouchers, and that total sum minus the fees it would cost to submit them all to the chain.
+
+Bob receives this request, and checks that all the fields are correct, and then ensures that the difference between ReqVal and the vouchers sum is sufficient (this is a parameter that the client can set).  Then, he sends back a response which either contains the requested voucher, or an error status and message.
+
+```sh
+type ReconcileResponse struct {
+	combined Voucher
+	status  Status
+	message optional String
+}
+
+## TODO: what are the possible status cases?
+type Status enum {
+    | Success
+    | Failure
+}
+```
+
+Open Questions:
+
+- In a number of usecases, this protocol will require the miner look up and connect to a client to propose reconciliation. How does a miner look up and connect to a client over libp2p given only their filecoin address?
+- Without repair miners, this protocol will likely not be used that much. Should that be made clear? Should there be other considerations added to compensate?
