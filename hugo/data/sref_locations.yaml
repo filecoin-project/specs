@@ -57,6 +57,10 @@ storage_faults: [systems, filecoin_markets, storage_market, faults]
 deals: [systems, filecoin_markets, deal]
 deal_states: [systems, filecoin_markets, deal, deal_states]
 
+# payments
+payment_channels: [systems, filecoin_token, payment_channel, payment_channels]
+payment_channel_actor: [systems, filecoin_token, payment_channel, payment_channels, payment_channel_actor]
+
 # mining
 mining_cycle: [systems, filecoin_mining, storage_mining, mining_cycle]
 

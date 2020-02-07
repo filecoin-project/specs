@@ -2,7 +2,7 @@ package sealer
 
 import "errors"
 
-import abi "github.com/filecoin-project/specs/actors/abi"
+import abi "github.com/filecoin-project/specs-actors/actors/abi"
 import util "github.com/filecoin-project/specs/util"
 import filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"

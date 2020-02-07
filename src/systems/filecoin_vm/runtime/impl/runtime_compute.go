@@ -4,7 +4,7 @@ import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import util "github.com/filecoin-project/specs/util"
-import vmr "github.com/filecoin-project/specs/actors/runtime"
+import vmr "github.com/filecoin-project/specs-actors/actors/runtime"
 
 type Any = util.Any
 type Int = util.Int

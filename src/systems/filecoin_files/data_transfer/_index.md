@@ -32,9 +32,9 @@ but their code belongs in the Markets system.
 There are two basic phases to any data transfer:
 
 1. Negotiation - the requestor and responder agree to the transfer by validating with the data transfer voucher
-2. Transfer - Once both parties have negotiated and agreed upon, the data is actually transferred. The default protocol used to do the transfer is Graphsync
+2. Transfer - Once the negotiation phase is complete, the data is actually transferred. The default protocol used to do the transfer is Graphsync.
 
-Note that the Negotiation and Transfer stages can occur in seperate round trips,
+Note that the Negotiation and Transfer stages can occur in separate round trips,
 or potentially the same round trip, where the requesting party implicitly agrees by sending the request, and the responding party can agree and immediately send or receive data.
 
 # Example Flows

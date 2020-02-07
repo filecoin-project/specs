@@ -1,8 +1,8 @@
 package sector_index
 
 import (
-	abi "github.com/filecoin-project/specs/actors/abi"
-	smarkact "github.com/filecoin-project/specs/actors/builtin/storage_market"
+	abi "github.com/filecoin-project/specs-actors/actors/abi"
+	smarkact "github.com/filecoin-project/specs-actors/actors/builtin/storage_market"
 )
 
 func (sis *SectorIndexerSubsystem_I) AddNewDeal(deal smarkact.StorageDeal) StageDealResponse {

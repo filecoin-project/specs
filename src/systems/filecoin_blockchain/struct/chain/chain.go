@@ -1,8 +1,8 @@
 package chain
 
 import (
-	abi "github.com/filecoin-project/specs/actors/abi"
-	builtin "github.com/filecoin-project/specs/actors/builtin"
+	abi "github.com/filecoin-project/specs-actors/actors/abi"
+	builtin "github.com/filecoin-project/specs-actors/actors/builtin"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 )
 

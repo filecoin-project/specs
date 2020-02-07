@@ -1,4 +1,4 @@
-import abi "github.com/filecoin-project/specs/actors/abi"
+import abi "github.com/filecoin-project/specs-actors/actors/abi"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import addr "github.com/filecoin-project/go-address"
@@ -8,7 +8,7 @@ type SealInputs struct {
     RegisteredProof  abi.RegisteredProof  // FIXME: Ensure this is provided.
     SectorID         abi.SectorID
     MinerID          addr.Address
-    RandomSeed       abi.SealRandomness
+    RandomSeed       abi.SealRandomness  // This should be derived from SEAL_EPOCH = CURRENT_EPOCH - FINALITY.
     UnsealedPath     file.Path
     SealedPath       file.Path
     DealIDs          [abi.DealID]

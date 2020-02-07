@@ -4,11 +4,11 @@ title: Storage Power Actor
 
 # `StoragePowerActorState` implementation
 
-{{< readfile file="/docs/actors/builtin/storage_power/storage_power_actor_state.go" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/actors/builtin/storage_power/storage_power_actor_state.go" code="true" lang="go" >}}
 
 # `StoragePowerActor` implementation
 
-{{< readfile file="/docs/actors/builtin/storage_power/storage_power_actor.go" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/actors/builtin/storage_power/storage_power_actor.go" code="true" lang="go" >}}
 
 {{<label power_table>}}
 # The Power Table

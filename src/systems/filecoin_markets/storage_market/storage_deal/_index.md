@@ -16,5 +16,5 @@ This section describes the storage deal data type and a technical outline for de
 
 # Data Types
 
-{{< readfile file="/docs/actors/builtin/storage_market/storage_deal.go" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/actors/builtin/storage_market/storage_deal.go" code="true" lang="go" >}}
 
