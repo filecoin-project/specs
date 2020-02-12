@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Storage Market in Filecoin on Filecoin Spec</title>
@@ -36,7 +36,7 @@ import abi &amp;#34;github.com/filecoin-project/specs-actors/actors/abi&amp;#34;
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_markets/storage_market/storage_provider/</guid>
-      <description>The StorageProvider is a module that handles incoming queries for Asks and proposals for Deals from a StorageClient. It also tracks deals as they move through the deal flow, handling off chain actions during the negotiation phases of the deal and ultimately telling the StorageMarketActor to publish on chain. The StorageProvider&amp;rsquo;s last action is to handoff a published deal for storage and sealing to the Storage Mining Subsystem. Note that any address registered as a StorageMarketParticipant with the StorageMarketActor can be used with the StorageClient.</description>
+      <description>The StorageProvider is a module that handles incoming queries for Asks and proposals for Deals from a StorageClient. It also tracks deals as they move through the deal flow, handling off chain actions during the negotiation phases of the deal and ultimately telling the StorageMarketActor to publish on chain. The StorageProvider&#39;s last action is to handoff a published deal for storage and sealing to the Storage Mining Subsystem. Note that any address registered as a StorageMarketParticipant with the StorageMarketActor can be used with the StorageClient.</description>
     </item>
     
   </channel>

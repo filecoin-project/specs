@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Introduction on Filecoin Spec</title>
@@ -16,8 +16,8 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/intro/arch/</guid>
-      <description>Filecoin Systems function statusIndicatorsShow() { var $uls = document.querySelectorAll(&#39;.statusIcon&#39;) $uls.forEach(function (el) { el.classList.remove(&#39;hidden&#39;) }) return false; // stop click event } function statusIndicatorsHide() { var $uls = document.querySelectorAll(&#39;.statusIcon&#39;) $uls.forEach(function (el) { el.classList.add(&#39;hidden&#39;) }) return false; // stop click event }  Status Legend:
- 🛑 Bare - Very incomplete at this time.  Implementors: This is far from ready for you.  ⚠️ Rough &amp;ndash; work in progress, heavy changes coming, as we put in place key functionality.</description>
+      <description>Filecoin Systems Status Legend:
+ 🛑 Bare - Very incomplete at this time.  Implementors: This is far from ready for you.   ⚠️ Rough &amp;ndash; work in progress, heavy changes coming, as we put in place key functionality.  Implementors: This will be ready for you soon.   🔁 Refining - Key functionality is there, some small things expected to change. Some big things may change.  Implementors: Almost ready for you.</description>
     </item>
     
     <item>
@@ -37,9 +37,9 @@ The global state here consists of a set of actors, each with their own private s
       
       <guid>/docs/intro/concepts/</guid>
       <description>For clarity, we refer the following types of entities to describe implementations of the Filecoin protocol:
- Data structures are collections of semantically-tagged data members (e.g., structs, interfaces, or enums).
- Functions are computational procedures that do not depend on external state (i.e., mathematical functions, or programming language functions that do not refer to global variables).
- Components are sets of functionality that are intended to be represented as single software units in the implementation structure.</description>
+  Data structures are collections of semantically-tagged data members (e.g., structs, interfaces, or enums).
+  Functions are computational procedures that do not depend on external state (i.e., mathematical functions, or programming language functions that do not refer to global variables).
+  Components are sets of functionality that are intended to be represented as single software units in the implementation structure.</description>
     </item>
     
   </channel>

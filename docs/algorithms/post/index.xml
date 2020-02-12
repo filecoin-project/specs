@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Proof-of-Spacetime on Filecoin Spec</title>
@@ -28,7 +28,7 @@ At a high-level it marries ElectionPoSt with a SurprisePoSt fallback:
       
       <guid>/docs/algorithms/post/proof_of_spacetime_parameters/</guid>
       <description>This section describes parameters for Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
-   Parameter Type Value Description     POST-CHALLENGE-BLOCKS BLOCKS 480 The time offset before which the actual work of generating the PoSt cannot be started. This is some delta before the end of the Proving Period, and as such less than a single Proving Period.   POST-CHALLENGE-HOURS HOURS 2 PoSt challenge time (see POST_CHALLENGE_BLOCKS).   POST-PROVING-PERIOD BLOCKS 5760 The time interval in which a PoSt has to be submitted    TODO: The above values are tentative and need both backing from research as well as detailed reasoning why we picked them.</description>
+   Parameter Type Value Description     POST-CHALLENGE-BLOCKS BLOCKS 480 The time offset before which the actual work of generating the PoSt cannot be started. This is some delta before the end of the Proving Period, and as such less than a single Proving Period.   POST-CHALLENGE-HOURS HOURS 2 PoSt challenge time (see POST_CHALLENGE_BLOCKS).   POST-PROVING-PERIOD BLOCKS 5760 The time interval in which a PoSt has to be submitted    </description>
     </item>
     
     <item>

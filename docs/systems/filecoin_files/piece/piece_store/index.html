@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4737,13 +4737,12 @@ an index of pieces.</p>
 
 
 
-
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 
 <span class="kd">type</span> <span class="nx">PieceID</span> <span class="nx">UVarint</span>
 
 <span class="c1">// PieceStore is an object that stores pieces into some local storage.
-</span><span class="c1">// it is internally backed by an IpldStore.
+</span><span class="c1"></span><span class="c1">// it is internally backed by an IpldStore.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">PieceStore</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Store</span>              <span class="nx">ipld</span><span class="p">.</span><span class="nx">GraphStore</span>
     <span class="nx">Index</span>              <span class="p">{</span><span class="nx">PieceID</span><span class="p">:</span> <span class="nx">Piece</span><span class="p">}</span>
@@ -4768,6 +4767,10 @@ an index of pieces.</p>
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents"></nav>
+  </aside>
 
 
 

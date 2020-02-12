@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4715,44 +4715,29 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  
-
-<h1 id="vm-interpreter">VM Interpreter</h1>
-
+  <h1 id="vm-interpreter">VM Interpreter</h1>
 <h3 id="sending-funds">Sending Funds</h3>
-
 <p>As all messages carry a method ID, the method ID &lsquo;0&rsquo; is reserved for simple
 transfers of funds. Funds specified by the value field are always transferred,
 but specifying a method ID of &lsquo;0&rsquo; ensures that no other side effects occur.</p>
-
 <h3 id="state-representation">State Representation</h3>
-
 <p>The <code>global state</code> is modeled as a map of actor <code>ID</code>s to actor structs. This map is implemented by an ipld HAMT (TODO: link to spec for our HAMT) with the &lsquo;key&rsquo; being the serialized ID address (every actor has an ID address that can be looked up via the <code>InitActor</code>), and the value is an <a href="../data-structures#actor"><code>Actor</code></a> object with the actors information. Within each <code>Actor</code> object is a field called <code>state</code> that is an ipld pointer to a graph that can be entirely defined by the actor.</p>
-
 <h3 id="actor-creation">Actor Creation</h3>
-
 <p>There are two mechanisms by which an actor can be created. By explicitly invoking <code>exec</code> on the <code>Init</code> actor, and by sending a message to a <code>Public Key</code> typed <code>Address</code>.</p>
-
 <p>Calling <code>exec</code> to create an actor should generate an Actor address, and register it in the state tree (see <a href="../actors#init-actor">Init Actor</a> for more details).</p>
-
 <p>Sending a message to a non-existant account via a public key address causes the creation of an account actor for that address. The <code>To</code> address should be placed into the actor storage for later use in validating messages sent from this actor.</p>
-
 <p>This second route for creating an actor is allowed to avoid the necessity of an explicit &lsquo;register account&rsquo; step for creating new accounts.</p>
-
 <h3 id="execution-calling-a-method-on-an-actor">Execution (Calling a method on an Actor)</h3>
-
 <p>Message execution currently relies entirely on &lsquo;built-in&rsquo; code, with a common external interface. The method and actor to call it on are specified in the <code>Method</code> and <code>To</code> fields of a message, respectively. Method parameters are encoded and put into the <code>Params</code> field of a message. The encoding is technically actor dependent, but for all built-in Filecoin actors it is the dag-cbor ipld encoding of the parameters struct for each method defined in <a href="../actors">the actors doc</a>.</p>
-
 <h4 id="storage">Storage</h4>
-
 <p>Actors are given acess to a <code>Storage</code> interface to fulfil their need for persistent storage. The <code>Storage</code> interface describes a content addressed block storage system (<code>Put</code> and <code>Get</code>) and a pointer into it (<code>Head</code> and <code>Commit</code>) that points to the actor&rsquo;s current state.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Storage</span> <span class="kd">interface</span> <span class="p">{</span>
     <span class="c1">// Put writes the given object to the storage staging area and returns its CID
-</span><span class="c1"></span>    <span class="nf">Put</span><span class="p">(</span><span class="kd">interface</span><span class="p">{})</span> <span class="p">(</span><span class="nx">Cid</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">Put</span><span class="p">(</span><span class="kd">interface</span><span class="p">{</span><span class="p">}</span><span class="p">)</span> <span class="p">(</span><span class="nx">Cid</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// Get fetches the given object from storage (either staging, or local) and returns
 </span><span class="c1"></span>    <span class="c1">// the serialized data.
-</span><span class="c1"></span>    <span class="nf">Get</span><span class="p">(</span><span class="nx">Cid</span><span class="p">)</span> <span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">Get</span><span class="p">(</span><span class="nx">Cid</span><span class="p">)</span> <span class="p">(</span><span class="p">[</span><span class="p">]</span><span class="kt">byte</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// Commit updates the actual stored state for the actor. This is a compare and swap
 </span><span class="c1"></span>    <span class="c1">// operation, and will fail if &#39;old&#39; is not equal to the current return value of `Head`.
@@ -4760,65 +4745,52 @@ but specifying a method ID of &lsquo;0&rsquo; ensures that no other side effects
 </span><span class="c1"></span>    <span class="nf">Commit</span><span class="p">(</span><span class="nx">old</span> <span class="nx">Cid</span><span class="p">,</span> <span class="nx">new</span> <span class="nx">Cid</span><span class="p">)</span> <span class="kt">error</span>
 
     <span class="c1">// Head returns the CID of the current actor state
-</span><span class="c1"></span>    <span class="nf">Head</span><span class="p">()</span> <span class="nx">Cid</span>
-<span class="p">}</span></code></pre></div>
-<p>Actors can store state as a single block or implement any persistent
+</span><span class="c1"></span>    <span class="nf">Head</span><span class="p">(</span><span class="p">)</span> <span class="nx">Cid</span>
+<span class="p">}</span>
+</code></pre></div><p>Actors can store state as a single block or implement any persistent
 data structure that can be built upon a content addressed block store.
 Implementations may provide data structure implementations to simplify
 development. The current interface only supports CBOR-IPLD, but this
 should soon expand to allow other types of IPLD data structures (as long
 as the system has resolvers for them).</p>
-
 <p>The current state of a given actor can be accessed first by calling <code>Head</code> to retrieve the CID of the root of the actors state, then by using <code>Get</code> to retrieve the actual object being referenced.</p>
-
 <p>To store data, <code>Put</code> is used. Any number of objects may be <code>Put</code>, but only the object whose CID is committed, or objects that are linked to in some way by the committed object will be kept. All other objects are dropped after the method invocation returns. Objects stored via <code>Put</code> are first marshaled to CBOR-IPLD, and then stored, the returned CID is a 32 byte sha2-256 CBOR-IPLD content identifier.</p>
-
 <h1 id="pledge-collateral">Pledge Collateral</h1>
-
 <p>Filecoin includes a concept of &ldquo;Pledge Collateral&rdquo;, which is FIL collateral that storage miners must lock up when participating as miners.</p>
-
 <p>Pledge collateral serves several functions in Filecoin. It:</p>
-
 <ul>
 <li>makes it possible to slash misbehaving or slow miners</li>
 <li>ensures that miners have skin in the game (for the Filecoin network as a whole)</li>
 <li>increases the cost of launching a 51% attack</li>
 </ul>
-
 <h2 id="computing-pledge-collateral">Computing Pledge Collateral</h2>
-
 <p>The total pledge collateral across all miners is a fixed proportion of available FIL.
 Available FIL is computed as the total amount of FIL that has been mined, plus the total amount of FIL that&rsquo;s been vested, minued the amount of FIL which has been burned.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">availableFil</span> <span class="o">:=</span> <span class="nx">minedFil</span> <span class="o">+</span> <span class="nx">vestedFil</span> <span class="o">-</span> <span class="nx">burnedFil</span></code></pre></div>
-<p>Pledge collateral is subdivided into two kinds: power collateral and per-capita collateral.
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">availableFil</span> <span class="o">:=</span> <span class="nx">minedFil</span> <span class="o">+</span> <span class="nx">vestedFil</span> <span class="o">-</span> <span class="nx">burnedFil</span>
+</code></pre></div><p>Pledge collateral is subdivided into two kinds: power collateral and per-capita collateral.
 Power collateral is split across miners according to their share of the total network power, and per-capita collateral is split across miners evenly.
 Two parameters, <code>POWER_COLLATERAL_PROPORTION</code> and <code>PER_CAPITA_COLLATERAL_PROPORTION</code>, relate the total amount of collateral to the <code>availableFil</code>.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">totalPowerCollateral</span> <span class="o">:=</span> <span class="nx">availableFil</span> <span class="o">*</span> <span class="nx">POWER_COLLATERAL_PROPORTION</span>
 <span class="nx">totalPerCapitaCollateral</span> <span class="o">:=</span> <span class="nx">availableFil</span> <span class="o">*</span> <span class="nx">PER_CAPITA_COLLATERAL_PROPORTION</span>
-<span class="nx">totalPledgeCollateral</span> <span class="o">:=</span> <span class="nx">totalPowerCollateral</span> <span class="o">+</span> <span class="nx">totalPerCapitaCollateral</span></code></pre></div>
-<p>Power-based collateral ensures that miners&rsquo; collateral is proportional to their economic size and to their expected rewards.
+<span class="nx">totalPledgeCollateral</span> <span class="o">:=</span> <span class="nx">totalPowerCollateral</span> <span class="o">+</span> <span class="nx">totalPerCapitaCollateral</span>
+</code></pre></div><p>Power-based collateral ensures that miners&rsquo; collateral is proportional to their economic size and to their expected rewards.
 The presence of per-capital collateral acts as a deterrent against Sibyl attacks.
 We intend for the <code>POWER_COLLATERAL_PROPORTION</code> to be several times larger than the <code>PER_CAPITA_COLLATERAL_PROPORTION</code>.</p>
-
 <p>To calculate any particular miner&rsquo;s collateral requirements, we need to know the miner&rsquo;s power, the total network power, and the total number of miners in the network.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">minerPowerCollateral</span> <span class="o">:=</span> <span class="nx">totalPowerCollateral</span> <span class="o">*</span> <span class="nx">minerPower</span> <span class="o">/</span> <span class="nx">totalNetworkPower</span>
-<span class="nx">minerPerCapitaCollateral</span> <span class="o">:=</span> <span class="nx">totalPerCapitaCollateral</span> <span class="o">/</span> <span class="nx">numMiners</span></code></pre></div>
-<p>Putting all these variables together, we have each miner&rsquo;s individual collateral requirement:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">minerPlegeCollateral</span> <span class="o">:=</span> <span class="nx">availableFil</span> <span class="o">*</span> <span class="p">(</span> <span class="nx">POWER_COLLATERAL_PROPORTION</span> <span class="o">*</span> <span class="nx">minerPower</span> <span class="o">/</span> <span class="nx">totalNetworkPower</span> <span class="nx">PER_CAPITA_COLLATERAL_PROPORTION</span> <span class="o">/</span> <span class="nx">numMiners</span><span class="p">)</span></code></pre></div>
-<h2 id="dealing-with-undercollateralization">Dealing with Undercollateralization</h2>
-
+<span class="nx">minerPerCapitaCollateral</span> <span class="o">:=</span> <span class="nx">totalPerCapitaCollateral</span> <span class="o">/</span> <span class="nx">numMiners</span>
+</code></pre></div><p>Putting all these variables together, we have each miner&rsquo;s individual collateral requirement:</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">minerPlegeCollateral</span> <span class="o">:=</span> <span class="nx">availableFil</span> <span class="o">*</span> <span class="p">(</span> <span class="nx">POWER_COLLATERAL_PROPORTION</span> <span class="o">*</span> <span class="nx">minerPower</span> <span class="o">/</span> <span class="nx">totalNetworkPower</span> <span class="nx">PER_CAPITA_COLLATERAL_PROPORTION</span> <span class="o">/</span> <span class="nx">numMiners</span><span class="p">)</span>
+</code></pre></div><h2 id="dealing-with-undercollateralization">Dealing with Undercollateralization</h2>
 <p>In the course of normal events, miners may become undercollateralized.</p>
-
 <p>They cannot directly undercollateralized themselves by adding more power, as commitSector will fail if they do not have sufficient collateral to cover their power requirements.
 However, their collateral requirement could increase due to growth in availableFil, a reduction in the total network power, or a reduction in the total number of miners.
 In such cases, the miner may continue to submit PoSts and mine blocks. When they win blocks, their block rewards will be garnished while they remain undercollateralized.</p>
-
 <h2 id="parameter-choices">Parameter Choices</h2>
-
 <p>We provisionally propose the following two parameters choices:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">POWER_COLLATERAL_PROPORTION</span> <span class="o">:=</span> <span class="mf">0.2</span>
-<span class="nx">PER_CAPITA_COLLATERAL_PROPORTION</span> <span class="o">:=</span> <span class="mf">0.05</span></code></pre></div>
-<p>These are subject to change before launch.</p>
+<span class="nx">PER_CAPITA_COLLATERAL_PROPORTION</span> <span class="o">:=</span> <span class="mf">0.05</span>
+</code></pre></div><p>These are subject to change before launch.</p>
 
 </article>
 
@@ -4832,27 +4804,22 @@ In such cases, the miner may continue to submit PoSts and mine blocks. When they
 
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
-<ul>
-<li><a href="#vm-interpreter">VM Interpreter</a>
-<ul>
-<li>
-<ul>
-<li><a href="#sending-funds">Sending Funds</a></li>
-<li><a href="#state-representation">State Representation</a></li>
-<li><a href="#actor-creation">Actor Creation</a></li>
-<li><a href="#execution-calling-a-method-on-an-actor">Execution (Calling a method on an Actor)</a>
-<ul>
-<li><a href="#storage">Storage</a></li>
-</ul></li>
-</ul></li>
-</ul></li>
-<li><a href="#pledge-collateral">Pledge Collateral</a>
-<ul>
-<li><a href="#computing-pledge-collateral">Computing Pledge Collateral</a></li>
-<li><a href="#dealing-with-undercollateralization">Dealing with Undercollateralization</a></li>
-<li><a href="#parameter-choices">Parameter Choices</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#sending-funds">Sending Funds</a></li>
+        <li><a href="#state-representation">State Representation</a></li>
+        <li><a href="#actor-creation">Actor Creation</a></li>
+        <li><a href="#execution-calling-a-method-on-an-actor">Execution (Calling a method on an Actor)</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#computing-pledge-collateral">Computing Pledge Collateral</a></li>
+    <li><a href="#dealing-with-undercollateralization">Dealing with Undercollateralization</a></li>
+    <li><a href="#parameter-choices">Parameter Choices</a></li>
+  </ul>
 </nav>
   </aside>
 

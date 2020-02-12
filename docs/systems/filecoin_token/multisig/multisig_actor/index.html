@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4766,28 +4766,28 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">txn</span> <span class="o">*</span><span class="nx">MultiSigTransaction</span><span class="p">)</span> <span class="nf">Equals</span><span class="p">(</span><span class="nx">MultiSigTransaction</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="nf">IMPL_FINISH</span><span class="p">()</span>
+    <span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">MultiSigTransactionHAMT</span> <span class="kd">map</span><span class="p">[</span><span class="nx">TxnID</span><span class="p">]</span><span class="nx">MultiSigTransaction</span>
 <span class="kd">type</span> <span class="nx">MultiSigApprovalSetHAMT</span> <span class="kd">map</span><span class="p">[</span><span class="nx">TxnID</span><span class="p">]</span><span class="nx">autil</span><span class="p">.</span><span class="nx">ActorIDSetHAMT</span>
 
-<span class="kd">func</span> <span class="nf">MultiSigTransactionHAMT_Empty</span><span class="p">()</span> <span class="nx">MultiSigTransactionHAMT</span> <span class="p">{</span>
-    <span class="nf">IMPL_FINISH</span><span class="p">()</span>
+<span class="kd">func</span> <span class="nf">MultiSigTransactionHAMT_Empty</span><span class="p">(</span><span class="p">)</span> <span class="nx">MultiSigTransactionHAMT</span> <span class="p">{</span>
+    <span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">MultiSigApprovalSetHAMT_Empty</span><span class="p">()</span> <span class="nx">MultiSigApprovalSetHAMT</span> <span class="p">{</span>
-    <span class="nf">IMPL_FINISH</span><span class="p">()</span>
+<span class="kd">func</span> <span class="nf">MultiSigApprovalSetHAMT_Empty</span><span class="p">(</span><span class="p">)</span> <span class="nx">MultiSigApprovalSetHAMT</span> <span class="p">{</span>
+    <span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">MultiSigActor</span> <span class="kd">struct</span><span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">MultiSigActor</span> <span class="kd">struct</span><span class="p">{</span><span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">MultiSigActor</span><span class="p">)</span> <span class="nf">State</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">MultiSigActorState</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
-    <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">cid</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">())</span>
+    <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">(</span><span class="p">)</span>
+    <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">cid</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
     <span class="kd">var</span> <span class="nx">state</span> <span class="nx">MultiSigActorState</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nx">stateCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">state</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;state not found&#34;</span><span class="p">)</span>
@@ -4797,33 +4797,33 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">MultiSigActor</span><span class="p">)</span> <span class="nf">Propose</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">txn</span> <span class="nx">MultiSigTransaction</span><span class="p">)</span> <span class="nx">TxnID</span> <span class="p">{</span>
     <span class="nx">vmr</span><span class="p">.</span><span class="nf">RT_ValidateImmediateCallerIsSignable</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-    <span class="nx">callerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+    <span class="nx">callerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(</span><span class="p">)</span>
     <span class="nx">a</span><span class="p">.</span><span class="nf">_rtValidateAuthorizedPartyOrAbort</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">callerAddr</span><span class="p">)</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
     <span class="nx">txnID</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nx">NextTxnID</span>
     <span class="nx">st</span><span class="p">.</span><span class="nx">NextTxnID</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="nx">st</span><span class="p">.</span><span class="nx">PendingTxns</span><span class="p">[</span><span class="nx">txnID</span><span class="p">]</span> <span class="p">=</span> <span class="nx">txn</span>
-    <span class="nx">st</span><span class="p">.</span><span class="nx">PendingApprovals</span><span class="p">[</span><span class="nx">txnID</span><span class="p">]</span> <span class="p">=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">ActorIDSetHAMT_Empty</span><span class="p">()</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nx">PendingApprovals</span><span class="p">[</span><span class="nx">txnID</span><span class="p">]</span> <span class="p">=</span> <span class="nx">autil</span><span class="p">.</span><span class="nf">ActorIDSetHAMT_Empty</span><span class="p">(</span><span class="p">)</span>
     <span class="nf">UpdateRelease_MultiSig</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
     <span class="c1">// Proposal implicitly includes approval of a transaction.
 </span><span class="c1"></span>    <span class="nx">a</span><span class="p">.</span><span class="nf">_rtApproveTransactionOrAbort</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">callerAddr</span><span class="p">,</span> <span class="nx">txnID</span><span class="p">,</span> <span class="nx">txn</span><span class="p">)</span>
 
-    <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// Ensure stability across reorgs (consider having proposer supply ID?)
+    <span class="nf">TODO</span><span class="p">(</span><span class="p">)</span> <span class="c1">// Ensure stability across reorgs (consider having proposer supply ID?)
 </span><span class="c1"></span>    <span class="k">return</span> <span class="nx">txnID</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">MultiSigActor</span><span class="p">)</span> <span class="nf">Approve</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">txnID</span> <span class="nx">TxnID</span><span class="p">,</span> <span class="nx">txn</span> <span class="nx">MultiSigTransaction</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">vmr</span><span class="p">.</span><span class="nf">RT_ValidateImmediateCallerIsSignable</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-    <span class="nx">callerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
+    <span class="nx">callerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(</span><span class="p">)</span>
     <span class="nx">a</span><span class="p">.</span><span class="nf">_rtValidateAuthorizedPartyOrAbort</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">callerAddr</span><span class="p">)</span>
     <span class="nx">a</span><span class="p">.</span><span class="nf">_rtApproveTransactionOrAbort</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">callerAddr</span><span class="p">,</span> <span class="nx">txnID</span><span class="p">,</span> <span class="nx">txn</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">MultiSigActor</span><span class="p">)</span> <span class="nf">AddAuthorizedParty</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">actorID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// Can only be called by the multisig wallet itself.
-</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrReceiver</span><span class="p">())</span>
+</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrReceiver</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
     <span class="nx">st</span><span class="p">.</span><span class="nx">AuthorizedParties</span><span class="p">[</span><span class="nx">actorID</span><span class="p">]</span> <span class="p">=</span> <span class="kc">true</span>
@@ -4832,11 +4832,11 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">MultiSigActor</span><span class="p">)</span> <span class="nf">RemoveAuthorizedParty</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">actorID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// Can only be called by the multisig wallet itself.
-</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrReceiver</span><span class="p">())</span>
+</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrReceiver</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nx">AuthorizedParties</span><span class="p">[</span><span class="nx">actorID</span><span class="p">];</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nx">AuthorizedParties</span><span class="p">[</span><span class="nx">actorID</span><span class="p">]</span><span class="p">;</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Party not found&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
@@ -4851,15 +4851,15 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">MultiSigActor</span><span class="p">)</span> <span class="nf">SwapAuthorizedParty</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">oldActorID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">,</span> <span class="nx">newActorID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// Can only be called by the multisig wallet itself.
-</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrReceiver</span><span class="p">())</span>
+</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrReceiver</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nx">AuthorizedParties</span><span class="p">[</span><span class="nx">oldActorID</span><span class="p">];</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nx">AuthorizedParties</span><span class="p">[</span><span class="nx">oldActorID</span><span class="p">]</span><span class="p">;</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Party not found&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nx">AuthorizedParties</span><span class="p">[</span><span class="nx">oldActorID</span><span class="p">];</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nx">AuthorizedParties</span><span class="p">[</span><span class="nx">oldActorID</span><span class="p">]</span><span class="p">;</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Party already present&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
@@ -4871,7 +4871,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">MultiSigActor</span><span class="p">)</span> <span class="nf">ChangeNumApprovalsThreshold</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">newThreshold</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// Can only be called by the multisig wallet itself.
-</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrReceiver</span><span class="p">())</span>
+</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrReceiver</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
@@ -4887,13 +4887,13 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">MultiSigActor</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">authorizedParties</span> <span class="nx">autil</span><span class="p">.</span><span class="nx">ActorIDSetHAMT</span><span class="p">,</span> <span class="nx">numApprovalsThreshold</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
 
     <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">InitActorAddr</span><span class="p">)</span>
-    <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
+    <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">(</span><span class="p">)</span>
 
     <span class="nx">st</span> <span class="o">:=</span> <span class="nx">MultiSigActorState</span><span class="p">{</span>
         <span class="nx">AuthorizedParties</span><span class="p">:</span>     <span class="nx">authorizedParties</span><span class="p">,</span>
         <span class="nx">NumApprovalsThreshold</span><span class="p">:</span> <span class="nx">numApprovalsThreshold</span><span class="p">,</span>
-        <span class="nx">PendingTxns</span><span class="p">:</span>           <span class="nf">MultiSigTransactionHAMT_Empty</span><span class="p">(),</span>
-        <span class="nx">PendingApprovals</span><span class="p">:</span>      <span class="nf">MultiSigApprovalSetHAMT_Empty</span><span class="p">(),</span>
+        <span class="nx">PendingTxns</span><span class="p">:</span>           <span class="nf">MultiSigTransactionHAMT_Empty</span><span class="p">(</span><span class="p">)</span><span class="p">,</span>
+        <span class="nx">PendingApprovals</span><span class="p">:</span>      <span class="nf">MultiSigApprovalSetHAMT_Empty</span><span class="p">(</span><span class="p">)</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="nf">UpdateRelease_MultiSig</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
@@ -4908,28 +4908,28 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Requested transcation not found or not matched&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="nx">expirationExceeded</span> <span class="o">:=</span> <span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">txn</span><span class="p">.</span><span class="nx">Expiration</span><span class="p">)</span>
+    <span class="nx">expirationExceeded</span> <span class="o">:=</span> <span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(</span><span class="p">)</span> <span class="p">&gt;</span> <span class="nx">txn</span><span class="p">.</span><span class="nx">Expiration</span><span class="p">)</span>
     <span class="k">if</span> <span class="nx">expirationExceeded</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Transaction expiration exceeded&#34;</span><span class="p">)</span>
 
-        <span class="nf">TODO</span><span class="p">()</span>
+        <span class="nf">TODO</span><span class="p">(</span><span class="p">)</span>
         <span class="c1">// Determine what to do about state accumulation over time.
 </span><span class="c1"></span>        <span class="c1">// Cannot rely on proposer to delete unexecuted transactions;
 </span><span class="c1"></span>        <span class="c1">// there is no incentive (in fact, this costs gas).
 </span><span class="c1"></span>        <span class="c1">// Could potentially amortize cost of cleanup via Cron.
 </span><span class="c1"></span>    <span class="p">}</span>
 
-    <span class="nf">AssertMsg</span><span class="p">(</span><span class="nx">callerAddr</span><span class="p">.</span><span class="nf">Protocol</span><span class="p">()</span> <span class="o">==</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ID</span><span class="p">,</span> <span class="s">&#34;caller address does not have ID&#34;</span><span class="p">)</span>
+    <span class="nf">AssertMsg</span><span class="p">(</span><span class="nx">callerAddr</span><span class="p">.</span><span class="nf">Protocol</span><span class="p">(</span><span class="p">)</span> <span class="o">==</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ID</span><span class="p">,</span> <span class="s">&#34;caller address does not have ID&#34;</span><span class="p">)</span>
     <span class="nx">actorID</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">IDFromAddress</span><span class="p">(</span><span class="nx">callerAddr</span><span class="p">)</span>
     <span class="nx">autil</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
 
-    <span class="nx">st</span><span class="p">.</span><span class="nx">PendingApprovals</span><span class="p">[</span><span class="nx">txnID</span><span class="p">][</span><span class="nx">abi</span><span class="p">.</span><span class="nf">ActorID</span><span class="p">(</span><span class="nx">actorID</span><span class="p">)]</span> <span class="p">=</span> <span class="kc">true</span>
-    <span class="nx">thresholdMet</span> <span class="o">:=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">PendingApprovals</span><span class="p">[</span><span class="nx">txnID</span><span class="p">])</span> <span class="o">==</span> <span class="nx">st</span><span class="p">.</span><span class="nx">NumApprovalsThreshold</span><span class="p">)</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nx">PendingApprovals</span><span class="p">[</span><span class="nx">txnID</span><span class="p">]</span><span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nf">ActorID</span><span class="p">(</span><span class="nx">actorID</span><span class="p">)</span><span class="p">]</span> <span class="p">=</span> <span class="kc">true</span>
+    <span class="nx">thresholdMet</span> <span class="o">:=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">PendingApprovals</span><span class="p">[</span><span class="nx">txnID</span><span class="p">]</span><span class="p">)</span> <span class="o">==</span> <span class="nx">st</span><span class="p">.</span><span class="nx">NumApprovalsThreshold</span><span class="p">)</span>
 
     <span class="nf">UpdateRelease_MultiSig</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nx">thresholdMet</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">!</span><span class="nx">st</span><span class="p">.</span><span class="nf">_hasAvailable</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrentBalance</span><span class="p">(),</span> <span class="nx">txn</span><span class="p">.</span><span class="nx">Value</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">())</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">!</span><span class="nx">st</span><span class="p">.</span><span class="nf">_hasAvailable</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrentBalance</span><span class="p">(</span><span class="p">)</span><span class="p">,</span> <span class="nx">txn</span><span class="p">.</span><span class="nx">Value</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(</span><span class="p">)</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;insufficient funds unlocked&#34;</span><span class="p">)</span>
         <span class="p">}</span>
 
@@ -4952,24 +4952,24 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">MultiSigActor</span><span class="p">)</span> <span class="nf">_rtValidateAuthorizedPartyOrAbort</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nf">AssertMsg</span><span class="p">(</span><span class="nx">address</span><span class="p">.</span><span class="nf">Protocol</span><span class="p">()</span> <span class="o">==</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ID</span><span class="p">,</span> <span class="s">&#34;caller address does not have ID&#34;</span><span class="p">)</span>
+    <span class="nf">AssertMsg</span><span class="p">(</span><span class="nx">address</span><span class="p">.</span><span class="nf">Protocol</span><span class="p">(</span><span class="p">)</span> <span class="o">==</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ID</span><span class="p">,</span> <span class="s">&#34;caller address does not have ID&#34;</span><span class="p">)</span>
     <span class="nx">actorID</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">IDFromAddress</span><span class="p">(</span><span class="nx">address</span><span class="p">)</span>
     <span class="nx">autil</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nx">AuthorizedParties</span><span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nf">ActorID</span><span class="p">(</span><span class="nx">actorID</span><span class="p">)];</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nx">AuthorizedParties</span><span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nf">ActorID</span><span class="p">(</span><span class="nx">actorID</span><span class="p">)</span><span class="p">]</span><span class="p">;</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;Party not authorized&#34;</span><span class="p">)</span>
     <span class="p">}</span>
     <span class="nf">Release_MultiSig</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">Release_MultiSig</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">h</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">st</span> <span class="nx">MultiSigActorState</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">checkCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">st</span><span class="p">))</span>
+    <span class="nx">checkCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">st</span><span class="p">)</span><span class="p">)</span>
     <span class="nx">h</span><span class="p">.</span><span class="nf">Release</span><span class="p">(</span><span class="nx">checkCID</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">UpdateRelease_MultiSig</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">h</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">st</span> <span class="nx">MultiSigActorState</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">newCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">st</span><span class="p">))</span>
+    <span class="nx">newCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">st</span><span class="p">)</span><span class="p">)</span>
     <span class="nx">h</span><span class="p">.</span><span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">newCID</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -5022,9 +5022,9 @@ https://github.com/alex-shpak/hugo-book
         <span class="k">return</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// BigInt
+    <span class="nf">TODO</span><span class="p">(</span><span class="p">)</span> <span class="c1">// BigInt
 </span><span class="c1"></span>    <span class="nx">lockedProportion</span> <span class="o">:=</span> <span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">UnlockDuration</span> <span class="o">-</span> <span class="nx">elapsedEpoch</span><span class="p">)</span> <span class="o">/</span> <span class="nx">st</span><span class="p">.</span><span class="nx">UnlockDuration</span>
-    <span class="k">return</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">InitialBalance</span><span class="p">)</span> <span class="o">*</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">lockedProportion</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nx">InitialBalance</span><span class="p">)</span> <span class="o">*</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">lockedProportion</span><span class="p">)</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">// return true if MultiSig maintains required locked balance after spending the amount
@@ -5040,7 +5040,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="kc">true</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">MultiSigActorState</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">MultiSigActorState</span><span class="p">)</span> <span class="nf">CID</span><span class="p">(</span><span class="p">)</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span> <span class="p">{</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -5059,6 +5059,10 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents"></nav>
+  </aside>
 
 
 

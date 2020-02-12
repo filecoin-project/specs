@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Storage Deals on Filecoin Spec</title>
@@ -19,7 +19,7 @@
       <description>There are two main categories of faults in the Filecoin network.
  ConsensusFaults StorageDealFaults  ConsensusFaults are faults that impact network consensus and StorageDealFaults are faults where data in a StorageDeal is not maintained by the providers pursuant to deal terms.
 Pledge Collateral is slashed for ConsensusFaults and Storage Deal Collateral for StorageDealFaults.
-Any misbehavior may result in more than one fault thus lead to slashing on both collaterals.</description>
+Any misbehavior may result in more than one fault thus lead to slashing on both collaterals. For example, missing a PoStProof will incur a penalty on both PledgeCollateral and StorageDealCollateral given it impacts both a given StorageDeal and power derived from the sector commitments in Storage Power Consensus.</description>
     </item>
     
     <item>
@@ -28,7 +28,7 @@ Any misbehavior may result in more than one fault thus lead to slashing on both 
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_markets/storage_market/storage_deal/storage_deal_flow/</guid>
-      <description>Deal Flow Sequence Diagram (open in new tab)  Add Storage Deal and Power  1. StorageClient and StorageProvider call StorageMarketActor.AddBalance to deposit funds into Storage Market.  StorageClient and StorageProvider can call WithdrawBalance before any deal is made.  2. StorageClient and StorageProvider negotiate a deal off chain. StorageClient sends a StorageDealProposal to a StorageProvider.  StorageProvider verifies the StorageDeal by checking address and signature of StorageClient, checking the proposal&amp;rsquo;s StartEpoch is after the current Epoch, checking StorageClient did not call withdraw in the last X Epoch (WithdrawBalance should take at least X Epoch), checking both StorageProvider and StorageClient have sufficient available balances in StorageMarketActor.</description>
+      <description>Deal Flow Sequence Diagram (open in new tab)  Add Storage Deal and Power    StorageClient and StorageProvider call StorageMarketActor.AddBalance to deposit funds into Storage Market.   StorageClient and StorageProvider can call WithdrawBalance before any deal is made.    StorageClient and StorageProvider negotiate a deal off chain. StorageClient sends a StorageDealProposal to a StorageProvider.   StorageProvider verifies the StorageDeal by checking address and signature of StorageClient, checking the proposal&amp;rsquo;s StartEpoch is after the current Epoch, checking StorageClient did not call withdraw in the last X Epoch (WithdrawBalance should take at least X Epoch), checking both StorageProvider and StorageClient have sufficient available balances in StorageMarketActor.</description>
     </item>
     
     <item>

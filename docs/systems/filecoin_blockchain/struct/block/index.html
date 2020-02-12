@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4715,18 +4715,11 @@ https://github.com/alex-shpak/hugo-book
 </header>
 
       
-<article class="markdown">
-
-<div id="systems__filecoin_blockchain__struct__block__block"></div>
-
+<article class="markdown"><div id="systems__filecoin_blockchain__struct__block__block"></div>
 <h1 id="block">Block</h1>
-
 <p>The Block is a unit of the Filecoin blockchain.</p>
-
 <p>A block header contains information relevant to a particular point in time over which the network may achieve consensus.</p>
-
-<div class="notices note" ><strong>Note:</strong> A block is functionally the same as a block header in the Filecoin protocol. While a block header contains Merkle links to the full system state, messages, and message receipts, a block can be thought of as the full set of this information (not just the Merkle roots, but rather the full data of the state tree, message tree, receipts tree, etc.). Because a full block is quite large, our chain consists of block headers rather than full blocks. We often use the terms <code>block</code> and <code>block header</code> interchangeably.</div>
-
+<!-- raw HTML omitted -->
 
 
 
@@ -4802,19 +4795,18 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="c1">// HACK: All of the below was duplicated from posting.id
-</span><span class="c1">// in order to get spec to compile. Check the actual source for details
+</span><span class="c1"></span><span class="c1">// in order to get spec to compile. Check the actual source for details
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ElectionPoStVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Candidates</span>  <span class="p">[</span><span class="nx">PoStCandidate</span><span class="p">]</span>
     <span class="nx">Proof</span>       <span class="nx">PoStProof</span>
     <span class="nx">Randomness</span>  <span class="nx">PoStRandomness</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">ChallengeTicketsCommitment</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// see sector
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStCandidate</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// see sector
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStRandomness</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// see sector
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStProof</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">ChallengeTicketsCommitment</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>  <span class="c1">// see sector
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStCandidate</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>  <span class="c1">// see sector
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStRandomness</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>  <span class="c1">// see sector
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStProof</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
 </code></pre></div>
-
 
 
 
@@ -4848,7 +4840,7 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nx">Output</span>     <span class="nx">Bytes</span>                <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
     <span class="nf">DrawRandomness</span><span class="p">(</span><span class="nx">round</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Bytes</span>
-    <span class="nf">ValidateSyntax</span><span class="p">()</span> <span class="kt">bool</span>
+    <span class="nf">ValidateSyntax</span><span class="p">(</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">Verify</span><span class="p">(</span>
         <span class="nx">input</span>           <span class="nx">Bytes</span>
         <span class="nx">pk</span>              <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span>
@@ -4861,18 +4853,12 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
 <h1 id="block-syntax-validation">Block syntax validation</h1>
-
 <p>Syntax validation refers to validation that may be performed on a block and its messages
 without reference to outside information such as the parent state tree.</p>
-
 <p>An invalid block must not be transmitted or referenced as a parent.</p>
-
 <p>A syntactically valid block header must decode into fields matching the type definition below.</p>
-
 <p>A syntactically valid header must have:</p>
-
 <ul>
 <li>between 1 and <code>5*ec.ExpectedLeaders</code> <code>Parents</code> CIDs if <code>Epoch</code> is greater than zero (else empty <code>Parents</code>),</li>
 <li>a non-negative <code>ParentWeight</code>,</li>
@@ -4881,37 +4867,29 @@ without reference to outside information such as the parent state tree.</p>
 <li>a positive <code>Timestamp</code>,</li>
 <li>a <code>Ticket</code> with non-empty <code>VRFResult</code>,</li>
 <li><code>ElectionPoStOutput</code> containing:
-
 <ul>
 <li>a <code>Candidates</code> array with between 1 and <code>EC.ExpectedLeaders</code> values (inclusive),</li>
 <li>a non-empty <code>PoStRandomness</code> field,</li>
 <li>a non-empty <code>Proof</code> field,</li>
-</ul></li>
-<li>a non-empty <code>ForkSignal</code> field.
-<br /></li>
 </ul>
-
+</li>
+<li>a non-empty <code>ForkSignal</code> field.</li>
+</ul>
 <p>A syntactically valid full block must have:</p>
-
 <ul>
 <li>all referenced messages syntactically valid,</li>
 <li>all referenced parent receipts syntactically valid,</li>
 <li>the sum of the serialized sizes of the block header and included messages is no greater than <code>block.BlockMaxSize</code>,</li>
 <li>the sum of the gas limit of all explicit messages is no greater than <code>block.BlockGasLimit</code>.</li>
 </ul>
-
 <p>Note that validation of the block signature requires access to the miner worker address and
 public key from the parent tipset state, so signature validation forms part of semantic validation.
 Similarly, message signature validation requires lookup of the public key associated with
 each message&rsquo;s <code>From</code> account actor in the block&rsquo;s parent state.</p>
-
 <h1 id="block-semantic-validation">Block semantic validation</h1>
-
 <p>Semantic validation refers to validation that requires reference to information outside the block
 header and messages themselves, in particular the parent tipset and state on which the block is built.</p>
-
 <p>A semantically valid block must have:</p>
-
 <ul>
 <li><code>Parents</code> listed in lexicographic order of their header&rsquo;s <code>Ticket</code>,</li>
 <li><code>Parents</code> all reference valid blocks and form a valid <a href="../../../../../#systems__filecoin_blockchain__struct__tipset___index"></a>,</li>
@@ -4919,42 +4897,40 @@ header and messages themselves, in particular the parent tipset and state on whi
 <li><code>ParentMessageReceipts</code> identifying the receipt list produced by parent tipset execution, with one receipt for each unique message from the parent tipset,</li>
 <li><code>ParentWeight</code> matching the weight of the chain up to and including the parent tipset,</li>
 <li><code>Epoch</code> greater than that of its parents, and
-
 <ul>
 <li>not in the future according to the node&rsquo;s local clock reading of the current epoch,
-
 <ul>
 <li>blocks with future epochs should not be rejected, but should not be evaluated (validated or included in a tipset) until the appropriate epoch</li>
-</ul></li>
+</ul>
+</li>
 <li>not farther in the past than the soft finality as defined by SPC $<a href="../../../../../#algorithms__expected_consensus__finality">EC Finality</a>,
-
 <ul>
 <li>this rule only applied when receiving new gossip blocks (i.e. from the current chain head), not when syncing to the chain for the first time (e.g.)</li>
-</ul></li>
-</ul></li>
-<li><code>Miner</code> that is active in the storage power table in the parent tipset state,<br /></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>Miner</code> that is active in the storage power table in the parent tipset state,</li>
 <li>a <code>Ticket</code> derived from the minimum ticket from the parent tipset&rsquo;s block headers,
-
 <ul>
 <li><code>Ticket.VRFResult</code> validly signed by the <code>Miner</code> actor&rsquo;s worker account public key,</li>
-</ul></li>
+</ul>
+</li>
 <li><code>ElectionPoStOutput</code> yielding winning partial tickets that were generated validly,
-
 <ul>
 <li><code>ElectionPoSt.Randomness</code> is well formed and appropriately drawn from a past tipset according to the PoStLookback,</li>
-<li><code>ElectionPoSt.Proof</code> is a valid proof verifying the generation of the <code>ElectionPoSt.Candidates</code> from the <code>Miner</code>&rsquo;s eligible sectors,</li>
+<li><code>ElectionPoSt.Proof</code> is a valid proof verifying the generation of the <code>ElectionPoSt.Candidates</code> from the <code>Miner</code>'s eligible sectors,</li>
 <li><code>ElectionPoSt.Candidates</code> contains well formed <code>PoStCandidate</code>s each of which has a <code>PartialTicket</code> yielding a winning <code>ChallengeTicket</code> in Expected Consensus.</li>
-</ul></li>
+</ul>
+</li>
 <li>a <code>Timestamp</code> in seconds lying within the quantized epoch window implied by the genesis block&rsquo;s timestamp and the block&rsquo;s <code>Epoch</code>,</li>
 <li>all SECP messages correctly signed by their sending actor&rsquo;s worker account key,</li>
 <li>a <code>BLSAggregate</code> signature that signs the array of CIDs of the BLS messages referenced by the block
 with their sending actor&rsquo;s key.</li>
 <li>a valid <code>Signature</code> over the block header&rsquo;s fields from the block&rsquo;s <code>Miner</code> actor&rsquo;s worker account public key.</li>
 </ul>
-
 <p>There is no semantic validation of the messages included in a block beyond validation of their signatures.
 If all messages included in a block are syntactically valid then they may be executed and produce a receipt.</p>
-
 <p>A chain sync system may perform syntactic and semantic validation in stages in order to minimize unnecessary resource expenditure.</p>
 </article>
 
@@ -4967,13 +4943,7 @@ If all messages included in a block are syntactically valid then they may be exe
   
 
   <aside class="book-toc level-6 fixed">
-    <nav id="TableOfContents">
-<ul>
-<li><a href="#block">Block</a></li>
-<li><a href="#block-syntax-validation">Block syntax validation</a></li>
-<li><a href="#block-semantic-validation">Block semantic validation</a></li>
-</ul>
-</nav>
+    <nav id="TableOfContents"></nav>
   </aside>
 
 

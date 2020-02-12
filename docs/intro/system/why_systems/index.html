@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4715,20 +4715,14 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  
-
-<p>Filecoin decouples and modularizes functionality into loosely-joined <code>systems</code>.
+  <p>Filecoin decouples and modularizes functionality into loosely-joined <code>systems</code>.
 Each system adds significant functionality, usually to achieve a set of important and tightly related goals.</p>
-
 <p>For example, the Blockchain System provides structures like Block, Tipset, and Chain, and provides functionality
 like Block Sync, Block Propagation, Block Validation, Chain Selection, and Chain Access. This is
 separated from the Files, Pieces, Piece Preparation, and Data Transfer. Both of these systems are separated from
 the Markets, which provide Orders, Deals, Market Visibility, and Deal Settlement.</p>
-
 <h1 id="why-is-system-decoupling-useful">Why is System decoupling useful?</h1>
-
 <p>This decoupling is useful for:</p>
-
 <ul>
 <li><strong>Implementation Boundaries:</strong> it is possible to build implementations of Filecoin that only implement a
 subset of systems. This is especially useful for <em>Implementation Diversity</em>: we want many implementations
@@ -4742,21 +4736,16 @@ processing from Data Transfer.</li>
 <li><strong>Scalability:</strong> systems and various use cases may drive different performance requirements for different opertators.
 System decoupling makes it easier for operators to scale their deployments along system boundaries.</li>
 </ul>
-
-<h1 id="filecoin-nodes-don-t-need-all-the-systems">Filecoin Nodes don&rsquo;t need all the systems</h1>
-
+<h1 id="filecoin-nodes-dont-need-all-the-systems">Filecoin Nodes don&rsquo;t need all the systems</h1>
 <p>Filecoin Nodes vary significantly, and do not need all the systems.
 Most systems are only needed for a subset of use cases.</p>
-
 <p>For example, the Blockchain System is required for synchronizing the chain, participating in secure consensus,
 storage mining, and chain validation.
 Many Filecoin Nodes do not need the chain and can perform their work by just fetching content from the latest
 StateTree, from a node they trust. Of course, such nodes</p>
-
 <p>Note: Filecoin does not use the &ldquo;full node&rdquo; or &ldquo;light client&rdquo; terminology, in wide use in Bitcoin and other blockchain
 networks. In filecoin, these terms are not well defined. It is best to define nodes in terms of their capabilities,
 and therefore, in terms of the Systems they run. For example:</p>
-
 <ul>
 <li><strong>Chain Verifier Node:</strong> Runs the Blockchain system. Can sync and validate the chain. Cannot mine or produce blocks.</li>
 <li><strong>Client Node:</strong> Runs the Blockchain, Market, and Data Transfer systems. Can sync and validate the chain. Cannot mine or produce blocks.</li>
@@ -4766,27 +4755,21 @@ and therefore, in terms of the Systems they run. For example:</p>
 Can make Storage Deals (Storage Provider side). Can seal stored data into sectors. Can acquire
 storage consensus power. Can mine and produce blocks.</li>
 </ul>
-
 <h1 id="separating-systems">Separating Systems</h1>
-
 <blockquote>
 <p>How do we determine what functionality belongs in one system vs another?</p>
 </blockquote>
-
 <p>Drawing boundaries between systems is the art of separating tightly related functionality from unrelated parts.
 In a sense, we seek to keep tightly integrated components in the same system, and away from other unrelated
 components. This is sometimes straightforward, the boundaries naturally spring from the data structures or
 functionality. For example, it is straightforward to observe that Clients and Miners negotiating a deal
 with each other is very unrelated to VM Execution.</p>
-
 <p>Sometimes this is harder, and it requires detangling, adding, or removing abstractions. For
 example, the <code>StoragePowerActor</code> and the <code>StorageMarketActor</code> were a single <code>Actor</code> previously. This caused
 a large coupling of functionality across <code>StorageDeal</code> making, the <code>StorageMarket</code>, markets in general, with
 Storage Mining, Sector Sealing, PoSt Generation, and more. Detangling these two sets of related functionality
 requried breaking apart the one actor into two.</p>
-
 <h1 id="decomposing-within-a-system">Decomposing within a System</h1>
-
 <p>Systems themselves decompose into smaller subunits. These are sometimes called &ldquo;subsystems&rdquo; to avoid confusion
 with the much larger, first-class Systems. Subsystems themselves may break down further. The naming here is not
 strictly enforced, as these subdivisions are more related to protocol and implementation engineering concerns
@@ -4803,14 +4786,7 @@ than to user capabilities.</p>
   
 
   <aside class="book-toc level-6 fixed">
-    <nav id="TableOfContents">
-<ul>
-<li><a href="#why-is-system-decoupling-useful">Why is System decoupling useful?</a></li>
-<li><a href="#filecoin-nodes-don-t-need-all-the-systems">Filecoin Nodes don&rsquo;t need all the systems</a></li>
-<li><a href="#separating-systems">Separating Systems</a></li>
-<li><a href="#decomposing-within-a-system">Decomposing within a System</a></li>
-</ul>
-</nav>
+    <nav id="TableOfContents"></nav>
   </aside>
 
 

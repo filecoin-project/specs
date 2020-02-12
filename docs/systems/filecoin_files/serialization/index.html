@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4715,34 +4715,23 @@ https://github.com/alex-shpak/hugo-book
 </header>
 
       
-<article class="markdown">
-
-<p>Filecoin seeks to make use of as few data formats as needed, with well-specced serialization rules to
+<article class="markdown"><p>Filecoin seeks to make use of as few data formats as needed, with well-specced serialization rules to
 better protocol security through simplicity and enable interoperability amongst implementations of the
 Filecoin protocol.</p>
-
 <p>Read more on design considerations <a href="https://github.com/filecoin-project/specs/issues/621">here for CBOR-usage</a> and <a href="https://github.com/filecoin-project/specs/issues/615">here for int types in Filecoin</a>.</p>
-
 <h3 id="data-formats">Data Formats</h3>
-
 <p>Filecoin in-memory data types are mostly straightforward.
 Implementations should support two integer types: Int (meaning native 64-bit integer), and BigInt (meaning arbitrary length)
 and avoid dealing with floating-point numbers to minimize interoperability issues across programming languages and implementations.</p>
-
 <p>You can also read more on <a href="../../../../#algorithms__crypto__randomness">data formats as part of randomness generation</a>) in the Filecoin protocol.</p>
-
 <h3 id="serialization">Serialization</h3>
-
 <p>Data <code>Serialization</code> in Filecoin ensures a consistent format for serializing in-memory data for transfer
 in-flight and in-storage. Serialization is critical to protocol security and interoperability across
 implementations of the Filecoin protocol, enabling consistent state updates across Filecoin nodes.</p>
-
 <p>All data structures in Filecoin are <a href="https://tools.ietf.org/html/rfc7049">CBOR</a>-tuple encoded.
 That is, any data structures used in the Filecoin system (structs in this spec) should be serialized
 as CBOR-arrays with items corresponding to the data structure fields in their order of declaration.</p>
-
 <p>You can find the encoding structure for major data types in CBOR <a href="https://tools.ietf.org/html/rfc7049#section-2.1">here</a>.</p>
-
 <p>For illustration, an in-memory map would be represented as a CBOR-array of the keys and values listed in some
 pre-determined order. A near-term update to the serialization format will involve tagging fields appropriately
 to ensure appropriate serialization/deserialization as the protocol evolves.</p>
@@ -4758,16 +4747,14 @@ to ensure appropriate serialization/deserialization as the protocol evolves.</p>
 
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#data-formats">Data Formats</a></li>
-<li><a href="#serialization">Serialization</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#data-formats">Data Formats</a></li>
+        <li><a href="#serialization">Serialization</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
   </aside>
 

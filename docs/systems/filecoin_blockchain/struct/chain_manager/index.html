@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4715,49 +4715,37 @@ https://github.com/alex-shpak/hugo-book
 </header>
 
       
-<article class="markdown">
-
-<p>The <em>Chain Manager</em> is a central component in the blockchain system. It tracks and updates competing subchains received by a given node in order to select the appropriate blockchain head: the latest block of the heaviest subchain it is aware of in the system.</p>
-
+<article class="markdown"><p>The <em>Chain Manager</em> is a central component in the blockchain system. It tracks and updates competing subchains received by a given node in order to select the appropriate blockchain head: the latest block of the heaviest subchain it is aware of in the system.</p>
 <p>In so doing, the <em>chain manager</em> is the central subsystem that handles bookkeeping for numerous other systems in a Filecoin node and exposes convenience methods for use by those systems, enabling systems to sample randomness from the chain for instance, or to see which block has been finalized most recently.</p>
-
 <p>The chain manager interfaces and functions are included here, but we expand on important details below for clarity.</p>
-
 <h1 id="chain-expansion">Chain Expansion</h1>
-
 <h2 id="incoming-block-reception">Incoming block reception</h2>
-
 <p>Once a block has been received and passes syntactic and semantic validation it must be added to the local datastore, regardless whether it is understood as the best tip at this point. Future blocks from other miners may be mined on top of it and in that case we will want to have it around to avoid refetching.</p>
-
-<div class="notices info" >To make certain validation checks simpler, blocks should be indexed by height and by parent set. That way sets of blocks with a given height and common parents may be quickly queried. It may also be useful to compute and cache the resultant aggregate state of blocks in these sets, this saves extra state computation when checking which state root to start a block at when it has multiple parents.</div>
-
+<!-- raw HTML omitted -->
 <p>Chain selection is a crucial component of how the Filecoin blockchain works. Every chain has an associated weight accounting for the number of blocks mined on it and so the power (storage) they track. It is always preferable to mine atop a heavier Tipset rather than a lighter one. While a miner may be foregoing block rewards earned in the past, this lighter chain is likely to be abandoned by other miners forfeiting any block reward earned as miners converge on a final chain. For more on this, see <a href="expected-consensus.md#chain-selection">chain selection</a> in the Expected Consensus spec.</p>
-
 <p>However, ahead of finality, a given subchain may be abandoned in order of another, heavier one mined in a given round. In order to rapidly adapt to this, the chain manager must maintain and update all subchains being considered up to finality.</p>
-
-<p>That is, for every incoming block, even if the incoming block is not added to the current heaviest tipset, the chain manager should add it to the appropriate subchain it is tracking, or keep track of it independently until either:
-- it is able to do so, through the reception of another block in that subchain
-- it is able to discard it, as that block was mined before finality</p>
-
+<p>That is, for every incoming block, even if the incoming block is not added to the current heaviest tipset, the chain manager should add it to the appropriate subchain it is tracking, or keep track of it independently until either:</p>
+<ul>
+<li>it is able to do so, through the reception of another block in that subchain</li>
+<li>it is able to discard it, as that block was mined before finality</li>
+</ul>
 <p>We give an example of how this could work in the block reception algorithm.</p>
-
 <h3 id="chaintipsmanager">ChainTipsManager</h3>
-
 <p>The Chain Tips Manager is a subcomponent of Filecoin consensus that is technically up to the implementer, but since the pseudocode in previous sections reference it, it is documented here for clarity.</p>
-
 <p>The Chain Tips Manager is responsible for tracking all live tips of the Filecoin blockchain, and tracking what the current &lsquo;best&rsquo; tipset is.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Returns the ticket that is at round &#39;r&#39; in the chain behind &#39;head&#39;
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">TicketFromRound</span><span class="p">(</span><span class="nx">head</span> <span class="nx">Tipset</span><span class="p">,</span> <span class="nx">r</span> <span class="nx">Round</span><span class="p">)</span> <span class="p">{}</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">TicketFromRound</span><span class="p">(</span><span class="nx">head</span> <span class="nx">Tipset</span><span class="p">,</span> <span class="nx">r</span> <span class="nx">Round</span><span class="p">)</span> <span class="p">{</span><span class="p">}</span>
 
 <span class="c1">// Returns the tipset that contains round r (Note: multiple rounds&#39; worth of tickets may exist within a single block due to losing tickets being added to the eventually successfully generated block)
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">TipsetFromRound</span><span class="p">(</span><span class="nx">head</span> <span class="nx">Tipset</span><span class="p">,</span> <span class="nx">r</span> <span class="nx">Round</span><span class="p">)</span> <span class="p">{}</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">TipsetFromRound</span><span class="p">(</span><span class="nx">head</span> <span class="nx">Tipset</span><span class="p">,</span> <span class="nx">r</span> <span class="nx">Round</span><span class="p">)</span> <span class="p">{</span><span class="p">}</span>
 
 <span class="c1">// GetBestTipset returns the best known tipset. If the &#39;best&#39; tipset hasn&#39;t changed, then this
-</span><span class="c1">// will return the previous best tipset.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">GetBestTipset</span><span class="p">()</span>
+</span><span class="c1"></span><span class="c1">// will return the previous best tipset.
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">GetBestTipset</span><span class="p">(</span><span class="p">)</span>
 
 <span class="c1">// Adds the losing ticket to the chaintips manager so that blocks can be mined on top of it
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">AddLosingTicket</span><span class="p">(</span><span class="nx">parent</span> <span class="nx">Tipset</span><span class="p">,</span> <span class="nx">t</span> <span class="nx">Ticket</span><span class="p">)</span></code></pre></div></article>
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">AddLosingTicket</span><span class="p">(</span><span class="nx">parent</span> <span class="nx">Tipset</span><span class="p">,</span> <span class="nx">t</span> <span class="nx">Ticket</span><span class="p">)</span>
+</code></pre></div></article>
 
       
 
@@ -4769,15 +4757,13 @@ https://github.com/alex-shpak/hugo-book
 
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
-<ul>
-<li><a href="#chain-expansion">Chain Expansion</a>
-<ul>
-<li><a href="#incoming-block-reception">Incoming block reception</a>
-<ul>
-<li><a href="#chaintipsmanager">ChainTipsManager</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#incoming-block-reception">Incoming block reception</a>
+      <ul>
+        <li><a href="#chaintipsmanager">ChainTipsManager</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
   </aside>
 

@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4736,7 +4736,6 @@ The Message Pool is a subsystem in the Filecoin blockchain system. The message p
 
 
 
-
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/go-address&#34;</span>
 <span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 
@@ -4756,7 +4755,7 @@ The Message Pool is a subsystem in the Filecoin blockchain system. The message p
 </span><span class="c1"></span>    <span class="c1">// - do we need to have some sort of purge?
 </span><span class="c1"></span>
     <span class="c1">// Stats returns information about the MessagePool contents.
-</span><span class="c1"></span>    <span class="nf">Stats</span><span class="p">()</span> <span class="nx">MessagePoolStats</span>
+</span><span class="c1"></span>    <span class="nf">Stats</span><span class="p">(</span><span class="p">)</span> <span class="nx">MessagePoolStats</span>
 
     <span class="c1">// FindMessage receives a descriptor query q, and returns a set of
 </span><span class="c1"></span>    <span class="c1">// messages currently in the mempool that match the Query constraints.
@@ -4783,7 +4782,7 @@ The Message Pool is a subsystem in the Filecoin blockchain system. The message p
 <span class="p">}</span>
 
 <span class="c1">// MessageQuery is a descriptor used to find messages matching one or more
-</span><span class="c1">// of the constraints specified.
+</span><span class="c1"></span><span class="c1">// of the constraints specified.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">MessageQuery</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="cm">/*
 </span><span class="cm">  From   base.Address
@@ -4805,25 +4804,19 @@ The Message Pool is a subsystem in the Filecoin blockchain system. The message p
 
 
 
-
 <p>Clients that use a message pool include:</p>
-
 <ul>
 <li>storage market provider and client nodes - for transmission of deals on chain</li>
 <li>storage miner nodes - for transmission of PoSts, sector commitments, deals, and other operations tracked on chain</li>
 <li>verifier nodes - for transmission of potential faults on chain</li>
 <li>relayer nodes - for forwarding and discarding messages appropriately.</li>
 </ul>
-
 <p>The message pool subsystem is made of two components:</p>
-
 <ul>
 <li>The <a href="../../../../#systems__filecoin_blockchain__message_pool__message_syncer">Message Syncer</a> &ndash; which receives and propagates messages.</li>
 <li><a href="../../../../#systems__filecoin_blockchain__message_pool__message_storage">Message Storage</a> &ndash; which caches messages according to a given policy.</li>
 </ul>
-
 <p>TODOs:</p>
-
 <ul>
 <li>discuss how messages are meant to propagate slowly/async</li>
 <li>explain algorithms for choosing profitable txns</li>
@@ -4837,6 +4830,10 @@ The Message Pool is a subsystem in the Filecoin blockchain system. The message p
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents"></nav>
+  </aside>
 
 
 

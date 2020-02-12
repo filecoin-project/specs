@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4715,82 +4715,53 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  
-
-<p>A Filecoin address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. This address encodes information about the network to which an actor belongs, the specific type of address encoding, the address payload itself, and a checksum. The goal of this format is to provide a robust address format that is both easy to use and resistant to errors.</p>
-
+  <p>A Filecoin address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. This address encodes information about the network to which an actor belongs, the specific type of address encoding, the address payload itself, and a checksum. The goal of this format is to provide a robust address format that is both easy to use and resistant to errors.</p>
 <p>Note that each <code>ActorAddress</code> in the protocol contains a unique <code>ActorID</code> given to it by the <code>InitActor</code>. Throughout the protocol, actors are referenced by their ID-addresses. ID-addresses are computable from IDs (using <code>makeIdAddress(id)</code>), and vice versa (using the <code>AddressMap</code> to go from addr to ID).</p>
-
 <p>Most actors have an alternative address which is not their key in the state tree, but is resolved to their ID-address during message processing.</p>
-
 <p>Accounts have a public key-based address (e.g. to receive funds), and non-singleton actors have a temporary reorg-proof address.</p>
-
 <p>An account actor&rsquo;s crypto-address (for signature verification) is found by looking up its actor state, keyed by the canonical ID-address. There is no map from ID-address to pubkey address.</p>
-
 <p>The reference implementation is <a href="https://github.com/filecoin-project/go-address">https://github.com/filecoin-project/go-address</a></p>
-
 <h1 id="design-criteria">Design criteria</h1>
-
 <ol>
 <li><strong>Identifiable</strong>: The address must be easily identifiable as a Filecoin address.</li>
 <li><strong>Reliable</strong>: Addresses must provide a mechanism for error detection when they might be transmitted outside the network.</li>
 <li><strong>Upgradable</strong>: Addresses must be versioned to permit the introduction of new address formats.</li>
 <li><strong>Compact</strong>: Given the above constraints, addresses must be as short as possible.</li>
 </ol>
-
 <h1 id="specification">Specification</h1>
-
 <p>There are 2 ways a filecoin address can be represented. An address appearing on chain will always be formatted as raw bytes. An address may also be encoded to a string, this encoding includes a checksum and network prefix. An address encoded as a string will never appear on chain, this format is used for sharing among humans.</p>
-
 <h2 id="bytes">Bytes</h2>
-
 <p>When represented as bytes a filecoin address contains the following:</p>
-
 <ul>
 <li>A <strong>protocol indicator</strong> byte that identifies the type and version of this address.</li>
-
-<li><p>The <strong>payload</strong> used to uniquely identify the actor according to the protocol.</p>
-
+<li>The <strong>payload</strong> used to uniquely identify the actor according to the protocol.</li>
+</ul>
 <pre><code>|----------|---------|
 | protocol | payload |
 |----------|---------|
 |  1 byte  | n bytes |
-</code></pre></li>
-</ul>
-
-<h2 id="string">String</h2>
-
+</code></pre><h2 id="string">String</h2>
 <p>When encoded to a string a filecoin address contains the following:</p>
-
 <ul>
 <li>A <strong>network prefix</strong> character that identifies the network the address belongs to.</li>
 <li>A <strong>protocol indicator</strong> byte that identifies the type and version of this address.</li>
 <li>A <strong>payload</strong> used to uniquely identify the actor according to the protocol.</li>
-
-<li><p>A <strong>checksum</strong> used to validate the address.</p>
-
+<li>A <strong>checksum</strong> used to validate the address.</li>
+</ul>
 <pre><code>|------------|----------|---------|----------|
 |  network   | protocol | payload | checksum |
 |------------|----------|---------|----------|
 | 'f' or 't' |  1 byte  | n bytes | 4 bytes  |
-</code></pre></li>
-</ul>
-
-<h2 id="network-prefix">Network Prefix</h2>
-
+</code></pre><h2 id="network-prefix">Network Prefix</h2>
 <p>The <strong>network prefix</strong> is prepended to an address when encoding to a string. The network prefix indicates which network an address belongs in. The network prefix may either be <code>f</code> for filecoin mainnet or <code>t</code> for filecoin testnet. It is worth noting that a network prefix will never appear on chain and is only used when encoding an address to a human readable format.</p>
-
 <h2 id="protocol-indicator">Protocol Indicator</h2>
-
 <p>The <strong>protocol indicator</strong> byte describes how a method should interpret the information in the payload field of an address. Any deviation for the algorithms and data types specified by the protocol must be assigned a new protocol number. In this way, protocols also act as versions.</p>
-
 <ul>
-<li><code>0</code> : ID</li>
+<li><code>0 </code> : ID</li>
 <li><code>1</code> : SECP256K1 Public Key</li>
 <li><code>2</code> : Actor</li>
 <li><code>3</code> : BLS Public Key</li>
 </ul>
-
 <p>An example description in golang:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Protocol byte
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">Protocol</span> <span class="p">=</span> <span class="kt">byte</span>
@@ -4800,114 +4771,76 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">SECP256K1</span>
     <span class="nx">Actor</span>
     <span class="nx">BLS</span>
-<span class="p">)</span></code></pre></div>
-<h3 id="protocol-0-ids">Protocol 0: IDs</h3>
-
+<span class="p">)</span>
+</code></pre></div><h3 id="protocol-0-ids">Protocol 0: IDs</h3>
 <p><strong>Protocol 0</strong> addresses are simple IDs.  All actors have a numeric ID even if they don&rsquo;t have public keys. The payload of an ID address is base10 encoded. IDs are not hashed and do not have a checksum.</p>
-
 <p><strong>Bytes</strong></p>
-
 <pre><code>|----------|---------------|
 | protocol |    payload    |
 |----------|---------------|
 |    0     | leb128-varint |
-</code></pre>
-
-<p><strong>String</strong></p>
-
+</code></pre><p><strong>String</strong></p>
 <pre><code>|------------|----------|---------------|
 |  network   | protocol |    payload    |
 |------------|----------|---------------|
 | 'f' or 't' |    '0'   | leb128-varint |
                   base10[...............]
-</code></pre>
-
-<h3 id="protocol-1-libsecpk1-elliptic-curve-public-keys">Protocol 1: libsecpk1 Elliptic Curve Public Keys</h3>
-
+</code></pre><h3 id="protocol-1-libsecpk1-elliptic-curve-public-keys">Protocol 1: libsecpk1 Elliptic Curve Public Keys</h3>
 <p><strong>Protocol 1</strong> addresses represent secp256k1 public encryption keys. The payload field contains the <a href="https://blake2.net/">Blake2b 160</a> hash of the public key.</p>
-
 <p><strong>Bytes</strong></p>
-
 <pre><code>|----------|---------------------|
 | protocol |        payload      |
 |----------|---------------------|
 |    1     | blake2b-160(PubKey) |
-</code></pre>
-
-<p><strong>String</strong></p>
-
+</code></pre><p><strong>String</strong></p>
 <pre><code>|------------|----------|---------------------|----------|
 |  network   | protocol |      payload        | checksum |
 |------------|----------|---------------------|----------|
 | 'f' or 't' |    '1'   | blake2b-160(PubKey) |  4 bytes |
                   base32[................................]
-</code></pre>
-
-<h3 id="protocol-2-actor">Protocol 2: Actor</h3>
-
+</code></pre><h3 id="protocol-2-actor">Protocol 2: Actor</h3>
 <p><strong>Protocol 2</strong> addresses representing an Actor. The payload field contains the SHA256 hash of meaningful data produced as a result of creating the actor.</p>
-
 <p><strong>Bytes</strong></p>
-
 <pre><code>|----------|---------------------|
 | protocol |        payload      |
 |----------|---------------------|
 |    2     |     SHA256(Random)      |
-</code></pre>
-
-<p><strong>String</strong></p>
-
+</code></pre><p><strong>String</strong></p>
 <pre><code>|------------|----------|-----------------------|----------|
 |  network   | protocol |         payload       | checksum |
 |------------|----------|-----------------------|----------|
 | 'f' or 't' |    '2'   |      SHA256(Random)      |  4 bytes |
                   base32[..................................]
-</code></pre>
-
-<h3 id="protocol-3-bls">Protocol 3: BLS</h3>
-
+</code></pre><h3 id="protocol-3-bls">Protocol 3: BLS</h3>
 <p><strong>Protocol 3</strong> addresses represent BLS public encryption keys. The payload field contains the BLS public key.</p>
-
 <p><strong>Bytes</strong></p>
-
 <pre><code>|----------|---------------------|
 | protocol |        payload      |
 |----------|---------------------|
 |    3     | 48 byte BLS PubKey  |
-</code></pre>
-
-<p><strong>String</strong></p>
-
+</code></pre><p><strong>String</strong></p>
 <pre><code>|------------|----------|---------------------|----------|
 |  network   | protocol |      payload        | checksum |
 |------------|----------|---------------------|----------|
 | 'f' or 't' |    '3'   |  48 byte BLS PubKey |  4 bytes |
                   base32[................................]
-</code></pre>
-
-<h2 id="payload">Payload</h2>
-
+</code></pre><h2 id="payload">Payload</h2>
 <p>The payload represents the data specified by the protocol. All payloads except the payload of the ID protocol are <a href="https://tools.ietf.org/html/rfc4648#section-6">base32</a> encoded using the lowercase alphabet when seralized to their human readable format.</p>
-
 <h2 id="checksum">Checksum</h2>
-
 <p>Filecoin checksums are calculated over the address protocol and payload using blake2b-4. Checksums are base32 encoded and only added to an address when encoding to a string. Addresses following the ID Protocol do not have a checksum.</p>
-
 <h2 id="expected-methods">Expected Methods</h2>
-
 <p>All implementations in Filecoin must have methods for creating, encoding, and decoding addresses in addition to checksum creation and validation. The follwing is a golang version of the Address Interface:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">New</span><span class="p">(</span><span class="nx">protocol</span> <span class="kt">byte</span><span class="p">,</span> <span class="nx">payload</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">Address</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">New</span><span class="p">(</span><span class="nx">protocol</span> <span class="kt">byte</span><span class="p">,</span> <span class="nx">payload</span> <span class="p">[</span><span class="p">]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">Address</span>
 
 <span class="kd">type</span> <span class="nx">Address</span> <span class="kd">interface</span> <span class="p">{</span>
     <span class="nf">Encode</span><span class="p">(</span><span class="nx">network</span> <span class="nx">Network</span><span class="p">,</span> <span class="nx">a</span> <span class="nx">Adress</span><span class="p">)</span> <span class="kt">string</span>
     <span class="nf">Decode</span><span class="p">(</span><span class="nx">s</span> <span class="kt">string</span><span class="p">)</span> <span class="nx">Address</span>
-    <span class="nf">Checksum</span><span class="p">(</span><span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span>
+    <span class="nf">Checksum</span><span class="p">(</span><span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="p">[</span><span class="p">]</span><span class="kt">byte</span>
     <span class="nf">ValidateChecksum</span><span class="p">(</span><span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span>
-<span class="p">}</span></code></pre></div>
-<h3 id="new">New()</h3>
-
+<span class="p">}</span>
+</code></pre></div><h3 id="new">New()</h3>
 <p>New returns an Address for the specified protocol encapsulating corresponding payload. New fails for unknown protocols.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">New</span><span class="p">(</span><span class="nx">protocol</span> <span class="kt">byte</span><span class="p">,</span> <span class="nx">payload</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">New</span><span class="p">(</span><span class="nx">protocol</span> <span class="kt">byte</span><span class="p">,</span> <span class="nx">payload</span> <span class="p">[</span><span class="p">]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">protocol</span> <span class="p">&lt;</span> <span class="nx">SECP256K1</span> <span class="o">||</span> <span class="nx">protocol</span> <span class="p">&gt;</span> <span class="nx">BLS</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrUnknownType</span><span class="p">)</span>
     <span class="p">}</span>
@@ -4915,17 +4848,14 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">Protocol</span><span class="p">:</span> <span class="nx">protocol</span><span class="p">,</span>
         <span class="nx">Payload</span><span class="p">:</span>  <span class="nx">payload</span><span class="p">,</span>
     <span class="p">}</span>
-<span class="p">}</span></code></pre></div>
-<h3 id="encode">Encode()</h3>
-
+<span class="p">}</span>
+</code></pre></div><h3 id="encode">Encode()</h3>
 <p>Software encoding a Filecoin address must:</p>
-
 <ul>
 <li>produce an address encoded to a known network</li>
 <li>produce an address encoded to a known protocol</li>
 <li>produce an address with a valid checksum (if applicable)</li>
 </ul>
-
 <p>Encodes an Address as a string, prepending the network prefix, calculating the checksum, and encoding the payload and checksum to <a href="https://tools.ietf.org/html/rfc4648">base32</a>.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Encode</span><span class="p">(</span><span class="nx">network</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">network</span> <span class="o">!=</span> <span class="s">&#34;f&#34;</span> <span class="o">&amp;&amp;</span> <span class="nx">network</span> <span class="o">!=</span> <span class="s">&#34;t&#34;</span> <span class="p">{</span>
@@ -4937,18 +4867,18 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">cksm</span> <span class="o">:=</span> <span class="nf">Checksum</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
         <span class="k">return</span> <span class="nx">network</span> <span class="o">+</span> <span class="nb">string</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Protocol</span><span class="p">)</span> <span class="o">+</span> <span class="nx">base32</span><span class="p">.</span><span class="nf">Encode</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Payload</span><span class="o">+</span><span class="nx">cksm</span><span class="p">)</span>
     <span class="k">case</span> <span class="nx">ID</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nx">network</span> <span class="o">+</span> <span class="nb">string</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Protocol</span><span class="p">)</span> <span class="o">+</span> <span class="nx">base10</span><span class="p">.</span><span class="nf">Encode</span><span class="p">(</span><span class="nx">leb128</span><span class="p">.</span><span class="nf">Decode</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Payload</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nx">network</span> <span class="o">+</span> <span class="nb">string</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Protocol</span><span class="p">)</span> <span class="o">+</span> <span class="nx">base10</span><span class="p">.</span><span class="nf">Encode</span><span class="p">(</span><span class="nx">leb128</span><span class="p">.</span><span class="nf">Decode</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Payload</span><span class="p">)</span><span class="p">)</span>
     <span class="k">default</span><span class="p">:</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;invalid address protocol&#34;</span><span class="p">)</span>
     <span class="p">}</span>
-<span class="p">}</span></code></pre></div>
-<h3 id="decode">Decode()</h3>
-
-<p>Software decoding a Filecoin address must:
-* verify the network is a known network.
-* verify the protocol is a number of a known protocol.
-* verify the checksum is valid</p>
-
+<span class="p">}</span>
+</code></pre></div><h3 id="decode">Decode()</h3>
+<p>Software decoding a Filecoin address must:</p>
+<ul>
+<li>verify the network is a known network.</li>
+<li>verify the protocol is a number of a known protocol.</li>
+<li>verify the checksum is valid</li>
+</ul>
 <p>Decode an Address from a string by removing the network prefix, validating the address is of a know protocol, decoding the payload and checksum, and validating the checksum.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Decode</span><span class="p">(</span><span class="nx">a</span> <span class="kt">string</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span> <span class="p">&lt;</span> <span class="mi">3</span> <span class="p">{</span>
@@ -4960,23 +4890,23 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
 
     <span class="nx">protocol</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="nx">raw</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+    <span class="nx">raw</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="p">]</span>
     <span class="k">if</span> <span class="nx">protocol</span> <span class="o">==</span> <span class="nx">ID</span> <span class="p">{</span>
         <span class="k">return</span> <span class="nx">Address</span><span class="p">{</span>
             <span class="nx">Protocol</span><span class="p">:</span> <span class="nx">protocol</span><span class="p">,</span>
-            <span class="nx">Payload</span><span class="p">:</span>  <span class="nx">leb128</span><span class="p">.</span><span class="nf">Encode</span><span class="p">(</span><span class="nx">base10</span><span class="p">.</span><span class="nf">Decode</span><span class="p">(</span><span class="nx">raw</span><span class="p">)),</span>
+            <span class="nx">Payload</span><span class="p">:</span>  <span class="nx">leb128</span><span class="p">.</span><span class="nf">Encode</span><span class="p">(</span><span class="nx">base10</span><span class="p">.</span><span class="nf">Decode</span><span class="p">(</span><span class="nx">raw</span><span class="p">)</span><span class="p">)</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">}</span>
 
     <span class="nx">raw</span> <span class="p">=</span> <span class="nx">base32</span><span class="p">.</span><span class="nf">Decode</span><span class="p">(</span><span class="nx">raw</span><span class="p">)</span>
-    <span class="nx">payload</span> <span class="p">=</span> <span class="nx">raw</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="nx">raw</span><span class="p">)</span><span class="o">-</span><span class="nx">CksmLen</span><span class="p">]</span>
+    <span class="nx">payload</span> <span class="p">=</span> <span class="nx">raw</span><span class="p">[</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="nx">raw</span><span class="p">)</span><span class="o">-</span><span class="nx">CksmLen</span><span class="p">]</span>
     <span class="k">if</span> <span class="nx">protocol</span> <span class="o">==</span> <span class="nx">SECP256K1</span> <span class="o">||</span> <span class="nx">protocol</span> <span class="o">==</span> <span class="nx">Actor</span> <span class="p">{</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">payload</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">20</span> <span class="p">{</span>
             <span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrInvalidBytes</span><span class="p">)</span>
         <span class="p">}</span>
     <span class="p">}</span>
 
-    <span class="nx">cksm</span> <span class="o">:=</span> <span class="nx">payload</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="nx">payload</span><span class="p">)</span><span class="o">-</span><span class="nx">CksmLen</span><span class="p">:]</span>
+    <span class="nx">cksm</span> <span class="o">:=</span> <span class="nx">payload</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="nx">payload</span><span class="p">)</span><span class="o">-</span><span class="nx">CksmLen</span><span class="p">:</span><span class="p">]</span>
     <span class="k">if</span> <span class="p">!</span><span class="nf">ValidateChecksum</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">cksm</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrInvalidChecksum</span><span class="p">)</span>
     <span class="p">}</span>
@@ -4985,36 +4915,30 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">Protocol</span><span class="p">:</span> <span class="nx">protocol</span><span class="p">,</span>
         <span class="nx">Payload</span><span class="p">:</span>  <span class="nx">payload</span><span class="p">,</span>
     <span class="p">}</span>
-<span class="p">}</span></code></pre></div>
-<h3 id="checksum-1">Checksum()</h3>
-
+<span class="p">}</span>
+</code></pre></div><h3 id="checksum-1">Checksum()</h3>
 <p>Checksum produces a byte array by taking the blake2b-4 hash of an address protocol and payload.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Checksum</span><span class="p">(</span><span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="kt">byte</span> <span class="p">{</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go">
+<span class="kd">func</span> <span class="nf">Checksum</span><span class="p">(</span><span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="kt">byte</span> <span class="p">{</span>
     <span class="nf">blake2b4</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Protocol</span> <span class="o">+</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Payload</span><span class="p">)</span>
-<span class="p">}</span></code></pre></div>
-<h3 id="validatechecksum">ValidateChecksum()</h3>
-
+<span class="p">}</span>
+</code></pre></div><h3 id="validatechecksum">ValidateChecksum()</h3>
 <p>ValidateChecksum returns true if the Checksum of data matches the expected checksum.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ValidateChecksum</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">expected</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ValidateChecksum</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">expected</span> <span class="p">[</span><span class="p">]</span><span class="kt">byte</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="nx">digest</span> <span class="o">:=</span> <span class="nf">Checksum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
     <span class="k">return</span> <span class="nx">digest</span> <span class="o">==</span> <span class="nx">expected</span>
-<span class="p">}</span></code></pre></div>
-<h1 id="test-vectors">Test Vectors</h1>
-
+<span class="p">}</span>
+</code></pre></div><h1 id="test-vectors">Test Vectors</h1>
 <p>These are a set of test vectors that can be used to test an implementation of
 this address spec. Test vectors are presented as newline-delimited address/hex
 fields. The &lsquo;address&rsquo; field, when parsed, should produce raw bytes that match
 the corresponding item in the &lsquo;hex&rsquo; field. For example:</p>
-
 <pre><code>address1
 hex1
 
 address2
 hex2
-</code></pre>
-
-<h2 id="id-type-addresses">ID Type Addresses</h2>
-
+</code></pre><h2 id="id-type-addresses">ID Type Addresses</h2>
 <pre><code>f00
 0000
 
@@ -5029,10 +4953,7 @@ f01729
 
 f018446744073709551615
 00ffffffffffffffffff01
-</code></pre>
-
-<h2 id="secp256k1-type-addresses">Secp256k1 Type Addresses</h2>
-
+</code></pre><h2 id="secp256k1-type-addresses">Secp256k1 Type Addresses</h2>
 <pre><code>f17uoq6tp427uzv7fztkbsnn64iwotfrristwpryy
 01fd1d0f4dfcd7e99afcb99a8326b7dc459d32c628
 
@@ -5047,10 +4968,7 @@ f1wbxhu3ypkuo6eyp6hjx6davuelxaxrvwb2kuwva
 
 f12fiakbhe2gwd5cnmrenekasyn6v5tnaxaqizq6a
 01d1500504e4d1ac3e89ac891a4502586fabd9b417
-</code></pre>
-
-<h2 id="actor-type-addresses">Actor Type Addresses</h2>
-
+</code></pre><h2 id="actor-type-addresses">Actor Type Addresses</h2>
 <pre><code>f24vg6ut43yw2h2jqydgbg2xq7x6f4kub3bg6as6i
 02e54dea4f9bc5b47d261819826d5e1fbf8bc5503b
 
@@ -5065,13 +4983,9 @@ f24dd4ox4c2vpf5vk5wkadgyyn6qtuvgcpxxon64a
 
 f2gfvuyh7v2sx3patm5k23wdzmhyhtmqctasbr23y
 02316b4c1ff5d4afb7826ceab5bb0f2c3e0f364053
-</code></pre>
-
-<h2 id="bls-type-addresses">BLS Type Addresses</h2>
-
+</code></pre><h2 id="bls-type-addresses">BLS Type Addresses</h2>
 <p>To aid in readability, these addresses are line-wrapped. Address and hex pairs
 are separated by <code>---</code>.</p>
-
 <pre><code>f3vvmn62lofvhjd2ugzca6sof2j2ubwok6cj4xxbfzz
 4yuxfkgobpihhd2thlanmsh3w2ptld2gqkn2jvlss4a
 ---
@@ -5107,7 +5021,6 @@ xzg5tcaqwbyfabxetwtj4tsam3pbhnwghyhijr5mixa
 d28712965e5f26ecc40858382803724ed34f2720336
 f09db631f074
 </code></pre>
-
 </article>
 
       
@@ -5120,39 +5033,37 @@ f09db631f074
 
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
-<ul>
-<li><a href="#design-criteria">Design criteria</a></li>
-<li><a href="#specification">Specification</a>
-<ul>
-<li><a href="#bytes">Bytes</a></li>
-<li><a href="#string">String</a></li>
-<li><a href="#network-prefix">Network Prefix</a></li>
-<li><a href="#protocol-indicator">Protocol Indicator</a>
-<ul>
-<li><a href="#protocol-0-ids">Protocol 0: IDs</a></li>
-<li><a href="#protocol-1-libsecpk1-elliptic-curve-public-keys">Protocol 1: libsecpk1 Elliptic Curve Public Keys</a></li>
-<li><a href="#protocol-2-actor">Protocol 2: Actor</a></li>
-<li><a href="#protocol-3-bls">Protocol 3: BLS</a></li>
-</ul></li>
-<li><a href="#payload">Payload</a></li>
-<li><a href="#checksum">Checksum</a></li>
-<li><a href="#expected-methods">Expected Methods</a>
-<ul>
-<li><a href="#new">New()</a></li>
-<li><a href="#encode">Encode()</a></li>
-<li><a href="#decode">Decode()</a></li>
-<li><a href="#checksum-1">Checksum()</a></li>
-<li><a href="#validatechecksum">ValidateChecksum()</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#test-vectors">Test Vectors</a>
-<ul>
-<li><a href="#id-type-addresses">ID Type Addresses</a></li>
-<li><a href="#secp256k1-type-addresses">Secp256k1 Type Addresses</a></li>
-<li><a href="#actor-type-addresses">Actor Type Addresses</a></li>
-<li><a href="#bls-type-addresses">BLS Type Addresses</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#bytes">Bytes</a></li>
+    <li><a href="#string">String</a></li>
+    <li><a href="#network-prefix">Network Prefix</a></li>
+    <li><a href="#protocol-indicator">Protocol Indicator</a>
+      <ul>
+        <li><a href="#protocol-0-ids">Protocol 0: IDs</a></li>
+        <li><a href="#protocol-1-libsecpk1-elliptic-curve-public-keys">Protocol 1: libsecpk1 Elliptic Curve Public Keys</a></li>
+        <li><a href="#protocol-2-actor">Protocol 2: Actor</a></li>
+        <li><a href="#protocol-3-bls">Protocol 3: BLS</a></li>
+      </ul>
+    </li>
+    <li><a href="#payload">Payload</a></li>
+    <li><a href="#checksum">Checksum</a></li>
+    <li><a href="#expected-methods">Expected Methods</a>
+      <ul>
+        <li><a href="#new">New()</a></li>
+        <li><a href="#encode">Encode()</a></li>
+        <li><a href="#decode">Decode()</a></li>
+        <li><a href="#checksum-1">Checksum()</a></li>
+        <li><a href="#validatechecksum">ValidateChecksum()</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#id-type-addresses">ID Type Addresses</a></li>
+    <li><a href="#secp256k1-type-addresses">Secp256k1 Type Addresses</a></li>
+    <li><a href="#actor-type-addresses">Actor Type Addresses</a></li>
+    <li><a href="#bls-type-addresses">BLS Type Addresses</a></li>
+  </ul>
 </nav>
   </aside>
 

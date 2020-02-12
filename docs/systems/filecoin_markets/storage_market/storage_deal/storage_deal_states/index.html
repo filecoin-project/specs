@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4716,41 +4716,33 @@ https://github.com/alex-shpak/hugo-book
       
 <article class="markdown">
   <p>All on-chain economic activities in Filecoin start with the deal. This section aims to explain different states of a deal and their relationship with other concepts in the protocol such as Power, Payment, and Collaterals.</p>
-
 <p>A deal has the following states:</p>
-
 <ul>
 <li><code>Unpublished</code>: the deal has yet to be posted on chain.</li>
 <li><code>Published</code>: the deal has been published and accepted by the chain but is not yet active as the sector containing the deal has not been proven.</li>
 <li><code>Active</code>: the deal has been proven and not yet expired.</li>
 <li><code>Deleted</code>: the deal has expired or the sector containing the deal has been terminated because of faults.</li>
 </ul>
-
 <p>Note that <code>Unpublished</code> and <code>Deleted</code> states not tracked on chain. To reduce on-chain footprint, an <code>OnChainDeal</code> struct is created when a deal is published and it keeps track of a <code>LastPaymentEpoch</code> which defaults to -1 when a deal is in the <code>Published</code> state. A deal transitions into the <code>Active</code> state when <code>LastPaymentEpoch</code> is positive.</p>
-
 <p>The following describes how a deal transitions between its different states.</p>
-
 <ul>
 <li><code>Unpublished -&gt; Published</code>: this is triggered by <code>StorageMarketActor.PublishStorageDeals</code> which validates new storage deals, locks necessary funds, generates deal IDs, and registers the storage deals in <code>StorageMarketActor</code>.</li>
 <li><code>Published -&gt; Deleted</code>: this is triggered by <code>StorageMinerActor.ProveCommitSector</code> during InteractivePoRep when the elapsed number of epochs between PreCommit and ProveCommit messages exceeds <code>MAX_PROVE_COMMIT_SECTOR_EPOCH</code>. ProveCommitSector will also trigger garbage collection on the list of published storage deals.</li>
 <li><code>Published -&gt; Active</code>: this is triggered by <code>ActivateStorageDeals</code> after successful <code>StorageMinerActor.ProveCommitSector</code>. It is okay for the StorageDeal to have already started (i.e. for <code>StartEpoch</code> to have passed) at this point but it must not have expired.</li>
 <li><code>Active -&gt; Deleted</code>: this can happen under the following conditions:
-
 <ul>
 <li>The deal itself has expired. This is triggered by <code>StorageMinerActorCode._submitPowerReport</code> which is called whenever a PoSt is submitted. Power associated with the deal will be lost, collaterals returned, and all remaining storage fees unlocked (allowing miners to call <code>WithdrawBalance</code> successfully).</li>
 <li>The sector containing the deal has expired. This is triggered by <code>StorageMinerActorCode._submitPowerReport</code> which is called whenver a PoSt is submitted. Power associated with the deals in the sector will be lost, collaterals returned, and all remaining storage fees unlocked.</li>
 <li>The sector containing the active deal has been terminated. This is triggered by <code>StorageMinerActor._submitFaultReport</code> for <code>TerminatedFaults</code>. No storage deal collateral will be slashed on fault declaration or detection, only on termination. A terminated fault is triggered when a sector is in the <code>Failing</code> state for <code>MAX_CONSECUTIVE_FAULTS</code> consecutive proving periods.</li>
-</ul></li>
 </ul>
-
+</li>
+</ul>
 <p>Given deal states and their transitions, the following are the relationships between deal states and other economic states and activities in the protocol.</p>
-
 <ul>
 <li><code>Power</code>: only payload data in an Active storage deal counts towards power.</li>
 <li><code>Deal Payment</code>: happens on <code>_onSuccessfulPoSt</code> and at deal/sector expiration through <code>_submitPowerReport</code>, paying out <code>StoragePricePerEpoch</code> for each epoch since the last PoSt.</li>
 <li><code>Deal Collateral</code>: no storage deal collateral will be slashed for <code>NewDeclaredFaults</code> and <code>NewDetectedFaults</code> but instead some pledge collateral will be slashed given these faults&rsquo; impact on consensus power. In the event of <code>NewTerminatedFaults</code>, all storage deal collateral and some pledge collateral will be slashed. Provider and client storage deal collaterals will be returned when a deal or a sector has expired. If a sector recovers from <code>Failing</code> within the <code>MAX_CONSECUTIVE_FAULTS</code> threshold, deals in that sector are still considered active. However, miners may need to top up pledge collateral when they try to <code>RecoverFaults</code> given the earlier slashing.</li>
 </ul>
-
 
 
 
@@ -4789,6 +4781,10 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents"></nav>
+  </aside>
 
 
 

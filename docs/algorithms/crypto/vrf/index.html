@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4716,7 +4716,6 @@ https://github.com/alex-shpak/hugo-book
       
 <article class="markdown">
   <div id="algorithms__crypto__vrf__vrf"></div>
-
 <p>Filecoin uses the notion of a <a href="https://people.csail.mit.edu/silvio/Selected%20Scientific%20Papers/Pseudo%20Randomness/Verifiable_Random_Functions.pdf">Verifiable Random
 Function</a>
 (VRF). A VRF uses a private key to produce a digest of
@@ -4725,19 +4724,14 @@ Any third party in possession of the corresponding public key, the message and
 the VRF output can verify if the digest has been computed correctly and from the
 correct signer. Using a VRF in the ticket generation process allows anyone to
 verify if a block comes from an eligible block producer (see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Ticket Generation</a> for more details).</p>
-
 <p>BLS signature can be used as the basis to construct a VRF. Filecoin transforms
 the BLS signature scheme it uses (see <a href="../../../../#algorithms__crypto__signatures">Signatures</a> into a
 VRF, Filecoin uses the random oracle model and deterministically hash the
 signature to produce the final digest. Filecoin uses
 SHA256 as the hash function. The algorithm is the following:</p>
-
 <pre><code>VRFOutput = SHA256(DST || index || Serialization(BLSSignature(message)))
-</code></pre>
-
-<p>where <code>DST</code> is a domain separation tag in order to treat the hash
+</code></pre><p>where <code>DST</code> is a domain separation tag in order to treat the hash
 function as an independent random oracle in the VRF output (see <a href="../../../../#algorithms__crypto__randomness">Randomness</a>).</p>
-
 <p>
 
 
@@ -4761,7 +4755,7 @@ function as an independent random oracle in the VRF output (see <a href="../../.
 <span class="kd">type</span> <span class="nx">VRFSecretKey</span> <span class="nx">SecretKey</span>
 
 <span class="c1">// VRFKeyPair holds the private key and respectively the public key to create 
-</span><span class="c1">// and respectively verify a VRF output.
+</span><span class="c1"></span><span class="c1">// and respectively verify a VRF output.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">VRFKeyPair</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">VRFPublicKey</span>
     <span class="nx">VRFSecretKey</span>
@@ -4773,8 +4767,8 @@ function as an independent random oracle in the VRF output (see <a href="../../.
 
 <span class="kd">type</span> <span class="nx">VRFResult</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Output</span>            <span class="nx">Bytes</span>  <span class="c1">// @(internal)
-</span><span class="c1"></span>    <span class="nf">MaxValue</span><span class="p">()</span>        <span class="nx">Bytes</span>
-    <span class="nf">ValidateSyntax</span><span class="p">()</span>  <span class="kt">bool</span>
+</span><span class="c1"></span>    <span class="nf">MaxValue</span><span class="p">(</span><span class="p">)</span>        <span class="nx">Bytes</span>
+    <span class="nf">ValidateSyntax</span><span class="p">(</span><span class="p">)</span>  <span class="kt">bool</span>
 
     <span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span> <span class="nx">Bytes</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">VRFPublicKey</span><span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
@@ -4807,7 +4801,7 @@ function as an independent random oracle in the VRF output (see <a href="../../.
 
 <span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">VRFResult_I</span><span class="p">)</span> <span class="nf">ValidateSyntax</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">VRFResult_I</span><span class="p">)</span> <span class="nf">ValidateSyntax</span><span class="p">(</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
     <span class="k">return</span> <span class="kc">false</span>
 <span class="p">}</span>
@@ -4817,7 +4811,7 @@ function as an independent random oracle in the VRF output (see <a href="../../.
 </span><span class="c1"></span>    <span class="k">return</span> <span class="kc">false</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">VRFResult_I</span><span class="p">)</span> <span class="nf">MaxValue</span><span class="p">()</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">VRFResult_I</span><span class="p">)</span> <span class="nf">MaxValue</span><span class="p">(</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
     <span class="c1">// return new(BLS).MaxSigValue()
 </span><span class="c1"></span><span class="p">}</span>
@@ -4846,6 +4840,10 @@ function as an independent random oracle in the VRF output (see <a href="../../.
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents"></nav>
+  </aside>
 
 
 

@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4763,7 +4763,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">InitActorState</span><span class="p">)</span> <span class="nf">ResolveAddress</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
     <span class="nx">actorID</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">AddressMap</span><span class="p">[</span><span class="nx">address</span><span class="p">]</span>
     <span class="k">if</span> <span class="nx">ok</span> <span class="p">{</span>
-        <span class="nx">idAddr</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">NewIDAddress</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">actorID</span><span class="p">))</span>
+        <span class="nx">idAddr</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">NewIDAddress</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">actorID</span><span class="p">)</span><span class="p">)</span>
         <span class="nx">autil</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
         <span class="k">return</span> <span class="nx">idAddr</span>
     <span class="p">}</span>
@@ -4774,33 +4774,33 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">actorID</span> <span class="o">:=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">NextID</span>
     <span class="nx">s</span><span class="p">.</span><span class="nx">NextID</span><span class="o">++</span>
     <span class="nx">s</span><span class="p">.</span><span class="nx">AddressMap</span><span class="p">[</span><span class="nx">address</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actorID</span>
-    <span class="nx">idAddr</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">NewIDAddress</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">actorID</span><span class="p">))</span>
+    <span class="nx">idAddr</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">NewIDAddress</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">actorID</span><span class="p">)</span><span class="p">)</span>
     <span class="nx">autil</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
     <span class="k">return</span> <span class="nx">idAddr</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">InitActorState</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">InitActorState</span><span class="p">)</span> <span class="nf">CID</span><span class="p">(</span><span class="p">)</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span> <span class="p">{</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">InitActor</span> <span class="kd">struct</span><span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">InitActor</span> <span class="kd">struct</span><span class="p">{</span><span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActor</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
     <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
-    <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
+    <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">(</span><span class="p">)</span>
     <span class="nx">st</span> <span class="o">:=</span> <span class="nx">InitActorState</span><span class="p">{</span>
-        <span class="nx">AddressMap</span><span class="p">:</span>  <span class="kd">map</span><span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">{},</span> <span class="c1">// TODO: HAMT
-</span><span class="c1"></span>        <span class="nx">NextID</span><span class="p">:</span>      <span class="nx">abi</span><span class="p">.</span><span class="nf">ActorID</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">FirstNonSingletonActorId</span><span class="p">),</span>
-        <span class="nx">NetworkName</span><span class="p">:</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">NetworkName</span><span class="p">(),</span>
+        <span class="nx">AddressMap</span><span class="p">:</span>  <span class="kd">map</span><span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">{</span><span class="p">}</span><span class="p">,</span> <span class="c1">// TODO: HAMT
+</span><span class="c1"></span>        <span class="nx">NextID</span><span class="p">:</span>      <span class="nx">abi</span><span class="p">.</span><span class="nf">ActorID</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">FirstNonSingletonActorId</span><span class="p">)</span><span class="p">,</span>
+        <span class="nx">NetworkName</span><span class="p">:</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">NetworkName</span><span class="p">(</span><span class="p">)</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
     <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReturn</span><span class="p">(</span><span class="kc">nil</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActor</span><span class="p">)</span> <span class="nf">Exec</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">execCodeID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">,</span> <span class="nx">constructorParams</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
-    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAny</span><span class="p">()</span>
-    <span class="nx">callerCodeID</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">GetActorCodeID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">())</span>
-    <span class="nf">AssertMsg</span><span class="p">(</span><span class="nx">ok</span><span class="p">,</span> <span class="s">&#34;no code for actor at %s&#34;</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">())</span>
+    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAny</span><span class="p">(</span><span class="p">)</span>
+    <span class="nx">callerCodeID</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">GetActorCodeID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
+    <span class="nf">AssertMsg</span><span class="p">(</span><span class="nx">ok</span><span class="p">,</span> <span class="s">&#34;no code for actor at %s&#34;</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nf">_codeIDSupportsExec</span><span class="p">(</span><span class="nx">callerCodeID</span><span class="p">,</span> <span class="nx">execCodeID</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;Caller type cannot create an actor of requested type&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -4809,7 +4809,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// This address exists for use by messages coming from outside the system, in order to
 </span><span class="c1"></span>    <span class="c1">// stably address the newly created actor even if a chain re-org causes it to end up with
 </span><span class="c1"></span>    <span class="c1">// a different ID.
-</span><span class="c1"></span>    <span class="nx">newAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">NewActorAddress</span><span class="p">()</span>
+</span><span class="c1"></span>    <span class="nx">newAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">NewActorAddress</span><span class="p">(</span><span class="p">)</span>
 
     <span class="c1">// Allocate an ID for this actor.
 </span><span class="c1"></span>    <span class="c1">// Store mapping of pubkey or actor address to actor ID
@@ -4826,23 +4826,23 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">To</span><span class="p">:</span>     <span class="nx">idAddr</span><span class="p">,</span>
         <span class="nx">Method</span><span class="p">:</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">MethodConstructor</span><span class="p">,</span>
         <span class="nx">Params</span><span class="p">:</span> <span class="nx">constructorParams</span><span class="p">,</span>
-        <span class="nx">Value</span><span class="p">:</span>  <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReceived</span><span class="p">(),</span>
-    <span class="p">})</span>
+        <span class="nx">Value</span><span class="p">:</span>  <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReceived</span><span class="p">(</span><span class="p">)</span><span class="p">,</span>
+    <span class="p">}</span><span class="p">)</span>
 
     <span class="kd">var</span> <span class="nx">addrBuf</span> <span class="nx">bytes</span><span class="p">.</span><span class="nx">Buffer</span>
     <span class="nx">err</span> <span class="o">:=</span> <span class="nx">idAddr</span><span class="p">.</span><span class="nf">MarshalCBOR</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">addrBuf</span><span class="p">)</span>
     <span class="nx">autil</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReturn</span><span class="p">(</span><span class="nx">addrBuf</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">())</span>
+    <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReturn</span><span class="p">(</span><span class="nx">addrBuf</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">// This method is disabled until proven necessary.
-</span><span class="c1">//func (a *InitActorCode_I) GetActorIDForAddress(rt Runtime, address addr.Address) InvocOutput {
-</span><span class="c1">//    h, st := _loadState(rt)
-</span><span class="c1">//    actorID := st.AddressMap[address]
-</span><span class="c1">//    Release(rt, h, st)
-</span><span class="c1">//    return rt.ValueReturn(Bytes(addr.Serialize_ActorID(actorID)))
-</span><span class="c1">//}
+</span><span class="c1"></span><span class="c1">//func (a *InitActorCode_I) GetActorIDForAddress(rt Runtime, address addr.Address) InvocOutput {
+</span><span class="c1"></span><span class="c1">//    h, st := _loadState(rt)
+</span><span class="c1"></span><span class="c1">//    actorID := st.AddressMap[address]
+</span><span class="c1"></span><span class="c1">//    Release(rt, h, st)
+</span><span class="c1"></span><span class="c1">//    return rt.ValueReturn(Bytes(addr.Serialize_ActorID(actorID)))
+</span><span class="c1"></span><span class="c1">//}
 </span><span class="c1"></span>
 <span class="kd">func</span> <span class="nf">_codeIDSupportsExec</span><span class="p">(</span><span class="nx">callerCodeID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">,</span> <span class="nx">execCodeID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">execCodeID</span> <span class="o">==</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">AccountActorCodeID</span> <span class="p">{</span>
@@ -4867,8 +4867,8 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">///// Boilerplate /////
 </span><span class="c1"></span>
 <span class="kd">func</span> <span class="nf">_loadState</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">InitActorState</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
-    <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">cid</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">())</span>
+    <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">(</span><span class="p">)</span>
+    <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">cid</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
     <span class="kd">var</span> <span class="nx">state</span> <span class="nx">InitActorState</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nx">stateCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">state</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;state not found&#34;</span><span class="p">)</span>
@@ -4877,12 +4877,12 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">h</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">st</span> <span class="nx">InitActorState</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">checkCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">st</span><span class="p">))</span>
+    <span class="nx">checkCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">st</span><span class="p">)</span><span class="p">)</span>
     <span class="nx">h</span><span class="p">.</span><span class="nf">Release</span><span class="p">(</span><span class="nx">checkCID</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">h</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">st</span> <span class="nx">InitActorState</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">newCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">st</span><span class="p">))</span>
+    <span class="nx">newCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">st</span><span class="p">)</span><span class="p">)</span>
     <span class="nx">h</span><span class="p">.</span><span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">newCID</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -4901,6 +4901,10 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents"></nav>
+  </aside>
 
 
 

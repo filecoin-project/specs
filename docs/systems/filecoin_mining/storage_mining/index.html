@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4715,47 +4715,31 @@ https://github.com/alex-shpak/hugo-book
 </header>
 
       
-<article class="markdown">
-
-<div id="systems__filecoin_mining__storage_mining__storage_mining_subsystem"></div>
-
+<article class="markdown"><div id="systems__filecoin_mining__storage_mining__storage_mining_subsystem"></div>
 <h1 id="filecoin-storage-mining-subsystem">Filecoin Storage Mining Subsystem</h1>
-
 <p>The Filecoin Storage Mining Subsystem ensures a storage miner can effectively commit storage to the Filecoin protocol in order to both:</p>
-
 <ul>
 <li>participate in the Filecoin <a href="../../../../#systems__filecoin_markets__storage_market___index">Storage Market</a> by taking on client data and participating in storage deals.</li>
 <li>participate in Filecoin <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus___index">Storage Power Consensus</a>, verifying and generating blocks to grow the Filecoin blockchain and earning block rewards and fees for doing so.</li>
 </ul>
-
 <p>The above involves a number of steps to putting on and maintaining online storage, such as:</p>
-
 <ul>
 <li>Committing new storage (see Sealing and PoRep)</li>
 <li>Continously proving storage (see <a href="../../../../#algorithms__post__election_post">Election PoSt</a>)</li>
 <li>Declaring storage faults and recovering from them.</li>
 </ul>
-
 <h2 id="sector-types">Sector Types</h2>
-
 <p>There are two types of sectors, Regular Sectors with storage deals in them and Committed Capacity (CC) Sectors with no deals. All sectors require an expiration epoch that is declared upon PreCommit and sectors are assigned a StartEpoch at ProveCommit. Start and Expiration epoch collectively define the lifetime of a Sector. Length and size of active deals in a sector&rsquo;s lifetime determine the <code>DealWeight</code> of the sector. <code>SectorSize</code>, <code>Duration</code>, and <code>DealWeight</code> statically determine the power assigned to a sector that will remain constant throughout its lifetime. More details on cost and reward for different sector types will be announced soon.</p>
-
 <h2 id="sector-states">Sector States</h2>
-
 <p>When managing their storage <a href="../../../../#systems__filecoin_mining__sector___index">sectors</a>  as part of Filecoin mining, storage providers will account for where in the <a href="../../../../#systems__filecoin_mining__storage_mining__mining_cycle">Storage Mining Cycle</a> their sectors are. For instance, has a sector been committed? Does it need a new PoSt? Most of these operations happen as part of cycles of chain epochs called <code>Proving Period</code>s each of which yield high confidence that every miner in the chain has proven their power (see <a href="../../../../#algorithms__post__election_post">Election PoSt</a>).</p>
-
 <p>There are three states that an individual sector can be in:</p>
-
 <ul>
 <li><code>PreCommit</code> when a sector has been added through a PreCommit message.</li>
 <li><code>Active</code> when a sector has been proven through a ProveCommit message and when a sector&rsquo;s TemporaryFault period has ended.</li>
 <li><code>TemporaryFault</code> when a miner declares fault on a particular sector.</li>
 </ul>
-
 <p>Sectors enter <code>Active</code> from <code>PreCommit</code> through a ProveCommit message that serves as the first proof for the sector. PreCommit requires a PreCommit deposit which will be returned upon successful and timely ProveCommit. However, if there is no matching ProveCommit for a particular PreCommit message, the deposit will be burned at PreCommit expiration.</p>
-
 <p>A particular sector enters <code>TemporaryFault</code> from <code>Active</code> through <code>DeclareTemporaryFault</code> with a specified period. Power associated with the sector will be lost immediately and miner needs to pay a <code>TemporaryFaultFee</code> determined by the power suspended and the duration of suspension. At the end of the declared duration, faulted sectors automatically regain power and enter <code>Active</code>. Miners are expected to prove over this recovered sector. Failure to do so may result in failing ElectionPoSt or <code>DetectedFault</code> from failing SurprisePoSt.</p>
-
 
 
 
@@ -4796,7 +4780,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
 <div class="diagram">
 
 <span class="diagram-title">Sector State Machine Legend</span>
@@ -4813,23 +4796,16 @@ https://github.com/alex-shpak/hugo-book
 
 </div>
 
-
 <h3 id="miner-post-state">Miner PoSt State</h3>
-
 <p><code>MinerPoStState</code> keeps track of a miner&rsquo;s state in responding to PoSt and there are three states in <code>MinerPoStState</code>:</p>
-
 <ul>
 <li><code>OK</code> miner has passed either a ElectionPoSt or a SurprisePoSt sufficiently recently.</li>
 <li><code>Challenged</code> miner has been selected to prove its storage via SurprisePoSt and is currently in the Challenged state</li>
 <li><code>DetectedFault</code> miner has failed at least one SurprisePoSt, indicating that all claimed storage may not be proven. Miner has lost power on its sector and recovery can only proceed by a successful response to a subsequent SurprisePoSt challenge, up until the limit of number of consecutive failures.</li>
 </ul>
-
 <p><code>DetectedFault</code> is a miner-wide PoSt state when all sectors are considered inactive. All power is lost immediately and pledge collateral is slashed. If a miner remains in <code>DetectedFault</code> for more than MaxConsecutiveFailures, all sectors will be terminated, both power and market actors will be notified for slashing and return of client deal collateral.</p>
-
 <p><code>ProvingSet</code> consists of sectors that miners are required to generate proofs against and is what counts towards miners&rsquo; power. In other words, <code>ProvingSet</code> is a set of all <code>Active</code> sectors for a particular miner. <code>ProvingSet</code> is only relevant when the miner is in OK stage of its <code>MinerPoStState</code>. When a miner is in the <code>Challenged</code> state, <code>ChallengedSectors</code> specify the list of sectors to be challenged which is the <code>ProvingSet</code> before the challenge is issued thus allowing more sectors to be added while it is in the <code>Challenged</code> state.</p>
-
 <p>Miners can call ProveCommit to commit a sector and add to their Claimed Power. However, a miner&rsquo;s Nominal Power and Consensus Power will be zero when it is in either Challenged or DetectedFault state. Note also that miners can call DeclareTemporaryFault when they are in Challenged or DetectedFault state. This does not change the list of  sectors that are currently challenged which is a snapshot of all active sectors (ProvingSet) at the time of challenge.</p>
-
 
 
 
@@ -4857,7 +4833,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 </div>
-
 
 
 
@@ -4899,16 +4874,14 @@ https://github.com/alex-shpak/hugo-book
 
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
-<ul>
-<li><a href="#filecoin-storage-mining-subsystem">Filecoin Storage Mining Subsystem</a>
-<ul>
-<li><a href="#sector-types">Sector Types</a></li>
-<li><a href="#sector-states">Sector States</a>
-<ul>
-<li><a href="#miner-post-state">Miner PoSt State</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#sector-types">Sector Types</a></li>
+    <li><a href="#sector-states">Sector States</a>
+      <ul>
+        <li><a href="#miner-post-state">Miner PoSt State</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
   </aside>
 

@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4738,12 +4738,12 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">Path</span> <span class="kt">string</span>
 
 <span class="c1">// File is a variable length data container.
-</span><span class="c1">// The File interface is modeled after a unix-style file, but abstracts the
-</span><span class="c1">// underlying storage system.
+</span><span class="c1"></span><span class="c1">// The File interface is modeled after a unix-style file, but abstracts the
+</span><span class="c1"></span><span class="c1">// underlying storage system.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">File</span> <span class="kd">interface</span> <span class="p">{</span>
-    <span class="nf">Path</span><span class="p">()</span>   <span class="nx">Path</span>
-    <span class="nf">Size</span><span class="p">()</span>   <span class="kt">int</span>
-    <span class="nf">Close</span><span class="p">()</span>  <span class="kt">error</span>
+    <span class="nf">Path</span><span class="p">(</span><span class="p">)</span>   <span class="nx">Path</span>
+    <span class="nf">Size</span><span class="p">(</span><span class="p">)</span>   <span class="kt">int</span>
+    <span class="nf">Close</span><span class="p">(</span><span class="p">)</span>  <span class="kt">error</span>
 
     <span class="c1">// Read reads from File into buf, starting at offset, and for size bytes.
 </span><span class="c1"></span>    <span class="nf">Read</span><span class="p">(</span><span class="nx">offset</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">size</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">buf</span> <span class="nx">Bytes</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">size</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">e</span> <span class="kt">error</span><span class="p">}</span>
@@ -4766,6 +4766,10 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents"></nav>
+  </aside>
 
 
 

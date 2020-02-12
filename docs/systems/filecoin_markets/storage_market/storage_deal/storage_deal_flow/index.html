@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4727,8 +4727,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-
 <div class="diagram">
 
 <span class="diagram-title">Deal Flow Sequence Diagram</span>
@@ -4745,75 +4743,101 @@ https://github.com/alex-shpak/hugo-book
 
 </div>
 
-
 <h1 id="add-storage-deal-and-power">Add Storage Deal and Power</h1>
-
 <ul>
-<li>1. <code>StorageClient</code> and <code>StorageProvider</code> call <code>StorageMarketActor.AddBalance</code> to deposit funds into Storage Market.
-
+<li>
+<ol>
+<li><code>StorageClient</code> and <code>StorageProvider</code> call <code>StorageMarketActor.AddBalance</code> to deposit funds into Storage Market.</li>
+</ol>
 <ul>
 <li><code>StorageClient</code> and <code>StorageProvider</code> can call <code>WithdrawBalance</code> before any deal is made.</li>
-</ul></li>
-<li>2. <code>StorageClient</code> and <code>StorageProvider</code> negotiate a deal off chain. <code>StorageClient</code> sends a <code>StorageDealProposal</code> to a <code>StorageProvider</code>.
-
+</ul>
+</li>
+<li>
+<ol start="2">
+<li><code>StorageClient</code> and <code>StorageProvider</code> negotiate a deal off chain. <code>StorageClient</code> sends a <code>StorageDealProposal</code> to a <code>StorageProvider</code>.</li>
+</ol>
 <ul>
 <li><code>StorageProvider</code> verifies the <code>StorageDeal</code> by checking address and signature of <code>StorageClient</code>, checking the proposal&rsquo;s <code>StartEpoch</code> is after the current Epoch, checking <code>StorageClient</code> did not call withdraw in the last X Epoch (<code>WithdrawBalance</code> should take at least X Epoch), checking both <code>StorageProvider</code> and <code>StorageClient</code> have sufficient available balances in <code>StorageMarketActor</code>.</li>
-</ul></li>
-<li>3. <code>StorageProvider</code> signs the <code>StorageDealProposal</code>  by constructing an on-chain message.
-
+</ul>
+</li>
+<li>
+<ol start="3">
+<li><code>StorageProvider</code> signs the <code>StorageDealProposal</code>  by constructing an on-chain message.</li>
+</ol>
 <ul>
 <li><code>StorageProvider</code> calls <code>PublishStorageDeals</code> in <code>StorageMarketActor</code> to publish this on-chain message which will generate a <code>DealID</code> for each <code>StorageDeal</code> and store a mapping from <code>DealID</code> to <code>StorageDeal</code>. However, the deals are not active at this point.
-
 <ul>
 <li>As a backup, <code>StorageClient</code> may call <code>PublishStorageDeals</code> with the <code>StorageDeal</code>, to activate the deal if they can obtain the signed on-chain message from <code>StorageProvider</code>.</li>
 <li>It is possible for either <code>StorageProvider</code> or <code>StorageClient</code> to try to enter into two deals simultaneously with funds available only for one. Only the first deal to commit to the chain will clear, the second will fail with error <code>errorcode.InsufficientFunds</code>.</li>
-</ul></li>
+</ul>
+</li>
 <li><code>StorageProvider</code> calls <code>HandleStorageDeal</code> in <code>StorageMiningSubsystem</code> which will then add the <code>StorageDeal</code> into a <code>Sector</code>.</li>
-</ul></li>
 </ul>
-
+</li>
+</ul>
 <h1 id="sealing-sectors">Sealing sectors</h1>
-
 <ul>
-<li>4. Once the miner finishes packing a <code>Sector</code>, it generates a SectorPreCommitInfo and call PreCommitSector with a PreCommitDeposit. It must call ProveCommitSector with SectorProveCommitInfo within some bound to recover the deposit. Expired PreCommit message will result in PreCommitDeposit being burned. There are two types of sectors, Regular Sector and Committed Capacity Sector but all sectors have an explicit expiration epoch declared during PreCommit. For a Regular Sector with storage deals in it, all deals must expire before sector expiration. Miner gains power for this particular sector upon successful ProveCommit.</li>
+<li>
+<ol start="4">
+<li>Once the miner finishes packing a <code>Sector</code>, it generates a SectorPreCommitInfo and call PreCommitSector with a PreCommitDeposit. It must call ProveCommitSector with SectorProveCommitInfo within some bound to recover the deposit. Expired PreCommit message will result in PreCommitDeposit being burned. There are two types of sectors, Regular Sector and Committed Capacity Sector but all sectors have an explicit expiration epoch declared during PreCommit. For a Regular Sector with storage deals in it, all deals must expire before sector expiration. Miner gains power for this particular sector upon successful ProveCommit.</li>
+</ol>
+</li>
 </ul>
-
 <h1 id="receive-challenge">Receive Challenge</h1>
-
 <ul>
-<li>5. Miners enter the <code>Challenged</code> status when it receives a SurprisePoSt challenge from the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before the chain checks for SurprisePoSt expiry. Miners can only get out the challenge with <code>SubmitSurprisePoStResponse</code>.</li>
-<li>6. Miners are allowed to DeclareTemporaryFault when they are in the <code>Challenged</code> state but this will not change the list of sectors challenged as <code>Challenged</code> state specifies a list of sectors to be challenged which is a snapshot of all Active sectors at the time of challenge. Miners are also allowed to call ProveCommit which will add to their ClaimedPower but their Nominal and Consensus Power are still zero whe  they are in either Challenged or DetectedFault state.</li>
+<li>
+<ol start="5">
+<li>Miners enter the <code>Challenged</code> status when it receives a SurprisePoSt challenge from the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before the chain checks for SurprisePoSt expiry. Miners can only get out the challenge with <code>SubmitSurprisePoStResponse</code>.</li>
+</ol>
+</li>
+<li>
+<ol start="6">
+<li>Miners are allowed to DeclareTemporaryFault when they are in the <code>Challenged</code> state but this will not change the list of sectors challenged as <code>Challenged</code> state specifies a list of sectors to be challenged which is a snapshot of all Active sectors at the time of challenge. Miners are also allowed to call ProveCommit which will add to their ClaimedPower but their Nominal and Consensus Power are still zero whe  they are in either Challenged or DetectedFault state.</li>
+</ol>
+</li>
 </ul>
-
 <h1 id="declare-and-recover-faults">Declare and Recover Faults</h1>
-
 <ul>
-<li>7. Declared faults are penalized to a smaller degree than DetectedFault. Miners declare failing sectors by invoking <code>DeclareTemporaryFaults</code> with a specified fault duration and associated <code>TemporaryFaultFee</code>. Miner will lose power associated with the sector when the TemporaryFault period begins.</li>
-<li>8. The loss of power associated with TemporaryFault will be restored when the TemporaryFault period has ended and the miner is now expected to prove over that sector. Failure to do so will result in unsuccessful ElectionPoSt or unsuccessful SurprisePoSt that leads to detected faults.</li>
+<li>
+<ol start="7">
+<li>Declared faults are penalized to a smaller degree than DetectedFault. Miners declare failing sectors by invoking <code>DeclareTemporaryFaults</code> with a specified fault duration and associated <code>TemporaryFaultFee</code>. Miner will lose power associated with the sector when the TemporaryFault period begins.</li>
+</ol>
+</li>
+<li>
+<ol start="8">
+<li>The loss of power associated with TemporaryFault will be restored when the TemporaryFault period has ended and the miner is now expected to prove over that sector. Failure to do so will result in unsuccessful ElectionPoSt or unsuccessful SurprisePoSt that leads to detected faults.</li>
+</ol>
+</li>
 </ul>
-
 <h1 id="detect-faults">Detect Faults</h1>
-
 <ul>
-<li>9. <code>CronActor</code> triggers <code>StorageMinerActor._rtCheckSurprisePoStExpiry</code> through <code>StoragePowerActor</code> and checks if SurprisePoSt challenge has expired for a particular miner.
-
+<li>
+<ol start="9">
+<li><code>CronActor</code> triggers <code>StorageMinerActor._rtCheckSurprisePoStExpiry</code> through <code>StoragePowerActor</code> and checks if SurprisePoSt challenge has expired for a particular miner.</li>
+</ol>
 <ul>
 <li>If no PoSt is submitted by the end of the <code>ProvingPeriod</code>, miner enters <code>DetectedFault</code> state, some <code>PledgeCollateral</code> is slashed, and all power is lost.</li>
 <li>Miners will now have to wait for the next SurprisePoSt challenge.</li>
 <li>If the faults persist for <code>MAX_CONSECUTIVE_FAULTS</code> then sectors are terminated and provider deal collateral is slashed.</li>
-</ul></li>
 </ul>
-
+</li>
+</ul>
 <h1 id="sector-expiration">Sector Expiration</h1>
-
 <ul>
-<li>10. Sector expiration is done via a scheduled Cron event <code>_rtCheckSectorExpiry</code>. Sector expires when its Expiration epoch is reached and sector expiration epoch must be greater than all its deal expiration epoch.</li>
+<li>
+<ol start="10">
+<li>Sector expiration is done via a scheduled Cron event <code>_rtCheckSectorExpiry</code>. Sector expires when its Expiration epoch is reached and sector expiration epoch must be greater than all its deal expiration epoch.</li>
+</ol>
+</li>
 </ul>
-
 <h1 id="deal-payment-and-slashing">Deal Payment and slashing</h1>
-
 <ul>
-<li>11. Deal payment and slashing are evaluated lazily through <code>_updatePendingDealState</code> at WithdrawBalance and PublishStorageDeals events. The method is also called at <code>OnEpochTickEnd</code> on StorageMarketActor as a clean up mechanism.</li>
+<li>
+<ol start="11">
+<li>Deal payment and slashing are evaluated lazily through <code>_updatePendingDealState</code> at WithdrawBalance and PublishStorageDeals events. The method is also called at <code>OnEpochTickEnd</code> on StorageMarketActor as a clean up mechanism.</li>
+</ol>
+</li>
 </ul>
 
 </article>
@@ -4827,17 +4851,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   <aside class="book-toc level-6 fixed">
-    <nav id="TableOfContents">
-<ul>
-<li><a href="#add-storage-deal-and-power">Add Storage Deal and Power</a></li>
-<li><a href="#sealing-sectors">Sealing sectors</a></li>
-<li><a href="#receive-challenge">Receive Challenge</a></li>
-<li><a href="#declare-and-recover-faults">Declare and Recover Faults</a></li>
-<li><a href="#detect-faults">Detect Faults</a></li>
-<li><a href="#sector-expiration">Sector Expiration</a></li>
-<li><a href="#deal-payment-and-slashing">Deal Payment and slashing</a></li>
-</ul>
-</nav>
+    <nav id="TableOfContents"></nav>
   </aside>
 
 

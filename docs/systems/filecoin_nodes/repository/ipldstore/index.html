@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4739,7 +4739,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Object</span> <span class="kd">interface</span> <span class="p">{</span>
-    <span class="nf">CID</span><span class="p">()</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
+    <span class="nf">CID</span><span class="p">(</span><span class="p">)</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
 
     <span class="c1">// Populate(v interface{}) error
 </span><span class="c1"></span><span class="p">}</span>
@@ -4757,51 +4757,44 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
 <p>Filecoin datastructures are stored in <a href="https://ipld.io">IPLD</a> format, a data format akin to json built for storage, retrieval and traversal of hash-linked data DAGs.</p>
-
 <p>The Filecoin network relies primarily on two distinct IPLD GraphStores:</p>
-
 <ul>
 <li>One <code>ChainStore</code> which stores the blockchain, including block headers, associated messages, etc.</li>
 <li>One <code>StateStore</code> which stores the payload state from a given blockchain, or the <code>stateTree</code> resulting from all block messages in a given chain being applied to the genesis state by the <a href="../../../../../#systems__filecoin_vm">Filecoin VM</a>.</li>
 </ul>
-
 <p>The <code>ChainStore</code> is downloaded by nodes from their peers during the bootstrapping phase of <a href="../../../../../#systems__filecoin_blockchain__chainsync">ChainSync - synchronizing the Blockchain</a> and stored by the node thereafter. It is updated on every new block reception, or if the node syncs to a new best chain.</p>
-
 <p>The <code>StateStore</code> is computed through execution of all block messages in a given <code>ChainStore</code> and stored by the node thereafter. It is updated with every new incoming block&rsquo;s processing by the <a href="../../../../../#systems__filecoin_vm__interpreter">VM Interpreter - Message Invocation (Outside VM)</a> and referenced accordingly by new blocks produced atop it in the block <a href="../../../../../#systems__filecoin_blockchain__struct__block___index">block header</a>&rsquo;s <code>ParentState</code> field.</p>
-
 <p>TODO:</p>
-
 <ul>
 <li>What is IPLD
-
 <ul>
 <li>hash linked data</li>
 <li>from IPFS</li>
-</ul></li>
+</ul>
+</li>
 <li>Why is it relevant to filecoin
-
 <ul>
 <li>all network datastructures are definitively IPLD</li>
 <li>all local datastructures can be IPLD</li>
-</ul></li>
+</ul>
+</li>
 <li>What is an IpldStore
-
 <ul>
 <li>local storage of dags</li>
-</ul></li>
+</ul>
+</li>
 <li>How to use IpldStores in filecoin
-
 <ul>
 <li>pass it around</li>
-</ul></li>
+</ul>
+</li>
 <li>One ipldstore or many
-
 <ul>
 <li>temporary caches</li>
 <li>intermediately computed state</li>
-</ul></li>
+</ul>
+</li>
 <li>Garbage Collection</li>
 </ul>
 </article>
@@ -4813,6 +4806,10 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents"></nav>
+  </aside>
 
 
 

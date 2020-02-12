@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4716,9 +4716,7 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown"><p>The <code>Key Store</code> is a fundamental abstraction in any full Filecoin node used to store the keypairs associated to a given miner&rsquo;s address and distinct workers (should the miner choose to run multiple workers).</p>
-
 <p>Node security depends in large part on keeping these keys secure. To that end we recommend keeping keys separate from any given subsystem and using a separate key store to sign requests as required by subsystems as well as keeping those keys not used as part of mining in cold storage.</p>
-
 
 
 
@@ -4752,22 +4750,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
 <p>Filecoin storage miners rely on three main components:</p>
-
 <ul>
 <li><strong>The miner address</strong> uniquely assigned to a given storage miner actor upon calling <code>registerMiner()</code> in the Storage Power Consensus Subsystem. It is a unique identifier for a given storage miner to which its power and other keys will be associated.</li>
 <li><strong>The owner keypair</strong> is provided by the miner ahead of registration and its public key associated to the miner address. Block rewards and other payments are made to the ownerAddress.</li>
 <li><strong>The worker keypair</strong> can be chosen and changed by the miner, its public key associated to the miner address. It is used to sign transactions, signatures, etc. It must be a BLS keypair given its use as part of the <a href="../../../../../#algorithms__crypto__vrf">Verifiable Random Function</a>.</li>
 </ul>
-
 <p>While miner addresses are unique, multiple storage miner actors can share an owner public key or likewise a worker public key.</p>
-
 <p>The process for changing the worker keypairs on-chain (i.e. the workerKey associated to a storage miner) is specified in <a href="../../../../../#systems__filecoin_mining__storage_mining__storage_miner_actor">Storage Miner Actor</a>. Note that this is a two-step process. First a miner stages a change by sending a message to the chain. When received, the key change is staged to occur in twice the randomness lookback parameter number of epochs, to prevent adaptive key selection attacks.
 Every time a worker key is queried, a pending change is lazily checked and state is potentially updated as needed.</p>
-
 <p>TODO:</p>
-
 <ul>
 <li>potential reccomendations or clear disclaimers with regards to consequences of failed key security</li>
 </ul>
@@ -4780,6 +4772,10 @@ Every time a worker key is queried, a pending change is lazily checked and state
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents"></nav>
+  </aside>
 
 
 

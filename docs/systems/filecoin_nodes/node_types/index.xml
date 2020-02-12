@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Node Types on Filecoin Spec</title>
@@ -16,7 +16,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_nodes/node_types/verifier_node/</guid>
-      <description>type ChainVerifierNode interface { FilecoinNode systems.Blockchain }  </description>
+      <description>type ChainVerifierNode interface { FilecoinNode systems.Blockchain } </description>
     </item>
     
     <item>
@@ -25,7 +25,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_nodes/node_types/client_node/</guid>
-      <description>type ClientNode struct { FilecoinNode systems.Blockchain markets.StorageMarketClient markets.RetrievalMarketClient markets.MarketOrderBook markets.DataTransfers }  </description>
+      <description>type ClientNode struct { FilecoinNode systems.Blockchain markets.StorageMarketClient markets.RetrievalMarketClient markets.MarketOrderBook markets.DataTransfers } </description>
     </item>
     
     <item>
@@ -54,7 +54,7 @@ This section should contain:
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_nodes/node_types/relayer_node/</guid>
-      <description>type RelayerNode interface { FilecoinNode blockchain.MessagePool markets.MarketOrderBook }  </description>
+      <description>type RelayerNode interface { FilecoinNode blockchain.MessagePool markets.MarketOrderBook } </description>
     </item>
     
     <item>
@@ -63,7 +63,7 @@ This section should contain:
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_nodes/node_types/retrieval_miner_node/</guid>
-      <description>type RetrievalMinerNode interface { FilecoinNode blockchain.Blockchain markets.RetrievalMarketProvider markets.MarketOrderBook markets.DataTransfers }  </description>
+      <description>type RetrievalMinerNode interface { FilecoinNode blockchain.Blockchain markets.RetrievalMarketProvider markets.MarketOrderBook markets.DataTransfers } </description>
     </item>
     
     <item>
@@ -72,7 +72,7 @@ This section should contain:
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_nodes/node_types/storage_miner_node/</guid>
-      <description>type StorageMinerNode interface { FilecoinNode systems.Blockchain systems.Mining markets.StorageMarketProvider markets.MarketOrderBook markets.DataTransfers }  </description>
+      <description>type StorageMinerNode interface { FilecoinNode systems.Blockchain systems.Mining markets.StorageMarketProvider markets.MarketOrderBook markets.DataTransfers } </description>
     </item>
     
   </channel>

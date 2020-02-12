@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4715,24 +4715,16 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  
-
-<div id="systems__filecoin_blockchain__message_pool__message_syncer__message_syncer"></div>
-
+  <div id="systems__filecoin_blockchain__message_pool__message_syncer__message_syncer"></div>
 <p>TODO:</p>
-
 <ul>
 <li>explain message syncer works</li>
 <li>include the message syncer code</li>
 </ul>
-
 <h1 id="message-propagation">Message Propagation</h1>
-
 <p>Messages are propagated over the libp2p pubsub channel <code>/fil/messages</code>. On this channel, every serialised <code>SignedMessage</code> is announced (see <a href="../../../../../#systems__filecoin_vm__message___index">Message</a>).</p>
-
 <p>Upon receiving the message, its validity must be checked: the signature must be valid, and the account in question must have enough funds to cover the actions specified. If the message is not valid it should be dropped and must not be forwarded.</p>
-
-<div class="notices todo" >discuss checking signatures and account balances, some tricky bits that need consideration. Does the fund check cause improper dropping? E.g. I have a message sending funds then use the newly constructed account to send funds, as long as the previous wasn&rsquo;t executed the second will be considered &ldquo;invalid&rdquo; &hellip; though it won&rsquo;t be at the time of execution.</div>
+<!-- raw HTML omitted -->
 
 </article>
 
@@ -4745,11 +4737,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   <aside class="book-toc level-6 fixed">
-    <nav id="TableOfContents">
-<ul>
-<li><a href="#message-propagation">Message Propagation</a></li>
-</ul>
-</nav>
+    <nav id="TableOfContents"></nav>
   </aside>
 
 

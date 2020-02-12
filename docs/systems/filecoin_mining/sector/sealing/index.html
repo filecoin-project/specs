@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4734,20 +4734,18 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
 
-<span class="kd">type</span> <span class="nx">Path</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// TODO
+<span class="kd">type</span> <span class="nx">Path</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>  <span class="c1">// TODO
 </span><span class="c1"></span>
 <span class="c1">// SealSeed is unique to each Sector
-</span><span class="c1">// SealSeed is:
-</span><span class="c1">//    SealSeedHash(MinerID, SectorNumber, SealRandomness, abi.UnsealedSectorCID)
+</span><span class="c1"></span><span class="c1">// SealSeed is:
+</span><span class="c1"></span><span class="c1">//    SealSeedHash(MinerID, SectorNumber, SealRandomness, abi.UnsealedSectorCID)
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealSeed</span> <span class="nx">Bytes</span>
 
 <span class="c1">// SealCommitment is the information kept in the state tree about a sector.
-</span><span class="c1">// SealCommitment is a subset of OnChainSealVerifyInfo.
+</span><span class="c1"></span><span class="c1">// SealCommitment is a subset of OnChainSealVerifyInfo.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealCommitment</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SealedCID</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
 </span><span class="c1"></span>    <span class="nx">DealIDs</span>     <span class="nx">abi</span><span class="p">.</span><span class="nx">DealIDs</span>
@@ -4755,8 +4753,8 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="c1">// PersistentProofAux is meta data required to generate certain proofs
-</span><span class="c1">// for a sector, for example PoSt.
-</span><span class="c1">// These should be stored and indexed somewhere by CommR.
+</span><span class="c1"></span><span class="c1">// for a sector, for example PoSt.
+</span><span class="c1"></span><span class="c1">// These should be stored and indexed somewhere by CommR.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">PersistentProofAux</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">CommC</span>              <span class="nx">Commitment</span>
     <span class="nx">CommQ</span>              <span class="nx">Commitment</span>
@@ -4788,53 +4786,37 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="c1">// TODO: move into proofs lib
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">FilecoinSNARKProof</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">//&lt;bls12-381, Groth16&gt;
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">FilecoinSNARKProof</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>  <span class="c1">//&lt;bls12-381, Groth16&gt;
 </span><span class="c1"></span>
 <span class="c1">// TODO
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealOutputArtifacts</span> <span class="kd">struct</span> <span class="p">{}</span>
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealOutputArtifacts</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
 </code></pre></div>
 
 
 
 
 
-
 <h2 id="drawing-randomness-for-sector-commitments">Drawing randomness for sector commitments</h2>
-
 <p><a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__ticket_chain">Tickets</a> are used as input to calculation of the ReplicaID in order to tie Proofs-of-Replication to a given chain, thereby preventing long-range attacks (from another miner in the future trying to reuse SEALs).</p>
-
 <p>The ticket has to be drawn from a finalized block in order to prevent the miner from potential losing storage (in case of a chain reorg) even though their storage is intact.</p>
-
 <p>Verification should ensure that the ticket was drawn no farther back than necessary by the miner. We note that tickets can uniquely be associated to a given round in the protocol (lest a hash collision be found), but that the round number is explicited by the miner in <code>commitSector</code>.</p>
-
 <p>We present precisely how ticket selection and verification should work. In the below, we use the following notation:</p>
-
 <ul>
 <li><code>F</code>&ndash; Finality (number of rounds)</li>
 <li><code>X</code>&ndash; round in which SEALing starts</li>
 <li><code>Z</code>&ndash; round in which the SEAL appears (in a block)</li>
-<li><code>Y</code>&ndash; round announced in the SEAL <code>commitSector</code> (should be X, but a miner could use any Y &lt;= X), denoted by the ticket selection
-
-<ul>
+<li><code>Y</code>&ndash; round announced in the SEAL <code>commitSector</code> (should be X, but a miner could use any Y &lt;= X), denoted by the ticket selection</li>
 <li><code>T</code>&ndash; estimated time for SEAL, dependent on sector size</li>
 <li><code>G = T + variance</code>&ndash; necessary flexibility to account for network delay and SEAL-time variance.</li>
-</ul></li>
 </ul>
-
 <p>We expect Filecoin will be able to produce estimates for sector commitment time based on sector sizes, e.g.:
 <code>(estimate, variance) &lt;--- SEALTime(sectors)</code>
 G and T will be selected using these.</p>
-
 <h4 id="picking-a-ticket-to-seal">Picking a Ticket to Seal</h4>
-
 <p>When starting to prepare a SEAL in round X, the miner should draw a ticket from X-F with which to compute the SEAL.</p>
-
-<h4 id="verifying-a-seal-s-ticket">Verifying a Seal&rsquo;s ticket</h4>
-
+<h4 id="verifying-a-seals-ticket">Verifying a Seal&rsquo;s ticket</h4>
 <p>When verifying a SEAL in round Z, a verifier should ensure that the ticket used to generate the SEAL is found in the range of rounds [Z-T-F-G, Z-T-F+G].</p>
-
 <h4 id="in-detail">In Detail</h4>
-
 <pre><code>                               Prover
            ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
           │
@@ -4849,27 +4831,21 @@ G and T will be selected using these.</p>
 
           └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
                               Verifier
-</code></pre>
-
-<p>Note that the prover here is submitting a message on chain (i.e. the SEAL). Using an older ticket than necessary to generate the SEAL is something the miner may do to gain more confidence about finality (since we are in a probabilistically final system). However it has a cost in terms of securing the chain in the face of long-range attacks (specifically, by mixing in chain randomness here, we ensure that an attacker going back a month in time to try and create their own chain would have to completely regenerate any and all sectors drawing randomness since to use for their fork&rsquo;s power).</p>
-
+</code></pre><p>Note that the prover here is submitting a message on chain (i.e. the SEAL). Using an older ticket than necessary to generate the SEAL is something the miner may do to gain more confidence about finality (since we are in a probabilistically final system). However it has a cost in terms of securing the chain in the face of long-range attacks (specifically, by mixing in chain randomness here, we ensure that an attacker going back a month in time to try and create their own chain would have to completely regenerate any and all sectors drawing randomness since to use for their fork&rsquo;s power).</p>
 <p>We break this down as follows:</p>
-
 <ul>
 <li>The miner should draw from <code>X-F</code>.</li>
 <li>The verifier wants to find what <code>X-F</code> should have been (to ensure the miner is not drawing from farther back) even though Y (i.e. the round of the ticket actually used) is an unverifiable value.</li>
 <li>Thus, the verifier will need to make an inference about what <code>X-F</code> is likely to have been based on:
-
 <ul>
 <li>(known) round in which the message is received (Z)</li>
 <li>(known) finality value (F)</li>
 <li>(approximate) SEAL time (T)</li>
-</ul></li>
+</ul>
+</li>
 <li>Because T is an approximate value, and to account for network delay and variance in SEAL time across miners, the verifier allows for G offset from the assumed value of <code>X-F</code>: <code>Z-T-F</code>, hence verifying that the ticket is drawn from the range <code>[Z-T-F-G, Z-T-F+G]</code>.</li>
 </ul>
-
 <h4 id="in-practice">In Practice</h4>
-
 <p>The Filecoin protocol will include a <code>MAX_SEAL_TIME</code> for each sector size and proof type.</p>
 
 </article>
@@ -4884,21 +4860,13 @@ G and T will be selected using these.</p>
 
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#drawing-randomness-for-sector-commitments">Drawing randomness for sector commitments</a>
-<ul>
-<li>
-<ul>
-<li><a href="#picking-a-ticket-to-seal">Picking a Ticket to Seal</a></li>
-<li><a href="#verifying-a-seal-s-ticket">Verifying a Seal&rsquo;s ticket</a></li>
-<li><a href="#in-detail">In Detail</a></li>
-<li><a href="#in-practice">In Practice</a></li>
-</ul></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#drawing-randomness-for-sector-commitments">Drawing randomness for sector commitments</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
   </aside>
 

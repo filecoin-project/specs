@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4734,8 +4734,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Node</span> <span class="nx">libp2p</span><span class="p">.</span><span class="nx">Node</span>
@@ -4745,70 +4743,59 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
 <p>Filecoin nodes use the libp2p protocol for peer discovery, peer routing, and message multicast, and so on. Libp2p is a set of modular protocols common to the peer-to-peer networking stack. Nodes open connections with one another and mount different protocols or streams over the same connection. In the initial handshake, nodes exchange the protocols that each of them supports and all Filecoin related protcols will be mounted under <code>/fil/...</code> protocol identifiers.</p>
-
 <p>Here is the list of libp2p protocols used by Filecoin.</p>
-
 <ul>
 <li>Graphsync:
-
 <ul>
 <li>Graphsync is used to transfer blockchain and user data</li>
 <li><a href="https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md">Draft spec</a></li>
 <li>No filecoin specific modifications to the protocol id</li>
-</ul></li>
+</ul>
+</li>
 <li>Gossipsub:
-
 <ul>
-<li>block headers and messages are broadcasted through a Gossip PubSub protocol where nodes can subscribe to topics for blockchain data and receive messages in those topics. When receiving messages related to a topic, nodes processes the message and forwards it to its peers who also subscribed to the same topic.<br /></li>
+<li>block headers and messages are broadcasted through a Gossip PubSub protocol where nodes can subscribe to topics for blockchain data and receive messages in those topics. When receiving messages related to a topic, nodes processes the message and forwards it to its peers who also subscribed to the same topic.</li>
 <li>Spec is <a href="https://github.com/libp2p/specs/tree/master/pubsub/gossipsub">here</a></li>
 <li>No filecoin specific modifications to the protocol id.  However the topic identifiers MUST be of the form <code>fil/blocks/&lt;network-name&gt;</code> and <code>fil/msgs/&lt;network-name&gt;</code></li>
-</ul></li>
+</ul>
+</li>
 <li>KademliaDHT:
-
 <ul>
 <li>Kademlia DHT is a distributed hash table with a logarithmic bound on the maximum number of lookups for a particular node. Kad DHT is used primarily for peer routing as well as peer discovery in the Filecoin protocol.</li>
 <li>Spec TODO <a href="https://github.com/libp2p/go-libp2p-kad-dht">reference implementation</a></li>
 <li>The protocol id must be of the form <code>fil/kad/&lt;network-name&gt;</code></li>
-</ul></li>
+</ul>
+</li>
 <li>Bootstrap List:
-
 <ul>
 <li>Bootstrap is a list of nodes that a new node attempts to connect upon joining the network. The list of bootstrap nodes and their addresses are defined by the users.</li>
-</ul></li>
+</ul>
+</li>
 <li>Peer Exchange:
-
 <ul>
 <li>Peer Exchange is a discovery protocol enabling peers to create and issue queries for desired peers against their existing peers</li>
 <li>spec <a href="https://github.com/libp2p/specs/issues/222">TODO</a></li>
 <li>No Filecoin specific modifications to the protocol id.</li>
-</ul></li>
+</ul>
+</li>
 <li>DNSDiscovery: Design and spec needed before implementing</li>
 <li>HTTPDiscovery: Design and spec needed before implementing</li>
 <li>Hello:
-
 <ul>
 <li>Hello protocol handles new connections to filecoin nodes to facilitate discovery</li>
 <li>the protocol string is <code>fil/hello/1.0.0</code>.</li>
-</ul></li>
 </ul>
-
+</li>
+</ul>
 <h1 id="hello-spec">Hello Spec</h1>
-
 <h2 id="protocol-flow">Protocol Flow</h2>
-
 <p><code>fil/hello</code> is a filecoin specific protocol built on the libp2p stack.  It consists of two conceptual
 procedures: <code>hello_connect</code> and <code>hello_listen</code>.</p>
-
 <p><code>hello_listen</code>: <code>on new stream</code> -&gt; <code>read peer hello msg from stream</code> -&gt; <code>write latency message to stream</code> -&gt; <code>close stream</code></p>
-
 <p><code>hello_connect</code>: <code>on connected</code> -&gt; <code>open stream</code> -&gt; <code>write own hello msg to stream</code> -&gt; <code>read peer latency msg from stream</code>  -&gt; <code>close stream</code></p>
-
 <p>where stream and connection operations are all standard libp2p operations.  Nodes running the Hello Protocol should consume the incoming Hello Message and use it to help manage peers and sync the chain.</p>
-
 <h2 id="messages">Messages</h2>
-
 
 
 
@@ -4851,7 +4838,6 @@ procedures: <code>hello_connect</code> and <code>hello_listen</code>.</p>
 
 
 
-
 <p>When writing the <code>HelloMessage</code> to the stream the peer must inspect its current head to provide accurate information.  When writing the <code>LatencyMessage</code> to the stream the peer should set <code>TArrival</code> immediately upon receipt and <code>TSent</code> immediately before writing the message to the stream.</p>
 </article>
 
@@ -4865,13 +4851,10 @@ procedures: <code>hello_connect</code> and <code>hello_listen</code>.</p>
 
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
-<ul>
-<li><a href="#hello-spec">Hello Spec</a>
-<ul>
-<li><a href="#protocol-flow">Protocol Flow</a></li>
-<li><a href="#messages">Messages</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#protocol-flow">Protocol Flow</a></li>
+    <li><a href="#messages">Messages</a></li>
+  </ul>
 </nav>
   </aside>
 

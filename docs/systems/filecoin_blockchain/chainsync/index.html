@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4715,27 +4715,19 @@ https://github.com/alex-shpak/hugo-book
 </header>
 
       
-<article class="markdown">
-
-<div id="systems__filecoin_blockchain__chainsync__chain_sync"></div>
-
+<article class="markdown"><div id="systems__filecoin_blockchain__chainsync__chain_sync"></div>
 <h1 id="what-is-blockchain-synchronization">What is blockchain synchronization?</h1>
-
 <p>Blockchain synchronization (&ldquo;sync&rdquo;) is a key part of a blockchain system.
 It handles retrieval and propagation of blocks and transactions (messages), and
 thus in charge of distributed state replication.
 <strong>This process is security critical &ndash; problems here can be catastrophic to the
 operation of a blockchain.</strong></p>
-
 <h1 id="what-is-chainsync">What is ChainSync?</h1>
-
 <p><code>ChainSync</code> is the protocol Filecoin uses to synchronize its blockchain. It is
 specific to Filecoin&rsquo;s choices in state representation and consensus rules,
 but is general enough that it can serve other blockchains. <code>ChainSync</code> is a
 group of smaller protocols, which handle different parts of the sync process.</p>
-
 <h1 id="terms-and-concepts">Terms and Concepts</h1>
-
 <ul>
 <li><code>LastCheckpoint</code> the last hard social-consensus oriented checkpoint that <code>ChainSync</code> is aware of.
 This consensus checkpoint defines the minimum finality, and a minimum of history to build on.
@@ -4746,57 +4738,51 @@ These are the newest and best blocks <code>ChainSync</code> knows about. They ar
 <li><code>BestTargetHead</code> the single best chain head <code>BlockCID</code> to try to sync to.
 This is the first element of <code>TargetHeads</code></li>
 </ul>
-
 <h1 id="chainsync-summary">ChainSync Summary</h1>
-
 <p>At a high level, <code>ChainSync</code> does the following:</p>
-
 <ul>
 <li><strong>Part 1: Verify internal state (<code>INIT</code> state below)</strong>
-
 <ul>
 <li>SHOULD verify data structures and validate local chain</li>
 <li>Resource expensive verification MAY be skipped at nodes&rsquo; own risk</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>Part 2: Bootstrap to the network (<code>BOOTSTRAP</code>)</strong>
-
 <ul>
 <li>Step 1. Bootstrap to the network, and acquire a &ldquo;secure enough&rdquo; set of peers (more details below)</li>
 <li>Step 2. Bootstrap to the <code>BlockPubsub</code> channels</li>
 <li>Step 3. Listen and serve on Graphsync</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>Part 3: Synchronize trusted checkpoint state (<code>SYNC_CHECKPOINT</code>)</strong>
-
 <ul>
 <li>Step 1. Start with a <code>TrustedCheckpoint</code> (defaults to <code>GenesisCheckpoint</code>).</li>
 <li>Step 2. Get the block it points to, and that block&rsquo;s parents</li>
 <li>Step 3. Graphsync the <code>StateTree</code></li>
-</ul></li>
+</ul>
+</li>
 <li><strong>Part 4: Catch up to the chain  (<code>CHAIN_CATCHUP</code>)</strong>
-
 <ul>
 <li>Step 1. Maintain a set of <code>TargetHeads</code> (<code>BlockCIDs</code>), and select the <code>BestTargetHead</code> from it</li>
 <li>Step 2. Synchronize to the latest heads observed, validating blocks towards them (requesting intermediate points)</li>
 <li>Step 3. As validation progresses, <code>TargetHeads</code> and <code>BestTargetHead</code> will likely change, as new blocks at the production fringe will arrive,
 and some target heads or paths to them may fail to validate.</li>
 <li>Step 4. Finish when node has &ldquo;caught up&rdquo; with <code>BestTargetHead</code> (retrieved all the state, linked to local chain, validated all the blocks, etc).</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>Part 5: Stay in sync, and participate in block propagation (<code>CHAIN_FOLLOW</code>)</strong>
-
 <ul>
 <li>Step 1. If security conditions change, go back to Part 4 (<code>CHAIN_CATCHUP</code>)</li>
 <li>Step 2. Receive, validate, and propagate received <code>Blocks</code></li>
 <li>Step 3. Now with greater certainty of having the best chain, finalize Tipsets, and advance chain state.</li>
-</ul></li>
 </ul>
-
+</li>
+</ul>
 <h1 id="libp2p-network-protocols">libp2p Network Protocols</h1>
-
 <p>As a networking-heavy protocol, <code>ChainSync</code> makes heavy use of <code>libp2p</code>. In particular, we use three sets of protocols:</p>
-
 <ul>
 <li><strong><code>libp2p.PubSub</code> a family of publish/subscribe protocols to propagate recent <code>Blocks</code>.</strong>
-The concrete protocol choice impacts <code>ChainSync</code>&rsquo;s effectiveness, efficiency, and security dramatically.
+The concrete protocol choice impacts <code>ChainSync</code>'s effectiveness, efficiency, and security dramatically.
 For Filecoin v1.0 we will use <code>libp2p.Gossipsub</code>, a recent <code>libp2p</code> protocol that combines features and learnings
 from many excellent PubSub systems. In the future, Filecoin may use other <code>PubSub</code> protocols. <em>Important Note:</em> is entirely
 possible for Filecoin Nodes to run multiple versions simultaneously. That said, this specification <em>requires</em> that filecoin
@@ -4810,16 +4796,13 @@ Discovery protocols marked as <strong>required</strong> MUST be included in impl
 <li><strong><code>libp2p.DataTransfer</code> a family of protocols for transfering data</strong>
 Filecoin Nodes must run <code>libp2p.Graphsync</code>.</li>
 </ul>
-
 <p>More concretely, we use these protocols:</p>
-
 <ul>
 <li><strong><code>libp2p.PeerDiscovery</code></strong>
-
 <ul>
 <li><strong>(required)</strong> <code>libp2p.BootstrapList</code> a protocol that uses a persistent and user-configurable list of semi-trusted
 bootstrap peers. The default list includes a set of peers semi-trusted by the Filecoin Community.</li>
-<li><strong>(optional)</strong> <code>libp2p.KademliaDHT</code> a dht protocol that enables random queries across the entire network<br /></li>
+<li><strong>(optional)</strong> <code>libp2p.KademliaDHT</code> a dht protocol that enables random queries across the entire network</li>
 <li><strong>(required)</strong> <code>libp2p.Gossipsub</code> a pub/sub protocol that includes &ldquo;prune peer exchange&rdquo; by default, disseminating peer info as part of operation</li>
 <li><strong>(optional)</strong> <code>libp2p.PersistentPeerstore</code> a connectivity component that keeps persistent information about peers
 observed in the network throughout the lifetime of the node. This is useful because we resume and continually
@@ -4827,59 +4810,54 @@ improve Bootstrap security.</li>
 <li><strong>(optional)</strong> <code>libp2p.DNSDiscovery</code> to learn about peers via DNS lookups to semi-trusted peer aggregators</li>
 <li><strong>(optional)</strong> <code>libp2p.HTTPDiscovery</code> to learn about peers via HTTP lookups to semi-trusted peer aggregators</li>
 <li><strong>(optional)</strong> <code>libp2p.PEX</code> a general use peer exchange protocol distinct from pubsub peer exchange for 1:1 adhoc peer exchange</li>
-</ul></li>
+</ul>
+</li>
 <li><strong><code>libp2p.PubSub</code></strong>
-
 <ul>
 <li><strong>(required)</strong> <code>libp2p.Gossipsub</code> the concrete <code>libp2p.PubSub</code> protocol <code>ChainSync</code> uses</li>
-</ul></li>
+</ul>
+</li>
 <li><strong><code>libp2p.DataTransfer</code></strong>
-
 <ul>
 <li><strong>(required)</strong> <code>libp2p.Graphsync</code> the data transfer protocol nodes must support for providing blockchain and user data</li>
 <li><strong>(optional)</strong> <code>BlockSync</code> a blockchain data transfer protocol that can be used by some nodes</li>
-</ul></li>
 </ul>
-
+</li>
+</ul>
 <h1 id="subcomponents">Subcomponents</h1>
-
 <p>Aside from <code>libp2p</code>, <code>ChainSync</code> uses or relies on the following components:</p>
-
 <ul>
 <li>Libraries:
-
 <ul>
-<li><code>ipld</code> data structures, selectors, and protocols</li>
+<li><code>ipld</code> data structures, selectors, and protocols
+<ul>
 <li><code>ipld.GraphStore</code> local persistent storage for <code>chain</code> datastructures</li>
 <li><code>ipld.Selector</code> a way to express requests for chain data structures</li>
 <li><code>ipfs.GraphSync</code> a general-purpose <code>ipld</code> datastructure syncing protocol</li>
-</ul></li>
+</ul>
+</li>
+</ul>
+</li>
 <li>Data Structures:
-
 <ul>
 <li>Data structures in the <code>chain</code> package: <code>Block, Tipset, Chain, Checkpoint ...</code></li>
 <li><code>chainsync.BlockCache</code> a temporary cache of blocks, to constrain resource expended</li>
 <li><code>chainsync.AncestryGraph</code> a datastructure to efficiently link <code>Blocks</code>, <code>Tipsets</code>, and <code>PartialChains</code></li>
 <li><code>chainsync.ValidationGraph</code> a datastructure for efficient and secure validation of <code>Blocks</code> and <code>Tipsets</code></li>
-</ul></li>
 </ul>
-
+</li>
+</ul>
 <h2 id="graphsync-in-chainsync">Graphsync in ChainSync</h2>
-
 <p><code>ChainSync</code> is written in terms of <code>Graphsync</code>. <code>ChainSync</code> adds blockchain and filecoin-specific
 synchronization functionality that is critical for Filecoin security.</p>
-
 <h3 id="rate-limiting-graphsync-responses-should">Rate Limiting Graphsync responses (SHOULD)</h3>
-
 <p>When running Graphsync, Filecoin nodes must respond to graphsync queries. Filecoin requires nodes
 to provide critical data structures to others, otherwise the network will not function. During
 ChainSync, it is in operators&rsquo; interests to provide data structures critical to validating,
 following, and participating in the blockchain they are on. However, this has limitations, and
 some level of rate limiting is critical for maintaining security in the presence of attackers
 who might issue large Graphsync requests to cause DOS.</p>
-
 <p>We recommend the following:</p>
-
 <ul>
 <li><strong>Set and enforce batch size rate limits.</strong>
 Force selectors to be shaped like: <code>LimitedBlockIpldSelector(blockCID, BatchSize)</code> for a single
@@ -4900,7 +4878,6 @@ tracks bandwidth usage in each connection. This information can be used to impos
 Graphsync and other Filecoin protocols.</li>
 <li><strong>Detect and react to  DOS: restrict operation.</strong>
 The safest implementations will likely detect and react to DOS attacks. Reactions could include:
-
 <ul>
 <li>Smaller <code>Graphsync.BatchSize</code> limits</li>
 <li>Fewer connections to other peers</li>
@@ -4908,11 +4885,10 @@ The safest implementations will likely detect and react to DOS attacks. Reaction
 <li>Assign Graphsync bandwidth based on a peer priority queue</li>
 <li>Disconnect from and do not accept connections from unknown peers</li>
 <li>Introspect Graphsync requests and filter/deny/rate limit suspicious ones</li>
-</ul></li>
 </ul>
-
+</li>
+</ul>
 <h2 id="previous-blocksync-protocol">Previous BlockSync protocol</h2>
-
 <p>Prior versions of this spec recommended a <code>BlockSync</code> protocol. This protocol definition is
 <a href="https://github.com/filecoin-project/specs/blob/prevspec/network-protocols.md#blocksync">available here</a>.
 Filecoin nodes are libp2p nodes, and therefore may run a variety
@@ -4920,16 +4896,12 @@ of other protocols, including this <code>BlockSync</code> protocol. As with anyt
 MAY opt to use additional protocols to achieve the results.
 That said, Nodes MUST implement the version of <code>ChainSync</code> as described in this spec in order to
 be considered implementations of Filecoin. Test suites will assume this protocol.</p>
-
 <h1 id="chainsync-state-machine">ChainSync State Machine</h1>
-
 <p><code>ChainSync</code> uses the following <em>conceptual</em> state machine. Since this is a <em>conceptual</em> state machine,
 implementations MAY deviate from implementing precisely these states, or dividing them strictly.
 Implementations MAY blur the lines between the states. If so, implementations MUST ensure security
 of the altered protocol.</p>
-
 <p>State Machine:</p>
-
 
 
 
@@ -4958,100 +4930,105 @@ of the altered protocol.</p>
 
 </div>
 
-
 <h2 id="chainsync-fsm-init">ChainSync FSM: <code>INIT</code></h2>
-
 <ul>
 <li>beginning state. no network connections, not synchronizing.</li>
 <li>local state is loaded: internal data structures (eg chain, cache) are loaded</li>
 <li><code>LastTrustedCheckpoint</code> is set the latest network-wide accepted <code>TrustedCheckpoint</code></li>
 <li><code>FinalityTipset</code> is set to finality achieved in a prior protocol run.
-
 <ul>
 <li>Default: If no later <code>FinalityTipset</code> has been achieved, set <code>FinalityTipset</code> to <code>LastTrustedCheckpoint</code></li>
-</ul></li>
+</ul>
+</li>
 <li><strong>Chain State and Finality</strong>:
-
 <ul>
 <li>In this state, the <strong>chain MUST NOT advance</strong> beyond whatever the node already has.</li>
 <li>No new blocks are reported to consumers.</li>
 <li>The chain state provided is whatever was loaded from prior executions (worst case is <code>LastTrustedCheckpoint</code>)</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>security conditions to transition out:</strong>
-
 <ul>
-<li>local state and data structures SHOULD be verified to be correct</li>
+<li>local state and data structures SHOULD be verified to be correct
+<ul>
 <li>this means validating any parts of the chain or <code>StateTree</code> the node has, from <code>LastTrustedCheckpoint</code> on.</li>
-<li><code>LastTrustedCheckpoint</code> is well-known across the Filecoin Network to be a true <code>TrustedCheckpoint</code></li>
+</ul>
+</li>
+<li><code>LastTrustedCheckpoint</code> is well-known across the Filecoin Network to be a true <code>TrustedCheckpoint</code>
+<ul>
 <li>this SHOULD NOT be verified in software, it SHOULD be verified by operators</li>
 <li>Note: we ALWAYS have at least one <code>TrustedCheckpoint</code>, the <code>GenesisCheckpoint</code>.</li>
-</ul></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><strong>transitions out:</strong>
-
 <ul>
 <li>once done verifying things: move to <code>BOOTSTRAP</code></li>
-</ul></li>
 </ul>
-
+</li>
+</ul>
 <h2 id="chainsync-fsm-bootstrap">ChainSync FSM: <code>BOOTSTRAP</code></h2>
-
 <ul>
 <li><code>network.Bootstrap()</code>: establish connections to peers until we satisfy security requirement
-
 <ul>
 <li>for better security, use many different <code>libp2p.PeerDiscovery</code> protocols</li>
-</ul></li>
+</ul>
+</li>
 <li><code>BlockPubsub.Bootstrap()</code>: establish connections to <code>BlockPubsub</code> peers
-
 <ul>
 <li>The subscription is for both peer discovery and to start selecting best heads.
 Listing on pubsub from the start keeps the node informed about potential head changes.</li>
-</ul></li>
+</ul>
+</li>
 <li><code>Graphsync.Serve()</code>: set up a Graphsync service, that responds to others&rsquo; queries</li>
 <li><strong>Chain State and Finality</strong>:
-
 <ul>
 <li>In this state, the <strong>chain MUST NOT advance</strong> beyond whatever the node already has.</li>
 <li>No new blocks are reported to consumers.</li>
 <li>The chain state provided is whatever was loaded from prior executions (worst case is <code>LastTrustedCheckpoint</code>).</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>security conditions to transition out:</strong>
-
 <ul>
 <li><code>Network</code> connectivity MUST have reached the security level acceptable for <code>ChainSync</code></li>
 <li><code>BlockPubsub</code> connectivity MUST have reached the security level acceptable for <code>ChainSync</code></li>
 <li>&ldquo;on time&rdquo; blocks MUST be arriving through <code>BlockPubsub</code></li>
-</ul></li>
+</ul>
+</li>
 <li><strong>transitions out:</strong>
-
 <ul>
-<li>once bootstrap is deemed secure enough:</li>
+<li>once bootstrap is deemed secure enough:
+<ul>
 <li>if node does not have the <code>Blocks</code> or <code>StateTree</code> corresponding to <code>LastTrustedCheckpoint</code>: move to <code>SYNC_CHECKPOINT</code></li>
 <li>otherwise: move to <code>CHAIN_CATCHUP</code></li>
-</ul></li>
 </ul>
-
-<h2 id="chainsync-fsm-sync-checkpoint">ChainSync FSM: <code>SYNC_CHECKPOINT</code></h2>
-
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="chainsync-fsm-sync_checkpoint">ChainSync FSM: <code>SYNC_CHECKPOINT</code></h2>
 <ul>
 <li>While in this state:
-
 <ul>
 <li><code>ChainSync</code> is well-bootstrapped, but does not yet have the <code>Blocks</code> or <code>StateTree</code> for <code>LastTrustedCheckpoint</code></li>
-<li><code>ChainSync</code> issues <code>Graphsync</code> requests to its peers randomly for the <code>Blocks</code> and <code>StateTree</code> for <code>LastTrustedCheckpoint</code>:</li>
-<li><code>ChainSync</code>&rsquo;s counterparts in other peers MUST provide the state tree.</li>
+<li><code>ChainSync</code> issues <code>Graphsync</code> requests to its peers randomly for the <code>Blocks</code> and <code>StateTree</code> for <code>LastTrustedCheckpoint</code>:
+<ul>
+<li><code>ChainSync</code>'s counterparts in other peers MUST provide the state tree.</li>
 <li>It is only semi-rational to do so, so <code>ChainSync</code> may have to try many peers.</li>
 <li>Some of these requests MAY fail.</li>
-</ul></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><strong>Chain State and Finality</strong>:
-
 <ul>
 <li>In this state, the <strong>chain MUST NOT advance</strong> beyond whatever the node already has.</li>
 <li>No new blocks are reported to consumers.</li>
 <li>The chain state provided is the available <code>Blocks</code> and <code>StateTree</code> for <code>LastTrustedCheckpoint</code>.</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>Important Notes:</strong>
-
 <ul>
 <li><code>ChainSync</code> needs to fetch several blocks: the <code>Block</code> pointed at by <code>LastTrustedCheckpoint</code>, and its direct <code>Block.Parents</code>.</li>
 <li>Nodes only need hashing to validate these <code>Blocks</code> and <code>StateTrees</code> &ndash; no block validation or state machine computation is needed.</li>
@@ -5061,10 +5038,10 @@ Listing on pubsub from the start keeps the node informed about potential head ch
 efficient syncing than comparable blockchain synchronization protocols, as syncing and validation can start there.</li>
 <li>Nodes DO NOT need to validate the chain from <code>GenesisCheckpoint</code>. <code>LastTrustedCheckpoint</code> MAY be a value later in Chain history.</li>
 <li>Nodes DO NOT need to but MAY sync earlier <code>StateTrees</code> than <code>LastTrustedCheckpoint</code> as well.</li>
-</ul></li>
-
-<li><p>Pseudocode 1: a basic version of <code>SYNC_CHECKPOINT</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">ChainSync</span><span class="p">)</span> <span class="nf">SyncCheckpoint</span><span class="p">()</span> <span class="p">{</span>
+</ul>
+</li>
+<li>Pseudocode 1: a basic version of <code>SYNC_CHECKPOINT</code>:
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">ChainSync</span><span class="p">)</span> <span class="nf">SyncCheckpoint</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">while</span> <span class="p">!</span><span class="nx">c</span><span class="p">.</span><span class="nf">HasCompleteStateTreeFor</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">LastTrustedCheckpoint</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">selector</span> <span class="o">:=</span> <span class="nx">ipldselector</span><span class="p">.</span><span class="nf">SelectAll</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">LastTrustedCheckpoint</span><span class="p">)</span>
         <span class="nx">c</span><span class="p">.</span><span class="nx">Graphsync</span><span class="p">.</span><span class="nf">Pull</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">Peers</span><span class="p">,</span> <span class="nx">sel</span><span class="p">,</span> <span class="nx">c</span><span class="p">.</span><span class="nx">IpldStore</span><span class="p">)</span>
@@ -5075,51 +5052,54 @@ efficient syncing than comparable blockchain synchronization protocols, as synci
 </span><span class="c1"></span>        <span class="c1">// can be implemented on top of a graphsync that only pulls from a single
 </span><span class="c1"></span>        <span class="c1">// peer and does not check local store first.
 </span><span class="c1"></span>    <span class="p">}</span>
-    <span class="nx">c</span><span class="p">.</span><span class="nf">ChainCatchup</span><span class="p">()</span> <span class="c1">// on to CHAIN_CATCHUP
-</span><span class="c1"></span><span class="p">}</span></code></pre></div></li>
-
-<li><p><strong>security conditions to transition out:</strong></p>
-
+    <span class="nx">c</span><span class="p">.</span><span class="nf">ChainCatchup</span><span class="p">(</span><span class="p">)</span> <span class="c1">// on to CHAIN_CATCHUP
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></div></li>
+<li><strong>security conditions to transition out:</strong>
 <ul>
 <li><code>StateTree</code> for <code>LastTrustedCheckpoint</code> MUST be stored locally and verified (hashing is enough)</li>
-</ul></li>
-
-<li><p><strong>transitions out:</strong></p>
-
+</ul>
+</li>
+<li><strong>transitions out:</strong>
 <ul>
 <li>once node receives and verifies complete <code>StateTree</code> for <code>LastTrustedCheckpoint</code>: move to <code>CHAIN_CATCHUP</code></li>
-</ul></li>
 </ul>
-
-<h2 id="chainsync-fsm-chain-catchup">ChainSync FSM: <code>CHAIN_CATCHUP</code></h2>
-
+</li>
+</ul>
+<h2 id="chainsync-fsm-chain_catchup">ChainSync FSM: <code>CHAIN_CATCHUP</code></h2>
 <ul>
 <li>While in this state:
-
 <ul>
 <li><code>ChainSync</code> is well-bootstrapped, and has an initial <strong>trusted</strong> <code>StateTree</code> to start from.</li>
 <li><code>ChainSync</code> is receiving latest <code>Blocks</code> from <code>BlockPubsub</code></li>
 <li><code>ChainSync</code> starts fetching and validating blocks</li>
 <li><code>ChainSync</code> has unvalidated blocks between <code>ChainSync.FinalityTipset</code> and <code>ChainSync.TargetHeads</code></li>
-</ul></li>
+</ul>
+</li>
 <li><strong>Chain State and Finality</strong>:
-
 <ul>
-<li>In this state, the <strong>chain MUST NOT advance</strong> beyond whatever the node already has:</li>
+<li>In this state, the <strong>chain MUST NOT advance</strong> beyond whatever the node already has:
+<ul>
 <li><code>FinalityTipset</code> does not change.</li>
 <li>No new blocks are reported to consumers/users of <code>ChainSync</code> yet.</li>
 <li>The chain state provided is the available <code>Blocks</code> and <code>StateTree</code> for all available epochs,
 specially the <code>FinalityTipset</code>.</li>
 <li>finality must not move forward here because there are serious attack vectors where a node can be forced to end up on the wrong fork if finality advances before validation is complete up to the block production fringe.</li>
-<li>Validation must advance, all the way to the block production fringe:</li>
+</ul>
+</li>
+<li>Validation must advance, all the way to the block production fringe:
+<ul>
 <li>Validate the whole chain, from <code>FinalityTipset</code> to <code>BestTargetHead</code></li>
 <li>The node can reach <code>BestTargetHead</code> only to find out it was invalid, then has to update <code>BestTargetHead</code> with next best one, and sync to it
 (without having advanced <code>FinalityTipset</code> yet, as otherwise we may end up on the wrong fork)</li>
-</ul></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><strong>security conditions to transition out:</strong>
-
 <ul>
-<li>Gaps between <code>ChainSync.FinalityTipset ... ChainSync.BestTargetHead</code> have been closed:</li>
+<li>Gaps between <code>ChainSync.FinalityTipset ... ChainSync.BestTargetHead</code> have been closed:
+<ul>
 <li>All <code>Blocks</code> and their content MUST be fetched, stored, linked, and validated locally.
 This includes <code>BlockHeaders</code>, <code>Messages</code>, etc.</li>
 <li>Bad heads have been expunged from <code>ChainSync.TargetHeads</code>. Bad heads include heads that initially
@@ -5127,80 +5107,82 @@ seemed good but turned out invalid, or heads that <code>ChainSync</code> has fai
 fetch ancestors connecting back to <code>ChainSync.FinalityTipset</code> within a reasonable amount of time).</li>
 <li>All blocks between <code>ChainSync.FinalityTipset ... ChainSync.TargetHeads</code> have been validated
 This means all blocks <em>before</em> the best heads.</li>
+</ul>
+</li>
 <li>Not under a temporary network partition</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>transitions out:</strong>
-
 <ul>
 <li>once gaps between <code>ChainSync.FinalityTipset ... ChainSync.TargetHeads</code> are closed: move to <code>CHAIN_FOLLOW</code></li>
-<li>(Perhaps moving to <code>CHAIN_FOLLOW</code> when 1-2 blocks back in validation may be ok.</li>
+<li>(Perhaps moving to <code>CHAIN_FOLLOW</code> when 1-2 blocks back in validation may be ok.
+<ul>
 <li>we dont know we have the right head until we validate it, so if other heads of similar height are right/better, we wont know till then.)</li>
-</ul></li>
 </ul>
-
-<h2 id="chainsync-fsm-chain-follow">ChainSync FSM: <code>CHAIN_FOLLOW</code></h2>
-
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="chainsync-fsm-chain_follow">ChainSync FSM: <code>CHAIN_FOLLOW</code></h2>
 <ul>
 <li>While in this state:
-
 <ul>
 <li><code>ChainSync</code> is well-bootstrapped, and has an initial <strong>trusted</strong> <code>StateTree</code> to start from.</li>
 <li><code>ChainSync</code> fetches and validates blocks.</li>
 <li><code>ChainSync</code> is receiving and validating latest <code>Blocks</code> from <code>BlockPubsub</code></li>
 <li><code>ChainSync</code> DOES NOT have unvalidated blocks between <code>ChainSync.FinalityTipset</code> and <code>ChainSync.TargetHeads</code></li>
 <li><code>ChainSync</code> MUST drop back to another state if security conditions change.</li>
-<li>Keep a set of gap measures:</li>
+<li>Keep a set of gap measures:
+<ul>
 <li><code>BlockGap</code> is the number of remaining blocks to validate between the Validated blocks and <code>BestTargetHead</code>.
-
 <ul>
 <li>(ie how many epochs do we need to validate to have validated <code>BestTargetHead</code>. does not include null blocks)</li>
-</ul></li>
+</ul>
+</li>
 <li><code>EpochGap</code> is the number of epochs between the latest validated block, and <code>BestTargetHead</code> (includes null blocks).</li>
 <li><code>MaxBlockGap = 2</code>, which means how many blocks may <code>ChainSync</code> fall behind on before switching back to <code>CHAIN_CATCHUP</code> (does not include null blocks)</li>
 <li><code>MaxEpochGap = 10</code>, which means how many epochs may <code>ChainSync</code> fall behind on before switching back to <code>CHAIN_CATCHUP</code> (includes null blocks)</li>
-</ul></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><strong>Chain State and Finality</strong>:
-
 <ul>
 <li>In this state, the <strong>chain MUST advance</strong> as all the blocks up to <code>BestTargetHead</code> are validated.</li>
 <li>New blocks are finalized as they cross the finality threshold (<code>ValidG.Heads[0].ChainEpoch - FinalityLookback</code>)</li>
 <li>New finalized blocks are reported to consumers.</li>
 <li>The chain state provided includes the <code>Blocks</code> and <code>StateTree</code> for the <code>Finality</code> epoch, as well as
 candidate <code>Blocks</code> and <code>StateTrees</code> for unfinalized epochs.</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>security conditions to transition out:</strong>
-
 <ul>
 <li>Temporary network partitions (see <em>Detecting Network Partitions</em>).</li>
 <li>Encounter gaps of <code>&gt;MaxBlockGap</code> or <code>&gt;MaxEpochGap</code> between Validated set and a new <code>ChainSync.BestTargetHead</code></li>
-</ul></li>
+</ul>
+</li>
 <li><strong>transitions out:</strong>
-
 <ul>
 <li>if a temporary network partition is detected: move to <code>CHAIN_CATCHUP</code></li>
 <li>if <code>BlockGap &gt; MaxBlockGap</code>: move to <code>CHAIN_CATCHUP</code></li>
 <li>if <code>EpochGap &gt; MaxEpochGap</code>: move to <code>CHAIN_CATCHUP</code></li>
 <li>if node is shut down: move to <code>INIT</code></li>
-</ul></li>
 </ul>
-
+</li>
+</ul>
 <h1 id="block-fetching-validation-and-propagation">Block Fetching, Validation, and Propagation</h1>
-
 <h2 id="notes-on-changing-targetheads-while-syncing">Notes on changing <code>TargetHeads</code> while syncing</h2>
-
 <ul>
 <li><code>TargetHeads</code> is changing, as <code>ChainSync</code> must be aware of the best heads at any time. reorgs happen, and our first set of peers could&rsquo;ve been bad, we keep discovering others.
-
 <ul>
 <li>Hello protocol is good, but it&rsquo;s polling. unless node is constantly polllng, wont see all the heads.</li>
 <li><code>BlockPubsub</code> gives us the realtime view into what&rsquo;s actually going on.</li>
 <li>weight can also be close between 2+ possible chains (long-forked), and <code>ChainSync</code> must select the right one (which, we may not be able to distinguish until validating all the way)</li>
-</ul></li>
+</ul>
+</li>
 <li>fetching + validation are strictly faster per round on average than blocks produced/block time (if they&rsquo;re not, will always fall behind), so we definitely catch up eventually (and even quickly). the last couple rounds can be close (&ldquo;almost got it, almost got it, there&rdquo;).</li>
 </ul>
-
 <h2 id="general-notes-on-fetching-blocks">General notes on fetching Blocks</h2>
-
 <ul>
 <li><code>ChainSync</code> selects and maintains a set of the most likely heads to be correct from among those received
 via <code>BlockPubsub</code>. As more blocks are received, the set of <code>TargetHeads</code> is reevaluated.</li>
@@ -5215,19 +5197,25 @@ via <code>BlockPubsub</code>. As more blocks are received, the set of <code>Targ
 <li><code>ChainSync</code> delays syncing <code>Messages</code> until they are needed. Much of the structure of the partial chains can
 be checked and used to make syncing decisions without fetching the <code>Messages</code>.</li>
 </ul>
-
 <h2 id="progressive-block-validation">Progressive Block Validation</h2>
-
 <ul>
-<li><a href="../../../../#systems__filecoin_blockchain__struct__block___index">Blocks</a> may be validated in progressive stages, in order to minimize resource expenditure.</li>
-<li>Validation computation is considerable, and a serious DOS attack vector.</li>
-<li>Secure implementations must carefully schedule validation and minimize the work done by pruning blocks without validating them fully.</li>
-<li><code>ChainSync</code> SHOULD keep a cache of unvalidated blocks (ideally sorted by likelihood of belonging to the chain), and delete unvalidated blocks when they are passed by <code>FinalityTipset</code>, or when <code>ChainSync</code> is under significant resource load.</li>
-
-<li><p>These stages can be used partially across many blocks in a candidate chain, in order to prune out clearly bad blocks long before actually doing the expensive validation work.</p></li>
-
-<li><p><strong>Progressive Stages of Block Validation</strong></p>
-
+<li>
+<p><a href="../../../../#systems__filecoin_blockchain__struct__block___index">Blocks</a> may be validated in progressive stages, in order to minimize resource expenditure.</p>
+</li>
+<li>
+<p>Validation computation is considerable, and a serious DOS attack vector.</p>
+</li>
+<li>
+<p>Secure implementations must carefully schedule validation and minimize the work done by pruning blocks without validating them fully.</p>
+</li>
+<li>
+<p><code>ChainSync</code> SHOULD keep a cache of unvalidated blocks (ideally sorted by likelihood of belonging to the chain), and delete unvalidated blocks when they are passed by <code>FinalityTipset</code>, or when <code>ChainSync</code> is under significant resource load.</p>
+</li>
+<li>
+<p>These stages can be used partially across many blocks in a candidate chain, in order to prune out clearly bad blocks long before actually doing the expensive validation work.</p>
+</li>
+<li>
+<p><strong>Progressive Stages of Block Validation</strong></p>
 <ul>
 <li><strong>BV0 - Syntax</strong>: Serialization, typing, value ranges.</li>
 <li><strong>BV1 - Plausible Consensus</strong>: Plausible miner, weight, and epoch values (e.g from chain state at <code>b.ChainEpoch - consensus.LookbackParameter</code>).</li>
@@ -5236,19 +5224,18 @@ be checked and used to make syncing decisions without fetching the <code>Message
 <li><strong>BV4 - Chain ancestry and finality</strong>: Verify block links back to trusted chain, not prior to finality.</li>
 <li><strong>BV4 - Message Signatures</strong>:</li>
 <li><strong>BV5 - State tree</strong>: Parent tipset message execution produces the claimed state tree root and receipts.</li>
-</ul></li>
 </ul>
-
-<p>Notes:
-- in <code>CHAIN_CATCHUP</code>, if a node is receiving/fetching hundreds/thousands of <code>BlockHeaders</code>, validating signatures can be very expensive, and can be deferred in favor of other validation. (ie lots of BlockHeaders coming in through network pipe, dont want to bound on sig verification, other checks can help dump blocks on the floor faster (BV0, BV2)
-- in <code>CHAIN_FOLLOW</code>, we&rsquo;re not receiving thousands, we&rsquo;re receiving maybe a dozen or 2 dozen packets in a few seconds. We receive cid w/ Sig and addr first (ideally fits in 1 packet), and can afford to (a) check if we already have the cid (if so done, cheap), or (b) if not, check if sig is correct before fetching header (expensive computation, but checking 1 sig is way faster than checking a ton). In practice likely that which one to do is dependent on miner tradeoffs. we&rsquo;ll recommend something but let miners decide, because one strat or the other may be much more effective depending on their hardware, on their bandwidth limitations, or their propensity to getting DOSed</p>
-
+</li>
+</ul>
+<p>Notes:</p>
+<ul>
+<li>in <code>CHAIN_CATCHUP</code>, if a node is receiving/fetching hundreds/thousands of <code>BlockHeaders</code>, validating signatures can be very expensive, and can be deferred in favor of other validation. (ie lots of BlockHeaders coming in through network pipe, dont want to bound on sig verification, other checks can help dump blocks on the floor faster (BV0, BV2)</li>
+<li>in <code>CHAIN_FOLLOW</code>, we&rsquo;re not receiving thousands, we&rsquo;re receiving maybe a dozen or 2 dozen packets in a few seconds. We receive cid w/ Sig and addr first (ideally fits in 1 packet), and can afford to (a) check if we already have the cid (if so done, cheap), or (b) if not, check if sig is correct before fetching header (expensive computation, but checking 1 sig is way faster than checking a ton). In practice likely that which one to do is dependent on miner tradeoffs. we&rsquo;ll recommend something but let miners decide, because one strat or the other may be much more effective depending on their hardware, on their bandwidth limitations, or their propensity to getting DOSed</li>
+</ul>
 <h2 id="progressive-block-propagation-or-blocksend">Progressive Block Propagation (or BlockSend)</h2>
-
 <ul>
 <li>In order to make Block propagation more efficient, we trade off network round trips for bandwidth usage.</li>
 <li><strong>Motivating observations:</strong>
-
 <ul>
 <li>Block propagation is one of the most security critical points of the whole protocol.</li>
 <li>Bandwidth usage during Block propagation is the biggest rate limiter for network scalability.</li>
@@ -5257,12 +5244,11 @@ be checked and used to make syncing decisions without fetching the <code>Message
 <li><code>Blocks</code> will propagate over a <code>libp2p.PubSub</code>. <code>libp2p.PubSub.Messages</code> will most likely arrive multiple times at a node. Therefore, using only the <code>block.CID</code> here could make this very cheap in bandwidth (more expensive in round trips)</li>
 <li><code>Blocks</code> in a single epoch may include the same <code>Messages</code>, and duplicate transfers can be avoided</li>
 <li><code>Messages</code> propagate through their own <code>MessagePubsub</code>, and nodes have a significant probability of already having a large fraction of the messages in a block. Since messages are the <em>bulk</em> of the size of a <code>Block</code>, this can present great bandwidth savings.</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>Progressive Steps of Block Propagation</strong>
-
 <ul>
 <li><strong>IMPORTANT NOTES</strong>:
-
 <ul>
 <li>these can be effectively pipelined. The <code>receiver</code> is in control of what to pull, and when. It is up them to decide when to trade-off RTTs for Bandwidth.</li>
 <li>If the <code>sender</code> is propagating the block at all to <code>receiver</code>, it is in their interest to provide the full content to <code>receiver</code> when asked. Otherwise the block may not get included at all.</li>
@@ -5271,117 +5257,93 @@ be checked and used to make syncing decisions without fetching the <code>Message
 (as the originator, as another peer in the network, or just a Gossipsub router).</li>
 <li><code>receiver</code> is the local filecoin node running <code>ChainSync</code>, trying to get the blocks.</li>
 <li>for <code>receiver</code> to <code>Pull</code> things from <code>sender</code>, <code>receiver</code>must conntect to <code>sender</code>. Usually <code>sender</code> is sending to <code>receiver</code> because of the Gossipsub propagation rules. <code>receiver</code> could choose to <code>Pull</code> from any other node they are connected to, but it is most likely <code>sender</code> will have the needed information. They usually may be more well-connected in the network.</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>Step 1. (sender) <code>Push BlockHeader</code></strong>:
-
 <ul>
 <li><code>sender</code> sends <code>block.BlockHeader</code> to <code>receiver</code> via Gossipsub:
-
 <ul>
 <li><code>bh := Gossipsub.Send(h block.BlockHeader)</code></li>
 <li>This is a light-ish object (&lt;4KB).</li>
-</ul></li>
+</ul>
+</li>
 <li><code>receiver</code> receives <code>bh</code>.
-
 <ul>
 <li>This has many fields that can be validated before pulling the messages. (See <strong>Progressive Block Validation</strong>).</li>
 <li><strong>BV0</strong>, <strong>BV1</strong>, <strong>BV2</strong>, and <strong>BV3</strong> validation takes place before propagating <code>bh</code> to other nodes.</li>
-<li><code>receiver</code> MAY receive many advertisements for each winning block in an epoch in quick succession. this is because (a) many want propagation as fast as possible, (b) many want to make those network advertisements as light as reasonable, &copy; we want to enable <code>receiver</code> to choose who to ask it from (usually the first party to advertise it, and that&rsquo;s what spec will recommend), and (d) want to be able to fall back to asking others if that fails (fail = dont get it in 1s or so)</li>
-</ul></li>
-</ul></li>
+<li><code>receiver</code> MAY receive many advertisements for each winning block in an epoch in quick succession. this is because (a) many want propagation as fast as possible, (b) many want to make those network advertisements as light as reasonable, (c) we want to enable <code>receiver</code> to choose who to ask it from (usually the first party to advertise it, and that&rsquo;s what spec will recommend), and (d) want to be able to fall back to asking others if that fails (fail = dont get it in 1s or so)</li>
+</ul>
+</li>
+</ul>
+</li>
 <li><strong>Step 2. (receiver) <code>Pull MessageCids</code></strong>:
-
 <ul>
 <li>upon receiving <code>bh</code>, <code>receiver</code> checks whether it already has the full block for <code>bh.BlockCID</code>. if not:
-
 <ul>
 <li><code>receiver</code> requests <code>bh.MessageCids</code> from <code>sender</code>:
-
 <ul>
 <li><code>bm := Graphsync.Pull(sender, SelectAMTCIDs(b.Messages))</code></li>
-</ul></li>
-</ul></li>
-</ul></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li><strong>Step 3. (receiver) <code>Pull Messages</code></strong>:
-
 <ul>
 <li>if <code>receiver</code> <strong>DOES NOT</strong> already have the all messages for <code>b.BlockCID</code>, then:
-
 <ul>
 <li>if <code>receiver</code> has <em>some</em> of the messages:
-
 <ul>
 <li><code>receiver</code> requests missing <code>Messages</code> from <code>sender</code>:
-
 <ul>
 <li><code>Graphsync.Pull(sender, SelectAll(bm[3], bm[10], bm[50], ...))</code> or</li>
-
-<li><pre><code>for m in bm {
-Graphsync.Pull(sender, SelectAll(m))
+<li>
+<pre><code>for m in bm {
+  Graphsync.Pull(sender, SelectAll(m))
 }
 </code></pre></li>
-</ul></li>
-</ul></li>
+</ul>
+</li>
+</ul>
+</li>
 <li>if <code>receiver</code> does not have any of the messages (default safe but expensive thing to do):
-
 <ul>
 <li><code>receiver</code> requests all <code>Messages</code> from <code>sender</code>:
-
 <ul>
 <li><code>Graphsync.Pull(sender, SelectAll(bh.Messages))</code></li>
-</ul></li>
-</ul></li>
+</ul>
+</li>
+</ul>
+</li>
 <li>(This is the largest amount of stuff)</li>
-</ul></li>
-</ul></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><strong>Step 4. (receiver) <code>Validate Block</code></strong>:
-
 <ul>
 <li>the only remaining thing to do is to complete Block Validation.</li>
-</ul></li>
-</ul></li>
 </ul>
-
-<!--
-  - **Step 1. (sender) `Send SignedBlock`**: (TODO: rename to `BlockStamp`)
-      - Block propagation begins with the `sender` propagating the `block.SignedBlock`
-          - `Gossipsub.Send(b block.SignedBlock)`
-      - This is a very light object (~200 bytes), which fits into one network packet.
-      - This has the BlockCID, the MinerAddress and the Signature. This enables parties to (a) learn that a block from a particular miner is propagating, (b) validate the `MinerAddress` and `Signature`, and decide whether to invest more resources pulling the `BlockHeader`, or the `Messages`.
-      - Note that this can propagate to ther rest of the network before the next steps complete.
-  - **Step 2. (receiver) `Pull BlockHeader`**:
-      - if `receiver` **DOES NOT** already have the `BlockHeader` for `b.BlockCID`, then:
-          - `receiver` requests `BlockHeader` from `sender`:
-              - `bh := Graphsync.Pull(sender, SelectCID(b.BlockCID))`
-          - This is a light-ish object (<4KB).
-          - This has many fields that can be validated before pulling the messages. (See **Progressive Block Validation**).
-  - **Step 3. (receiver) `Pull MessageHints` (TODO: validate/decide on this)**:
-      - if `receiver` **DOES NOT** already have the full block for `b.BlockCID`, then:
-          - `receiver` requests `MessagePoolHints` from `sender`: ...
-          - `MessagePoolHints` are TBD -- this is a compressed representation of messages that can expedite message propagation by leveraging prior `MessagePool` syncing.
-          - (This is an extension and not required. can just do Step 4.)
-
--->
-
+</li>
+</ul>
+</li>
+</ul>
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
 <h1 id="calculations">Calculations</h1>
-
 <h2 id="security-parameters">Security Parameters</h2>
-
 <ul>
 <li><code>Peers</code> &gt;= 32 &ndash; direct connections
-
 <ul>
-<li>ideally <code>Peers</code> &gt;= {64, 128}
--</li>
-</ul></li>
+<li>ideally <code>Peers</code> &gt;= {64, 128}</li>
 </ul>
-
+</li>
+<li></li>
+</ul>
 <h2 id="pubsub-bandwidth">Pubsub Bandwidth</h2>
-
 <p>These bandwidth calculations are used to motivate choices in <code>ChainSync</code>.</p>
-
 <p>If you imagine that you will receive the header once per gossipsub peer (or if lucky, half of them), and that there is EC.E_LEADERS=10 blocks per round, then we&rsquo;re talking the difference between:</p>
-
 <pre><code>16 peers, 1 pkt  -- 1 * 16 * 10 = 160 dup pkts (256KB) in &lt;5s
 16 peers, 4 pkts -- 4 * 16 * 10 = 640 dup pkts (1MB)   in &lt;5s
 
@@ -5390,14 +5352,9 @@ Graphsync.Pull(sender, SelectAll(m))
 
 64 peers, 1 pkt  -- 1 * 32 * 10 =   320 dup pkts (1MB) in &lt;5s
 64 peers, 4 pkts -- 4 * 32 * 10 = 1,280 dup pkts (4MB)   in &lt;5s
-</code></pre>
-
-<p>2MB in &lt;5s may not be worth saving&ndash; and maybe gossipsub can be much better about supressing dups.</p>
-
+</code></pre><p>2MB in &lt;5s may not be worth saving&ndash; and maybe gossipsub can be much better about supressing dups.</p>
 <h1 id="notes-todo-move-elsewhere">Notes (TODO: move elsewhere)</h1>
-
 <h2 id="checkpoints">Checkpoints</h2>
-
 <ul>
 <li>A checkpoint is the CID of a block (not a tipset list of CIDs, or StateTree)</li>
 <li>The reason a block is OK is that it uniquely identifies a tipset.</li>
@@ -5406,30 +5363,22 @@ Graphsync.Pull(sender, SelectAll(m))
 <li>When we have <code>EC.E_PARENTS &gt; 5</code> or <code>= 10</code>, tipsets will get annoyingly large.</li>
 <li>the big quirk/weirdness with blocks it that it also must be in the chain. (if you relaxed that constraint you could end up in a weird case where a checkpoint isnt in the chain and that&rsquo;s weird/violates assumptions).</li>
 </ul>
-
-<p><img src="https://user-images.githubusercontent.com/138401/67015561-8c929000-f0ab-11e9-847a-ec42f23b14da.png" alt="" /></p>
-
+<p><img src="https://user-images.githubusercontent.com/138401/67015561-8c929000-f0ab-11e9-847a-ec42f23b14da.png" alt=""></p>
 <h2 id="bootstrap-chain-stub">Bootstrap chain stub</h2>
-
 <ul>
 <li>the mainnet filecoin chain will need to start with a small chain stub of blocks.</li>
 <li>we must include some data in different blocks.</li>
 <li>we do need a genesis block &ndash; we derive randomness from the ticket there. Rather than special casing, it is easier/less complex to ensure a well-formed chain always, including at the beginning</li>
 <li>A lot of code expects lookbacks, especially actor code. Rather than introducing a bunch of special case logic for what happens ostensibly once in network history (special case logic which adds complexity and likelihood of problems), it is easiest to assume the chain is always at least X blocks long, and the system lookback parameters are all fine and dont need to be scaled in the beginning of network&rsquo;s history.</li>
 </ul>
-
 <h2 id="partialgraph">PartialGraph</h2>
-
 <p>The <code>PartialGraph</code> of blocks.</p>
-
 <blockquote>
 <p>Is a graph necessarily connected, or is this just a bag of blocks, with each disconnected subgraph being reported in heads/tails?</p>
 </blockquote>
-
 <p>The latter.  the partial graph is a DAG fragment&ndash; including disconnected components.
 here&rsquo;s a visual example, 4 example PartialGraphs, with Heads and Tails. (note they aren&rsquo;t tipsets)</p>
-
-<p><img src="https://user-images.githubusercontent.com/138401/67014349-90bdae00-f0a9-11e9-9f29-bdca6c673c4b.png" alt="" /></p>
+<p><img src="https://user-images.githubusercontent.com/138401/67014349-90bdae00-f0a9-11e9-9f29-bdca6c673c4b.png" alt=""></p>
 </article>
 
       
@@ -5442,47 +5391,40 @@ here&rsquo;s a visual example, 4 example PartialGraphs, with Heads and Tails. (n
 
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
-<ul>
-<li><a href="#what-is-blockchain-synchronization">What is blockchain synchronization?</a></li>
-<li><a href="#what-is-chainsync">What is ChainSync?</a></li>
-<li><a href="#terms-and-concepts">Terms and Concepts</a></li>
-<li><a href="#chainsync-summary">ChainSync Summary</a></li>
-<li><a href="#libp2p-network-protocols">libp2p Network Protocols</a></li>
-<li><a href="#subcomponents">Subcomponents</a>
-<ul>
-<li><a href="#graphsync-in-chainsync">Graphsync in ChainSync</a>
-<ul>
-<li><a href="#rate-limiting-graphsync-responses-should">Rate Limiting Graphsync responses (SHOULD)</a></li>
-</ul></li>
-<li><a href="#previous-blocksync-protocol">Previous BlockSync protocol</a></li>
-</ul></li>
-<li><a href="#chainsync-state-machine">ChainSync State Machine</a>
-<ul>
-<li><a href="#chainsync-fsm-init">ChainSync FSM: <code>INIT</code></a></li>
-<li><a href="#chainsync-fsm-bootstrap">ChainSync FSM: <code>BOOTSTRAP</code></a></li>
-<li><a href="#chainsync-fsm-sync-checkpoint">ChainSync FSM: <code>SYNC_CHECKPOINT</code></a></li>
-<li><a href="#chainsync-fsm-chain-catchup">ChainSync FSM: <code>CHAIN_CATCHUP</code></a></li>
-<li><a href="#chainsync-fsm-chain-follow">ChainSync FSM: <code>CHAIN_FOLLOW</code></a></li>
-</ul></li>
-<li><a href="#block-fetching-validation-and-propagation">Block Fetching, Validation, and Propagation</a>
-<ul>
-<li><a href="#notes-on-changing-targetheads-while-syncing">Notes on changing <code>TargetHeads</code> while syncing</a></li>
-<li><a href="#general-notes-on-fetching-blocks">General notes on fetching Blocks</a></li>
-<li><a href="#progressive-block-validation">Progressive Block Validation</a></li>
-<li><a href="#progressive-block-propagation-or-blocksend">Progressive Block Propagation (or BlockSend)</a></li>
-</ul></li>
-<li><a href="#calculations">Calculations</a>
-<ul>
-<li><a href="#security-parameters">Security Parameters</a></li>
-<li><a href="#pubsub-bandwidth">Pubsub Bandwidth</a></li>
-</ul></li>
-<li><a href="#notes-todo-move-elsewhere">Notes (TODO: move elsewhere)</a>
-<ul>
-<li><a href="#checkpoints">Checkpoints</a></li>
-<li><a href="#bootstrap-chain-stub">Bootstrap chain stub</a></li>
-<li><a href="#partialgraph">PartialGraph</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#graphsync-in-chainsync">Graphsync in ChainSync</a>
+      <ul>
+        <li><a href="#rate-limiting-graphsync-responses-should">Rate Limiting Graphsync responses (SHOULD)</a></li>
+      </ul>
+    </li>
+    <li><a href="#previous-blocksync-protocol">Previous BlockSync protocol</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#chainsync-fsm-init">ChainSync FSM: INIT</a></li>
+    <li><a href="#chainsync-fsm-bootstrap">ChainSync FSM: BOOTSTRAP</a></li>
+    <li><a href="#chainsync-fsm-sync_checkpoint">ChainSync FSM: SYNC_CHECKPOINT</a></li>
+    <li><a href="#chainsync-fsm-chain_catchup">ChainSync FSM: CHAIN_CATCHUP</a></li>
+    <li><a href="#chainsync-fsm-chain_follow">ChainSync FSM: CHAIN_FOLLOW</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#notes-on-changing-targetheads-while-syncing">Notes on changing TargetHeads while syncing</a></li>
+    <li><a href="#general-notes-on-fetching-blocks">General notes on fetching Blocks</a></li>
+    <li><a href="#progressive-block-validation">Progressive Block Validation</a></li>
+    <li><a href="#progressive-block-propagation-or-blocksend">Progressive Block Propagation (or BlockSend)</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#security-parameters">Security Parameters</a></li>
+    <li><a href="#pubsub-bandwidth">Pubsub Bandwidth</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#checkpoints">Checkpoints</a></li>
+    <li><a href="#bootstrap-chain-stub">Bootstrap chain stub</a></li>
+    <li><a href="#partialgraph">PartialGraph</a></li>
+  </ul>
 </nav>
   </aside>
 

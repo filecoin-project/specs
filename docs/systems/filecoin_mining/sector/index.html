@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4716,16 +4716,11 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown"><div id="systems__filecoin_mining__sector__sector"></div>
-
 <p>The <code>Sector</code> is a fundamental &ldquo;storage container&rdquo; abstraction used in Filecoin Storage Mining. It is the basic unit of storage,
 and serves to make storage conform to a set of expectations.</p>
-
 <p>New sectors are empty upon creation. As the miner receives client data, they fill or &ldquo;pack&rdquo; the piece(s) into an unsealed sector.</p>
-
 <p>Once a sector is full, the unsealed sector is combined by a proving tree into a single root <code>UnsealedSectorCID</code>. The sealing process then encodes (using CBOR) an unsealed sector into a sealed sector, with the root <code>SealedSectorCID</code>.</p>
-
 <p>This diagram shows the composition of an unsealed sector and a sealed sector.</p>
-
 
 
 
@@ -4773,7 +4768,6 @@ and serves to make storage conform to a set of expectations.</p>
 
 
 
-
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 <span class="kn">import</span> <span class="nx">smarkact</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin/storage_market&#34;</span>
@@ -4785,11 +4779,11 @@ and serves to make storage conform to a set of expectations.</p>
 <span class="kd">type</span> <span class="nx">StorageFaultType</span> <span class="kt">int</span>
 
 <span class="c1">// SectorInDetail describes all the bits of information associated
-</span><span class="c1">// with each sector.
-</span><span class="c1">// - ID   - a unique identifier assigned once the Sector is registered on chain
-</span><span class="c1">// - Size - the size of the sector. there are a set of allowable sizes
-</span><span class="c1">//
-</span><span class="c1">// NOTE: do not use this struct. It is for illustrative purposes only.
+</span><span class="c1"></span><span class="c1">// with each sector.
+</span><span class="c1"></span><span class="c1">// - ID   - a unique identifier assigned once the Sector is registered on chain
+</span><span class="c1"></span><span class="c1">// - Size - the size of the sector. there are a set of allowable sizes
+</span><span class="c1"></span><span class="c1">//
+</span><span class="c1"></span><span class="c1">// NOTE: do not use this struct. It is for illustrative purposes only.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorInDetail</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">ID</span>    <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span>
     <span class="nx">Size</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span>
@@ -4810,7 +4804,7 @@ and serves to make storage conform to a set of expectations.</p>
 <span class="p">}</span>
 
 <span class="c1">// SectorInfo is an object that gathers all the information miners know about their
-</span><span class="c1">// sectors. This is meant to be used for a local index.
+</span><span class="c1"></span><span class="c1">// sectors. This is meant to be used for a local index.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">ID</span>                  <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span>
     <span class="nx">UnsealedInfo</span>        <span class="nx">UnsealedSectorInfo</span>
@@ -4840,9 +4834,7 @@ and serves to make storage conform to a set of expectations.</p>
 
 
 
-
 <p>TODO:</p>
-
 <ul>
 <li>describe sizing ranges of sectors</li>
 <li>describe &ldquo;storage/shipping container&rdquo; analogy</li>
@@ -4856,6 +4848,10 @@ and serves to make storage conform to a set of expectations.</p>
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents"></nav>
+  </aside>
 
 
 

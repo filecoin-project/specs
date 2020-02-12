@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4715,19 +4715,13 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  
-
-<div id="algorithms__block_sync__block_sync"></div>
-
+  <div id="algorithms__block_sync__block_sync"></div>
 <ul>
 <li><strong>Name</strong>: Block Sync</li>
 <li><strong>Protocol ID</strong>: <code>/fil/sync/blk/0.0.1</code></li>
 </ul>
-
 <p>The blocksync protocol is a small protocol that allows Filecoin nodes to request ranges of blocks from each other. It is a simple request/response protocol.</p>
-
 <p>The request requests a chain of a given length by the hash of its highest block. The <code>Options</code> allow the requester to specify whether or not blocks and messages to be included.</p>
-
 <p>The response contains the requested chain in reverse iteration order. Each item in the <code>Chain</code> array contains the blocks for that tipset if the <code>Blocks</code> option bit in the request was set, and if the <code>Messages</code> bit was set, the messages across all blocks in that tipset. The <code>MsgIncludes</code> array contains one array of integers for each block in the <code>Blocks</code> array. Each of the arrays in <code>MsgIncludes</code> contains a list of indexes of messages from the <code>Messages</code> array that are in each <code>Block</code> in the blocks array.</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> BlockSyncRequest struct <span class="o">{</span>
     <span class="c1">## The TipSet being synced from</span>
@@ -4736,7 +4730,8 @@ https://github.com/alex-shpak/hugo-book
     requestLength UInt
     <span class="c1">## Query options</span>
     options Options
-<span class="o">}</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> Options enum <span class="o">{</span>
+<span class="o">}</span>
+</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> Options enum <span class="o">{</span>
     <span class="c1"># Include only blocks</span>
     <span class="p">|</span> Blocks <span class="m">0</span>
     <span class="c1"># Include only messages</span>
@@ -4753,10 +4748,10 @@ https://github.com/alex-shpak/hugo-book
 <span class="nb">type</span> TipSetBundle struct <span class="o">{</span>
   blocks <span class="o">[</span>Blocks<span class="o">]</span>
   secpMsgs <span class="o">[</span>SignedMessage<span class="o">]</span>
-  secpMsgIncludes <span class="o">[[</span>UInt<span class="o">]]</span>
+  secpMsgIncludes <span class="o">[</span><span class="o">[</span>UInt<span class="o">]</span><span class="o">]</span>
 
   blsMsgs <span class="o">[</span>Message<span class="o">]</span>
-  blsMsgIncludes <span class="o">[[</span>Uint<span class="o">]]</span>
+  blsMsgIncludes <span class="o">[</span><span class="o">[</span>Uint<span class="o">]</span><span class="o">]</span>
 <span class="o">}</span>
 
 <span class="nb">type</span> Status enum <span class="o">{</span>
@@ -4772,22 +4767,16 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">|</span> InternalError <span class="m">203</span>
     <span class="c1">## Request was bad</span>
     <span class="p">|</span> BadRequest <span class="m">204</span>
-<span class="o">}</span></code></pre></div>
-<h2 id="example">Example</h2>
-
+<span class="o">}</span>
+</code></pre></div><h2 id="example">Example</h2>
 <p>The TipSetBundle</p>
-
 <pre><code>Blocks: [b0, b1]
 secpMsgs: [mA, mB, mC, mD]
 secpMsgIncludes: [[0, 1, 3], [1, 2, 0]]
-</code></pre>
-
-<p>corresponds to:</p>
-
+</code></pre><p>corresponds to:</p>
 <pre><code>Block 'b0': [mA, mB, mD]
 Block 'b1': [mB, mC, mA]
 </code></pre>
-
 </article>
 
       
@@ -4800,12 +4789,9 @@ Block 'b1': [mB, mC, mA]
 
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#example">Example</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#example">Example</a></li>
+  </ul>
 </nav>
   </aside>
 

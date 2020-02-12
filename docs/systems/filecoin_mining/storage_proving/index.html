@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4735,7 +4735,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">poster</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&#34;</span>
 <span class="kn">import</span> <span class="nx">sealer</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/sealer&#34;</span>
@@ -4745,8 +4744,8 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">SectorSealer</span>   <span class="nx">sealer</span><span class="p">.</span><span class="nx">SectorSealer</span>
     <span class="nx">PoStGenerator</span>  <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStGenerator</span>
 
-    <span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">,</span> <span class="nx">pieceInfos</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">])</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">ok</span> <span class="kt">bool</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
-    <span class="nf">ComputeUnsealedSectorCID</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">UInt</span><span class="p">,</span> <span class="nx">pieceInfos</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">])</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">unsealedSectorCID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+    <span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">,</span> <span class="nx">pieceInfos</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">]</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">ok</span> <span class="kt">bool</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+    <span class="nf">ComputeUnsealedSectorCID</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">UInt</span><span class="p">,</span> <span class="nx">pieceInfos</span> <span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">]</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">unsealedSectorCID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 
     <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span>
 
@@ -4788,6 +4787,10 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents"></nav>
+  </aside>
 
 
 

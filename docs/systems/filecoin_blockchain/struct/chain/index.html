@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4736,7 +4736,6 @@ A Chain is a sequence of tipsets, linked together. It is a single history of exe
 
 
 
-
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 
@@ -4757,34 +4756,33 @@ A Chain is a sequence of tipsets, linked together. It is a single history of exe
 <span class="p">}</span>
 
 <span class="c1">// Checkpoint represents a particular block to use as a trust anchor
-</span><span class="c1">// in Consensus and ChainSync
-</span><span class="c1">//
-</span><span class="c1">// Note: a Block uniquely identifies a tipset (the parents)
-</span><span class="c1">// from here, we may consider many tipsets that _include_ Block
-</span><span class="c1">// but we must indeed include t and not consider tipsets that
-</span><span class="c1">// fork from Block.Parents, but do not include Block.
+</span><span class="c1"></span><span class="c1">// in Consensus and ChainSync
+</span><span class="c1"></span><span class="c1">//
+</span><span class="c1"></span><span class="c1">// Note: a Block uniquely identifies a tipset (the parents)
+</span><span class="c1"></span><span class="c1">// from here, we may consider many tipsets that _include_ Block
+</span><span class="c1"></span><span class="c1">// but we must indeed include t and not consider tipsets that
+</span><span class="c1"></span><span class="c1">// fork from Block.Parents, but do not include Block.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">Checkpoint</span> <span class="o">&amp;</span><span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span>
 
 <span class="c1">// SoftCheckpoint is a checkpoint that Filecoin nodes may use as they
-</span><span class="c1">// gain confidence in the blockchain. It is a unilateral checkpoint,
-</span><span class="c1">// and derived algorithmically from notions of probabilistic consensus
-</span><span class="c1">// and finality.
+</span><span class="c1"></span><span class="c1">// gain confidence in the blockchain. It is a unilateral checkpoint,
+</span><span class="c1"></span><span class="c1">// and derived algorithmically from notions of probabilistic consensus
+</span><span class="c1"></span><span class="c1">// and finality.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SoftCheckpoint</span> <span class="nx">Checkpoint</span>
 
 <span class="c1">// TrustedCheckpoint is a Checkpoint that is trusted by the broader
-</span><span class="c1">// Filecoin Network. These TrustedCheckpoints are arrived at through
-</span><span class="c1">// the higher level economic consensus that surrounds Filecoin.
-</span><span class="c1">// TrustedCheckpoints:
-</span><span class="c1">// - MUST be at least 200,000 blocks old (&gt;1mo)
-</span><span class="c1">// - MUST be at least
-</span><span class="c1">// - MUST be widely known and accepted
-</span><span class="c1">// - MAY ship with Filecoin software implementations
-</span><span class="c1">// - MAY be propagated through other side-channel systems
-</span><span class="c1">// For more, see the Checkpoints section.
-</span><span class="c1">// TODO: consider renaming as EconomicCheckpoint
+</span><span class="c1"></span><span class="c1">// Filecoin Network. These TrustedCheckpoints are arrived at through
+</span><span class="c1"></span><span class="c1">// the higher level economic consensus that surrounds Filecoin.
+</span><span class="c1"></span><span class="c1">// TrustedCheckpoints:
+</span><span class="c1"></span><span class="c1">// - MUST be at least 200,000 blocks old (&gt;1mo)
+</span><span class="c1"></span><span class="c1">// - MUST be at least
+</span><span class="c1"></span><span class="c1">// - MUST be widely known and accepted
+</span><span class="c1"></span><span class="c1">// - MAY ship with Filecoin software implementations
+</span><span class="c1"></span><span class="c1">// - MAY be propagated through other side-channel systems
+</span><span class="c1"></span><span class="c1">// For more, see the Checkpoints section.
+</span><span class="c1"></span><span class="c1">// TODO: consider renaming as EconomicCheckpoint
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">TrustedCheckpoint</span> <span class="nx">Checkpoint</span>
 </code></pre></div>
-
 
 
 
@@ -4819,9 +4817,9 @@ A Chain is a sequence of tipsets, linked together. It is a single history of exe
 
 <span class="c1">// Returns the tipset at or immediately prior to `epoch`.
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset</span> <span class="p">{</span>
-	<span class="nx">current</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">HeadTipset</span><span class="p">()</span>
-	<span class="k">for</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Epoch</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">epoch</span> <span class="p">{</span>
-		<span class="nx">current</span> <span class="p">=</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Parents</span><span class="p">()</span>
+	<span class="nx">current</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">HeadTipset</span><span class="p">(</span><span class="p">)</span>
+	<span class="k">for</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Epoch</span><span class="p">(</span><span class="p">)</span> <span class="p">&gt;</span> <span class="nx">epoch</span> <span class="p">{</span>
+		<span class="nx">current</span> <span class="p">=</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Parents</span><span class="p">(</span><span class="p">)</span>
 	<span class="p">}</span>
 
 	<span class="k">return</span> <span class="nx">current</span>
@@ -4830,7 +4828,7 @@ A Chain is a sequence of tipsets, linked together. It is a single history of exe
 <span class="c1">// Draws randomness from the tipset at or immediately prior to `epoch`.
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span> <span class="p">{</span>
 	<span class="nx">ts</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
-	<span class="k">return</span> <span class="nx">ts</span><span class="p">.</span><span class="nf">MinTicket</span><span class="p">().</span><span class="nf">DrawRandomness</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">ts</span><span class="p">.</span><span class="nf">MinTicket</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">DrawRandomness</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">GetTicketProductionRandSeed</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span> <span class="p">{</span>
@@ -4859,6 +4857,10 @@ A Chain is a sequence of tipsets, linked together. It is a single history of exe
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents"></nav>
+  </aside>
 
 
 

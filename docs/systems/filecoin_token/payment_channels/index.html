@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4716,29 +4716,18 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown"><div id="systems__filecoin_token__payment_channels__payment_channels"></div>
-
 <p>Payment Channels are used in the Filecoin <a href="../../../../#systems__filecoin_markets__retrieval_market___index">Retrieval Market</a> to enable efficient off-chain payments and accounting between parties for what is expected to be series of microtransactions, specifically those occurring as part of retrieval market data retrieval.</p>
-
 <p>Note that the following provides a high-level overview of payment channels and an accompanying interface. The lotus implementation of <a href="https://github.com/filecoin-project/lotus/blob/master/chain/types/voucher.go">vouchers</a> and <a href="https://github.com/filecoin-project/lotus/tree/master/paych">payment channels</a> are also good references.</p>
-
 <p>You can also read more about the <a href="../../../../#systems__filecoin_token__payment_channels__payment_channel_actor">Filecoin payment channel actor interface</a>.</p>
-
 <p>In short, the payment channel actor can be used to open long-lived, flexible payment channels between users. Each channel can be funded by adding to their balance.
 The goal of the payment channel actor is to enable a series of off-chain microtransactions to be reconciled on-chain at a later time with fewer messages. Accordingly, the expectation is <code>From</code> will send to <code>To</code> vouchers of successively greater <code>Value</code> and increasing <code>Nonce</code>s. When they choose to, <code>To</code> can <code>Update</code> the channel to update the balance available <code>ToSend</code> to them in the channel, and can choose to <code>Collect</code> this balance at any time (incurring a gas cost).
 The channel is split into <code>lane</code>s created as part of updating the channel state with a payment <code>voucher</code>. Each lane has an associated <code>nonce</code> and amount of tokens it can be <code>redeemed</code> for. These lanes allow for a lot of accounting between parties to be done off chain and reconciled via single updates to the payment channel, merging these lanes to arrive at a desired outcome.</p>
-
 <p>Over the course of a transaction cycle, each party to the payment channel can send the other <code>voucher</code>s. The payment channel&rsquo;s  <code>From</code> account holder will send a signed voucher with a given nonce to the <code>To</code> account holder. The latter can use the voucher to <code>redeem</code> part of the lane&rsquo;s value, merging other lanes into it as needed.</p>
-
 <p>For instance if <code>From</code> sends <code>To</code> the following vouchers (voucher_val, voucher_nonce) for a lane with 100 to be redeemed: (10, 1), (20, 2), (30, 3), then <code>To</code> could choose to redeem (30, 3) bringing the lane&rsquo;s value to 70 (100 - 30). They could not redeem (10, 1) or (20, 2) thereafter. They could however redeem (20, 2) for 20, and then (30, 3) for 10 (30 - 20) thereafter.</p>
-
 <p>The multiple lanes enable two parties to use a single payment channel to adjudicate multiple independent sets of payments.</p>
-
 <p>Vouchers are signed by the sender and authenticated using a <code>Secret</code>, <code>PreImage</code> pair provided by the paying party. If the <code>PreImage</code> is indeed a pre-image of the <code>Secret</code> when used as input to some given algorithm (typically a one-way function like a hash), the <code>Voucher</code> is valid. The <code>Voucher</code> itself contains the <code>PreImage</code> but not the <code>Secret</code> (communicated separately to the receiving party). This enables multi-hop payments since an intermediary cannot redeem a voucher on their own. They can also be used to update the minimum height at which a channel will be closed. Likewise, vouchers can have <code>TimeLock</code>s to prevent they are being used too early, likewise a channel can have a <code>MinCloseHeight</code> to prevent it being closed prematurely (e.g. before the recipient has collected funds) by the sender.</p>
-
 <p>Once their transactions have completed, either party can choose to <code>Close</code> the channel, the recipient can then <code>Collect</code> the <code>ToPay</code> amount from the channel. <code>From</code> will be refunded the remaining balance in the channel.</p>
-
 <p>So we have:</p>
-
 <ul>
 <li>[off-chain] - Two parties agree to a series of transactions (for instance as part of file retrieval) with party <strong>A</strong> paying party <strong>B</strong> up to some <strong>total</strong> sum of Filecoin over time.</li>
 <li>[on-chain] - The <a href="../../../../#systems__filecoin_token__payment_channels__payment_channel_actor">Payment Channel Actor</a> is used called by A to open a payment channel <code>from</code> A <code>to</code> B and a lane is opened to increase the <code>balance</code> of the channel, triggering a transaction between A and the payment channel actor.
@@ -4757,6 +4746,10 @@ At any time, A can open new lanes to increase the total balance available in the
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents"></nav>
+  </aside>
 
 
 

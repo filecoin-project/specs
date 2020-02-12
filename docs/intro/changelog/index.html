@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4715,73 +4715,68 @@ https://github.com/alex-shpak/hugo-book
 </header>
 
       
-<article class="markdown">
-
-<h1 id="v1-1-2019-10-30-c3f6a6dd">v1.1 - 2019-10-30 - <code>c3f6a6dd</code></h1>
-
+<article class="markdown"><h1 id="v11---2019-10-30---c3f6a6dd">v1.1 - 2019-10-30 - <code>c3f6a6dd</code></h1>
 <ul>
 <li><strong>Deals on chain</strong>
-
 <ul>
 <li>Storage Deals</li>
 <li>Full <code>StorageMarketActor</code> logic:
-
 <ul>
 <li>client and miner balances: deposits, locking, charges, and withdrawls</li>
 <li>collateral slashing</li>
-</ul></li>
+</ul>
+</li>
 <li>Full <code>StorageMinerActor</code> logic:
-
 <ul>
 <li>sector states, state transitions, state accounting, power accounting</li>
 <li>DeclareFaults + RecoverSectors flow</li>
 <li><code>CommitSector</code> flow</li>
 <li><code>SubmitElectionPost</code> or <code>SubmitSurprisePoSt</code> flow
-
 <ul>
 <li>Sector proving, faults, recovery, and expiry</li>
-</ul></li>
+</ul>
+</li>
 <li><code>OnMissedSurprisePost</code> flow
-
 <ul>
 <li>Fault sectors, drop power, expiry, and more</li>
-</ul></li>
-</ul></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><code>StoragePowerActor</code>
-
 <ul>
 <li>power accounting based on <code>StorageMinerActor</code> state changes</li>
 <li>Collaterals: deposit, locking, withdrawal</li>
 <li>Slashing collaerals</li>
-</ul></li>
+</ul>
+</li>
 <li>Interactive-Post
-
 <ul>
 <li><code>StorageMinerActor</code>: <code>PrecommitSector</code> and <code>CommitSector</code></li>
-</ul></li>
+</ul>
+</li>
 <li>Surprise-Post
-
 <ul>
 <li>Challenge flow through <code>CronActor -&gt; StoragePowerActor -&gt; StorageMiner</code></li>
-</ul></li>
-</ul></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><strong>Virtual Machine</strong>
-
 <ul>
 <li>Extracted VM system out of blockchain</li>
 <li>Addresses</li>
 <li>Actors
-
 <ul>
 <li>Separation of code and state</li>
-</ul></li>
+</ul>
+</li>
 <li>Messages
-
 <ul>
 <li>Method invocation representation</li>
-</ul></li>
+</ul>
+</li>
 <li>Runtime
-
 <ul>
 <li>Slimmed down interface</li>
 <li>Safer state Acquire, Release, Commit flow</li>
@@ -4790,130 +4785,128 @@ https://github.com/alex-shpak/hugo-book
 <li>Safer recursive context construction</li>
 <li>Error levels and handling</li>
 <li>Detecting and handling out of gas errors</li>
-</ul></li>
+</ul>
+</li>
 <li>Interpreter
-
 <ul>
 <li><code>ApplyMessage</code></li>
 <li><code>{Deduct,Deposit} -&gt; Transfer</code> - safer</li>
 <li>Gas accounting</li>
-</ul></li>
+</ul>
+</li>
 <li>VM system actors
-
 <ul>
 <li><code>InitActor</code> basic flow, plug into Runtime</li>
 <li><code>CronActor</code> full flow, static registry</li>
-</ul></li>
+</ul>
+</li>
 <li><code>AccountActor</code> basic flow</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>Data Transfer</strong>
-
 <ul>
 <li>Full Data Transfer flows
-
 <ul>
 <li>push, pull, 1-RTT pull</li>
-</ul></li>
+</ul>
+</li>
 <li>protocol, data structures, interface</li>
 <li>diagrams</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>blockchain/ChainSync:</strong>
-
 <ul>
 <li>first version of ChainSync protocol description</li>
 <li>Includes protocol state machine description</li>
 <li>Network bootstrap &ndash; connectivity and state</li>
 <li>Progressive Block Validation</li>
 <li>Progressive Block Propagation</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>Other</strong>
-
 <ul>
 <li>Spec section status indicators</li>
 <li>Changelog</li>
-</ul></li>
 </ul>
-
-<h1 id="v1-0-2019-10-07-583b1d06">v1.0 - 2019-10-07 - <code>583b1d06</code></h1>
-
+</li>
+</ul>
+<h1 id="v10---2019-10-07---583b1d06">v1.0 - 2019-10-07 - <code>583b1d06</code></h1>
 <ul>
 <li><strong>Full spec reorganization</strong></li>
 <li><strong>Tooling</strong>
-
 <ul>
 <li>added a build system to compile tools</li>
 <li>added diagraming tools (dot, mermaid, etc)</li>
 <li>added dependency installation</li>
 <li>added Orient to calculate protocol parameters</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>Content</strong>
-
 <ul>
 <li><strong>filecoin_nodes</strong>
-
 <ul>
 <li>types - an overview of different filecoin node types</li>
 <li>repository - local data-structure storage</li>
 <li>network interface - connecting to libp2p</li>
 <li>clock - a wall clock</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>files &amp; data</strong>
-
 <ul>
 <li>file - basic representation of data</li>
 <li>piece - representation of data to store in filecoin</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>blockchain</strong>
-
 <ul>
 <li>blocks - basic blockchain data structures (block, tipset, chain, etc)</li>
 <li>storage power consensus - basic algorithms and crypto artifacts for SPC</li>
 <li><code>StoragePowerActor</code> basics</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>token</strong>
-
 <ul>
 <li>skeleton of sections</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>storage mining</strong>
-
 <ul>
 <li>storage miner: module that controls and coordinates storage mining</li>
 <li>sector: unit of storage, sealing, crypto artifacts, etc.</li>
 <li>sector index: accounting sectors and metadata</li>
 <li>storage proving: seals, posts, and more</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>market</strong>
-
 <ul>
 <li>deals: storage market deal basics</li>
 <li>storage market: <code>StorageMarketActor</code> basics</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>orient</strong>
-
 <ul>
 <li>orient models for proofs and block sizes</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>libraries</strong>
-
 <ul>
 <li>filcrypto - sealing, PoRep, PoSt algorithms</li>
 <li>ipld - cids, ipldstores</li>
 <li>libp2p - host/node representation</li>
 <li>ipfs - graphsync and bitswap</li>
 <li>multiformats - multihash, multiaddr</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>diagrams</strong>
-
 <ul>
 <li>system overview</li>
 <li>full protocol mermaid flow</li>
-</ul></li>
-</ul></li>
 </ul>
-
-<h1 id="pre-v1-0">pre v1.0</h1>
-
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="pre-v10">pre v1.0</h1>
 <ul>
 <li>Extensive write up of the filecoin protocol - visible <a href="https://github.com/filecoin-project/specs/tree/prevspec">here</a></li>
 <li>See full changelog: <a href="https://github.com/filecoin-project/specs/commits/prevspec">https://github.com/filecoin-project/specs/commits/prevspec</a></li>
@@ -4929,13 +4922,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   <aside class="book-toc level-6 fixed">
-    <nav id="TableOfContents">
-<ul>
-<li><a href="#v1-1-2019-10-30-c3f6a6dd">v1.1 - 2019-10-30 - <code>c3f6a6dd</code></a></li>
-<li><a href="#v1-0-2019-10-07-583b1d06">v1.0 - 2019-10-07 - <code>583b1d06</code></a></li>
-<li><a href="#pre-v1-0">pre v1.0</a></li>
-</ul>
-</nav>
+    <nav id="TableOfContents"></nav>
   </aside>
 
 

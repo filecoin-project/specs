@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4715,15 +4715,12 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  
-
-<p>The <code>FileStore</code> is an abstraction used to refer to any underlying system or device
+  <p>The <code>FileStore</code> is an abstraction used to refer to any underlying system or device
 that Filecoin will store its data to. It is based on Unix filesystem semantics, and
 includes the notion of <code>Paths</code>. This abstraction is here in order to make sure Filecoin
 implementations make it easy for end-users to replace the underlying storage system with
 whatever suits their needs. The simplest version of <code>FileStore</code> is just the host operating
 system&rsquo;s file system.</p>
-
 
 
 
@@ -4759,20 +4756,15 @@ system&rsquo;s file system.</p>
 
 
 
-
 <h1 id="varying-user-needs">Varying user needs</h1>
-
 <p>Filecoin user needs vary significantly, and many users &ndash; especially miners &ndash; will implement
 complex storage architectures underneath and around Filecoin. The <code>FileStore</code> abstraction is here
 to make it easy for these varying needs to be easy to satisfy. All file and sector local data
 storage in the Filecoin Protocol is defined in terms of this <code>FileStore</code> interface, which makes
 it easy for implementations to make swappable, and for end-users to swap out with their system
 of choice.</p>
-
 <h1 id="implementation-examples">Implementation examples</h1>
-
 <p>The <code>FileStore</code> interface may be implemented by many kinds of backing data storage systems. For example:</p>
-
 <ul>
 <li>The host Operating System file system</li>
 <li>Any Unix/Posix file system</li>
@@ -4784,7 +4776,6 @@ of choice.</p>
 <li>Raw serial or block devices</li>
 <li>Raw hard drives (hdd sectors, etc)</li>
 </ul>
-
 <p>Implementations SHOULD implement support for the host OS file system.
 Implementations MAY implement support for other storage systems.</p>
 
@@ -4799,12 +4790,7 @@ Implementations MAY implement support for other storage systems.</p>
   
 
   <aside class="book-toc level-6 fixed">
-    <nav id="TableOfContents">
-<ul>
-<li><a href="#varying-user-needs">Varying user needs</a></li>
-<li><a href="#implementation-examples">Implementation examples</a></li>
-</ul>
-</nav>
+    <nav id="TableOfContents"></nav>
   </aside>
 
 

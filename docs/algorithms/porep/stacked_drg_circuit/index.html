@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4715,12 +4715,8 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  
-
-<h3 id="stacked-drg-overview">Stacked DRG Overview</h3>
-
+  <h3 id="stacked-drg-overview">Stacked DRG Overview</h3>
 <p>Stacked DRG PoRep is based on layering DRG graphs <code>LAYERS</code> times. The data represented in each DRG layer is a labeling based on previously labeled nodes. The final labeled layer is the SDR key, and the &lsquo;final layer&rsquo; of replication the replica, an encoding of the original data using the generated key.</p>
-
 <ul>
 <li><code>ReplicaId</code> is a unique replica identifier (see the Filecoin Proofs spec for details).</li>
 <li><code>CommD</code> is the Merkle tree root hash of the input data to the first layer.</li>
@@ -4728,32 +4724,24 @@ https://github.com/alex-shpak/hugo-book
 <li><code>CommRLast</code> is the Merkle tree root hash of the replica.</li>
 <li><code>CommR</code> is the on-chain commitment to the replica, dervied as the hash of the concatenation of <code>CommC</code> and <code>CommRLast</code>.</li>
 </ul>
-
 <p>The (offline) proof size in SDR is too large for blockchain usage (~3MB). We use SNARKs to generate a proof of knowledge of a correct SDR proof. In other words, we implement the SDR proof verification algorithm in an arithmetic circuit and use SNARKs to prove that it was evaluated correctly.</p>
-
 <p>This circuit proves that given a Merkle root <code>CommD</code>, <code>CommRLast</code>, and <code>commRStar</code>, that the prover knew the correct replicated data at each layer.</p>
-
 <h3 id="spec-notation">Spec notation</h3>
-
 <ul>
 <li><strong>Fr</strong>: Field element of BLS12-381</li>
 <li><strong>UInt</strong>: Unsigned integer</li>
 <li><strong>{0..x}</strong>: From <code>0</code> (included) to <code>x</code> (not included) (e.g. <code>[0,x)</code> )</li>
 <li><strong>Check</strong>:
-
 <ul>
 <li>If there is an equality, create a constraint</li>
 <li>otherwise, execute the function</li>
-</ul></li>
+</ul>
+</li>
 <li><strong>Inclusion path</strong>: Binary representation of the Merkle tree path that must be proven packed into a single <code>Fr</code> element.</li>
 </ul>
-
 <h1 id="offline-porep-circuit">Offline PoRep circuit</h1>
-
 <h2 id="public-parameters">Public Parameters</h2>
-
 <p><em>Parameters that are embeded in the circuits or used to generate the circuit</em></p>
-
 <ul>
 <li><code>LAYERS : UInt</code>: Number of DRG layers.</li>
 <li><code>LAYER_CHALLENGES : [LAYERS]UInt</code>: Number of challenges per layer.</li>
@@ -4762,11 +4750,8 @@ https://github.com/alex-shpak/hugo-book
 <li><code>TREE_DEPTH: UInt</code>: Depth of the Merkle tree. Note, this is (log_2(Size of original data in bytes/32 bytes per leaf)).</li>
 <li><code>PARENT_COUNT : UInt</code>: Defined as <code>EXPANSION_DEGREE+BASE_DEGREE</code>.</li>
 </ul>
-
 <h2 id="public-inputs">Public Inputs</h2>
-
 <p><em>Inputs that the prover uses to generate a SNARK proof and that the verifier uses to verify it</em></p>
-
 <ul>
 <li><code>ReplicaId : Fr</code>: A unique identifier for the replica.</li>
 <li><code>CommD : Fr</code>: the Merkle tree root hash of the original data (input to the first layer).</li>
@@ -4774,50 +4759,46 @@ https://github.com/alex-shpak/hugo-book
 <li><code>InclusionPath : [LAYERS][]Fr</code>: Inclusion path for the challenged data and replica leaf.</li>
 <li><code>ParentInclusionPath : [LAYERS][][PARENT_COUNT]Fr</code>:  Inclusion path for the parents of the corresponding <code>InclusionPath[l][c]</code>.</li>
 </ul>
-
 <p>Design notes:</p>
-
 <ul>
 <li><code>CommRLast</code> is a private input used during during Proof-of-Spacetime.
 To enable this, the prover must store <code>CommC</code> and use it to prove that <code>CommRLast</code> is included in <code>CommR</code> [TODO: define &lsquo;included&rsquo; language.]</li>
 <li><code>InclusionPath</code> and <code>ParentInclusionPath</code>: Each layer <code>l</code> has <code>LAYER_CHALLENGES[l]</code> inclusion paths.</li>
 </ul>
-
 <h2 id="private-inputs">Private Inputs</h2>
-
 <p><em>Inputs that the prover uses to generate a SNARK proof, these are not needed by the verifier to verify the proof</em></p>
-
 <ul>
-<li><code>CommR : [LAYERS-1]Fr</code>: Commitment of the the encoded data at each layer.</li>
-</ul>
-
+<li>
+<p><code>CommR : [LAYERS-1]Fr</code>: Commitment of the the encoded data at each layer.</p>
 <p>Note: Size is <code>LAYERS-1</code> since the commitment to the last layer is <code>CommRLast</code></p>
-
-<ul>
-<li><p><code>DataProof : [LAYERS][][TREE_DEPTH]Fr</code>: Merkle tree inclusion proof for the current layer unencoded challenged leaf.</p></li>
-
-<li><p><code>ReplicaProof : [LAYERS][][TREE_DEPTH]Fr</code>: Merkle tree inclusion proof for the current layer encoded challenged leaves.</p></li>
-
-<li><p><code>ParentProof : [LAYERS][][PARENT_COUNT][TREE_DEPTH]Fr</code>: Pedersen hashes of the Merkle inclusion proofs of the parent leaves for each challenged leaf at layer <code>l</code>.</p></li>
-
-<li><p><code>DataValue : [LAYERS][]Fr</code>: Value of the unencoded challenged leaves at layer <code>l</code>.</p></li>
-
-<li><p><code>ReplicaValue : [LAYERS][]Fr</code>: Value of the encoded leaves for each challenged leaf at layer <code>l</code>.</p></li>
-
-<li><p><code>ParentValue : [LAYERS][][PARENT_COUNT]Fr</code>: Value of the parent leaves for each challenged leaf at layer <code>l</code>.</p></li>
+</li>
+<li>
+<p><code>DataProof : [LAYERS][][TREE_DEPTH]Fr</code>: Merkle tree inclusion proof for the current layer unencoded challenged leaf.</p>
+</li>
+<li>
+<p><code>ReplicaProof : [LAYERS][][TREE_DEPTH]Fr</code>: Merkle tree inclusion proof for the current layer encoded challenged leaves.</p>
+</li>
+<li>
+<p><code>ParentProof : [LAYERS][][PARENT_COUNT][TREE_DEPTH]Fr</code>: Pedersen hashes of the Merkle inclusion proofs of the parent leaves for each challenged leaf at layer <code>l</code>.</p>
+</li>
+<li>
+<p><code>DataValue : [LAYERS][]Fr</code>: Value of the unencoded challenged leaves at layer <code>l</code>.</p>
+</li>
+<li>
+<p><code>ReplicaValue : [LAYERS][]Fr</code>: Value of the encoded leaves for each challenged leaf at layer <code>l</code>.</p>
+</li>
+<li>
+<p><code>ParentValue : [LAYERS][][PARENT_COUNT]Fr</code>: Value of the parent leaves for each challenged leaf at layer <code>l</code>.</p>
+</li>
 </ul>
-
 <h2 id="circuit">Circuit</h2>
-
 <p>In high level, we do 4 checks:</p>
-
 <ol>
 <li><strong>ReplicaId Check</strong>: Check the binary representation of the ReplicaId</li>
 <li><strong>Inclusion Proofs Checks</strong>: Check the inclusion proofs</li>
 <li><strong>Encoding Checks</strong>: Check that the data has been correctly encoding into a replica</li>
 <li><strong>CommRStar Check</strong>: Check that CommRStar has been generated correctly</li>
 </ol>
-
 <p>Detailed</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// 1: ReplicaId Check - Check ReplicaId is equal to its bit representation
 </span><span class="c1"></span><span class="nx">let</span> <span class="nx">ReplicaIdBits</span> <span class="p">:</span> <span class="p">[</span><span class="mi">255</span><span class="p">]</span><span class="nx">Fr</span> <span class="p">=</span> <span class="nf">Fr_to_bits</span><span class="p">(</span><span class="nx">ReplicaId</span><span class="p">)</span>
@@ -4842,21 +4823,21 @@ To enable this, the prover must store <code>CommC</code> and use it to prove tha
   <span class="k">for</span> <span class="nx">c</span> <span class="nx">in</span> <span class="k">range</span> <span class="nx">LAYERS_CHALLENGES</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span> <span class="p">{</span>
     <span class="c1">// 2: Inclusion Proofs Checks
 </span><span class="c1"></span>    <span class="c1">// 2.1: Check inclusion proofs for data leaves are correct
-</span><span class="c1"></span>    <span class="nf">assert</span><span class="p">(</span><span class="nf">MerkleTreeVerify</span><span class="p">(</span><span class="nx">DataRoot</span><span class="p">,</span> <span class="nx">InclusionPath</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">],</span> <span class="nx">DataProof</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">],</span> <span class="nx">DataValue</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">]))</span>
+</span><span class="c1"></span>    <span class="nf">assert</span><span class="p">(</span><span class="nf">MerkleTreeVerify</span><span class="p">(</span><span class="nx">DataRoot</span><span class="p">,</span> <span class="nx">InclusionPath</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">,</span> <span class="nx">DataProof</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">,</span> <span class="nx">DataValue</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">)</span><span class="p">)</span>
     <span class="c1">// 2.2: Check inclusion proofs for replica leaves are correct
-</span><span class="c1"></span>    <span class="nf">assert</span><span class="p">(</span><span class="nf">MerkleTreeVerify</span><span class="p">(</span><span class="nx">ReplicaRoot</span><span class="p">,</span> <span class="nx">InclusionPath</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">],</span> <span class="nx">ReplicaProof</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">],</span> <span class="nx">ReplicaValue</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">]))</span>
+</span><span class="c1"></span>    <span class="nf">assert</span><span class="p">(</span><span class="nf">MerkleTreeVerify</span><span class="p">(</span><span class="nx">ReplicaRoot</span><span class="p">,</span> <span class="nx">InclusionPath</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">,</span> <span class="nx">ReplicaProof</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">,</span> <span class="nx">ReplicaValue</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">)</span><span class="p">)</span>
     <span class="c1">// 2.3: Check inclusion proofs for parent leaves are correct
 </span><span class="c1"></span>    <span class="k">for</span> <span class="nx">p</span> <span class="nx">in</span> <span class="k">range</span> <span class="nx">PARENT_COUNT</span> <span class="p">{</span>
-      <span class="nf">assert</span><span class="p">(</span><span class="nf">MerkleTreeVerify</span><span class="p">(</span><span class="nx">ReplicaRoot</span><span class="p">,</span> <span class="nx">ParentInclusionPath</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">][</span><span class="nx">p</span><span class="p">],</span> <span class="nx">ParentProof</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">][</span><span class="nx">p</span><span class="p">]))</span>
+      <span class="nf">assert</span><span class="p">(</span><span class="nf">MerkleTreeVerify</span><span class="p">(</span><span class="nx">ReplicaRoot</span><span class="p">,</span> <span class="nx">ParentInclusionPath</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">[</span><span class="nx">p</span><span class="p">]</span><span class="p">,</span> <span class="nx">ParentProof</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">[</span><span class="nx">p</span><span class="p">]</span><span class="p">)</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="c1">// 3: Encoding checks - Check that replica leaves have been correctly encoded
-</span><span class="c1"></span>    <span class="nx">let</span> <span class="nx">ParentBits</span> <span class="p">[</span><span class="nx">PARENT_COUNT</span><span class="p">][</span><span class="mi">255</span><span class="p">]</span><span class="nx">Fr</span>
+</span><span class="c1"></span>    <span class="nx">let</span> <span class="nx">ParentBits</span> <span class="p">[</span><span class="nx">PARENT_COUNT</span><span class="p">]</span><span class="p">[</span><span class="mi">255</span><span class="p">]</span><span class="nx">Fr</span>
     <span class="k">for</span> <span class="nx">p</span> <span class="nx">in</span> <span class="k">range</span> <span class="nx">PARENT_COUNT</span> <span class="p">{</span>
       <span class="c1">// 3.1: Check that each ParentValue is equal to its bit representation
-</span><span class="c1"></span>      <span class="nx">let</span> <span class="nx">parent</span> <span class="p">=</span> <span class="nx">ParentValue</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">][</span><span class="nx">p</span><span class="p">]</span>
+</span><span class="c1"></span>      <span class="nx">let</span> <span class="nx">parent</span> <span class="p">=</span> <span class="nx">ParentValue</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">[</span><span class="nx">p</span><span class="p">]</span>
       <span class="nx">ParentBits</span><span class="p">[</span><span class="nx">p</span><span class="p">]</span> <span class="p">=</span> <span class="nf">Fr_to_bits</span><span class="p">(</span><span class="nx">parent</span><span class="p">)</span>
-      <span class="nf">assert</span><span class="p">(</span><span class="nf">Packed</span><span class="p">(</span><span class="nx">ParentBits</span><span class="p">[</span><span class="nx">p</span><span class="p">])</span> <span class="o">==</span> <span class="nx">parent</span><span class="p">)</span>
+      <span class="nf">assert</span><span class="p">(</span><span class="nf">Packed</span><span class="p">(</span><span class="nx">ParentBits</span><span class="p">[</span><span class="nx">p</span><span class="p">]</span><span class="p">)</span> <span class="o">==</span> <span class="nx">parent</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="c1">// 3.2: KDF check - Check that each key has generated correctly
@@ -4869,29 +4850,28 @@ To enable this, the prover must store <code>CommC</code> and use it to prove tha
     <span class="nf">assert</span><span class="p">(</span><span class="nf">SHA256</span><span class="p">(</span><span class="nx">PreImage</span><span class="p">)</span> <span class="o">==</span> <span class="nx">key</span><span class="p">)</span>
 
     <span class="c1">// 3.3: Check that the data has been encoded to a replica with the right key
-</span><span class="c1"></span>    <span class="nf">assert</span><span class="p">(</span><span class="nx">ReplicaValue</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">]</span> <span class="o">==</span> <span class="nx">DataValue</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">]</span> <span class="o">+</span> <span class="nx">key</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">assert</span><span class="p">(</span><span class="nx">ReplicaValue</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span> <span class="o">==</span> <span class="nx">DataValue</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span> <span class="o">+</span> <span class="nx">key</span><span class="p">)</span>
   <span class="p">}</span>
 
   <span class="c1">// 4: CommRStar check - Check that the CommRStar constructed correctly
 </span><span class="c1"></span>  <span class="nx">let</span> <span class="nx">hash</span> <span class="p">=</span> <span class="nx">ReplicaId</span>
   <span class="k">for</span> <span class="nx">l</span> <span class="nx">in</span> <span class="k">range</span> <span class="nx">LAYERS</span><span class="o">-</span><span class="mi">1</span> <span class="p">{</span>
-    <span class="nx">hash</span><span class="p">.</span><span class="nf">Append</span><span class="p">(</span><span class="nx">CommR</span><span class="p">[</span><span class="nx">l</span><span class="p">])</span>
+    <span class="nx">hash</span><span class="p">.</span><span class="nf">Append</span><span class="p">(</span><span class="nx">CommR</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">)</span>
   <span class="p">}</span>
   <span class="nx">hash</span><span class="p">.</span><span class="nf">Append</span><span class="p">(</span><span class="nx">CommRLast</span><span class="p">)</span>
 
-  <span class="nf">assert</span><span class="p">(</span><span class="nx">CommRStar</span> <span class="o">==</span> <span class="nf">PedersenHash</span><span class="p">(</span><span class="nx">hash</span><span class="p">))</span>
+  <span class="nf">assert</span><span class="p">(</span><span class="nx">CommRStar</span> <span class="o">==</span> <span class="nf">PedersenHash</span><span class="p">(</span><span class="nx">hash</span><span class="p">)</span><span class="p">)</span>
   <span class="c1">// TODO check if we need to do packing/unpacking
-</span><span class="c1"></span><span class="p">}</span></code></pre></div>
-<h2 id="verification-of-offline-porep-proof">Verification of offline porep proof</h2>
-
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></div><h2 id="verification-of-offline-porep-proof">Verification of offline porep proof</h2>
 <ul>
 <li>SNARK proof check: <strong>Check</strong> that given the SNARK proof and the public inputs, the SNARK verification outputs true</li>
 <li>Parent checks: For each <code>leaf = InclusionPath[l][c]</code>:
-
 <ul>
 <li><strong>Check</strong> that all <code>ParentsInclusionPaths_[l][c][0..PARENT_COUNT}</code> are the correct parent leaves of <code>leaf</code> in the DRG graph, if a leaf has less than <code>PARENT_COUNT</code>, repeat the leaf with the highest label in the graph.</li>
 <li><strong>Check</strong> that the parent leaves are in ascending numerical order.</li>
-</ul></li>
+</ul>
+</li>
 </ul>
 
 </article>
@@ -4906,24 +4886,22 @@ To enable this, the prover must store <code>CommC</code> and use it to prove tha
 
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#stacked-drg-overview">Stacked DRG Overview</a></li>
-<li><a href="#spec-notation">Spec notation</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#offline-porep-circuit">Offline PoRep circuit</a>
-<ul>
-<li><a href="#public-parameters">Public Parameters</a></li>
-<li><a href="#public-inputs">Public Inputs</a></li>
-<li><a href="#private-inputs">Private Inputs</a></li>
-<li><a href="#circuit">Circuit</a></li>
-<li><a href="#verification-of-offline-porep-proof">Verification of offline porep proof</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#stacked-drg-overview">Stacked DRG Overview</a></li>
+        <li><a href="#spec-notation">Spec notation</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#public-parameters">Public Parameters</a></li>
+    <li><a href="#public-inputs">Public Inputs</a></li>
+    <li><a href="#private-inputs">Private Inputs</a></li>
+    <li><a href="#circuit">Circuit</a></li>
+    <li><a href="#verification-of-offline-porep-proof">Verification of offline porep proof</a></li>
+  </ul>
 </nav>
   </aside>
 

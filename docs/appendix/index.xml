@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Appendix on Filecoin Spec</title>
@@ -27,7 +27,7 @@
       <guid>/docs/appendix/network_params/</guid>
       <description>Some of these parameters are used around the code in the Filecoin subsystems and abi. Others are used as part of the proofs libraries.
 Most are generated/finalized using the orient framework. It is used to modelize the Filecoin network.
-⚠️ WARNING: Filecoin is not yet launched, and we are finishing protocol spec and implementations. Parameters are set here as placeholders and highly likely to change to fit product and security requirements.</description>
+Code parameters package node_base import ( addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; ) // Parameters for on-chain calculations are in actors/builtin/network_params.go  ///////////////////////////////////////////////////////////// // Global /////////////////////////////////////////////////////////////  const NETWORK = addr.Testnet // how many sectors should be challenged in surprise post (if miner has fewer, will get dup challenges) const SURPRISE_CHALLENGE_COUNT = 200 // placeholder  const EPOST_SAMPLE_RATE_NUM = 1 // placeholder const EPOST_SAMPLE_RATE_DENOM = 25 // placeholder const SPOST_SAMPLE_RATE_NUM = 1 // placeholder const SPOST_SAMPLE_RATE_DENOM = 50 // placeholder  ///////////////////////////////////////////////////////////// // Consensus /////////////////////////////////////////////////////////////  const FINALITY = 500 // placeholder const SPC_LOOKBACK_TICKET = 1 // we chain blocks together one after the other  Orient parameters    LAMBDA SPACEGAP BLOCK-SIZE-KIB SECTOR-SIZE-GIB     10 0.</description>
     </item>
     
     <item>
@@ -56,7 +56,7 @@ Most are generated/finalized using the orient framework. It is used to modelize 
       <guid>/docs/appendix/sharray/</guid>
       <description>The Sharray is an IPLD tree structure used to store an array of items. It is designed for usecases that know all items at the time of creation and do not need insertion or deletion.
 IPLD Representation Each sharray node is represented by an IPLD node of the following schema:
-type Node struct { height Int items [Item] } representation tuple  Item may be either a direct value, if height == 0, or the Cid of a child node if height &amp;gt; 0.</description>
+type Node struct { height Int items [Item] } representation tuple Item may be either a direct value, if height == 0, or the Cid of a child node if height &amp;gt; 0.</description>
     </item>
     
   </channel>

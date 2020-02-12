@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4715,10 +4715,8 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  <p>The <code>StorageProvider</code> is a module that handles incoming queries for Asks and proposals for Deals from a <code>StorageClient</code>. It also tracks deals as they move through the deal flow, handling off chain actions during the negotiation phases of the deal and ultimately telling the <code>StorageMarketActor</code> to publish on chain. The <code>StorageProvider</code>&rsquo;s last action is to handoff a published deal for storage and sealing to the Storage Mining Subsystem. Note that any address registered as a <code>StorageMarketParticipant</code> with the <code>StorageMarketActor</code> can be used with the <code>StorageClient</code>. A single participant can be a client, provider, or both at the same time.</p>
-
+  <p>The <code>StorageProvider</code> is a module that handles incoming queries for Asks and proposals for Deals from a <code>StorageClient</code>. It also tracks deals as they move through the deal flow, handling off chain actions during the negotiation phases of the deal and ultimately telling the <code>StorageMarketActor</code> to publish on chain. The <code>StorageProvider</code>'s last action is to handoff a published deal for storage and sealing to the Storage Mining Subsystem. Note that any address registered as a <code>StorageMarketParticipant</code> with the <code>StorageMarketActor</code> can be used with the <code>StorageClient</code>. A single participant can be a client, provider, or both at the same time.</p>
 <p>Because most of what a Storage Provider does is respond to actions initiated by a <code>StorageClient</code>, most of its public facing methods relate to getting current status on deals, as opposed to initiating new actions. However, a user of the <code>StorageProvider</code> module can update the current Ask for the provider.</p>
-
 
 
 
@@ -4747,9 +4745,9 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">smarkact</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin/storage_market&#34;</span>
 
 <span class="c1">// ProviderLocalDealInfo is the information that a storage provider tracks locally about
-</span><span class="c1">// a deal. It contains not only the storage proposal but the state of the deal
-</span><span class="c1">// as it moves throught the system. It is persisted to local storage and updated 
-</span><span class="c1">// as the deal goes through stages leading up to its being published (and afterward)
+</span><span class="c1"></span><span class="c1">// a deal. It contains not only the storage proposal but the state of the deal
+</span><span class="c1"></span><span class="c1">// as it moves throught the system. It is persisted to local storage and updated 
+</span><span class="c1"></span><span class="c1">// as the deal goes through stages leading up to its being published (and afterward)
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ProviderLocalDealInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">ProposalCid</span>   <span class="o">&amp;</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
     <span class="nx">Proposal</span>      <span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
@@ -4771,16 +4769,16 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">ListAsks</span><span class="p">(</span><span class="nx">addrress</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">[</span><span class="nx">StorageAsk</span><span class="p">]</span>
 
     <span class="c1">// ListDeals lists on-chain deals associated with this provider
-</span><span class="c1"></span>    <span class="nf">ListDeals</span><span class="p">()</span>            <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">],</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">ListDeals</span><span class="p">(</span><span class="p">)</span>            <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">]</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// ListIncompleteDeals lists deals that are in progress or rejected
-</span><span class="c1"></span>    <span class="nf">ListIncompleteDeals</span><span class="p">()</span>  <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">ProviderLocalDealInfo</span><span class="p">],</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">ListIncompleteDeals</span><span class="p">(</span><span class="p">)</span>  <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">ProviderLocalDealInfo</span><span class="p">]</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// AddStorageCollateral adds storage collateral
 </span><span class="c1"></span>    <span class="nf">AddStorageCollateral</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">error</span>
 
     <span class="c1">// GetStorageCollateral returns the current collateral balance
-</span><span class="c1"></span>    <span class="nf">GetStorageCollateral</span><span class="p">()</span> <span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">GetStorageCollateral</span><span class="p">(</span><span class="p">)</span> <span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// DataTransferValidator methods
 </span><span class="c1"></span>    <span class="nf">ValidatePush</span><span class="p">(</span>
@@ -4809,8 +4807,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-<!-- # Storage Provider State Machine -->
+<!-- raw HTML omitted -->
 
 </article>
 
@@ -4821,6 +4818,10 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents"></nav>
+  </aside>
 
 
 

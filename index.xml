@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Filecoin Specification on Filecoin Spec</title>
@@ -25,7 +25,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/orient/viz/readme/</guid>
-      <description> Ubercalc visualizations Install  Install orient Install obs  Usage # Run these commands from the root folder of the spec repo on two different terminals $ ORIENT_CACHE_DIR=/absolute/path/to/cache ./orient/bin/orient web --system=src/orient/rational-calc.orient --port=8000 $ obs serve 8081 src/orient/viz  </description>
+      <description>Ubercalc visualizations Install  Install orient Install obs  Usage # Run these commands from the root folder of the spec repo on two different terminals $ ORIENT_CACHE_DIR=/absolute/path/to/cache ./orient/bin/orient web --system=src/orient/rational-calc.orient --port=8000 $ obs serve 8081 src/orient/viz </description>
     </item>
     
     <item>
@@ -61,8 +61,8 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/intro/arch/</guid>
-      <description>Filecoin Systems function statusIndicatorsShow() { var $uls = document.querySelectorAll(&#39;.statusIcon&#39;) $uls.forEach(function (el) { el.classList.remove(&#39;hidden&#39;) }) return false; // stop click event } function statusIndicatorsHide() { var $uls = document.querySelectorAll(&#39;.statusIcon&#39;) $uls.forEach(function (el) { el.classList.add(&#39;hidden&#39;) }) return false; // stop click event }  Status Legend:
- 🛑 Bare - Very incomplete at this time.  Implementors: This is far from ready for you.  ⚠️ Rough &amp;ndash; work in progress, heavy changes coming, as we put in place key functionality.</description>
+      <description>Filecoin Systems Status Legend:
+ 🛑 Bare - Very incomplete at this time.  Implementors: This is far from ready for you.   ⚠️ Rough &amp;ndash; work in progress, heavy changes coming, as we put in place key functionality.  Implementors: This will be ready for you soon.   🔁 Refining - Key functionality is there, some small things expected to change. Some big things may change.  Implementors: Almost ready for you.</description>
     </item>
     
     <item>
@@ -102,7 +102,7 @@ The response contains the requested chain in reverse iteration order.</descripti
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_nodes/node_types/verifier_node/</guid>
-      <description>type ChainVerifierNode interface { FilecoinNode systems.Blockchain }  </description>
+      <description>type ChainVerifierNode interface { FilecoinNode systems.Blockchain } </description>
     </item>
     
     <item>
@@ -120,7 +120,7 @@ The response contains the requested chain in reverse iteration order.</descripti
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_nodes/node_types/client_node/</guid>
-      <description>type ClientNode struct { FilecoinNode systems.Blockchain markets.StorageMarketClient markets.RetrievalMarketClient markets.MarketOrderBook markets.DataTransfers }  </description>
+      <description>type ClientNode struct { FilecoinNode systems.Blockchain markets.StorageMarketClient markets.RetrievalMarketClient markets.MarketOrderBook markets.DataTransfers } </description>
     </item>
     
     <item>
@@ -177,7 +177,7 @@ Format The format consists of a header, followed by a series of blocks, of which
       
       <guid>/docs/listings/libp2p_protocols/data_transfer_protocol/</guid>
       <description> Name: Data Transfer Protocol Protocol ID: /fil/data-transfer/0.0.1  Message Protobuf
- message DataTransferMessage { message Request { int32 transferID = 1 bool isPull = 2 bytes voucher = 3 bytes pieceID = 4 bytes selector = 5 bool isPartial = 6 bool isCancel = 7 } message Response { int32 transferID = 1 boolean accepted = 2 } bool isResponse = 1 Request request = 2 Response response = 3 }  </description>
+ message DataTransferMessage { message Request { int32 transferID = 1 bool isPull = 2 bytes voucher = 3 bytes pieceID = 4 bytes selector = 5 bool isPartial = 6 bool isCancel = 7 } message Response { int32 transferID = 1 boolean accepted = 2 } bool isResponse = 1 Request request = 2 Response response = 3 } </description>
     </item>
     
     <item>
@@ -211,7 +211,7 @@ This section should contain:
       <description>There are two main categories of faults in the Filecoin network.
  ConsensusFaults StorageDealFaults  ConsensusFaults are faults that impact network consensus and StorageDealFaults are faults where data in a StorageDeal is not maintained by the providers pursuant to deal terms.
 Pledge Collateral is slashed for ConsensusFaults and Storage Deal Collateral for StorageDealFaults.
-Any misbehavior may result in more than one fault thus lead to slashing on both collaterals.</description>
+Any misbehavior may result in more than one fault thus lead to slashing on both collaterals. For example, missing a PoStProof will incur a penalty on both PledgeCollateral and StorageDealCollateral given it impacts both a given StorageDeal and power derived from the sector commitments in Storage Power Consensus.</description>
     </item>
     
     <item>
@@ -240,7 +240,7 @@ Any misbehavior may result in more than one fault thus lead to slashing on both 
       <guid>/docs/appendix/network_params/</guid>
       <description>Some of these parameters are used around the code in the Filecoin subsystems and abi. Others are used as part of the proofs libraries.
 Most are generated/finalized using the orient framework. It is used to modelize the Filecoin network.
-⚠️ WARNING: Filecoin is not yet launched, and we are finishing protocol spec and implementations. Parameters are set here as placeholders and highly likely to change to fit product and security requirements.</description>
+Code parameters package node_base import ( addr &amp;#34;github.com/filecoin-project/go-address&amp;#34; ) // Parameters for on-chain calculations are in actors/builtin/network_params.go  ///////////////////////////////////////////////////////////// // Global /////////////////////////////////////////////////////////////  const NETWORK = addr.Testnet // how many sectors should be challenged in surprise post (if miner has fewer, will get dup challenges) const SURPRISE_CHALLENGE_COUNT = 200 // placeholder  const EPOST_SAMPLE_RATE_NUM = 1 // placeholder const EPOST_SAMPLE_RATE_DENOM = 25 // placeholder const SPOST_SAMPLE_RATE_NUM = 1 // placeholder const SPOST_SAMPLE_RATE_DENOM = 50 // placeholder  ///////////////////////////////////////////////////////////// // Consensus /////////////////////////////////////////////////////////////  const FINALITY = 500 // placeholder const SPC_LOOKBACK_TICKET = 1 // we chain blocks together one after the other  Orient parameters    LAMBDA SPACEGAP BLOCK-SIZE-KIB SECTOR-SIZE-GIB     10 0.</description>
     </item>
     
     <item>
@@ -371,9 +371,9 @@ All Systems, as defined in this document, require the following:
       
       <guid>/docs/intro/concepts/</guid>
       <description>For clarity, we refer the following types of entities to describe implementations of the Filecoin protocol:
- Data structures are collections of semantically-tagged data members (e.g., structs, interfaces, or enums).
- Functions are computational procedures that do not depend on external state (i.e., mathematical functions, or programming language functions that do not refer to global variables).
- Components are sets of functionality that are intended to be represented as single software units in the implementation structure.</description>
+  Data structures are collections of semantically-tagged data members (e.g., structs, interfaces, or enums).
+  Functions are computational procedures that do not depend on external state (i.e., mathematical functions, or programming language functions that do not refer to global variables).
+  Components are sets of functionality that are intended to be represented as single software units in the implementation structure.</description>
     </item>
     
     <item>
@@ -460,7 +460,7 @@ import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; t
       
       <guid>/docs/algorithms/post/proof_of_spacetime_parameters/</guid>
       <description>This section describes parameters for Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
-   Parameter Type Value Description     POST-CHALLENGE-BLOCKS BLOCKS 480 The time offset before which the actual work of generating the PoSt cannot be started. This is some delta before the end of the Proving Period, and as such less than a single Proving Period.   POST-CHALLENGE-HOURS HOURS 2 PoSt challenge time (see POST_CHALLENGE_BLOCKS).   POST-PROVING-PERIOD BLOCKS 5760 The time interval in which a PoSt has to be submitted    TODO: The above values are tentative and need both backing from research as well as detailed reasoning why we picked them.</description>
+   Parameter Type Value Description     POST-CHALLENGE-BLOCKS BLOCKS 480 The time offset before which the actual work of generating the PoSt cannot be started. This is some delta before the end of the Proving Period, and as such less than a single Proving Period.   POST-CHALLENGE-HOURS HOURS 2 PoSt challenge time (see POST_CHALLENGE_BLOCKS).   POST-PROVING-PERIOD BLOCKS 5760 The time interval in which a PoSt has to be submitted    </description>
     </item>
     
     <item>
@@ -479,7 +479,7 @@ import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; t
       
       <guid>/docs/content/algorithms/post/proof_of_spacetime_parameters/</guid>
       <description>This section describes parameters for Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
-   Parameter Type Value Description     POST-CHALLENGE-BLOCKS BLOCKS 480 The time offset before which the actual work of generating the PoSt cannot be started. This is some delta before the end of the Proving Period, and as such less than a single Proving Period.   POST-CHALLENGE-HOURS HOURS 2 PoSt challenge time (see POST_CHALLENGE_BLOCKS).   POST-PROVING-PERIOD BLOCKS 5760 The time interval in which a PoSt has to be submitted    TODO: The above values are tentative and need both backing from research as well as detailed reasoning why we picked them.</description>
+   Parameter Type Value Description     POST-CHALLENGE-BLOCKS BLOCKS 480 The time offset before which the actual work of generating the PoSt cannot be started. This is some delta before the end of the Proving Period, and as such less than a single Proving Period.   POST-CHALLENGE-HOURS HOURS 2 PoSt challenge time (see POST_CHALLENGE_BLOCKS).   POST-PROVING-PERIOD BLOCKS 5760 The time interval in which a PoSt has to be submitted    </description>
     </item>
     
     <item>
@@ -499,7 +499,7 @@ Encoding On-chain data for randomness Any randomness derived from on-chain value
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_nodes/node_types/relayer_node/</guid>
-      <description>type RelayerNode interface { FilecoinNode blockchain.MessagePool markets.MarketOrderBook }  </description>
+      <description>type RelayerNode interface { FilecoinNode blockchain.MessagePool markets.MarketOrderBook } </description>
     </item>
     
     <item>
@@ -537,7 +537,7 @@ Method Reserved Ranges    Method ID     value send 0   constructor 1    All othe
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_nodes/node_types/retrieval_miner_node/</guid>
-      <description>type RetrievalMinerNode interface { FilecoinNode blockchain.Blockchain markets.RetrievalMarketProvider markets.MarketOrderBook markets.DataTransfers }  </description>
+      <description>type RetrievalMinerNode interface { FilecoinNode blockchain.Blockchain markets.RetrievalMarketProvider markets.MarketOrderBook markets.DataTransfers } </description>
     </item>
     
     <item>
@@ -655,7 +655,7 @@ Something&#39;s not right. The sector_sealer.id file was not found.</description
       <guid>/docs/appendix/sharray/</guid>
       <description>The Sharray is an IPLD tree structure used to store an array of items. It is designed for usecases that know all items at the time of creation and do not need insertion or deletion.
 IPLD Representation Each sharray node is represented by an IPLD node of the following schema:
-type Node struct { height Int items [Item] } representation tuple  Item may be either a direct value, if height == 0, or the Cid of a child node if height &amp;gt; 0.</description>
+type Node struct { height Int items [Item] } representation tuple Item may be either a direct value, if height == 0, or the Cid of a child node if height &amp;gt; 0.</description>
     </item>
     
     <item>
@@ -735,7 +735,7 @@ import abi &amp;#34;github.com/filecoin-project/specs-actors/actors/abi&amp;#34;
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_markets/storage_market/storage_deal/storage_deal_flow/</guid>
-      <description>Deal Flow Sequence Diagram (open in new tab)  Add Storage Deal and Power  1. StorageClient and StorageProvider call StorageMarketActor.AddBalance to deposit funds into Storage Market.  StorageClient and StorageProvider can call WithdrawBalance before any deal is made.  2. StorageClient and StorageProvider negotiate a deal off chain. StorageClient sends a StorageDealProposal to a StorageProvider.  StorageProvider verifies the StorageDeal by checking address and signature of StorageClient, checking the proposal&amp;rsquo;s StartEpoch is after the current Epoch, checking StorageClient did not call withdraw in the last X Epoch (WithdrawBalance should take at least X Epoch), checking both StorageProvider and StorageClient have sufficient available balances in StorageMarketActor.</description>
+      <description>Deal Flow Sequence Diagram (open in new tab)  Add Storage Deal and Power    StorageClient and StorageProvider call StorageMarketActor.AddBalance to deposit funds into Storage Market.   StorageClient and StorageProvider can call WithdrawBalance before any deal is made.    StorageClient and StorageProvider negotiate a deal off chain. StorageClient sends a StorageDealProposal to a StorageProvider.   StorageProvider verifies the StorageDeal by checking address and signature of StorageClient, checking the proposal&amp;rsquo;s StartEpoch is after the current Epoch, checking StorageClient did not call withdraw in the last X Epoch (WithdrawBalance should take at least X Epoch), checking both StorageProvider and StorageClient have sufficient available balances in StorageMarketActor.</description>
     </item>
     
     <item>
@@ -773,7 +773,7 @@ A deal has the following states:
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_nodes/node_types/storage_miner_node/</guid>
-      <description>type StorageMinerNode interface { FilecoinNode systems.Blockchain systems.Mining markets.StorageMarketProvider markets.MarketOrderBook markets.DataTransfers }  </description>
+      <description>type StorageMinerNode interface { FilecoinNode systems.Blockchain systems.Mining markets.StorageMarketProvider markets.MarketOrderBook markets.DataTransfers } </description>
     </item>
     
     <item>
@@ -801,7 +801,7 @@ Active Miner Mining Cycle In order to mine blocks on the Filecoin blockchain a m
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_markets/storage_market/storage_provider/</guid>
-      <description>The StorageProvider is a module that handles incoming queries for Asks and proposals for Deals from a StorageClient. It also tracks deals as they move through the deal flow, handling off chain actions during the negotiation phases of the deal and ultimately telling the StorageMarketActor to publish on chain. The StorageProvider&amp;rsquo;s last action is to handoff a published deal for storage and sealing to the Storage Mining Subsystem. Note that any address registered as a StorageMarketParticipant with the StorageMarketActor can be used with the StorageClient.</description>
+      <description>The StorageProvider is a module that handles incoming queries for Asks and proposals for Deals from a StorageClient. It also tracks deals as they move through the deal flow, handling off chain actions during the negotiation phases of the deal and ultimately telling the StorageMarketActor to publish on chain. The StorageProvider&#39;s last action is to handoff a published deal for storage and sealing to the Storage Mining Subsystem. Note that any address registered as a StorageMarketParticipant with the StorageMarketActor can be used with the StorageClient.</description>
     </item>
     
     <item>

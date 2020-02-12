@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4715,10 +4715,7 @@ https://github.com/alex-shpak/hugo-book
 </header>
 
       
-<article class="markdown">
-
-<div id="systems__filecoin_nodes__clock__clock"></div>
-
+<article class="markdown"><div id="systems__filecoin_nodes__clock__clock"></div>
 <p>
 
 
@@ -4741,13 +4738,13 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">UnixTime</span> <span class="kt">int64</span>  <span class="c1">// unix timestamp
 </span><span class="c1"></span>
 <span class="c1">// UTCClock is a normal, system clock reporting UTC time.
-</span><span class="c1">// It should be kept in sync, with drift less than 1 second.
+</span><span class="c1"></span><span class="c1">// It should be kept in sync, with drift less than 1 second.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">UTCClock</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">NowUTCUnix</span><span class="p">()</span> <span class="nx">UnixTime</span>
+    <span class="nf">NowUTCUnix</span><span class="p">(</span><span class="p">)</span> <span class="nx">UnixTime</span>
 <span class="p">}</span>
 
 <span class="c1">// ChainEpoch represents a round of a blockchain protocol.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">ChainEpoch</span> <span class="nx">UVarint</span>
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">ChainEpoch</span> <span class="kt">int64</span>
 
 <span class="c1">// ChainEpochClock is a clock that represents epochs of the protocol.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ChainEpochClock</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4787,22 +4784,22 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="s">&#34;time&#34;</span>
 
 <span class="c1">// UTCSyncPeriod notes how often to sync the UTC clock with an authoritative
-</span><span class="c1">// source, such as NTP, or a very precise hardware clock.
+</span><span class="c1"></span><span class="c1">// source, such as NTP, or a very precise hardware clock.
 </span><span class="c1"></span><span class="kd">var</span> <span class="nx">UTCSyncPeriod</span> <span class="p">=</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Hour</span>
 
 <span class="c1">// EpochDuration is a constant that represents the duration in seconds
-</span><span class="c1">// of a blockchain epoch.
+</span><span class="c1"></span><span class="c1">// of a blockchain epoch.
 </span><span class="c1"></span><span class="kd">var</span> <span class="nx">EpochDuration</span> <span class="p">=</span> <span class="nf">UnixTime</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">_</span> <span class="o">*</span><span class="nx">UTCClock_I</span><span class="p">)</span> <span class="nf">NowUTCUnix</span><span class="p">()</span> <span class="nx">UnixTime</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nf">UnixTime</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">().</span><span class="nf">Unix</span><span class="p">())</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">_</span> <span class="o">*</span><span class="nx">UTCClock_I</span><span class="p">)</span> <span class="nf">NowUTCUnix</span><span class="p">(</span><span class="p">)</span> <span class="nx">UnixTime</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nf">UnixTime</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">Unix</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">// EpochAtTime returns the ChainEpoch corresponding to time `t`.
-</span><span class="c1">// It first subtracts GenesisTime, then divides by EpochDuration
-</span><span class="c1">// and returns the resulting number of epochs.
+</span><span class="c1"></span><span class="c1">// It first subtracts GenesisTime, then divides by EpochDuration
+</span><span class="c1"></span><span class="c1">// and returns the resulting number of epochs.
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">ChainEpochClock_I</span><span class="p">)</span> <span class="nf">EpochAtTime</span><span class="p">(</span><span class="nx">t</span> <span class="nx">UnixTime</span><span class="p">)</span> <span class="nx">ChainEpoch</span> <span class="p">{</span>
-	<span class="nx">difference</span> <span class="o">:=</span> <span class="nx">t</span> <span class="o">-</span> <span class="nx">c</span><span class="p">.</span><span class="nf">GenesisTime</span><span class="p">()</span>
+	<span class="nx">difference</span> <span class="o">:=</span> <span class="nx">t</span> <span class="o">-</span> <span class="nx">c</span><span class="p">.</span><span class="nf">GenesisTime</span><span class="p">(</span><span class="p">)</span>
 	<span class="nx">epochs</span> <span class="o">:=</span> <span class="nx">difference</span> <span class="o">/</span> <span class="nx">EpochDuration</span>
 	<span class="k">return</span> <span class="nf">ChainEpoch</span><span class="p">(</span><span class="nx">epochs</span><span class="p">)</span>
 <span class="p">}</span>
@@ -4812,59 +4809,45 @@ https://github.com/alex-shpak/hugo-book
 
 
 </p>
-
 <p>Filecoin assumes weak clock synchrony amongst participants in the system. That is, the system relies on participants having access to a globally synchronized clock (tolerating some bounded drift).</p>
-
 <p>Filecoin relies on this system clock in order to secure consensus.  Specifically the clock is necessary to support validation rules that prevent block producers from mining blocks with a future timstamp, and running leader elections more frequently than the protocol allows.</p>
-
 <h2 id="clock-uses">Clock uses</h2>
-
 <p>The Filecoin system clock is used:</p>
-
 <ul>
 <li>by syncing nodes to validate that incoming blocks were mined in the appropriate epoch given their timestamp (see <a href="../../../../#systems__filecoin_blockchain__block__block_validation">Block Validation</a>).  This is possible because the system clock maps all times to a unique epoch number totally determined by the start time in the genesis block.</li>
 <li>by syncing nodes to drop blocks coming from a future epoch</li>
 <li>by mining nodes to maintain protocol liveness by allowing participants to try leader election in the next round if no one has produced a block in the current round (see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus___index">Storage Power Consensus</a>).</li>
 </ul>
-
 <p>In order to allow miners to do the above, the system clock must:</p>
-
 <ol>
 <li>Have low enough clock drift (sub 1s) relative to other nodes so that blocks are not mined in epochs considered future epochs from the persective of other nodes (those blocks should not be validated until the proper epoch/time as per <a href="../../../../#systems__filecoin_blockchain__struct__block___index">validation rules</a>).</li>
 <li>Set epoch number on node initialization equal to <code>epoch = Floor[(current_time - genesis_time) / epoch_time]</code></li>
 </ol>
-
 <p>It is expected that other subsystems will register to a NewRound() event from the clock subsystem.</p>
-
 <h2 id="clock-requirements">Clock Requirements</h2>
-
 <p>Clocks used as part of the Filecoin protocol should be kept in sync, with drift less than 1 second so as to enable appropriate validation.</p>
-
 <p>Computer-grade clock crystals can be expected to have drift rates on the order of <a href="https://www.hindawi.com/journals/jcnc/2008/583162/">1ppm</a> (i.e. 1 microsecond every second or .6 seconds a week), therefore, in order to respect the above-requirement,</p>
-
 <ul>
 <li>clients SHOULD query an NTP server (<code>pool.ntp.org</code> is recommended) on an hourly basis to adjust clock skew.
-
 <ul>
-<li>We recommend one of the following:</li>
+<li>We recommend one of the following:
+<ul>
 <li><code>pool.ntp.org</code> (can be catered to a <a href="https://www.ntppool.org/zone">specific zone</a>)</li>
 <li><code>time.cloudflare.com:1234</code> (more on <a href="https://www.cloudflare.com/time/">Cloudflare time services</a>)</li>
 <li><code>time.google.com</code> (more on <a href="https://developers.google.com/time">Google Public NTP</a>)</li>
 <li><code>ntp-b.nist.gov</code> (<a href="https://tf.nist.gov/tf-cgi/servers.cgi">NIST</a> servers require registration)</li>
+</ul>
+</li>
 <li>We further recommend making 3 measurements in order to drop by using the network to drop outliers</li>
 <li>See how <a href="https://github.com/ethereum/go-ethereum/blob/master/p2p/discv5/ntp.go">go-ethereum does this</a> for inspiration</li>
-</ul></li>
+</ul>
+</li>
 <li>clients MAY consider using cesium clocks instead for accurate synchrony within larger mining operations</li>
 </ul>
-
 <p>Mining operations have a strong incentive to prevent their clock from drifting ahead more than one epoch to keep their block submissions from being rejected.  Likewise they have an incentive to prevent their clocks from drifting behind more than one epoch to avoid partitioning themselves off from the synchronized nodes in the network.</p>
-
 <h2 id="future-work">Future work</h2>
-
 <p>If either of the above metrics show significant network skew over time, future versions of Filecoin may include potential timestamp/epoch correction periods at regular intervals.</p>
-
 <p>When recoverying from exceptional chain halting outages (for example all implementations panic on a given block) the network can potentially opt for per-outage &ldquo;dead zone&rdquo; rules banning the authoring of blocks during the outage epochs to prevent attack vectors related to unmined epochs during chain restart.</p>
-
 <p>Future versions of the Filecoin protocol may use Verifiable Delay Functions (VDFs) to strongly enforce block time and fulfill this leader election requirement; we choose to explicitly assume clock synchrony until hardware VDF security has been proven more extensively.</p>
 </article>
 
@@ -4878,14 +4861,11 @@ https://github.com/alex-shpak/hugo-book
 
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#clock-uses">Clock uses</a></li>
-<li><a href="#clock-requirements">Clock Requirements</a></li>
-<li><a href="#future-work">Future work</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#clock-uses">Clock uses</a></li>
+    <li><a href="#clock-requirements">Clock Requirements</a></li>
+    <li><a href="#future-work">Future work</a></li>
+  </ul>
 </nav>
   </aside>
 

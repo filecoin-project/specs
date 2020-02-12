@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
+<link rel="stylesheet" href="../../../book.min.cc8a7af7caa5a1f2d6cb09b76c451c38ff26f98a05f07f81e81723e47f8f3ef8.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -4717,34 +4717,31 @@ https://github.com/alex-shpak/hugo-book
 <article class="markdown">
   <p><div id="algorithms__block_reception__block-reception"></div>
 func (g *BlockValidationGraph_I) ConsiderBlock(block Block) {
-    panic(&ldquo;TODO&rdquo;)
-    // g.UnconnectedBlocks.AddBlock(block)
-    // g.tryConnectBlockToFringe(block)
+panic(&ldquo;TODO&rdquo;)
+// g.UnconnectedBlocks.AddBlock(block)
+// g.tryConnectBlockToFringe(block)
 }</p>
-
 <p>func (g *BlockValidationGraph_I) tryConnectBlockToFringe(block Block) {
-    panic(&ldquo;TODO&rdquo;)</p>
-
+panic(&ldquo;TODO&rdquo;)</p>
 <pre><code>// try to connect the block, and then try connecting its descendents.
 //
 // this algorithm should be breadth-first because we need to process the fringe
 // in order. Depth-first search may consider blocks whose parents are still
 // yet to be added
 // blocks := Queue &lt; Block &gt;
-//  blocks.Enqueue(block)
+//     blocks.Enqueue(block)
 // for block := range blocks.Dequeue() {
-//  if !g.ValidationFringe.HasTipset(block.Parents()) {
-//      continue // ignore this one. not all of its parents are in fringe
-//  }
+//     if !g.ValidationFringe.HasTipset(block.Parents()) {
+//         continue // ignore this one. not all of its parents are in fringe
+//     }
 
-//  children := g.UnconnectedBlocks.Children[block]
-//  g.UnconnectedBlocks.Parents.Remove(block)
-//  g.UnconnectedBlocks.Children.Remove(block)
-//  g.ValidationFringe.AddBlock(block)
-//  blocks.EnqueueAll(children)
+//     children := g.UnconnectedBlocks.Children[block]
+//     g.UnconnectedBlocks.Parents.Remove(block)
+//     g.UnconnectedBlocks.Children.Remove(block)
+//     g.ValidationFringe.AddBlock(block)
+//     blocks.EnqueueAll(children)
 // }
 </code></pre>
-
 <p>}</p>
 
 </article>
@@ -4756,6 +4753,10 @@ func (g *BlockValidationGraph_I) ConsiderBlock(block Block) {
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents"></nav>
+  </aside>
 
 
 
