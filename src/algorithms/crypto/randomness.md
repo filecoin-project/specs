@@ -61,3 +61,14 @@ randomness = SHA256(buffer)
 
 {{< readfile file="/docs/actors/actors/crypto/randomness.go" code="true" lang="go" >}}
 {{< readfile file="/docs/systems/filecoin_blockchain/struct/chain/chain.go" code="true" lang="go" >}}
+
+
+Any randomness tickets drawn from farther back than genesis will be drawn using the genesis ticket concatenated with the wanted epoch number.
+
+For instance, if in epoch `curr`, a miner wants randomness from `lookback` epochs back.
+
+for instance, we would have
+``` text
+getRandomness(curr-lookback)
+if curr - lookback < 0
+H(genesis || curr-lookback)

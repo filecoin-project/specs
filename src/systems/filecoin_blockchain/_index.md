@@ -4,6 +4,7 @@ title: "**Blockchain**"
 entries:
 - struct
 - message_pool
+- genesis
 - chainsync
 - storage_power_consensus
 ---
