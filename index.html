@@ -36124,6 +36124,8 @@ the same encoding, given the same input.</p>
 </blockquote>
 <h6 id="bit-numbering">Bit Numbering</h6>
 <p>For Filecoin, byte arrays representing RLE+ bitstreams are encoded using <a href="https://en.wikipedia.org/wiki/Bit_numbering#LSB_0_bit_numbering">LSB 0</a> bit numbering.</p>
+<h3 id="hamt">HAMT</h3>
+<p>See the draft <a href="https://github.com/ipld/specs/blob/master/data-structures/hashmap.md">IPLD hash map spec</a> for details on implementing the HAMT used for the global state tree map and throughout the actor code.</p>
 <h3 id="other-considerations">Other Considerations</h3>
 <ul>
 <li>The maximum size of an Object should be 1MB (2^20 bytes). Objects larger than this are invalid.</li>
