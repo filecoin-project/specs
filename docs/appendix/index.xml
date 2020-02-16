@@ -36,15 +36,6 @@ Code parameters package node_base import ( addr &amp;#34;github.com/filecoin-pro
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/appendix/orient/</guid>
-      <description>All Parameters    Parameter Type Value Description     ACTOR-METHOD BYTES 8 The size required to represent an actor method.   ACTORS-MESSAGES-FRACTION  0.30000004    ACTORS-MESSAGES-PER-BLOCK  32.661842    ADDRESS-SIZE BYTES 35 The size of an address.   ALL-POST-MESSAGES-PER-YEAR  122557560.0    ALL-SEAL-MESSAGES-PER-YEAR  335544320    ALL-SEAL-SIZE-PER-YEAR  335544320    AVG-POSTS-MESSAGES-PER-BLOCK  11.650845    AVG-PROOFS-MESSAGES-PER-BLOCK  43.</description>
-    </item>
-    
-    <item>
-      <title>Filecoin Parameters</title>
-      <link>/docs/appendix/orient/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/appendix/orient/</guid>
       <description>(asdf:load-system :orient) (in-package orient.lang)  #&amp;lt;PACKAGE &amp;#34;ORIENT.LANG&amp;#34;&amp;gt;  (defparameter *filecoin* (get-system &amp;#34;../orient/filecoin.orient&amp;#34;)) (defparameter *input* (interface:get-json-relation-list &amp;#34;../orient/params.json&amp;#34;)) (defparameter *multi-input* (interface:get-json-relation-list &amp;#34;../orient/multi-params.json&amp;#34;))  *MULTI-INPUT*  All Parameters  (let ((result-tuple (extract (solve-for *filecoin* &amp;#39;() *input*)))) (org-present-tuple result-tuple *filecoin*))     Parameter Type Value Description   ACTOR-METHOD BYTES 8 The size required to represent an actor method.   ACTORS-MESSAGES-FRACTION  0.30000004    ACTORS-MESSAGES-PER-BLOCK  32.661842    ADDRESS-SIZE BYTES 35 The size of an address.</description>
     </item>
     
