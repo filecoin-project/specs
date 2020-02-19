@@ -56,3 +56,13 @@ Any randomness tickets drawn from farther back than genesis will be drawn using 
 For instance, if in epoch `curr`, a miner wants randomness from `lookback` epochs back where `curr - lookback < genesis`, 
 the ticket randomness drawn would be `H(genesisTicket.digest || curr-lookback)` where the `genesisTicket` is the randomness included
 in the genesis block (to be determined ahead of time to enable genesis participants to SEAL data ahead of time).
+
+## Entropy to be used with randomness
+
+We currently distinguish the following entropy needs per use:
+
+- TicketProduction: requires MinerIDAddress
+- ElectionPoStChallengeSeed: requires current epoch and MinerIDAddress
+- WindowedPoStChallengeSeed: requires MinerIDAddress
+- SealRandomness: requires MinerIDAddress
+- InteractiveSealChallengeSeed: requires MinerIDAddress

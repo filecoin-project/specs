@@ -18,8 +18,17 @@ func (chain *Chain_I) TipsetAtEpoch(epoch abi.ChainEpoch) Tipset {
 
 // Draws randomness from the tipset at or immediately prior to `epoch`.
 func (chain *Chain_I) RandomnessAtEpoch(epoch abi.ChainEpoch) abi.RandomnessSeed {
-	ts := chain.TipsetAtEpoch(epoch)
-	return ts.MinTicket().DrawRandomness(epoch)
+	if epoch < genesis {
+		genesisTS := chain.TipsetAtEpoch(genesis)
+		genesisTix := genesisTS.MinTicket().DrawRandomness(genesis)
+		buffer := []byte{}
+		buffer = append(buffer, genesisTix...)
+		buffer = append(buffer, BigEndianBytesFromInt(int64(epoch))...)
+		return blake2b.Sum256(buffer)
+	} else {
+		ts := chain.TipsetAtEpoch(epoch)
+		return ts.MinTicket().DrawRandomness()
+	}
 }
 
 func (chain *Chain_I) GetTicketProductionRandSeed(epoch abi.ChainEpoch) abi.RandomnessSeed {
