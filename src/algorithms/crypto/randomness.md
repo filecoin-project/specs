@@ -10,65 +10,49 @@ We describe this formatting below.
 
 ## Encoding On-chain data for randomness
 
-Any randomness derived from on-chain values uses the following encodings to represent these values as bytes:
-
-- **Bytes**: Bytes
-- **Ints**: Big-endian uint64 representation
-- **Strings**: ASCII
-- **Objects**: Their specified Serialization, currently CBOR-based serialization defined on algebraic datatypes
+Entropy from the ticket-chain can be combined with other values to generate necessary randomness that can be
+specific to (eg) a given miner address or epoch. To be used as part of entropy, these values are combined in 
+objects that can then be CBOR-serialized according to their algebraic datatypes.
 
 ## Domain Separation Tags
 
-For {{<sref crypto_signatures>}} as well as {{<sref vrf>}} usage in the protocol, we define Domain Separation Tags with which we prepend random inputs.
+Further, we define Domain Separation Tags with which we prepend random inputs when creating entropy.
 
-The source of truth is defined below, but the currently defined DSTs are:
-
-- for drawing randomness from an on-chain ticket:
-    - `TicketDrawingDST = 1`
-- for generating a new random ticket:
-    - `TicketProductionDST = 2`
-- for generating randomness for running ElectionPoSt:
-    - `ElectionPoStChallengeSeedDST = 3`
-- for generating randomness for running SurprisePoSt:
-    - `SurprisePoStChallengeSeedDST = 4`
-- for selection of which miners to surprise:
-    - `SurprisePoStSelectMinersDST = 5`
-- for selection of which sectors to sample:
-	- `SurprisePoStSampleSectors = 6`
+All randomness used in the protocol must be generated in conjunction with a unique DST, as well as 
+certain {{<sref crypto_signatures>}} and {{<sref vrf>}} usage.
 
 ## Forming Randomness Seeds
 
 Different uses of randomness require randomness seeds predicated on a variety of inputs. For instance, we have:
 
-- `TicketDrawing` -- uses ticket and epoch number
 - `TicketProduction` -- uses ticket and miner actor addr
-- `PoStChallengeSeed` -- uses ticket and miner actor addr
-- `SurprisePoStSelectMiners` -- uses ticket and epoch number
+- `ElectionPoStChallengeSeed` -- uses ticket and miner actor addr
+- `WindowedPoStChallengeSeed` -- uses ticket and epoch number
 ...
 
 In all cases, a ticket is used as the base of randomness (see {{<sref tickets>}}). In order to make randomness seed creation uniform, the protocol derives all such seeds in the same way, as follows (also see {{<sref tickets>}}):
+
+For a given randomness lookback `l`, and serialized entropy `s`:
+
 ```text
- For a given ticket's randomness ticket_randomness:
+ticket = draw_ticket_from_chain(l)
+ticket_randomness = ticket.digest
 
 buffer = Bytes{}
 buffer.append(IntToBigEndianBytes(AppropriateDST))
-buffer.append(-1) // a flag to be used in cases where FIL might need longer randomness outputs. Currently unused
 buffer.append(ticket_randomness)
-buffer.append(other needed serialized inputs)
+buffer.append(s)
 
-randomness = SHA256(buffer)
+randomness = H(buffer)
 ```
 
 {{< readfile file="/docs/actors/actors/crypto/randomness.go" code="true" lang="go" >}}
 {{< readfile file="/docs/systems/filecoin_blockchain/struct/chain/chain.go" code="true" lang="go" >}}
 
+## Drawing randomness prior to genesis
 
 Any randomness tickets drawn from farther back than genesis will be drawn using the genesis ticket concatenated with the wanted epoch number.
 
-For instance, if in epoch `curr`, a miner wants randomness from `lookback` epochs back.
-
-for instance, we would have
-``` text
-getRandomness(curr-lookback)
-if curr - lookback < 0
-H(genesis || curr-lookback)
+For instance, if in epoch `curr`, a miner wants randomness from `lookback` epochs back where `curr - lookback < genesis`, 
+the ticket randomness drawn would be `H(genesisTicket.digest || curr-lookback)` where the `genesisTicket` is the randomness included
+in the genesis block (to be determined ahead of time to enable genesis participants to SEAL data ahead of time).
