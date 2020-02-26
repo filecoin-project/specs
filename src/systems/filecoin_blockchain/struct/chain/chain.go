@@ -7,9 +7,12 @@ import (
 )
 
 // Returns the tipset at or immediately prior to `epoch`.
+// For negative epochs, it should return a tipset composed of the genesis block.
 func (chain *Chain_I) TipsetAtEpoch(epoch abi.ChainEpoch) Tipset {
 	current := chain.HeadTipset()
-	for current.Epoch() > epoch {
+
+	for current.Epoch() > epoch && epoch >= genesisEpoch{
+		// for epoch <= genesisEpoch, this should return a single-block tipset that includes the genesis block
 		current = current.Parents()
 	}
 
@@ -18,17 +21,12 @@ func (chain *Chain_I) TipsetAtEpoch(epoch abi.ChainEpoch) Tipset {
 
 // Draws randomness from the tipset at or immediately prior to `epoch`.
 func (chain *Chain_I) RandomnessAtEpoch(epoch abi.ChainEpoch) abi.RandomnessSeed {
-	if epoch < genesis {
-		genesisTS := chain.TipsetAtEpoch(genesis)
-		genesisTix := genesisTS.MinTicket().DrawRandomness(genesis)
-		buffer := []byte{}
-		buffer = append(buffer, genesisTix...)
-		buffer = append(buffer, BigEndianBytesFromInt(int64(epoch))...)
-		return blake2b.Sum256(buffer)
-	} else {
-		ts := chain.TipsetAtEpoch(epoch)
-		return ts.MinTicket().DrawRandomness()
-	}
+
+	ts := chain.TipsetAtEpoch(epoch)
+	buffer := []byte{}
+	buffer = append(buffer, ts.MinTicket().Digest()...)
+	buffer = append(buffer, BigEndianBytesFromInt(int64(epoch))...)
+	return blake2b.Sum256(buffer)
 }
 
 func (chain *Chain_I) GetTicketProductionRandSeed(epoch abi.ChainEpoch) abi.RandomnessSeed {

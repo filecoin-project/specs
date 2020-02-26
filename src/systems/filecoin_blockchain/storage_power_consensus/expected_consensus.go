@@ -20,7 +20,7 @@ func (self *ExpectedConsensus_I) ComputeChainWeight(tipset chain.Tipset) block.C
 	//		numTickets += bl.ElectionPoSt.Candidates
 	// }
 	// wPowerFactor := self.log2b(spa.GetTotalPower())
-	// wBlocksFactor_num := (wPowerFactor * numTicketes * self.wParams.wRatio_num)
+	// wBlocksFactor_num := (wPowerFactor * numTickets * self.wParams.wRatio_num)
 	// wBlocksFactor_den := self.expectedLeadersPerEpoch * self.wParams.wRatio_den
 	// return tipset.ParentTipset.ChainWeight
 	// 	+wPowerFactor * self.wParams.wPrecision

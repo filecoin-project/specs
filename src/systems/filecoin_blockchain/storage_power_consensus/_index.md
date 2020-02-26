@@ -72,32 +72,6 @@ Due to the nature of Filecoin's Tipsets and the possibility of using tickets fro
 
 To read more about specifically how tickets are processed for randomness, see {{<sref randomness>}}.
 
-To sample a ticket for a given epoch n:
-```text
-Set referenceTipsetOffset = 0
-While true:
-    Set referenceTipsetHeight = n - referenceTipsetOffset
-    If blocks were mined at referenceTipsetHeight:
-        ReferenceTipset = TipsetAtHeight(referenceTipsetHeight)
-        Select the block in ReferenceTipset with the smallest final ticket, return its value (pastTicket).
-    If no blocks were mined at referenceTipsetHeight:
-        Increment referenceTipsetOffset
-        (Repeat)
-newRandomness = H(TicketDrawDST || index || Serialization(epoch || pastTicketOutput))
-```
-
-In plain language, this means two things:
-
-- Choose the smallest ticket in the Tipset if it contains multiple blocks.
-- When sampling a ticket from an epoch with no blocks, draw the min ticket from the prior epoch with blocks and concatenate it with
-    - the wanted epoch number
-    - hash this concatenation for a usable ticket value
-
-See the `RandomnessAtEpoch` method below:
-{{< readfile file="../struct/chain/chain.go" code="true" lang="go" >}}
-
-The above means that ticket randomness is reseeded with every new block, but can indeed be derived by any miner for an arbitrary epoch number using a past epoch.
-
 {{<label ticket_generation>}}
 ### Randomness Ticket generation
 

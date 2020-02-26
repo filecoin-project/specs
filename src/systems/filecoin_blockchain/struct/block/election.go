@@ -15,7 +15,3 @@ func (tix *Ticket_I) ValidateSyntax() bool {
 func (tix *Ticket_I) Verify(proof util.Bytes, digest util.Bytes, pk filcrypto.VRFPublicKey) bool {
 	return tix.VRFResult_.Verify(proof, pk) && digest == blake2b.Sum256(proof)
 }
-
-func (tix *Ticket_I) DrawRandomness() util.Bytes {
-	return tix.Digest()
-}
