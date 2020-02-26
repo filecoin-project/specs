@@ -25,7 +25,7 @@ certain {{<sref crypto_signatures>}} and {{<sref vrf>}} usage.
 
 Tickets are used as a source of on-chain randomness, generated with each new block created (see {{<sref tickets>}}).
 
-Randomness is derived from a ticket as follows, for a given epoch `n`, and ticket sought at epoch `e`:
+Randomness is derived from a ticket's digest as follows, for a given epoch `n`, and ticket sought at epoch `e`:
 ```text
 While ticket is not set:
     Set wantedTipsetHeight = e

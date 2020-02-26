@@ -54,15 +54,17 @@ Tickets are used across the Filecoin protocol as sources of randomness:
 - They are drawn by the Storage Power subsystem as randomness in {{<sref leader_election>}} to determine their eligibility to mine a block
 - They are drawn by the Storage Power subsystem in order to generate new tickets for future use.
 
-Each of these ticket uses may require drawing tickets at different chain epochs, according to the security requirements of the particular protocol making use of tickets. Specifically, the ticket output (which is a SHA256 output) is used for randomness.
+Each of these ticket uses may require drawing tickets at different chain epochs, according to the security requirements of the particular protocol making use of tickets. Specifically, the ticket Digest (which is a Blake2b output) is used for randomness.
 
 In Filecoin, every block header contains a single ticket.
 
 You can find the Ticket data structure {{<sref data_structures "here">}}.
 
-### Comparing Tickets in a Tipset
+### Comparing Tickets in a Tipset and using ticket values
 
-Whenever comparing tickets is evoked in Filecoin, for instance when discussing selecting the "min ticket" in a Tipset, the comparison is that of the little endian representation of the ticket's VFOutput bytes.
+Whenever comparing tickets is evoked in Filecoin, for instance when discussing selecting the "min ticket" in a Tipset, the comparison is that of the ticket's VRFDigest's bytes.
+
+Likewise any use of a ticket's value, is that of its VRFDigest's bytes.
 
 {{<label ticket_chain>}}
 ## The Ticket chain and drawing randomness
