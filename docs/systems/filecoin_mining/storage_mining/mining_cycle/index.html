@@ -1380,33 +1380,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1474,33 +1447,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4111,7 +4057,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4120,7 +4066,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4809,7 +4755,7 @@ https://github.com/alex-shpak/hugo-book
 <li>declare faults</li>
 </ul>
 <h3 id="faults">Faults</h3>
-<p>If a miner detects <a href="../../../../../#systems__filecoin_markets__storage_market__faults">Storage Faults</a> among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the <code>DeclareTemporaryFaults()</code> method of the Storage Miner Actor.</p>
+<p>If a miner detects <a href="../../../../../#systems__filecoin_markets__storage_market__faults">Faults</a> among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the <code>DeclareTemporaryFaults()</code> method of the Storage Miner Actor.</p>
 <p>The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of winning Election and SurprisePoSts. By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can specify how long the duration of their TemporaryFault and pay a TemporaryFaultFee.</p>
 <p>A miner will no longer be able to declare faults after being challenged for a SurprisePoSt.</p>
 <h3 id="step-3-dealsector-expiration">Step 3: Deal/Sector Expiration</h3>

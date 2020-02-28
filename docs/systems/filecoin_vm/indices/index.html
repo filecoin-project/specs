@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4746,21 +4692,21 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">var</span> <span class="nx">PARAM_FINISH</span> <span class="p">=</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">PARAM_FINISH</span>
 
 <span class="c1">// Data in Indices are populated at instantiation with data from the state tree
-</span><span class="c1"></span><span class="c1">// Indices itself has no state tree or access to the runtime
-</span><span class="c1"></span><span class="c1">// it is a passive data structure that allows for convenience access to network indices
-</span><span class="c1"></span><span class="c1">// and pure functions in implementing economic policies given states
+</span><span class="c1">// Indices itself has no state tree or access to the runtime
+</span><span class="c1">// it is a passive data structure that allows for convenience access to network indices
+</span><span class="c1">// and pure functions in implementing economic policies given states
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">Indices</span> <span class="kd">interface</span> <span class="p">{</span>
-	<span class="nf">Epoch</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-	<span class="nf">NetworkKPI</span><span class="p">(</span><span class="p">)</span> <span class="nx">big</span><span class="p">.</span><span class="nx">Int</span>
-	<span class="nf">TotalNetworkSectorWeight</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorWeight</span>
-	<span class="nf">TotalPledgeCollateral</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
-	<span class="nf">TotalNetworkEffectivePower</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span> <span class="c1">// power above minimum miner size
-</span><span class="c1"></span>	<span class="nf">TotalNetworkPower</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span>          <span class="c1">// total network power irrespective of meeting minimum miner size
+	<span class="nf">Epoch</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+	<span class="nf">NetworkKPI</span><span class="p">()</span> <span class="nx">big</span><span class="p">.</span><span class="nx">Int</span>
+	<span class="nf">TotalNetworkSectorWeight</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorWeight</span>
+	<span class="nf">TotalPledgeCollateral</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
+	<span class="nf">TotalNetworkEffectivePower</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span> <span class="c1">// power above minimum miner size
+</span><span class="c1"></span>	<span class="nf">TotalNetworkPower</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span>          <span class="c1">// total network power irrespective of meeting minimum miner size
 </span><span class="c1"></span>
-	<span class="nf">TotalMinedFIL</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
-	<span class="nf">TotalUnminedFIL</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
-	<span class="nf">TotalBurnedFIL</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
-	<span class="nf">LastEpochReward</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
+	<span class="nf">TotalMinedFIL</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
+	<span class="nf">TotalUnminedFIL</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
+	<span class="nf">TotalBurnedFIL</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
+	<span class="nf">LastEpochReward</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
 	<span class="nf">StorageDeal_DurationBounds</span><span class="p">(</span>
 		<span class="nx">pieceSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceSize</span><span class="p">,</span>
@@ -4798,7 +4744,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nf">StoragePowerProportion</span><span class="p">(</span>
 		<span class="nx">minerStoragePower</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span>
 	<span class="p">)</span> <span class="nx">big</span><span class="p">.</span><span class="nx">Int</span>
-	<span class="nf">CurrEpochBlockReward</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
+	<span class="nf">CurrEpochBlockReward</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 	<span class="nf">GetCurrBlockRewardRewardForMiner</span><span class="p">(</span>
 		<span class="nx">minerStoragePower</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span>
 		<span class="nx">minerPledgeCollateral</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span>
@@ -4817,7 +4763,7 @@ https://github.com/alex-shpak/hugo-book
 		<span class="nx">expirationEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
 	<span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 	<span class="nf">StorageMining_TemporaryFaultFee</span><span class="p">(</span>
-		<span class="nx">storageWeightDescs</span> <span class="p">[</span><span class="p">]</span><span class="nx">actor_util</span><span class="p">.</span><span class="nx">SectorStorageWeightDesc</span><span class="p">,</span>
+		<span class="nx">storageWeightDescs</span> <span class="p">[]</span><span class="nx">actor_util</span><span class="p">.</span><span class="nx">SectorStorageWeightDesc</span><span class="p">,</span>
 		<span class="nx">duration</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
 	<span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 	<span class="nf">NetworkTransactionFee</span><span class="p">(</span>
@@ -4852,7 +4798,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">)</span> <span class="p">(</span><span class="nx">minDuration</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">maxDuration</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="c1">// placeholder
-</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nx">minDuration</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 	<span class="nx">maxDuration</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">20</span><span class="p">)</span>
 	<span class="k">return</span>
@@ -4865,7 +4811,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">)</span> <span class="p">(</span><span class="nx">minPrice</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">maxPrice</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="c1">// placeholder
-</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -4876,7 +4822,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">)</span> <span class="p">(</span><span class="nx">minProviderCollateral</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">maxProviderCollateral</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="c1">// placeholder
-</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -4887,7 +4833,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">)</span> <span class="p">(</span><span class="nx">minClientCollateral</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">maxClientCollateral</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="c1">// placeholder
-</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -4899,24 +4845,24 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorWeight</span> <span class="p">{</span>
 	<span class="c1">// for every sector, given its size, start, end, and deals within the sector
 </span><span class="c1"></span>	<span class="c1">// assign sector power for the duration of its lifetime
-</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">IndicesImpl</span><span class="p">)</span> <span class="nf">PledgeCollateralReq</span><span class="p">(</span><span class="nx">minerNominalPower</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
-	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">IndicesImpl</span><span class="p">)</span> <span class="nf">SectorWeightProportion</span><span class="p">(</span><span class="nx">minerActiveSectorWeight</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorWeight</span><span class="p">)</span> <span class="nx">big</span><span class="p">.</span><span class="nx">Int</span> <span class="p">{</span>
 	<span class="c1">// return proportion of SectorWeight for miner
-</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">IndicesImpl</span><span class="p">)</span> <span class="nf">PledgeCollateralProportion</span><span class="p">(</span><span class="nx">minerPledgeCollateral</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">big</span><span class="p">.</span><span class="nx">Int</span> <span class="p">{</span>
 	<span class="c1">// return proportion of Pledge Collateral for miner
-</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -4927,22 +4873,22 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span> <span class="p">{</span>
 	<span class="c1">// return StoragePower based on inputs
 </span><span class="c1"></span>	<span class="c1">// StoragePower for miner = func(ActiveSectorWeight for miner, PledgeCollateral for miner, global indices)
-</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">IndicesImpl</span><span class="p">)</span> <span class="nf">StoragePowerProportion</span><span class="p">(</span>
 	<span class="nx">minerStoragePower</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span>
 <span class="p">)</span> <span class="nx">big</span><span class="p">.</span><span class="nx">Int</span> <span class="p">{</span>
-	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">IndicesImpl</span><span class="p">)</span> <span class="nf">CurrEpochBlockReward</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">IndicesImpl</span><span class="p">)</span> <span class="nf">CurrEpochBlockReward</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 	<span class="c1">// total block reward allocated for CurrEpoch
 </span><span class="c1"></span>	<span class="c1">// each expected winner get an equal share of this reward
 </span><span class="c1"></span>	<span class="c1">// computed as a function of NetworkKPI, LastEpochReward, TotalUnmminedFIL, etc
-</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -4951,7 +4897,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">minerPledgeCollateral</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span>
 	<span class="c1">// TODO extend or eliminate
 </span><span class="c1"></span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
-	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -4960,7 +4906,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">storageWeightDesc</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">SectorStorageWeightDesc</span><span class="p">,</span>
 	<span class="nx">terminationType</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">SectorTermination</span><span class="p">,</span>
 <span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
-	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -4969,7 +4915,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">minerClaimedPower</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span>
 	<span class="nx">numConsecutiveFailures</span> <span class="kt">int64</span><span class="p">,</span>
 <span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
-	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -4977,15 +4923,15 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span>
 	<span class="nx">expirationEpoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
 <span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
-	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">inds</span> <span class="o">*</span><span class="nx">IndicesImpl</span><span class="p">)</span> <span class="nf">StorageMining_TemporaryFaultFee</span><span class="p">(</span>
-	<span class="nx">storageWeightDescs</span> <span class="p">[</span><span class="p">]</span><span class="nx">actor_util</span><span class="p">.</span><span class="nx">SectorStorageWeightDesc</span><span class="p">,</span>
+	<span class="nx">storageWeightDescs</span> <span class="p">[]</span><span class="nx">actor_util</span><span class="p">.</span><span class="nx">SectorStorageWeightDesc</span><span class="p">,</span>
 	<span class="nx">duration</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span>
 <span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
-	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -4993,7 +4939,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">toActorCodeID</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">,</span>
 	<span class="nx">methodNum</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span>
 <span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
-	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5001,45 +4947,45 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">minerStoragePower</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span>
 	<span class="nx">minerPledgeCollateral</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span>
 <span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
-	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">ConsensusPowerForStorageWeight</span><span class="p">(</span>
 	<span class="nx">storageWeightDesc</span> <span class="nx">actor_util</span><span class="p">.</span><span class="nx">SectorStorageWeightDesc</span><span class="p">,</span>
 <span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span> <span class="p">{</span>
-	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">StorageDeal_ProviderInitTimedOutSlashAmount</span><span class="p">(</span><span class="nx">providerCollateral</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 	<span class="c1">// placeholder
-</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="k">return</span> <span class="nx">providerCollateral</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">StoragePower_ConsensusMinMinerPower</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span> <span class="p">{</span>
-	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">StoragePower_ConsensusMinMinerPower</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">StoragePower</span> <span class="p">{</span>
+	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">StorageMining_PoStNoChallengePeriod</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
-	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">StorageMining_PoStNoChallengePeriod</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
+	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">StorageMining_SurprisePoStProvingPeriod</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
-	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">StorageMining_SurprisePoStProvingPeriod</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
+	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">StoragePower_SurprisePoStMaxConsecutiveFailures</span><span class="p">(</span><span class="p">)</span> <span class="kt">int64</span> <span class="p">{</span>
-	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">StoragePower_SurprisePoStMaxConsecutiveFailures</span><span class="p">()</span> <span class="kt">int64</span> <span class="p">{</span>
+	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">StorageMining_DeclaredFaultEffectiveDelay</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
-	<span class="nf">PARAM_FINISH</span><span class="p">(</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">StorageMining_DeclaredFaultEffectiveDelay</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
+	<span class="nf">PARAM_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>

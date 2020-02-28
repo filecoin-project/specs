@@ -1380,33 +1380,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1474,33 +1447,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4111,7 +4057,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4120,7 +4066,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4741,11 +4687,11 @@ Given an array of size <code>N</code> and a fixed width of <code>W</code>:</p>
 <blockquote>
 <p>Create a sharray from a given set of items</p>
 </blockquote>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">create</span><span class="p">(</span><span class="nx">items</span> <span class="p">[</span><span class="p">]</span><span class="nx">Item</span><span class="p">)</span> <span class="nx">Cid</span> <span class="p">{</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">create</span><span class="p">(</span><span class="nx">items</span> <span class="p">[]</span><span class="nx">Item</span><span class="p">)</span> <span class="nx">Cid</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">layer</span> <span class="nx">cidQueue</span>
 
     <span class="nx">itemQ</span> <span class="o">:=</span> <span class="nf">queue</span><span class="p">(</span><span class="nx">items</span><span class="p">)</span>
-    <span class="k">for</span> <span class="p">!</span><span class="nx">itemQ</span><span class="p">.</span><span class="nf">Empty</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">!</span><span class="nx">itemQ</span><span class="p">.</span><span class="nf">Empty</span><span class="p">()</span> <span class="p">{</span>
         <span class="c1">// get the next &#39;Width&#39; items from the input items
 </span><span class="c1"></span>        <span class="nx">vals</span> <span class="o">:=</span> <span class="nx">itemQ</span><span class="p">.</span><span class="nf">PopN</span><span class="p">(</span><span class="nx">width</span><span class="p">)</span>
 
@@ -4757,12 +4703,12 @@ Given an array of size <code>N</code> and a fixed width of <code>W</code>:</p>
         <span class="c1">// persist the node to the datastore
 </span><span class="c1"></span>        <span class="nf">storeNode</span><span class="p">(</span><span class="nx">nd</span><span class="p">)</span>
 
-        <span class="nx">layer</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="nx">nd</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
+        <span class="nx">layer</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="nx">nd</span><span class="p">.</span><span class="nf">Cid</span><span class="p">())</span>
     <span class="p">}</span>
 
     <span class="kd">var</span> <span class="nx">nextLayer</span> <span class="nx">cidQueue</span>
-    <span class="k">for</span> <span class="nx">height</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">layer</span><span class="p">.</span><span class="nf">Len</span><span class="p">(</span><span class="p">)</span> <span class="p">&gt;</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">height</span><span class="o">++</span> <span class="p">{</span>
-        <span class="k">for</span> <span class="nx">layer</span><span class="p">.</span><span class="nf">Len</span><span class="p">(</span><span class="p">)</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="nx">height</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">layer</span><span class="p">.</span><span class="nf">Len</span><span class="p">()</span> <span class="p">&gt;</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">height</span><span class="o">++</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="nx">layer</span><span class="p">.</span><span class="nf">Len</span><span class="p">()</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
             <span class="nx">vals</span> <span class="o">:=</span> <span class="nx">layer</span><span class="p">.</span><span class="nf">PopN</span><span class="p">(</span><span class="nx">width</span><span class="p">)</span>
 
             <span class="nx">nd</span> <span class="o">:=</span> <span class="nx">Node</span><span class="p">{</span>
@@ -4772,13 +4718,13 @@ Given an array of size <code>N</code> and a fixed width of <code>W</code>:</p>
 
             <span class="nf">storeNode</span><span class="p">(</span><span class="nx">nd</span><span class="p">)</span>
 
-            <span class="nx">nextLayer</span><span class="p">.</span><span class="nb">append</span><span class="p">(</span><span class="nx">nd</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
+            <span class="nx">nextLayer</span><span class="p">.</span><span class="nb">append</span><span class="p">(</span><span class="nx">nd</span><span class="p">.</span><span class="nf">Cid</span><span class="p">())</span>
         <span class="p">}</span>
         <span class="nx">layer</span> <span class="p">=</span> <span class="nx">nextLayer</span>
-        <span class="nx">nextLayer</span><span class="p">.</span><span class="nf">ClearItems</span><span class="p">(</span><span class="p">)</span>
+        <span class="nx">nextLayer</span><span class="p">.</span><span class="nf">ClearItems</span><span class="p">()</span>
     <span class="p">}</span>
 
-    <span class="k">return</span> <span class="nx">nextLayer</span><span class="p">.</span><span class="nf">First</span><span class="p">(</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">nextLayer</span><span class="p">.</span><span class="nf">First</span><span class="p">()</span>
 <span class="p">}</span>
 </code></pre></div><h2 id="geti"><code>get(i)</code></h2>
 <blockquote>
@@ -4791,7 +4737,7 @@ Given an array of size <code>N</code> and a fixed width of <code>W</code>:</p>
 
     <span class="nx">childWidth</span> <span class="o">:=</span> <span class="nf">Pow</span><span class="p">(</span><span class="nx">Width</span><span class="p">,</span> <span class="nx">n</span><span class="p">.</span><span class="nx">Height</span><span class="p">)</span>
 
-    <span class="nx">child</span> <span class="o">:=</span> <span class="nf">loadNode</span><span class="p">(</span><span class="nx">n</span><span class="p">.</span><span class="nx">Array</span><span class="p">[</span><span class="nx">i</span><span class="o">/</span><span class="nx">childWidth</span><span class="p">]</span><span class="p">)</span>
+    <span class="nx">child</span> <span class="o">:=</span> <span class="nf">loadNode</span><span class="p">(</span><span class="nx">n</span><span class="p">.</span><span class="nx">Array</span><span class="p">[</span><span class="nx">i</span><span class="o">/</span><span class="nx">childWidth</span><span class="p">])</span>
     <span class="k">return</span> <span class="nx">child</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="nx">i</span> <span class="o">%</span> <span class="nx">childWidth</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -4808,8 +4754,8 @@ Given an array of size <code>N</code> and a fixed width of <code>W</code>:</p>
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#createitems">create(items)</a></li>
-    <li><a href="#geti">get(i)</a></li>
+    <li><a href="#createitems"><code>create(items)</code></a></li>
+    <li><a href="#geti"><code>get(i)</code></a></li>
   </ul>
 </nav>
   </aside>

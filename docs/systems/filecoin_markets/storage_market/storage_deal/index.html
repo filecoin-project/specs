@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4746,13 +4692,13 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">)</span>
 
 <span class="c1">// Note: Deal Collateral is only released and returned to clients and miners
-</span><span class="c1"></span><span class="c1">// when the storage deal stops counting towards power. In the current iteration,
-</span><span class="c1"></span><span class="c1">// it will be released when the sector containing the storage deals expires,
-</span><span class="c1"></span><span class="c1">// even though some storage deals can expire earlier than the sector does.
-</span><span class="c1"></span><span class="c1">// Collaterals are denominated in PerEpoch to incur a cost for self dealing or
-</span><span class="c1"></span><span class="c1">// minimal deals that last for a long time.
-</span><span class="c1"></span><span class="c1">// Note: ClientCollateralPerEpoch may not be needed and removed pending future confirmation.
-</span><span class="c1"></span><span class="c1">// There will be a Minimum value for both client and provider deal collateral.
+</span><span class="c1">// when the storage deal stops counting towards power. In the current iteration,
+</span><span class="c1">// it will be released when the sector containing the storage deals expires,
+</span><span class="c1">// even though some storage deals can expire earlier than the sector does.
+</span><span class="c1">// Collaterals are denominated in PerEpoch to incur a cost for self dealing or
+</span><span class="c1">// minimal deals that last for a long time.
+</span><span class="c1">// Note: ClientCollateralPerEpoch may not be needed and removed pending future confirmation.
+</span><span class="c1">// There will be a Minimum value for both client and provider deal collateral.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageDealProposal</span> <span class="kd">struct</span> <span class="p">{</span>
 	<span class="nx">PieceCID</span>        <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceCID</span> <span class="c1">// CommP
 </span><span class="c1"></span>	<span class="nx">PieceSize</span>       <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceSize</span>
@@ -4772,33 +4718,33 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">ClientCollateral</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nf">CID</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nf">Duration</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nf">Duration</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">EndEpoch</span> <span class="o">-</span> <span class="nx">p</span><span class="p">.</span><span class="nx">StartEpoch</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nf">TotalStorageFee</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">StoragePricePerEpoch</span><span class="p">)</span> <span class="o">*</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nf">Duration</span><span class="p">(</span><span class="p">)</span><span class="p">)</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nf">TotalStorageFee</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">StoragePricePerEpoch</span><span class="p">)</span> <span class="o">*</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nf">Duration</span><span class="p">()))</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nf">ClientBalanceRequirement</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">ClientCollateral</span> <span class="o">+</span> <span class="nx">p</span><span class="p">.</span><span class="nf">TotalStorageFee</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nf">ClientBalanceRequirement</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">ClientCollateral</span> <span class="o">+</span> <span class="nx">p</span><span class="p">.</span><span class="nf">TotalStorageFee</span><span class="p">())</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nf">ProviderBalanceRequirement</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nf">ProviderBalanceRequirement</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">p</span><span class="p">.</span><span class="nx">ProviderCollateral</span>
 <span class="p">}</span>
 
 <span class="c1">// Everything in this struct will go on chain
-</span><span class="c1"></span><span class="c1">// Provider&#39;s signature is implicit in the message containing this structure.
+</span><span class="c1">// Provider&#39;s signature is implicit in the message containing this structure.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageDeal</span> <span class="kd">struct</span> <span class="p">{</span>
 	<span class="nx">Proposal</span> <span class="nx">StorageDealProposal</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">d</span> <span class="o">*</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="nf">CID</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">d</span> <span class="o">*</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 

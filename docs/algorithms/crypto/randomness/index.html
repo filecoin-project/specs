@@ -1380,33 +1380,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1474,33 +1447,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4111,7 +4057,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4120,7 +4066,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4829,46 +4775,46 @@ randomness = SHA256(buffer)
     <span class="nx">err</span> <span class="o">:=</span> <span class="nx">minerAddr</span><span class="p">.</span><span class="nf">MarshalCBOR</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">addrBuf</span><span class="p">)</span>
     <span class="nx">autil</span><span class="p">.</span><span class="nf">AssertNoError</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span><span class="p">,</span> <span class="nx">tix</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">addrBuf</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span><span class="p">,</span> <span class="nx">tix</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">addrBuf</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">())</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">DeriveRandWithEpoch</span><span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">,</span> <span class="nx">tix</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span><span class="p">,</span> <span class="nx">epoch</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span><span class="p">,</span> <span class="nx">tix</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nf">BigEndianBytesFromInt</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span><span class="p">,</span> <span class="nx">tix</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nf">BigEndianBytesFromInt</span><span class="p">(</span><span class="nx">epoch</span><span class="p">))</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">,</span> <span class="nx">randSeed</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span><span class="p">,</span> <span class="nx">index</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">s</span> <span class="p">[</span><span class="p">]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
-    <span class="nx">buffer</span> <span class="o">:=</span> <span class="p">[</span><span class="p">]</span><span class="kt">byte</span><span class="p">{</span><span class="p">}</span>
-    <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nf">BigEndianBytesFromInt</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">tag</span><span class="p">)</span><span class="p">)</span><span class="o">...</span><span class="p">)</span>
-    <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nf">BigEndianBytesFromInt</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span><span class="p">)</span><span class="o">...</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">,</span> <span class="nx">randSeed</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span><span class="p">,</span> <span class="nx">index</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">s</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
+    <span class="nx">buffer</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">{}</span>
+    <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nf">BigEndianBytesFromInt</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">tag</span><span class="p">))</span><span class="o">...</span><span class="p">)</span>
+    <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nf">BigEndianBytesFromInt</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">index</span><span class="p">))</span><span class="o">...</span><span class="p">)</span>
     <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(</span><span class="nx">randSeed</span><span class="p">)</span><span class="o">...</span><span class="p">)</span>
     <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nx">s</span><span class="o">...</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(</span><span class="nf">SHA256</span><span class="p">(</span><span class="nx">buffer</span><span class="p">)</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(</span><span class="nf">SHA256</span><span class="p">(</span><span class="nx">buffer</span><span class="p">))</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">RandomInt</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span> <span class="nx">nonce</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">limit</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
     <span class="nx">nonceBytes</span> <span class="o">:=</span> <span class="nf">BigEndianBytesFromInt</span><span class="p">(</span><span class="nx">nonce</span><span class="p">)</span>
     <span class="nx">input</span> <span class="o">:=</span> <span class="nx">randomness</span>
     <span class="nx">input</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">nonceBytes</span><span class="o">...</span><span class="p">)</span>
-    <span class="nx">ranHash</span> <span class="o">:=</span> <span class="nf">SHA256</span><span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(</span><span class="nx">input</span><span class="p">[</span><span class="p">:</span><span class="p">]</span><span class="p">)</span><span class="p">)</span>
+    <span class="nx">ranHash</span> <span class="o">:=</span> <span class="nf">SHA256</span><span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(</span><span class="nx">input</span><span class="p">[:]))</span>
     <span class="nx">hashInt</span> <span class="o">:=</span> <span class="nf">IntFromBigEndianBytes</span><span class="p">(</span><span class="nx">ranHash</span><span class="p">)</span>
-    <span class="nx">num</span> <span class="o">:=</span> <span class="nb">int</span><span class="p">(</span><span class="nx">math</span><span class="p">.</span><span class="nf">Mod</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">hashInt</span><span class="p">)</span><span class="p">,</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">limit</span><span class="p">)</span><span class="p">)</span><span class="p">)</span>
+    <span class="nx">num</span> <span class="o">:=</span> <span class="nb">int</span><span class="p">(</span><span class="nx">math</span><span class="p">.</span><span class="nf">Mod</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">hashInt</span><span class="p">),</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">limit</span><span class="p">)))</span>
     <span class="k">return</span> <span class="nx">num</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">BigEndianBytesFromInt</span><span class="p">(</span><span class="nx">x</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
-    <span class="nx">buf</span> <span class="o">:=</span> <span class="nx">bytes</span><span class="p">.</span><span class="nf">NewBuffer</span><span class="p">(</span><span class="nb">make</span><span class="p">(</span><span class="p">[</span><span class="p">]</span><span class="kt">byte</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span><span class="p">)</span>
+    <span class="nx">buf</span> <span class="o">:=</span> <span class="nx">bytes</span><span class="p">.</span><span class="nf">NewBuffer</span><span class="p">(</span><span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
     <span class="nx">err</span> <span class="o">:=</span> <span class="nx">binary</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">buf</span><span class="p">,</span> <span class="nx">binary</span><span class="p">.</span><span class="nx">BigEndian</span><span class="p">,</span> <span class="nx">x</span><span class="p">)</span>
     <span class="nx">autil</span><span class="p">.</span><span class="nf">AssertNoError</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nx">buf</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">buf</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">()</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">SHA256</span><span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
-    <span class="nx">autil</span><span class="p">.</span><span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">[</span><span class="p">]</span><span class="kt">byte</span><span class="p">{</span><span class="p">}</span>
+    <span class="nx">autil</span><span class="p">.</span><span class="nf">IMPL_FINISH</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">{}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">IntFromBigEndianBytes</span><span class="p">(</span><span class="nx">bytes</span> <span class="p">[</span><span class="p">]</span><span class="kt">byte</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
-    <span class="nx">autil</span><span class="p">.</span><span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">IntFromBigEndianBytes</span><span class="p">(</span><span class="nx">bytes</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+    <span class="nx">autil</span><span class="p">.</span><span class="nf">IMPL_FINISH</span><span class="p">()</span>
     <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -4905,9 +4851,9 @@ randomness = SHA256(buffer)
 
 <span class="c1">// Returns the tipset at or immediately prior to `epoch`.
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset</span> <span class="p">{</span>
-    <span class="nx">current</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">HeadTipset</span><span class="p">(</span><span class="p">)</span>
-    <span class="k">for</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Epoch</span><span class="p">(</span><span class="p">)</span> <span class="p">&gt;</span> <span class="nx">epoch</span> <span class="p">{</span>
-        <span class="nx">current</span> <span class="p">=</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Parents</span><span class="p">(</span><span class="p">)</span>
+    <span class="nx">current</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">HeadTipset</span><span class="p">()</span>
+    <span class="k">for</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Epoch</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">epoch</span> <span class="p">{</span>
+        <span class="nx">current</span> <span class="p">=</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Parents</span><span class="p">()</span>
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="nx">current</span>
@@ -4916,7 +4862,7 @@ randomness = SHA256(buffer)
 <span class="c1">// Draws randomness from the tipset at or immediately prior to `epoch`.
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span> <span class="p">{</span>
     <span class="nx">ts</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nx">ts</span><span class="p">.</span><span class="nf">MinTicket</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">DrawRandomness</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">ts</span><span class="p">.</span><span class="nf">MinTicket</span><span class="p">().</span><span class="nf">DrawRandomness</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">GetTicketProductionRandSeed</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span> <span class="p">{</span>

@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4926,12 +4872,12 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 <span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 <span class="kn">import</span> <span class="nx">peer</span> <span class="s">&#34;github.com/libp2p/go-libp2p-core/peer&#34;</span>
 
-<span class="kd">type</span> <span class="nx">StorageDeal</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
-<span class="kd">type</span> <span class="nx">RetrievalDeal</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
+<span class="kd">type</span> <span class="nx">StorageDeal</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">RetrievalDeal</span> <span class="kd">struct</span> <span class="p">{}</span>
 
 <span class="c1">// A DataTransferVoucher is used to validate
-</span><span class="c1"></span><span class="c1">// a data transfer request against the underlying storage or retrieval deal
-</span><span class="c1"></span><span class="c1">// that precipitated it
+</span><span class="c1">// a data transfer request against the underlying storage or retrieval deal
+</span><span class="c1">// that precipitated it
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">DataTransferVoucher</span> <span class="nx">union</span> <span class="p">{</span>
     <span class="nx">StorageDealVoucher</span>
     <span class="nx">RetrievalDealVoucher</span>
@@ -4945,11 +4891,11 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
     <span class="nx">deal</span> <span class="nx">RetrievalDeal</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">Ongoing</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
-<span class="kd">type</span> <span class="nx">Paused</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
-<span class="kd">type</span> <span class="nx">Completed</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
-<span class="kd">type</span> <span class="nx">Failed</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
-<span class="kd">type</span> <span class="nx">ChannelNotFoundError</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
+<span class="kd">type</span> <span class="nx">Ongoing</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Paused</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Completed</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Failed</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">ChannelNotFoundError</span> <span class="kd">struct</span> <span class="p">{}</span>
 
 <span class="kd">type</span> <span class="nx">DataTransferStatus</span> <span class="nx">union</span> <span class="p">{</span>
     <span class="nx">Ongoing</span>
@@ -5013,7 +4959,7 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
     <span class="nx">ErrorMsg</span> <span class="kt">string</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">Complete</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
+<span class="kd">type</span> <span class="nx">Complete</span> <span class="kd">struct</span> <span class="p">{}</span>
 
 <span class="kd">type</span> <span class="nx">DataTransferEvent</span> <span class="nx">union</span> <span class="p">{</span>
     <span class="nx">Open</span>
@@ -5094,7 +5040,7 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 </span><span class="c1"></span>    <span class="nf">SubscribeToEvents</span><span class="p">(</span><span class="nx">subscriber</span> <span class="nx">DataTransferSubscriber</span><span class="p">)</span>
 
     <span class="c1">// get all in progress transfers
-</span><span class="c1"></span>    <span class="nf">InProgressChannels</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span><span class="nx">ChannelID</span><span class="p">:</span> <span class="nx">DataTransferState</span><span class="p">}</span>
+</span><span class="c1"></span>    <span class="nf">InProgressChannels</span><span class="p">()</span> <span class="p">{</span><span class="nx">ChannelID</span><span class="p">:</span> <span class="nx">DataTransferState</span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 

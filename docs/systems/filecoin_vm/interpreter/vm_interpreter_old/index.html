@@ -1380,33 +1380,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1474,33 +1447,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4111,7 +4057,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4120,7 +4066,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4733,11 +4679,11 @@ but specifying a method ID of &lsquo;0&rsquo; ensures that no other side effects
 <p>Actors are given acess to a <code>Storage</code> interface to fulfil their need for persistent storage. The <code>Storage</code> interface describes a content addressed block storage system (<code>Put</code> and <code>Get</code>) and a pointer into it (<code>Head</code> and <code>Commit</code>) that points to the actor&rsquo;s current state.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Storage</span> <span class="kd">interface</span> <span class="p">{</span>
     <span class="c1">// Put writes the given object to the storage staging area and returns its CID
-</span><span class="c1"></span>    <span class="nf">Put</span><span class="p">(</span><span class="kd">interface</span><span class="p">{</span><span class="p">}</span><span class="p">)</span> <span class="p">(</span><span class="nx">Cid</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">Put</span><span class="p">(</span><span class="kd">interface</span><span class="p">{})</span> <span class="p">(</span><span class="nx">Cid</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// Get fetches the given object from storage (either staging, or local) and returns
 </span><span class="c1"></span>    <span class="c1">// the serialized data.
-</span><span class="c1"></span>    <span class="nf">Get</span><span class="p">(</span><span class="nx">Cid</span><span class="p">)</span> <span class="p">(</span><span class="p">[</span><span class="p">]</span><span class="kt">byte</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">Get</span><span class="p">(</span><span class="nx">Cid</span><span class="p">)</span> <span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// Commit updates the actual stored state for the actor. This is a compare and swap
 </span><span class="c1"></span>    <span class="c1">// operation, and will fail if &#39;old&#39; is not equal to the current return value of `Head`.
@@ -4745,7 +4691,7 @@ but specifying a method ID of &lsquo;0&rsquo; ensures that no other side effects
 </span><span class="c1"></span>    <span class="nf">Commit</span><span class="p">(</span><span class="nx">old</span> <span class="nx">Cid</span><span class="p">,</span> <span class="nx">new</span> <span class="nx">Cid</span><span class="p">)</span> <span class="kt">error</span>
 
     <span class="c1">// Head returns the CID of the current actor state
-</span><span class="c1"></span>    <span class="nf">Head</span><span class="p">(</span><span class="p">)</span> <span class="nx">Cid</span>
+</span><span class="c1"></span>    <span class="nf">Head</span><span class="p">()</span> <span class="nx">Cid</span>
 <span class="p">}</span>
 </code></pre></div><p>Actors can store state as a single block or implement any persistent
 data structure that can be built upon a content addressed block store.

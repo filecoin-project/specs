@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4731,8 +4677,8 @@ https://github.com/alex-shpak/hugo-book
 <li>A provider module to respond to queries and deal proposals</li>
 </ul>
 <h1 id="vo--v1">VO &amp; V1</h1>
-<p>V0 of the protocol has participants send data over the retrieval protocol itself in a series of Blocks encoded in Bitswap format and verify received blocks manually. It will only support fetching the payload CID which is at the root of PieceCID&rsquo;s Car File, and will only support fetching the whole DAG.</p>
-<p>In V1, the retrieval markets will evolve to support sending arbitrary payload CID&rsquo;s &amp; selectors within a piece (V1). Further, it will piggy back on the Data Transfer system and Graphsync to handle transfer and verification, to support arbitrary selectors, and to reduce roundtrips.
+<p>V0 of the protocol has participants send data over the retrieval protocol itself in a series of Blocks encoded in Bitswap format and verify received blocks manually. It will only support fetching the payload CID which is at the root of PieceCID&rsquo;s <code>.car</code> File, and will only support fetching the whole DAG.</p>
+<p>In V1, the retrieval markets will evolve to support sending arbitrary payload CID&rsquo;s &amp; selectors within a piece. Further, it will piggy back on the Data Transfer system and Graphsync to handle transfer and verification, to support arbitrary selectors, and to reduce round trips.
 The Data Transfer System will accordingly be augmented to support pausing/resuming and sending intermediate vouchers to facilitate this.
 V1 will also include additional mechanisms for timeouts and cancellations. (to be specified)</p>
 <p>Though the underlying protocols will change, the API interfaces for the client &amp; provider will not change from V0 to V1.</p>
@@ -4777,9 +4723,9 @@ V1 will also include additional mechanisms for timeouts and cancellations. (to b
 <li>The provider sends blocks over the protocol until it requires payment</li>
 <li>The client consumes blocks over the retrieval protocol and manually verifies them</li>
 <li>When the provider requires payment to proceed, it sends payment request and does not send any more blocks</li>
-<li>The client puts a payment voucher on chain</li>
+<li>The client creates and stores a payment voucher off-chain</li>
 <li>The client responds to the provider with a reference to the payment voucher</li>
-<li>The provider redeems the payment voucher on the chain</li>
+<li>The provider redeems the payment voucher off-chain</li>
 <li>The provider resumes sending blocks</li>
 <li>The client consumes blocks until payment is required again</li>
 <li>The process continues until the end of the query</li>
@@ -4820,19 +4766,19 @@ V1 will also include additional mechanisms for timeouts and cancellations. (to b
 <li>The client schedules a <code>Data Transfer Pull Request</code> passing the <code>RetrievalDealProposal</code> as a voucher.</li>
 <li>The provider validates the proposal and rejects it if it is invalid</li>
 <li>If the proposal is valid, the provider responds with an accept message and begins monitoring the data transfer process</li>
-<li>The client creates a payment channel as neccesary and a lane, ensures there are free funds in the channel</li>
-<li>The provider unseals the sector as neccesary</li>
+<li>The client creates a payment channel as necessary and a lane, ensures there are free funds in the channel</li>
+<li>The provider unseals the sector as necessary</li>
 <li>The provider monitors data transfer as it sends blocks over the protocol, until it requires payment</li>
 <li>When the provider requires payment, it pauses the data transfer and sends a request for payment as an intermediate voucher</li>
 <li>The client receives the request for payment</li>
-<li>The client puts a payment voucher on chain</li>
+<li>The client creates and stores payment voucher off-chain</li>
 <li>The client responds to provider with a reference to the payment voucher, sent as an intermediate voucher</li>
-<li>The provider redeems the payment voucher on the chain</li>
-<li>The provider unpauses the request and data resumes sending</li>
+<li>The provider redeems the payment voucher off-chain</li>
+<li>The provider resumes both the request and sending data</li>
 <li>The process continues until the end of the query</li>
 </ul>
 <h1 id="bootstrapping-trust">Bootstrapping Trust</h1>
-<p>Neither the client nor the provider have any specific reason to trust the other. Therefore, payment for a retrieval deal is done in pieces, sending vouchers as bytes are sent and verified.</p>
+<p>Neither the client nor the provider have any specific reason to trust the other. Therefore, payment for a retrieval deal is done incrementally, sending vouchers as bytes are sent and verified.</p>
 <p>The trust process is as follows:</p>
 <ul>
 <li>When the deal is created, client &amp; provider agree to a &ldquo;payment interval&rdquo; in bytes, which is the <em>minimum</em> amount of data the provider will send before each required increment</li>
@@ -4876,16 +4822,16 @@ requests payment, assuming it&rsquo;s received at least 1300 bytes since last pa
 <span class="kn">import</span> <span class="nx">peer</span> <span class="s">&#34;github.com/libp2p/go-libp2p-core/peer&#34;</span>
 <span class="kn">import</span> <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 
-<span class="kd">type</span> <span class="nx">PaymentVoucher</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
+<span class="kd">type</span> <span class="nx">PaymentVoucher</span> <span class="kd">struct</span> <span class="p">{}</span>
 
 <span class="kd">type</span> <span class="nx">RetrievalPeer</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Address</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
     <span class="nx">ID</span>       <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>  <span class="c1">// optional
 </span><span class="c1"></span><span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">Available</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
-<span class="kd">type</span> <span class="nx">Unavailable</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
-<span class="kd">type</span> <span class="nx">Unknown</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
+<span class="kd">type</span> <span class="nx">Available</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Unavailable</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Unknown</span> <span class="kd">struct</span> <span class="p">{}</span>
 
 <span class="kd">type</span> <span class="nx">RetrievalQueryResponseStatus</span> <span class="nx">union</span> <span class="p">{</span>
     <span class="nx">Available</span>
@@ -4924,19 +4870,19 @@ requests payment, assuming it&rsquo;s received at least 1300 bytes since last pa
     <span class="nx">MaxPaymentInterval</span>          <span class="nx">UInt</span>
     <span class="nx">MaxPaymentIntervalIncrease</span>  <span class="nx">UInt</span>
 
-    <span class="nf">PieceRetrievalPrice</span><span class="p">(</span><span class="p">)</span>  <span class="c1">// == MinPricePerByte * Size
-</span><span class="c1"></span>    <span class="nf">PayloadRetrievalPrice</span><span class="p">(</span><span class="p">)</span>  <span class="c1">// V1 - optional == MinPricePerByte * ExpectedPayloadSize
+    <span class="nf">PieceRetrievalPrice</span><span class="p">()</span>  <span class="c1">// == MinPricePerByte * Size
+</span><span class="c1"></span>    <span class="nf">PayloadRetrievalPrice</span><span class="p">()</span>  <span class="c1">// V1 - optional == MinPricePerByte * ExpectedPayloadSize
 </span><span class="c1"></span><span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">Accepted</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
-<span class="kd">type</span> <span class="nx">Failed</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
-<span class="kd">type</span> <span class="nx">Rejected</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
-<span class="kd">type</span> <span class="nx">Unsealing</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
-<span class="kd">type</span> <span class="nx">FundsNeeded</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
-<span class="kd">type</span> <span class="nx">Ongoing</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
-<span class="kd">type</span> <span class="nx">FundsNeededLastPayment</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
-<span class="kd">type</span> <span class="nx">Completed</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
-<span class="kd">type</span> <span class="nx">DealNotFound</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
+<span class="kd">type</span> <span class="nx">Accepted</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Failed</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Rejected</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Unsealing</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">FundsNeeded</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Ongoing</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">FundsNeededLastPayment</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Completed</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">DealNotFound</span> <span class="kd">struct</span> <span class="p">{}</span>
 
 <span class="kd">type</span> <span class="nx">DealStatus</span> <span class="nx">union</span> <span class="p">{</span>
     <span class="nx">Accepted</span>

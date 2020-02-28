@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4753,9 +4699,9 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 
 <span class="c1">// Runtime is the VM&#39;s internal runtime object.
-</span><span class="c1"></span><span class="c1">// this is everything that is accessible to actors, beyond parameters.
+</span><span class="c1">// this is everything that is accessible to actors, beyond parameters.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">Runtime</span> <span class="kd">interface</span> <span class="p">{</span>
-	<span class="nf">CurrEpoch</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+	<span class="nf">CurrEpoch</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 
 	<span class="c1">// Randomness returns a (pseudo)random string for the given epoch and tag.
 </span><span class="c1"></span>	<span class="nf">GetRandomness</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span>
@@ -4763,25 +4709,25 @@ https://github.com/alex-shpak/hugo-book
 	<span class="c1">// The address of the immediate calling actor.
 </span><span class="c1"></span>	<span class="c1">// Not necessarily the actor in the From field of the initial on-chain Message.
 </span><span class="c1"></span>	<span class="c1">// Always an ID-address.
-</span><span class="c1"></span>	<span class="nf">ImmediateCaller</span><span class="p">(</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>	<span class="nf">ImmediateCaller</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 	<span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">caller</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
-	<span class="nf">ValidateImmediateCallerInSet</span><span class="p">(</span><span class="nx">callers</span> <span class="p">[</span><span class="p">]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
+	<span class="nf">ValidateImmediateCallerInSet</span><span class="p">(</span><span class="nx">callers</span> <span class="p">[]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
 	<span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">type_</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">)</span>
-	<span class="nf">ValidateImmediateCallerAcceptAnyOfTypes</span><span class="p">(</span><span class="nx">types</span> <span class="p">[</span><span class="p">]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">)</span>
-	<span class="nf">ValidateImmediateCallerAcceptAny</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">ValidateImmediateCallerAcceptAnyOfTypes</span><span class="p">(</span><span class="nx">types</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">)</span>
+	<span class="nf">ValidateImmediateCallerAcceptAny</span><span class="p">()</span>
 	<span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span><span class="nx">CallerPattern</span><span class="p">)</span>
 
 	<span class="c1">// The address of the actor receiving the message. Always an ID-address.
-</span><span class="c1"></span>	<span class="nf">CurrReceiver</span><span class="p">(</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>	<span class="nf">CurrReceiver</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
 	<span class="c1">// The actor who mined the block in which the initial on-chain message appears.
 </span><span class="c1"></span>	<span class="c1">// Always an ID-address.
-</span><span class="c1"></span>	<span class="nf">ToplevelBlockWinner</span><span class="p">(</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>	<span class="nf">ToplevelBlockWinner</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
-	<span class="nf">AcquireState</span><span class="p">(</span><span class="p">)</span> <span class="nx">ActorStateHandle</span>
+	<span class="nf">AcquireState</span><span class="p">()</span> <span class="nx">ActorStateHandle</span>
 
-	<span class="nf">SuccessReturn</span><span class="p">(</span><span class="p">)</span> <span class="nx">InvocOutput</span>
-	<span class="nf">ValueReturn</span><span class="p">(</span><span class="p">[</span><span class="p">]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">InvocOutput</span>
+	<span class="nf">SuccessReturn</span><span class="p">()</span> <span class="nx">InvocOutput</span>
+	<span class="nf">ValueReturn</span><span class="p">([]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">InvocOutput</span>
 
 	<span class="c1">// Throw an error indicating a failure condition has occurred, from which the given actor
 </span><span class="c1"></span>	<span class="c1">// code is unable to recover.
@@ -4789,15 +4735,15 @@ https://github.com/alex-shpak/hugo-book
 
 	<span class="c1">// Calls Abort with InvalidArguments_User.
 </span><span class="c1"></span>	<span class="nf">AbortArgMsg</span><span class="p">(</span><span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span>
-	<span class="nf">AbortArg</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">AbortArg</span><span class="p">()</span>
 
 	<span class="c1">// Calls Abort with InconsistentState_User.
 </span><span class="c1"></span>	<span class="nf">AbortStateMsg</span><span class="p">(</span><span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span>
-	<span class="nf">AbortState</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">AbortState</span><span class="p">()</span>
 
 	<span class="c1">// Calls Abort with InsufficientFunds_User.
 </span><span class="c1"></span>	<span class="nf">AbortFundsMsg</span><span class="p">(</span><span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span>
-	<span class="nf">AbortFunds</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">AbortFunds</span><span class="p">()</span>
 
 	<span class="c1">// Calls Abort with RuntimeAPIError.
 </span><span class="c1"></span>	<span class="c1">// For internal use only (not in actor code).
@@ -4806,11 +4752,11 @@ https://github.com/alex-shpak/hugo-book
 	<span class="c1">// Check that the given condition is true (and call Abort if not).
 </span><span class="c1"></span>	<span class="nf">Assert</span><span class="p">(</span><span class="kt">bool</span><span class="p">)</span>
 
-	<span class="nf">CurrentBalance</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
-	<span class="nf">ValueReceived</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
+	<span class="nf">CurrentBalance</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
+	<span class="nf">ValueReceived</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
 	<span class="c1">// Look up the current values of several system-wide economic indices.
-</span><span class="c1"></span>	<span class="nf">CurrIndices</span><span class="p">(</span><span class="p">)</span> <span class="nx">indices</span><span class="p">.</span><span class="nx">Indices</span>
+</span><span class="c1"></span>	<span class="nf">CurrIndices</span><span class="p">()</span> <span class="nx">indices</span><span class="p">.</span><span class="nx">Indices</span>
 
 	<span class="c1">// Look up the code ID of a given actor address.
 </span><span class="c1"></span>	<span class="nf">GetActorCodeID</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">ret</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
@@ -4818,7 +4764,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="c1">// Run a (pure function) computation, consuming the gas cost associated with that function.
 </span><span class="c1"></span>	<span class="c1">// This mechanism is intended to capture the notion of an ABI between the VM and native
 </span><span class="c1"></span>	<span class="c1">// functions, and should be used for any function whose computation is expensive.
-</span><span class="c1"></span>	<span class="nf">Compute</span><span class="p">(</span><span class="nx">ComputeFunctionID</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[</span><span class="p">]</span><span class="kd">interface</span><span class="p">{</span><span class="p">}</span><span class="p">)</span> <span class="kd">interface</span><span class="p">{</span><span class="p">}</span>
+</span><span class="c1"></span>	<span class="nf">Compute</span><span class="p">(</span><span class="nx">ComputeFunctionID</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{})</span> <span class="kd">interface</span><span class="p">{}</span>
 
 	<span class="c1">// Sends a message to another actor.
 </span><span class="c1"></span>	<span class="c1">// If the invoked method does not return successfully, this caller will be aborted too.
@@ -4833,7 +4779,7 @@ https://github.com/alex-shpak/hugo-book
 		<span class="nx">toAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
 		<span class="nx">methodNum</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span>
 		<span class="nx">params</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">,</span>
-	<span class="p">)</span> <span class="p">[</span><span class="p">]</span><span class="kt">byte</span>
+	<span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span>
 	<span class="nf">SendFunds</span><span class="p">(</span><span class="nx">toAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
 
 	<span class="c1">// Sends a message to another actor, trapping an unsuccessful execution.
@@ -4844,7 +4790,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>	<span class="c1">// the actor even in the event of a chain re-org (whereas an ID-address might refer to a
 </span><span class="c1"></span>	<span class="c1">// different actor after messages are re-ordered).
 </span><span class="c1"></span>	<span class="c1">// Always an ActorExec address.
-</span><span class="c1"></span>	<span class="nf">NewActorAddress</span><span class="p">(</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>	<span class="nf">NewActorAddress</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
 	<span class="c1">// Creates an actor in the state tree, with empty state. May only be called by InitActor.
 </span><span class="c1"></span>	<span class="nf">CreateActor</span><span class="p">(</span>
@@ -4859,12 +4805,12 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>	<span class="nf">DeleteActor</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
 
 	<span class="c1">// Retrieves and deserializes an object from the store into o. Returns whether successful.
-</span><span class="c1"></span>	<span class="nf">IpldGet</span><span class="p">(</span><span class="nx">c</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span><span class="p">,</span> <span class="nx">o</span> <span class="kd">interface</span><span class="p">{</span><span class="p">}</span><span class="p">)</span> <span class="kt">bool</span>
+</span><span class="c1"></span>	<span class="nf">IpldGet</span><span class="p">(</span><span class="nx">c</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span><span class="p">,</span> <span class="nx">o</span> <span class="kd">interface</span><span class="p">{})</span> <span class="kt">bool</span>
 	<span class="c1">// Serializes and stores an object, returning its CID.
-</span><span class="c1"></span>	<span class="nf">IpldPut</span><span class="p">(</span><span class="nx">x</span> <span class="kd">interface</span><span class="p">{</span><span class="p">}</span><span class="p">)</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
+</span><span class="c1"></span>	<span class="nf">IpldPut</span><span class="p">(</span><span class="nx">x</span> <span class="kd">interface</span><span class="p">{})</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
 
 	<span class="c1">// Provides the system call interface.
-</span><span class="c1"></span>	<span class="nf">Syscalls</span><span class="p">(</span><span class="p">)</span> <span class="nx">Syscalls</span>
+</span><span class="c1"></span>	<span class="nf">Syscalls</span><span class="p">()</span> <span class="nx">Syscalls</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">Syscalls</span> <span class="kd">interface</span> <span class="p">{</span>
@@ -4872,10 +4818,10 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>	<span class="nf">VerifySignature</span><span class="p">(</span>
 		<span class="nx">signature</span> <span class="nx">crypto</span><span class="p">.</span><span class="nx">Signature</span><span class="p">,</span>
 		<span class="nx">signer</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
-		<span class="nx">plaintext</span> <span class="p">[</span><span class="p">]</span><span class="kt">byte</span><span class="p">,</span>
+		<span class="nx">plaintext</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span>
 	<span class="p">)</span> <span class="kt">bool</span>
 	<span class="c1">// Computes an unsealed sector CID (CommD) from its constituent piece CIDs (CommPs) and sizes.
-</span><span class="c1"></span>	<span class="nf">ComputeUnsealedSectorCID</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">pieces</span> <span class="p">[</span><span class="p">]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">)</span> <span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nf">ComputeUnsealedSectorCID</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">pieces</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">)</span> <span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 	<span class="c1">// Verifies a sector seal proof.
 </span><span class="c1"></span>	<span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">vi</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
 	<span class="c1">// Verifies a proof of spacetime.
@@ -4890,13 +4836,13 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">ReturnValue</span> <span class="p">[</span><span class="p">]</span><span class="kt">byte</span>
+	<span class="nx">ReturnValue</span> <span class="p">[]</span><span class="kt">byte</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ActorStateHandle</span> <span class="kd">interface</span> <span class="p">{</span>
 	<span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">newStateCID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorSubstateCID</span><span class="p">)</span>
 	<span class="nf">Release</span><span class="p">(</span><span class="nx">checkStateCID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorSubstateCID</span><span class="p">)</span>
-	<span class="nf">Take</span><span class="p">(</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorSubstateCID</span>
+	<span class="nf">Take</span><span class="p">()</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorSubstateCID</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ComputeFunctionID</span> <span class="kt">int64</span>
@@ -4982,13 +4928,13 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">ErrMsg</span>   <span class="kt">string</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">init</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">n</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">cbornode</span><span class="p">.</span><span class="nf">WrapObject</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kd">struct</span><span class="p">{</span><span class="p">}</span><span class="p">{</span><span class="p">}</span><span class="p">,</span> <span class="nx">mh</span><span class="p">.</span><span class="nx">SHA2_256</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">init</span><span class="p">()</span> <span class="p">{</span>
+	<span class="nx">n</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">cbornode</span><span class="p">.</span><span class="nf">WrapObject</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kd">struct</span><span class="p">{}{},</span> <span class="nx">mh</span><span class="p">.</span><span class="nx">SHA2_256</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
-	<span class="nx">EmptyCBOR</span> <span class="p">=</span> <span class="nx">n</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="p">)</span>
+	<span class="nx">EmptyCBOR</span> <span class="p">=</span> <span class="nx">n</span><span class="p">.</span><span class="nf">Cid</span><span class="p">()</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">RuntimeError</span><span class="p">)</span> <span class="nf">String</span><span class="p">(</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">RuntimeError</span><span class="p">)</span> <span class="nf">String</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
 	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;Runtime error: %v&#34;</span><span class="p">,</span> <span class="nx">x</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">x</span><span class="p">.</span><span class="nx">ErrMsg</span> <span class="o">!=</span> <span class="s">&#34;&#34;</span> <span class="p">{</span>
 		<span class="nx">ret</span> <span class="o">+=</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34; (\&#34;%v\&#34;)&#34;</span><span class="p">,</span> <span class="nx">x</span><span class="p">.</span><span class="nx">ErrMsg</span><span class="p">)</span>
@@ -5005,7 +4951,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">ActorSubstateCID_Equals</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span> <span class="nx">ActorSubstateCID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5022,7 +4968,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">h</span><span class="p">.</span><span class="nx">_rt</span><span class="p">.</span><span class="nf">_releaseActorSubstate</span><span class="p">(</span><span class="nx">checkStateCID</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">h</span> <span class="o">*</span><span class="nx">ActorStateHandle_I</span><span class="p">)</span> <span class="nf">Take</span><span class="p">(</span><span class="p">)</span> <span class="nx">ActorSubstateCID</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">h</span> <span class="o">*</span><span class="nx">ActorStateHandle_I</span><span class="p">)</span> <span class="nf">Take</span><span class="p">()</span> <span class="nx">ActorSubstateCID</span> <span class="p">{</span>
 	<span class="k">if</span> <span class="nx">h</span><span class="p">.</span><span class="nx">_initValue</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
 		<span class="nx">h</span><span class="p">.</span><span class="nx">_rt</span><span class="p">.</span><span class="nf">_apiError</span><span class="p">(</span><span class="s">&#34;Must call Take() only once on actor substate object&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
@@ -5032,8 +4978,8 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="c1">// Concrete instantiation of the Runtime interface. This should be instantiated by the
-</span><span class="c1"></span><span class="c1">// interpreter once per actor method invocation, and responds to that method&#39;s Runtime
-</span><span class="c1"></span><span class="c1">// API calls.
+</span><span class="c1">// interpreter once per actor method invocation, and responds to that method&#39;s Runtime
+</span><span class="c1">// API calls.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">VMContext</span> <span class="kd">struct</span> <span class="p">{</span>
 	<span class="nx">_store</span>              <span class="nx">ipld</span><span class="p">.</span><span class="nx">GraphStore</span>
 	<span class="nx">_globalStateInit</span>    <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
@@ -5092,7 +5038,7 @@ https://github.com/alex-shpak/hugo-book
 		<span class="nx">_valueReceived</span><span class="p">:</span>            <span class="nx">valueReceived</span><span class="p">,</span>
 		<span class="nx">_gasRemaining</span><span class="p">:</span>             <span class="nx">gasRemaining</span><span class="p">,</span>
 		<span class="nx">_numValidateCalls</span><span class="p">:</span>         <span class="mi">0</span><span class="p">,</span>
-		<span class="nx">_output</span><span class="p">:</span>                   <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span><span class="p">{</span><span class="p">}</span><span class="p">,</span>
+		<span class="nx">_output</span><span class="p">:</span>                   <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span><span class="p">{},</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
@@ -5100,7 +5046,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidArguments_User</span><span class="p">,</span> <span class="nx">msg</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">AbortArg</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">AbortArg</span><span class="p">()</span> <span class="p">{</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArgMsg</span><span class="p">(</span><span class="s">&#34;Invalid arguments&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5108,7 +5054,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InconsistentState_User</span><span class="p">,</span> <span class="nx">msg</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">AbortState</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">AbortState</span><span class="p">()</span> <span class="p">{</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortStateMsg</span><span class="p">(</span><span class="s">&#34;Inconsistent state&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5116,7 +5062,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InsufficientFunds_User</span><span class="p">,</span> <span class="nx">msg</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">AbortFunds</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">AbortFunds</span><span class="p">()</span> <span class="p">{</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortFundsMsg</span><span class="p">(</span><span class="s">&#34;Insufficient funds&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5128,7 +5074,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">if</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span> <span class="o">!=</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">InitActorAddr</span> <span class="p">{</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;Only InitActor may call rt.CreateActor&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
-	<span class="k">if</span> <span class="nx">address</span><span class="p">.</span><span class="nf">Protocol</span><span class="p">(</span><span class="p">)</span> <span class="o">!=</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ID</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">address</span><span class="p">.</span><span class="nf">Protocol</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ID</span> <span class="p">{</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;New actor adddress must be an ID-address&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 
@@ -5139,13 +5085,13 @@ https://github.com/alex-shpak/hugo-book
 	<span class="c1">// Create empty actor state.
 </span><span class="c1"></span>	<span class="nx">actorState</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">actstate</span><span class="p">.</span><span class="nx">ActorState_I</span><span class="p">{</span>
 		<span class="nx">CodeID_</span><span class="p">:</span>     <span class="nx">codeID</span><span class="p">,</span>
-		<span class="nx">State_</span><span class="p">:</span>      <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">EmptyCBOR</span><span class="p">)</span><span class="p">,</span>
-		<span class="nx">Balance_</span><span class="p">:</span>    <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="p">,</span>
+		<span class="nx">State_</span><span class="p">:</span>      <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">EmptyCBOR</span><span class="p">),</span>
+		<span class="nx">Balance_</span><span class="p">:</span>    <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
 		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
 	<span class="p">}</span>
 
 	<span class="c1">// Put it in the state tree.
-</span><span class="c1"></span>	<span class="nx">actorStateCID</span> <span class="o">:=</span> <span class="nx">actstate</span><span class="p">.</span><span class="nf">ActorSystemStateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">actorState</span><span class="p">)</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">actorStateCID</span> <span class="o">:=</span> <span class="nx">actstate</span><span class="p">.</span><span class="nf">ActorSystemStateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">actorState</span><span class="p">))</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_updateActorSystemStateInternal</span><span class="p">(</span><span class="nx">address</span><span class="p">,</span> <span class="nx">actorStateCID</span><span class="p">)</span>
 
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nx">ExecNewActor</span><span class="p">)</span>
@@ -5161,12 +5107,12 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_deleteActor</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span> <span class="p">=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">Impl</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">WithDeleteActorSystemState</span><span class="p">(</span><span class="nx">address</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span> <span class="p">=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithDeleteActorSystemState</span><span class="p">(</span><span class="nx">address</span><span class="p">)</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nx">DeleteActor</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_updateActorSystemStateInternal</span><span class="p">(</span><span class="nx">actorAddress</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">newStateCID</span> <span class="nx">actstate</span><span class="p">.</span><span class="nx">ActorSystemStateCID</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">newGlobalStatePending</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">Impl</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">WithActorSystemState</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">,</span> <span class="nx">newStateCID</span><span class="p">)</span>
+	<span class="nx">newGlobalStatePending</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithActorSystemState</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">,</span> <span class="nx">newStateCID</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
 		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Error in runtime implementation: failed to update actor system state&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
@@ -5174,7 +5120,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_updateActorSubstateInternal</span><span class="p">(</span><span class="nx">actorAddress</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">newStateCID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorSubstateCID</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">newGlobalStatePending</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">Impl</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">WithActorSubstate</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">,</span> <span class="nx">newStateCID</span><span class="p">)</span>
+	<span class="nx">newGlobalStatePending</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithActorSubstate</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">,</span> <span class="nx">newStateCID</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
 		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Error in runtime implementation: failed to update actor substate&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
@@ -5182,20 +5128,20 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_updateReleaseActorSubstate</span><span class="p">(</span><span class="nx">newStateCID</span> <span class="nx">ActorSubstateCID</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">(</span><span class="p">)</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateAcquired</span><span class="p">(</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">()</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateAcquired</span><span class="p">()</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_updateActorSubstateInternal</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">,</span> <span class="nx">newStateCID</span><span class="p">)</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nx">_actorSubstateUpdated</span> <span class="p">=</span> <span class="kc">true</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nx">_actorStateAcquired</span> <span class="p">=</span> <span class="kc">false</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_releaseActorSubstate</span><span class="p">(</span><span class="nx">checkStateCID</span> <span class="nx">ActorSubstateCID</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">(</span><span class="p">)</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateAcquired</span><span class="p">(</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">()</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateAcquired</span><span class="p">()</span>
 
 	<span class="nx">prevState</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">)</span>
 	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
-	<span class="nx">prevStateCID</span> <span class="o">:=</span> <span class="nx">prevState</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="p">)</span>
+	<span class="nx">prevStateCID</span> <span class="o">:=</span> <span class="nx">prevState</span><span class="p">.</span><span class="nf">State</span><span class="p">()</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nf">ActorSubstateCID_Equals</span><span class="p">(</span><span class="nx">prevStateCID</span><span class="p">,</span> <span class="nx">checkStateCID</span><span class="p">)</span> <span class="p">{</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;State CID differs upon release call&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
@@ -5210,17 +5156,17 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_checkActorStateAcquiredFlag</span><span class="p">(</span><span class="nx">expected</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">(</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">()</span>
 	<span class="k">if</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_actorStateAcquired</span> <span class="o">!=</span> <span class="nx">expected</span> <span class="p">{</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">_apiError</span><span class="p">(</span><span class="s">&#34;State updates and message sends must be disjoint&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_checkActorStateAcquired</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_checkActorStateAcquired</span><span class="p">()</span> <span class="p">{</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateAcquiredFlag</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_checkActorStateNotAcquired</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_checkActorStateNotAcquired</span><span class="p">()</span> <span class="p">{</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateAcquiredFlag</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5229,31 +5175,31 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_throwErrorFull</span><span class="p">(</span><span class="nx">errExitCode</span><span class="p">,</span> <span class="nx">errMsg</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ImmediateCaller</span><span class="p">(</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ImmediateCaller</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_immediateCaller</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">CurrReceiver</span><span class="p">(</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">CurrReceiver</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ToplevelBlockWinner</span><span class="p">(</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ToplevelBlockWinner</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_toplevelBlockWinner</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span>
 	<span class="nx">callerExpectedPattern</span> <span class="nx">CallerPattern</span><span class="p">)</span> <span class="p">{</span>
 
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">(</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">()</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkNumValidateCalls</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-	<span class="nx">caller</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(</span><span class="p">)</span>
+	<span class="nx">caller</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">callerExpectedPattern</span><span class="p">.</span><span class="nf">Matches</span><span class="p">(</span><span class="nx">caller</span><span class="p">)</span> <span class="p">{</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;Method invoked by incorrect caller&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nx">_numValidateCalls</span> <span class="o">+=</span> <span class="mi">1</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">CallerPattern_MakeAcceptAnyOfTypes</span><span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">,</span> <span class="nx">types</span> <span class="p">[</span><span class="p">]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">)</span> <span class="nx">CallerPattern</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">CallerPattern_MakeAcceptAnyOfTypes</span><span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">,</span> <span class="nx">types</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">)</span> <span class="nx">CallerPattern</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">CallerPattern</span><span class="p">{</span>
 		<span class="nx">Matches</span><span class="p">:</span> <span class="kd">func</span><span class="p">(</span><span class="nx">y</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 			<span class="nx">codeID</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">GetActorCodeID</span><span class="p">(</span><span class="nx">y</span><span class="p">)</span>
@@ -5267,28 +5213,28 @@ https://github.com/alex-shpak/hugo-book
 				<span class="p">}</span>
 			<span class="p">}</span>
 			<span class="k">return</span> <span class="kc">false</span>
-		<span class="p">}</span><span class="p">,</span>
+		<span class="p">},</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">callerExpected</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nf">CallerPattern_MakeSingleton</span><span class="p">(</span><span class="nx">callerExpected</span><span class="p">)</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nf">CallerPattern_MakeSingleton</span><span class="p">(</span><span class="nx">callerExpected</span><span class="p">))</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ValidateImmediateCallerInSet</span><span class="p">(</span><span class="nx">callersExpected</span> <span class="p">[</span><span class="p">]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nf">CallerPattern_MakeSet</span><span class="p">(</span><span class="nx">callersExpected</span><span class="p">)</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ValidateImmediateCallerInSet</span><span class="p">(</span><span class="nx">callersExpected</span> <span class="p">[]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nf">CallerPattern_MakeSet</span><span class="p">(</span><span class="nx">callersExpected</span><span class="p">))</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ValidateImmediateCallerAcceptAnyOfType</span><span class="p">(</span><span class="nx">type_</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfTypes</span><span class="p">(</span><span class="p">[</span><span class="p">]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">{</span><span class="nx">type_</span><span class="p">}</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerAcceptAnyOfTypes</span><span class="p">([]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">{</span><span class="nx">type_</span><span class="p">})</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ValidateImmediateCallerAcceptAnyOfTypes</span><span class="p">(</span><span class="nx">types</span> <span class="p">[</span><span class="p">]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span><span class="nf">CallerPattern_MakeAcceptAnyOfTypes</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">types</span><span class="p">)</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ValidateImmediateCallerAcceptAnyOfTypes</span><span class="p">(</span><span class="nx">types</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span><span class="nf">CallerPattern_MakeAcceptAnyOfTypes</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">types</span><span class="p">))</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ValidateImmediateCallerAcceptAny</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nf">CallerPattern_MakeAcceptAny</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ValidateImmediateCallerAcceptAny</span><span class="p">()</span> <span class="p">{</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nf">CallerPattern_MakeAcceptAny</span><span class="p">())</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_checkNumValidateCalls</span><span class="p">(</span><span class="nx">x</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
@@ -5297,12 +5243,12 @@ https://github.com/alex-shpak/hugo-book
 	<span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_checkRunning</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_checkRunning</span><span class="p">()</span> <span class="p">{</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_running</span> <span class="p">{</span>
 		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Internal runtime error: actor API called with no actor code running&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 <span class="p">}</span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SuccessReturn</span><span class="p">(</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SuccessReturn</span><span class="p">()</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="kc">nil</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5315,7 +5261,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_throwErrorFull</span><span class="p">(</span><span class="nx">exitCode</span> <span class="nx">ExitCode</span><span class="p">,</span> <span class="nx">errMsg</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="nf">RuntimeError_Make</span><span class="p">(</span><span class="nx">exitCode</span><span class="p">,</span> <span class="nx">errMsg</span><span class="p">)</span><span class="p">)</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="nf">RuntimeError_Make</span><span class="p">(</span><span class="nx">exitCode</span><span class="p">,</span> <span class="nx">errMsg</span><span class="p">))</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_apiError</span><span class="p">(</span><span class="nx">errMsg</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
@@ -5323,13 +5269,13 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_gasAmountAssertValid</span><span class="p">(</span><span class="nx">x</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="nx">x</span><span class="p">.</span><span class="nf">LessThan</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Zero</span><span class="p">(</span><span class="p">)</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">x</span><span class="p">.</span><span class="nf">LessThan</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Zero</span><span class="p">())</span> <span class="p">{</span>
 		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Interpreter error: negative gas amount&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
 <span class="c1">// Deduct an amount of gas corresponding to cost about to be incurred, but not necessarily
-</span><span class="c1"></span><span class="c1">// incurred yet.
+</span><span class="c1">// incurred yet.
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">x</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nf">_gasAmountAssertValid</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
 	<span class="kd">var</span> <span class="nx">ok</span> <span class="kt">bool</span>
@@ -5340,10 +5286,10 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_transferFunds</span><span class="p">(</span><span class="nx">from</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">(</span><span class="p">)</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateNotAcquired</span><span class="p">(</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">()</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateNotAcquired</span><span class="p">()</span>
 
-	<span class="nx">newGlobalStatePending</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">Impl</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">WithFundsTransfer</span><span class="p">(</span><span class="nx">from</span><span class="p">,</span> <span class="nx">to</span><span class="p">,</span> <span class="nx">amount</span><span class="p">)</span>
+	<span class="nx">newGlobalStatePending</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithFundsTransfer</span><span class="p">(</span><span class="nx">from</span><span class="p">,</span> <span class="nx">to</span><span class="p">,</span> <span class="nx">amount</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="nx">err</span>
 	<span class="p">}</span>
@@ -5353,7 +5299,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">GetActorCodeID</span><span class="p">(</span><span class="nx">actorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">ret</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5365,10 +5311,10 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">)</span>
 
 <span class="c1">// TODO: This function should be private (not intended to be exposed to actors).
-</span><span class="c1"></span><span class="c1">// (merging runtime and interpreter packages should solve this)
-</span><span class="c1"></span><span class="c1">// TODO: this should not use the MessageReceipt return type, even though it needs the same triple
-</span><span class="c1"></span><span class="c1">// of values. This method cannot compute the total gas cost and the returned receipt will never
-</span><span class="c1"></span><span class="c1">// go on chain.
+</span><span class="c1">// (merging runtime and interpreter packages should solve this)
+</span><span class="c1">// TODO: this should not use the MessageReceipt return type, even though it needs the same triple
+</span><span class="c1">// of values. This method cannot compute the total gas cost and the returned receipt will never
+</span><span class="c1">// go on chain.
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SendToplevelFromInterpreter</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="p">(</span><span class="nx">MessageReceipt</span><span class="p">,</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="nx">rt</span><span class="p">.</span><span class="nx">_running</span> <span class="p">=</span> <span class="kc">true</span>
@@ -5377,21 +5323,21 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">ret</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">_catchRuntimeErrors</span><span class="p">(</span><span class="nx">f</span> <span class="kd">func</span><span class="p">(</span><span class="p">)</span> <span class="nx">InvocOutput</span><span class="p">)</span> <span class="p">(</span><span class="nx">output</span> <span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">exitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">defer</span> <span class="kd">func</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
-		<span class="k">if</span> <span class="nx">r</span> <span class="o">:=</span> <span class="nb">recover</span><span class="p">(</span><span class="p">)</span><span class="p">;</span> <span class="nx">r</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-			<span class="k">switch</span> <span class="nx">r</span><span class="p">.</span><span class="p">(</span><span class="kd">type</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">_catchRuntimeErrors</span><span class="p">(</span><span class="nx">f</span> <span class="kd">func</span><span class="p">()</span> <span class="nx">InvocOutput</span><span class="p">)</span> <span class="p">(</span><span class="nx">output</span> <span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">exitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">defer</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="nx">r</span> <span class="o">:=</span> <span class="nb">recover</span><span class="p">();</span> <span class="nx">r</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+			<span class="k">switch</span> <span class="nx">r</span><span class="p">.(</span><span class="kd">type</span><span class="p">)</span> <span class="p">{</span>
 			<span class="k">case</span> <span class="o">*</span><span class="nx">RuntimeError</span><span class="p">:</span>
 				<span class="nx">output</span> <span class="p">=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="kc">nil</span><span class="p">)</span>
-				<span class="nx">exitCode</span> <span class="p">=</span> <span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="p">(</span><span class="o">*</span><span class="nx">RuntimeError</span><span class="p">)</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span>
+				<span class="nx">exitCode</span> <span class="p">=</span> <span class="p">(</span><span class="nx">r</span><span class="p">.(</span><span class="o">*</span><span class="nx">RuntimeError</span><span class="p">).</span><span class="nx">ExitCode</span><span class="p">)</span>
 			<span class="k">default</span><span class="p">:</span>
 				<span class="nb">panic</span><span class="p">(</span><span class="nx">r</span><span class="p">)</span>
 			<span class="p">}</span>
 		<span class="p">}</span>
-	<span class="p">}</span><span class="p">(</span><span class="p">)</span>
+	<span class="p">}()</span>
 
-	<span class="nx">output</span> <span class="p">=</span> <span class="nf">f</span><span class="p">(</span><span class="p">)</span>
-	<span class="nx">exitCode</span> <span class="p">=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">(</span><span class="p">)</span>
+	<span class="nx">output</span> <span class="p">=</span> <span class="nf">f</span><span class="p">()</span>
+	<span class="nx">exitCode</span> <span class="p">=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">()</span>
 	<span class="k">return</span>
 <span class="p">}</span>
 
@@ -5408,16 +5354,16 @@ https://github.com/alex-shpak/hugo-book
 	<span class="p">}</span>
 
 	<span class="nx">rt</span><span class="p">.</span><span class="nx">_running</span> <span class="p">=</span> <span class="kc">true</span>
-	<span class="nx">ret</span><span class="p">,</span> <span class="nx">exitCode</span> <span class="p">=</span> <span class="nf">_catchRuntimeErrors</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+	<span class="nx">ret</span><span class="p">,</span> <span class="nx">exitCode</span> <span class="p">=</span> <span class="nf">_catchRuntimeErrors</span><span class="p">(</span><span class="kd">func</span><span class="p">()</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
 		<span class="nf">IMPL_TODO</span><span class="p">(</span><span class="s">&#34;dispatch to actor code&#34;</span><span class="p">)</span>
 		<span class="kd">var</span> <span class="nx">methodOutput</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span> <span class="c1">// actorCode.InvokeMethod(rt, method, params)
 </span><span class="c1"></span>		<span class="k">if</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_actorSubstateUpdated</span> <span class="p">{</span>
 			<span class="nx">rt</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nx">UpdateActorSubstate</span><span class="p">)</span>
 		<span class="p">}</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateNotAcquired</span><span class="p">(</span><span class="p">)</span>
+		<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateNotAcquired</span><span class="p">()</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkNumValidateCalls</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 		<span class="k">return</span> <span class="nx">methodOutput</span>
-	<span class="p">}</span><span class="p">)</span>
+	<span class="p">})</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nx">_running</span> <span class="p">=</span> <span class="kc">false</span>
 
 	<span class="nx">internalCallSeqNumFinal</span> <span class="p">=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_internalCallSeqNum</span>
@@ -5426,15 +5372,15 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rtOuter</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_sendInternal</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">,</span> <span class="nx">errSpec</span> <span class="nx">ErrorHandlingSpec</span><span class="p">)</span> <span class="nx">MessageReceipt</span> <span class="p">{</span>
-	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">(</span><span class="p">)</span>
-	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_checkActorStateNotAcquired</span><span class="p">(</span><span class="p">)</span>
+	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">()</span>
+	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_checkActorStateNotAcquired</span><span class="p">()</span>
 
 	<span class="nx">initGasRemaining</span> <span class="o">:=</span> <span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_gasRemaining</span>
 
-	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nx">Value</span><span class="p">,</span> <span class="nx">input</span><span class="p">.</span><span class="nx">Method</span><span class="p">)</span><span class="p">)</span>
+	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nx">Value</span><span class="p">,</span> <span class="nx">input</span><span class="p">.</span><span class="nx">Method</span><span class="p">))</span>
 
 	<span class="nx">receiver</span><span class="p">,</span> <span class="nx">receiverAddr</span> <span class="o">:=</span> <span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_resolveReceiver</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nx">To</span><span class="p">)</span>
-	<span class="nx">receiverCode</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">loadActorCode</span><span class="p">(</span><span class="nx">receiver</span><span class="p">.</span><span class="nf">CodeID</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
+	<span class="nx">receiverCode</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">loadActorCode</span><span class="p">(</span><span class="nx">receiver</span><span class="p">.</span><span class="nf">CodeID</span><span class="p">())</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
 		<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorCodeNotFound</span><span class="p">)</span>
 	<span class="p">}</span>
@@ -5464,7 +5410,7 @@ https://github.com/alex-shpak/hugo-book
 		<span class="nx">input</span><span class="p">.</span><span class="nx">Params</span><span class="p">,</span>
 	<span class="p">)</span>
 
-	<span class="nf">_gasAmountAssertValid</span><span class="p">(</span><span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">.</span><span class="nf">Subtract</span><span class="p">(</span><span class="nx">rtInner</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">)</span><span class="p">)</span>
+	<span class="nf">_gasAmountAssertValid</span><span class="p">(</span><span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">.</span><span class="nf">Subtract</span><span class="p">(</span><span class="nx">rtInner</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">))</span>
 	<span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_gasRemaining</span> <span class="p">=</span> <span class="nx">rtInner</span><span class="p">.</span><span class="nx">_gasRemaining</span>
 	<span class="nx">gasUsed</span> <span class="o">:=</span> <span class="nx">initGasRemaining</span><span class="p">.</span><span class="nf">Subtract</span><span class="p">(</span><span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">)</span>
 	<span class="nf">_gasAmountAssertValid</span><span class="p">(</span><span class="nx">gasUsed</span><span class="p">)</span>
@@ -5476,11 +5422,11 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>		<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitCode</span><span class="p">)</span>
 	<span class="p">}</span>
 
-	<span class="k">if</span> <span class="nx">errSpec</span> <span class="o">==</span> <span class="nx">PropagateErrors</span> <span class="o">&amp;&amp;</span> <span class="nx">exitCode</span><span class="p">.</span><span class="nf">IsError</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">errSpec</span> <span class="o">==</span> <span class="nx">PropagateErrors</span> <span class="o">&amp;&amp;</span> <span class="nx">exitCode</span><span class="p">.</span><span class="nf">IsError</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">MethodSubcallError</span><span class="p">)</span>
 	<span class="p">}</span>
 
-	<span class="k">if</span> <span class="nx">exitCode</span><span class="p">.</span><span class="nf">AllowsStateUpdate</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">exitCode</span><span class="p">.</span><span class="nf">AllowsStateUpdate</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_globalStatePending</span> <span class="p">=</span> <span class="nx">rtInner</span><span class="p">.</span><span class="nx">_globalStatePending</span>
 	<span class="p">}</span>
 
@@ -5488,19 +5434,19 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="c1">// Loads a receiving actor state from the state tree, resolving non-ID addresses through the InitActor state.
-</span><span class="c1"></span><span class="c1">// If it doesn&#39;t exist, and the message is a simple value send to a pubkey-style address,
-</span><span class="c1"></span><span class="c1">// creates the receiver as an account actor in the returned state.
-</span><span class="c1"></span><span class="c1">// Aborts otherwise.
+</span><span class="c1">// If it doesn&#39;t exist, and the message is a simple value send to a pubkey-style address,
+</span><span class="c1">// creates the receiver as an account actor in the returned state.
+</span><span class="c1">// Aborts otherwise.
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_resolveReceiver</span><span class="p">(</span><span class="nx">targetRaw</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">actstate</span><span class="p">.</span><span class="nx">ActorState</span><span class="p">,</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
 	<span class="c1">// Resolve the target address via the InitActor, and attempt to load state.
-</span><span class="c1"></span>	<span class="nx">initSubState</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">_loadInitActorState</span><span class="p">(</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">initSubState</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">_loadInitActorState</span><span class="p">()</span>
 	<span class="nx">targetIdAddr</span> <span class="o">:=</span> <span class="nx">initSubState</span><span class="p">.</span><span class="nf">ResolveAddress</span><span class="p">(</span><span class="nx">targetRaw</span><span class="p">)</span>
 	<span class="nx">act</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">targetIdAddr</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="nx">act</span><span class="p">,</span> <span class="nx">targetIdAddr</span>
 	<span class="p">}</span>
 
-	<span class="k">if</span> <span class="nx">targetRaw</span><span class="p">.</span><span class="nf">Protocol</span><span class="p">(</span><span class="p">)</span> <span class="o">!=</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">SECP256K1</span> <span class="o">&amp;&amp;</span> <span class="nx">targetRaw</span><span class="p">.</span><span class="nf">Protocol</span><span class="p">(</span><span class="p">)</span> <span class="o">!=</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">BLS</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">targetRaw</span><span class="p">.</span><span class="nf">Protocol</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">SECP256K1</span> <span class="o">&amp;&amp;</span> <span class="nx">targetRaw</span><span class="p">.</span><span class="nf">Protocol</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">BLS</span> <span class="p">{</span>
 		<span class="c1">// Don&#39;t implicitly create an account actor for an address without an associated key.
 </span><span class="c1"></span>		<span class="nx">rt</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorNotFound</span><span class="p">)</span>
 	<span class="p">}</span>
@@ -5521,11 +5467,11 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">act</span><span class="p">,</span> <span class="nx">newIdAddr</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_loadInitActorState</span><span class="p">(</span><span class="p">)</span> <span class="nx">initact</span><span class="p">.</span><span class="nx">InitActorState</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_loadInitActorState</span><span class="p">()</span> <span class="nx">initact</span><span class="p">.</span><span class="nx">InitActorState</span> <span class="p">{</span>
 	<span class="nx">initState</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">InitActorAddr</span><span class="p">)</span>
 	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="kd">var</span> <span class="nx">initSubState</span> <span class="nx">initact</span><span class="p">.</span><span class="nx">InitActorState</span>
-	<span class="nx">ok</span> <span class="p">=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nx">cid</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="nx">initState</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="p">)</span><span class="p">)</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">initSubState</span><span class="p">)</span>
+	<span class="nx">ok</span> <span class="p">=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nx">cid</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="nx">initState</span><span class="p">.</span><span class="nf">State</span><span class="p">()),</span> <span class="o">&amp;</span><span class="nx">initSubState</span><span class="p">)</span>
 	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">initSubState</span>
 <span class="p">}</span>
@@ -5534,29 +5480,29 @@ https://github.com/alex-shpak/hugo-book
 	<span class="c1">// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
 </span><span class="c1"></span>	<span class="c1">// than the receiver.
 </span><span class="c1"></span>	<span class="nx">rt</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nx">UpdateActorSubstate</span><span class="p">)</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_updateActorSubstateInternal</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">InitActorAddr</span><span class="p">,</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">state</span><span class="p">)</span><span class="p">)</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_updateActorSubstateInternal</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">InitActorAddr</span><span class="p">,</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">state</span><span class="p">)))</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_saveAccountActorState</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">state</span> <span class="nx">acctact</span><span class="p">.</span><span class="nx">AccountActorState</span><span class="p">)</span> <span class="p">{</span>
 	<span class="c1">// Gas is charged here separately from _actorSubstateUpdated because this is a different actor
 </span><span class="c1"></span>	<span class="c1">// than the receiver.
 </span><span class="c1"></span>	<span class="nx">rt</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nx">UpdateActorSubstate</span><span class="p">)</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_updateActorSubstateInternal</span><span class="p">(</span><span class="nx">address</span><span class="p">,</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">state</span><span class="p">)</span><span class="p">)</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_updateActorSubstateInternal</span><span class="p">(</span><span class="nx">address</span><span class="p">,</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">state</span><span class="p">)))</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_sendInternalOutputs</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">,</span> <span class="nx">errSpec</span> <span class="nx">ErrorHandlingSpec</span><span class="p">)</span> <span class="p">(</span><span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">_sendInternal</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">errSpec</span><span class="p">)</span>
-	<span class="k">return</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">ret</span><span class="p">.</span><span class="nx">ReturnValue</span><span class="p">)</span><span class="p">,</span> <span class="nx">ret</span><span class="p">.</span><span class="nx">ExitCode</span>
+	<span class="k">return</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">ret</span><span class="p">.</span><span class="nx">ReturnValue</span><span class="p">),</span> <span class="nx">ret</span><span class="p">.</span><span class="nx">ExitCode</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">Send</span><span class="p">(</span>
 	<span class="nx">toAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">methodNum</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
 
-	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nf">InvocInput_Make</span><span class="p">(</span><span class="nx">toAddr</span><span class="p">,</span> <span class="nx">methodNum</span><span class="p">,</span> <span class="nx">params</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nf">InvocInput_Make</span><span class="p">(</span><span class="nx">toAddr</span><span class="p">,</span> <span class="nx">methodNum</span><span class="p">,</span> <span class="nx">params</span><span class="p">,</span> <span class="nx">value</span><span class="p">))</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SendQuery</span><span class="p">(</span><span class="nx">toAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">methodNum</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span> <span class="p">{</span>
-	<span class="nx">invocOutput</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span><span class="nx">toAddr</span><span class="p">,</span> <span class="nx">methodNum</span><span class="p">,</span> <span class="nx">params</span><span class="p">,</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="p">)</span>
+	<span class="nx">invocOutput</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span><span class="nx">toAddr</span><span class="p">,</span> <span class="nx">methodNum</span><span class="p">,</span> <span class="nx">params</span><span class="p">,</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">invocOutput</span><span class="p">.</span><span class="nx">ReturnValue</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ret</span> <span class="o">!=</span> <span class="kc">nil</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">ret</span>
@@ -5576,12 +5522,12 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">_sendInternalOutputs</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">CatchErrors</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">CurrentBalance</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
-	<span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">CurrentBalance</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ValueReceived</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ValueReceived</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_valueReceived</span>
 <span class="p">}</span>
 
@@ -5589,7 +5535,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">NewActorAddress</span><span class="p">(</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">NewActorAddress</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
 	<span class="nx">addrBuf</span> <span class="o">:=</span> <span class="nb">new</span><span class="p">(</span><span class="nx">bytes</span><span class="p">.</span><span class="nx">Buffer</span><span class="p">)</span>
 
 	<span class="nx">err</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_immediateCaller</span><span class="p">.</span><span class="nf">MarshalCBOR</span><span class="p">(</span><span class="nx">addrBuf</span><span class="p">)</span>
@@ -5599,56 +5545,56 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">err</span> <span class="p">=</span> <span class="nx">binary</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">addrBuf</span><span class="p">,</span> <span class="nx">binary</span><span class="p">.</span><span class="nx">BigEndian</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_internalCallSeqNum</span><span class="p">)</span>
 	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span><span class="p">)</span>
 
-	<span class="nx">newAddr</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">NewActorAddress</span><span class="p">(</span><span class="nx">addrBuf</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
+	<span class="nx">newAddr</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">NewActorAddress</span><span class="p">(</span><span class="nx">addrBuf</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">())</span>
 	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">newAddr</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">IpldPut</span><span class="p">(</span><span class="nx">x</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">Object</span><span class="p">)</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span> <span class="p">{</span>
-	<span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span> <span class="c1">// Serialization
-</span><span class="c1"></span>	<span class="nx">serialized</span> <span class="o">:=</span> <span class="p">[</span><span class="p">]</span><span class="kt">byte</span><span class="p">{</span><span class="p">}</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span> <span class="c1">// Serialization
+</span><span class="c1"></span>	<span class="nx">serialized</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">{}</span>
 	<span class="nx">cid</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_store</span><span class="p">.</span><span class="nf">Put</span><span class="p">(</span><span class="nx">serialized</span><span class="p">)</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">serialized</span><span class="p">)</span><span class="p">)</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">serialized</span><span class="p">)))</span>
 	<span class="k">return</span> <span class="nx">cid</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">IpldGet</span><span class="p">(</span><span class="nx">c</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span><span class="p">,</span> <span class="nx">o</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">Object</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="nx">serialized</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_store</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="nx">c</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">ok</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">serialized</span><span class="p">)</span><span class="p">)</span><span class="p">)</span>
+		<span class="nx">rt</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">serialized</span><span class="p">)))</span>
 	<span class="p">}</span>
-	<span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span> <span class="c1">// Deserialization into o
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span> <span class="c1">// Deserialization into o
 </span><span class="c1"></span>	<span class="k">return</span> <span class="nx">ok</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">CurrEpoch</span><span class="p">(</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
-	<span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">CurrEpoch</span><span class="p">()</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">CurrIndices</span><span class="p">(</span><span class="p">)</span> <span class="nx">indices</span><span class="p">.</span><span class="nx">Indices</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">CurrIndices</span><span class="p">()</span> <span class="nx">indices</span><span class="p">.</span><span class="nx">Indices</span> <span class="p">{</span>
 	<span class="c1">// TODO: compute from state tree (rt._globalStatePending), using individual actor
 </span><span class="c1"></span>	<span class="c1">// state helper functions when possible
-</span><span class="c1"></span>	<span class="nf">TODO</span><span class="p">(</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nf">TODO</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">AcquireState</span><span class="p">(</span><span class="p">)</span> <span class="nx">ActorStateHandle</span> <span class="p">{</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">(</span><span class="p">)</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateNotAcquired</span><span class="p">(</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">AcquireState</span><span class="p">()</span> <span class="nx">ActorStateHandle</span> <span class="p">{</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">()</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateNotAcquired</span><span class="p">()</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nx">_actorStateAcquired</span> <span class="p">=</span> <span class="kc">true</span>
 
 	<span class="nx">state</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">)</span>
 	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 
-	<span class="nx">stateRef</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">Ref</span><span class="p">(</span><span class="p">)</span>
+	<span class="nx">stateRef</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">State</span><span class="p">().</span><span class="nf">Ref</span><span class="p">()</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">ActorStateHandle_I</span><span class="p">{</span>
 		<span class="nx">_initValue</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">stateRef</span><span class="p">,</span>
 		<span class="nx">_rt</span><span class="p">:</span>        <span class="nx">rt</span><span class="p">,</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">Compute</span><span class="p">(</span><span class="nx">f</span> <span class="nx">ComputeFunctionID</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[</span><span class="p">]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Any</span><span class="p">)</span> <span class="nx">Any</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">Compute</span><span class="p">(</span><span class="nx">f</span> <span class="nx">ComputeFunctionID</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Any</span><span class="p">)</span> <span class="nx">Any</span> <span class="p">{</span>
 	<span class="nx">def</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">_computeFunctionDefs</span><span class="p">[</span><span class="nx">f</span><span class="p">]</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;Function definition in rt.Compute() not found&#34;</span><span class="p">)</span>
@@ -5731,8 +5677,8 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">const</span> <span class="p">(</span>
 	<span class="c1">// TODO: remove once canonical error codes are finalized
-</span><span class="c1"></span>	<span class="nx">SystemErrorCode_Placeholder</span>      <span class="p">=</span> <span class="nf">ExitCode</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">)</span><span class="p">)</span>
-	<span class="nx">UserDefinedErrorCode_Placeholder</span> <span class="p">=</span> <span class="nf">ExitCode</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">)</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">SystemErrorCode_Placeholder</span>      <span class="p">=</span> <span class="nf">ExitCode</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">))</span>
+	<span class="nx">UserDefinedErrorCode_Placeholder</span> <span class="p">=</span> <span class="nf">ExitCode</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">))</span>
 <span class="p">)</span>
 
 <span class="kd">const</span> <span class="nx">Ok</span> <span class="p">=</span> <span class="nf">ExitCode</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -5793,24 +5739,24 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">InsufficientPledgeCollateral</span>
 <span class="p">)</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">ExitCode</span><span class="p">)</span> <span class="nf">IsSuccess</span><span class="p">(</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">ExitCode</span><span class="p">)</span> <span class="nf">IsSuccess</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">x</span> <span class="o">==</span> <span class="nx">Ok</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">ExitCode</span><span class="p">)</span> <span class="nf">IsError</span><span class="p">(</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="p">!</span><span class="nx">x</span><span class="p">.</span><span class="nf">IsSuccess</span><span class="p">(</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">ExitCode</span><span class="p">)</span> <span class="nf">IsError</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="p">!</span><span class="nx">x</span><span class="p">.</span><span class="nf">IsSuccess</span><span class="p">()</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">ExitCode</span><span class="p">)</span> <span class="nf">AllowsStateUpdate</span><span class="p">(</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">x</span><span class="p">.</span><span class="nf">IsSuccess</span><span class="p">(</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">ExitCode</span><span class="p">)</span> <span class="nf">AllowsStateUpdate</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">x</span><span class="p">.</span><span class="nf">IsSuccess</span><span class="p">()</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">OK</span><span class="p">(</span><span class="p">)</span> <span class="nx">ExitCode</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">OK</span><span class="p">()</span> <span class="nx">ExitCode</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">Ok</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">EnsureErrorCode</span><span class="p">(</span><span class="nx">x</span> <span class="nx">ExitCode</span><span class="p">)</span> <span class="nx">ExitCode</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="p">!</span><span class="nx">x</span><span class="p">.</span><span class="nf">IsError</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">x</span><span class="p">.</span><span class="nf">IsError</span><span class="p">()</span> <span class="p">{</span>
 		<span class="c1">// Throwing an error with a non-error exit code is itself an error
 </span><span class="c1"></span>		<span class="nx">x</span> <span class="p">=</span> <span class="p">(</span><span class="nx">RuntimeAPIError</span><span class="p">)</span>
 	<span class="p">}</span>

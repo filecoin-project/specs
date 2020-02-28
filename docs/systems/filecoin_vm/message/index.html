@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4876,44 +4822,44 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">Sign</span><span class="p">(</span><span class="nx">message</span> <span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">keyPair</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">SigKeyPair</span><span class="p">)</span> <span class="p">(</span><span class="nx">SignedMessage</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">sig</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">Sign</span><span class="p">(</span><span class="nx">keyPair</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(</span><span class="nf">Serialize_UnsignedMessage</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span><span class="p">)</span><span class="p">)</span>
+	<span class="nx">sig</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">Sign</span><span class="p">(</span><span class="nx">keyPair</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(</span><span class="nf">Serialize_UnsignedMessage</span><span class="p">(</span><span class="nx">message</span><span class="p">)))</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">err</span>
 	<span class="p">}</span>
-	<span class="k">return</span> <span class="nf">SignedMessage_Make</span><span class="p">(</span><span class="nx">message</span><span class="p">,</span> <span class="nx">sig</span><span class="p">)</span><span class="p">,</span> <span class="kc">nil</span>
+	<span class="k">return</span> <span class="nf">SignedMessage_Make</span><span class="p">(</span><span class="nx">message</span><span class="p">,</span> <span class="nx">sig</span><span class="p">),</span> <span class="kc">nil</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">SignatureVerificationError</span><span class="p">(</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
-	<span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">SignatureVerificationError</span><span class="p">()</span> <span class="kt">error</span> <span class="p">{</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">Verify</span><span class="p">(</span><span class="nx">message</span> <span class="nx">SignedMessage</span><span class="p">,</span> <span class="nx">publicKey</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span><span class="p">)</span> <span class="p">(</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">m</span> <span class="o">:=</span> <span class="nx">util</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(</span><span class="nf">Serialize_UnsignedMessage</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">Message</span><span class="p">(</span><span class="p">)</span><span class="p">)</span><span class="p">)</span>
-	<span class="nx">sigValid</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">publicKey</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Signature</span><span class="p">(</span><span class="p">)</span><span class="p">,</span> <span class="nx">m</span><span class="p">)</span>
+	<span class="nx">m</span> <span class="o">:=</span> <span class="nx">util</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(</span><span class="nf">Serialize_UnsignedMessage</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">Message</span><span class="p">()))</span>
+	<span class="nx">sigValid</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">publicKey</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Signature</span><span class="p">(),</span> <span class="nx">m</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">err</span>
 	<span class="p">}</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">sigValid</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nf">SignatureVerificationError</span><span class="p">(</span><span class="p">)</span>
+		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nf">SignatureVerificationError</span><span class="p">()</span>
 	<span class="p">}</span>
-	<span class="k">return</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Message</span><span class="p">(</span><span class="p">)</span><span class="p">,</span> <span class="kc">nil</span>
+	<span class="k">return</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Message</span><span class="p">(),</span> <span class="kc">nil</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">GasAmount_I</span><span class="p">)</span> <span class="nf">Add</span><span class="p">(</span><span class="nx">y</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">GasAmount</span> <span class="p">{</span>
-	<span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">GasAmount_I</span><span class="p">)</span> <span class="nf">Subtract</span><span class="p">(</span><span class="nx">y</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">GasAmount</span> <span class="p">{</span>
-	<span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">GasAmount_I</span><span class="p">)</span> <span class="nf">SubtractIfNonnegative</span><span class="p">(</span><span class="nx">y</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="p">(</span><span class="nx">ret</span> <span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">ret</span> <span class="p">=</span> <span class="nx">x</span><span class="p">.</span><span class="nf">Subtract</span><span class="p">(</span><span class="nx">y</span><span class="p">)</span>
 	<span class="nx">ok</span> <span class="p">=</span> <span class="kc">true</span>
-	<span class="k">if</span> <span class="nx">ret</span><span class="p">.</span><span class="nf">LessThan</span><span class="p">(</span><span class="nf">GasAmount_Zero</span><span class="p">(</span><span class="p">)</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">ret</span><span class="p">.</span><span class="nf">LessThan</span><span class="p">(</span><span class="nf">GasAmount_Zero</span><span class="p">())</span> <span class="p">{</span>
 		<span class="nx">ret</span> <span class="p">=</span> <span class="nx">x</span>
 		<span class="nx">ok</span> <span class="p">=</span> <span class="kc">false</span>
 	<span class="p">}</span>
@@ -4921,37 +4867,37 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">GasAmount_I</span><span class="p">)</span> <span class="nf">LessThan</span><span class="p">(</span><span class="nx">y</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">GasAmount_I</span><span class="p">)</span> <span class="nf">Equals</span><span class="p">(</span><span class="nx">y</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">GasAmount_I</span><span class="p">)</span> <span class="nf">Scale</span><span class="p">(</span><span class="nx">count</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">GasAmount</span> <span class="p">{</span>
-	<span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">GasAmount_Affine</span><span class="p">(</span><span class="nx">b</span> <span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">x</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">m</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">GasAmount</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">b</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">m</span><span class="p">.</span><span class="nf">Scale</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">b</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">m</span><span class="p">.</span><span class="nf">Scale</span><span class="p">(</span><span class="nx">x</span><span class="p">))</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">GasAmount_Zero</span><span class="p">(</span><span class="p">)</span> <span class="nx">GasAmount</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">GasAmount_Zero</span><span class="p">()</span> <span class="nx">GasAmount</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nf">GasAmount_FromInt</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">GasAmount_FromInt</span><span class="p">(</span><span class="nx">x</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">GasAmount</span> <span class="p">{</span>
-	<span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">GasAmount_SentinelUnlimited</span><span class="p">(</span><span class="p">)</span> <span class="nx">GasAmount</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">GasAmount_SentinelUnlimited</span><span class="p">()</span> <span class="nx">GasAmount</span> <span class="p">{</span>
 	<span class="c1">// Amount of gas larger than any feasible execution; meant to indicated unlimited gas
 </span><span class="c1"></span>	<span class="c1">// (e.g., for builtin system method invocations).
-</span><span class="c1"></span>	<span class="k">return</span> <span class="nf">GasAmount_FromInt</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="p">.</span><span class="nf">Scale</span><span class="p">(</span><span class="mf">1e9</span><span class="p">)</span><span class="p">.</span><span class="nf">Scale</span><span class="p">(</span><span class="mf">1e9</span><span class="p">)</span> <span class="c1">// 10^18
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nf">GasAmount_FromInt</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nf">Scale</span><span class="p">(</span><span class="mf">1e9</span><span class="p">).</span><span class="nf">Scale</span><span class="p">(</span><span class="mf">1e9</span><span class="p">)</span> <span class="c1">// 10^18
 </span><span class="c1"></span><span class="p">}</span>
 </code></pre></div>
 

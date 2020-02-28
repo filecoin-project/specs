@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -5041,7 +4987,7 @@ efficient syncing than comparable blockchain synchronization protocols, as synci
 </ul>
 </li>
 <li>Pseudocode 1: a basic version of <code>SYNC_CHECKPOINT</code>:
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">ChainSync</span><span class="p">)</span> <span class="nf">SyncCheckpoint</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">ChainSync</span><span class="p">)</span> <span class="nf">SyncCheckpoint</span><span class="p">()</span> <span class="p">{</span>
     <span class="nx">while</span> <span class="p">!</span><span class="nx">c</span><span class="p">.</span><span class="nf">HasCompleteStateTreeFor</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">LastTrustedCheckpoint</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">selector</span> <span class="o">:=</span> <span class="nx">ipldselector</span><span class="p">.</span><span class="nf">SelectAll</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">LastTrustedCheckpoint</span><span class="p">)</span>
         <span class="nx">c</span><span class="p">.</span><span class="nx">Graphsync</span><span class="p">.</span><span class="nf">Pull</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">Peers</span><span class="p">,</span> <span class="nx">sel</span><span class="p">,</span> <span class="nx">c</span><span class="p">.</span><span class="nx">IpldStore</span><span class="p">)</span>
@@ -5052,7 +4998,7 @@ efficient syncing than comparable blockchain synchronization protocols, as synci
 </span><span class="c1"></span>        <span class="c1">// can be implemented on top of a graphsync that only pulls from a single
 </span><span class="c1"></span>        <span class="c1">// peer and does not check local store first.
 </span><span class="c1"></span>    <span class="p">}</span>
-    <span class="nx">c</span><span class="p">.</span><span class="nf">ChainCatchup</span><span class="p">(</span><span class="p">)</span> <span class="c1">// on to CHAIN_CATCHUP
+    <span class="nx">c</span><span class="p">.</span><span class="nf">ChainCatchup</span><span class="p">()</span> <span class="c1">// on to CHAIN_CATCHUP
 </span><span class="c1"></span><span class="p">}</span>
 </code></pre></div></li>
 <li><strong>security conditions to transition out:</strong>
@@ -5401,15 +5347,15 @@ here&rsquo;s a visual example, 4 example PartialGraphs, with Heads and Tails. (n
   </ul>
 
   <ul>
-    <li><a href="#chainsync-fsm-init">ChainSync FSM: INIT</a></li>
-    <li><a href="#chainsync-fsm-bootstrap">ChainSync FSM: BOOTSTRAP</a></li>
-    <li><a href="#chainsync-fsm-sync_checkpoint">ChainSync FSM: SYNC_CHECKPOINT</a></li>
-    <li><a href="#chainsync-fsm-chain_catchup">ChainSync FSM: CHAIN_CATCHUP</a></li>
-    <li><a href="#chainsync-fsm-chain_follow">ChainSync FSM: CHAIN_FOLLOW</a></li>
+    <li><a href="#chainsync-fsm-init">ChainSync FSM: <code>INIT</code></a></li>
+    <li><a href="#chainsync-fsm-bootstrap">ChainSync FSM: <code>BOOTSTRAP</code></a></li>
+    <li><a href="#chainsync-fsm-sync_checkpoint">ChainSync FSM: <code>SYNC_CHECKPOINT</code></a></li>
+    <li><a href="#chainsync-fsm-chain_catchup">ChainSync FSM: <code>CHAIN_CATCHUP</code></a></li>
+    <li><a href="#chainsync-fsm-chain_follow">ChainSync FSM: <code>CHAIN_FOLLOW</code></a></li>
   </ul>
 
   <ul>
-    <li><a href="#notes-on-changing-targetheads-while-syncing">Notes on changing TargetHeads while syncing</a></li>
+    <li><a href="#notes-on-changing-targetheads-while-syncing">Notes on changing <code>TargetHeads</code> while syncing</a></li>
     <li><a href="#general-notes-on-fetching-blocks">General notes on fetching Blocks</a></li>
     <li><a href="#progressive-block-validation">Progressive Block Validation</a></li>
     <li><a href="#progressive-block-propagation-or-blocksend">Progressive Block Propagation (or BlockSend)</a></li>

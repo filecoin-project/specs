@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4772,7 +4718,7 @@ piece data structures.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
 
 <span class="c1">// PieceInfo is an object that describes details about a piece, and allows
-</span><span class="c1"></span><span class="c1">// decoupling storage of this information from the piece itself.
+</span><span class="c1">// decoupling storage of this information from the piece itself.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">PieceInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">ID</span>    <span class="nx">PieceID</span>
     <span class="nx">Size</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">PieceSize</span>
@@ -4780,13 +4726,13 @@ piece data structures.</p>
 </span><span class="c1"></span><span class="p">}</span>
 
 <span class="c1">// Piece represents the basic unit of tradeable data in Filecoin. Clients
-</span><span class="c1"></span><span class="c1">// break files and data up into Pieces, maybe apply some transformations,
-</span><span class="c1"></span><span class="c1">// and then hire Miners to store the Pieces.
-</span><span class="c1"></span><span class="c1">//
-</span><span class="c1"></span><span class="c1">// The kinds of transformations that may ocurr include erasure coding,
-</span><span class="c1"></span><span class="c1">// encryption, and more.
-</span><span class="c1"></span><span class="c1">//
-</span><span class="c1"></span><span class="c1">// Note: pieces are well formed.
+</span><span class="c1">// break files and data up into Pieces, maybe apply some transformations,
+</span><span class="c1">// and then hire Miners to store the Pieces.
+</span><span class="c1">//
+</span><span class="c1">// The kinds of transformations that may ocurr include erasure coding,
+</span><span class="c1">// encryption, and more.
+</span><span class="c1">//
+</span><span class="c1">// Note: pieces are well formed.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">Piece</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Info</span>       <span class="nx">PieceInfo</span>
 
@@ -4796,30 +4742,30 @@ piece data structures.</p>
 </span><span class="c1"></span>    <span class="nx">tree</span>       <span class="nx">PieceTree</span>
 
     <span class="c1">// Payload is the user&#39;s data.
-</span><span class="c1"></span>    <span class="nf">Payload</span><span class="p">(</span><span class="p">)</span>  <span class="nx">Bytes</span>
+</span><span class="c1"></span>    <span class="nf">Payload</span><span class="p">()</span>  <span class="nx">Bytes</span>
 
     <span class="c1">// Data returns the serialized representation of the Piece.
 </span><span class="c1"></span>    <span class="c1">// It includes the payload data, and intermediate tree objects,
 </span><span class="c1"></span>    <span class="c1">// formed according to relevant storage algorithms.
-</span><span class="c1"></span>    <span class="nf">Data</span><span class="p">(</span><span class="p">)</span>     <span class="nx">Bytes</span>
+</span><span class="c1"></span>    <span class="nf">Data</span><span class="p">()</span>     <span class="nx">Bytes</span>
 <span class="p">}</span>
 
 <span class="c1">// // LocalPieceRef is an object used to refer to pieces in local storage.
-</span><span class="c1"></span><span class="c1">// // This is used by subsystems to store and locate pieces.
-</span><span class="c1"></span><span class="c1">// type LocalPieceRef struct {
-</span><span class="c1"></span><span class="c1">//   ID   PieceID
-</span><span class="c1"></span><span class="c1">//   Path file.Path
-</span><span class="c1"></span><span class="c1">// }
+</span><span class="c1">// // This is used by subsystems to store and locate pieces.
+</span><span class="c1">// type LocalPieceRef struct {
+</span><span class="c1">//   ID   PieceID
+</span><span class="c1">//   Path file.Path
+</span><span class="c1">// }
 </span><span class="c1"></span>
 <span class="c1">// PieceTree is a data structure used to form pieces. The algorithms involved
-</span><span class="c1"></span><span class="c1">// in the storage proofs determine the shape of PieceTree and how it must be
-</span><span class="c1"></span><span class="c1">// constructed.
-</span><span class="c1"></span><span class="c1">//
-</span><span class="c1"></span><span class="c1">// Usually, a node in PieceTree will include either Children or Data, but not
-</span><span class="c1"></span><span class="c1">// both.
-</span><span class="c1"></span><span class="c1">//
-</span><span class="c1"></span><span class="c1">// TODO: move this into filproofs -- use a tree from there, as that&#39;s where
-</span><span class="c1"></span><span class="c1">// the algorightms are defined. Or keep this as an interface, met by others.
+</span><span class="c1">// in the storage proofs determine the shape of PieceTree and how it must be
+</span><span class="c1">// constructed.
+</span><span class="c1">//
+</span><span class="c1">// Usually, a node in PieceTree will include either Children or Data, but not
+</span><span class="c1">// both.
+</span><span class="c1">//
+</span><span class="c1">// TODO: move this into filproofs -- use a tree from there, as that&#39;s where
+</span><span class="c1">// the algorightms are defined. Or keep this as an interface, met by others.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">PieceTree</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Children</span>  <span class="p">[</span><span class="nx">PieceTree</span><span class="p">]</span>
     <span class="nx">Data</span>      <span class="nx">Bytes</span>

@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4738,9 +4684,9 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">UnixTime</span> <span class="kt">int64</span>  <span class="c1">// unix timestamp
 </span><span class="c1"></span>
 <span class="c1">// UTCClock is a normal, system clock reporting UTC time.
-</span><span class="c1"></span><span class="c1">// It should be kept in sync, with drift less than 1 second.
+</span><span class="c1">// It should be kept in sync, with drift less than 1 second.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">UTCClock</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">NowUTCUnix</span><span class="p">(</span><span class="p">)</span> <span class="nx">UnixTime</span>
+    <span class="nf">NowUTCUnix</span><span class="p">()</span> <span class="nx">UnixTime</span>
 <span class="p">}</span>
 
 <span class="c1">// ChainEpoch represents a round of a blockchain protocol.
@@ -4784,22 +4730,22 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="s">&#34;time&#34;</span>
 
 <span class="c1">// UTCSyncPeriod notes how often to sync the UTC clock with an authoritative
-</span><span class="c1"></span><span class="c1">// source, such as NTP, or a very precise hardware clock.
+</span><span class="c1">// source, such as NTP, or a very precise hardware clock.
 </span><span class="c1"></span><span class="kd">var</span> <span class="nx">UTCSyncPeriod</span> <span class="p">=</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Hour</span>
 
 <span class="c1">// EpochDuration is a constant that represents the duration in seconds
-</span><span class="c1"></span><span class="c1">// of a blockchain epoch.
+</span><span class="c1">// of a blockchain epoch.
 </span><span class="c1"></span><span class="kd">var</span> <span class="nx">EpochDuration</span> <span class="p">=</span> <span class="nf">UnixTime</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">_</span> <span class="o">*</span><span class="nx">UTCClock_I</span><span class="p">)</span> <span class="nf">NowUTCUnix</span><span class="p">(</span><span class="p">)</span> <span class="nx">UnixTime</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nf">UnixTime</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">Unix</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">_</span> <span class="o">*</span><span class="nx">UTCClock_I</span><span class="p">)</span> <span class="nf">NowUTCUnix</span><span class="p">()</span> <span class="nx">UnixTime</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nf">UnixTime</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">().</span><span class="nf">Unix</span><span class="p">())</span>
 <span class="p">}</span>
 
 <span class="c1">// EpochAtTime returns the ChainEpoch corresponding to time `t`.
-</span><span class="c1"></span><span class="c1">// It first subtracts GenesisTime, then divides by EpochDuration
-</span><span class="c1"></span><span class="c1">// and returns the resulting number of epochs.
+</span><span class="c1">// It first subtracts GenesisTime, then divides by EpochDuration
+</span><span class="c1">// and returns the resulting number of epochs.
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">ChainEpochClock_I</span><span class="p">)</span> <span class="nf">EpochAtTime</span><span class="p">(</span><span class="nx">t</span> <span class="nx">UnixTime</span><span class="p">)</span> <span class="nx">ChainEpoch</span> <span class="p">{</span>
-	<span class="nx">difference</span> <span class="o">:=</span> <span class="nx">t</span> <span class="o">-</span> <span class="nx">c</span><span class="p">.</span><span class="nf">GenesisTime</span><span class="p">(</span><span class="p">)</span>
+	<span class="nx">difference</span> <span class="o">:=</span> <span class="nx">t</span> <span class="o">-</span> <span class="nx">c</span><span class="p">.</span><span class="nf">GenesisTime</span><span class="p">()</span>
 	<span class="nx">epochs</span> <span class="o">:=</span> <span class="nx">difference</span> <span class="o">/</span> <span class="nx">EpochDuration</span>
 	<span class="k">return</span> <span class="nf">ChainEpoch</span><span class="p">(</span><span class="nx">epochs</span><span class="p">)</span>
 <span class="p">}</span>

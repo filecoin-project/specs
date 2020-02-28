@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4779,11 +4725,11 @@ and serves to make storage conform to a set of expectations.</p>
 <span class="kd">type</span> <span class="nx">StorageFaultType</span> <span class="kt">int</span>
 
 <span class="c1">// SectorInDetail describes all the bits of information associated
-</span><span class="c1"></span><span class="c1">// with each sector.
-</span><span class="c1"></span><span class="c1">// - ID   - a unique identifier assigned once the Sector is registered on chain
-</span><span class="c1"></span><span class="c1">// - Size - the size of the sector. there are a set of allowable sizes
-</span><span class="c1"></span><span class="c1">//
-</span><span class="c1"></span><span class="c1">// NOTE: do not use this struct. It is for illustrative purposes only.
+</span><span class="c1">// with each sector.
+</span><span class="c1">// - ID   - a unique identifier assigned once the Sector is registered on chain
+</span><span class="c1">// - Size - the size of the sector. there are a set of allowable sizes
+</span><span class="c1">//
+</span><span class="c1">// NOTE: do not use this struct. It is for illustrative purposes only.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorInDetail</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">ID</span>    <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span>
     <span class="nx">Size</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorSize</span>
@@ -4804,7 +4750,7 @@ and serves to make storage conform to a set of expectations.</p>
 <span class="p">}</span>
 
 <span class="c1">// SectorInfo is an object that gathers all the information miners know about their
-</span><span class="c1"></span><span class="c1">// sectors. This is meant to be used for a local index.
+</span><span class="c1">// sectors. This is meant to be used for a local index.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">ID</span>                  <span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span>
     <span class="nx">UnsealedInfo</span>        <span class="nx">UnsealedSectorInfo</span>

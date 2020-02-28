@@ -1380,33 +1380,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1474,33 +1447,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4111,7 +4057,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4120,7 +4066,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4737,15 +4683,15 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
 
-<span class="kd">type</span> <span class="nx">Path</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>  <span class="c1">// TODO
+<span class="kd">type</span> <span class="nx">Path</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// TODO
 </span><span class="c1"></span>
 <span class="c1">// SealSeed is unique to each Sector
-</span><span class="c1"></span><span class="c1">// SealSeed is:
-</span><span class="c1"></span><span class="c1">//    SealSeedHash(MinerID, SectorNumber, SealRandomness, abi.UnsealedSectorCID)
+</span><span class="c1">// SealSeed is:
+</span><span class="c1">//    SealSeedHash(MinerID, SectorNumber, SealRandomness, abi.UnsealedSectorCID)
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealSeed</span> <span class="nx">Bytes</span>
 
 <span class="c1">// SealCommitment is the information kept in the state tree about a sector.
-</span><span class="c1"></span><span class="c1">// SealCommitment is a subset of OnChainSealVerifyInfo.
+</span><span class="c1">// SealCommitment is a subset of OnChainSealVerifyInfo.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealCommitment</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SealedCID</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
 </span><span class="c1"></span>    <span class="nx">DealIDs</span>     <span class="nx">abi</span><span class="p">.</span><span class="nx">DealIDs</span>
@@ -4753,8 +4699,8 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="c1">// PersistentProofAux is meta data required to generate certain proofs
-</span><span class="c1"></span><span class="c1">// for a sector, for example PoSt.
-</span><span class="c1"></span><span class="c1">// These should be stored and indexed somewhere by CommR.
+</span><span class="c1">// for a sector, for example PoSt.
+</span><span class="c1">// These should be stored and indexed somewhere by CommR.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">PersistentProofAux</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">CommC</span>              <span class="nx">Commitment</span>
     <span class="nx">CommQ</span>              <span class="nx">Commitment</span>
@@ -4786,10 +4732,10 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="c1">// TODO: move into proofs lib
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">FilecoinSNARKProof</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>  <span class="c1">//&lt;bls12-381, Groth16&gt;
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">FilecoinSNARKProof</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">//&lt;bls12-381, Groth16&gt;
 </span><span class="c1"></span>
 <span class="c1">// TODO
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealOutputArtifacts</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealOutputArtifacts</span> <span class="kd">struct</span> <span class="p">{}</span>
 </code></pre></div>
 
 

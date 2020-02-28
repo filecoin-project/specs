@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4740,9 +4686,9 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">UInt64</span> <span class="nx">UInt</span>
 
 <span class="c1">// TODO: move this to somewhere the blockchain can import
-</span><span class="c1"></span><span class="c1">// candidates:
-</span><span class="c1"></span><span class="c1">// - filproofs - may have to learn about Sectors (and if we move Seal stuff, Deals)
-</span><span class="c1"></span><span class="c1">// - &#34;blockchain/builtins&#34; or something like that - a component in the blockchain that handles storage verification
+</span><span class="c1">// candidates:
+</span><span class="c1">// - filproofs - may have to learn about Sectors (and if we move Seal stuff, Deals)
+</span><span class="c1">// - &#34;blockchain/builtins&#34; or something like that - a component in the blockchain that handles storage verification
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStSubmission</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">PostProof</span>   <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span>
     <span class="nx">ChainEpoch</span>  <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span>
@@ -4809,10 +4755,10 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">Serialization</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
 
 <span class="c1">// See &#34;Proof-of-Spacetime Parameters&#34; Section
-</span><span class="c1"></span><span class="c1">// TODO: Unify with orient model.
+</span><span class="c1">// TODO: Unify with orient model.
 </span><span class="c1"></span><span class="kd">const</span> <span class="nx">POST_CHALLENGE_DEADLINE</span> <span class="p">=</span> <span class="nb">uint</span><span class="p">(</span><span class="mi">480</span><span class="p">)</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">pg</span> <span class="o">*</span><span class="nx">PoStGenerator_I</span><span class="p">)</span> <span class="nf">GeneratePoStCandidates</span><span class="p">(</span><span class="nx">challengeSeed</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">candidateCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">sectors</span> <span class="p">[</span><span class="p">]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">)</span> <span class="p">[</span><span class="p">]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">pg</span> <span class="o">*</span><span class="nx">PoStGenerator_I</span><span class="p">)</span> <span class="nf">GeneratePoStCandidates</span><span class="p">(</span><span class="nx">challengeSeed</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">candidateCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">sectors</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">)</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span> <span class="p">{</span>
 	<span class="c1">// Question: Should we pass metadata into FilProofs so it can interact with SectorStore directly?
 </span><span class="c1"></span>	<span class="c1">// Like this:
 </span><span class="c1"></span>	<span class="c1">// PoStReponse := SectorStorageSubsystem.GeneratePoSt(sectorSize, challenge, faults, sectorsMetatada);
@@ -4826,11 +4772,11 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>
 	<span class="c1">// For now, dodge this by passing the whole SectorStore. Once we decide how we want to represent this, we can narrow the call.
 </span><span class="c1"></span>
-	<span class="k">return</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">GenerateElectionPoStCandidates</span><span class="p">(</span><span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">sectors</span><span class="p">,</span> <span class="nx">candidateCount</span><span class="p">,</span> <span class="nx">pg</span><span class="p">.</span><span class="nf">SectorStore</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">GenerateElectionPoStCandidates</span><span class="p">(</span><span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">sectors</span><span class="p">,</span> <span class="nx">candidateCount</span><span class="p">,</span> <span class="nx">pg</span><span class="p">.</span><span class="nf">SectorStore</span><span class="p">())</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">pg</span> <span class="o">*</span><span class="nx">PoStGenerator_I</span><span class="p">)</span> <span class="nf">CreateElectionPoStProof</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">postCandidates</span> <span class="p">[</span><span class="p">]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">)</span> <span class="p">[</span><span class="p">]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
-	<span class="kd">var</span> <span class="nx">privateProofs</span> <span class="p">[</span><span class="p">]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PrivatePoStCandidateProof</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">pg</span> <span class="o">*</span><span class="nx">PoStGenerator_I</span><span class="p">)</span> <span class="nf">CreateElectionPoStProof</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">postCandidates</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">)</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
+	<span class="kd">var</span> <span class="nx">privateProofs</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PrivatePoStCandidateProof</span>
 
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">candidate</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">postCandidates</span> <span class="p">{</span>
 		<span class="nx">privateProofs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">privateProofs</span><span class="p">,</span> <span class="nx">candidate</span><span class="p">.</span><span class="nx">PrivateProof</span><span class="p">)</span>
@@ -4839,8 +4785,8 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">CreateElectionPoStProof</span><span class="p">(</span><span class="nx">privateProofs</span><span class="p">,</span> <span class="nx">randomness</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">pg</span> <span class="o">*</span><span class="nx">PoStGenerator_I</span><span class="p">)</span> <span class="nf">CreateSurprisePoStProof</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">postCandidates</span> <span class="p">[</span><span class="p">]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">)</span> <span class="p">[</span><span class="p">]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
-	<span class="kd">var</span> <span class="nx">privateProofs</span> <span class="p">[</span><span class="p">]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PrivatePoStCandidateProof</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">pg</span> <span class="o">*</span><span class="nx">PoStGenerator_I</span><span class="p">)</span> <span class="nf">CreateSurprisePoStProof</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">postCandidates</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">)</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
+	<span class="kd">var</span> <span class="nx">privateProofs</span> <span class="p">[]</span><span class="nx">abi</span><span class="p">.</span><span class="nx">PrivatePoStCandidateProof</span>
 
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">candidate</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">postCandidates</span> <span class="p">{</span>
 		<span class="nx">privateProofs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">privateProofs</span><span class="p">,</span> <span class="nx">candidate</span><span class="p">.</span><span class="nx">PrivateProof</span><span class="p">)</span>

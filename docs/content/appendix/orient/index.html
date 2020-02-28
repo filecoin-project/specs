@@ -1380,33 +1380,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1474,33 +1447,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4111,7 +4057,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4120,7 +4066,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -6710,13 +6656,13 @@ ChainBandwidth:
                 <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
               <span class="p">}</span>
             <span class="p">]</span>
-          <span class="p">}</span><span class="p">,</span>
+          <span class="p">},</span>
           <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
             <span class="nt">&#34;cidSize.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ 32 1)&#34;</span><span class="p">,</span>
             <span class="nt">&#34;cidSize.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ cid-size.tmp1% 1)&#34;</span><span class="p">,</span>
             <span class="nt">&#34;cidSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ cid-size.tmp2% 1)&#34;</span>
           <span class="p">}</span>
-        <span class="p">}</span><span class="p">,</span>
+        <span class="p">},</span>
         <span class="p">{</span>
           <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;sle&#34;</span><span class="p">,</span>
           <span class="nt">&#34;schema&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -6731,7 +6677,7 @@ ChainBandwidth:
           <span class="p">}</span>
         <span class="p">}</span>
       <span class="p">]</span>
-    <span class="p">}</span><span class="p">,</span>
+    <span class="p">},</span>
     <span class="p">{</span>
       <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Primitives&#34;</span><span class="p">,</span>
       <span class="nt">&#34;schema&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -6740,18 +6686,18 @@ ChainBandwidth:
           <span class="p">{</span>
             <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;u64&#34;</span><span class="p">,</span>
             <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The size of a U64, in bytes.&#34;</span>
-          <span class="p">}</span><span class="p">,</span>
+          <span class="p">},</span>
           <span class="p">{</span>
             <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;varint&#34;</span><span class="p">,</span>
             <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The size of a VarInt.&#34;</span><span class="p">,</span>
             <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
           <span class="p">}</span>
         <span class="p">]</span>
-      <span class="p">}</span><span class="p">,</span>
+      <span class="p">},</span>
       <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">&#34;varint&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 4)&#34;</span><span class="p">,</span>
         <span class="nt">&#34;u64&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 8)&#34;</span>
-      <span class="p">}</span><span class="p">,</span>
+      <span class="p">},</span>
       <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
         <span class="p">{</span>
           <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Dimensions&#34;</span><span class="p">,</span>
@@ -6765,34 +6711,34 @@ ChainBandwidth:
                     <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;mib&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The number of bytes in one EiX.&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
-                  <span class="p">}</span><span class="p">,</span>
+                  <span class="p">},</span>
                   <span class="p">{</span>
                     <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;mib&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The number of bytes in one PiB.&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
-                  <span class="p">}</span><span class="p">,</span>
+                  <span class="p">},</span>
                   <span class="p">{</span>
                     <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;mib&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The number of bytes in one TiB.&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
-                  <span class="p">}</span><span class="p">,</span>
+                  <span class="p">},</span>
                   <span class="p">{</span>
                     <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;mib&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The number of bytes in one GiB.&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
-                  <span class="p">}</span><span class="p">,</span>
+                  <span class="p">},</span>
                   <span class="p">{</span>
                     <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;mib&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The number of bytes in one MiB.&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
-                  <span class="p">}</span><span class="p">,</span>
+                  <span class="p">},</span>
                   <span class="p">{</span>
                     <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;kib&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The number of bytes in one KiB.&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
                   <span class="p">}</span>
                 <span class="p">]</span>
-              <span class="p">}</span><span class="p">,</span>
+              <span class="p">},</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="nt">&#34;kib&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 1024)&#34;</span><span class="p">,</span>
                 <span class="nt">&#34;mib&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 1024 kib)&#34;</span><span class="p">,</span>
@@ -6801,7 +6747,7 @@ ChainBandwidth:
                 <span class="nt">&#34;pib&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 1024 tib)&#34;</span><span class="p">,</span>
                 <span class="nt">&#34;eix&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 1024 pib)&#34;</span>
               <span class="p">}</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Time&#34;</span><span class="p">,</span>
               <span class="nt">&#34;schema&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -6813,7 +6759,7 @@ ChainBandwidth:
                     <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;seconds&#34;</span>
                   <span class="p">}</span>
                 <span class="p">]</span>
-              <span class="p">}</span><span class="p">,</span>
+              <span class="p">},</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="nt">&#34;yearInSeconds.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 365.25 24)&#34;</span><span class="p">,</span>
                 <span class="nt">&#34;yearInSeconds.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* year-in-seconds.tmp1% 60)&#34;</span><span class="p">,</span>
@@ -6823,7 +6769,7 @@ ChainBandwidth:
           <span class="p">]</span>
         <span class="p">}</span>
       <span class="p">]</span>
-    <span class="p">}</span><span class="p">,</span>
+    <span class="p">},</span>
     <span class="p">{</span>
       <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;vdfrsa&#34;</span><span class="p">,</span>
       <span class="nt">&#34;schema&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -6835,11 +6781,11 @@ ChainBandwidth:
             <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
           <span class="p">}</span>
         <span class="p">]</span>
-      <span class="p">}</span><span class="p">,</span>
+      <span class="p">},</span>
       <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">&#34;rsaElement&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ 2048 8)&#34;</span>
       <span class="p">}</span>
-    <span class="p">}</span><span class="p">,</span>
+    <span class="p">},</span>
     <span class="p">{</span>
       <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Blockchain&#34;</span><span class="p">,</span>
       <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
@@ -6854,11 +6800,11 @@ ChainBandwidth:
                 <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
               <span class="p">}</span>
             <span class="p">]</span>
-          <span class="p">}</span><span class="p">,</span>
+          <span class="p">},</span>
           <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
             <span class="nt">&#34;addressSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== cid-size)&#34;</span>
           <span class="p">}</span>
-        <span class="p">}</span><span class="p">,</span>
+        <span class="p">},</span>
         <span class="p">{</span>
           <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Block&#34;</span><span class="p">,</span>
           <span class="nt">&#34;schema&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -6870,11 +6816,11 @@ ChainBandwidth:
                 <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
               <span class="p">}</span>
             <span class="p">]</span>
-          <span class="p">}</span><span class="p">,</span>
+          <span class="p">},</span>
           <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
             <span class="nt">&#34;blockFramingSize.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ block-header-size messages-size)&#34;</span><span class="p">,</span>
             <span class="nt">&#34;blockFramingSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ block-framing-size.tmp1% receipts-size)&#34;</span>
-          <span class="p">}</span><span class="p">,</span>
+          <span class="p">},</span>
           <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Messages&#34;</span><span class="p">,</span>
@@ -6885,18 +6831,18 @@ ChainBandwidth:
                     <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;messagesRootCid&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;Size of the CID of the root merkle tree of the messages.&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
-                  <span class="p">}</span><span class="p">,</span>
+                  <span class="p">},</span>
                   <span class="p">{</span>
                     <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;messagesSize&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The total size of the messages in a block.&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
                   <span class="p">}</span>
                 <span class="p">]</span>
-              <span class="p">}</span><span class="p">,</span>
+              <span class="p">},</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="nt">&#34;messagesSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(* messages message-size)&#34;</span><span class="p">,</span>
                 <span class="nt">&#34;messagesRootCid&#34;</span><span class="p">:</span> <span class="s2">&#34;(== cid-size)&#34;</span>
-              <span class="p">}</span><span class="p">,</span>
+              <span class="p">},</span>
               <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Message&#34;</span><span class="p">,</span>
@@ -6907,19 +6853,19 @@ ChainBandwidth:
                         <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;toAddress&#34;</span><span class="p">,</span>
                         <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The size of a message&#39;s &#39;from address&#39;.&#34;</span><span class="p">,</span>
                         <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
-                      <span class="p">}</span><span class="p">,</span>
+                      <span class="p">},</span>
                       <span class="p">{</span>
                         <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;toAddress&#34;</span><span class="p">,</span>
                         <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The size of a message&#39;s &#39;to address&#39;.&#34;</span><span class="p">,</span>
                         <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
-                      <span class="p">}</span><span class="p">,</span>
+                      <span class="p">},</span>
                       <span class="p">{</span>
                         <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;messageSize&#34;</span><span class="p">,</span>
                         <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The size of a single message.&#34;</span><span class="p">,</span>
                         <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
                       <span class="p">}</span>
                     <span class="p">]</span>
-                  <span class="p">}</span><span class="p">,</span>
+                  <span class="p">},</span>
                   <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="nt">&#34;messageSize.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ to-address from-address)&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;messageSize.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ message-size.tmp1% message-nonce)&#34;</span><span class="p">,</span>
@@ -6929,7 +6875,7 @@ ChainBandwidth:
                     <span class="nt">&#34;messageSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ message-size.tmp5% actor-method)&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;toAddress&#34;</span><span class="p">:</span> <span class="s2">&#34;(== address-size)&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;fromAddress&#34;</span><span class="p">:</span> <span class="s2">&#34;(== address-size)&#34;</span>
-                  <span class="p">}</span><span class="p">,</span>
+                  <span class="p">},</span>
                   <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
                     <span class="p">{</span>
                       <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Nonce&#34;</span><span class="p">,</span>
@@ -6942,11 +6888,11 @@ ChainBandwidth:
                             <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
                           <span class="p">}</span>
                         <span class="p">]</span>
-                      <span class="p">}</span><span class="p">,</span>
+                      <span class="p">},</span>
                       <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                         <span class="nt">&#34;messageNonce&#34;</span><span class="p">:</span> <span class="s2">&#34;(== varint)&#34;</span>
                       <span class="p">}</span>
-                    <span class="p">}</span><span class="p">,</span>
+                    <span class="p">},</span>
                     <span class="p">{</span>
                       <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Value&#34;</span><span class="p">,</span>
                       <span class="nt">&#34;schema&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -6958,11 +6904,11 @@ ChainBandwidth:
                             <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
                           <span class="p">}</span>
                         <span class="p">]</span>
-                      <span class="p">}</span><span class="p">,</span>
+                      <span class="p">},</span>
                       <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                         <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;(== u64)&#34;</span>
                       <span class="p">}</span>
-                    <span class="p">}</span><span class="p">,</span>
+                    <span class="p">},</span>
                     <span class="p">{</span>
                       <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Gas&#34;</span><span class="p">,</span>
                       <span class="nt">&#34;schema&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -6972,19 +6918,19 @@ ChainBandwidth:
                             <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;gasPrice&#34;</span><span class="p">,</span>
                             <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The size required to represent the gas limit.&#34;</span><span class="p">,</span>
                             <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
-                          <span class="p">}</span><span class="p">,</span>
+                          <span class="p">},</span>
                           <span class="p">{</span>
                             <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;gasPrice&#34;</span><span class="p">,</span>
                             <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The size required to represent the gas price.&#34;</span><span class="p">,</span>
                             <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
                           <span class="p">}</span>
                         <span class="p">]</span>
-                      <span class="p">}</span><span class="p">,</span>
+                      <span class="p">},</span>
                       <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                         <span class="nt">&#34;gasPrice&#34;</span><span class="p">:</span> <span class="s2">&#34;(== u64)&#34;</span><span class="p">,</span>
                         <span class="nt">&#34;gasLimit&#34;</span><span class="p">:</span> <span class="s2">&#34;(== u64)&#34;</span>
                       <span class="p">}</span>
-                    <span class="p">}</span><span class="p">,</span>
+                    <span class="p">},</span>
                     <span class="p">{</span>
                       <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ActorMethod&#34;</span><span class="p">,</span>
                       <span class="nt">&#34;schema&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -6996,7 +6942,7 @@ ChainBandwidth:
                             <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
                           <span class="p">}</span>
                         <span class="p">]</span>
-                      <span class="p">}</span><span class="p">,</span>
+                      <span class="p">},</span>
                       <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                         <span class="nt">&#34;actorMethod&#34;</span><span class="p">:</span> <span class="s2">&#34;(== u64)&#34;</span>
                       <span class="p">}</span>
@@ -7004,7 +6950,7 @@ ChainBandwidth:
                   <span class="p">]</span>
                 <span class="p">}</span>
               <span class="p">]</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Receipts&#34;</span><span class="p">,</span>
               <span class="nt">&#34;schema&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -7014,18 +6960,18 @@ ChainBandwidth:
                     <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;messageReceiptsCid&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The size of one message receipt&#39;s CID.&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
-                  <span class="p">}</span><span class="p">,</span>
+                  <span class="p">},</span>
                   <span class="p">{</span>
                     <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;receiptsSize&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The total size of all message receipts, in bytes.&#34;</span>
                   <span class="p">}</span>
                 <span class="p">]</span>
-              <span class="p">}</span><span class="p">,</span>
+              <span class="p">},</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="nt">&#34;receipts&#34;</span><span class="p">:</span> <span class="s2">&#34;(== messages)&#34;</span><span class="p">,</span>
                 <span class="nt">&#34;receiptsSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(* receipts message-receipt)&#34;</span><span class="p">,</span>
                 <span class="nt">&#34;messageReceiptsCid&#34;</span><span class="p">:</span> <span class="s2">&#34;(== cid-size)&#34;</span>
-              <span class="p">}</span><span class="p">,</span>
+              <span class="p">},</span>
               <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Receipt&#34;</span><span class="p">,</span>
@@ -7036,24 +6982,24 @@ ChainBandwidth:
                         <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;gasUsed&#34;</span><span class="p">,</span>
                         <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The size required to represent the amount of gas used by a message.&#34;</span><span class="p">,</span>
                         <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
-                      <span class="p">}</span><span class="p">,</span>
+                      <span class="p">},</span>
                       <span class="p">{</span>
                         <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;return&#34;</span><span class="p">,</span>
                         <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The size of a message&#39;s return value.&#34;</span><span class="p">,</span>
                         <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
-                      <span class="p">}</span><span class="p">,</span>
+                      <span class="p">},</span>
                       <span class="p">{</span>
                         <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;exitCode&#34;</span><span class="p">,</span>
                         <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The size of an exit code.&#34;</span><span class="p">,</span>
                         <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
-                      <span class="p">}</span><span class="p">,</span>
+                      <span class="p">},</span>
                       <span class="p">{</span>
                         <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;messageReceipt&#34;</span><span class="p">,</span>
                         <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The size of one message receipt.&#34;</span><span class="p">,</span>
                         <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;bytes&#34;</span>
                       <span class="p">}</span>
                     <span class="p">]</span>
-                  <span class="p">}</span><span class="p">,</span>
+                  <span class="p">},</span>
                   <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="nt">&#34;messageReceipt.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ exit-code return)&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;messageReceipt&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ message-receipt.tmp1% gas-used)&#34;</span><span class="p">,</span>
@@ -7063,7 +7009,7 @@ ChainBandwidth:
                   <span class="p">}</span>
                 <span class="p">}</span>
               <span class="p">]</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;BlockHeader&#34;</span><span class="p">,</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -7078,64 +7024,64 @@ ChainBandwidth:
                 <span class="nt">&#34;blockHeaderFixedSize.tmp8%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ block-header-fixed-size.tmp7% timestamp-size)&#34;</span><span class="p">,</span>
                 <span class="nt">&#34;blockHeaderFixedSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ block-header-fixed-size.tmp8% block-sig-size)&#34;</span><span class="p">,</span>
                 <span class="nt">&#34;blockHeaderVariableSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ tickets-size parents-cids)&#34;</span>
-              <span class="p">}</span><span class="p">,</span>
+              <span class="p">},</span>
               <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;StateTree&#34;</span><span class="p">,</span>
                   <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="nt">&#34;stateRootCid&#34;</span><span class="p">:</span> <span class="s2">&#34;(== cid-size)&#34;</span>
                   <span class="p">}</span>
-                <span class="p">}</span><span class="p">,</span>
+                <span class="p">},</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Weight&#34;</span><span class="p">,</span>
                   <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="nt">&#34;parentWeightSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== u64)&#34;</span>
                   <span class="p">}</span>
-                <span class="p">}</span><span class="p">,</span>
+                <span class="p">},</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Height&#34;</span><span class="p">,</span>
                   <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="nt">&#34;blockHeightSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== u64)&#34;</span>
                   <span class="p">}</span>
-                <span class="p">}</span><span class="p">,</span>
+                <span class="p">},</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;MinerAddress&#34;</span><span class="p">,</span>
                   <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="nt">&#34;minerAddressSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== address-size)&#34;</span>
                   <span class="p">}</span>
-                <span class="p">}</span><span class="p">,</span>
+                <span class="p">},</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ElectionProof&#34;</span><span class="p">,</span>
                   <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="nt">&#34;electionProofSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 64)&#34;</span>
                   <span class="p">}</span>
-                <span class="p">}</span><span class="p">,</span>
+                <span class="p">},</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Parents&#34;</span><span class="p">,</span>
                   <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="nt">&#34;parents&#34;</span><span class="p">:</span> <span class="s2">&#34;(== expected-winning-miners)&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;parentsCids&#34;</span><span class="p">:</span> <span class="s2">&#34;(* parents cid-size)&#34;</span>
                   <span class="p">}</span>
-                <span class="p">}</span><span class="p">,</span>
+                <span class="p">},</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;blsSignatures&#34;</span><span class="p">,</span>
                   <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="nt">&#34;blsAggSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 96)&#34;</span>
                   <span class="p">}</span>
-                <span class="p">}</span><span class="p">,</span>
+                <span class="p">},</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Timestamp&#34;</span><span class="p">,</span>
                   <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="nt">&#34;timestampSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== u64)&#34;</span>
                   <span class="p">}</span>
-                <span class="p">}</span><span class="p">,</span>
+                <span class="p">},</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;BlockSig&#34;</span><span class="p">,</span>
                   <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="nt">&#34;blockSigSizeInteger%&#34;</span><span class="p">:</span> <span class="s2">&#34;(integer block-sig-size)&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;blockSigSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 96)&#34;</span>
                   <span class="p">}</span>
-                <span class="p">}</span><span class="p">,</span>
+                <span class="p">},</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Tickets&#34;</span><span class="p">,</span>
                   <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -7149,21 +7095,21 @@ ChainBandwidth:
           <span class="p">]</span>
         <span class="p">}</span>
       <span class="p">]</span>
-    <span class="p">}</span><span class="p">,</span>
+    <span class="p">},</span>
     <span class="p">{</span>
       <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;snark&#34;</span><span class="p">,</span>
       <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">&#34;snarkSingleProofSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 192)&#34;</span><span class="p">,</span>
         <span class="nt">&#34;snarkMaxConstraints&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 100000000)&#34;</span>
       <span class="p">}</span>
-    <span class="p">}</span><span class="p">,</span>
+    <span class="p">},</span>
     <span class="p">{</span>
       <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;vdf&#34;</span><span class="p">,</span>
       <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">&#34;vdfProofSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 3 rsa-element)&#34;</span><span class="p">,</span>
         <span class="nt">&#34;vdfOutputSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 0)&#34;</span>
       <span class="p">}</span>
-    <span class="p">}</span><span class="p">,</span>
+    <span class="p">},</span>
     <span class="p">{</span>
       <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Proofs&#34;</span><span class="p">,</span>
       <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
@@ -7176,7 +7122,7 @@ ChainBandwidth:
                 <span class="nt">&#34;nodes&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ sector-size node-size)&#34;</span><span class="p">,</span>
                 <span class="nt">&#34;degree&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ degree-base degree-expander)&#34;</span><span class="p">,</span>
                 <span class="nt">&#34;sectorSizeGib&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ sector-size gib)&#34;</span>
-              <span class="p">}</span><span class="p">,</span>
+              <span class="p">},</span>
               <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;drg&#34;</span><span class="p">,</span>
@@ -7184,35 +7130,35 @@ ChainBandwidth:
                     <span class="nt">&#34;drgE&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 0.8)&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;drgD&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ 1 4)&#34;</span>
                   <span class="p">}</span>
-                <span class="p">}</span><span class="p">,</span>
+                <span class="p">},</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ExpanderParents&#34;</span>
-                <span class="p">}</span><span class="p">,</span>
+                <span class="p">},</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Layers&#34;</span>
                 <span class="p">}</span>
               <span class="p">]</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Soundness&#34;</span><span class="p">,</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="nt">&#34;soundness&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ 1 soundness.tmp1%)&#34;</span>
               <span class="p">}</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;SpaceGap&#34;</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Challenges&#34;</span><span class="p">,</span>
               <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;OfflineChallenges&#34;</span>
-                <span class="p">}</span><span class="p">,</span>
+                <span class="p">},</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;OnlineChallenges&#34;</span>
                 <span class="p">}</span>
               <span class="p">]</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Seal&#34;</span><span class="p">,</span>
               <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
@@ -7232,7 +7178,7 @@ ChainBandwidth:
                   <span class="p">}</span>
                 <span class="p">}</span>
               <span class="p">]</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Commitment&#34;</span><span class="p">,</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -7242,12 +7188,12 @@ ChainBandwidth:
                 <span class="nt">&#34;replicaCommitTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ replica-commit-time.tmp1% replica-commit-time.tmp2%)&#34;</span><span class="p">,</span>
                 <span class="nt">&#34;sealCommitmentsSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(* commit-size 2)&#34;</span>
               <span class="p">}</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ProofGeneration&#34;</span><span class="p">,</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="nt">&#34;openings&#34;</span><span class="p">:</span> <span class="s2">&#34;(* offline-challenges opening-per-challenge)&#34;</span>
-              <span class="p">}</span><span class="p">,</span>
+              <span class="p">},</span>
               <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Leaf&#34;</span><span class="p">,</span>
@@ -7256,7 +7202,7 @@ ChainBandwidth:
                     <span class="nt">&#34;leafCircuitTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(* layers leaf-hash-circuit-time)&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;leafTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(* layers leaf-hash-time)&#34;</span>
                   <span class="p">}</span>
-                <span class="p">}</span><span class="p">,</span>
+                <span class="p">},</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Inclusion&#34;</span><span class="p">,</span>
                   <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -7265,7 +7211,7 @@ ChainBandwidth:
                     <span class="nt">&#34;inclusionConstraints&#34;</span><span class="p">:</span> <span class="s2">&#34;(* tree-depth merkle-hash-constraints)&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;commitTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(* nodes merkle-hash-time)&#34;</span>
                   <span class="p">}</span>
-                <span class="p">}</span><span class="p">,</span>
+                <span class="p">},</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;snark&#34;</span><span class="p">,</span>
                   <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -7296,13 +7242,13 @@ ChainBandwidth:
                   <span class="p">}</span>
                 <span class="p">}</span>
               <span class="p">]</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Size&#34;</span><span class="p">,</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="nt">&#34;sealProofSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ porep-snark-proof-size seal-commitments-size)&#34;</span>
               <span class="p">}</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Time&#34;</span><span class="p">,</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -7312,7 +7258,7 @@ ChainBandwidth:
                 <span class="nt">&#34;parallelSealTime.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ parallel-seal-time.tmp2% cores)&#34;</span><span class="p">,</span>
                 <span class="nt">&#34;parallelSealTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ parallel-seal-time.tmp1% encoding-time)&#34;</span>
               <span class="p">}</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Cost&#34;</span><span class="p">,</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -7321,7 +7267,7 @@ ChainBandwidth:
               <span class="p">}</span>
             <span class="p">}</span>
           <span class="p">]</span>
-        <span class="p">}</span><span class="p">,</span>
+        <span class="p">},</span>
         <span class="p">{</span>
           <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ProofOfReplication&#34;</span><span class="p">,</span>
           <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
@@ -7348,7 +7294,7 @@ ChainBandwidth:
                   <span class="p">}</span>
                 <span class="p">}</span>
               <span class="p">]</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;SpaceGap&#34;</span><span class="p">,</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -7357,7 +7303,7 @@ ChainBandwidth:
                 <span class="nt">&#34;delta.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ epsilon 2)&#34;</span><span class="p">,</span>
                 <span class="nt">&#34;delta&#34;</span><span class="p">:</span> <span class="s2">&#34;(- delta.tmp2% 0.001)&#34;</span>
               <span class="p">}</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Challenges&#34;</span><span class="p">,</span>
               <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
@@ -7369,7 +7315,7 @@ ChainBandwidth:
                     <span class="nt">&#34;offlineChallenges.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(log2 offline-challenges.tmp3%)&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;offlineChallenges&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ offline-challenges.tmp1% offline-challenges.tmp2%)&#34;</span>
                   <span class="p">}</span>
-                <span class="p">}</span><span class="p">,</span>
+                <span class="p">},</span>
                 <span class="p">{</span>
                   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;OnlineChallenges&#34;</span><span class="p">,</span>
                   <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -7383,7 +7329,7 @@ ChainBandwidth:
                   <span class="p">}</span>
                 <span class="p">}</span>
               <span class="p">]</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ProofGeneration&#34;</span><span class="p">,</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -7392,13 +7338,13 @@ ChainBandwidth:
               <span class="p">}</span>
             <span class="p">}</span>
           <span class="p">]</span>
-        <span class="p">}</span><span class="p">,</span>
+        <span class="p">},</span>
         <span class="p">{</span>
           <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ProofOfSpacetime&#34;</span><span class="p">,</span>
           <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Randomness&#34;</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Parameters&#34;</span><span class="p">,</span>
               <span class="nt">&#34;schema&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -7408,26 +7354,26 @@ ChainBandwidth:
                     <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;postChallengeHours&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;PoSt challenge time (see POST_CHALLENGE_BLOCKS).&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;hours&#34;</span>
-                  <span class="p">}</span><span class="p">,</span>
+                  <span class="p">},</span>
                   <span class="p">{</span>
                     <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;postChallengeTime&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;PoSt challenge time (see POST_CHALLENGE_BLOCKS).&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;seconds&#34;</span>
-                  <span class="p">}</span><span class="p">,</span>
+                  <span class="p">},</span>
                   <span class="p">{</span>
                     <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;postChallengeBlocks&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The time offset before which the actual work of generating the PoSt cannot be started. This is some delta before the end of the Proving Period, and as such less than a single Proving Period.&#34;</span><span class="p">,</span>
                     <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;blocks&#34;</span>
                   <span class="p">}</span>
                 <span class="p">]</span>
-              <span class="p">}</span><span class="p">,</span>
+              <span class="p">},</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="nt">&#34;postChallengeTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(* post-challenge-time.tmp1% 60)&#34;</span><span class="p">,</span>
                 <span class="nt">&#34;postChallengeTime.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* post-challenge-hours 60)&#34;</span>
               <span class="p">}</span>
             <span class="p">}</span>
           <span class="p">]</span>
-        <span class="p">}</span><span class="p">,</span>
+        <span class="p">},</span>
         <span class="p">{</span>
           <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ProofOfSpacetime&#34;</span><span class="p">,</span>
           <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
@@ -7442,21 +7388,21 @@ ChainBandwidth:
                     <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;blocks&#34;</span>
                   <span class="p">}</span>
                 <span class="p">]</span>
-              <span class="p">}</span><span class="p">,</span>
+              <span class="p">},</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="nt">&#34;postChallenges&#34;</span><span class="p">:</span> <span class="s2">&#34;(== online-challenges)&#34;</span><span class="p">,</span>
                 <span class="nt">&#34;postProvingPeriod&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ proving-period-seconds block-time)&#34;</span>
               <span class="p">}</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Cost&#34;</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;snark&#34;</span><span class="p">,</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="nt">&#34;postSnarkCircuit&#34;</span><span class="p">:</span> <span class="s2">&#34;(* online-challenges inclusion-constraints)&#34;</span>
               <span class="p">}</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Size&#34;</span><span class="p">,</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -7468,7 +7414,7 @@ ChainBandwidth:
           <span class="p">]</span>
         <span class="p">}</span>
       <span class="p">]</span>
-    <span class="p">}</span><span class="p">,</span>
+    <span class="p">},</span>
     <span class="p">{</span>
       <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Consensus&#34;</span><span class="p">,</span>
       <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
@@ -7489,7 +7435,7 @@ ChainBandwidth:
           <span class="p">}</span>
         <span class="p">}</span>
       <span class="p">]</span>
-    <span class="p">}</span><span class="p">,</span>
+    <span class="p">},</span>
     <span class="p">{</span>
       <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;StorageMarket&#34;</span><span class="p">,</span>
       <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
@@ -7504,7 +7450,7 @@ ChainBandwidth:
           <span class="p">}</span>
         <span class="p">}</span>
       <span class="p">]</span>
-    <span class="p">}</span><span class="p">,</span>
+    <span class="p">},</span>
     <span class="p">{</span>
       <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Mining&#34;</span><span class="p">,</span>
       <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -7513,13 +7459,13 @@ ChainBandwidth:
         <span class="nt">&#34;sealsPerSectorPerYear&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ reseal 1)&#34;</span><span class="p">,</span>
         <span class="nt">&#34;postsPerSectorPerYear&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ year-in-seconds proving-period-seconds)&#34;</span>
       <span class="p">}</span>
-    <span class="p">}</span><span class="p">,</span>
+    <span class="p">},</span>
     <span class="p">{</span>
       <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ScalingRequirements&#34;</span><span class="p">,</span>
       <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">&#34;storageNetworkCapacity&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 10 eix)&#34;</span>
       <span class="p">}</span>
-    <span class="p">}</span><span class="p">,</span>
+    <span class="p">},</span>
     <span class="p">{</span>
       <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ChainBandwidth&#34;</span><span class="p">,</span>
       <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -7528,11 +7474,11 @@ ChainBandwidth:
         <span class="nt">&#34;allSealMessagesPerYear&#34;</span><span class="p">:</span> <span class="s2">&#34;(* sectors-count seals-per-sector-per-year)&#34;</span><span class="p">,</span>
         <span class="nt">&#34;allPostMessagesPerYear.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* sectors-count posts-per-sector-per-year)&#34;</span><span class="p">,</span>
         <span class="nt">&#34;allPostMessagesPerYear&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ all-post-messages-per-year.tmp1% miners)&#34;</span>
-      <span class="p">}</span><span class="p">,</span>
+      <span class="p">},</span>
       <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
         <span class="p">{</span>
           <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Chain&#34;</span>
-        <span class="p">}</span><span class="p">,</span>
+        <span class="p">},</span>
         <span class="p">{</span>
           <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Block&#34;</span><span class="p">,</span>
           <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -7540,14 +7486,14 @@ ChainBandwidth:
             <span class="nt">&#34;chainSizeYearGib&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ chain-size-year gib)&#34;</span><span class="p">,</span>
             <span class="nt">&#34;blockSizeKib&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ block-size kib)&#34;</span>
           <span class="p">}</span>
-        <span class="p">}</span><span class="p">,</span>
+        <span class="p">},</span>
         <span class="p">{</span>
           <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Block&#34;</span><span class="p">,</span>
           <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
             <span class="nt">&#34;blockSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ block-framing-size proofs-size-per-block)&#34;</span><span class="p">,</span>
             <span class="nt">&#34;messages.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ avg-proofs-messages-per-block tx-messages-per-block)&#34;</span><span class="p">,</span>
             <span class="nt">&#34;messages&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ messages.tmp1% actors-messages-per-block)&#34;</span>
-          <span class="p">}</span><span class="p">,</span>
+          <span class="p">},</span>
           <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Proofs&#34;</span><span class="p">,</span>
@@ -7560,7 +7506,7 @@ ChainBandwidth:
                 <span class="nt">&#34;proofsSizePerBlock&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ seal-size-per-block post-size-per-block)&#34;</span><span class="p">,</span>
                 <span class="nt">&#34;proofsSizePerBlockKib&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ proofs-size-per-block kib)&#34;</span>
               <span class="p">}</span>
-            <span class="p">}</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="p">{</span>
               <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Composition&#34;</span><span class="p">,</span>
               <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>

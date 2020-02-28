@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4735,33 +4681,33 @@ https://github.com/alex-shpak/hugo-book
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// This contains actor things that are _outside_ of VM exection.
-</span><span class="c1"></span><span class="c1">// The VM uses this to execute abi.
+</span><span class="c1">// The VM uses this to execute abi.
 </span><span class="c1"></span>
 <span class="kn">import</span> <span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors&#34;</span>
 <span class="kn">import</span> <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 
 <span class="c1">// CallSeqNum is an invocation (Call) sequence (Seq) number (Num).
-</span><span class="c1"></span><span class="c1">// This is a value used for securing against replay attacks:
-</span><span class="c1"></span><span class="c1">// each AccountActor (user) invocation must have a unique CallSeqNum
-</span><span class="c1"></span><span class="c1">// value. The sequenctiality of the numbers is used to make it
-</span><span class="c1"></span><span class="c1">// easy to verify, and to order messages.
-</span><span class="c1"></span><span class="c1">//
-</span><span class="c1"></span><span class="c1">// Q&amp;A
-</span><span class="c1"></span><span class="c1">// - &gt; Does it have to be sequential?
-</span><span class="c1"></span><span class="c1">//   No, a random nonce could work against replay attacks, but
-</span><span class="c1"></span><span class="c1">//   making it sequential makes it much easier to verify.
-</span><span class="c1"></span><span class="c1">// - &gt; Can it be used to order events?
-</span><span class="c1"></span><span class="c1">//   Yes, a user may submit N separate messages with increasing
-</span><span class="c1"></span><span class="c1">//   sequence number, causing them to execute in order.
-</span><span class="c1"></span><span class="c1">//
+</span><span class="c1">// This is a value used for securing against replay attacks:
+</span><span class="c1">// each AccountActor (user) invocation must have a unique CallSeqNum
+</span><span class="c1">// value. The sequenctiality of the numbers is used to make it
+</span><span class="c1">// easy to verify, and to order messages.
+</span><span class="c1">//
+</span><span class="c1">// Q&amp;A
+</span><span class="c1">// - &gt; Does it have to be sequential?
+</span><span class="c1">//   No, a random nonce could work against replay attacks, but
+</span><span class="c1">//   making it sequential makes it much easier to verify.
+</span><span class="c1">// - &gt; Can it be used to order events?
+</span><span class="c1">//   Yes, a user may submit N separate messages with increasing
+</span><span class="c1">//   sequence number, causing them to execute in order.
+</span><span class="c1">//
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">CallSeqNum</span> <span class="kt">int64</span>
 
 <span class="c1">// Actor is a base computation object in the Filecoin VM. Similar
-</span><span class="c1"></span><span class="c1">// to Actors in the Actor Model (programming), or Objects in Object-
-</span><span class="c1"></span><span class="c1">// Oriented Programming, or Ethereum Contracts in the EVM.
-</span><span class="c1"></span><span class="c1">//
-</span><span class="c1"></span><span class="c1">// ActorState represents the on-chain storage all actors keep.
+</span><span class="c1">// to Actors in the Actor Model (programming), or Objects in Object-
+</span><span class="c1">// Oriented Programming, or Ethereum Contracts in the EVM.
+</span><span class="c1">//
+</span><span class="c1">// ActorState represents the on-chain storage all actors keep.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ActorState</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// Identifies the code this actor executes.
 </span><span class="c1"></span>    <span class="nx">CodeID</span>      <span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span>
@@ -4778,24 +4724,24 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">ActorSystemStateCID</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
 
 <span class="c1">// ActorState represents the on-chain storage actors keep. This type is a
-</span><span class="c1"></span><span class="c1">// union of concrete types, for each of the Actors:
-</span><span class="c1"></span><span class="c1">// - InitActor
-</span><span class="c1"></span><span class="c1">// - CronActor
-</span><span class="c1"></span><span class="c1">// - AccountActor
-</span><span class="c1"></span><span class="c1">// - PaymentChannelActor
-</span><span class="c1"></span><span class="c1">// - StoragePowerActor
-</span><span class="c1"></span><span class="c1">// - StorageMinerActor
-</span><span class="c1"></span><span class="c1">// - StroageMarketActor
-</span><span class="c1"></span><span class="c1">//
-</span><span class="c1"></span><span class="c1">// TODO: move this into a directory inside the VM that patches in all
-</span><span class="c1"></span><span class="c1">// the actors from across the system. this will be where we declare/mount
-</span><span class="c1"></span><span class="c1">// all actors in the VM.
-</span><span class="c1"></span><span class="c1">// type ActorState union {
-</span><span class="c1"></span><span class="c1">//     Init struct {
-</span><span class="c1"></span><span class="c1">//         AddressMap  {addr.Address: ActorID}
-</span><span class="c1"></span><span class="c1">//         NextID      ActorID
-</span><span class="c1"></span><span class="c1">//     }
-</span><span class="c1"></span><span class="c1">// }
+</span><span class="c1">// union of concrete types, for each of the Actors:
+</span><span class="c1">// - InitActor
+</span><span class="c1">// - CronActor
+</span><span class="c1">// - AccountActor
+</span><span class="c1">// - PaymentChannelActor
+</span><span class="c1">// - StoragePowerActor
+</span><span class="c1">// - StorageMinerActor
+</span><span class="c1">// - StroageMarketActor
+</span><span class="c1">//
+</span><span class="c1">// TODO: move this into a directory inside the VM that patches in all
+</span><span class="c1">// the actors from across the system. this will be where we declare/mount
+</span><span class="c1">// all actors in the VM.
+</span><span class="c1">// type ActorState union {
+</span><span class="c1">//     Init struct {
+</span><span class="c1">//         AddressMap  {addr.Address: ActorID}
+</span><span class="c1">//         NextID      ActorID
+</span><span class="c1">//     }
+</span><span class="c1">// }
 </span></code></pre></div>
 
 
@@ -4834,7 +4780,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">Serialization</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">ActorState_I</span><span class="p">)</span> <span class="nf">CID</span><span class="p">(</span><span class="p">)</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">ActorState_I</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>

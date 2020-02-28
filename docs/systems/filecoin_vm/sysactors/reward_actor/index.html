@@ -1380,33 +1380,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1474,33 +1447,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4111,7 +4057,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4120,7 +4066,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4782,23 +4728,23 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">case</span> <span class="nx">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="nx">r</span><span class="p">.</span><span class="nx">Value</span>
     <span class="k">case</span> <span class="nx">Linear</span><span class="p">:</span>
-        <span class="nf">TODO</span><span class="p">(</span><span class="p">)</span> <span class="c1">// BigInt
-</span><span class="c1"></span>        <span class="nx">vestedProportion</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Max</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">elapsedEpoch</span><span class="p">)</span><span class="o">/</span><span class="nb">float64</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">StartEpoch</span><span class="o">-</span><span class="nx">r</span><span class="p">.</span><span class="nx">EndEpoch</span><span class="p">)</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Value</span><span class="p">)</span> <span class="o">*</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">vestedProportion</span><span class="p">)</span><span class="p">)</span>
+        <span class="nf">TODO</span><span class="p">()</span> <span class="c1">// BigInt
+</span><span class="c1"></span>        <span class="nx">vestedProportion</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Max</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">elapsedEpoch</span><span class="p">)</span><span class="o">/</span><span class="nb">float64</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">StartEpoch</span><span class="o">-</span><span class="nx">r</span><span class="p">.</span><span class="nx">EndEpoch</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Value</span><span class="p">)</span> <span class="o">*</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">vestedProportion</span><span class="p">))</span>
     <span class="k">default</span><span class="p">:</span>
         <span class="k">return</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
 <span class="c1">// ownerAddr to a collection of Reward
-</span><span class="c1"></span><span class="c1">// TODO: AMT
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">RewardBalanceAMT</span> <span class="kd">map</span><span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span><span class="p">[</span><span class="p">]</span><span class="nx">Reward</span>
+</span><span class="c1">// TODO: AMT
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">RewardBalanceAMT</span> <span class="kd">map</span><span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">][]</span><span class="nx">Reward</span>
 
 <span class="kd">type</span> <span class="nx">RewardActorState</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">RewardMap</span> <span class="nx">RewardBalanceAMT</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">RewardActorState</span><span class="p">)</span> <span class="nf">CID</span><span class="p">(</span><span class="p">)</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">RewardActorState</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span> <span class="p">{</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -4809,10 +4755,10 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
 
     <span class="nx">rewardToWithdrawTotal</span> <span class="o">:=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="nx">indicesToRemove</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="p">[</span><span class="p">]</span><span class="kt">int</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">rewards</span><span class="p">)</span><span class="p">)</span>
+    <span class="nx">indicesToRemove</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">rewards</span><span class="p">))</span>
 
     <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">r</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">rewards</span> <span class="p">{</span>
-        <span class="nx">elapsedEpoch</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(</span><span class="p">)</span> <span class="o">-</span> <span class="nx">r</span><span class="p">.</span><span class="nx">StartEpoch</span>
+        <span class="nx">elapsedEpoch</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span> <span class="o">-</span> <span class="nx">r</span><span class="p">.</span><span class="nx">StartEpoch</span>
         <span class="nx">unlockedReward</span> <span class="o">:=</span> <span class="nx">r</span><span class="p">.</span><span class="nf">AmountVested</span><span class="p">(</span><span class="nx">elapsedEpoch</span><span class="p">)</span>
         <span class="nx">withdrawableReward</span> <span class="o">:=</span> <span class="nx">unlockedReward</span> <span class="o">-</span> <span class="nx">r</span><span class="p">.</span><span class="nx">AmountWithdrawn</span>
 
@@ -4834,7 +4780,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">return</span> <span class="nx">rewardToWithdrawTotal</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">RewardActor</span> <span class="kd">struct</span><span class="p">{</span><span class="p">}</span>
+<span class="kd">type</span> <span class="nx">RewardActor</span> <span class="kd">struct</span><span class="p">{}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActor</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
     <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
@@ -4843,8 +4789,8 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActor</span><span class="p">)</span> <span class="nf">State</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">RewardActorState</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">(</span><span class="p">)</span>
-    <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">cid</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
+    <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
+    <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">cid</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">())</span>
     <span class="kd">var</span> <span class="nx">state</span> <span class="nx">RewardActorState</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nx">stateCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">state</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;state not found&#34;</span><span class="p">)</span>
@@ -4854,7 +4800,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">RewardActor</span><span class="p">)</span> <span class="nf">WithdrawReward</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">vmr</span><span class="p">.</span><span class="nf">RT_ValidateImmediateCallerIsSignable</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-    <span class="nx">ownerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(</span><span class="p">)</span>
+    <span class="nx">ownerAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">()</span>
 
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
 
@@ -4874,14 +4820,14 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">)</span> <span class="p">{</span>
     <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
 
-    <span class="nx">inds</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrIndices</span><span class="p">(</span><span class="p">)</span>
+    <span class="nx">inds</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrIndices</span><span class="p">()</span>
     <span class="nx">pledgeReq</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">PledgeCollateralReq</span><span class="p">(</span><span class="nx">minerNominalPower</span><span class="p">)</span>
     <span class="nx">currReward</span> <span class="o">:=</span> <span class="nx">inds</span><span class="p">.</span><span class="nf">GetCurrBlockRewardForMiner</span><span class="p">(</span><span class="nx">minerNominalPower</span><span class="p">,</span> <span class="nx">currPledge</span><span class="p">)</span>
-    <span class="nf">TODO</span><span class="p">(</span><span class="p">)</span>                                                                              <span class="c1">// BigInt
-</span><span class="c1"></span>    <span class="nx">underPledge</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Max</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="p">)</span><span class="p">,</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">pledgeReq</span><span class="o">-</span><span class="nx">currPledge</span><span class="p">)</span><span class="p">)</span> <span class="c1">// 0 if over collateralized
-</span><span class="c1"></span>    <span class="nx">rewardToGarnish</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Min</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">currReward</span><span class="p">)</span><span class="p">,</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">underPledge</span><span class="p">)</span><span class="p">)</span>
+    <span class="nf">TODO</span><span class="p">()</span>                                                                              <span class="c1">// BigInt
+</span><span class="c1"></span>    <span class="nx">underPledge</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Max</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)),</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">pledgeReq</span><span class="o">-</span><span class="nx">currPledge</span><span class="p">))</span> <span class="c1">// 0 if over collateralized
+</span><span class="c1"></span>    <span class="nx">rewardToGarnish</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Min</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">currReward</span><span class="p">),</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">underPledge</span><span class="p">))</span>
 
-    <span class="nf">TODO</span><span class="p">(</span><span class="p">)</span>
+    <span class="nf">TODO</span><span class="p">()</span>
     <span class="c1">// handle penalty here
 </span><span class="c1"></span>    <span class="c1">// also handle penalty greater than reward
 </span><span class="c1"></span>    <span class="nx">actualReward</span> <span class="o">:=</span> <span class="nx">currReward</span> <span class="o">-</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">rewardToGarnish</span><span class="p">)</span>
@@ -4890,8 +4836,8 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>        <span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span>
             <span class="nx">builtin</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
             <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_AddBalance</span><span class="p">,</span>
-            <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span><span class="p">,</span>
-            <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">rewardToGarnish</span><span class="p">)</span><span class="p">,</span>
+            <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span><span class="nx">miner</span><span class="p">),</span>
+            <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">rewardToGarnish</span><span class="p">),</span>
         <span class="p">)</span>
     <span class="p">}</span>
 
@@ -4899,15 +4845,15 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">if</span> <span class="nx">actualReward</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
         <span class="c1">// put Reward into RewardMap
 </span><span class="c1"></span>        <span class="nx">newReward</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">Reward</span><span class="p">{</span>
-            <span class="nx">StartEpoch</span><span class="p">:</span>      <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(</span><span class="p">)</span><span class="p">,</span>
-            <span class="nx">EndEpoch</span><span class="p">:</span>        <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(</span><span class="p">)</span><span class="p">,</span>
+            <span class="nx">StartEpoch</span><span class="p">:</span>      <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(),</span>
+            <span class="nx">EndEpoch</span><span class="p">:</span>        <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(),</span>
             <span class="nx">Value</span><span class="p">:</span>           <span class="nx">actualReward</span><span class="p">,</span>
-            <span class="nx">AmountWithdrawn</span><span class="p">:</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="p">,</span>
+            <span class="nx">AmountWithdrawn</span><span class="p">:</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
             <span class="nx">VestingFunction</span><span class="p">:</span> <span class="nx">None</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="nx">rewards</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nx">RewardMap</span><span class="p">[</span><span class="nx">miner</span><span class="p">]</span>
         <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
-            <span class="nx">rewards</span> <span class="p">=</span> <span class="nb">make</span><span class="p">(</span><span class="p">[</span><span class="p">]</span><span class="nx">Reward</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="nx">rewards</span> <span class="p">=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">Reward</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="p">}</span>
         <span class="nx">rewards</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">rewards</span><span class="p">,</span> <span class="o">*</span><span class="nx">newReward</span><span class="p">)</span>
         <span class="nx">st</span><span class="p">.</span><span class="nx">RewardMap</span><span class="p">[</span><span class="nx">miner</span><span class="p">]</span> <span class="p">=</span> <span class="nx">rewards</span>
@@ -4916,11 +4862,11 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">UpdateReleaseRewardActorState</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">h</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">st</span> <span class="nx">RewardActorState</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">newCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">st</span><span class="p">)</span><span class="p">)</span>
+    <span class="nx">newCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">st</span><span class="p">))</span>
     <span class="nx">h</span><span class="p">.</span><span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">newCID</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">removeIndices</span><span class="p">(</span><span class="nx">rewards</span> <span class="p">[</span><span class="p">]</span><span class="nx">Reward</span><span class="p">,</span> <span class="nx">indices</span> <span class="p">[</span><span class="p">]</span><span class="kt">int</span><span class="p">)</span> <span class="p">[</span><span class="p">]</span><span class="nx">Reward</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">removeIndices</span><span class="p">(</span><span class="nx">rewards</span> <span class="p">[]</span><span class="nx">Reward</span><span class="p">,</span> <span class="nx">indices</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="nx">Reward</span> <span class="p">{</span>
     <span class="c1">// remove fully paid out Rewards by indices
 </span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>

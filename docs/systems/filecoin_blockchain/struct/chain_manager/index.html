@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4734,14 +4680,14 @@ https://github.com/alex-shpak/hugo-book
 <p>The Chain Tips Manager is a subcomponent of Filecoin consensus that is technically up to the implementer, but since the pseudocode in previous sections reference it, it is documented here for clarity.</p>
 <p>The Chain Tips Manager is responsible for tracking all live tips of the Filecoin blockchain, and tracking what the current &lsquo;best&rsquo; tipset is.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Returns the ticket that is at round &#39;r&#39; in the chain behind &#39;head&#39;
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">TicketFromRound</span><span class="p">(</span><span class="nx">head</span> <span class="nx">Tipset</span><span class="p">,</span> <span class="nx">r</span> <span class="nx">Round</span><span class="p">)</span> <span class="p">{</span><span class="p">}</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">TicketFromRound</span><span class="p">(</span><span class="nx">head</span> <span class="nx">Tipset</span><span class="p">,</span> <span class="nx">r</span> <span class="nx">Round</span><span class="p">)</span> <span class="p">{}</span>
 
 <span class="c1">// Returns the tipset that contains round r (Note: multiple rounds&#39; worth of tickets may exist within a single block due to losing tickets being added to the eventually successfully generated block)
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">TipsetFromRound</span><span class="p">(</span><span class="nx">head</span> <span class="nx">Tipset</span><span class="p">,</span> <span class="nx">r</span> <span class="nx">Round</span><span class="p">)</span> <span class="p">{</span><span class="p">}</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">TipsetFromRound</span><span class="p">(</span><span class="nx">head</span> <span class="nx">Tipset</span><span class="p">,</span> <span class="nx">r</span> <span class="nx">Round</span><span class="p">)</span> <span class="p">{}</span>
 
 <span class="c1">// GetBestTipset returns the best known tipset. If the &#39;best&#39; tipset hasn&#39;t changed, then this
-</span><span class="c1"></span><span class="c1">// will return the previous best tipset.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">GetBestTipset</span><span class="p">(</span><span class="p">)</span>
+</span><span class="c1">// will return the previous best tipset.
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">GetBestTipset</span><span class="p">()</span>
 
 <span class="c1">// Adds the losing ticket to the chaintips manager so that blocks can be mined on top of it
 </span><span class="c1"></span><span class="kd">func</span> <span class="nf">AddLosingTicket</span><span class="p">(</span><span class="nx">parent</span> <span class="nx">Tipset</span><span class="p">,</span> <span class="nx">t</span> <span class="nx">Ticket</span><span class="p">)</span>

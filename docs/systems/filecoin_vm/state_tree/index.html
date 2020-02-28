@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4741,12 +4687,12 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">cid</span> <span class="s">&#34;github.com/ipfs/go-cid&#34;</span>
 
 <span class="c1">// The on-chain state data structure is a map (HAMT) of addresses to actor states.
-</span><span class="c1"></span><span class="c1">// Only ID addresses are expected as keys.
+</span><span class="c1">// Only ID addresses are expected as keys.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">StateTree</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">ActorStates</span>  <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span><span class="p">}</span>  <span class="c1">// HAMT
 </span><span class="c1"></span>
     <span class="c1">// Returns the CID of the root node of the HAMT.
-</span><span class="c1"></span>    <span class="nf">RootCID</span><span class="p">(</span><span class="p">)</span>    <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
+</span><span class="c1"></span>    <span class="nf">RootCID</span><span class="p">()</span>    <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
 
     <span class="c1">// Looks up an actor state by address.
 </span><span class="c1"></span>    <span class="nf">GetActor</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">state</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>

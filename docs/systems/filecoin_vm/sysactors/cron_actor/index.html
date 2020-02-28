@@ -1380,33 +1380,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1474,33 +1447,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4111,7 +4057,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4120,7 +4066,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4742,11 +4688,11 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/runtime&#34;</span>
 <span class="p">)</span>
 
-<span class="kd">type</span> <span class="nx">CronActorState</span> <span class="kd">struct</span><span class="p">{</span><span class="p">}</span>
+<span class="kd">type</span> <span class="nx">CronActorState</span> <span class="kd">struct</span><span class="p">{}</span>
 
 <span class="kd">type</span> <span class="nx">CronActor</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// TODO move Entries into the CronActorState struct
-</span><span class="c1"></span>    <span class="nx">Entries</span> <span class="p">[</span><span class="p">]</span><span class="nx">CronTableEntry</span>
+</span><span class="c1"></span>    <span class="nx">Entries</span> <span class="p">[]</span><span class="nx">CronTableEntry</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">CronTableEntry</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4757,7 +4703,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">CronActor</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span> <span class="p">{</span>
     <span class="c1">// Nothing. intentionally left blank.
 </span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">ValidateImmediateCallerIs</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SuccessReturn</span><span class="p">(</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SuccessReturn</span><span class="p">()</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">CronActor</span><span class="p">)</span> <span class="nf">EpochTick</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span> <span class="p">{</span>
@@ -4770,11 +4716,11 @@ https://github.com/alex-shpak/hugo-book
             <span class="nx">To</span><span class="p">:</span>     <span class="nx">entry</span><span class="p">.</span><span class="nx">ToAddr</span><span class="p">,</span>
             <span class="nx">Method</span><span class="p">:</span> <span class="nx">entry</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span>
             <span class="nx">Params</span><span class="p">:</span> <span class="kc">nil</span><span class="p">,</span>
-            <span class="nx">Value</span><span class="p">:</span>  <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="p">,</span>
-        <span class="p">}</span><span class="p">)</span>
+            <span class="nx">Value</span><span class="p">:</span>  <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="p">})</span>
     <span class="p">}</span>
 
-    <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SuccessReturn</span><span class="p">(</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SuccessReturn</span><span class="p">()</span>
 <span class="p">}</span>
 </code></pre></div>
 

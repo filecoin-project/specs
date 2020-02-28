@@ -1380,33 +1380,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1474,33 +1447,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4111,7 +4057,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4120,7 +4066,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4823,21 +4769,21 @@ To enable this, the prover must store <code>CommC</code> and use it to prove tha
   <span class="k">for</span> <span class="nx">c</span> <span class="nx">in</span> <span class="k">range</span> <span class="nx">LAYERS_CHALLENGES</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span> <span class="p">{</span>
     <span class="c1">// 2: Inclusion Proofs Checks
 </span><span class="c1"></span>    <span class="c1">// 2.1: Check inclusion proofs for data leaves are correct
-</span><span class="c1"></span>    <span class="nf">assert</span><span class="p">(</span><span class="nf">MerkleTreeVerify</span><span class="p">(</span><span class="nx">DataRoot</span><span class="p">,</span> <span class="nx">InclusionPath</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">,</span> <span class="nx">DataProof</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">,</span> <span class="nx">DataValue</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">)</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">assert</span><span class="p">(</span><span class="nf">MerkleTreeVerify</span><span class="p">(</span><span class="nx">DataRoot</span><span class="p">,</span> <span class="nx">InclusionPath</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">],</span> <span class="nx">DataProof</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">],</span> <span class="nx">DataValue</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">]))</span>
     <span class="c1">// 2.2: Check inclusion proofs for replica leaves are correct
-</span><span class="c1"></span>    <span class="nf">assert</span><span class="p">(</span><span class="nf">MerkleTreeVerify</span><span class="p">(</span><span class="nx">ReplicaRoot</span><span class="p">,</span> <span class="nx">InclusionPath</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">,</span> <span class="nx">ReplicaProof</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">,</span> <span class="nx">ReplicaValue</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">)</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">assert</span><span class="p">(</span><span class="nf">MerkleTreeVerify</span><span class="p">(</span><span class="nx">ReplicaRoot</span><span class="p">,</span> <span class="nx">InclusionPath</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">],</span> <span class="nx">ReplicaProof</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">],</span> <span class="nx">ReplicaValue</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">]))</span>
     <span class="c1">// 2.3: Check inclusion proofs for parent leaves are correct
 </span><span class="c1"></span>    <span class="k">for</span> <span class="nx">p</span> <span class="nx">in</span> <span class="k">range</span> <span class="nx">PARENT_COUNT</span> <span class="p">{</span>
-      <span class="nf">assert</span><span class="p">(</span><span class="nf">MerkleTreeVerify</span><span class="p">(</span><span class="nx">ReplicaRoot</span><span class="p">,</span> <span class="nx">ParentInclusionPath</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">[</span><span class="nx">p</span><span class="p">]</span><span class="p">,</span> <span class="nx">ParentProof</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">[</span><span class="nx">p</span><span class="p">]</span><span class="p">)</span><span class="p">)</span>
+      <span class="nf">assert</span><span class="p">(</span><span class="nf">MerkleTreeVerify</span><span class="p">(</span><span class="nx">ReplicaRoot</span><span class="p">,</span> <span class="nx">ParentInclusionPath</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">][</span><span class="nx">p</span><span class="p">],</span> <span class="nx">ParentProof</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">][</span><span class="nx">p</span><span class="p">]))</span>
     <span class="p">}</span>
 
     <span class="c1">// 3: Encoding checks - Check that replica leaves have been correctly encoded
-</span><span class="c1"></span>    <span class="nx">let</span> <span class="nx">ParentBits</span> <span class="p">[</span><span class="nx">PARENT_COUNT</span><span class="p">]</span><span class="p">[</span><span class="mi">255</span><span class="p">]</span><span class="nx">Fr</span>
+</span><span class="c1"></span>    <span class="nx">let</span> <span class="nx">ParentBits</span> <span class="p">[</span><span class="nx">PARENT_COUNT</span><span class="p">][</span><span class="mi">255</span><span class="p">]</span><span class="nx">Fr</span>
     <span class="k">for</span> <span class="nx">p</span> <span class="nx">in</span> <span class="k">range</span> <span class="nx">PARENT_COUNT</span> <span class="p">{</span>
       <span class="c1">// 3.1: Check that each ParentValue is equal to its bit representation
-</span><span class="c1"></span>      <span class="nx">let</span> <span class="nx">parent</span> <span class="p">=</span> <span class="nx">ParentValue</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="p">[</span><span class="nx">p</span><span class="p">]</span>
+</span><span class="c1"></span>      <span class="nx">let</span> <span class="nx">parent</span> <span class="p">=</span> <span class="nx">ParentValue</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">][</span><span class="nx">p</span><span class="p">]</span>
       <span class="nx">ParentBits</span><span class="p">[</span><span class="nx">p</span><span class="p">]</span> <span class="p">=</span> <span class="nf">Fr_to_bits</span><span class="p">(</span><span class="nx">parent</span><span class="p">)</span>
-      <span class="nf">assert</span><span class="p">(</span><span class="nf">Packed</span><span class="p">(</span><span class="nx">ParentBits</span><span class="p">[</span><span class="nx">p</span><span class="p">]</span><span class="p">)</span> <span class="o">==</span> <span class="nx">parent</span><span class="p">)</span>
+      <span class="nf">assert</span><span class="p">(</span><span class="nf">Packed</span><span class="p">(</span><span class="nx">ParentBits</span><span class="p">[</span><span class="nx">p</span><span class="p">])</span> <span class="o">==</span> <span class="nx">parent</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="c1">// 3.2: KDF check - Check that each key has generated correctly
@@ -4850,17 +4796,17 @@ To enable this, the prover must store <code>CommC</code> and use it to prove tha
     <span class="nf">assert</span><span class="p">(</span><span class="nf">SHA256</span><span class="p">(</span><span class="nx">PreImage</span><span class="p">)</span> <span class="o">==</span> <span class="nx">key</span><span class="p">)</span>
 
     <span class="c1">// 3.3: Check that the data has been encoded to a replica with the right key
-</span><span class="c1"></span>    <span class="nf">assert</span><span class="p">(</span><span class="nx">ReplicaValue</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span> <span class="o">==</span> <span class="nx">DataValue</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span> <span class="o">+</span> <span class="nx">key</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">assert</span><span class="p">(</span><span class="nx">ReplicaValue</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">]</span> <span class="o">==</span> <span class="nx">DataValue</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">]</span> <span class="o">+</span> <span class="nx">key</span><span class="p">)</span>
   <span class="p">}</span>
 
   <span class="c1">// 4: CommRStar check - Check that the CommRStar constructed correctly
 </span><span class="c1"></span>  <span class="nx">let</span> <span class="nx">hash</span> <span class="p">=</span> <span class="nx">ReplicaId</span>
   <span class="k">for</span> <span class="nx">l</span> <span class="nx">in</span> <span class="k">range</span> <span class="nx">LAYERS</span><span class="o">-</span><span class="mi">1</span> <span class="p">{</span>
-    <span class="nx">hash</span><span class="p">.</span><span class="nf">Append</span><span class="p">(</span><span class="nx">CommR</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="p">)</span>
+    <span class="nx">hash</span><span class="p">.</span><span class="nf">Append</span><span class="p">(</span><span class="nx">CommR</span><span class="p">[</span><span class="nx">l</span><span class="p">])</span>
   <span class="p">}</span>
   <span class="nx">hash</span><span class="p">.</span><span class="nf">Append</span><span class="p">(</span><span class="nx">CommRLast</span><span class="p">)</span>
 
-  <span class="nf">assert</span><span class="p">(</span><span class="nx">CommRStar</span> <span class="o">==</span> <span class="nf">PedersenHash</span><span class="p">(</span><span class="nx">hash</span><span class="p">)</span><span class="p">)</span>
+  <span class="nf">assert</span><span class="p">(</span><span class="nx">CommRStar</span> <span class="o">==</span> <span class="nf">PedersenHash</span><span class="p">(</span><span class="nx">hash</span><span class="p">))</span>
   <span class="c1">// TODO check if we need to do packing/unpacking
 </span><span class="c1"></span><span class="p">}</span>
 </code></pre></div><h2 id="verification-of-offline-porep-proof">Verification of offline porep proof</h2>

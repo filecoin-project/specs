@@ -1380,33 +1380,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1474,33 +1447,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4111,7 +4057,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4120,7 +4066,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4740,15 +4686,15 @@ Graph
 
   <span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*dumped-sdr-graph*</span> <span class="o">&#39;</span><span class="p">(</span><span class="ss">:NODES</span> <span class="mi">8</span> <span class="ss">:CHALLENGED-NODE</span> <span class="mi">7</span> <span class="ss">:LAYERS</span> <span class="mi">4</span> <span class="ss">:RENUMBERED-PERMUTATION</span>
                                      <span class="p">(</span><span class="ss">:PERM-LIST</span> <span class="p">(</span><span class="mi">7</span> <span class="mi">4</span> <span class="mi">3</span> <span class="mi">6</span> <span class="mi">1</span> <span class="mi">8</span> <span class="mi">2</span> <span class="mi">5</span><span class="p">)</span> <span class="ss">:TYPE</span> <span class="nv">PERM</span><span class="p">)</span> <span class="ss">:REVERSED-PERMUTATION</span>
-                                     <span class="p">(</span><span class="ss">:PERM-LIST</span> <span class="p">(</span><span class="mi">3</span> <span class="mi">7</span> <span class="mi">8</span> <span class="mi">6</span> <span class="mi">5</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">2</span><span class="p">)</span> <span class="ss">:TYPE</span> <span class="nv">PERM</span><span class="p">)</span> <span class="ss">:TYPE</span> <span class="nv">SDR-GRAPH</span><span class="p">)</span><span class="p">)</span>
+                                     <span class="p">(</span><span class="ss">:PERM-LIST</span> <span class="p">(</span><span class="mi">3</span> <span class="mi">7</span> <span class="mi">8</span> <span class="mi">6</span> <span class="mi">5</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">2</span><span class="p">)</span> <span class="ss">:TYPE</span> <span class="nv">PERM</span><span class="p">)</span> <span class="ss">:TYPE</span> <span class="nv">SDR-GRAPH</span><span class="p">))</span>
 
   <span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*sdr-graph*</span>  <span class="p">(</span><span class="k">if</span> <span class="vg">*regenerate-sdr-graph*</span>
                                  <span class="p">(</span><span class="nv">make-sdr-graph</span> <span class="vg">*nodes*</span> <span class="vg">*layers*</span><span class="p">)</span>
-                                 <span class="p">(</span><span class="nv">load-from-plist</span> <span class="vg">*dumped-sdr-graph*</span><span class="p">)</span><span class="p">)</span><span class="p">)</span>
+                                 <span class="p">(</span><span class="nv">load-from-plist</span> <span class="vg">*dumped-sdr-graph*</span><span class="p">)))</span>
 
-  <span class="p">(</span><span class="k">let</span> <span class="p">(</span><span class="p">(</span><span class="nv">lg</span> <span class="p">(</span><span class="nf">first</span> <span class="p">(</span><span class="nv">sdr-graph-layer-graphs</span> <span class="vg">*sdr-graph*</span><span class="p">)</span><span class="p">)</span><span class="p">)</span><span class="p">)</span>
-    <span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*comm-d-graph*</span> <span class="p">(</span><span class="nv">make-comm-d-layer-graph</span> <span class="p">(</span><span class="nv">layer-graph-nodes</span> <span class="nv">lg</span><span class="p">)</span> <span class="p">(</span><span class="nv">layer-graph-challenged-node</span> <span class="nv">lg</span><span class="p">)</span> <span class="ss">:parent</span> <span class="vg">*sdr-graph*</span><span class="p">)</span><span class="p">)</span>
-    <span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*replica-graph*</span> <span class="p">(</span><span class="nv">make-replica-layer-graph</span> <span class="p">(</span><span class="nv">layer-graph-nodes</span> <span class="nv">lg</span><span class="p">)</span> <span class="p">(</span><span class="nv">layer-graph-challenged-node</span> <span class="nv">lg</span><span class="p">)</span> <span class="ss">:parent</span> <span class="vg">*sdr-graph*</span> <span class="ss">:layers</span> <span class="vg">*layers*</span><span class="p">)</span><span class="p">)</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nv">lg</span> <span class="p">(</span><span class="nf">first</span> <span class="p">(</span><span class="nv">sdr-graph-layer-graphs</span> <span class="vg">*sdr-graph*</span><span class="p">))))</span>
+    <span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*comm-d-graph*</span> <span class="p">(</span><span class="nv">make-comm-d-layer-graph</span> <span class="p">(</span><span class="nv">layer-graph-nodes</span> <span class="nv">lg</span><span class="p">)</span> <span class="p">(</span><span class="nv">layer-graph-challenged-node</span> <span class="nv">lg</span><span class="p">)</span> <span class="ss">:parent</span> <span class="vg">*sdr-graph*</span><span class="p">))</span>
+    <span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*replica-graph*</span> <span class="p">(</span><span class="nv">make-replica-layer-graph</span> <span class="p">(</span><span class="nv">layer-graph-nodes</span> <span class="nv">lg</span><span class="p">)</span> <span class="p">(</span><span class="nv">layer-graph-challenged-node</span> <span class="nv">lg</span><span class="p">)</span> <span class="ss">:parent</span> <span class="vg">*sdr-graph*</span> <span class="ss">:layers</span> <span class="vg">*layers*</span><span class="p">)))</span>
 
   <span class="p">(</span><span class="nv">dump</span> <span class="vg">*sdr-graph*</span><span class="p">)</span></code></pre></div>
 </div>
@@ -4799,7 +4745,7 @@ Data Layer: $Comm_D$ Tree
 Replica Column Layers: $Comm_C$ Tree
 </h3>
 <div class="src src-lisp">
-<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">emit-layer-graph</span> <span class="p">(</span><span class="nf">nth</span> <span class="mi">0</span> <span class="p">(</span><span class="nv">sdr-graph-layer-graphs</span> <span class="vg">*sdr-graph*</span><span class="p">)</span><span class="p">)</span><span class="p">)</span></code></pre></div>
+<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">emit-layer-graph</span> <span class="p">(</span><span class="nf">nth</span> <span class="mi">0</span> <span class="p">(</span><span class="nv">sdr-graph-layer-graphs</span> <span class="vg">*sdr-graph*</span><span class="p">)))</span></code></pre></div>
 </div>
 <div class="src src-dot">
 <pre><code class="language-dot" data-lang="dot">$input</code></pre>
@@ -4808,7 +4754,7 @@ Replica Column Layers: $Comm_C$ Tree
 <img src="layer-1.png" alt="layer-1.png" title="layer-1.png" />
 </p>
 <div class="src src-lisp">
-<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">emit-layer-graph</span> <span class="p">(</span><span class="nf">nth</span> <span class="mi">1</span> <span class="p">(</span><span class="nv">sdr-graph-layer-graphs</span> <span class="vg">*sdr-graph*</span><span class="p">)</span><span class="p">)</span><span class="p">)</span></code></pre></div>
+<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">emit-layer-graph</span> <span class="p">(</span><span class="nf">nth</span> <span class="mi">1</span> <span class="p">(</span><span class="nv">sdr-graph-layer-graphs</span> <span class="vg">*sdr-graph*</span><span class="p">)))</span></code></pre></div>
 </div>
 <div class="src src-dot">
 <pre><code class="language-dot" data-lang="dot">$input</code></pre>
@@ -4817,7 +4763,7 @@ Replica Column Layers: $Comm_C$ Tree
 <img src="layer-2.png" alt="layer-2.png" title="layer-2.png" />
 </p>
 <div class="src src-lisp">
-<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">emit-layer-graph</span> <span class="p">(</span><span class="nf">nth</span> <span class="mi">2</span> <span class="p">(</span><span class="nv">sdr-graph-layer-graphs</span> <span class="vg">*sdr-graph*</span><span class="p">)</span><span class="p">)</span><span class="p">)</span></code></pre></div>
+<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">emit-layer-graph</span> <span class="p">(</span><span class="nf">nth</span> <span class="mi">2</span> <span class="p">(</span><span class="nv">sdr-graph-layer-graphs</span> <span class="vg">*sdr-graph*</span><span class="p">)))</span></code></pre></div>
 </div>
 <div class="src src-dot">
 <pre><code class="language-dot" data-lang="dot">$input</code></pre>
@@ -4826,7 +4772,7 @@ Replica Column Layers: $Comm_C$ Tree
 <img src="layer-3.png" alt="layer-3.png" title="layer-3.png" />
 </p>
 <div class="src src-lisp">
-<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">emit-layer-graph</span> <span class="p">(</span><span class="nf">nth</span> <span class="mi">3</span> <span class="p">(</span><span class="nv">sdr-graph-layer-graphs</span> <span class="vg">*sdr-graph*</span><span class="p">)</span><span class="p">)</span><span class="p">)</span></code></pre></div>
+<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">emit-layer-graph</span> <span class="p">(</span><span class="nf">nth</span> <span class="mi">3</span> <span class="p">(</span><span class="nv">sdr-graph-layer-graphs</span> <span class="vg">*sdr-graph*</span><span class="p">)))</span></code></pre></div>
 </div>
 <div class="src src-dot">
 <pre><code class="language-dot" data-lang="dot">$input</code></pre>

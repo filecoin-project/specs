@@ -1380,33 +1380,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1474,33 +1447,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4111,7 +4057,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4120,7 +4066,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4755,7 +4701,7 @@ function as an independent random oracle in the VRF output (see <a href="../../.
 <span class="kd">type</span> <span class="nx">VRFSecretKey</span> <span class="nx">SecretKey</span>
 
 <span class="c1">// VRFKeyPair holds the private key and respectively the public key to create 
-</span><span class="c1"></span><span class="c1">// and respectively verify a VRF output.
+</span><span class="c1">// and respectively verify a VRF output.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">VRFKeyPair</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">VRFPublicKey</span>
     <span class="nx">VRFSecretKey</span>
@@ -4767,8 +4713,8 @@ function as an independent random oracle in the VRF output (see <a href="../../.
 
 <span class="kd">type</span> <span class="nx">VRFResult</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Output</span>            <span class="nx">Bytes</span>  <span class="c1">// @(internal)
-</span><span class="c1"></span>    <span class="nf">MaxValue</span><span class="p">(</span><span class="p">)</span>        <span class="nx">Bytes</span>
-    <span class="nf">ValidateSyntax</span><span class="p">(</span><span class="p">)</span>  <span class="kt">bool</span>
+</span><span class="c1"></span>    <span class="nf">MaxValue</span><span class="p">()</span>        <span class="nx">Bytes</span>
+    <span class="nf">ValidateSyntax</span><span class="p">()</span>  <span class="kt">bool</span>
 
     <span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span> <span class="nx">Bytes</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">VRFPublicKey</span><span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
@@ -4801,7 +4747,7 @@ function as an independent random oracle in the VRF output (see <a href="../../.
 
 <span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">VRFResult_I</span><span class="p">)</span> <span class="nf">ValidateSyntax</span><span class="p">(</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">VRFResult_I</span><span class="p">)</span> <span class="nf">ValidateSyntax</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
     <span class="k">return</span> <span class="kc">false</span>
 <span class="p">}</span>
@@ -4811,7 +4757,7 @@ function as an independent random oracle in the VRF output (see <a href="../../.
 </span><span class="c1"></span>    <span class="k">return</span> <span class="kc">false</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">VRFResult_I</span><span class="p">)</span> <span class="nf">MaxValue</span><span class="p">(</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">VRFResult_I</span><span class="p">)</span> <span class="nf">MaxValue</span><span class="p">()</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
     <span class="c1">// return new(BLS).MaxSigValue()
 </span><span class="c1"></span><span class="p">}</span>

@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4848,7 +4794,7 @@ it will be created as an account actor.</p>
         <span class="nx">inTree</span>  <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
         <span class="nx">tipset</span>  <span class="nx">chain</span><span class="p">.</span><span class="nx">Tipset</span>
         <span class="nx">msgs</span>    <span class="nx">TipSetMessages</span>
-    <span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="p">[</span><span class="nx">vmri</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">]</span><span class="p">}</span>
+    <span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="p">[</span><span class="nx">vmri</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">]}</span>
 
     <span class="nf">ApplyMessage</span><span class="p">(</span>
         <span class="nx">inTree</span>          <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
@@ -4924,20 +4870,20 @@ it will be created as an account actor.</p>
 <span class="p">)</span>
 
 <span class="c1">// Applies all the message in a tipset, along with implicit block- and tipset-specific state
-</span><span class="c1"></span><span class="c1">// transitions.
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyTipSetMessages</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">tipset</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">,</span> <span class="nx">msgs</span> <span class="nx">TipSetMessages</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">receipts</span> <span class="p">[</span><span class="p">]</span><span class="nx">vmri</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="c1">// transitions.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyTipSetMessages</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">tipset</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">,</span> <span class="nx">msgs</span> <span class="nx">TipSetMessages</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">receipts</span> <span class="p">[]</span><span class="nx">vmri</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">outTree</span> <span class="p">=</span> <span class="nx">inTree</span>
-	<span class="nx">seenMsgs</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span><span class="p">]</span><span class="kd">struct</span><span class="p">{</span><span class="p">}</span><span class="p">)</span> <span class="c1">// CIDs of messages already seen once.
+	<span class="nx">seenMsgs</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span><span class="p">]</span><span class="kd">struct</span><span class="p">{})</span> <span class="c1">// CIDs of messages already seen once.
 </span><span class="c1"></span>	<span class="kd">var</span> <span class="nx">receipt</span> <span class="nx">vmri</span><span class="p">.</span><span class="nx">MessageReceipt</span>
-	<span class="nx">store</span> <span class="o">:=</span> <span class="nx">vmi</span><span class="p">.</span><span class="nf">Node</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">Repository</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">StateStore</span><span class="p">(</span><span class="p">)</span>
+	<span class="nx">store</span> <span class="o">:=</span> <span class="nx">vmi</span><span class="p">.</span><span class="nf">Node</span><span class="p">().</span><span class="nf">Repository</span><span class="p">().</span><span class="nf">StateStore</span><span class="p">()</span>
 	<span class="c1">// get chain from Tipset
 </span><span class="c1"></span>	<span class="nx">chainRand</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">chain</span><span class="p">.</span><span class="nx">Chain_I</span><span class="p">{</span>
 		<span class="nx">HeadTipset_</span><span class="p">:</span> <span class="nx">tipset</span><span class="p">,</span>
 	<span class="p">}</span>
 
-	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">blk</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">msgs</span><span class="p">.</span><span class="nf">Blocks</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
-		<span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">(</span><span class="p">)</span>
-		<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">.</span><span class="nf">Protocol</span><span class="p">(</span><span class="p">)</span> <span class="o">==</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ID</span><span class="p">)</span> <span class="c1">// Block syntactic validation requires this.
+	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">blk</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">msgs</span><span class="p">.</span><span class="nf">Blocks</span><span class="p">()</span> <span class="p">{</span>
+		<span class="nx">minerAddr</span> <span class="o">:=</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">()</span>
+		<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">.</span><span class="nf">Protocol</span><span class="p">()</span> <span class="o">==</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ID</span><span class="p">)</span> <span class="c1">// Block syntactic validation requires this.
 </span><span class="c1"></span>
 		<span class="c1">// Process block miner&#39;s Election PoSt.
 </span><span class="c1"></span>		<span class="nx">epostMessage</span> <span class="o">:=</span> <span class="nf">_makeElectionPoStMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
@@ -4950,34 +4896,34 @@ it will be created as an account actor.</p>
 		<span class="kd">var</span> <span class="nx">minerGasRewardCurr</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
 		<span class="c1">// Process BLS messages from the block.
-</span><span class="c1"></span>		<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">m</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">BLSMessages</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
-			<span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">seenMsgs</span><span class="p">[</span><span class="nf">_msgCID</span><span class="p">(</span><span class="nx">m</span><span class="p">)</span><span class="p">]</span>
+</span><span class="c1"></span>		<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">m</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">BLSMessages</span><span class="p">()</span> <span class="p">{</span>
+			<span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">seenMsgs</span><span class="p">[</span><span class="nf">_msgCID</span><span class="p">(</span><span class="nx">m</span><span class="p">)]</span>
 			<span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
 				<span class="k">continue</span>
 			<span class="p">}</span>
-			<span class="nx">onChainMessageLen</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nf">Serialize_UnsignedMessage</span><span class="p">(</span><span class="nx">m</span><span class="p">)</span><span class="p">)</span>
+			<span class="nx">onChainMessageLen</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nf">Serialize_UnsignedMessage</span><span class="p">(</span><span class="nx">m</span><span class="p">))</span>
 			<span class="nx">outTree</span><span class="p">,</span> <span class="nx">receipt</span><span class="p">,</span> <span class="nx">minerPenaltyCurr</span><span class="p">,</span> <span class="nx">minerGasRewardCurr</span> <span class="p">=</span> <span class="nx">vmi</span><span class="p">.</span><span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">chainRand</span><span class="p">,</span> <span class="nx">m</span><span class="p">,</span> <span class="nx">onChainMessageLen</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
 			<span class="nx">minerPenaltyTotal</span> <span class="o">+=</span> <span class="nx">minerPenaltyCurr</span>
 			<span class="nx">minerGasRewardTotal</span> <span class="o">+=</span> <span class="nx">minerGasRewardCurr</span>
 
 			<span class="nx">receipts</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">receipts</span><span class="p">,</span> <span class="nx">receipt</span><span class="p">)</span>
-			<span class="nx">seenMsgs</span><span class="p">[</span><span class="nf">_msgCID</span><span class="p">(</span><span class="nx">m</span><span class="p">)</span><span class="p">]</span> <span class="p">=</span> <span class="kd">struct</span><span class="p">{</span><span class="p">}</span><span class="p">{</span><span class="p">}</span>
+			<span class="nx">seenMsgs</span><span class="p">[</span><span class="nf">_msgCID</span><span class="p">(</span><span class="nx">m</span><span class="p">)]</span> <span class="p">=</span> <span class="kd">struct</span><span class="p">{}{}</span>
 		<span class="p">}</span>
 
 		<span class="c1">// Process SECP messages from the block.
-</span><span class="c1"></span>		<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sm</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">SECPMessages</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
-			<span class="nx">m</span> <span class="o">:=</span> <span class="nx">sm</span><span class="p">.</span><span class="nf">Message</span><span class="p">(</span><span class="p">)</span>
-			<span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">seenMsgs</span><span class="p">[</span><span class="nf">_msgCID</span><span class="p">(</span><span class="nx">m</span><span class="p">)</span><span class="p">]</span>
+</span><span class="c1"></span>		<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sm</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">SECPMessages</span><span class="p">()</span> <span class="p">{</span>
+			<span class="nx">m</span> <span class="o">:=</span> <span class="nx">sm</span><span class="p">.</span><span class="nf">Message</span><span class="p">()</span>
+			<span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">seenMsgs</span><span class="p">[</span><span class="nf">_msgCID</span><span class="p">(</span><span class="nx">m</span><span class="p">)]</span>
 			<span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
 				<span class="k">continue</span>
 			<span class="p">}</span>
-			<span class="nx">onChainMessageLen</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nf">Serialize_SignedMessage</span><span class="p">(</span><span class="nx">sm</span><span class="p">)</span><span class="p">)</span>
+			<span class="nx">onChainMessageLen</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nf">Serialize_SignedMessage</span><span class="p">(</span><span class="nx">sm</span><span class="p">))</span>
 			<span class="nx">outTree</span><span class="p">,</span> <span class="nx">receipt</span><span class="p">,</span> <span class="nx">minerPenaltyCurr</span><span class="p">,</span> <span class="nx">minerGasRewardCurr</span> <span class="p">=</span> <span class="nx">vmi</span><span class="p">.</span><span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">chainRand</span><span class="p">,</span> <span class="nx">m</span><span class="p">,</span> <span class="nx">onChainMessageLen</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
 			<span class="nx">minerPenaltyTotal</span> <span class="o">+=</span> <span class="nx">minerPenaltyCurr</span>
 			<span class="nx">minerGasRewardTotal</span> <span class="o">+=</span> <span class="nx">minerGasRewardCurr</span>
 
 			<span class="nx">receipts</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">receipts</span><span class="p">,</span> <span class="nx">receipt</span><span class="p">)</span>
-			<span class="nx">seenMsgs</span><span class="p">[</span><span class="nf">_msgCID</span><span class="p">(</span><span class="nx">m</span><span class="p">)</span><span class="p">]</span> <span class="p">=</span> <span class="kd">struct</span><span class="p">{</span><span class="p">}</span><span class="p">{</span><span class="p">}</span>
+			<span class="nx">seenMsgs</span><span class="p">[</span><span class="nf">_msgCID</span><span class="p">(</span><span class="nx">m</span><span class="p">)]</span> <span class="p">=</span> <span class="kd">struct</span><span class="p">{}{}</span>
 		<span class="p">}</span>
 
 		<span class="c1">// transfer gas reward from BurntFundsActor to RewardActor
@@ -4999,25 +4945,25 @@ it will be created as an account actor.</p>
 <span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">chain</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">onChainMessageSize</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
 	<span class="nx">retTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">retReceipt</span> <span class="nx">vmri</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">,</span> <span class="nx">retMinerPenalty</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">retMinerGasReward</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
 
-	<span class="nx">store</span> <span class="o">:=</span> <span class="nx">vmi</span><span class="p">.</span><span class="nf">Node</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">Repository</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">StateStore</span><span class="p">(</span><span class="p">)</span>
-	<span class="nx">senderAddr</span> <span class="o">:=</span> <span class="nf">_resolveSender</span><span class="p">(</span><span class="nx">store</span><span class="p">,</span> <span class="nx">inTree</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
+	<span class="nx">store</span> <span class="o">:=</span> <span class="nx">vmi</span><span class="p">.</span><span class="nf">Node</span><span class="p">().</span><span class="nf">Repository</span><span class="p">().</span><span class="nf">StateStore</span><span class="p">()</span>
+	<span class="nx">senderAddr</span> <span class="o">:=</span> <span class="nf">_resolveSender</span><span class="p">(</span><span class="nx">store</span><span class="p">,</span> <span class="nx">inTree</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
 
-	<span class="nx">vmiGasRemaining</span> <span class="o">:=</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(</span><span class="p">)</span>
-	<span class="nx">vmiGasUsed</span> <span class="o">:=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Zero</span><span class="p">(</span><span class="p">)</span>
+	<span class="nx">vmiGasRemaining</span> <span class="o">:=</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">()</span>
+	<span class="nx">vmiGasUsed</span> <span class="o">:=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Zero</span><span class="p">()</span>
 
 	<span class="nx">_applyReturn</span> <span class="o">:=</span> <span class="kd">func</span><span class="p">(</span>
 		<span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">invocOutput</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">exitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">,</span>
 		<span class="nx">senderResolveSpec</span> <span class="nx">SenderResolveSpec</span><span class="p">)</span> <span class="p">{</span>
 
-		<span class="nx">vmiGasRemainingFIL</span> <span class="o">:=</span> <span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">vmiGasRemaining</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
-		<span class="nx">vmiGasUsedFIL</span> <span class="o">:=</span> <span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">vmiGasUsed</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
+		<span class="nx">vmiGasRemainingFIL</span> <span class="o">:=</span> <span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">vmiGasRemaining</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">())</span>
+		<span class="nx">vmiGasUsedFIL</span> <span class="o">:=</span> <span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">vmiGasUsed</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">())</span>
 
 		<span class="k">switch</span> <span class="nx">senderResolveSpec</span> <span class="p">{</span>
 		<span class="k">case</span> <span class="nx">SenderResolveSpec_OK</span><span class="p">:</span>
 			<span class="c1">// In this case, the sender is valid and has already transferred funds to the burnt funds actor
 </span><span class="c1"></span>			<span class="c1">// sufficient for the gas limit. Thus, we may refund the unused gas funds to the sender here.
-</span><span class="c1"></span>			<span class="nf">Assert</span><span class="p">(</span><span class="p">!</span><span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">LessThan</span><span class="p">(</span><span class="nx">vmiGasUsed</span><span class="p">)</span><span class="p">)</span>
-			<span class="nf">Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">vmiGasUsed</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">vmiGasRemaining</span><span class="p">)</span><span class="p">)</span><span class="p">)</span>
+</span><span class="c1"></span>			<span class="nf">Assert</span><span class="p">(!</span><span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">().</span><span class="nf">LessThan</span><span class="p">(</span><span class="nx">vmiGasUsed</span><span class="p">))</span>
+			<span class="nf">Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">().</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">vmiGasUsed</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">vmiGasRemaining</span><span class="p">)))</span>
 			<span class="nx">tree</span> <span class="p">=</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span><span class="nx">tree</span><span class="p">,</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">senderAddr</span><span class="p">,</span> <span class="nx">vmiGasRemainingFIL</span><span class="p">)</span>
 			<span class="nx">retMinerGasReward</span> <span class="p">=</span> <span class="nx">vmiGasUsedFIL</span>
 			<span class="nx">retMinerPenalty</span> <span class="p">=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -5036,16 +4982,16 @@ it will be created as an account actor.</p>
 
 	<span class="c1">// TODO move this to a package with a less redundant name
 </span><span class="c1"></span>	<span class="nx">_applyError</span> <span class="o">:=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">errExitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">,</span> <span class="nx">senderResolveSpec</span> <span class="nx">SenderResolveSpec</span><span class="p">)</span> <span class="p">{</span>
-		<span class="nf">_applyReturn</span><span class="p">(</span><span class="nx">tree</span><span class="p">,</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="kc">nil</span><span class="p">)</span><span class="p">,</span> <span class="nx">errExitCode</span><span class="p">,</span> <span class="nx">senderResolveSpec</span><span class="p">)</span>
+		<span class="nf">_applyReturn</span><span class="p">(</span><span class="nx">tree</span><span class="p">,</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="kc">nil</span><span class="p">),</span> <span class="nx">errExitCode</span><span class="p">,</span> <span class="nx">senderResolveSpec</span><span class="p">)</span>
 	<span class="p">}</span>
 
 	<span class="c1">// Deduct an amount of gas corresponding to cost about to be incurred, but not necessarily
 </span><span class="c1"></span>	<span class="c1">// incurred yet.
 </span><span class="c1"></span>	<span class="nx">_vmiAllocGas</span> <span class="o">:=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmiAllocGasOK</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
 		<span class="nx">vmiGasRemaining</span><span class="p">,</span> <span class="nx">vmiAllocGasOK</span> <span class="p">=</span> <span class="nx">vmiGasRemaining</span><span class="p">.</span><span class="nf">SubtractIfNonnegative</span><span class="p">(</span><span class="nx">amount</span><span class="p">)</span>
-		<span class="nx">vmiGasUsed</span> <span class="p">=</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">Subtract</span><span class="p">(</span><span class="nx">vmiGasRemaining</span><span class="p">)</span>
-		<span class="nf">Assert</span><span class="p">(</span><span class="p">!</span><span class="nx">vmiGasRemaining</span><span class="p">.</span><span class="nf">LessThan</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Zero</span><span class="p">(</span><span class="p">)</span><span class="p">)</span><span class="p">)</span>
-		<span class="nf">Assert</span><span class="p">(</span><span class="p">!</span><span class="nx">vmiGasUsed</span><span class="p">.</span><span class="nf">LessThan</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Zero</span><span class="p">(</span><span class="p">)</span><span class="p">)</span><span class="p">)</span>
+		<span class="nx">vmiGasUsed</span> <span class="p">=</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">().</span><span class="nf">Subtract</span><span class="p">(</span><span class="nx">vmiGasRemaining</span><span class="p">)</span>
+		<span class="nf">Assert</span><span class="p">(!</span><span class="nx">vmiGasRemaining</span><span class="p">.</span><span class="nf">LessThan</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Zero</span><span class="p">()))</span>
+		<span class="nf">Assert</span><span class="p">(!</span><span class="nx">vmiGasUsed</span><span class="p">.</span><span class="nf">LessThan</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Zero</span><span class="p">()))</span>
 		<span class="k">return</span>
 	<span class="p">}</span>
 
@@ -5055,13 +5001,13 @@ it will be created as an account actor.</p>
 		<span class="nx">vmiGasUsedPre</span> <span class="o">:=</span> <span class="nx">vmiGasUsed</span>
 		<span class="nx">vmiBurnGasOK</span> <span class="p">=</span> <span class="nf">_vmiAllocGas</span><span class="p">(</span><span class="nx">amount</span><span class="p">)</span>
 		<span class="k">if</span> <span class="p">!</span><span class="nx">vmiBurnGasOK</span> <span class="p">{</span>
-			<span class="nx">vmiGasRemaining</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Zero</span><span class="p">(</span><span class="p">)</span>
+			<span class="nx">vmiGasRemaining</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Zero</span><span class="p">()</span>
 			<span class="nx">vmiGasUsed</span> <span class="p">=</span> <span class="nx">vmiGasUsedPre</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">amount</span><span class="p">)</span>
 		<span class="p">}</span>
 		<span class="k">return</span>
 	<span class="p">}</span>
 
-	<span class="nx">ok</span> <span class="o">:=</span> <span class="nf">_vmiBurnGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">OnChainMessage</span><span class="p">(</span><span class="nx">onChainMessageSize</span><span class="p">)</span><span class="p">)</span>
+	<span class="nx">ok</span> <span class="o">:=</span> <span class="nf">_vmiBurnGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">OnChainMessage</span><span class="p">(</span><span class="nx">onChainMessageSize</span><span class="p">))</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 		<span class="c1">// Invalid message; insufficient gas limit to pay for the on-chain message size.
 </span><span class="c1"></span>		<span class="nf">_applyError</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">OutOfGas</span><span class="p">,</span> <span class="nx">SenderResolveSpec_Invalid</span><span class="p">)</span>
@@ -5076,18 +5022,18 @@ it will be created as an account actor.</p>
 	<span class="p">}</span>
 
 	<span class="c1">// make sure this is the right message order for fromActor
-</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">message</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(</span><span class="p">)</span> <span class="o">!=</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">message</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nf">_applyError</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidCallSeqNum</span><span class="p">,</span> <span class="nx">SenderResolveSpec_Invalid</span><span class="p">)</span>
 		<span class="k">return</span>
 	<span class="p">}</span>
 
 	<span class="c1">// Check sender balance.
-</span><span class="c1"></span>	<span class="nx">gasLimitCost</span> <span class="o">:=</span> <span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(</span><span class="p">)</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">gasLimitCost</span> <span class="o">:=</span> <span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(),</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">())</span>
 	<span class="nx">tidx</span> <span class="o">:=</span> <span class="nf">indicesFromStateTree</span><span class="p">(</span><span class="nx">inTree</span><span class="p">)</span>
 	<span class="nx">networkTxnFee</span> <span class="o">:=</span> <span class="nx">tidx</span><span class="p">.</span><span class="nf">NetworkTransactionFee</span><span class="p">(</span>
-		<span class="nx">inTree</span><span class="p">.</span><span class="nf">GetActorCodeID_Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">(</span><span class="p">)</span><span class="p">)</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Method</span><span class="p">(</span><span class="p">)</span><span class="p">)</span>
-	<span class="nx">totalCost</span> <span class="o">:=</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Value</span><span class="p">(</span><span class="p">)</span> <span class="o">+</span> <span class="nx">gasLimitCost</span> <span class="o">+</span> <span class="nx">networkTxnFee</span>
-	<span class="k">if</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">Balance</span><span class="p">(</span><span class="p">)</span> <span class="p">&lt;</span> <span class="nx">totalCost</span> <span class="p">{</span>
+		<span class="nx">inTree</span><span class="p">.</span><span class="nf">GetActorCodeID_Assert</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">()),</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Method</span><span class="p">())</span>
+	<span class="nx">totalCost</span> <span class="o">:=</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Value</span><span class="p">()</span> <span class="o">+</span> <span class="nx">gasLimitCost</span> <span class="o">+</span> <span class="nx">networkTxnFee</span>
+	<span class="k">if</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">Balance</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">totalCost</span> <span class="p">{</span>
 		<span class="c1">// Execution error; sender does not have sufficient funds to pay for the gas limit.
 </span><span class="c1"></span>		<span class="nf">_applyError</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">InsufficientFunds_System</span><span class="p">,</span> <span class="nx">SenderResolveSpec_Invalid</span><span class="p">)</span>
 		<span class="k">return</span>
@@ -5098,7 +5044,7 @@ it will be created as an account actor.</p>
 </span><span class="c1"></span>	<span class="c1">// at least that much state change will be persisted even if the
 </span><span class="c1"></span>	<span class="c1">// method invocation subsequently fails.
 </span><span class="c1"></span>	<span class="nx">compTreePreSend</span> <span class="o">:=</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">senderAddr</span><span class="p">,</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">gasLimitCost</span><span class="o">+</span><span class="nx">networkTxnFee</span><span class="p">)</span>
-	<span class="nx">compTreePreSend</span> <span class="p">=</span> <span class="nx">compTreePreSend</span><span class="p">.</span><span class="nf">Impl</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">WithIncrementedCallSeqNum_Assert</span><span class="p">(</span><span class="nx">senderAddr</span><span class="p">)</span>
+	<span class="nx">compTreePreSend</span> <span class="p">=</span> <span class="nx">compTreePreSend</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithIncrementedCallSeqNum_Assert</span><span class="p">(</span><span class="nx">senderAddr</span><span class="p">)</span>
 
 	<span class="c1">// Reload sender actor state after the transfer and CallSeqNum increment.
 </span><span class="c1"></span>	<span class="nx">sender</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">compTreePreSend</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">senderAddr</span><span class="p">)</span>
@@ -5111,7 +5057,7 @@ it will be created as an account actor.</p>
 		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Interpreter error: runtime execution used more gas than provided&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 
-	<span class="nx">ok</span> <span class="p">=</span> <span class="nf">_vmiAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">OnChainReturnValue</span><span class="p">(</span><span class="nx">sendRet</span><span class="p">.</span><span class="nx">ReturnValue</span><span class="p">)</span><span class="p">)</span>
+	<span class="nx">ok</span> <span class="p">=</span> <span class="nf">_vmiAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">OnChainReturnValue</span><span class="p">(</span><span class="nx">sendRet</span><span class="p">.</span><span class="nx">ReturnValue</span><span class="p">))</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 		<span class="c1">// Insufficient gas remaining to cover the on-chain return value; proceed as in the case
 </span><span class="c1"></span>		<span class="c1">// of method execution failure.
@@ -5120,41 +5066,41 @@ it will be created as an account actor.</p>
 	<span class="p">}</span>
 
 	<span class="nx">compTreeRet</span> <span class="o">:=</span> <span class="nx">compTreePreSend</span>
-	<span class="k">if</span> <span class="nx">sendRet</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">.</span><span class="nf">AllowsStateUpdate</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">sendRet</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">.</span><span class="nf">AllowsStateUpdate</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nx">compTreeRet</span> <span class="p">=</span> <span class="nx">compTreePostSend</span>
 	<span class="p">}</span>
 
 	<span class="nf">_applyReturn</span><span class="p">(</span>
-		<span class="nx">compTreeRet</span><span class="p">,</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">sendRet</span><span class="p">.</span><span class="nx">ReturnValue</span><span class="p">)</span><span class="p">,</span> <span class="nx">sendRet</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">,</span> <span class="nx">SenderResolveSpec_OK</span><span class="p">)</span>
+		<span class="nx">compTreeRet</span><span class="p">,</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">sendRet</span><span class="p">.</span><span class="nx">ReturnValue</span><span class="p">),</span> <span class="nx">sendRet</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">,</span> <span class="nx">SenderResolveSpec_OK</span><span class="p">)</span>
 	<span class="k">return</span>
 <span class="p">}</span>
 
 <span class="c1">// Resolves an address through the InitActor&#39;s map.
-</span><span class="c1"></span><span class="c1">// Returns the resolved address (which will be an ID address) if found, else the original address.
+</span><span class="c1">// Returns the resolved address (which will be an ID address) if found, else the original address.
 </span><span class="c1"></span><span class="kd">func</span> <span class="nf">_resolveSender</span><span class="p">(</span><span class="nx">store</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">GraphStore</span><span class="p">,</span> <span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
 	<span class="nx">initState</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">InitActorAddr</span><span class="p">)</span>
 	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
-	<span class="nx">serialized</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">store</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="nx">cid</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="nx">initState</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="p">)</span><span class="p">)</span><span class="p">)</span>
+	<span class="nx">serialized</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">store</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="nx">cid</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="nx">initState</span><span class="p">.</span><span class="nf">State</span><span class="p">()))</span>
 	<span class="kd">var</span> <span class="nx">initSubState</span> <span class="nx">initact</span><span class="p">.</span><span class="nx">InitActorState</span>
 	<span class="nx">serde</span><span class="p">.</span><span class="nf">MustDeserialize</span><span class="p">(</span><span class="nx">serialized</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">initSubState</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">initSubState</span><span class="p">.</span><span class="nf">ResolveAddress</span><span class="p">(</span><span class="nx">address</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_applyMessageBuiltinAssert</span><span class="p">(</span><span class="nx">store</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">GraphStore</span><span class="p">,</span> <span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">chain</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span> <span class="p">{</span>
-	<span class="nx">senderAddr</span> <span class="o">:=</span> <span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(</span><span class="p">)</span>
+	<span class="nx">senderAddr</span> <span class="o">:=</span> <span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">()</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">senderAddr</span> <span class="o">==</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
-	<span class="nf">Assert</span><span class="p">(</span><span class="nx">senderAddr</span><span class="p">.</span><span class="nf">Protocol</span><span class="p">(</span><span class="p">)</span> <span class="o">==</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ID</span><span class="p">)</span>
+	<span class="nf">Assert</span><span class="p">(</span><span class="nx">senderAddr</span><span class="p">.</span><span class="nf">Protocol</span><span class="p">()</span> <span class="o">==</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ID</span><span class="p">)</span>
 	<span class="c1">// Note: this message CallSeqNum is never checked (b/c it&#39;s created in this file), but probably should be.
 </span><span class="c1"></span>	<span class="c1">// Since it changes state, we should be sure about the state transition.
 </span><span class="c1"></span>	<span class="c1">// Alternatively we could special-case the system actor and declare that its CallSeqNumber
 </span><span class="c1"></span>	<span class="c1">// never changes (saving us the state-change overhead).
-</span><span class="c1"></span>	<span class="nx">tree</span> <span class="p">=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">Impl</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">WithIncrementedCallSeqNum_Assert</span><span class="p">(</span><span class="nx">senderAddr</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">tree</span> <span class="p">=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithIncrementedCallSeqNum_Assert</span><span class="p">(</span><span class="nx">senderAddr</span><span class="p">)</span>
 
 	<span class="nx">sender</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">senderAddr</span><span class="p">)</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
 	<span class="nx">invoc</span> <span class="o">:=</span> <span class="nf">_makeInvocInput</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span>
-	<span class="nx">retReceipt</span><span class="p">,</span> <span class="nx">retTree</span> <span class="o">:=</span> <span class="nf">_applyMessageInternal</span><span class="p">(</span><span class="nx">store</span><span class="p">,</span> <span class="nx">tree</span><span class="p">,</span> <span class="nx">chain</span><span class="p">,</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">senderAddr</span><span class="p">,</span> <span class="nx">invoc</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(</span><span class="p">)</span><span class="p">,</span> <span class="nx">minerAddr</span><span class="p">)</span>
-	<span class="k">if</span> <span class="nx">retReceipt</span><span class="p">.</span><span class="nx">ExitCode</span> <span class="o">!=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">retReceipt</span><span class="p">,</span> <span class="nx">retTree</span> <span class="o">:=</span> <span class="nf">_applyMessageInternal</span><span class="p">(</span><span class="nx">store</span><span class="p">,</span> <span class="nx">tree</span><span class="p">,</span> <span class="nx">chain</span><span class="p">,</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">senderAddr</span><span class="p">,</span> <span class="nx">invoc</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(),</span> <span class="nx">minerAddr</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">retReceipt</span><span class="p">.</span><span class="nx">ExitCode</span> <span class="o">!=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;internal message application failed&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 
@@ -5169,11 +5115,11 @@ it will be created as an account actor.</p>
 		<span class="nx">chain</span><span class="p">,</span>
 		<span class="nx">senderAddr</span><span class="p">,</span>
 		<span class="nx">topLevelBlockWinner</span><span class="p">,</span>
-		<span class="nx">sender</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(</span><span class="p">)</span><span class="p">,</span>
-		<span class="nx">actstate</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="p">,</span>
+		<span class="nx">sender</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
+		<span class="nx">actstate</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
 		<span class="nx">tree</span><span class="p">,</span>
 		<span class="nx">senderAddr</span><span class="p">,</span>
-		<span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="p">,</span>
+		<span class="nx">abi</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
 		<span class="nx">gasRemainingInit</span><span class="p">,</span>
 	<span class="p">)</span>
 
@@ -5182,7 +5128,7 @@ it will be created as an account actor.</p>
 
 <span class="kd">func</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">from</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span> <span class="p">{</span>
 	<span class="c1">// TODO: assert amount nonnegative
-</span><span class="c1"></span>	<span class="nx">retTree</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">Impl</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">WithFundsTransfer</span><span class="p">(</span><span class="nx">from</span><span class="p">,</span> <span class="nx">to</span><span class="p">,</span> <span class="nx">amount</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">retTree</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithFundsTransfer</span><span class="p">(</span><span class="nx">from</span><span class="p">,</span> <span class="nx">to</span><span class="p">,</span> <span class="nx">amount</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
 		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Interpreter error: insufficient funds (or transfer error) despite checks&#34;</span><span class="p">)</span>
 	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
@@ -5191,29 +5137,29 @@ it will be created as an account actor.</p>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">indicesFromStateTree</span><span class="p">(</span><span class="nx">st</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="nx">indices</span><span class="p">.</span><span class="nx">Indices</span> <span class="p">{</span>
-	<span class="nf">TODO</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">TODO</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">gas</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">price</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
-	<span class="nf">IMPL_FINISH</span><span class="p">(</span><span class="p">)</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span> <span class="c1">// BigInt arithmetic
 </span><span class="c1"></span>	<span class="c1">// return abi.TokenAmount(util.UVarint(gas) * util.UVarint(price))
 </span><span class="c1"></span><span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_makeInvocInput</span><span class="p">(</span><span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">)</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">{</span>
-		<span class="nx">To</span><span class="p">:</span>     <span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">(</span><span class="p">)</span><span class="p">,</span> <span class="c1">// Receiver address is resolved during execution.
-</span><span class="c1"></span>		<span class="nx">Method</span><span class="p">:</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Method</span><span class="p">(</span><span class="p">)</span><span class="p">,</span>
-		<span class="nx">Params</span><span class="p">:</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Params</span><span class="p">(</span><span class="p">)</span><span class="p">,</span>
-		<span class="nx">Value</span><span class="p">:</span>  <span class="nx">message</span><span class="p">.</span><span class="nf">Value</span><span class="p">(</span><span class="p">)</span><span class="p">,</span>
+		<span class="nx">To</span><span class="p">:</span>     <span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">(),</span> <span class="c1">// Receiver address is resolved during execution.
+</span><span class="c1"></span>		<span class="nx">Method</span><span class="p">:</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Method</span><span class="p">(),</span>
+		<span class="nx">Params</span><span class="p">:</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Params</span><span class="p">(),</span>
+		<span class="nx">Value</span><span class="p">:</span>  <span class="nx">message</span><span class="p">.</span><span class="nf">Value</span><span class="p">(),</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
 <span class="c1">// Builds a message for paying block reward to a miner&#39;s owner.
 </span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeBlockRewardMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">penalty</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">gasReward</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
 	<span class="nx">params</span> <span class="o">:=</span> <span class="nx">serde</span><span class="p">.</span><span class="nf">MustSerializeParams</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">penalty</span><span class="p">)</span>
-	<span class="nf">TODO</span><span class="p">(</span><span class="p">)</span> <span class="c1">// serialize other inputs to BlockRewardMessage or get this from query in RewardActor
+	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// serialize other inputs to BlockRewardMessage or get this from query in RewardActor
 </span><span class="c1"></span>
 	<span class="nx">sysActor</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">SystemActorAddr</span><span class="p">)</span>
 	<span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
@@ -5223,10 +5169,10 @@ it will be created as an account actor.</p>
 		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">builtin</span><span class="p">.</span><span class="nx">RewardActorAddr</span><span class="p">,</span>
 		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_RewardActor_AwardBlockReward</span><span class="p">,</span>
 		<span class="nx">Params_</span><span class="p">:</span>     <span class="nx">params</span><span class="p">,</span>
-		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">sysActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(</span><span class="p">)</span><span class="p">,</span>
+		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">sysActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
 		<span class="nx">Value_</span><span class="p">:</span>      <span class="mi">0</span><span class="p">,</span>
 		<span class="nx">GasPrice_</span><span class="p">:</span>   <span class="mi">0</span><span class="p">,</span>
-		<span class="nx">GasLimit_</span><span class="p">:</span>   <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_SentinelUnlimited</span><span class="p">(</span><span class="p">)</span><span class="p">,</span>
+		<span class="nx">GasLimit_</span><span class="p">:</span>   <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_SentinelUnlimited</span><span class="p">(),</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
@@ -5239,10 +5185,10 @@ it will be created as an account actor.</p>
 		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">minerActorAddr</span><span class="p">,</span>
 		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_StorageMinerActor_OnVerifiedElectionPoSt</span><span class="p">,</span>
 		<span class="nx">Params_</span><span class="p">:</span>     <span class="kc">nil</span><span class="p">,</span>
-		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">sysActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(</span><span class="p">)</span><span class="p">,</span>
+		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">sysActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
 		<span class="nx">Value_</span><span class="p">:</span>      <span class="mi">0</span><span class="p">,</span>
 		<span class="nx">GasPrice_</span><span class="p">:</span>   <span class="mi">0</span><span class="p">,</span>
-		<span class="nx">GasLimit_</span><span class="p">:</span>   <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_SentinelUnlimited</span><span class="p">(</span><span class="p">)</span><span class="p">,</span>
+		<span class="nx">GasLimit_</span><span class="p">:</span>   <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_SentinelUnlimited</span><span class="p">(),</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
@@ -5255,10 +5201,10 @@ it will be created as an account actor.</p>
 		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">builtin</span><span class="p">.</span><span class="nx">CronActorAddr</span><span class="p">,</span>
 		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_CronActor_EpochTick</span><span class="p">,</span>
 		<span class="nx">Params_</span><span class="p">:</span>     <span class="kc">nil</span><span class="p">,</span>
-		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">sysActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(</span><span class="p">)</span><span class="p">,</span>
+		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">sysActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
 		<span class="nx">Value_</span><span class="p">:</span>      <span class="mi">0</span><span class="p">,</span>
 		<span class="nx">GasPrice_</span><span class="p">:</span>   <span class="mi">0</span><span class="p">,</span>
-		<span class="nx">GasLimit_</span><span class="p">:</span>   <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_SentinelUnlimited</span><span class="p">(</span><span class="p">)</span><span class="p">,</span>
+		<span class="nx">GasLimit_</span><span class="p">:</span>   <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_SentinelUnlimited</span><span class="p">(),</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
@@ -5310,7 +5256,7 @@ it will be created as an account actor.</p>
 	<span class="nx">ErrActorNotFound</span> <span class="p">=</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;Actor Not Found&#34;</span><span class="p">)</span>
 <span class="p">)</span>
 
-<span class="kd">var</span> <span class="nx">staticActorCodeRegistry</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">actorCodeRegistry</span><span class="p">{</span><span class="p">}</span>
+<span class="kd">var</span> <span class="nx">staticActorCodeRegistry</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">actorCodeRegistry</span><span class="p">{}</span>
 
 <span class="kd">type</span> <span class="nx">actorCodeRegistry</span> <span class="kd">struct</span> <span class="p">{</span>
 	<span class="nx">code</span> <span class="kd">map</span><span class="p">[</span><span class="nx">abi</span><span class="p">.</span><span class="nx">ActorCodeID</span><span class="p">]</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span>
@@ -5337,36 +5283,36 @@ it will be created as an account actor.</p>
 <span class="p">}</span>
 
 <span class="c1">// init is called in Go during initialization of a program.
-</span><span class="c1"></span><span class="c1">// this is an idiomatic way to do this. Implementations should approach this
-</span><span class="c1"></span><span class="c1">// however they wish. The point is to initialize a static registry with
-</span><span class="c1"></span><span class="c1">// built in pure types that have the code for each actor. Once we have
-</span><span class="c1"></span><span class="c1">// a way to load code from the StateTree, use that instead.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">init</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nf">_registerBuiltinActors</span><span class="p">(</span><span class="p">)</span>
+</span><span class="c1">// this is an idiomatic way to do this. Implementations should approach this
+</span><span class="c1">// however they wish. The point is to initialize a static registry with
+</span><span class="c1">// built in pure types that have the code for each actor. Once we have
+</span><span class="c1">// a way to load code from the StateTree, use that instead.
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">init</span><span class="p">()</span> <span class="p">{</span>
+	<span class="nf">_registerBuiltinActors</span><span class="p">()</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">_registerBuiltinActors</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">_registerBuiltinActors</span><span class="p">()</span> <span class="p">{</span>
 	<span class="c1">// TODO
 </span><span class="c1"></span>
-	<span class="nx">cron</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">cronact</span><span class="p">.</span><span class="nx">CronActor</span><span class="p">{</span><span class="p">}</span>
+	<span class="nx">cron</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">cronact</span><span class="p">.</span><span class="nx">CronActor</span><span class="p">{}</span>
 
-	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">InitActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">initact</span><span class="p">.</span><span class="nx">InitActor</span><span class="p">{</span><span class="p">}</span><span class="p">)</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">InitActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">initact</span><span class="p">.</span><span class="nx">InitActor</span><span class="p">{})</span>
 	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">CronActorCodeID</span><span class="p">,</span> <span class="nx">cron</span><span class="p">)</span>
-	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">AccountActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">accact</span><span class="p">.</span><span class="nx">AccountActor</span><span class="p">{</span><span class="p">}</span><span class="p">)</span>
-	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StoragePowerActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">spowact</span><span class="p">.</span><span class="nx">StoragePowerActor</span><span class="p">{</span><span class="p">}</span><span class="p">)</span>
-	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMarketActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageMarketActor</span><span class="p">{</span><span class="p">}</span><span class="p">)</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">AccountActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">accact</span><span class="p">.</span><span class="nx">AccountActor</span><span class="p">{})</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StoragePowerActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">spowact</span><span class="p">.</span><span class="nx">StoragePowerActor</span><span class="p">{})</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMarketActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageMarketActor</span><span class="p">{})</span>
 
 	<span class="c1">// wire in CRON actions.
 </span><span class="c1"></span>	<span class="c1">// TODO: move this to CronActor&#39;s constructor method
 </span><span class="c1"></span>	<span class="nx">cron</span><span class="p">.</span><span class="nx">Entries</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Entries</span><span class="p">,</span> <span class="nx">cronact</span><span class="p">.</span><span class="nx">CronTableEntry</span><span class="p">{</span>
 		<span class="nx">ToAddr</span><span class="p">:</span>    <span class="nx">builtin</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
 		<span class="nx">MethodNum</span><span class="p">:</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_OnEpochTickEnd</span><span class="p">,</span>
-	<span class="p">}</span><span class="p">)</span>
+	<span class="p">})</span>
 
 	<span class="nx">cron</span><span class="p">.</span><span class="nx">Entries</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Entries</span><span class="p">,</span> <span class="nx">cronact</span><span class="p">.</span><span class="nx">CronTableEntry</span><span class="p">{</span>
 		<span class="nx">ToAddr</span><span class="p">:</span>    <span class="nx">builtin</span><span class="p">.</span><span class="nx">StorageMarketActorAddr</span><span class="p">,</span>
 		<span class="nx">MethodNum</span><span class="p">:</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">Method_StorageMarketActor_OnEpochTickEnd</span><span class="p">,</span>
-	<span class="p">}</span><span class="p">)</span>
+	<span class="p">})</span>
 <span class="p">}</span>
 </code></pre></div>
 

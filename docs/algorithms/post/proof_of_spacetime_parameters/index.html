@@ -1380,33 +1380,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1474,33 +1447,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4111,7 +4057,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4120,7 +4066,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4726,16 +4672,16 @@ This section describes parameters for Rational-PoSt, the Proof-of-Spacetime used
 #&lt;PACKAGE &#34;ORIENT.LANG&#34;&gt;
 </pre>
 <div class="src src-lisp">
-<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*filecoin*</span> <span class="p">(</span><span class="nv">get-system</span> <span class="s">&#34;../../orient/filecoin.orient&#34;</span><span class="p">)</span><span class="p">)</span>
-<span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*input*</span> <span class="p">(</span><span class="nv">interface:get-json-relation-list</span> <span class="s">&#34;../../orient/params.json&#34;</span><span class="p">)</span><span class="p">)</span>
-<span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*multi-input*</span> <span class="p">(</span><span class="nv">interface:get-json-relation-list</span> <span class="s">&#34;../../orient/multi-params.json&#34;</span><span class="p">)</span><span class="p">)</span></code></pre></div>
+<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*filecoin*</span> <span class="p">(</span><span class="nv">get-system</span> <span class="s">&#34;../../orient/filecoin.orient&#34;</span><span class="p">))</span>
+<span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*input*</span> <span class="p">(</span><span class="nv">interface:get-json-relation-list</span> <span class="s">&#34;../../orient/params.json&#34;</span><span class="p">))</span>
+<span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*multi-input*</span> <span class="p">(</span><span class="nv">interface:get-json-relation-list</span> <span class="s">&#34;../../orient/multi-params.json&#34;</span><span class="p">))</span></code></pre></div>
 </div>
 <pre class="example">
 *MULTI-INPUT*
 </pre>
 <div class="src src-lisp">
-<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp">  <span class="p">(</span><span class="k">let</span> <span class="p">(</span><span class="p">(</span><span class="nv">result-tuple</span> <span class="p">(</span><span class="nv">extract</span> <span class="p">(</span><span class="nv">ask</span> <span class="vg">*filecoin*</span> <span class="o">&#39;</span><span class="p">(</span><span class="nv">post-challenge-blocks</span> <span class="nv">post-challenge-hours</span> <span class="nv">post-proving-period</span><span class="p">)</span> <span class="vg">*input*</span><span class="p">)</span><span class="p">)</span><span class="p">)</span><span class="p">)</span>
-    <span class="p">(</span><span class="nv">org-present-tuple</span> <span class="nv">result-tuple</span> <span class="vg">*filecoin*</span><span class="p">)</span><span class="p">)</span></code></pre></div>
+<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp">  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nv">result-tuple</span> <span class="p">(</span><span class="nv">extract</span> <span class="p">(</span><span class="nv">ask</span> <span class="vg">*filecoin*</span> <span class="o">&#39;</span><span class="p">(</span><span class="nv">post-challenge-blocks</span> <span class="nv">post-challenge-hours</span> <span class="nv">post-proving-period</span><span class="p">)</span> <span class="vg">*input*</span><span class="p">))))</span>
+    <span class="p">(</span><span class="nv">org-present-tuple</span> <span class="nv">result-tuple</span> <span class="vg">*filecoin*</span><span class="p">))</span></code></pre></div>
 </div>
 <table>
 <tbody>

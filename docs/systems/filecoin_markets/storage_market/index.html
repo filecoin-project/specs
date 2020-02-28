@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4848,7 +4794,7 @@ seal the sector, and tell the Storage Market Actor that the deal is in a sector,
 <span class="kd">type</span> <span class="nx">StorageDealStatus</span> <span class="kt">uint64</span>
 
 <span class="c1">// StorageAsk is the current price and parameters a miner is currently offering for storage
-</span><span class="c1"></span><span class="c1">// (analogous to an Ask in a financial market)
+</span><span class="c1">// (analogous to an Ask in a financial market)
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageAsk</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Price</span>             <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// attoFIL per GiB per epoch
 </span><span class="c1"></span>    <span class="nx">Collateral</span>        <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// attoFIL per GiB per epoch
@@ -4873,19 +4819,19 @@ seal the sector, and tell the Storage Market Actor that the deal is in a sector,
 <span class="p">}</span>
 
 <span class="c1">// AskProtocolRequest is a request sent over the storage ask protocol to a miner 
-</span><span class="c1"></span><span class="c1">// to determine their current ask
+</span><span class="c1">// to determine their current ask
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">AskProtocolRequest</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Miner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 <span class="p">}</span>
 
 <span class="c1">// AskProtocolResponse is the response a miner sends over the ask protocol with
-</span><span class="c1"></span><span class="c1">// a signed version of their most recent storage ask
+</span><span class="c1">// a signed version of their most recent storage ask
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">AskProtocolResponse</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Ask</span> <span class="nx">SignedStorageAsk</span>
 <span class="p">}</span>
 
 <span class="c1">// DealProtocolRequest is a request sent by a storage client to 
-</span><span class="c1"></span><span class="c1">// a storage provider on the storage deal protocol to propose a storage deal
+</span><span class="c1">// a storage provider on the storage deal protocol to propose a storage deal
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">DealProtocolRequest</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// The deal being proposed
 </span><span class="c1"></span>    <span class="nx">DealProposal</span>  <span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
@@ -4894,8 +4840,8 @@ seal the sector, and tell the Storage Market Actor that the deal is in a sector,
 <span class="p">}</span>
 
 <span class="c1">// DealProtocolResponse is a response sent by a storage miner 
-</span><span class="c1"></span><span class="c1">// on the storage deal protocol with the current status of a storage
-</span><span class="c1"></span><span class="c1">// deal proposal
+</span><span class="c1">// on the storage deal protocol with the current status of a storage
+</span><span class="c1">// deal proposal
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">DealProtocolResponse</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// The CID of the storage deal proposal 
 </span><span class="c1"></span>    <span class="nx">Proposal</span>        <span class="o">&amp;</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDealProposal</span>

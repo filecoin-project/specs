@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4738,12 +4684,12 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">Path</span> <span class="kt">string</span>
 
 <span class="c1">// File is a variable length data container.
-</span><span class="c1"></span><span class="c1">// The File interface is modeled after a unix-style file, but abstracts the
-</span><span class="c1"></span><span class="c1">// underlying storage system.
+</span><span class="c1">// The File interface is modeled after a unix-style file, but abstracts the
+</span><span class="c1">// underlying storage system.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">File</span> <span class="kd">interface</span> <span class="p">{</span>
-    <span class="nf">Path</span><span class="p">(</span><span class="p">)</span>   <span class="nx">Path</span>
-    <span class="nf">Size</span><span class="p">(</span><span class="p">)</span>   <span class="kt">int</span>
-    <span class="nf">Close</span><span class="p">(</span><span class="p">)</span>  <span class="kt">error</span>
+    <span class="nf">Path</span><span class="p">()</span>   <span class="nx">Path</span>
+    <span class="nf">Size</span><span class="p">()</span>   <span class="kt">int</span>
+    <span class="nf">Close</span><span class="p">()</span>  <span class="kt">error</span>
 
     <span class="c1">// Read reads from File into buf, starting at offset, and for size bytes.
 </span><span class="c1"></span>    <span class="nf">Read</span><span class="p">(</span><span class="nx">offset</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">size</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">buf</span> <span class="nx">Bytes</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">size</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">e</span> <span class="kt">error</span><span class="p">}</span>

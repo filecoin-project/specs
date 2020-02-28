@@ -1380,33 +1380,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1474,33 +1447,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4111,7 +4057,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4120,7 +4066,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4815,7 +4761,7 @@ key locally from the signature rather than specify an ID of the public key.</p>
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// ECDSA implements the Signature interface using the ECDSA algorithm with
-</span><span class="c1"></span><span class="c1">// the Secp256k1 elliptic curve.
+</span><span class="c1">// the Secp256k1 elliptic curve.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ECDSA</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// The Signature object is the one returned from SigKeyPair.Sign(). It can
 </span><span class="c1"></span>    <span class="c1">// be casted to ECDSA to get the additional functionality described below.
@@ -4874,14 +4820,14 @@ serialized, see <a href="../../../../#algorithms__crypto__signatures">Signatures
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// BLS implements the Signature interface using the BLS signature scheme
-</span><span class="c1"></span><span class="c1">// with the BLS12-381 group of elliptic curves.
+</span><span class="c1">// with the BLS12-381 group of elliptic curves.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">BLS</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// This signature is the one returned from SigKeyPair.Sign(). It can be
 </span><span class="c1"></span>    <span class="c1">// casted to a BLS signature struct to get the additional functionalities.
 </span><span class="c1"></span>    <span class="nx">Signature</span>
 
     <span class="c1">// This represents the largest potential value for a BLS signature in Bytes
-</span><span class="c1"></span>    <span class="nf">MaxSigValue</span><span class="p">(</span><span class="p">)</span> <span class="nx">Bytes</span>
+</span><span class="c1"></span>    <span class="nf">MaxSigValue</span><span class="p">()</span> <span class="nx">Bytes</span>
 
     <span class="c1">// Aggregates this BLS signature and `sig` into one BLS signature that can
 </span><span class="c1"></span>    <span class="c1">// be verified against the aggregation of the two public key that signed
@@ -4892,11 +4838,11 @@ serialized, see <a href="../../../../#algorithms__crypto__signatures">Signatures
 </span><span class="c1"></span>    <span class="c1">// public key over all the distinct messages given. Note that if all
 </span><span class="c1"></span>    <span class="c1">// messages are the same, it is sufficient and correct to only call
 </span><span class="c1"></span>    <span class="c1">// `Verify` since it is a subset of `VerifyAggregate`.
-</span><span class="c1"></span>    <span class="nf">VerifyAggregate</span><span class="p">(</span><span class="nx">messages</span> <span class="p">[</span><span class="nx">Message</span><span class="p">]</span><span class="p">,</span> <span class="nx">aggPk</span> <span class="nx">BLSPublicKey</span><span class="p">,</span> <span class="nx">aggSig</span> <span class="nx">SignatureBytes</span><span class="p">)</span> <span class="kt">bool</span>
+</span><span class="c1"></span>    <span class="nf">VerifyAggregate</span><span class="p">(</span><span class="nx">messages</span> <span class="p">[</span><span class="nx">Message</span><span class="p">],</span> <span class="nx">aggPk</span> <span class="nx">BLSPublicKey</span><span class="p">,</span> <span class="nx">aggSig</span> <span class="nx">SignatureBytes</span><span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
 
 <span class="c1">// BLSPublicKey is a PublicKey with an addition method to aggregate public keys
-</span><span class="c1"></span><span class="c1">// together.
+</span><span class="c1">// together.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">BLSPublicKey</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">PublicKey</span>
 
@@ -4945,7 +4891,7 @@ serialized, see <a href="../../../../#algorithms__crypto__signatures">Signatures
     <span class="k">return</span> <span class="kc">false</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">BLS_I</span><span class="p">)</span> <span class="nf">MaxSigValue</span><span class="p">(</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">BLS_I</span><span class="p">)</span> <span class="nf">MaxSigValue</span><span class="p">()</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -4960,7 +4906,7 @@ serialized, see <a href="../../../../#algorithms__crypto__signatures">Signatures
     <span class="k">return</span> <span class="nx">ret</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">BLS_I</span><span class="p">)</span> <span class="nf">VerifyAggregate</span><span class="p">(</span><span class="nx">messages</span> <span class="p">[</span><span class="p">]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">aggPk</span> <span class="nx">PublicKey</span><span class="p">,</span> <span class="nx">aggSig</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">BLS_I</span><span class="p">)</span> <span class="nf">VerifyAggregate</span><span class="p">(</span><span class="nx">messages</span> <span class="p">[]</span><span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">aggPk</span> <span class="nx">PublicKey</span><span class="p">,</span> <span class="nx">aggSig</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;see 2.5.2 in https://tools.ietf.org/html/draft-boneh-bls-signature-00#page-9&#34;</span><span class="p">)</span>
     <span class="k">return</span> <span class="kc">false</span>
 <span class="p">}</span>

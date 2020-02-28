@@ -1380,33 +1380,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1474,33 +1447,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4111,7 +4057,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4120,7 +4066,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4744,8 +4690,8 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">smarkact</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin/storage_market&#34;</span>
 
 <span class="c1">// ClientLocalDealInfo is the information about a storage deal that storage client tracks
-</span><span class="c1"></span><span class="c1">// locally about a deal until it goes on chain. It is persisted to local storage
-</span><span class="c1"></span><span class="c1">// and updated as the deal goes through stages leading up to its being published
+</span><span class="c1">// locally about a deal until it goes on chain. It is persisted to local storage
+</span><span class="c1">// and updated as the deal goes through stages leading up to its being published
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ClientLocalDealInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">ProposalCid</span>     <span class="o">&amp;</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
     <span class="nx">Proposal</span>        <span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
@@ -4757,7 +4703,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="c1">// ProposeStorageDealResult is the returned data when ProposeStorageDeal
-</span><span class="c1"></span><span class="c1">// is called on a storage client
+</span><span class="c1">// is called on a storage client
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ProposeStorageDealResult</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">ProposalCid</span> <span class="o">&amp;</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
 <span class="p">}</span>
@@ -4770,14 +4716,14 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">StorageClient</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// ListProviders queries chain state and returns active storage providers
-</span><span class="c1"></span>    <span class="nf">ListProviders</span><span class="p">(</span><span class="p">)</span>   <span class="p">(</span><span class="nx">providers</span> <span class="p">[</span><span class="nx">StorageProviderInfo</span><span class="p">]</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">ListProviders</span><span class="p">()</span>   <span class="p">(</span><span class="nx">providers</span> <span class="p">[</span><span class="nx">StorageProviderInfo</span><span class="p">],</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// ListDeals lists on-chain deals associated with this client
-</span><span class="c1"></span>    <span class="nf">ListDeals</span><span class="p">(</span><span class="p">)</span>       <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">]</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">ListDeals</span><span class="p">()</span>       <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">],</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// ListInProgressDeals lists deals that are in progress or rejected
 </span><span class="c1"></span>    <span class="c1">// - but not on chain
-</span><span class="c1"></span>    <span class="nf">ListLocalDeals</span><span class="p">(</span><span class="p">)</span>  <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">ClientLocalDealInfo</span><span class="p">]</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">ListLocalDeals</span><span class="p">()</span>  <span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">ClientLocalDealInfo</span><span class="p">],</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// GetInProgressDeal looks up an in progress deal by proposal CID
 </span><span class="c1"></span>    <span class="nf">GetInProgressDeal</span><span class="p">(</span><span class="nx">proposalCID</span> <span class="o">&amp;</span><span class="nx">smarkact</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="p">(</span><span class="nx">ClientLocalDealInfo</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
@@ -4796,7 +4742,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">)</span> <span class="p">(</span><span class="nx">ProposeStorageDealResult</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// GetPaymentEscrow returns the current funds available for deal payment
-</span><span class="c1"></span>    <span class="nf">GetPaymentEscrow</span><span class="p">(</span><span class="p">)</span> <span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">GetPaymentEscrow</span><span class="p">()</span> <span class="p">(</span><span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
     <span class="c1">// AddPaymentEscrow adds storage collateral
 </span><span class="c1"></span>    <span class="nf">AddPaymentEscrow</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">error</span>

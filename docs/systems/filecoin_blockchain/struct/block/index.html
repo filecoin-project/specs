@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4795,17 +4741,17 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="c1">// HACK: All of the below was duplicated from posting.id
-</span><span class="c1"></span><span class="c1">// in order to get spec to compile. Check the actual source for details
+</span><span class="c1">// in order to get spec to compile. Check the actual source for details
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ElectionPoStVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Candidates</span>  <span class="p">[</span><span class="nx">PoStCandidate</span><span class="p">]</span>
     <span class="nx">Proof</span>       <span class="nx">PoStProof</span>
     <span class="nx">Randomness</span>  <span class="nx">PoStRandomness</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">ChallengeTicketsCommitment</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>  <span class="c1">// see sector
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStCandidate</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>  <span class="c1">// see sector
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStRandomness</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>  <span class="c1">// see sector
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStProof</span> <span class="kd">struct</span> <span class="p">{</span><span class="p">}</span>
+<span class="kd">type</span> <span class="nx">ChallengeTicketsCommitment</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// see sector
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStCandidate</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// see sector
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStRandomness</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// see sector
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStProof</span> <span class="kd">struct</span> <span class="p">{}</span>
 </code></pre></div>
 
 
@@ -4840,7 +4786,7 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nx">Output</span>     <span class="nx">Bytes</span>                <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
     <span class="nf">DrawRandomness</span><span class="p">(</span><span class="nx">round</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Bytes</span>
-    <span class="nf">ValidateSyntax</span><span class="p">(</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">ValidateSyntax</span><span class="p">()</span> <span class="kt">bool</span>
     <span class="nf">Verify</span><span class="p">(</span>
         <span class="nx">input</span>           <span class="nx">Bytes</span>
         <span class="nx">pk</span>              <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span>

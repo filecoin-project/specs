@@ -1381,33 +1381,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
     </li>
 
 </ul>
@@ -1475,33 +1448,6 @@ https://github.com/alex-shpak/hugo-book
 <ul class="menu-item-section depth-3">
 
     <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../#appendix__address" class="menu-item depth-2">
-    
-    
-        Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
     
     </li>
 
@@ -4112,7 +4058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../#content__algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-4">
+<a href="../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
     
     
         PoSt Parameters
@@ -4121,7 +4067,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -4738,7 +4684,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">Node</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// PeerID returns the PeerID associated with this libp2p Node
-</span><span class="c1"></span>    <span class="nf">PeerID</span><span class="p">(</span><span class="p">)</span> <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
+</span><span class="c1"></span>    <span class="nf">PeerID</span><span class="p">()</span> <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
 
     <span class="c1">// MountProtocol adds given Protocol under specified protocol id.
 </span><span class="c1"></span>    <span class="nf">MountProtocol</span><span class="p">(</span><span class="nx">path</span> <span class="nx">ProtocolPath</span><span class="p">,</span> <span class="nx">protocol</span> <span class="nx">Protocol</span><span class="p">)</span>
@@ -4763,9 +4709,9 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="c1">// Stream is an interface to deal with networked processes, which communicate
-</span><span class="c1"></span><span class="c1">// via streams of bytes.
-</span><span class="c1"></span><span class="c1">//
-</span><span class="c1"></span><span class="c1">// See golang.org/pkg/io -- as this is modelled after io.Reader and io.Writer
+</span><span class="c1">// via streams of bytes.
+</span><span class="c1">//
+</span><span class="c1">// See golang.org/pkg/io -- as this is modelled after io.Reader and io.Writer
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">Stream</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// Read reads bytes from the underlying stream and copies them to buf.
 </span><span class="c1"></span>    <span class="c1">// Read returns the number of bytes read (n), and potentially an error
@@ -4781,12 +4727,12 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="c1">// Close terminates client&#39;s use of the stream.
 </span><span class="c1"></span>    <span class="c1">// Calling Read or Write after Close is an error.
-</span><span class="c1"></span>    <span class="nf">Close</span><span class="p">(</span><span class="p">)</span> <span class="kt">error</span>
+</span><span class="c1"></span>    <span class="nf">Close</span><span class="p">()</span> <span class="kt">error</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StreamProtocol</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// AcceptStream accepts an incoming stream connection.
-</span><span class="c1"></span>    <span class="nf">AcceptStream</span><span class="p">(</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class="c1"></span>    <span class="nf">AcceptStream</span><span class="p">()</span> <span class="kd">struct</span> <span class="p">{</span>
         <span class="nx">stream</span>    <span class="nx">Stream</span>
         <span class="nx">peerInfo</span>  <span class="nx">peer</span><span class="p">.</span><span class="nx">AddrInfo</span>
         <span class="nx">err</span>       <span class="kt">error</span>
@@ -4803,16 +4749,16 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">Datagram</span> <span class="nx">Bytes</span>
 
 <span class="c1">// Datagrams are &#34;messages&#34; in the network packet sense of the word.
-</span><span class="c1"></span><span class="c1">//
-</span><span class="c1"></span><span class="c1">// &#34;message-oriented network protocols&#34; should use this interface,
-</span><span class="c1"></span><span class="c1">// not the StreamProtocol interface.
-</span><span class="c1"></span><span class="c1">//
-</span><span class="c1"></span><span class="c1">// We call it &#34;Datagram&#34; here because unfortunately the word &#34;Message&#34;
-</span><span class="c1"></span><span class="c1">// is very overloaded in Filecoin.
-</span><span class="c1"></span><span class="c1">// Suggestion for libp2p: use datagram too.
+</span><span class="c1">//
+</span><span class="c1">// &#34;message-oriented network protocols&#34; should use this interface,
+</span><span class="c1">// not the StreamProtocol interface.
+</span><span class="c1">//
+</span><span class="c1">// We call it &#34;Datagram&#34; here because unfortunately the word &#34;Message&#34;
+</span><span class="c1">// is very overloaded in Filecoin.
+</span><span class="c1">// Suggestion for libp2p: use datagram too.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">DatagramProtocol</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// AcceptDatagram accepts an incoming message.
-</span><span class="c1"></span>    <span class="nf">AcceptDatagram</span><span class="p">(</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class="c1"></span>    <span class="nf">AcceptDatagram</span><span class="p">()</span> <span class="kd">struct</span> <span class="p">{</span>
         <span class="nx">datagram</span>  <span class="nx">Datagram</span>
         <span class="nx">peerInfo</span>  <span class="nx">peer</span><span class="p">.</span><span class="nx">AddrInfo</span>
         <span class="nx">err</span>       <span class="kt">error</span>
@@ -4823,11 +4769,11 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="c1">// type StorageDealLibp2pProtocol struct {
-</span><span class="c1"></span><span class="c1">//   StreamProtocol StreamProtocol
-</span><span class="c1"></span><span class="c1">//   // ---
-</span><span class="c1"></span><span class="c1">//   AcceptStream() struct {}
-</span><span class="c1"></span><span class="c1">//   OpenStream() struct {}
-</span><span class="c1"></span><span class="c1">// }
+</span><span class="c1">//   StreamProtocol StreamProtocol
+</span><span class="c1">//   // ---
+</span><span class="c1">//   AcceptStream() struct {}
+</span><span class="c1">//   OpenStream() struct {}
+</span><span class="c1">// }
 </span></code></pre></div>
 
 
