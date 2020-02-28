@@ -20,6 +20,8 @@ Please [read the spec process](https://filecoin-project.github.io/specs/#intro__
 
 ### Install
 
+- Make sure you have installed `go` on your machine.
+
 ```
 git clone https://github.com/filecoin-project/specs filecoin-specs
 cd filecoin-specs
@@ -47,7 +49,7 @@ The actor code lives in https://github.com/filecoin-project/specs-actors. It is 
 - into the compilation as a Go module, configured in src/build_go.mod
 - into the webside as a Git submodule at src/actors
 
-To change the code, edit in the home repository and then update *both* the build_go.mod and submodule to point to the new ref.
+To change the code, edit in the home repository and then update _both_ the build_go.mod and submodule to point to the new ref.
 You should probably make a release of the specs-actors repo for ease of referring to it as a Go module.
 
 ### Website
@@ -59,14 +61,17 @@ make website
 ### Diagrams
 
 Install dependencies for diagram making
+
 ```
 make deps-diag
 ```
 
 Render diagrams
+
 ```
 make diagrams
 ```
+
 Make sure to check in your rendered output (`*.dot.svg` and `*.mmd.svg`) so that others dont need to install diagram building deps.
 
 ### Orient and Org mode

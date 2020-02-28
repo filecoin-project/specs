@@ -19,7 +19,7 @@ import cid "github.com/ipfs/go-cid"
 //   Yes, a user may submit N separate messages with increasing
 //   sequence number, causing them to execute in order.
 //
-type CallSeqNum UVarint
+type CallSeqNum int64
 
 // Actor is a base computation object in the Filecoin VM. Similar
 // to Actors in the Actor Model (programming), or Objects in Object-

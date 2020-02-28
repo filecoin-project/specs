@@ -57,6 +57,9 @@ a long block.
 
 For Filecoin, byte arrays representing RLE+ bitstreams are encoded using [LSB 0](https://en.wikipedia.org/wiki/Bit_numbering#LSB_0_bit_numbering) bit numbering.
 
+# HAMT
+
+See the draft [IPLD hash map spec](https://github.com/ipld/specs/blob/master/data-structures/hashmap.md) for details on implementing the HAMT used for the global state tree map and throughout the actor code.
 
 # Other Considerations
 
