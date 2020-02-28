@@ -27,8 +27,7 @@ The main components are as follows:
 
 V0 of the protocol has participants send data over the retrieval protocol itself in a series of Blocks encoded in Bitswap format and verify received blocks manually. It will only support fetching the payload CID which is at the root of PieceCID's Car File, and will only support fetching the whole DAG.
 
-In V1, the retrieval markets will evolve to support sending arbitrary payload CID's & selectors
- within a piece (V1). Further, it will piggy back on the Data Transfer system and Graphsync to handle transfer and verification, to support arbitrary selectors, and to reduce round trips.
+In V1, the retrieval markets will evolve to support sending arbitrary payload CID's & selectors within a piece (V1). Further, it will piggy back on the Data Transfer system and Graphsync to handle transfer and verification, to support arbitrary selectors, and to reduce round trips.
 The Data Transfer System will accordingly be augmented to support pausing/resuming and sending intermediate vouchers to facilitate this.
 V1 will also include additional mechanisms for timeouts and cancellations. (to be specified)
 
@@ -68,8 +67,7 @@ The evolved protocol for proposing and accepting a deal will work as follows:
 - The client schedules a `Data Transfer Pull Request` passing the `RetrievalDealProposal` as a voucher.
 - The provider validates the proposal and rejects it if it is invalid
 - If the proposal is valid, the provider responds with an accept message and begins monitoring the data transfer process
-- The client creates a payment channel as necessary and a lane, ensures there are free funds in
- the channel
+- The client creates a payment channel as necessary and a lane, ensures there are free funds in the channel
 - The provider unseals the sector as necessary
 - The provider monitors data transfer as it sends blocks over the protocol, until it requires payment
 - When the provider requires payment, it pauses the data transfer and sends a request for payment as an intermediate voucher
