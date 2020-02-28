@@ -25,11 +25,7 @@ The main components are as follows:
 
 # VO & V1
 
-V0 of the protocol has participants send data over the retrieval protocol itself in a
- series of
- Blocks encoded in Bitswap format and verify received blocks manually. It will only support
-  fetching the payload CID which is at the root of PieceCID's `.car` File, and will only support
-   fetching the whole DAG.
+V0 of the protocol has participants send data over the retrieval protocol itself in a series of Blocks encoded in Bitswap format and verify received blocks manually. It will only support fetching the payload CID which is at the root of PieceCID's `.car` File, and will only support fetching the whole DAG.
 
 In V1, the retrieval markets will evolve to support sending arbitrary payload CID's & selectors within a piece. Further, it will piggy back on the Data Transfer system and Graphsync to handle transfer and verification, to support arbitrary selectors, and to reduce round trips.
 The Data Transfer System will accordingly be augmented to support pausing/resuming and sending intermediate vouchers to facilitate this.
@@ -84,9 +80,7 @@ The evolved protocol for proposing and accepting a deal will work as follows:
 
 # Bootstrapping Trust
 
-Neither the client nor the provider have any specific reason to trust the other. Therefore
-, payment for a retrieval deal is done incrementally, sending vouchers as bytes are sent and
- verified.
+Neither the client nor the provider have any specific reason to trust the other. Therefore, payment for a retrieval deal is done incrementally, sending vouchers as bytes are sent and verified.
 
 The trust process is as follows:
 - When the deal is created, client & provider agree to a "payment interval" in bytes, which is the _minimum_ amount of data the provider will send before each required increment
