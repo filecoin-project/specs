@@ -92,7 +92,7 @@ randomness = H(buffer)
 We currently distinguish the following entropy needs per use:
 
 - TicketProduction: requires MinerIDAddress
-- ElectionPoStChallengeSeed: requires current epoch and MinerIDAddress
+- ElectionPoStChallengeSeed: requires current epoch and MinerIDAddress -- epoch is already mixed in from ticket drawing so in practice is the same as just adding MinerIDAddress as entropy
 - WindowedPoStChallengeSeed: requires MinerIDAddress
 - SealRandomness: requires MinerIDAddress
 - InteractiveSealChallengeSeed: requires MinerIDAddress
