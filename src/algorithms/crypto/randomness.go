@@ -16,11 +16,12 @@ import (
 // random beacon at a given epoch and incorporating requisite entropy
 GetRandomness(chain personalization crypto.DomainSeparationTag, randEpoch abi.ChainEpoch, entropy []byte) abi.Randomness {
 
-	randSeed := chain.RandomnessAtEpoch(randEpoch)
+	randSeed := chain.RandomnessSeedAtEpoch(randEpoch)
 
 	buffer := []byte{}
 	buffer = append(buffer, BigEndianBytesFromInt(int64(personalization))...)
 	buffer = append(buffer, randSeed...)
+	buffer = append(buffer, BigEndianBytesFromInt(int64(epoch))...)
 	buffer = append(buffer, entropy...)
 	bufHash := blake2b.Sum256(buffer)
 	return bufHash[:]	

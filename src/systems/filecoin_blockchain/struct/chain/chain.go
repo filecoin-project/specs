@@ -20,23 +20,20 @@ func (chain *Chain_I) TipsetAtEpoch(epoch abi.ChainEpoch) Tipset {
 }
 
 // Draws randomness from the tipset at or immediately prior to `epoch`.
-func (chain *Chain_I) RandomnessAtEpoch(epoch abi.ChainEpoch) abi.RandomnessSeed {
+func (chain *Chain_I) RandomnessSeedAtEpoch(epoch abi.ChainEpoch) abi.RandomnessSeed {
 
 	ts := chain.TipsetAtEpoch(epoch)
-	buffer := []byte{}
-	buffer = append(buffer, ts.MinTicket().Digest()...)
-	buffer = append(buffer, BigEndianBytesFromInt(int64(epoch))...)
-	return blake2b.Sum256(buffer)
+	return ts.MinTicket().Digest()
 }
 
 func (chain *Chain_I) GetTicketProductionRandSeed(epoch abi.ChainEpoch) abi.RandomnessSeed {
-	return chain.RandomnessAtEpoch(epoch - node_base.SPC_LOOKBACK_TICKET)
+	return chain.RandomnessSeedAtEpoch(epoch - node_base.SPC_LOOKBACK_TICKET)
 }
 
 func (chain *Chain_I) GetSealRandSeed(epoch abi.ChainEpoch) abi.RandomnessSeed {
-	return chain.RandomnessAtEpoch(epoch - builtin.SPC_LOOKBACK_SEAL)
+	return chain.RandomnessSeedAtEpoch(epoch - builtin.SPC_LOOKBACK_SEAL)
 }
 
 func (chain *Chain_I) GetPoStChallengeRandSeed(epoch abi.ChainEpoch) abi.RandomnessSeed {
-	return chain.RandomnessAtEpoch(epoch - builtin.SPC_LOOKBACK_POST)
+	return chain.RandomnessSeedAtEpoch(epoch - builtin.SPC_LOOKBACK_POST)
 }

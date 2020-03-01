@@ -21,24 +21,24 @@ Further, we define Domain Separation Tags with which we prepend random inputs wh
 All randomness used in the protocol must be generated in conjunction with a unique DST, as well as 
 certain {{<sref crypto_signatures>}} and {{<sref vrf>}} usage.
 
-## Drawing Randomness from the chain
+## Drawing tickets for randomness from the chain
 
 Tickets are used as a source of on-chain randomness, generated with each new block created (see {{<sref tickets>}}).
 
-Randomness is derived from a ticket's digest as follows, for a given epoch `n`, and ticket sought at epoch `e`:
+A ticket is drawn from the chain for randomness as follows, for a given epoch `n`, and ticket sought at epoch `e`:
 ```text
-While ticket is not set:
-    Set wantedTipsetHeight = e
-    if wantedTipsetHeight <= genesis:
-        Set ticket = genesis ticket
-    else if blocks were mined at wantedTipsetHeight:
-        ReferenceTipset = TipsetAtHeight(wantedTipsetHeight)
-        Set ticket = minTicket in ReferenceTipset
-    If no blocks were mined at wantedTipsetHeight:
-        wantedTipsetHeight--
-        (Repeat)
-newRandomness = H(ticket.Digest() || e)
-return newRandomness
+RandomnessSeedAtEpoch(e):
+    While ticket is not set:
+        Set wantedTipsetHeight = e
+        if wantedTipsetHeight <= genesis:
+            Set ticket = genesis ticket
+        else if blocks were mined at wantedTipsetHeight:
+            ReferenceTipset = TipsetAtHeight(wantedTipsetHeight)
+            Set ticket = minTicket in ReferenceTipset
+        If no blocks were mined at wantedTipsetHeight:
+            wantedTipsetHeight--
+            (Repeat)
+    return ticket.Digest()
 ```
 
 In plain language, this means:
@@ -46,42 +46,41 @@ In plain language, this means:
 - Choose the smallest ticket in the Tipset if it contains multiple blocks.
 - When sampling a ticket from an epoch with no blocks, draw the min ticket from the prior epoch with blocks
 
-The ticket digest is concatenated with the wanted epoch number in order to ensure both:
-- liveness for leader election -- in the case of null rounds, the new epoch number will output new randomness for LE
-- distinct values for randomness sought before genesis -- where the genesis ticket will be returned
+This ticket is then combined with a Domain Separation Tag, the round number sought and appropriate entropy to form randomness for various uses in the protocol.
 
-For instance, if in epoch `curr`, a miner wants randomness from `lookback` epochs back where `curr - lookback <= genesis`, 
-the ticket randomness drawn would be `H(genesisTicket.digest || curr-lookback)` where the `genesisTicket` is the randomness included
-in the genesis block (to be determined ahead of time to enable genesis participants to SEAL data ahead of time).
-
-While the inclusion of the round number is not necessary for other uses of entropy, we include it as part of ticket drawing for uniformity/simplicity in the overall protocol.
-
-See the `RandomnessAtEpoch` method below:
+See the `RandomnessSeedAtEpoch` method below:
 {{< readfile file="../struct/chain/chain.go" code="true" lang="go" >}}
 
 ## Forming Randomness Seeds
 
-Different uses of randomness require randomness seeds predicated on a variety of inputs. For instance, we have:
+The drawn ticket digest is combined with a few elements to make up randomness for use as part of the protocol.
 
-- `TicketProduction` -- uses ticket and miner actor addr
-- `ElectionPoStChallengeSeed` -- uses ticket and miner actor addr
-- `WindowedPoStChallengeSeed` -- uses ticket and epoch number
-...
+- a DST (domain separation tag)
+    - Different uses of randomness are distinguished by this type of personalization which ensures that randomness used for different purposes will not conflict with randomness used elsewhere in the protocol
+- the epoch number, ensuring
+    - liveness for leader election -- in the case of null rounds, the new epoch number will output new randomness for LE
+    - distinct values for randomness sought before genesis -- where the genesis ticket will be returned
+    - For instance, if in epoch `curr`, a miner wants randomness from `lookback` epochs back where `curr - lookback <= genesis`, the ticket randomness drawn would be based on `genesisTicket.digest` where the `genesisTicket` is the randomness included in the genesis block. Using the epoch as part of randomness composition ensures that randomness drawn at various epochs prior to genesis has different values.
+- other entropy,
+    - ensuring that randomness is modified as needed by other context-dependent entropy (e.g. a miner address if we want the randomness to be different for each miner).
+
+While all elements are not needed for every use of entropy (e.g. the inclusion of the round number is not necessary prior to genesis or outside of leader election, other entropy is only used sometimes, etc), we draw randomness as follows for the sake of uniformity/simplicity in the overall protocol.
 
 In all cases, a ticket is used as the base of randomness (see {{<sref tickets>}}). In order to make randomness seed creation uniform, the protocol derives all such seeds in the same way, using blake2b as a hash function to generate a 256-bit output as follows (also see {{<sref tickets>}}):
 
 In round `n`, for a given randomness lookback `l`, and serialized entropy `s`:
 
 ```text
-ticket = DrawRandomness(n-l)
-randSeed = ticket.digest
+GetRandomness(dst, l, s):
+    ticketDigest = RandomnessSeedAtEpoch(n-l)
 
-buffer = Bytes{}
-buffer.append(IntToBigEndianBytes(AppropriateDST))
-buffer.append(randSeed)
-buffer.append(s)
+    buffer = Bytes{}
+    buffer.append(IntToBigEndianBytes(dst))
+    buffer.append(randSeed)
+    buffer.append(n-l) // the sought epoch
+    buffer.append(s)
 
-randomness = H(buffer)
+    return H(buffer)
 ```
 
 {{< readfile file="/docs/actors/actors/crypto/randomness.go" code="true" lang="go" >}}
@@ -89,10 +88,23 @@ randomness = H(buffer)
 
 ## Entropy to be used with randomness
 
-We currently distinguish the following entropy needs per use:
+As stated above, different uses of randomness may require added entropy. The CBOR-serialization of the inputs to this entropy must be used.
+
+For instance, if using entropy from an object of type foo, its CBOR-serialization would be appended to the randomness in `GetRandomness()`. If using both an object of type foo and one of type bar for entropy, you may define an object of type baz (as below) which includes all needed entropy, and include its CBOR-serialization in `GetRandomness()`.
+
+```text
+type baz struct {
+    firstObject     foo
+    secondObject    bar
+}
+```
+
+Currently, we distinguish the following entropy needs in the Filecoin protocol (this list is not exhaustive):
 
 - TicketProduction: requires MinerIDAddress
 - ElectionPoStChallengeSeed: requires current epoch and MinerIDAddress -- epoch is already mixed in from ticket drawing so in practice is the same as just adding MinerIDAddress as entropy
 - WindowedPoStChallengeSeed: requires MinerIDAddress
 - SealRandomness: requires MinerIDAddress
 - InteractiveSealChallengeSeed: requires MinerIDAddress
+
+The above uses of the MinerIDAddress ensures that drawn randomness is distinct for every miner drawing this (regardless of whether they share worker keys or not, eg -- in the case of randomness that is then signed as part of leader election or ticket production).
