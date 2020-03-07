@@ -21,7 +21,7 @@ Here is the list of libp2p protocols used by Filecoin.
 - KademliaDHT: 
 	- Kademlia DHT is a distributed hash table with a logarithmic bound on the maximum number of lookups for a particular node. Kad DHT is used primarily for peer routing as well as peer discovery in the Filecoin protocol.
 	- Spec TODO [reference implementation](https://github.com/libp2p/go-libp2p-kad-dht)
-	- The protocol id must be of the form `fil/kad/<network-name>`
+	- The protocol id must be of the form `fil/<network-name>/kad/1.0.0`
 - Bootstrap List: 
 	- Bootstrap is a list of nodes that a new node attempts to connect upon joining the network. The list of bootstrap nodes and their addresses are defined by the users.
 - Peer Exchange: 
