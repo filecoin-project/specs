@@ -8,9 +8,9 @@ entries:
 
 {{<label payment_channels>}}
 
-Payment Channels are used in the Filecoin {{<sref retrieval_market>}} in order to enable efficient off-chain payments and accounting between parties for what are expected to be series of microtransactions, specifically those occuring as part of retrieval market data retrieval.
+Payment Channels are used in the Filecoin {{<sref retrieval_market>}} to enable efficient off-chain payments and accounting between parties for what is expected to be series of microtransactions, specifically those occurring as part of retrieval market data retrieval.
 
-Note that the following provides a high-level overview of payment channels and an accompanying interface. The lotus implementation of [vouchers](https://github.com/filecoin-project/lotus/blob/master/chain/types/voucher.go) and[payment channels](https://github.com/filecoin-project/lotus/tree/master/paych) are also good reeferences.
+Note that the following provides a high-level overview of payment channels and an accompanying interface. The lotus implementation of [vouchers](https://github.com/filecoin-project/lotus/blob/master/chain/types/voucher.go) and [payment channels](https://github.com/filecoin-project/lotus/tree/master/paych) are also good references.
 
 You can also read more about the {{<sref payment_channel_actor "Filecoin payment channel actor interface">}}.
 
@@ -24,7 +24,7 @@ For instance if `From` sends `To` the following vouchers (voucher_val, voucher_n
 
 The multiple lanes enable two parties to use a single payment channel to adjudicate multiple independent sets of payments.
 
-Vouchers are signed by the sender and authenticated using a `Secret`, `PreImage` pair provided by the paying party. If the `PreImage` is indeed a pre-image of the `Secret` when used as input to some given algorithm (typically a one-way function like a hash), the `Voucher` is valid. The `Voucher` itself contains the `PreImage` but not the `Secret` (communicated separately to the receiving party). This enables multi-hop payments since an intermediary cannot redeem a voucher on their own. They can also be used to update the minimum height at which a channel will be closed. Likewise, vouchers can have `TimeLock`s to prevent their being used too early, likewise a channel can have a `MinCloseHeight` to prevent it being closed prematurely (e.g. before the recipient has collected funds) by the sender.
+Vouchers are signed by the sender and authenticated using a `Secret`, `PreImage` pair provided by the paying party. If the `PreImage` is indeed a pre-image of the `Secret` when used as input to some given algorithm (typically a one-way function like a hash), the `Voucher` is valid. The `Voucher` itself contains the `PreImage` but not the `Secret` (communicated separately to the receiving party). This enables multi-hop payments since an intermediary cannot redeem a voucher on their own. They can also be used to update the minimum height at which a channel will be closed. Likewise, vouchers can have `TimeLock`s to prevent they are being used too early, likewise a channel can have a `MinCloseHeight` to prevent it being closed prematurely (e.g. before the recipient has collected funds) by the sender.
 
 Once their transactions have completed, either party can choose to `Close` the channel, the recipient can then `Collect` the `ToPay` amount from the channel. `From` will be refunded the remaining balance in the channel.
 

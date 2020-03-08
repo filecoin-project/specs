@@ -12,7 +12,7 @@ title: "Reserved Ranges"
 | CronActor            | 3 |
 | StoragePowerActor    | 4 |
 | StorageMarketActor   | 5 |
-| BurnFundsActor       | 99 |
+| BurntFundsActor       | 99 |
 
 All values below 100 are reserved for singleton actors. The first non-singleton actor starts at 100.
 

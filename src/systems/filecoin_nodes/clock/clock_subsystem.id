@@ -7,7 +7,7 @@ type UTCClock struct {
 }
 
 // ChainEpoch represents a round of a blockchain protocol.
-type ChainEpoch UVarint
+type ChainEpoch int64
 
 // ChainEpochClock is a clock that represents epochs of the protocol.
 type ChainEpochClock struct {

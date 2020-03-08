@@ -9,8 +9,8 @@ entries:
 ---
 
 - There are two system actors required for VM processing:
-  - [CronActor](#CronActor) - runs critical functions at every epoch
-  - [InitActor](#InitActor) - initializes new actors, records the network name
+  - [InitActor](#systems__filecoin_vm__sysactors__init_actor) - initializes new actors, records the network name
+  - [CronActor](#systems__filecoin_vm__sysactors__cron_actor) - runs critical functions at every epoch
 - There are two more VM level actors:
-  - [AccountActor](#AccountActor) - for user accounts (non-singleton).
-  - [RewardActor](#RewardActor) - for block reward and token vesting (singleton).
+  - [AccountActor](#systems__filecoin_vm__sysactors__account_actor) - for user accounts (non-singleton).
+  - [RewardActor](#systems__filecoin_vm__sysactors__reward_actor) - for block reward and token vesting (singleton).
