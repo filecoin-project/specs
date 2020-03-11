@@ -4755,7 +4755,7 @@ https://github.com/alex-shpak/hugo-book
 <li>declare faults</li>
 </ul>
 <h3 id="faults">Faults</h3>
-<p>If a miner detects <a href="../../../../../#systems__filecoin_markets__storage_market__faults">Faults</a> among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the <code>DeclareTemporaryFaults()</code> method of the Storage Miner Actor.</p>
+<p>If a miner detects <a href="../../../../../#systems__filecoin_markets__storage_market__faults">Storage Faults</a> among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the <code>DeclareTemporaryFaults()</code> method of the Storage Miner Actor.</p>
 <p>The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of winning Election and SurprisePoSts. By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can specify how long the duration of their TemporaryFault and pay a TemporaryFaultFee.</p>
 <p>A miner will no longer be able to declare faults after being challenged for a SurprisePoSt.</p>
 <h3 id="step-3-dealsector-expiration">Step 3: Deal/Sector Expiration</h3>

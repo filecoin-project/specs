@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-	<meta name="generator" content="Hugo 0.65.3" />
+	<meta name="generator" content="Hugo 0.67.0" />
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Filecoin Specification | Filecoin Spec</title>
@@ -9157,7 +9157,7 @@ Every time a worker key is queried, a pending change is lazily checked and state
 <ul>
 <li>Kademlia DHT is a distributed hash table with a logarithmic bound on the maximum number of lookups for a particular node. Kad DHT is used primarily for peer routing as well as peer discovery in the Filecoin protocol.</li>
 <li>Spec TODO <a href="https://github.com/libp2p/go-libp2p-kad-dht">reference implementation</a></li>
-<li>The protocol id must be of the form <code>fil/kad/&lt;network-name&gt;</code></li>
+<li>The protocol id must be of the form <code>fil/&lt;network-name&gt;/kad/1.0.0</code></li>
 </ul>
 </li>
 <li>Bootstrap List:
@@ -19594,7 +19594,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 <p>Pledge Collateral is slashed for any fault affecting storage-power consensus, these include:</p>
 <ul>
 <li>faults to expected consensus in particular (see <a href="./#algorithms__expected_consensus__consensus_faults">Consensus Faults</a>) which will be reported by a slasher to the <code>StoragePowerActor</code> in exchange for a reward.</li>
-<li>faults affecting consensus power more generally, specifically uncommitted power faults (i.e. <a href="./#systems__filecoin_markets__storage_market__faults">Faults</a>) which will be reported by the <code>CronActor</code> automatically or when a miner terminates a sector earlier than its promised duration.</li>
+<li>faults affecting consensus power more generally, specifically uncommitted power faults (i.e. <a href="./#systems__filecoin_markets__storage_market__faults">Storage Faults</a>) which will be reported by the <code>CronActor</code> automatically or when a miner terminates a sector earlier than its promised duration.</li>
 </ul>
 
 
@@ -21584,7 +21584,7 @@ satisfy those constraints, especially those relating to protocol security.</p>
 <li>declare faults</li>
 </ul>
 <h6 id="faults">Faults</h6>
-<p>If a miner detects <a href="./#systems__filecoin_markets__storage_market__faults">Faults</a> among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the <code>DeclareTemporaryFaults()</code> method of the Storage Miner Actor.</p>
+<p>If a miner detects <a href="./#systems__filecoin_markets__storage_market__faults">Storage Faults</a> among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the <code>DeclareTemporaryFaults()</code> method of the Storage Miner Actor.</p>
 <p>The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of winning Election and SurprisePoSts. By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can specify how long the duration of their TemporaryFault and pay a TemporaryFaultFee.</p>
 <p>A miner will no longer be able to declare faults after being challenged for a SurprisePoSt.</p>
 <h6 id="step-3-dealsector-expiration">Step 3: Deal/Sector Expiration</h6>
@@ -32019,7 +32019,7 @@ potentially long chain scans would be required to compute a given block&rsquo;s 
 <p>Any node that detects any of the above events should submit both block headers to the <code>StoragePowerActor</code>'s <code>ReportConsensusFault</code> method. The &ldquo;slasher&rdquo; will receive a portion of the offending miner&rsquo;s <a href="./#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor__pledge_collateral">Pledge Collateral</a> as a reward for notifying the network of the fault. Consensus faults (except for <code>uncommitted power fault</code> below which falls under storage faults with impact on consensus) will tentatively result in all pledge collateral being slashed and the miner removed from the power table. Some portion of the pledge collateral is given to the slasher as a function of some initial share (<code>SLASHER_INITIAL_SHARE</code>) and growth rate (<code>SLASHER_SHARE_GROWTH_RATE</code>). Slasher&rsquo;s share of the slashed collateral increases as block elapses since the block when the fault is committed. Default growth rate results in slasher&rsquo;s share reaches 1 after 250 blocks. However, only the first slasher gets its share of the pledge collateral and the remaining pledge collateral will be burned. The longer a slasher waits, the higher the likelihood that the slashed collateral will be claimed by another slasher.</p>
 <p>It is important to note that there exists a third type of consensus fault directly reported by the <code>CronActor</code> on <code>StorageDeal</code> failures via the <code>ReportUncommittedPowerFault</code> method:</p>
 <ul>
-<li>(4) <code>uncommitted power fault</code> which occurs when a miner fails to submit their <code>PostProof</code> and is thus participating in leader election with undue power (see <a href="./#systems__filecoin_markets__storage_market__faults">Faults</a>).</li>
+<li>(4) <code>uncommitted power fault</code> which occurs when a miner fails to submit their <code>PostProof</code> and is thus participating in leader election with undue power (see <a href="./#systems__filecoin_markets__storage_market__faults">Storage Faults</a>).</li>
 </ul>
 
 
