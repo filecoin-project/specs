@@ -4997,8 +4997,8 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>	<span class="c1">// Not necessarily the immediate caller.
 </span><span class="c1"></span>	<span class="nx">_toplevelSender</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 	<span class="nx">_toplevelBlockWinner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-	<span class="c1">// Top-level call sequence number of the &#34;From&#34; actor in the initial on-chain message.
-</span><span class="c1"></span>	<span class="nx">_toplevelSenderCallSeqNum</span> <span class="nx">actstate</span><span class="p">.</span><span class="nx">CallSeqNum</span>
+	<span class="c1">// call sequence number of the top level message that began this execution sequence
+</span><span class="c1"></span>	<span class="nx">_toplevelMsgCallSeqNum</span> <span class="nx">actstate</span><span class="p">.</span><span class="nx">CallSeqNum</span>
 	<span class="c1">// Sequence number representing the total number of calls (to any actor, any method)
 </span><span class="c1"></span>	<span class="c1">// during the current top-level message execution.
 </span><span class="c1"></span>	<span class="c1">// Note: resets with every top-level message, and therefore not necessarily monotonic.
@@ -5014,7 +5014,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">chain</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span>
 	<span class="nx">toplevelSender</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
 	<span class="nx">toplevelBlockWinner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
-	<span class="nx">toplevelSenderCallSeqNum</span> <span class="nx">actstate</span><span class="p">.</span><span class="nx">CallSeqNum</span><span class="p">,</span>
+	<span class="nx">toplevelMsgCallSeqNum</span> <span class="nx">actstate</span><span class="p">.</span><span class="nx">CallSeqNum</span><span class="p">,</span>
 	<span class="nx">internalCallSeqNum</span> <span class="nx">actstate</span><span class="p">.</span><span class="nx">CallSeqNum</span><span class="p">,</span>
 	<span class="nx">globalState</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span>
 	<span class="nx">actorAddress</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
@@ -5031,14 +5031,14 @@ https://github.com/alex-shpak/hugo-book
 		<span class="nx">_actorStateAcquired</span><span class="p">:</span>   <span class="kc">false</span><span class="p">,</span>
 		<span class="nx">_actorSubstateUpdated</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
 
-		<span class="nx">_toplevelSender</span><span class="p">:</span>           <span class="nx">toplevelSender</span><span class="p">,</span>
-		<span class="nx">_toplevelBlockWinner</span><span class="p">:</span>      <span class="nx">toplevelBlockWinner</span><span class="p">,</span>
-		<span class="nx">_toplevelSenderCallSeqNum</span><span class="p">:</span> <span class="nx">toplevelSenderCallSeqNum</span><span class="p">,</span>
-		<span class="nx">_internalCallSeqNum</span><span class="p">:</span>       <span class="nx">internalCallSeqNum</span><span class="p">,</span>
-		<span class="nx">_valueReceived</span><span class="p">:</span>            <span class="nx">valueReceived</span><span class="p">,</span>
-		<span class="nx">_gasRemaining</span><span class="p">:</span>             <span class="nx">gasRemaining</span><span class="p">,</span>
-		<span class="nx">_numValidateCalls</span><span class="p">:</span>         <span class="mi">0</span><span class="p">,</span>
-		<span class="nx">_output</span><span class="p">:</span>                   <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span><span class="p">{},</span>
+		<span class="nx">_toplevelSender</span><span class="p">:</span>        <span class="nx">toplevelSender</span><span class="p">,</span>
+		<span class="nx">_toplevelBlockWinner</span><span class="p">:</span>   <span class="nx">toplevelBlockWinner</span><span class="p">,</span>
+		<span class="nx">_toplevelMsgCallSeqNum</span><span class="p">:</span> <span class="nx">toplevelMsgCallSeqNum</span><span class="p">,</span>
+		<span class="nx">_internalCallSeqNum</span><span class="p">:</span>    <span class="nx">internalCallSeqNum</span><span class="p">,</span>
+		<span class="nx">_valueReceived</span><span class="p">:</span>         <span class="nx">valueReceived</span><span class="p">,</span>
+		<span class="nx">_gasRemaining</span><span class="p">:</span>          <span class="nx">gasRemaining</span><span class="p">,</span>
+		<span class="nx">_numValidateCalls</span><span class="p">:</span>      <span class="mi">0</span><span class="p">,</span>
+		<span class="nx">_output</span><span class="p">:</span>                <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span><span class="p">{},</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
@@ -5395,7 +5395,7 @@ https://github.com/alex-shpak/hugo-book
 		<span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_chain</span><span class="p">,</span>
 		<span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_toplevelSender</span><span class="p">,</span>
 		<span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_toplevelBlockWinner</span><span class="p">,</span>
-		<span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_toplevelSenderCallSeqNum</span><span class="p">,</span>
+		<span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_toplevelMsgCallSeqNum</span><span class="p">,</span>
 		<span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_internalCallSeqNum</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
 		<span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">,</span>
 		<span class="nx">receiverAddr</span><span class="p">,</span>
@@ -5538,9 +5538,14 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">NewActorAddress</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
 	<span class="nx">addrBuf</span> <span class="o">:=</span> <span class="nb">new</span><span class="p">(</span><span class="nx">bytes</span><span class="p">.</span><span class="nx">Buffer</span><span class="p">)</span>
 
-	<span class="nx">err</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_immediateCaller</span><span class="p">.</span><span class="nf">MarshalCBOR</span><span class="p">(</span><span class="nx">addrBuf</span><span class="p">)</span>
+	<span class="nx">senderState</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_toplevelSender</span><span class="p">)</span>
+	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+	<span class="kd">var</span> <span class="nx">aast</span> <span class="nx">acctact</span><span class="p">.</span><span class="nx">AccountActorState</span>
+	<span class="nx">ok</span> <span class="p">=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nx">cid</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(</span><span class="nx">senderState</span><span class="p">.</span><span class="nf">State</span><span class="p">()),</span> <span class="o">&amp;</span><span class="nx">aast</span><span class="p">)</span>
+	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">ok</span><span class="p">)</span>
+	<span class="nx">err</span> <span class="o">:=</span> <span class="nx">aast</span><span class="p">.</span><span class="nx">Address</span><span class="p">.</span><span class="nf">MarshalCBOR</span><span class="p">(</span><span class="nx">addrBuf</span><span class="p">)</span>
 	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
-	<span class="nx">err</span> <span class="p">=</span> <span class="nx">binary</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">addrBuf</span><span class="p">,</span> <span class="nx">binary</span><span class="p">.</span><span class="nx">BigEndian</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_toplevelSenderCallSeqNum</span><span class="p">)</span>
+	<span class="nx">err</span> <span class="p">=</span> <span class="nx">binary</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">addrBuf</span><span class="p">,</span> <span class="nx">binary</span><span class="p">.</span><span class="nx">BigEndian</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_toplevelMsgCallSeqNum</span><span class="p">)</span>
 	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span><span class="p">)</span>
 	<span class="nx">err</span> <span class="p">=</span> <span class="nx">binary</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">addrBuf</span><span class="p">,</span> <span class="nx">binary</span><span class="p">.</span><span class="nx">BigEndian</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_internalCallSeqNum</span><span class="p">)</span>
 	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span><span class="p">)</span>

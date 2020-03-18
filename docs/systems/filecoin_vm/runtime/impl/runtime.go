@@ -119,8 +119,8 @@ type VMContext struct {
 	// Not necessarily the immediate caller.
 	_toplevelSender      addr.Address
 	_toplevelBlockWinner addr.Address
-	// Top-level call sequence number of the "From" actor in the initial on-chain message.
-	_toplevelSenderCallSeqNum actstate.CallSeqNum
+	// call sequence number of the top level message that began this execution sequence
+	_toplevelMsgCallSeqNum actstate.CallSeqNum
 	// Sequence number representing the total number of calls (to any actor, any method)
 	// during the current top-level message execution.
 	// Note: resets with every top-level message, and therefore not necessarily monotonic.
@@ -136,7 +136,7 @@ func VMContext_Make(
 	chain chain.Chain,
 	toplevelSender addr.Address,
 	toplevelBlockWinner addr.Address,
-	toplevelSenderCallSeqNum actstate.CallSeqNum,
+	toplevelMsgCallSeqNum actstate.CallSeqNum,
 	internalCallSeqNum actstate.CallSeqNum,
 	globalState st.StateTree,
 	actorAddress addr.Address,
@@ -153,14 +153,14 @@ func VMContext_Make(
 		_actorStateAcquired:   false,
 		_actorSubstateUpdated: false,
 
-		_toplevelSender:           toplevelSender,
-		_toplevelBlockWinner:      toplevelBlockWinner,
-		_toplevelSenderCallSeqNum: toplevelSenderCallSeqNum,
-		_internalCallSeqNum:       internalCallSeqNum,
-		_valueReceived:            valueReceived,
-		_gasRemaining:             gasRemaining,
-		_numValidateCalls:         0,
-		_output:                   vmr.InvocOutput{},
+		_toplevelSender:        toplevelSender,
+		_toplevelBlockWinner:   toplevelBlockWinner,
+		_toplevelMsgCallSeqNum: toplevelMsgCallSeqNum,
+		_internalCallSeqNum:    internalCallSeqNum,
+		_valueReceived:         valueReceived,
+		_gasRemaining:          gasRemaining,
+		_numValidateCalls:      0,
+		_output:                vmr.InvocOutput{},
 	}
 }
 
@@ -517,7 +517,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 		rtOuter._chain,
 		rtOuter._toplevelSender,
 		rtOuter._toplevelBlockWinner,
-		rtOuter._toplevelSenderCallSeqNum,
+		rtOuter._toplevelMsgCallSeqNum,
 		rtOuter._internalCallSeqNum+1,
 		rtOuter._globalStatePending,
 		receiverAddr,
@@ -660,9 +660,14 @@ func (rt *VMContext) GetRandomness(epoch abi.ChainEpoch) abi.RandomnessSeed {
 func (rt *VMContext) NewActorAddress() addr.Address {
 	addrBuf := new(bytes.Buffer)
 
-	err := rt._immediateCaller.MarshalCBOR(addrBuf)
+	senderState, ok := rt._globalStatePending.GetActor(rt._toplevelSender)
+	util.Assert(ok)
+	var aast acctact.AccountActorState
+	ok = rt.IpldGet(cid.Cid(senderState.State()), &aast)
+	util.Assert(ok)
+	err := aast.Address.MarshalCBOR(addrBuf)
 	util.Assert(err == nil)
-	err = binary.Write(addrBuf, binary.BigEndian, rt._toplevelSenderCallSeqNum)
+	err = binary.Write(addrBuf, binary.BigEndian, rt._toplevelMsgCallSeqNum)
 	util.Assert(err != nil)
 	err = binary.Write(addrBuf, binary.BigEndian, rt._internalCallSeqNum)
 	util.Assert(err != nil)
