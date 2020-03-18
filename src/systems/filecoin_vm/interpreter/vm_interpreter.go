@@ -210,11 +210,8 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, chain chain.Chain,
 	compTreePreSend := _withTransferFundsAssert(inTree, senderAddr, builtin.BurntFundsActorAddr, gasLimitCost+networkTxnFee)
 	compTreePreSend = compTreePreSend.Impl().WithIncrementedCallSeqNum_Assert(senderAddr)
 
-	// Reload sender actor state after the transfer and CallSeqNum increment.
-	sender, ok := compTreePreSend.GetActor(senderAddr)
-	Assert(ok)
 	invoc := _makeInvocInput(message)
-	sendRet, compTreePostSend := _applyMessageInternal(store, compTreePreSend, chain, sender, senderAddr, invoc, vmiGasRemaining, minerAddr)
+	sendRet, compTreePostSend := _applyMessageInternal(store, compTreePreSend, chain, message.CallSeqNum(), senderAddr, invoc, vmiGasRemaining, minerAddr)
 
 	ok = _vmiBurnGas(sendRet.GasUsed)
 	if !ok {
@@ -260,10 +257,8 @@ func _applyMessageBuiltinAssert(store ipld.GraphStore, tree st.StateTree, chain 
 	// never changes (saving us the state-change overhead).
 	tree = tree.Impl().WithIncrementedCallSeqNum_Assert(senderAddr)
 
-	sender, ok := tree.GetActor(senderAddr)
-	Assert(ok)
 	invoc := _makeInvocInput(message)
-	retReceipt, retTree := _applyMessageInternal(store, tree, chain, sender, senderAddr, invoc, message.GasLimit(), minerAddr)
+	retReceipt, retTree := _applyMessageInternal(store, tree, chain, message.CallSeqNum(), senderAddr, invoc, message.GasLimit(), minerAddr)
 	if retReceipt.ExitCode != exitcode.OK() {
 		panic("internal message application failed")
 	}
@@ -271,7 +266,7 @@ func _applyMessageBuiltinAssert(store ipld.GraphStore, tree st.StateTree, chain 
 	return retTree
 }
 
-func _applyMessageInternal(store ipld.GraphStore, tree st.StateTree, chain chain.Chain, sender actstate.ActorState, senderAddr addr.Address, invoc vmr.InvocInput,
+func _applyMessageInternal(store ipld.GraphStore, tree st.StateTree, chain chain.Chain, messageCallSequenceNumber actstate.CallSeqNum, senderAddr addr.Address, invoc vmr.InvocInput,
 	gasRemainingInit msg.GasAmount, topLevelBlockWinner addr.Address) (vmri.MessageReceipt, st.StateTree) {
 
 	rt := vmri.VMContext_Make(
@@ -279,7 +274,7 @@ func _applyMessageInternal(store ipld.GraphStore, tree st.StateTree, chain chain
 		chain,
 		senderAddr,
 		topLevelBlockWinner,
-		sender.CallSeqNum(),
+		messageCallSequenceNumber,
 		actstate.CallSeqNum(0),
 		tree,
 		senderAddr,
