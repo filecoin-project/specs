@@ -129,9 +129,8 @@ In short, the weight at each block is equal to its `ParentWeight` plus that bloc
 
 Delta weight is a term composed of a few elements:
 
-- wForkFactor: which seeks to cut the weight derived from rounds in which produced Tipsets do not correspond to what an honest chain is likely to have yielded (pointing to selfish mining or other non-collaborative miner behavior).
 - wPowerFactor: which adds weight to the chain proportional to the total power backing the chain, i.e. accounted for in the chain's power table.
-- wBlocksFactor: which adds weight to the chain proportional to the number of tickets mined in a given epoch. Like wForkFactor, it rewards miner cooperation (which will yield more blocks per round on expectation).
+- wBlocksFactor: which adds weight to the chain proportional to the number of tickets mined in a given epoch. It rewards miner cooperation (which will yield more blocks per round on expectation).
 
 The weight should be calculated using big integer arithmetic with order of operations defined above. We use brackets instead of parentheses below for legibility. We have:
 
