@@ -21,7 +21,7 @@ After the chain has caught up to the current head using {{<sref chain_sync>}}, t
 - At the same time it continuously {{<sref block_sync "receives blocks">}}
     - Each block has an associated timestamp and epoch (quantized time window in which it was crafted)
     - Blocks are validated as they come in during an epoch (provided it is before that epoch's epoch cutoff, see {{<sref block "validation">}})
-- After an epoch's epoch cutoff, the miner should take all the valid blocks received for this epoch and assemble them into tipsets according to {{<sref tipset "tipset validation rules">}}
+- After the epoch ends, a miner waits for the duration of the transmission period (see below for details oon how it is calculated) for the epoch cutoff, after which blocks from that epoch should no longer be accepted. At the cutoff, the miner should take all the valid blocks received for this epoch and assemble them into tipsets according to {{<sref tipset "tipset validation rules">}}.
 - The miner then attempts to mine atop the heaviest tipset (as calculated with {{<sref chain_selection "EC's weight function">}}) using its smallest ticket to run leader election
     - The miner runs an {{<sref election_post>}} on their sectors in order to generate partial tickets
     - The miner uses these tickets in order to run {{<sref leader_election>}}
@@ -44,6 +44,12 @@ Anytime a miner receives new valid blocks, it should evaluate what is the heavie
 
 The mining cycle relies on receiving and producing blocks concurrently.  The sequence of these events in time is given by the timing diagram above.  The upper row represents the conceptual consumption channel consisting of successive receiving periods `Rx` during which nodes validate incoming blocks. The lower row is the conceptual production channel made up of a period of mining `M` followed by a period of transmission `Tx` (which lasts long enough for blocks to propagate throughout the network).  The lengths of the periods are not to scale.
 
+The transmission period is composed of two periods, the propagation period and the random period:
+
+    - The propagation period is of the same duration for all miners at every epoch and lasts long enough for blocks to be propagated throughout the network (PROP_DELAY). 
+    - The random period is computed by each miner at each epoch. It is a random duration drawn locally (e.g. using the miner's PRNG) to last x ms, with x between 0 and MAX_CUTOFF_RAN seconds.
+        - The random period exists to disincentivize miners from releasing their blocks as late as possible by making the cutoff unpredictable.
+
 Blocks are received and validated during `Rx` up to the epoch's cutoff, propagation delay after the end of the epoch. At the cutoff, the miner computes the heaviest tipset from the blocks received during `Rx`, used as the head to build on during the next mining period `M`.  If mining is successful, the miner sets the block's timestamp to the epoch boundary and waits until then to release it. Blocks are transmitted during `Tx`.  The epoch boundary and cutoff are as shown.
 
 In a fully synchronized network most of period `Rx` does not see any network traffic, only the period lined up with `Tx`.  In practice we expect blocks from previous epochs to propagate during the remainder of `Rx`. **These blocks should be rejected after the cutoff, as should any incoming blocks from the future**.  We also expect differences in operator mining time to cause additional variance.
@@ -55,7 +61,7 @@ In short, a miner's cycle in `CHAIN_FOLLOW` is as follows:
 - at epoch n's cutoff, assemble heaviest tipset from epoch n,
 - mine for epoch n + 1 and upon finding a block set block's timestamp to the next boundary (between n + 1 and n + 2),
 - broadcast the block at the wall clock time corresponding to its timestamp,
-- receive new blocks for propagation delay longer, until epoch n+1's cutoff,
+- compute the random period value for this epoch and receive new blocks for propagation + random period longer, until epoch n+1's cutoff,
 - restart.
 
 ## Full Miner Lifecycle
