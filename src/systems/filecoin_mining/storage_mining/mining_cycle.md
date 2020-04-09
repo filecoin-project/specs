@@ -58,9 +58,10 @@ In an epoch, blocks are received and validated during `Rx` up to the prior epoch
 
 The timing validation rules are as follows:
 
-- Blocks whose timestamps are not exactly on the epoch boundary are rejected
-- Blocks received with a timestamp in the future are rejected
-- Blocks received after the cutoff are rejected. 
+- Blocks whose timestamps are not exactly on the epoch boundary are rejected.
+- Blocks received with a timestamp in the future are rejected.
+- Blocks received after the cutoff are rejected.
+    - Note that those blocks are not invalid, just not considered for the miner's own tipset building. Tipsets received with such a block as a parent should be accepted.
 
 In a fully synchronized network most of period `Rx` does not see any network traffic, only its beginning should. While there may be variance in operator mining time, most miners are expected to finish mining by the epoch boundary.
 
