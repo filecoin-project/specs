@@ -76,7 +76,9 @@ A semantically valid block must have:
   - `ElectionPoSt.Randomness` is well formed and appropriately drawn from a past tipset according to the PoStLookback,
   - `ElectionPoSt.Proof` is a valid proof verifying the generation of the `ElectionPoSt.Candidates` from the `Miner`'s eligible sectors,
   - `ElectionPoSt.Candidates` contains well formed `PoStCandidate`s each of which has a `PartialTicket` yielding a winning `ChallengeTicket` in Expected Consensus.
-- a `Timestamp` in seconds lying within the quantized epoch window implied by the genesis block's timestamp and the block's `Epoch`,
+- a `Timestamp` in seconds that must be
+  - not in the future at time of reception
+  - of the precise value implied implied by the genesis block's timestamp, the network's block time and the block's `Epoch`,
 - all SECP messages correctly signed by their sending actor's worker account key,
 - a `BLSAggregate` signature that signs the array of CIDs of the BLS messages referenced by the block 
 with their sending actor's key.
