@@ -198,17 +198,17 @@ This is detectable when a given miner submits two blocks that satisfy any of the
 
 Thereafter, the faults are:
 
-- (1) `double-fork mining fault`: two blocks mined at the same epoch. 
-  - `blockA.Epoch == blockB.Epoch`
+- (1) `double-fork mining fault`: two blocks mined at the same epoch.
+  - `B4.Epoch == B5.Epoch`
 {{< diagram src="diagrams/double_fork.dot.svg" title="Double-Fork Mining Fault" >}}
 
 - (2) `time-offset mining fault`: two blocks mined off of the same Tipset at different epochs (i.e. with different `ChallengeTickets` generated from the same input ticket).
-  - `blockA.Parents == blockB.Parents && blockA.Epoch != blockB.Epoch`
+  - `B3.Parents == B4.Parents && B3.Epoch != B4.Epoch`
 {{< diagram src="diagrams/time_offset.dot.svg" title="Time-Offset Mining Fault" >}}
 
 - (3) `parent-grinding fault`: one block's parent is a Tipset that provably should have included a given block but does not. While it cannot be proven that a missing block was willfully omitted in general (i.e. network latency could simply mean the miner did not receive a particular block), it can when a miner has successfully mined a block two epochs in a row and omitted one. That is, this condition should be evoked when a miner omits their own prior block.
-  - Specifically, this can be proven with a "witness" block, that is by submitting blocks A, B, C where C is B's parent and A's sibling but A is not B's parent.
-  - `!blockB.Parents.Include(blockA) && blockB.Parents.Include(blockC) && blockA.Parents == blockC.Parents && blockA.Height == blockC.Height`
+  - Specifically, this can be proven with a "witness" block, that is by submitting blocks B2, B3, B4 where B2 is B4's parent and B3's sibling but B3 is not B4's parent.
+  - `!B4.Parents.Include(B3) && B4.Parents.Include(B2) && B3.Parents == B2.Parents && B3.Epoch == B2.Epoch`
 
 {{< diagram src="diagrams/parent_grinding.dot.svg" title="Parent-Grinding fault" >}}
 
