@@ -3,9 +3,9 @@ digraph G {
   node [shape=box, style="filled", color="green3"]
 
   B1 [label="B1\nMinerAny"]
-  B2 [label="B2\nMinerA"]
-  B3 [label="B3\nMinerB",   color=pink]
-  B4 [label="B4\nMinerB",   color=pink]
+  B2 [label="B2\nMinerAny"]
+  B3 [label="B3\nMinerE",   color=pink]
+  B4 [label="B4\nMinerE",   color=pink]
   
   B2 -> B1
   B3 -> B2
