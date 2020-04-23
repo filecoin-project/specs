@@ -13,22 +13,22 @@ With every new tipset, the miner can use their committed power to attempt to cra
 
 For additional details around how consensus works in Filecoin, see {{<sref expected_consensus>}}. For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner is eligible to mine a block itself, and other rules pertaining to the production of some artifacts required of valid blocks (e.g. Tickets, ElectionPoSt).
 
-### Continuous Mining Cycle
+### Mining Cycle
 
-After the chain has caught up to the current head using {{<sref chain_sync>}}, the mining process is as follows:
+After the chain has caught up to the current head using {{<sref chain_sync>}}. At a high-level, the mining process is as follows, (we go into more detail on epoch timing below):
 
-- The node continuously receives and transmits messages using the {{<sref message_syncer>}}
-- At the same time it continuously {{<sref block_sync "receives blocks">}}
+- The node receives and transmits messages using the {{<sref message_syncer>}}
+- At the same time it {{<sref block_sync "receives blocks">}}
     - Each block has an associated timestamp and epoch (quantized time window in which it was crafted)
-    - Blocks are validated as they come in during an epoch (provided it is their epoch, see {{<sref block "validation">}})
-- At the end of a given epoch, the miner should take all the valid blocks received for this epoch and assemble them into tipsets according to {{<sref tipset "tipset validation rules">}}
+    - Blocks are validated as they come in {{<sref block "validation">}})
+- After an epoch's "cutoff", the miner should take all the valid blocks received for this epoch and assemble them into tipsets according to {{<sref tipset "tipset validation rules">}}
 - The miner then attempts to mine atop the heaviest tipset (as calculated with {{<sref chain_selection "EC's weight function">}}) using its smallest ticket to run leader election
     - The miner runs an {{<sref election_post>}} on their sectors in order to generate partial tickets
     - The miner uses these tickets in order to run {{<sref leader_election>}}
         - if successful, the miner generates a new {{<sref tickets "randomness ticket">}} for inclusion in the block
-        - the miner then assembles a new block (see "block creation" below) and broadcasts it
+        - the miner then assembles a new block (see "block creation" below) and waits until this epoch's quantized timestamp to broadcast it 
 
-This process is repeated until either the {{<sref election_post>}} process yields a winning ticket (in EC) and a block published or a new valid {{<sref tipset>}} comes in from the network.
+This process is repeated until either the {{<sref election_post>}} process yields a winning ticket (in EC) and the miner publishes a block or a new valid block comes in from the network.
 
 At any height `H`, there are three possible situations:
 
@@ -38,17 +38,50 @@ At any height `H`, there are three possible situations:
 
 Anytime a miner receives new valid blocks, it should evaluate what is the heaviest Tipset it knows about and mine atop it.
 
-### Timing
+### Epoch Timing
 
 {{< diagram src="./diagrams/timing.png" title="Mining Cycle Timing" >}}
 
-The mining cycle relies on receiving and producing blocks concurrently.  The sequence of these events in time is given by the timing diagram above.  The upper row represents the conceptual consumption channel consisting of successive receiving periods `Rx` during which nodes validate and select blocks as chain heads.  The lower row is the conceptual production channel made up of a period of mining `M` followed by a period of transmission `Tx`.  The lengths of the periods are not to scale.
-
-Blocks are received and validated during `Rx` up to the end of the epoch.  At the beginning of the next epoch, the heaviest tipset is computed from the blocks received during `Rx`, used as the head to build on during `M`.  If mining is successful a block is transmitted during `Tx`.  The epoch boundaries are as shown.
-
-In a fully synchronized network most of period `Rx` does not see any network traffic, only the period lined up with `Tx`.  In practice we expect blocks from previous epochs to propagate during the remainder of `Rx`.  We also expect differences in operator mining time to cause additional variance.
+The timing diagram above describes the sequence of block creation "mining", propagation and reception.
 
 This sequence of events applies only when the node is in the `CHAIN_FOLLOW` syncing mode.  Nodes in other syncing modes do not mine blocks.
+
+The upper row represents the conceptual consumption channel consisting of successive receiving periods `Rx` during which nodes validate incoming blocks.
+The lower row is the conceptual production channel made up of a period of mining `M` followed by a period of transmission `Tx` (which lasts long enough for blocks to propagate throughout the network).  The lengths of the periods are not to scale.
+
+The above diagram represents the important events within an epoch:
+
+- **Epoch boundary**: change of current epoch. New blocks mined are mined in new epoch, and timestamped accordingly.
+- **Epoch cutoff**: blocks from the prior epoch propagated on the network are no longer accepted. Miners can form a new tipset to mine on.
+
+In an epoch, blocks are received and validated during `Rx` up to the prior epoch's cutoff. At the cutoff, the miner computes the heaviest tipset from the blocks received during `Rx`, and uses it as the head to build on during the next mining period `M`.  If mining is successful, the miner sets the block's timestamp to the epoch boundary and waits until the boundary to release the block. While some blocks could be submitted a bit later, blocks are all transmitted during `Tx`, the transmission period.
+
+The timing validation rules are as follows:
+
+- Blocks whose timestamps are not exactly on the epoch boundary are rejected.
+- Blocks received with a timestamp in the future are rejected.
+- Blocks received after the cutoff are rejected.
+    - Note that those blocks are not invalid, just not considered for the miner's own tipset building. Tipsets received with such a block as a parent should be accepted.
+
+In a fully synchronized network most of period `Rx` does not see any network traffic, only its beginning should. While there may be variance in operator mining time, most miners are expected to finish mining by the epoch boundary.
+
+Let's look at an example, both use a block-time of 30s, and a cutoff at 15s.
+
+- T = 0: start of epoch n
+- T in [0, 15]: miner A receives, validates and propagates incoming blocks. Valid blocks should have timestamp 0.
+- T = 15: epoch cutoff for n-1, A assembles the heaviest tipset and starts mining atop it.
+- T = 25: A successfully generates a block, sets its timestamp to 30, and waits until the epoch boundary (at 30) to release it.
+- T = 30: start of epoch n + 1, A releases its block for epoch n.
+- T in [30, 45]: A receives and validates incoming blocks, their timestamp is 30.
+- T = 45: epoch cutoff for n, A forms tipsets and starts mining atop the heaviest.
+- T = 60: start of epoch n + 2.
+- T in [60, 75]: A receives and validates incoming blocks
+- T = 67: A successfully generates a block, sets it timestamp to 60 and releases it.
+- T = 75: epoch cutoff for n+1...
+
+Above, in epoch n, A mines fast, in epoch n+1 A mines slow. So long as the miner's block is between the epoch boundary and the cutoff, it will be accepted by other miners.
+
+In practice miners should not be releasing blocks close to the epoch cutoff. Implementations may choose to locally randomize the exact time of the cutoff in order to prevent such behavior (while this means it may accept/reject blocks others do not, in practice this will not affect the miners submitting blocks on time).
 
 ## Full Miner Lifecycle
 
