@@ -1,0 +1,124 @@
+Utilities:
+  b_in_eib = (1024 * 1024 * 1024 * 1024 * 1024 * 1024)
+  b_in_pib = (1024 * 1024 * 1024 * 1024 * 1024)
+  b_in_tib = (1024 * 1024 * 1024 * 1024)
+  b_in_gib = (1024 * 1024 * 1024)
+  b_in_mib = (1024 * 1024)
+  gib_in_tib = 1024
+  gib_in_pib = 1024 * 1024
+  b_in_kib = 1024
+  secs_in_month = (24 * 60 * 60 * 30)
+  secs_in_year = (24  * 60 * 60 * 365)
+  secs_in_day = (24 * 60 * 60)
+  secs_in_min = (60)
+  tb_to_tib = (1024 * 1024 * 1024 * 1024) / (1000 * 1000 * 1000 * 1000)
+  gb_to_gib = (1024 * 1024 * 1024) / (1000 * 1000 * 1000)
+  mb_to_mib = (1024 * 1024) / (1000 * 1000)
+
+
+Rigs:
+  rig_memaccess_throughput_tib_s = rig_memaccess_throughput_tb_s * tb_to_tib
+  rig_memaccess_throughput_b_s = rig_memaccess_throughput_tib_s * b_in_tib
+  // rig_memaccess_throughput_access_s = rig_memaccess_throughput_b_s / node_size
+  // rig_memaccess_throughput_gaccess_s = rig_memaccess_throughput_access_s / (1000 * 1000 * 1000)  
+
+  rig_hashing_throughput_tib_s = rig_hashing_throughput_tb_s * tb_to_tib
+  rig_hashing_throughput_b_s = rig_hashing_throughput_tib_s * b_in_tib
+  // rig_hashing_throughput_hash_s = rig_hashing_throughput_b_s / node_size
+  // rig_hashing_throughput_ghash_s = rig_hashing_throughput_hash_s / (1000 * 1000 * 1000)  
+
+
+NSE:
+  PaperToUbercalc:
+    // T = windows
+    // d_e = expander_degree
+    // d_b = butterfly_degree
+    // l_e = expander_layers
+    // l_b = butterfly_layers
+    // l = l_e + l_b
+    // m = porep_challenges
+    // c = post_window_challenges
+    // N = window_nodes
+
+  Params:
+    describe(window_nodes, "Nodes in a window", nodes)
+    window_nodes = window_size / node_sequence_size
+    node_sequence_size = node_size * nodes_in_sequence
+    replica_nodes = window_nodes * windows
+    replica_size = window_size * windows
+
+    window_size = window_size_gib * b_in_gib
+
+  PoRep:
+    porep_soundness = expt(2, -porep_lambda)
+    layers = expander_layers + butterfly_layers
+    Commitment:
+      mtrees = expander_layers + butterfly_layers
+      mtree_depth = (log2(replica_nodes)/log2(mtree_hash_blocks))
+      commtree_time = (mtree_hash_time * replica_nodes) / mtree_hash_blocks)
+      comm_time = mtrees * commtree_time
+
+    SNARK:
+      avg_parents = (expander_degree + butterfly_degree)/2
+      // TODO: note this 
+      commr_inclusions = porep_challenges * (1 + avg_parents) 
+      commr_inclusion_constraints = mtree_hash_constraints * mtree_depth // this is log8(replica_nodes)
+      commr_inclusions_constraints = commr_inclusions * commr_inclusion_constraints
+
+      commd_inclusions = porep_challenges/layers
+      commd_inclusion_constraints = commd_hash_constraints * log2(replica_nodes)
+      commd_inclusions_constraints = commd_inclusions * commd_inclusion_constraints
+
+      // TODO: note this considers average!
+      labeling_constraints = porep_challenges * avg_parents * kdf_constraints
+
+      porep_constraints = labeling_constraints + commr_inclusions_constraints + commd_inclusions_constraints
+      porep_partitions = porep_constraints / snark_partition
+
+    Encoding:
+      describe(encoding_hashes, "Mem access during encoding", access)
+      Hashes:
+        describe(hashes_node_expander, "Number of 32-bytes blocks hashed per node in expander layers", hashes)
+        describe(hashes_node_butterfly, "Number of 32-bytes blocks hashed per node in butterfly layers", hashes)
+        describe(hashes_window, "Number of 32-bytes blocks hashes in a window", hashes)
+        describe(hashes_replica, "Number of 32-bytes blocks hashes in a replica", hashes)
+        describe(hashes_node, "Number of 32-bytes blocks hashes per node in all layers", hashes)
+
+        hashes_node_expander = expander_layers * expander_degree
+        hashes_node_butterfly = butterfly_layers * butterfly_degree
+
+        hashes_node = (hashes_node_expander + hashes_node_butterfly)
+
+        hashes_window = hashes_node * window_nodes
+        hashes_replica = hashes_window * windows
+
+        describe(memaccess_replica_time, "Time to hash required to encode replica", s)
+        describe(memaccess_window_time, "Time to hash required to encode window", s)
+        hashes_window_time = (hashes_window * node_size) / rig_hashing_throughput_b_s
+        hashes_replica_time = (hashes_replica * node_size) / rig_hashing_throughput_b_s
+
+        describe(hash_kdf_expander_size, "Size of a KDF hash for the expander layers", bytes)
+        describe(hash_kdf_butterfly_size, "Size of a KDF hash for the butterfly layers", bytes)
+        hash_kdf_expander_size = expander_degree * node_size
+        hash_kdf_butterfly_size = butterfly_degree * node_size
+
+        hash_kdf_expander = expander_degree
+        hash_kdf_butterfly = butterfly_degree
+
+      MemAccess:
+        describe(memaccess_window, "Number of 32-bytes mem access in a window", memaccess)
+        describe(memaccess_replica, "Number of 32-bytes mem access in a replica", memaccess)
+        describe(memaccess_node, "Number of 32-bytes blocks mem access per node in all layers", memaccess)
+
+        memaccess_node = hashes_node * nodes_in_sequence
+        memaccess_window = memaccess_node * window_nodes
+        memaccess_replica = memaccess_window * windows
+
+        describe(memaccess_replica_time, "Time to access memory required to encode replica", s)
+        describe(memaccess_window_time, "Time to access memory required to encode window", s)
+        memaccess_window_time = (memaccess_window * node_size) / rig_memaccess_throughput_b_s
+        memaccess_replica_time = (memaccess_replica * node_size) / rig_memaccess_throughput_b_s
+        
+  PoSt:
+    post_soundness = expt(2, -post_lambda)
+    post_challenges = windows * post_window_challenges
