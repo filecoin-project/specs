@@ -26,6 +26,12 @@ Rigs:
   rig_hashing_throughput_b_s = rig_hashing_throughput_tib_s * b_in_tib
   // rig_hashing_throughput_hash_s = rig_hashing_throughput_b_s / node_size
   // rig_hashing_throughput_ghash_s = rig_hashing_throughput_hash_s / (1000 * 1000 * 1000)  
+  describe(rig_cost_s, "Cost of running the rig for one second")
+  rig_cost_s = rig_cost / (rig_lifetime_years * secs_in_year)
+
+  rig_cost_storage_tib = rig_cost_storage_tb * tb_to_tib
+  rig_storage_cost_b = rig_cost_storage_tib * b_in_tib
+  rig_storage_cost_b_s = rig_storage_cost_b / (rig_storage_lifetime_years * secs_in_year)
 
 
 NSE:
@@ -52,6 +58,29 @@ NSE:
   PoRep:
     porep_soundness = expt(2, -porep_lambda)
     layers = expander_layers + butterfly_layers
+
+    Costs:
+      cost_replicate = porep_time_replicate * rig_cost_s
+      time_memaccess_node =  (node_size) / rig_memaccess_throughput_b_s
+      time_memaccess_sequence = time_memaccess_node * nodes_in_sequence
+      cost_memaccess_sequence = time_memaccess_sequence * rig_cost_s
+      cost_memaccess_node = time_memaccess_node * rig_cost_s
+
+      NSE:
+        gamma = 1 - spacegap
+        w = windows * (gamma + delta) / 0.9502 //pinsker
+
+        // Attacker's formula
+        memaccess_sequence_attack = ((windows - w -1)/spacegap) * (expander_layers - 2) * (1 - 0.0249) * window_nodes * expander_degree
+        
+        cost_attack_replica = memaccess_sequence_attack * cost_memaccess_sequence
+        cost_honest_replica = memaccess_replica * cost_memaccess_node
+        cost_honest_storage_day = rig_storage_cost_b_s *  secs_in_day / replica_size
+        cost_honest_storage_year = rig_storage_cost_b_s *  secs_in_year / replica_size
+
+        amax = cost_attack_replica / cost_honest_storage_day
+        describe(cost_honest_ratio, "Ratio of the cost of replica vs cost of storage for a year")
+        cost_honest_ratio = cost_honest_replica / cost_honest_storage_year
     Commitment:
       mtrees = expander_layers + butterfly_layers
       mtree_leaves = replica_nodes * mtrees
@@ -112,7 +141,7 @@ NSE:
         describe(memaccess_replica, "Number of 32-bytes mem access in a replica", memaccess)
         describe(memaccess_node, "Number of 32-bytes blocks mem access per node in all layers", memaccess)
 
-        memaccess_node = hashes_node * nodes_in_sequence
+        memaccess_node = (hashes_node_expander * nodes_in_sequence + hashes_node_butterfly)
         memaccess_window = memaccess_node * window_nodes
         memaccess_replica = memaccess_window * windows
 
