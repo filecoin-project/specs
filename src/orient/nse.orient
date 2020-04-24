@@ -42,7 +42,7 @@ NSE:
 
   Params:
     describe(window_nodes, "Nodes in a window", nodes)
-    window_nodes = window_size / node_sequence_size
+    window_nodes = window_size / node_size
     node_sequence_size = node_size * nodes_in_sequence
     replica_nodes = window_nodes * windows
     replica_size = window_size * windows
@@ -54,9 +54,10 @@ NSE:
     layers = expander_layers + butterfly_layers
     Commitment:
       mtrees = expander_layers + butterfly_layers
-      mtree_depth = (log2(replica_nodes)/log2(mtree_hash_blocks))
-      commtree_time = (mtree_hash_time * replica_nodes) / mtree_hash_blocks)
-      comm_time = mtrees * commtree_time
+      mtree_leaves = replica_nodes * mtrees
+      mtree_depth = (log2(mtree_leaves)/log2(mtree_hash_blocks))
+      commtree_time = (mtree_hash_time * mtree_leaves) / mtree_hash_blocks)
+      porep_time_commitment = commtree_time
 
     SNARK:
       avg_parents = (expander_degree + butterfly_degree)/2
@@ -74,6 +75,7 @@ NSE:
 
       porep_constraints = labeling_constraints + commr_inclusions_constraints + commd_inclusions_constraints
       porep_partitions = porep_constraints / snark_partition
+      porep_time_snark = snark_constraint_time * porep_constraints
 
     Encoding:
       describe(encoding_hashes, "Mem access during encoding", access)
@@ -118,7 +120,19 @@ NSE:
         describe(memaccess_window_time, "Time to access memory required to encode window", s)
         memaccess_window_time = (memaccess_window * node_size) / rig_memaccess_throughput_b_s
         memaccess_replica_time = (memaccess_replica * node_size) / rig_memaccess_throughput_b_s
+
+        porep_time_unseal = memaccess_window_time
+        porep_time_replicate = memaccess_replica_time
         
   PoSt:
     post_soundness = expt(2, -post_lambda)
     post_challenges = windows * post_window_challenges
+    post_partitions = post_constraints / snark_partition
+    post_time_snark = snark_constraint_time * post_constraints
+    SNARK:
+      post_constraints = commrlast_inclusions_constraints
+
+      commrlast_depth = log2(replica_nodes)/log2(mtree_hash_blocks)
+      commrlast_inclusions = post_challenges
+      commrlast_inclusion_constraints = mtree_hash_constraints * commrlast_depth // this is log8(replica_nodes)
+      commrlast_inclusions_constraints = commrlast_inclusions * commrlast_inclusion_constraints

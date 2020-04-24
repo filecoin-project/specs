@@ -26,7 +26,10 @@ combos = makeQuery([{
   })
   .add({
     rig_memaccess_throughput_tb_s:  3,
-    rig_hashing_throughput_tb_s: (0.0025 * 32)
+    rig_hashing_throughput_tb_s: 0.016 * 32
+  })
+  .add({
+    snark_constraint_time: 0.00000317488,
   })
   .compile()
 
