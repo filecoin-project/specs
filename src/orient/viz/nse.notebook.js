@@ -1,5 +1,5 @@
 combos = makeQuery([{
-  windows: 2048,
+  windows: 256,
   window_size_gib: 4,
   nodes_in_sequence: 8,
   post_window_challenges: 2,
@@ -8,7 +8,7 @@ combos = makeQuery([{
   expander_layers: 8,
   butterfly_layers: 7,
   porep_lambda: 10,
-  porep_challenges: 2080,
+  // porep_challenges: 2080,
   node_size: 32,
   snark_partition: 100000000
 }])
@@ -34,10 +34,19 @@ combos = makeQuery([{
   })
   .add({
     snark_constraint_time: 0.00000317488,
+    snark_size: 192
   })
   .add({
     spacegap: 0.15,
     delta: 0.05
+  })
+  .add({
+    proving_period_hours: 24,
+  })
+  .add({
+    network_size_eib: 10,
+    block_time: 30,
+    tipset_size: 5,
   })
   .compile()
 

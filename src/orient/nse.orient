@@ -10,6 +10,7 @@ Utilities:
   secs_in_month = (24 * 60 * 60 * 30)
   secs_in_year = (24  * 60 * 60 * 365)
   secs_in_day = (24 * 60 * 60)
+  secs_in_hour = (60 * 60)
   secs_in_min = (60)
   tb_to_tib = (1024 * 1024 * 1024 * 1024) / (1000 * 1000 * 1000 * 1000)
   gb_to_gib = (1024 * 1024 * 1024) / (1000 * 1000 * 1000)
@@ -30,8 +31,8 @@ Rigs:
   rig_cost_s = rig_cost / (rig_lifetime_years * secs_in_year)
 
   rig_cost_storage_tib = rig_cost_storage_tb * tb_to_tib
-  rig_storage_cost_b = rig_cost_storage_tib * b_in_tib
-  rig_storage_cost_b_s = rig_storage_cost_b / (rig_storage_lifetime_years * secs_in_year)
+  rig_cost_storage_tib = rig_cost_storage_b * b_in_tib
+  rig_cost_storage_b_s = rig_cost_storage_b / (rig_storage_lifetime_years * secs_in_year)
 
 
 NSE:
@@ -58,6 +59,7 @@ NSE:
   PoRep:
     porep_soundness = expt(2, -porep_lambda)
     layers = expander_layers + butterfly_layers
+    porep_challenges = -porep_lambda / log2(1- delta / layers)
 
     Costs:
       cost_replicate = porep_time_replicate * rig_cost_s
@@ -70,15 +72,16 @@ NSE:
         gamma = 1 - spacegap
         w = windows * (gamma + delta) / 0.9502 //pinsker
 
-        // Attacker's formula
-        memaccess_sequence_attack = ((windows - w -1)/spacegap) * (expander_layers - 2) * (1 - 0.0249) * window_nodes * expander_degree
+        // Attacker's formula TODO: note that expander_layers are - 2 but we count them as -1
+        memaccess_sequence_attack = ((windows - w -1)/spacegap) * (expander_layers - 1) * (1 - 0.0249) * window_nodes * expander_degree
         
         cost_attack_replica = memaccess_sequence_attack * cost_memaccess_sequence
         cost_honest_replica = memaccess_replica * cost_memaccess_node
-        cost_honest_storage_day = rig_storage_cost_b_s *  secs_in_day / replica_size
-        cost_honest_storage_year = rig_storage_cost_b_s *  secs_in_year / replica_size
+        cost_honest_storage_proving_period = rig_cost_storage_b_s * proving_period_hours * secs_in_hour * replica_size
+        cost_honest_storage_proving_period_node = rig_cost_storage_b_s *  proving_period_hours * secs_in_hour * 32
+        cost_honest_storage_year = rig_cost_storage_b_s *  secs_in_year * replica_size
 
-        amax = cost_attack_replica / cost_honest_storage_day
+        amax = cost_attack_replica / cost_honest_storage_proving_period
         describe(cost_honest_ratio, "Ratio of the cost of replica vs cost of storage for a year")
         cost_honest_ratio = cost_honest_replica / cost_honest_storage_year
     Commitment:
@@ -158,6 +161,7 @@ NSE:
     post_challenges = windows * post_window_challenges
     post_partitions = post_constraints / snark_partition
     post_time_snark = snark_constraint_time * post_constraints
+    post_proof_size = post_partitions * snark_size
     SNARK:
       post_constraints = commrlast_inclusions_constraints
 
@@ -165,3 +169,11 @@ NSE:
       commrlast_inclusions = post_challenges
       commrlast_inclusion_constraints = mtree_hash_constraints * commrlast_depth // this is log8(replica_nodes)
       commrlast_inclusions_constraints = commrlast_inclusions * commrlast_inclusion_constraints
+
+Filecoin:
+  network_size_b = network_size_eib * b_in_eib
+  sectors = network_size_b / replica_size
+  network_proof_size_in_pp = sectors * post_proof_size 
+  blocks_in_proving_period = tipset_size * (proving_period_hours * secs_in_hour) / block_time
+  proofs_in_block = network_proof_size_in_pp / blocks_in_proving_period
+  proofs_in_block_kib = proofs_in_block / b_in_kib
