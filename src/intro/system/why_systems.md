@@ -25,7 +25,7 @@ This decoupling is useful for:
 - **Security Isolation:** some systems require higher operational security than others. System decoupling allows
   implementations to meet their security and functionality needs. A good example of this is separating Blockchain
   processing from Data Transfer.
-- **Scalability:** systems and various use cases may drive different performance requirements for different opertators.
+- **Scalability:** systems, and various use cases, may drive different performance requirements for different opertators.
   System decoupling makes it easier for operators to scale their deployments along system boundaries.
 
 
