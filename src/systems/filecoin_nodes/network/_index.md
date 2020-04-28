@@ -23,7 +23,7 @@ Here is the list of libp2p protocols used by Filecoin.
 	- Spec TODO [reference implementation](https://github.com/libp2p/go-libp2p-kad-dht)
 	- The protocol id must be of the form `fil/<network-name>/kad/1.0.0`
 - Bootstrap List: 
-	- Bootstrap is a list of nodes that a new node attempts to connect upon joining the network. The list of bootstrap nodes and their addresses are defined by the users.
+	- Bootstrap is a list of nodes that a new node attempts to connect to upon joining the network. The list of bootstrap nodes and their addresses are defined by the users.
 - Peer Exchange: 
 	- Peer Exchange is a discovery protocol enabling peers to create and issue queries for desired peers against their existing peers
 	- spec [TODO](https://github.com/libp2p/specs/issues/222)
