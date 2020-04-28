@@ -301,7 +301,7 @@ State Machine:
   - `ChainSync` MUST drop back to another state if security conditions change.
   - Keep a set of gap measures:
     - `BlockGap` is the number of remaining blocks to validate between the Validated blocks and `BestTargetHead`.
-      - (ie how many epochs do we need to validate to have validated `BestTargetHead`. does not include null blocks)
+      - (ie how many epochs do we need to validate to have validated `BestTargetHead`, does not include null blocks)
     - `EpochGap` is the number of epochs between the latest validated block, and `BestTargetHead` (includes null blocks).
     - `MaxBlockGap = 2`, which means how many blocks may `ChainSync` fall behind on before switching back to `CHAIN_CATCHUP` (does not include null blocks)
     - `MaxEpochGap = 10`, which means how many epochs may `ChainSync` fall behind on before switching back to `CHAIN_CATCHUP` (includes null blocks)
