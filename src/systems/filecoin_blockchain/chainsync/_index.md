@@ -271,7 +271,7 @@ State Machine:
     - No new blocks are reported to consumers/users of `ChainSync` yet.
     - The chain state provided is the available `Blocks` and `StateTree` for all available epochs,
       specially the `FinalityTipset`.
-    - finality must not move forward here because there are serious attack vectors where a node can be forced to end up on the wrong fork if finality advances before validation is complete up to the block production fringe.
+    - Finality must not move forward here because there are serious attack vectors where a node can be forced to end up on the wrong fork if finality advances before validation is complete up to the block production fringe.
   - Validation must advance, all the way to the block production fringe:
     - Validate the whole chain, from `FinalityTipset` to `BestTargetHead`
     - The node can reach `BestTargetHead` only to find out it was invalid, then has to update `BestTargetHead` with next best one, and sync to it
