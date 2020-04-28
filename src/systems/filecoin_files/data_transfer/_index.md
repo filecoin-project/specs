@@ -89,7 +89,7 @@ The pull flow is ideal for retrieval deals, where the client initiates the pull 
 
 # Protocol
 
-A data transfer CAN be negotiated over the network via the {{<sref data_transfer_protocol "Data Transfer Protocol">}}, a Libp2p protocol type
+A data transfer CAN be negotiated over the network via the {{<sref data_transfer_protocol "Data Transfer Protocol">}}, a libp2p protocol type
 
 A Pull request expects a response. The requestor does not initiate the transfer
 until they know the request is accepted.
