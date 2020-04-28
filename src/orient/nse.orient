@@ -49,6 +49,7 @@ NSE:
 
   Params:
     describe(window_nodes, "Nodes in a window", nodes)
+    describe(node_size, "Size of a node in the graph", bytes)
     window_nodes = window_size / node_size
     node_sequence_size = node_size * nodes_in_sequence
     replica_nodes = window_nodes * windows
@@ -156,6 +157,8 @@ NSE:
         memaccess_window_time = (memaccess_window * node_size) / rig_memaccess_throughput_b_s
         memaccess_replica_time = (memaccess_replica * node_size) / rig_memaccess_throughput_b_s
 
+        describe(porep_time_unseal, "Time to unseal 4GiB", seconds)
+        describe(porep_time_unseal, "Time to unseal 4GiB", seconds)
         porep_time_unseal = memaccess_window_time
         porep_time_replicate = memaccess_replica_time
         
