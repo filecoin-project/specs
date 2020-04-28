@@ -16,6 +16,9 @@ Utilities:
   gb_to_gib = (1024 * 1024 * 1024) / (1000 * 1000 * 1000)
   mb_to_mib = (1024 * 1024) / (1000 * 1000)
 
+Crypto:
+  describe(snark_constraint_time, "Time to prove a single constraint in a SNARK", seconds)
+  describe(snark_size, "Size of a single SNARK partition", bytes)
 
 Rigs:
   rig_memaccess_throughput_tib_s = rig_memaccess_throughput_tb_s * tb_to_tib
@@ -53,10 +56,15 @@ NSE:
     window_nodes = window_size / node_size
     node_sequence_size = node_size * nodes_in_sequence
     replica_nodes = window_nodes * windows
+    describe(replica_size, "Size of the replica", bytes)
     replica_size = window_size * windows
+    describe(replica_size_gib, "Size of the replica", gib)
     replica_size_gib = replica_size / b_in_gib
+    describe(replica_size_tib, "Size of the replica", tib)
     replica_size_tib = replica_size / b_in_tib
 
+    describe(window_size, "Size of a window", bytes)
+    describe(window_size_gib, "Size of a window", gib)
     window_size = window_size_gib * b_in_gib
 
   PoRep:
@@ -66,9 +74,13 @@ NSE:
 
     Costs:
       cost_replicate = porep_time_replicate * rig_cost_s
+      describe(time_memaccess_node, "Time of a memory access (32 bytes)", seconds)
       time_memaccess_node =  (node_size) / rig_memaccess_throughput_b_s
+      describe(time_memaccess_sequence, "Time of a memory access (256 bytes)", seconds)
       time_memaccess_sequence = time_memaccess_node * nodes_in_sequence
+      describe(cost_memaccess_node, "Cost of a memory access (256 bytes)", dollars)
       cost_memaccess_sequence = time_memaccess_sequence * rig_cost_s
+      describe(cost_memaccess_node, "Cost of a single memory access (32 bytes)", dollars)
       cost_memaccess_node = time_memaccess_node * rig_cost_s
 
       NSE:
@@ -76,12 +88,18 @@ NSE:
         w = windows * (gamma + delta) / 0.9502 //pinsker
 
         // Attacker's formula TODO: note that expander_layers are - 2 but we count them as -1
+        describe(memaccess_sequence_attack, "Memaccess (of 256 bytes) in an attack", memaccess)
         memaccess_sequence_attack = ((windows - w -1)/spacegap) * (expander_layers - 1) * (1 - 0.0249) * window_nodes * expander_degree
         
+        describe(cost_attack_replica, "Cost to attack", dollars)
         cost_attack_replica = memaccess_sequence_attack * cost_memaccess_sequence
+        describe(cost_honest_replica, "Cost to encode a replica", dollars)
         cost_honest_replica = memaccess_replica * cost_memaccess_node
+        describe(cost_honest_storage_proving_period, "Cost of storage during a proving period", dollars)
         cost_honest_storage_proving_period = rig_cost_storage_b_s * proving_period_hours * secs_in_hour * replica_size
+        describe(cost_honest_storage_proving_period_node, "Cost of storing an individual node in a proving period", dollars)
         cost_honest_storage_proving_period_node = rig_cost_storage_b_s *  proving_period_hours * secs_in_hour * 32
+        describe(cost_honest_storage_year, "Cost of storing the replica for a year", dollars)
         cost_honest_storage_year = rig_cost_storage_b_s *  secs_in_year * replica_size
 
         amax = cost_attack_replica / cost_honest_storage_proving_period
@@ -91,10 +109,18 @@ NSE:
       mtrees = expander_layers + butterfly_layers
       mtree_leaves = replica_nodes * mtrees
       mtree_depth = (log2(mtree_leaves)/log2(mtree_hash_blocks))
+      describe(commtree_time, "Time to generate the commitments during PoRep", seconds)
       commtree_time = (mtree_hash_time * mtree_leaves) / mtree_hash_blocks)
+      describe(porep_time_commitment, "Time to generate the commitments during porep", seconds)
       porep_time_commitment = commtree_time
+      porep_time_commitment_mins = porep_time_commitment / secs_in_min
+      porep_time_commitment_s_per_gb = porep_time_commitment / replica_size_gib
+      porep_time_commitment_mins_per_gb = porep_time_commitment_mins / replica_size_gib
 
     SNARK:
+      describe(expander_degree, "Number of expander parents", parents)
+      describe(butterfly_degree, "Number of butterfly parents", parents)
+      describe(avg_parents, "Average number of parents", parents)
       avg_parents = (expander_degree + butterfly_degree)/2
       // TODO: note this 
       commr_inclusions = porep_challenges * (1 + avg_parents) 
@@ -110,8 +136,15 @@ NSE:
 
       porep_constraints = labeling_constraints + commr_inclusions_constraints + commd_inclusions_constraints
       porep_partitions = porep_constraints / snark_partition
+      describe(porep_size_snark, "Size of a PoRep SNARK", bytes)
       porep_size_snark = porep_partitions * snark_size
+      describe(porep_time_snark, "Time to generate a PoRep SNARK proof", seconds)
       porep_time_snark = snark_constraint_time * porep_constraints
+      describe(porep_time_snark_mins, "Time to generate a PoRep SNARK proof", mins)
+      porep_time_snark_mins = porep_time_snark / secs_in_min
+      describe(porep_time_snark_s_per_gib, "Time to generate a SNARK per GiB", seconds)
+      porep_time_snark_s_per_gib = porep_time_snark / replica_size_gib
+      porep_time_snark_mins_per_gib = porep_time_snark_mins / replica_size_gib
 
     Encoding:
       describe(encoding_hashes, "Mem access during encoding", access)
@@ -130,8 +163,8 @@ NSE:
         hashes_window = hashes_node * window_nodes
         hashes_replica = hashes_window * windows
 
-        describe(memaccess_replica_time, "Time to hash required to encode replica", s)
-        describe(memaccess_window_time, "Time to hash required to encode window", s)
+        describe(memaccess_replica_time, "Time to hash required to encode replica", seconds)
+        describe(memaccess_window_time, "Time to hash required to encode window", seconds)
         hashes_window_time = (hashes_window * node_size) / rig_hashing_throughput_b_s
         hashes_replica_time = (hashes_replica * node_size) / rig_hashing_throughput_b_s
 
@@ -152,21 +185,23 @@ NSE:
         memaccess_window = memaccess_node * window_nodes
         memaccess_replica = memaccess_window * windows
 
-        describe(memaccess_replica_time, "Time to access memory required to encode replica", s)
-        describe(memaccess_window_time, "Time to access memory required to encode window", s)
+        describe(memaccess_replica_time, "Time to access memory required to encode replica", seconds)
+        describe(memaccess_window_time, "Time to access memory required to encode window", seconds)
         memaccess_window_time = (memaccess_window * node_size) / rig_memaccess_throughput_b_s
         memaccess_replica_time = (memaccess_replica * node_size) / rig_memaccess_throughput_b_s
 
-        describe(porep_time_unseal, "Time to unseal 4GiB", seconds)
-        describe(porep_time_unseal, "Time to unseal 4GiB", seconds)
+        describe(porep_time_unseal, "Time to unseal window", seconds)
         porep_time_unseal = memaccess_window_time
+        describe(porep_time_replicate, "Time to replicate", seconds)
         porep_time_replicate = memaccess_replica_time
         
   PoSt:
     post_soundness = expt(2, -post_lambda)
     post_challenges = windows * post_window_challenges
     post_partitions = post_constraints / snark_partition
+    describe(post_time_snark, "Time to generate a PoSt SNARK", seconds)
     post_time_snark = snark_constraint_time * post_constraints
+    describe(post_proof_size, "Size of a PoSt SNARK proof", bytes)
     post_proof_size = post_partitions * snark_size
 
 
@@ -183,6 +218,7 @@ Filecoin:
   network_sectors = network_size / replica_size
   describe(network_post_size_in_pp, "Size of PoSt proofs in a proving period")
   describe(blocks_in_pp, "Number of blocks in a proving period")
+  describe(proving_period_hours, "Duration of a proving period", seconds)
   blocks_in_pp = tipset_size * (proving_period_hours * secs_in_hour) / block_time
   blocks_in_year = tipset_size * (secs_in_year) / block_time
   Proofs:
@@ -190,10 +226,11 @@ Filecoin:
       wpost_sectors = snark_partition / post_constraints
       describe(wpost_storage_tib, "Amount of storage proven in a WindowPoSt proof", tib)
       wpost_storage_tib = wpost_sectors * replica_size_tib
-      describe(wpost_footprint_b_per_tib_stored, "Size of proof (in bytes) for 1 TiB stored in WindowPoSt")
+
+      describe(wpost_footprint_b_per_tib_stored, "PoSt on-chain footprint per TiB", bytes)
       wpost_footprint_b_per_tib_stored = snark_size / wpost_storage_tib 
-      describe(porep_footprint_b_per_tib_stored, "Size of proof (in bytes) for 1 TiB stored in PoRep")
       porep_footprint_b_per_tib_stored = porep_size_snark / replica_size_tib 
+      describe(porep_footprint_b_per_gib_stored, "PoRep on-chain footprint per GiB", bytes)
       porep_footprint_b_per_gib_stored = porep_size_snark / replica_size_gib
       PoSt:
         pp_in_year = secs_in_year / (proving_period_hours * secs_in_hour)
