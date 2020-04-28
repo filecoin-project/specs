@@ -94,7 +94,7 @@ A data transfer CAN be negotiated over the network via the {{<sref data_transfer
 A Pull request expects a response. The requestor does not initiate the transfer
 until they know the request is accepted.
 
-The responder should send a response to a push request as well so the requestor can release the resources (if not accepted). However, if the Responder accepts the request they can immediately initiate the transfer
+The responder should send a response to a push request as well so the requestor can release the resources (if not accepted). However, if the Responder accepts the request they can immediately initiate the transfer.
 
 Using the Data Transfer Protocol as an independent libp2p communciation mechanism is not a hard requirement -- as long as both parties have an implementation of the Data Transfer Subsystem that can talk to the other, any
 transport mechanism (including offline mechanisms) is acceptable.
