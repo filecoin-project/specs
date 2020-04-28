@@ -44,7 +44,7 @@ Further, Systems MUST abide by the following limitations:
   and through the use of initialization routines that check state, and perhaps correct errors.
 - **Isolation.** Systems must communicate over well-defined, isolated interfaces. They must not build their critical
   functionality over a shared memory space. (Note: for performance, shared memory abstractions can be used to power
-  IpldStore, FileStore, and libp2p, but the systems themselves should not require it). This is not just an operational
+  IpldStore, FileStore, and libp2p, but the systems themselves should not require it.) This is not just an operational
   concern; it also significantly simplifies the protocol and makes it easier to understand, analyze, debug, and change.
 - **No direct access to host OS Filesystem or Disk.** Systems cannot access disks directly -- they do so over the FileStore
   and IpldStore abstractions. This is to provide a high degree of portability and flexibility for end-users, especially
