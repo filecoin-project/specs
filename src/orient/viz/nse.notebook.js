@@ -46,7 +46,7 @@ combos = makeQuery([{
   .add({
     network_size_eib: 10,
     block_time: 30,
-    tipset_size: 5,
+    tipset_size: 1,
   })
   .compile()
 

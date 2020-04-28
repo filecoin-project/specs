@@ -53,6 +53,8 @@ NSE:
     node_sequence_size = node_size * nodes_in_sequence
     replica_nodes = window_nodes * windows
     replica_size = window_size * windows
+    replica_size_gib = replica_size / b_in_gib
+    replica_size_tib = replica_size / b_in_tib
 
     window_size = window_size_gib * b_in_gib
 
@@ -107,6 +109,7 @@ NSE:
 
       porep_constraints = labeling_constraints + commr_inclusions_constraints + commd_inclusions_constraints
       porep_partitions = porep_constraints / snark_partition
+      porep_size_snark = porep_partitions * snark_size
       porep_time_snark = snark_constraint_time * porep_constraints
 
     Encoding:
@@ -162,6 +165,8 @@ NSE:
     post_partitions = post_constraints / snark_partition
     post_time_snark = snark_constraint_time * post_constraints
     post_proof_size = post_partitions * snark_size
+
+
     SNARK:
       post_constraints = commrlast_inclusions_constraints
 
@@ -171,9 +176,32 @@ NSE:
       commrlast_inclusions_constraints = commrlast_inclusions * commrlast_inclusion_constraints
 
 Filecoin:
-  network_size_b = network_size_eib * b_in_eib
-  sectors = network_size_b / replica_size
-  network_proof_size_in_pp = sectors * post_proof_size 
-  blocks_in_proving_period = tipset_size * (proving_period_hours * secs_in_hour) / block_time
-  proofs_in_block = network_proof_size_in_pp / blocks_in_proving_period
-  proofs_in_block_kib = proofs_in_block / b_in_kib
+  network_size = network_size_eib * b_in_eib
+  network_sectors = network_size / replica_size
+  describe(network_post_size_in_pp, "Size of PoSt proofs in a proving period")
+  describe(blocks_in_pp, "Number of blocks in a proving period")
+  blocks_in_pp = tipset_size * (proving_period_hours * secs_in_hour) / block_time
+  blocks_in_year = tipset_size * (secs_in_year) / block_time
+  Proofs:
+      describe(wpost_sectors, "Sectors proven in a WindowPoSt proof")
+      wpost_sectors = snark_partition / post_constraints
+      describe(wpost_storage_tib, "Amount of storage proven in a WindowPoSt proof", tib)
+      wpost_storage_tib = wpost_sectors * replica_size_tib
+      describe(wpost_footprint_b_per_tib_stored, "Size of proof (in bytes) for 1 TiB stored in WindowPoSt")
+      wpost_footprint_b_per_tib_stored = snark_size / wpost_storage_tib 
+      describe(porep_footprint_b_per_tib_stored, "Size of proof (in bytes) for 1 TiB stored in PoRep")
+      porep_footprint_b_per_tib_stored = porep_size_snark / replica_size_tib 
+      porep_footprint_b_per_gib_stored = porep_size_snark / replica_size_gib
+      PoSt:
+        pp_in_year = secs_in_year / (proving_period_hours * secs_in_hour)
+        network_post_size_in_year = network_post_size_in_pp * pp_in_year
+        network_post_size_in_year_gib = network_post_size_in_year / b_in_gib
+        network_post_size_in_pp = network_sectors * post_proof_size 
+        network_post_partitions_in_block = network_post_size_in_block / snark_size
+        network_post_size_in_block = network_post_size_in_pp / blocks_in_pp
+        network_post_size_in_block_kib = network_post_size_in_block / b_in_kib
+      PoRep:
+        network_porep_size = network_sectors * porep_size_snark
+        network_porep_size_gib = network_porep_size / b_in_gib
+        network_porep_size_in_block = network_porep_size / blocks_in_year
+
