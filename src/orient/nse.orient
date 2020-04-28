@@ -37,8 +37,20 @@ Rigs:
   rig_cost_storage_tib = rig_cost_storage_b * b_in_tib
   rig_cost_storage_b_s = rig_cost_storage_b / (rig_storage_lifetime_years * secs_in_year)
 
+PoRep:
+  describe(replica_size_gib, "Size of the replica", gib)
+  replica_size_gib = replica_size / b_in_gib
+  describe(replica_size_tib, "Size of the replica", tib)
+  replica_size_tib = replica_size / b_in_tib
 
-NSE:
+PoRepSDR (SDR):
+  describe(porep_size_snark, "Size of a PoRep SNARK", bytes)
+  porep_size_snark = porep_partitions * snark_size
+  describe(post_proof_size, "Size of a PoSt SNARK proof", bytes)
+  post_proof_size = post_partitions * snark_size
+  post_partitions = post_constraints / snark_partition
+
+PoRepNSE (NSE):
   PaperToUbercalc:
     // T = windows
     // d_e = expander_degree
@@ -58,10 +70,6 @@ NSE:
     replica_nodes = window_nodes * windows
     describe(replica_size, "Size of the replica", bytes)
     replica_size = window_size * windows
-    describe(replica_size_gib, "Size of the replica", gib)
-    replica_size_gib = replica_size / b_in_gib
-    describe(replica_size_tib, "Size of the replica", tib)
-    replica_size_tib = replica_size / b_in_tib
 
     describe(window_size, "Size of a window", bytes)
     describe(window_size_gib, "Size of a window", gib)
@@ -207,7 +215,6 @@ NSE:
 
     SNARK:
       post_constraints = commrlast_inclusions_constraints
-
       commrlast_depth = log2(replica_nodes)/log2(mtree_hash_blocks)
       commrlast_inclusions = post_challenges
       commrlast_inclusion_constraints = mtree_hash_constraints * commrlast_depth // this is log8(replica_nodes)
@@ -232,7 +239,11 @@ Filecoin:
       porep_footprint_b_per_tib_stored = porep_size_snark / replica_size_tib 
       describe(porep_footprint_b_per_gib_stored, "PoRep on-chain footprint per GiB", bytes)
       porep_footprint_b_per_gib_stored = porep_size_snark / replica_size_gib
-      PoSt:
+
+      network_proofs_size_in_year = network_post_size_in_year + network_porep_size
+      network_proofs_size_in_year_gib = network_proofs_size_in_year / b_in_gib
+
+      PoStNetwork:
         pp_in_year = secs_in_year / (proving_period_hours * secs_in_hour)
         network_post_size_in_year = network_post_size_in_pp * pp_in_year
         network_post_size_in_year_gib = network_post_size_in_year / b_in_gib
@@ -240,8 +251,10 @@ Filecoin:
         network_post_partitions_in_block = network_post_size_in_block / snark_size
         network_post_size_in_block = network_post_size_in_pp / blocks_in_pp
         network_post_size_in_block_kib = network_post_size_in_block / b_in_kib
-      PoRep:
+      PoRepNetwork:
+        network_porep_size_in_block = network_porep_size_in_block_kib * b_in_kib
         network_porep_size = network_sectors * porep_size_snark
         network_porep_size_gib = network_porep_size / b_in_gib
         network_porep_size_in_block = network_porep_size / blocks_in_year
+        end = 1
 

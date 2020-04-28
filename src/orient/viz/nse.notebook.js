@@ -1,49 +1,53 @@
-combos = makeQuery([{
-  windows: 256,
-  window_size_gib: 4,
-  nodes_in_sequence: 8,
-  post_window_challenges: 2,
-  expander_degree: 384,
-  butterfly_degree: 16,
-  expander_layers: 8,
-  butterfly_layers: 7,
-  porep_lambda: 10,
-  // porep_challenges: 2080,
-  node_size: 32,
-  snark_partition: 100000000
-}])
-  .add({
-    mtree_hash_name: 'poseidon',
-    mtree_hash_time: 8.3e-7, // ((8/7)*(2^27/8 -1))*32*8, // GPU 4s per GiB // CPU 5.803e-5,
-    mtree_hash_blocks: 8,
-    mtree_hash_constraints: 508 + 56,
-    kdf_constraints: 25849/2
-  })
-  .add({
-    commd_hash_name: 'sha',
-    commd_hash_constraints: 25840,
-    commd_hash_time: 130e-9,
-  })
-  .add({
+combos = makeQuery([
+  {
+    windows: 256,
+    window_size_gib: 4,
+    nodes_in_sequence: 8,
+    post_window_challenges: 2,
+    expander_degree: 384,
+    butterfly_degree: 16,
+    expander_layers: 8,
+    butterfly_layers: 7,
+    porep_lambda: 10,
+    spacegap: 0.15,
+    delta: 0.05,
+
     rig_memaccess_throughput_tb_s:  3,
     rig_hashing_throughput_tb_s: 0.016 * 32,
     rig_lifetime_years: 2,
     rig_cost: 2000,
     rig_storage_lifetime_years: 2,
-    rig_cost_storage_tb: 15
+    rig_cost_storage_tb: 15,
+
+    "!NSE": true
+  },
+  {
+    replica_size_gib: 32,
+    porep_partitions: 9,
+    wpost_sectors: 2350,
+    "!SDR": true
+  },
+])
+  .add({
+    mtree_hash_name: 'poseidon',
+    mtree_hash_time: 8.3e-7, // ((8/7)*(2^27/8 -1))*32*8, // GPU 4s per GiB // CPU 5.803e-5,
+    mtree_hash_blocks: 8,
+    mtree_hash_constraints: 508 + 56,
+    kdf_constraints: 25849/2,
+    commd_hash_name: 'sha',
+    commd_hash_constraints: 25840,
+    commd_hash_time: 130e-9,
   })
   .add({
+  })
+  .add({
+    node_size: 32,
+    snark_partition: 100000000,
     snark_constraint_time: 0.00000317488,
     snark_size: 192
   })
   .add({
-    spacegap: 0.15,
-    delta: 0.05
-  })
-  .add({
     proving_period_hours: 24,
-  })
-  .add({
     network_size_eib: 10,
     block_time: 30,
     tipset_size: 1,
