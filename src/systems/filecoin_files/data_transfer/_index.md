@@ -53,7 +53,7 @@ or potentially the same round trip, where the requesting party implicitly agrees
 8. The responder completes receiving data, and notifies any listeners
 
 The push flow is ideal for storage deals, where the client initiates the push
-once it verifies the the deal is signed and on chain
+once it verifies the deal is signed and on chain
 
 ## Pull Flow
 
