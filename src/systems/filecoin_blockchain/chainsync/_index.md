@@ -289,7 +289,7 @@ State Machine:
 - **transitions out:**
   - once gaps between `ChainSync.FinalityTipset ... ChainSync.TargetHeads` are closed: move to `CHAIN_FOLLOW`
   - (Perhaps moving to `CHAIN_FOLLOW` when 1-2 blocks back in validation may be ok.
-    - we dont know we have the right head until we validate it, so if other heads of similar height are right/better, we wont know till then.)
+    - we dont know we have the right head until we validate it, so if other heads of similar height are right/better, we won't know till then.)
 
 ## ChainSync FSM: `CHAIN_FOLLOW`
 
@@ -325,7 +325,7 @@ State Machine:
 ## Notes on changing `TargetHeads` while syncing
 
 - `TargetHeads` is changing, as `ChainSync` must be aware of the best heads at any time. reorgs happen, and our first set of peers could've been bad, we keep discovering others.
-  - Hello protocol is good, but it's polling. unless node is constantly polllng, wont see all the heads.
+  - Hello protocol is good, but it's polling. unless node is constantly polllng, won't see all the heads.
   - `BlockPubsub` gives us the realtime view into what's actually going on.
   - weight can also be close between 2+ possible chains (long-forked), and `ChainSync` must select the right one (which, we may not be able to distinguish until validating all the way)
 - fetching + validation are strictly faster per round on average than blocks produced/block time (if they're not, will always fall behind), so we definitely catch up eventually (and even quickly). the last couple rounds can be close ("almost got it, almost got it, there").
