@@ -33,7 +33,7 @@ For anything that is not part of the currently speced systems (like 'repair', fo
   - (Note: these drafts will give way to FIPs in the future)
 - **(3) Seek approval to merge this into the specification.**
   - To seek approval, open an issue and discuss it.
-  - If the draft approved by the owners of the filecoin-spec, then the changes to the spec will need to be made in a PR.
+  - If the draft is approved by the owners of the filecoin-spec, then the changes to the spec will need to be made in a PR.
   - Once changes make it into the spec, remove the draft.
 
 It is acceptable for a PR for a draft to stay open for quite a while, as thought and discussion on the topic happens. At some point, if the reviewers and the author feel that the current state of the draft is stable enough (though not 'done') then it should be merged into the repo. Further changes to the draft are additional PRs, which may generate more discussion. Comments on these drafts are welcome from anyone, but if you wish to be involved in the actual research process, you will need to devote very considerable time and energy to the process.
