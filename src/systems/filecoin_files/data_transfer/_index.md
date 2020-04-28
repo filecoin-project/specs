@@ -83,7 +83,7 @@ The pull flow is ideal for retrieval deals, where the client initiates the pull 
 5. The requestors' data transfer module will send a pull request to the responder along with the data transfer voucher.
 6. The responder's data transfer module validates the data transfer request via a PullValidator provided as a dependency by the responder
 7. The responder's data transfer module schedules the transfer
-8. The responder sends a graphsync response along with a data transfer accepted response piggypacked
+8. The responder sends a graphsync response along with a data transfer accepted response piggybacked
 9. The requestor receives data and can produce an indication of progress
 10. The requestor completes receiving data, and notifies any listeners
 
