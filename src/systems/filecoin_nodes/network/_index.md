@@ -15,7 +15,7 @@ Here is the list of libp2p protocols used by Filecoin.
 	- [Draft spec](https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md)
 	- No filecoin specific modifications to the protocol id
 - Gossipsub: 
-	- block headers and messages are broadcasted through a Gossip PubSub protocol where nodes can subscribe to topics for blockchain data and receive messages in those topics. When receiving messages related to a topic, nodes processes the message and forwards it to its peers who also subscribed to the same topic.  
+	- block headers and messages are broadcasted through a Gossip PubSub protocol where nodes can subscribe to topics for blockchain data and receive messages in those topics. When receiving messages related to a topic, nodes processes the message and forward it to peers who also subscribed to the same topic.
 	- Spec is [here](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub)
 	- No filecoin specific modifications to the protocol id.  However the topic identifiers MUST be of the form `fil/blocks/<network-name>` and `fil/msgs/<network-name>`
 - KademliaDHT: 
