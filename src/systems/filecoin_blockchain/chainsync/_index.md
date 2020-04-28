@@ -385,7 +385,7 @@ Notes:
       - `sender` is a filecoin node running `ChainSync`, propagating a block via Gossipsub
         (as the originator, as another peer in the network, or just a Gossipsub router).
       - `receiver` is the local filecoin node running `ChainSync`, trying to get the blocks.
-      - for `receiver` to `Pull` things from `sender`, `receiver`must conntect to `sender`. Usually `sender` is sending to `receiver` because of the Gossipsub propagation rules. `receiver` could choose to `Pull` from any other node they are connected to, but it is most likely `sender` will have the needed information. They usually may be more well-connected in the network.
+      - for `receiver` to `Pull` things from `sender`, `receiver`must conntect to `sender`. Usually `sender` is sending to `receiver` because of the Gossipsub propagation rules. `receiver` could choose to `Pull` from any other node they are connected to, but it is most likely `sender` will have the needed information. They usually will be more well-connected in the network.
   - **Step 1. (sender) `Push BlockHeader`**:
       - `sender` sends `block.BlockHeader` to `receiver` via Gossipsub:
           - `bh := Gossipsub.Send(h block.BlockHeader)`
