@@ -81,7 +81,7 @@ More concretely, we use these protocols:
 - **`libp2p.PeerDiscovery`**
   - **(required)** `libp2p.BootstrapList` a protocol that uses a persistent and user-configurable list of semi-trusted
     bootstrap peers. The default list includes a set of peers semi-trusted by the Filecoin Community.
-  - **(optional)** `libp2p.KademliaDHT` a dht protocol that enables random queries across the entire network  
+  - **(optional)** `libp2p.KademliaDHT` a DHT protocol that enables random queries across the entire network  
   - **(required)** `libp2p.Gossipsub` a pub/sub protocol that includes "prune peer exchange" by default, disseminating peer info as part of operation
   - **(optional)** `libp2p.PersistentPeerstore` a connectivity component that keeps persistent information about peers
     observed in the network throughout the lifetime of the node. This is useful because we resume and continually
