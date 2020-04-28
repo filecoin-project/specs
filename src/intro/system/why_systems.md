@@ -37,7 +37,7 @@ Most systems are only needed for a subset of use cases.
 For example, the Blockchain System is required for synchronizing the chain, participating in secure consensus,
 storage mining, and chain validation.
 Many Filecoin Nodes do not need the chain and can perform their work by just fetching content from the latest
-StateTree, from a node they trust. Of course, such nodes
+StateTree, from a node they trust.
 
 Note: Filecoin does not use the "full node" or "light client" terminology, in wide use in Bitcoin and other blockchain
 networks. In filecoin, these terms are not well defined. It is best to define nodes in terms of their capabilities,
