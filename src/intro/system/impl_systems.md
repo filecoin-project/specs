@@ -24,7 +24,7 @@ All Systems, as defined in this document, require the following:
   Some systems (like Markets) may need to store and delete large volumes of smaller files (1MB - 10GB).
   Other systems (like Storage Mining) may need to store and delete large volumes of large files (1GB - 1TB).
 - **Network.** Most systems need access to the network, to be able to connect to their counterparts in other Filecoin Nodes.
-  Systems expect to be initialized with a libp2p.Node on which they can mount their own protocols.
+  Systems expect to be initialized with a `libp2p.Node` on which they can mount their own protocols.
 - **Clock.** Some systems need access to current network time, some with low tolerance for drift.
   Systems expect to be initialized with a Clock from which to tell network time. Some systems (like Blockchain)
   require very little clock drift, and require _secure_ time.
