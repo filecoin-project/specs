@@ -289,7 +289,7 @@ State Machine:
 - **transitions out:**
   - once gaps between `ChainSync.FinalityTipset ... ChainSync.TargetHeads` are closed: move to `CHAIN_FOLLOW`
   - (Perhaps moving to `CHAIN_FOLLOW` when 1-2 blocks back in validation may be ok.
-    - we dont know we have the right head until we validate it, so if other heads of similar height are right/better, we won't know till then.)
+    - we dont know we have the right head until we validate it, so if other heads of similar height are right/better, we won't know until then.)
 
 ## ChainSync FSM: `CHAIN_FOLLOW`
 
