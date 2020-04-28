@@ -44,4 +44,4 @@ For anything in the drafts or notes folder, merge yourself after a review from a
 
 # Issues
 
-Issues in the specs repo will be high signal. They will either be proposals, or issues directly relating to problems in the spec. More speculative research questions and discussion will happen in the research repo.
+Issues in the specs repo will be high signal. They will either be proposals or issues directly relating to problems in the spec. More speculative research questions and discussion will happen in the research repo.
