@@ -475,16 +475,16 @@ If you imagine that you will receive the header once per gossipsub peer (or if l
 - using tipsets directly would make Checkpoints harder to communicate. we want to make checkpoints a single hash, as short as we can have it. They will be shared in tweets, URLs, emails, printed into newspapers, etc. Compactness, ease of copy-paste, etc matters.
 - we'll make human readable lists of checkpoints, and making "lists of lists" is more annoying.
 - When we have `EC.E_PARENTS > 5` or `= 10`, tipsets will get annoyingly large.
-- the big quirk/weirdness with blocks it that it also must be in the chain. (if you relaxed that constraint you could end up in a weird case where a checkpoint isnt in the chain and that's weird/violates assumptions).
+- The big quirk/weirdness with blocks it that it also must be in the chain. (If you relaxed that constraint you could end up in a weird case where a checkpoint isn't in the chain and that's weird/violates assumptions.)
 
 
 ![](https://user-images.githubusercontent.com/138401/67015561-8c929000-f0ab-11e9-847a-ec42f23b14da.png)
 
 ## Bootstrap chain stub
 
-- the mainnet filecoin chain will need to start with a small chain stub of blocks.
-- we must include some data in different blocks.
-- we do need a genesis block -- we derive randomness from the ticket there. Rather than special casing, it is easier/less complex to ensure a well-formed chain always, including at the beginning
+- The mainnet filecoin chain will need to start with a small chain stub of blocks.
+- We must include some data in different blocks.
+- We do need a genesis block -- we derive randomness from the ticket there. Rather than special casing, it is easier/less complex to ensure a well-formed chain always, including at the beginning
 - A lot of code expects lookbacks, especially actor code. Rather than introducing a bunch of special case logic for what happens ostensibly once in network history (special case logic which adds complexity and likelihood of problems), it is easiest to assume the chain is always at least X blocks long, and the system lookback parameters are all fine and dont need to be scaled in the beginning of network's history.
 
 ## PartialGraph
