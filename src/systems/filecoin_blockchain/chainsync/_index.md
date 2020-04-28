@@ -9,7 +9,7 @@ title: ChainSync - synchronizing the Blockchain
 
 Blockchain synchronization ("sync") is a key part of a blockchain system.
 It handles retrieval and propagation of blocks and transactions (messages), and
-thus in charge of distributed state replication.
+thus is in charge of distributed state replication.
 **This process is security critical -- problems here can be catastrophic to the
 operation of a blockchain.**
 
