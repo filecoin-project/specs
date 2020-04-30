@@ -40,7 +40,7 @@ To create a block, the eligible miner must compute a few fields:
   - `TxMeta.BLSMessages`: The CID of the root of an AMT comprising the bare `UnsignedMessage`s
   - `TxMeta.SECPMessages`: the CID of the root of an AMT comprising the `SignedMessage`s
 - `BLSAggregate` - The aggregated signature of all messages in the block that used BLS signing.
-- `Signature` - A signature with the miner's worker account private key (must also match the ticket signature) over the the block header's serialized representation (with empty signature). 
+- `Signature` - A signature with the miner's worker account private key (must also match the ticket signature) over the block header's serialized representation (with empty signature). 
 
 Note that the messages to be included in a block need not be evaluated in order to produce a valid block.
 A miner may wish to speculatively evaluate the messages anyway in order to optimize for including

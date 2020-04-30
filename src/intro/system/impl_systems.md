@@ -24,7 +24,7 @@ All Systems, as defined in this document, require the following:
   Some systems (like Markets) may need to store and delete large volumes of smaller files (1MB - 10GB).
   Other systems (like Storage Mining) may need to store and delete large volumes of large files (1GB - 1TB).
 - **Network.** Most systems need access to the network, to be able to connect to their counterparts in other Filecoin Nodes.
-  Systems expect to be initialized with a libp2p.Node on which they can mount their own protocols.
+  Systems expect to be initialized with a `libp2p.Node` on which they can mount their own protocols.
 - **Clock.** Some systems need access to current network time, some with low tolerance for drift.
   Systems expect to be initialized with a Clock from which to tell network time. Some systems (like Blockchain)
   require very little clock drift, and require _secure_ time.
@@ -44,7 +44,7 @@ Further, Systems MUST abide by the following limitations:
   and through the use of initialization routines that check state, and perhaps correct errors.
 - **Isolation.** Systems must communicate over well-defined, isolated interfaces. They must not build their critical
   functionality over a shared memory space. (Note: for performance, shared memory abstractions can be used to power
-  IpldStore, FileStore, and libp2p, but the systems themselves should not require it). This is not just an operational
+  IpldStore, FileStore, and libp2p, but the systems themselves should not require it.) This is not just an operational
   concern; it also significantly simplifies the protocol and makes it easier to understand, analyze, debug, and change.
 - **No direct access to host OS Filesystem or Disk.** Systems cannot access disks directly -- they do so over the FileStore
   and IpldStore abstractions. This is to provide a high degree of portability and flexibility for end-users, especially

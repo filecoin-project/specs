@@ -9,7 +9,7 @@ title: ChainSync - synchronizing the Blockchain
 
 Blockchain synchronization ("sync") is a key part of a blockchain system.
 It handles retrieval and propagation of blocks and transactions (messages), and
-thus in charge of distributed state replication.
+thus is in charge of distributed state replication.
 **This process is security critical -- problems here can be catastrophic to the
 operation of a blockchain.**
 
@@ -81,7 +81,7 @@ More concretely, we use these protocols:
 - **`libp2p.PeerDiscovery`**
   - **(required)** `libp2p.BootstrapList` a protocol that uses a persistent and user-configurable list of semi-trusted
     bootstrap peers. The default list includes a set of peers semi-trusted by the Filecoin Community.
-  - **(optional)** `libp2p.KademliaDHT` a dht protocol that enables random queries across the entire network  
+  - **(optional)** `libp2p.KademliaDHT` a DHT protocol that enables random queries across the entire network  
   - **(required)** `libp2p.Gossipsub` a pub/sub protocol that includes "prune peer exchange" by default, disseminating peer info as part of operation
   - **(optional)** `libp2p.PersistentPeerstore` a connectivity component that keeps persistent information about peers
     observed in the network throughout the lifetime of the node. This is useful because we resume and continually
@@ -271,7 +271,7 @@ State Machine:
     - No new blocks are reported to consumers/users of `ChainSync` yet.
     - The chain state provided is the available `Blocks` and `StateTree` for all available epochs,
       specially the `FinalityTipset`.
-    - finality must not move forward here because there are serious attack vectors where a node can be forced to end up on the wrong fork if finality advances before validation is complete up to the block production fringe.
+    - Finality must not move forward here because there are serious attack vectors where a node can be forced to end up on the wrong fork if finality advances before validation is complete up to the block production fringe.
   - Validation must advance, all the way to the block production fringe:
     - Validate the whole chain, from `FinalityTipset` to `BestTargetHead`
     - The node can reach `BestTargetHead` only to find out it was invalid, then has to update `BestTargetHead` with next best one, and sync to it
@@ -289,7 +289,7 @@ State Machine:
 - **transitions out:**
   - once gaps between `ChainSync.FinalityTipset ... ChainSync.TargetHeads` are closed: move to `CHAIN_FOLLOW`
   - (Perhaps moving to `CHAIN_FOLLOW` when 1-2 blocks back in validation may be ok.
-    - we dont know we have the right head until we validate it, so if other heads of similar height are right/better, we wont know till then.)
+    - we dont know we have the right head until we validate it, so if other heads of similar height are right/better, we won't know until then.)
 
 ## ChainSync FSM: `CHAIN_FOLLOW`
 
@@ -301,7 +301,7 @@ State Machine:
   - `ChainSync` MUST drop back to another state if security conditions change.
   - Keep a set of gap measures:
     - `BlockGap` is the number of remaining blocks to validate between the Validated blocks and `BestTargetHead`.
-      - (ie how many epochs do we need to validate to have validated `BestTargetHead`. does not include null blocks)
+      - (ie how many epochs do we need to validate to have validated `BestTargetHead`, does not include null blocks)
     - `EpochGap` is the number of epochs between the latest validated block, and `BestTargetHead` (includes null blocks).
     - `MaxBlockGap = 2`, which means how many blocks may `ChainSync` fall behind on before switching back to `CHAIN_CATCHUP` (does not include null blocks)
     - `MaxEpochGap = 10`, which means how many epochs may `ChainSync` fall behind on before switching back to `CHAIN_CATCHUP` (includes null blocks)
@@ -325,10 +325,10 @@ State Machine:
 ## Notes on changing `TargetHeads` while syncing
 
 - `TargetHeads` is changing, as `ChainSync` must be aware of the best heads at any time. reorgs happen, and our first set of peers could've been bad, we keep discovering others.
-  - Hello protocol is good, but it's polling. unless node is constantly polllng, wont see all the heads.
+  - Hello protocol is good, but it's polling. Unless node is constantly polllng, won't see all the heads.
   - `BlockPubsub` gives us the realtime view into what's actually going on.
-  - weight can also be close between 2+ possible chains (long-forked), and `ChainSync` must select the right one (which, we may not be able to distinguish until validating all the way)
-- fetching + validation are strictly faster per round on average than blocks produced/block time (if they're not, will always fall behind), so we definitely catch up eventually (and even quickly). the last couple rounds can be close ("almost got it, almost got it, there").
+  - Weight can also be close between 2+ possible chains (long-forked), and `ChainSync` must select the right one (which, we may not be able to distinguish until validating all the way)
+- fetching + validation are strictly faster per round on average than blocks produced/block time (if they're not, will always fall behind), so we definitely catch up eventually (and even quickly). The last couple rounds can be close ("almost got it, almost got it, there").
 
 ## General notes on fetching Blocks
 
@@ -363,7 +363,7 @@ State Machine:
   - **BV5 - State tree**: Parent tipset message execution produces the claimed state tree root and receipts.
 
 Notes:
-- in `CHAIN_CATCHUP`, if a node is receiving/fetching hundreds/thousands of `BlockHeaders`, validating signatures can be very expensive, and can be deferred in favor of other validation. (ie lots of BlockHeaders coming in through network pipe, dont want to bound on sig verification, other checks can help dump blocks on the floor faster (BV0, BV2)
+- in `CHAIN_CATCHUP`, if a node is receiving/fetching hundreds/thousands of `BlockHeaders`, validating signatures can be very expensive, and can be deferred in favor of other validation. (ie lots of BlockHeaders coming in through network pipe, don't want to bound on sig verification, other checks can help dump blocks on the floor faster (BV0, BV2)
 - in `CHAIN_FOLLOW`, we're not receiving thousands, we're receiving maybe a dozen or 2 dozen packets in a few seconds. We receive cid w/ Sig and addr first (ideally fits in 1 packet), and can afford to (a) check if we already have the cid (if so done, cheap), or (b) if not, check if sig is correct before fetching header (expensive computation, but checking 1 sig is way faster than checking a ton). In practice likely that which one to do is dependent on miner tradeoffs. we'll recommend something but let miners decide, because one strat or the other may be much more effective depending on their hardware, on their bandwidth limitations, or their propensity to getting DOSed
 
 ## Progressive Block Propagation (or BlockSend)
@@ -379,13 +379,13 @@ Notes:
   - `Messages` propagate through their own `MessagePubsub`, and nodes have a significant probability of already having a large fraction of the messages in a block. Since messages are the _bulk_ of the size of a `Block`, this can present great bandwidth savings.
 - **Progressive Steps of Block Propagation**
   - **IMPORTANT NOTES**:
-      - these can be effectively pipelined. The `receiver` is in control of what to pull, and when. It is up them to decide when to trade-off RTTs for Bandwidth.
+      - These can be effectively pipelined. The `receiver` is in control of what to pull, and when. It is up them to decide when to trade-off RTTs for Bandwidth.
       - If the `sender` is propagating the block at all to `receiver`, it is in their interest to provide the full content to `receiver` when asked. Otherwise the block may not get included at all.
       - Lots of security assumptions here -- this needs to be hyper verified, in both spec and code.
       - `sender` is a filecoin node running `ChainSync`, propagating a block via Gossipsub
         (as the originator, as another peer in the network, or just a Gossipsub router).
       - `receiver` is the local filecoin node running `ChainSync`, trying to get the blocks.
-      - for `receiver` to `Pull` things from `sender`, `receiver`must conntect to `sender`. Usually `sender` is sending to `receiver` because of the Gossipsub propagation rules. `receiver` could choose to `Pull` from any other node they are connected to, but it is most likely `sender` will have the needed information. They usually may be more well-connected in the network.
+      - For `receiver` to `Pull` things from `sender`, `receiver`must conntect to `sender`. Usually `sender` is sending to `receiver` because of the Gossipsub propagation rules. `receiver` could choose to `Pull` from any other node they are connected to, but it is most likely `sender` will have the needed information. They usually will be more well-connected in the network.
   - **Step 1. (sender) `Push BlockHeader`**:
       - `sender` sends `block.BlockHeader` to `receiver` via Gossipsub:
           - `bh := Gossipsub.Send(h block.BlockHeader)`
@@ -393,14 +393,14 @@ Notes:
       - `receiver` receives `bh`.
           - This has many fields that can be validated before pulling the messages. (See **Progressive Block Validation**).
           - **BV0**, **BV1**, **BV2**, and **BV3** validation takes place before propagating `bh` to other nodes.
-          - `receiver` MAY receive many advertisements for each winning block in an epoch in quick succession. this is because (a) many want propagation as fast as possible, (b) many want to make those network advertisements as light as reasonable, (c) we want to enable `receiver` to choose who to ask it from (usually the first party to advertise it, and that's what spec will recommend), and (d) want to be able to fall back to asking others if that fails (fail = dont get it in 1s or so)
+          - `receiver` MAY receive many advertisements for each winning block in an epoch in quick succession. This is because (a) many want propagation as fast as possible, (b) many want to make those network advertisements as light as reasonable, (c) we want to enable `receiver` to choose who to ask it from (usually the first party to advertise it, and that's what spec will recommend), and (d) want to be able to fall back to asking others if that fails (fail = dont get it in 1s or so)
   - **Step 2. (receiver) `Pull MessageCids`**:
       - upon receiving `bh`, `receiver` checks whether it already has the full block for `bh.BlockCID`. if not:
           - `receiver` requests `bh.MessageCids` from `sender`:
               - `bm := Graphsync.Pull(sender, SelectAMTCIDs(b.Messages))`
   - **Step 3. (receiver) `Pull Messages`**:
-      - if `receiver` **DOES NOT** already have the all messages for `b.BlockCID`, then:
-          - if `receiver` has _some_ of the messages:
+      - If `receiver` **DOES NOT** already have the all messages for `b.BlockCID`, then:
+          - If `receiver` has _some_ of the messages:
               - `receiver` requests missing `Messages` from `sender`:
                   - `Graphsync.Pull(sender, SelectAll(bm[3], bm[10], bm[50], ...))` or
                   - ```
@@ -408,12 +408,12 @@ Notes:
                       Graphsync.Pull(sender, SelectAll(m))
                     }
                     ```
-          - if `receiver` does not have any of the messages (default safe but expensive thing to do):
+          - If `receiver` does not have any of the messages (default safe but expensive thing to do):
               - `receiver` requests all `Messages` from `sender`:
                   - `Graphsync.Pull(sender, SelectAll(bh.Messages))`
           - (This is the largest amount of stuff)
   - **Step 4. (receiver) `Validate Block`**:
-      - the only remaining thing to do is to complete Block Validation.
+      - The only remaining thing to do is to complete Block Validation.
 
 
 <!--
@@ -424,13 +424,13 @@ Notes:
       - This has the BlockCID, the MinerAddress and the Signature. This enables parties to (a) learn that a block from a particular miner is propagating, (b) validate the `MinerAddress` and `Signature`, and decide whether to invest more resources pulling the `BlockHeader`, or the `Messages`.
       - Note that this can propagate to ther rest of the network before the next steps complete.
   - **Step 2. (receiver) `Pull BlockHeader`**:
-      - if `receiver` **DOES NOT** already have the `BlockHeader` for `b.BlockCID`, then:
+      - If `receiver` **DOES NOT** already have the `BlockHeader` for `b.BlockCID`, then:
           - `receiver` requests `BlockHeader` from `sender`:
               - `bh := Graphsync.Pull(sender, SelectCID(b.BlockCID))`
           - This is a light-ish object (<4KB).
           - This has many fields that can be validated before pulling the messages. (See **Progressive Block Validation**).
   - **Step 3. (receiver) `Pull MessageHints` (TODO: validate/decide on this)**:
-      - if `receiver` **DOES NOT** already have the full block for `b.BlockCID`, then:
+      - If `receiver` **DOES NOT** already have the full block for `b.BlockCID`, then:
           - `receiver` requests `MessagePoolHints` from `sender`: ...
           - `MessagePoolHints` are TBD -- this is a compressed representation of messages that can expedite message propagation by leveraging prior `MessagePool` syncing.
           - (This is an extension and not required. can just do Step 4.)
@@ -472,19 +472,19 @@ If you imagine that you will receive the header once per gossipsub peer (or if l
 
 - A checkpoint is the CID of a block (not a tipset list of CIDs, or StateTree)
 - The reason a block is OK is that it uniquely identifies a tipset.
-- using tipsets directly would make Checkpoints harder to communicate. we want to make checkpoints a single hash, as short as we can have it. They will be shared in tweets, URLs, emails, printed into newspapers, etc. Compactness, ease of copy-paste, etc matters.
-- we'll make human readable lists of checkpoints, and making "lists of lists" is more annoying.
+- using tipsets directly would make Checkpoints harder to communicate. We want to make checkpoints a single hash, as short as we can have it. They will be shared in tweets, URLs, emails, printed into newspapers, etc. Compactness, ease of copy-paste, etc matters.
+- We'll make human readable lists of checkpoints, and making "lists of lists" is more annoying.
 - When we have `EC.E_PARENTS > 5` or `= 10`, tipsets will get annoyingly large.
-- the big quirk/weirdness with blocks it that it also must be in the chain. (if you relaxed that constraint you could end up in a weird case where a checkpoint isnt in the chain and that's weird/violates assumptions).
+- The big quirk/weirdness with blocks it that it also must be in the chain. (If you relaxed that constraint you could end up in a weird case where a checkpoint isn't in the chain and that's weird/violates assumptions.)
 
 
 ![](https://user-images.githubusercontent.com/138401/67015561-8c929000-f0ab-11e9-847a-ec42f23b14da.png)
 
 ## Bootstrap chain stub
 
-- the mainnet filecoin chain will need to start with a small chain stub of blocks.
-- we must include some data in different blocks.
-- we do need a genesis block -- we derive randomness from the ticket there. Rather than special casing, it is easier/less complex to ensure a well-formed chain always, including at the beginning
+- The mainnet filecoin chain will need to start with a small chain stub of blocks.
+- We must include some data in different blocks.
+- We do need a genesis block -- we derive randomness from the ticket there. Rather than special casing, it is easier/less complex to ensure a well-formed chain always, including at the beginning
 - A lot of code expects lookbacks, especially actor code. Rather than introducing a bunch of special case logic for what happens ostensibly once in network history (special case logic which adds complexity and likelihood of problems), it is easiest to assume the chain is always at least X blocks long, and the system lookback parameters are all fine and dont need to be scaled in the beginning of network's history.
 
 ## PartialGraph
@@ -493,7 +493,7 @@ The `PartialGraph` of blocks.
 
 > Is a graph necessarily connected, or is this just a bag of blocks, with each disconnected subgraph being reported in heads/tails?
 
-The latter.  the partial graph is a DAG fragment-- including disconnected components.
+The latter.  The partial graph is a DAG fragment-- including disconnected components.
 here's a visual example, 4 example PartialGraphs, with Heads and Tails. (note they aren't tipsets)
 
 ![](https://user-images.githubusercontent.com/138401/67014349-90bdae00-f0a9-11e9-9f29-bdca6c673c4b.png)
