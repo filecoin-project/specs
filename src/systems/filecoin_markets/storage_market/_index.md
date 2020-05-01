@@ -86,7 +86,7 @@ Data is now transferred, both parties have agreed, and it's time to publish the 
 
 Finally, the client verifies the deal.
 
-16. The `StorageClient` queries the node for the CID of the message published on chain (sent by the provider). It then inspects message parameters to make sure they match the expected deal
+16. The `StorageClient` queries the node for the CID of the message published on chain (sent by the provider). It then inspects the message parameters to make sure they match the expected deal.
 
 # Handoff
 
