@@ -33,7 +33,7 @@ So we have:
 - \[off-chain\] - Two parties agree to a series of transactions (for instance as part of file retrieval) with party **A** paying party **B** up to some **total** sum of Filecoin over time.
 - \[on-chain\] - The {{<sref payment_channel_actor>}} is used, called by A, to open a payment channel `from` A `to` B and a lane is opened to increase the `balance` of the channel, triggering a transaction between A and the payment channel actor.
 At any time, A can open new lanes to increase the total balance available in the channel (e.g. if A and B choose to do more transactions together).
-- \[off-chain\] - Throughout the transaction cycle (e.g. on every piece of data sent via a retrieval deal), party A sends a voucher to party B enabling B to redeem more payment from the payment lanes, and incentivizing B to continue providing a service (e.g. sending more data along).
+- \[off-chain\] - Throughout the transaction cycle (e.g. on every piece of data sent via a retrieval deal), party A sends a voucher to party B enabling B to redeem payment from the payment lanes, and incentivizing B to continue providing a service (e.g. sending more data along).
 - \[on-chain\] - At regular intervals, B can `Update` the payment channel balance available `ToSend` with the vouchers received (past their `timeLock`), decreasing the remaining `Value` of the payment channel.
 - \[on-chain\] - At the end of the cycle, past the `MinCloseHeight`, A can choose to `Close` the payment channel.
 - \[on-chain\] - B can choose to `Collect` the amount `ToSend` triggering a payment between the payment channel actor and B.
