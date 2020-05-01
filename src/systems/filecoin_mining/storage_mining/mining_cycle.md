@@ -87,7 +87,7 @@ In practice miners should not be releasing blocks close to the epoch cutoff. Imp
 
 ### Step 0: Registration and Market participation
 
-To initially become a miner, a miner first register a new miner actor on-chain. This is done through the storage power actor's `CreateStorageMiner` method. The call will then create a new miner actor instance and return its address.
+To initially become a miner, a miner first registers a new miner actor on-chain. This is done through the storage power actor's `CreateStorageMiner` method. The call will then create a new miner actor instance and return its address.
 
 The next step is to place one or more storage market asks on the market. This is done off-chain as part of storage market functions. A miner may create a single ask for their entire storage, or partition their storage up in some way with multiple asks (at potentially different prices).
 
