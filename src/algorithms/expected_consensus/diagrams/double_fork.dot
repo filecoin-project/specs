@@ -3,10 +3,10 @@ digraph G {
   node [shape=box, style="filled", color="green3"]
 
   B1 [label="B1\nMinerAny"]
-  B2 [label="B2\nMinerA"]
-  B3 [label="B3\nMinerB"]
-  B4 [label="B4\nMinerC",   color=pink]
-  B5 [label="B5\nMinerC",   color=pink]
+  B2 [label="B2\nMinerAny"]
+  B3 [label="B3\nMinerAny"]
+  B4 [label="B4\nMinerE",   color=pink]
+  B5 [label="B5\nMinerE",   color=pink]
 
   B4 -> B2 -> B1
   B5 -> B3 -> B1

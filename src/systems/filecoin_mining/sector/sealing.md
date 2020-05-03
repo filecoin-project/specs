@@ -10,7 +10,7 @@ title: Sector Sealing
 
 The ticket has to be drawn from a finalized block in order to prevent the miner from potential losing storage (in case of a chain reorg) even though their storage is intact.
 
-Verification should ensure that the ticket was drawn no farther back than necessary by the miner. We note that tickets can uniquely be associated to a given round in the protocol (lest a hash collision be found), but that the round number is explicited by the miner in `commitSector`.
+Verification should ensure that the ticket was drawn no farther back than necessary by the miner. We note that tickets can uniquely be associated with a given round in the protocol (lest a hash collision be found), but that the round number is explicited by the miner in `commitSector`.
 
 We present precisely how ticket selection and verification should work. In the below, we use the following notation:
 

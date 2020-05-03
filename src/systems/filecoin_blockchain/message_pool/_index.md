@@ -7,7 +7,7 @@ entries:
 ---
 
 {{<label message_pool>}}
-The Message Pool is a subsystem in the Filecoin blockchain system. The message pool is acts as the interface between Filecoin nodes and a peer-to-peer network used for off-chain message transmission. It is used by nodes to maintain a set of messages to transmit to the Filecoin VM (for "on-chain" execution).
+The Message Pool is a subsystem in the Filecoin blockchain system. The message pool acts as the interface between Filecoin nodes and a peer-to-peer network used for off-chain message transmission. It is used by nodes to maintain a set of messages to transmit to the Filecoin VM (for "on-chain" execution).
 
 {{< readfile file="message_pool_subsystem.id" code="true" lang="go" >}}
 

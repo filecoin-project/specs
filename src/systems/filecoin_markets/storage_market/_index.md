@@ -72,7 +72,7 @@ Execution now moves back to the `StorageClient`
 8. The `StorageProvider` checks the voucher and verifies the CID matches a storage deal proposal it has received and verified but not put on chain already. If so, it accepts the data transfer request from the `StorageClient`.
 9. The `Data Transfer Module` now transfers for the payload data to be stored from the  `StorageClient` to the `StorageProvider` using `GraphSync`.
 10. Once complete, the `Data Transfer Module` notifies the `StorageProvider`
-11. The `StorageProvider` recalculates the piece commitment (`CommP`) from the data that was transferred and verifies it matches the piece commitment in the the `StorageDealProposal`
+11. The `StorageProvider` recalculates the piece commitment (`CommP`) from the data that was transferred and verifies it matches the piece commitment in the `StorageDealProposal`
 
 # Publishing
 

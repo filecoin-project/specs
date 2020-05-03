@@ -59,7 +59,7 @@ Design notes:
 
 *Inputs that the prover uses to generate a SNARK proof, these are not needed by the verifier to verify the proof*
 
-- `CommR : [LAYERS-1]Fr`: Commitment of the the encoded data at each layer.
+- `CommR : [LAYERS-1]Fr`: Commitment of the encoded data at each layer.
 
   Note: Size is `LAYERS-1` since the commitment to the last layer is `CommRLast`
 
