@@ -96,7 +96,7 @@ def finalizeTicket(partialTicket):
 
 ```
 
-A single winning ticket and can be used to submit a block but a miner would want to check as many as possible to increase their potential rewards. The target ensures that on expectation, a miner's total power is expressed if they check all of their tickets, taking the `ElectionPoStSampleRate` into account.
+A single winning ticket can be used to submit a block but a miner would want to check as many as possible to increase their potential rewards. The target ensures that on expectation, a miner's total power is expressed if they check all of their tickets, taking the `ElectionPoStSampleRate` into account.
 
 5. **(generate a `PoStProof`)** for inclusion in the block header
 
