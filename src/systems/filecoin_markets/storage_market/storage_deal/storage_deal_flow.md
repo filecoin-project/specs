@@ -24,7 +24,7 @@ title: Storage Deal Flow
 
 # Receive Challenge
 
-- 5. Miners enter the `Challenged` status when it receives a SurprisePoSt challenge from the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before the chain checks for SurprisePoSt expiry. Miners can only get out the challenge with `SubmitSurprisePoStResponse`.
+- 5. Miners enter the `Challenged` status when receiving a SurprisePoSt challenge from the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before the chain checks for SurprisePoSt expiry. Miners can only get out the challenge with `SubmitSurprisePoStResponse`.
 - 6. Miners are allowed to DeclareTemporaryFault when they are in the `Challenged` state but this will not change the list of sectors challenged as `Challenged` state specifies a list of sectors to be challenged which is a snapshot of all Active sectors at the time of challenge. Miners are also allowed to call ProveCommit which will add to their ClaimedPower but their Nominal and Consensus Power are still zero whe  they are in either Challenged or DetectedFault state.
 
 # Declare and Recover Faults
