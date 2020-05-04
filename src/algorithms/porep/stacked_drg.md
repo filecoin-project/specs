@@ -129,7 +129,7 @@ We have describe three hash functions:
 
 ## Stacked DRG Graph
 
-The slow sequential encoding required is enforced by the depth robusness property of the SDR graph.
+The slow sequential encoding required is enforced by the depth robustness property of the SDR graph.
 
 **Encoding with SDR**: The data from a sector (of size `SECTOR_SIZE`) is divided in `NODE_SIZE` nodes (for a total of `GRAPH_SIZE` nodes) and arranged in a directed acyclic graph. The structure of the graph is used to label the nodes sequentially to generate a key with which to encode the original data: in order to label a node, its parents must be labeled (see the "Layer Labeling" section below). We repeat this process for `LAYERS` layers, where the input to a next layer is the output of the previous one.
 
