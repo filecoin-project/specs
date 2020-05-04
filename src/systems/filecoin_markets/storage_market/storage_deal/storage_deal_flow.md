@@ -20,7 +20,7 @@ title: Storage Deal Flow
 
 # Sealing sectors
 
-- 4. Once the miner finishes packing a `Sector`, it generates a SectorPreCommitInfo and call PreCommitSector with a PreCommitDeposit. It must call ProveCommitSector with SectorProveCommitInfo within some bound to recover the deposit. Expired PreCommit message will result in PreCommitDeposit being burned. There are two types of sectors, Regular Sector and Committed Capacity Sector but all sectors have an explicit expiration epoch declared during PreCommit. For a Regular Sector with storage deals in it, all deals must expire before sector expiration. Miner gains power for this particular sector upon successful ProveCommit.
+- 4. Once the miner finishes packing a `Sector`, it generates a SectorPreCommitInfo and calls PreCommitSector with a PreCommitDeposit. It must call ProveCommitSector with SectorProveCommitInfo within some bound to recover the deposit. An expired PreCommit message will result in PreCommitDeposit being burned. There are two types of sectors, Regular Sector and Committed Capacity Sector but all sectors have an explicit expiration epoch declared during PreCommit. For a Regular Sector with storage deals in it, all deals must expire before sector expiration. Miner gains power for this particular sector upon successful ProveCommit.
 
 # Receive Challenge
 
