@@ -44,8 +44,8 @@ authenticate the blockchain transactions. The main reason is to be able to
 validate transactions from other blockchain systems that uses secp256k1 (such as
 Bitcoin or exchanges in general). ECDSA signatures offer an additional
 useful functionality as well: to recover the public key from a given signature.
-That feature can allow to save space on the blockchain by extracting the public
-key locally from the signature rather than specify an ID of the public key.
+This feature can allow space to be saved on the blockchain by extracting the public
+key locally from the signature rather than specifying an ID of the public key.
 
 {{< readfile file="ecdsa.id" code="true" lang="go" >}}
 
@@ -104,14 +104,14 @@ candidates in recent blockchain systems:
   the signature is always the same.  That feature removes an important security 
   weakness of most randomized signature schemes: signer must never re-use the
   same randomness twice otherwise this reveals its private key. As well,
-  deterministic signature are ideal candidate to reduce the attack surface in
+  deterministic signatures are an ideal candidate to reduce the attack surface in
   terms of grinding, which is a real concern in recent proof of stake systems.
 - BLS signatures are aggregatable: one can aggregate signatures from different
-  signers into one single signature. That feature allows to drastically save
+  signers into one single signature. This feature enables drastically saving
   space on the blockchain, especially when aggregating user transactions.
 
 **Aggregation Functionality**: The aggregation functionality is commutative and
-associative, enabling to perform *partial* aggregation. For example, given
+associative, enabling *partial* aggregation. For example, given
 `(PK1, sig1), (PK2, sig2), (PK3, sig3)`, one can first aggregate `(PK12 = PK1 +
 PK2, sig12 = sig1 + sig2)` then aggregate with the third tuple to produce
 `(PK123 = PK12 + PK3, sig123 = sig12 + sig3)`.
@@ -128,12 +128,12 @@ of measures, as explained [here](https://crypto.stanford.edu/~dabo/pubs/papers/B
 Fortunately, Filecoin can enforce the second condition to safely use the
 aggregation property:
 Filecoin uses aggregation only for aggregating the transaction's signature of a
-block. since Filecoin uses the account model to represent the state of the
-chain, each message for a given signer is used in combination of a nonce to
+block. Since Filecoin uses the account model to represent the state of the
+chain, each message for a given signer is used in combination with a nonce to
 avoid replay attacks. As a direct consequence, every transaction's message is
 unique thereby the aggregation is done on distinct messages.  Obviously, the
 **assumption** here is that the block producer **enforces that distinction** and
-the other miners will **check every transactions** to make sure they are valid.
+the other miners will **check all transactions** to make sure they are valid.
 The validity of a transaction in Filecoin's context implies that the signature
 is correctly formed over the message with the correct nonce.
 
