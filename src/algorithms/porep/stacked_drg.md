@@ -179,7 +179,7 @@ This section describes how to compute the "base parents" of the SDR graph, which
 
 The properties of DRG graphs guarantee that a sector has been encoded with a slow, non-parallelizable process. We use the `BucketSample` algorithm that is based on DRSample ([ABH17](https://acmccs.github.io/papers/p1001-alwenA.pdf)) and described in [FBGB18](https://web.stanford.edu/~bfisch/porep_short.pdf) and generates a directed acyclic graph of in-degree `BASE_DEGREE`.
 
-`BucketSample` DRG graphs are random graphs that can be deterministically generated from a seed; different seed lead with high probability to different graphs. In SDR, we use the same seed `GRAPH_SEED` for each layer of the SDR graph such that they are all based on the same underlying DRG graph.
+`BucketSample` DRG graphs are random graphs that can be deterministically generated from a seed; different seeds lead with high probability to different graphs. In SDR, we use the same seed `GRAPH_SEED` for each layer of the SDR graph such that they are all based on the same underlying DRG graph.
 
 The parents of any node can be locally computed without computing the entire graph. We call the parents of a node calculated in this way *base parents*.
 
