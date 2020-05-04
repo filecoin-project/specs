@@ -42,7 +42,7 @@ title: Storage Deal Flow
 
 # Sector Expiration
 
-- 10. Sector expiration is done via a scheduled Cron event `_rtCheckSectorExpiry`. Sector expires when its Expiration epoch is reached and sector expiration epoch must be greater than all its deal expiration epoch.
+- 10. Sector expiration is done via a scheduled Cron event `_rtCheckSectorExpiry`. Sector expires when its Expiration epoch is reached and sector expiration epoch must be greater than the expiration epoch of all its deals.
 
 # Deal Payment and slashing
 
