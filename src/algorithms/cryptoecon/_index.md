@@ -9,7 +9,7 @@ The Filecoin network is a complex multi-agent economic system. This section aims
 2. **Block reward vesting function** - block reward earned from mining may be required to vest over some period of time.
 3. **Pledge collateral function and slashing** - pledge collateral needs to satisfy certain security constraints for consensus and hence needs to be re-evaluated.
 4. **Deal collateral requirement** - minimum deal collaterals may be adjusted to achieve appropriate incentive structure.
-5.**Interactive PoRep slashing** - some penalties may be introduced for failing `ProveCommit` in interactive `PoRep`.
+5. **Interactive PoRep slashing** - some penalties may be introduced for failing `ProveCommit` in interactive `PoRep`.
 6. **Network transaction fee** - burned as a network fee during proof or txn submission.
 7. **Reward for pledged but unused storage** - explicit reward for available but unused storage.
 8. **Minimum miner size** - the minimum size of sectors a storage miner must have to produce blocks. There are several security and scalability parameters that depend on this.
