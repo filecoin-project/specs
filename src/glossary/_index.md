@@ -55,7 +55,7 @@ A client is any user with an account who wishes to store data with a miner. A cl
 
 Collateral is Filecoin tokens pledged by an actor as a commitment to a promise. If the promise is respected, the collateral is returned. If the promise is broken, the collateral is not returned in full. For instance:
 
-- In becoming a Filecoin storage miner: the miner will put up collateral alongside their SEAL to
+- In becoming a Filecoin storage miner: the miner will put up collateral alongside their SEAL.
 - In a Filecoin deal: both the miner and client put up collateral to ensure their respect of deal terms.
 
 ## Commitment
