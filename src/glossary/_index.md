@@ -45,7 +45,7 @@ Derived from a `Partial Ticket` as part of ElectionPoSt and used to run leader e
 
 ## Cid
 
-CID is short for Content Identifier, a self describing content address used throughout the ipfs ecosystem. For more detailed information, see [the github documentation for it](https://github.com/ipld/cid).
+CID is short for Content Identifier, a self describing content address used throughout the IPFS ecosystem. For more detailed information, see [the github documentation for it](https://github.com/ipld/cid).
 
 ## Client
 
