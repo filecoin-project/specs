@@ -268,7 +268,7 @@ Something that is verifiable can be checked for correctness by a third party.
 A verifiable function that guarantees a time delay given some hardware assumptions and a small set of requirements. These requirements are efficient proof verification, random output, and strong sequentiality. Verifiable delay functions are formally defined by [BBBF](https://eprint.iacr.org/2018/601).
 
 ```text
-{proof, value} <—- VDF(public parameters, seed)
+{proof, value} <-- VDF(public parameters, seed)
 ```
 
 ## VM
