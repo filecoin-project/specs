@@ -28,6 +28,9 @@ Rigs:
 
   rig_hashing_throughput_tib_s = rig_hashing_throughput_tb_s * tb_to_tib
   rig_hashing_throughput_b_s = rig_hashing_throughput_tib_s * b_in_tib
+
+  rig_hashing_sequential_throughput_gib_s = rig_hashing_sequential_throughput_gb_s * gb_to_gib
+  rig_hashing_sequential_throughput_b_s = rig_hashing_sequential_throughput_gib_s * b_in_gib
   // rig_hashing_throughput_hash_s = rig_hashing_throughput_b_s / node_size
   // rig_hashing_throughput_ghash_s = rig_hashing_throughput_hash_s / (1000 * 1000 * 1000)  
   describe(rig_cost_s, "Cost of running the rig for one second")
@@ -76,6 +79,7 @@ PoRepSDR (SDR):
   porep_size_snark = porep_partitions * snark_size
   post_proof_size = post_partitions * snark_size
   post_partitions = post_constraints / snark_partition
+  // porep_time_replicate = 
 
 PoRepNSE (NSE):
   PaperToUbercalc:

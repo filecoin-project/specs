@@ -30,6 +30,7 @@ combos = makeQuery([
     rig_cost: 4750,
     rig_storage_lifetime_years: 2,
     rig_cost_storage_tb: 15,
+    rig_hashing_sequential_throughput_gb_s: 2.5,
   })
   .add({
     mtree_hash_name: 'poseidon',
