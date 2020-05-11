@@ -12,22 +12,24 @@ combos = makeQuery([
     spacegap: 0.15,
     delta: 0.05,
 
-    rig_memaccess_throughput_tb_s:  3,
-    rig_hashing_throughput_tb_s: 0.016 * 32,
-    rig_lifetime_years: 2,
-    rig_cost: 2000,
-    rig_storage_lifetime_years: 2,
-    rig_cost_storage_tb: 15,
-
     "!NSE": true
   },
   {
     replica_size_gib: 32,
     porep_partitions: 9,
     wpost_sectors: 2350,
-    "!SDR": true
+    "!SDR": true,
+    porep_time_commitment: 120/4,
   },
 ])
+  .add({
+    rig_memaccess_throughput_tb_s:  3,
+    rig_hashing_throughput_tb_s: 0.016 * 32,
+    rig_lifetime_years: 2,
+    rig_cost: 2000,
+    rig_storage_lifetime_years: 2,
+    rig_cost_storage_tb: 15,
+  })
   .add({
     mtree_hash_name: 'poseidon',
     mtree_hash_time: 8.3e-7, // ((8/7)*(2^27/8 -1))*32*8, // GPU 4s per GiB // CPU 5.803e-5,

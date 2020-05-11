@@ -42,13 +42,25 @@ PoRep:
   replica_size_gib = replica_size / b_in_gib
   describe(replica_size_tib, "Size of the replica", tib)
   replica_size_tib = replica_size / b_in_tib
+  describe(cost_commitment, "Cost of commitment during PoRep", dollars)
+
+  describe(porep_size_snark, "Size of a PoRep SNARK", bytes)
+  describe(porep_time_commitment, "Time to generate the commitments during porep", seconds)
+  porep_time_commitment_mins = porep_time_commitment / secs_in_min
+  porep_time_commitment_s_per_gb = porep_time_commitment / replica_size_gib
+  porep_time_commitment_mins_per_gb = porep_time_commitment_mins / replica_size_gib
+  porep_partitions = porep_constraints / snark_partition
+
+  describe(post_time_snark, "Time to generate a PoSt SNARK", seconds)
+  describe(post_proof_size, "Size of a PoSt SNARK proof", bytes)
+  post_time_snark = snark_constraint_time * post_constraints
+
 
 PoRepSDR (SDR):
-  describe(porep_size_snark, "Size of a PoRep SNARK", bytes)
   porep_size_snark = porep_partitions * snark_size
-  describe(post_proof_size, "Size of a PoSt SNARK proof", bytes)
   post_proof_size = post_partitions * snark_size
   post_partitions = post_constraints / snark_partition
+  cost_commitment = porep_time_commitment * rig_cost_s
 
 PoRepNSE (NSE):
   PaperToUbercalc:
@@ -104,12 +116,6 @@ PoRepNSE (NSE):
         cost_attack_replica = memaccess_sequence_attack * cost_memaccess_sequence
         describe(cost_honest_replica, "Cost to encode a replica", dollars)
         cost_honest_replica = memaccess_replica * cost_memaccess_node
-        describe(cost_honest_storage_proving_period, "Cost of storage during a proving period", dollars)
-        cost_honest_storage_proving_period = rig_cost_storage_b_s * proving_period_hours * secs_in_hour * replica_size
-        describe(cost_honest_storage_proving_period_node, "Cost of storing an individual node in a proving period", dollars)
-        cost_honest_storage_proving_period_node = rig_cost_storage_b_s *  proving_period_hours * secs_in_hour * 32
-        describe(cost_honest_storage_year, "Cost of storing the replica for a year", dollars)
-        cost_honest_storage_year = rig_cost_storage_b_s *  secs_in_year * replica_size
 
         amax = cost_attack_replica / cost_honest_storage_proving_period
         describe(cost_honest_ratio, "Ratio of the cost of replica vs cost of storage for a year")
@@ -120,11 +126,7 @@ PoRepNSE (NSE):
       mtree_depth = (log2(mtree_leaves)/log2(mtree_hash_blocks))
       describe(commtree_time, "Time to generate the commitments during PoRep", seconds)
       commtree_time = (mtree_hash_time * mtree_leaves) / mtree_hash_blocks)
-      describe(porep_time_commitment, "Time to generate the commitments during porep", seconds)
       porep_time_commitment = commtree_time
-      porep_time_commitment_mins = porep_time_commitment / secs_in_min
-      porep_time_commitment_s_per_gb = porep_time_commitment / replica_size_gib
-      porep_time_commitment_mins_per_gb = porep_time_commitment_mins / replica_size_gib
 
     SNARK:
       describe(expander_degree, "Number of expander parents", parents)
@@ -144,7 +146,6 @@ PoRepNSE (NSE):
       labeling_constraints = porep_challenges * avg_parents * kdf_constraints
 
       porep_constraints = labeling_constraints + commr_inclusions_constraints + commd_inclusions_constraints
-      porep_partitions = porep_constraints / snark_partition
       describe(porep_size_snark, "Size of a PoRep SNARK", bytes)
       porep_size_snark = porep_partitions * snark_size
       describe(porep_time_snark, "Time to generate a PoRep SNARK proof", seconds)
@@ -210,9 +211,6 @@ PoRepNSE (NSE):
     post_soundness = expt(2, -post_lambda)
     post_challenges = windows * post_window_challenges
     post_partitions = post_constraints / snark_partition
-    describe(post_time_snark, "Time to generate a PoSt SNARK", seconds)
-    post_time_snark = snark_constraint_time * post_constraints
-    describe(post_proof_size, "Size of a PoSt SNARK proof", bytes)
     post_proof_size = post_partitions * snark_size
 
 
@@ -231,8 +229,16 @@ Filecoin:
   describe(proving_period_hours, "Duration of a proving period", seconds)
   blocks_in_pp = tipset_size * (proving_period_hours * secs_in_hour) / block_time
   blocks_in_year = tipset_size * (secs_in_year) / block_time
+  Costs:
+    describe(cost_honest_storage_proving_period, "Cost of storage during a proving period", dollars)
+    cost_honest_storage_proving_period = rig_cost_storage_b_s * proving_period_hours * secs_in_hour * replica_size
+    describe(cost_honest_storage_proving_period_node, "Cost of storing an individual node in a proving period", dollars)
+    cost_honest_storage_proving_period_node = rig_cost_storage_b_s *  proving_period_hours * secs_in_hour * 32
+    describe(cost_honest_storage_year, "Cost of storing the replica for a year", dollars)
+    cost_honest_storage_year = rig_cost_storage_b_s *  secs_in_year * replica_size
+
   Proofs:
-      describe(wpost_sectors, "Sectors proven in a WindowPoSt proof")
+      describe(wpost_sectors, "Sectors proven in a WindowPoSt proof", sectors)
       wpost_sectors = snark_partition / post_constraints
       describe(wpost_storage_tib, "Amount of storage proven in a WindowPoSt proof", tib)
       wpost_storage_tib = wpost_sectors * replica_size_tib
@@ -243,6 +249,8 @@ Filecoin:
       describe(porep_footprint_b_per_gib_stored, "PoRep on-chain footprint per GiB", bytes)
       porep_footprint_b_per_gib_stored = porep_size_snark / replica_size_gib
 
+      describe(network_proofs_size_in_year, "Size of the proofs on-chain in a year", bytes)
+      describe(network_porep_size, "Size of the porep proofs on chain for target EiB", bytes)
       network_proofs_size_in_year = network_post_size_in_year + network_porep_size
       network_proofs_size_in_year_gib = network_proofs_size_in_year / b_in_gib
 
