@@ -55,12 +55,17 @@ PoRep:
   describe(post_proof_size, "Size of a PoSt SNARK proof", bytes)
   post_time_snark = snark_constraint_time * post_constraints
 
+  cost_commitment = porep_time_commitment * rig_cost_s
+  cost_commitment_per_gib = cost_commitment / replica_size_gib
+  cost_porep_snark = porep_time_snark * rig_cost_s
+  cost_porep_snark_per_gib = cost_porep_snark / replica_size_gib
+
+
 
 PoRepSDR (SDR):
   porep_size_snark = porep_partitions * snark_size
   post_proof_size = post_partitions * snark_size
   post_partitions = post_constraints / snark_partition
-  cost_commitment = porep_time_commitment * rig_cost_s
 
 PoRepNSE (NSE):
   PaperToUbercalc:
@@ -94,7 +99,6 @@ PoRepNSE (NSE):
 
     Costs:
       cost_replicate = porep_time_replicate * rig_cost_s
-      cost_commitment = porep_time_commitment * rig_cost_s
       describe(time_memaccess_node, "Time of a memory access (32 bytes)", seconds)
       time_memaccess_node =  (node_size) / rig_memaccess_throughput_b_s
       describe(time_memaccess_sequence, "Time of a memory access (256 bytes)", seconds)
