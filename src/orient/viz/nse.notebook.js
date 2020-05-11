@@ -21,6 +21,8 @@ combos = makeQuery([
     "!SDR": true,
     porep_time_commitment: (150 * 8)/4, // 150 for 4GiB, 4 GPU parallelization
     cost_replicate: 0.014,
+    layers: 11,
+    parents: 37
   },
 ])
   .add({
