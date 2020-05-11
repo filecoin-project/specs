@@ -59,6 +59,7 @@ PoRep:
   porep_time_snark_mins = porep_time_snark / secs_in_min
   porep_time_snark_s_per_gib = porep_time_snark / replica_size_gib
   porep_time_snark_mins_per_gib = porep_time_snark_mins / replica_size_gib
+  describe(porep_time_replicate, "Time to replicate", seconds)
   porep_time_replicate_per_b = porep_time_replicate / replica_size
 
 
@@ -204,7 +205,6 @@ PoRepNSE (NSE):
 
         describe(porep_time_unseal, "Time to unseal window", seconds)
         porep_time_unseal = memaccess_window_time
-        describe(porep_time_replicate, "Time to replicate", seconds)
         porep_time_replicate = memaccess_replica_time
         porep_time_replicate_mins = porep_time_replicate / secs_in_min
         porep_time_replicate_hours = porep_time_replicate / secs_in_hour
