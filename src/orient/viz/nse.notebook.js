@@ -16,7 +16,7 @@ combos = makeQuery([
   },
   {
     replica_size_gib: 32,
-    porep_partitions: 9,
+    porep_partitions: 8,
     wpost_sectors: 2350,
     "!SDR": true,
     porep_time_commitment: 120/4,

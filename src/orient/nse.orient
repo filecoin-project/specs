@@ -50,6 +50,17 @@ PoRep:
   porep_time_commitment_mins_per_gb = porep_time_commitment_mins / replica_size_gib
   porep_partitions = porep_constraints / snark_partition
 
+  describe(porep_size_snark, "Size of a PoRep SNARK", bytes)
+  describe(porep_time_snark, "Time to generate a PoRep SNARK proof", seconds)
+  describe(porep_time_snark_mins, "Time to generate a PoRep SNARK proof", mins)
+  describe(porep_time_snark_s_per_gib, "Time to generate a SNARK per GiB", seconds)
+  porep_size_snark = porep_partitions * snark_size
+  porep_time_snark = snark_constraint_time * porep_constraints
+  porep_time_snark_mins = porep_time_snark / secs_in_min
+  porep_time_snark_s_per_gib = porep_time_snark / replica_size_gib
+  porep_time_snark_mins_per_gib = porep_time_snark_mins / replica_size_gib
+
+
   describe(post_time_snark, "Time to generate a PoSt SNARK", seconds)
   describe(post_proof_size, "Size of a PoSt SNARK proof", bytes)
   post_time_snark = snark_constraint_time * post_constraints
@@ -145,15 +156,6 @@ PoRepNSE (NSE):
       labeling_constraints = porep_challenges * avg_parents * kdf_constraints
 
       porep_constraints = labeling_constraints + commr_inclusions_constraints + commd_inclusions_constraints
-      describe(porep_size_snark, "Size of a PoRep SNARK", bytes)
-      porep_size_snark = porep_partitions * snark_size
-      describe(porep_time_snark, "Time to generate a PoRep SNARK proof", seconds)
-      porep_time_snark = snark_constraint_time * porep_constraints
-      describe(porep_time_snark_mins, "Time to generate a PoRep SNARK proof", mins)
-      porep_time_snark_mins = porep_time_snark / secs_in_min
-      describe(porep_time_snark_s_per_gib, "Time to generate a SNARK per GiB", seconds)
-      porep_time_snark_s_per_gib = porep_time_snark / replica_size_gib
-      porep_time_snark_mins_per_gib = porep_time_snark_mins / replica_size_gib
 
     Encoding:
       describe(encoding_hashes, "Mem access during encoding", access)
