@@ -239,10 +239,17 @@ Filecoin:
     cost_honest_storage_year = rig_cost_storage_b_s *  secs_in_year * replica_size
 
     describe(cost_commitment, "Cost of commitment during PoRep", dollars)
+    describe(cost_porep, "Cost of Porep", dollars)
+    describe(cost_porep_snark, "Cost of Porep SNARK", dollars)
+    describe(cost_replicate, "Cost of PoRep replication", dollars)
     cost_commitment = porep_time_commitment * rig_cost_s
     cost_commitment_per_gib = cost_commitment / replica_size_gib
+
     cost_porep_snark = porep_time_snark * rig_cost_s
     cost_porep_snark_per_gib = cost_porep_snark / replica_size_gib
+
+    cost_porep = cost_porep + cost_commitment + cost_replicate
+    cost_porep_per_gib = cost_porep / replica_size_gib
 
 
   Proofs:
