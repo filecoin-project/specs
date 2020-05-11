@@ -79,7 +79,8 @@ PoRepSDR (SDR):
   porep_size_snark = porep_partitions * snark_size
   post_proof_size = post_partitions * snark_size
   post_partitions = post_constraints / snark_partition
-  // porep_time_replicate = 
+  porep_time_replicate = (layers * parents * replica_nodes * node_size) * rig_hashing_sequential_throughput_b_s
+  replica_nodes = replica_size / node_size
 
 PoRepNSE (NSE):
   PaperToUbercalc:
