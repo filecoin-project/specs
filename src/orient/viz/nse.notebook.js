@@ -20,6 +20,7 @@ combos = makeQuery([
     wpost_sectors: 2350,
     "!SDR": true,
     porep_time_commitment: 120/4,
+    cost_porep: 0.30,
   },
 ])
   .add({
