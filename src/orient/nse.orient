@@ -253,6 +253,12 @@ Filecoin:
     cost_porep = cost_porep_snark + cost_commitment + cost_replicate
     cost_porep_per_gib = cost_porep_snark_per_gib + cost_commitment_per_gib + cost_replicate_per_gib 
 
+    describe(cost_post, "Cost of a PoSt proof", dollars)
+    cost_post = cost_post_snark
+    cost_post_snark_per_gib = cost_post_snark_per_gib
+    cost_post_snark = post_time_snark * rig_cost_s
+    cost_post_snark_per_gib = cost_post_snark / replica_size_gib
+
 
   Proofs:
       describe(wpost_sectors, "Sectors proven in a WindowPoSt proof", sectors)
