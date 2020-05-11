@@ -27,13 +27,13 @@ combos = makeQuery([
     rig_memaccess_throughput_tb_s:  3,
     rig_hashing_throughput_tb_s: 0.016 * 32,
     rig_lifetime_years: 2,
-    rig_cost: 2000,
+    rig_cost: 4750,
     rig_storage_lifetime_years: 2,
     rig_cost_storage_tb: 15,
   })
   .add({
     mtree_hash_name: 'poseidon',
-    mtree_hash_time: 8.3e-7, // ((8/7)*(2^27/8 -1))*32*8, // GPU 4s per GiB // CPU 5.803e-5,
+    mtree_hash_time: 8.3e-7 / 4, // (divided by 4 since we have 4 GPUs) // ((8/7)*(2^27/8 -1))*32*8, // GPU 4s per GiB // CPU 5.803e-5,
     mtree_hash_blocks: 8,
     mtree_hash_constraints: 508 + 56,
     kdf_constraints: 25849/2,
@@ -46,7 +46,7 @@ combos = makeQuery([
   .add({
     node_size: 32,
     snark_partition: 100000000,
-    snark_constraint_time: 0.00000317488,
+    snark_constraint_time: 0.00000317488 / 4,
     snark_size: 192
   })
   .add({

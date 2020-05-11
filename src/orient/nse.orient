@@ -59,6 +59,7 @@ PoRep:
   porep_time_snark_mins = porep_time_snark / secs_in_min
   porep_time_snark_s_per_gib = porep_time_snark / replica_size_gib
   porep_time_snark_mins_per_gib = porep_time_snark_mins / replica_size_gib
+  porep_time_replicate_per_b = porep_time_replicate / replica_size
 
 
   describe(post_time_snark, "Time to generate a PoSt SNARK", seconds)
