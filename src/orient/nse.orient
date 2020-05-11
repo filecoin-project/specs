@@ -248,7 +248,7 @@ Filecoin:
     cost_porep_snark = porep_time_snark * rig_cost_s
     cost_porep_snark_per_gib = cost_porep_snark / replica_size_gib
 
-    cost_porep = cost_porep + cost_commitment + cost_replicate
+    cost_porep = cost_porep_snark + cost_commitment + cost_replicate
     cost_porep_per_gib = cost_porep / replica_size_gib
 
 
