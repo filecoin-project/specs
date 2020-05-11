@@ -42,7 +42,6 @@ PoRep:
   replica_size_gib = replica_size / b_in_gib
   describe(replica_size_tib, "Size of the replica", tib)
   replica_size_tib = replica_size / b_in_tib
-  describe(cost_commitment, "Cost of commitment during PoRep", dollars)
 
   describe(porep_size_snark, "Size of a PoRep SNARK", bytes)
   describe(porep_time_commitment, "Time to generate the commitments during porep", seconds)
@@ -55,10 +54,6 @@ PoRep:
   describe(post_proof_size, "Size of a PoSt SNARK proof", bytes)
   post_time_snark = snark_constraint_time * post_constraints
 
-  cost_commitment = porep_time_commitment * rig_cost_s
-  cost_commitment_per_gib = cost_commitment / replica_size_gib
-  cost_porep_snark = porep_time_snark * rig_cost_s
-  cost_porep_snark_per_gib = cost_porep_snark / replica_size_gib
 
 
 
@@ -240,6 +235,13 @@ Filecoin:
     cost_honest_storage_proving_period_node = rig_cost_storage_b_s *  proving_period_hours * secs_in_hour * 32
     describe(cost_honest_storage_year, "Cost of storing the replica for a year", dollars)
     cost_honest_storage_year = rig_cost_storage_b_s *  secs_in_year * replica_size
+
+    describe(cost_commitment, "Cost of commitment during PoRep", dollars)
+    cost_commitment = porep_time_commitment * rig_cost_s
+    cost_commitment_per_gib = cost_commitment / replica_size_gib
+    cost_porep_snark = porep_time_snark * rig_cost_s
+    cost_porep_snark_per_gib = cost_porep_snark / replica_size_gib
+
 
   Proofs:
       describe(wpost_sectors, "Sectors proven in a WindowPoSt proof", sectors)
