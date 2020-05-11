@@ -19,7 +19,7 @@ combos = makeQuery([
     porep_partitions: 8,
     wpost_sectors: 2350,
     "!SDR": true,
-    porep_time_commitment: 120/4,
+    porep_time_commitment: (150 * 8)/4, // 150 for 4GiB, 4 GPU parallelization
     cost_replicate: 0.014,
   },
 ])
