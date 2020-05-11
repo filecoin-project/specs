@@ -82,6 +82,7 @@ PoRepNSE (NSE):
 
     Costs:
       cost_replicate = porep_time_replicate * rig_cost_s
+      cost_commitment = porep_time_commitment * rig_cost_s
       describe(time_memaccess_node, "Time of a memory access (32 bytes)", seconds)
       time_memaccess_node =  (node_size) / rig_memaccess_throughput_b_s
       describe(time_memaccess_sequence, "Time of a memory access (256 bytes)", seconds)
@@ -202,6 +203,8 @@ PoRepNSE (NSE):
         porep_time_unseal = memaccess_window_time
         describe(porep_time_replicate, "Time to replicate", seconds)
         porep_time_replicate = memaccess_replica_time
+        porep_time_replicate_mins = porep_time_replicate / secs_in_min
+        porep_time_replicate_hours = porep_time_replicate / secs_in_hour
         
   PoSt:
     post_soundness = expt(2, -post_lambda)

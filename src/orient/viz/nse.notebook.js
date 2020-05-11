@@ -59,7 +59,7 @@ createJsonDownloadButton(combos)
 report_from_result(vars, solved_many[0], {})
 
 function fetch_model() {
-  return fetch('https://raw.githubusercontent.com/filecoin-project/specs/nse-calc/src/orient/nse.orient').then(d => d.text())
+  return fetch('https://raw.githubusercontent.com/filecoin-project/specs/nse-calc/src/orient/nse.orient?time=' + new Date()).then(d => d.text())
 }
 
 viewof filter = html`<input type="text">`
