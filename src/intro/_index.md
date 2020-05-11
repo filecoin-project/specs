@@ -19,6 +19,7 @@ enabling experts to fill in different sections in parallel.
 However, within each section, content may be out-of-order, incorrect, and/or incomplete.
 The reader is advised to refer to the
 [official Filecoin spec document](https://filecoin-project.github.io/specs/)
+ - Isn't that link *this* place?
 for specification and implementation questions.
 {{% /notice %}}
 

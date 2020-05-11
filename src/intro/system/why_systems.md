@@ -5,6 +5,7 @@ title: What are Systems? How do they work?
 
 
 Filecoin decouples and modularizes functionality into loosely-joined `systems`.
+- is this related to the "subsystem" definition in concepts?
 Each system adds significant functionality, usually to achieve a set of important and tightly related goals.
 
 For example, the Blockchain System provides structures like Block, Tipset, and Chain, and provides functionality
@@ -40,6 +41,7 @@ Many Filecoin Nodes do not need the chain and can perform their work by just fet
 StateTree, from a node they trust.
 
 Note: Filecoin does not use the "full node" or "light client" terminology, in wide use in Bitcoin and other blockchain
+- we have already defined "full node" in concepts.
 networks. In filecoin, these terms are not well defined. It is best to define nodes in terms of their capabilities,
 and therefore, in terms of the Systems they run. For example:
 
@@ -50,6 +52,9 @@ and therefore, in terms of the Systems they run. For example:
 - **Storage Miner Node:** Runs the Blockchain, Storage Market, Storage Mining systems. Can sync and validate the chain.
   Can make Storage Deals (Storage Provider side). Can seal stored data into sectors. Can acquire
   storage consensus power. Can mine and produce blocks.
+  - we still haven't defined all these systems so enumerating them here is
+    rather confusing, doesn't help to form a clear picture of which node
+    does what
 
 # Separating Systems
 
@@ -60,6 +65,8 @@ In a sense, we seek to keep tightly integrated components in the same system, an
 components. This is sometimes straightforward, the boundaries naturally spring from the data structures or
 functionality. For example, it is straightforward to observe that Clients and Miners negotiating a deal
 with each other is very unrelated to VM Execution.
+- this is all valid but seems anecdotal if we still haven't explained anything
+  about the systems themselves.
 
 Sometimes this is harder, and it requires detangling, adding, or removing abstractions. For
 example, the `StoragePowerActor` and the `StorageMarketActor` were a single `Actor` previously. This caused

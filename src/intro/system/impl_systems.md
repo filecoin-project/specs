@@ -14,6 +14,7 @@ All Systems, as defined in this document, require the following:
 - **Repository:**
   - **Local `IpldStore`.** Some amount of persistent local storage for data structures (small structured objects).
     Systems expect to be initialized with an IpldStore in which to store data structures they expect to persist across crashes.
+    - link to IPLD store definition
   - **User Configuration Values.** A small amount of user-editable configuration values.
     These should be easy for end-users to access, view, and edit.
   - **Local, Secure `KeyStore`.** A facility to use to generate and use cryptographic keys, which MUST remain secret to the
