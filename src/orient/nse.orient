@@ -42,8 +42,9 @@ Rigs:
 
 PoRep:
   describe(replica_size_gib, "Size of the replica", gib)
-  replica_size_gib = replica_size / b_in_gib
   describe(replica_size_tib, "Size of the replica", tib)
+  describe(replica_size, "Size of the replica", bytes)
+  replica_size_gib = replica_size / b_in_gib
   replica_size_tib = replica_size / b_in_tib
 
   describe(porep_size_snark, "Size of a PoRep SNARK", bytes)
@@ -63,6 +64,7 @@ PoRep:
   porep_time_snark_s_per_gib = porep_time_snark / replica_size_gib
   porep_time_snark_mins_per_gib = porep_time_snark_mins / replica_size_gib
   describe(porep_time_replicate, "Time to replicate", seconds)
+  describe(porep_time_replicate_per_b, "Time to replicate per bytes", seconds)
   porep_time_replicate_mins = porep_time_replicate / secs_in_min
   porep_time_replicate_hours = porep_time_replicate / secs_in_hour
   porep_time_replicate_per_b = porep_time_replicate / replica_size
@@ -79,7 +81,8 @@ PoRepSDR (SDR):
   porep_size_snark = porep_partitions * snark_size
   post_proof_size = post_partitions * snark_size
   post_partitions = post_constraints / snark_partition
-  porep_time_replicate = (layers * (parents + 1) * replica_nodes * node_size) * rig_hashing_sequential_throughput_b_s
+  porep_time_replicate = (layers * (parents + 1) * replica_nodes * node_size) / rig_hashing_sequential_throughput_b_s
+  porep_time_replicate_per_bb = (layers * (parents + 1) * node_size) / rig_hashing_sequential_throughput_b_s
   replica_nodes = replica_size / node_size
 
 PoRepNSE (NSE):
@@ -213,6 +216,7 @@ PoRepNSE (NSE):
         describe(porep_time_unseal, "Time to unseal window", seconds)
         porep_time_unseal = memaccess_window_time
         porep_time_replicate = memaccess_replica_time
+        porep_time_replicate_per_bb = memaccess_node / rig_memaccess_throughput_b_s
         
   PoSt:
     post_soundness = expt(2, -post_lambda)
