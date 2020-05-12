@@ -82,7 +82,6 @@ PoRepSDR (SDR):
   post_proof_size = post_partitions * snark_size
   post_partitions = post_constraints / snark_partition
   porep_time_replicate = (layers * (parents + 1) * replica_nodes * node_size) / rig_hashing_sequential_throughput_b_s
-  porep_time_replicate_per_bb = (layers * (parents + 1) * node_size) / rig_hashing_sequential_throughput_b_s
   replica_nodes = replica_size / node_size
 
 PoRepNSE (NSE):
@@ -216,8 +215,7 @@ PoRepNSE (NSE):
         describe(porep_time_unseal, "Time to unseal window", seconds)
         porep_time_unseal = memaccess_window_time
         porep_time_replicate = memaccess_replica_time
-        porep_time_replicate_per_bb = memaccess_node / rig_memaccess_throughput_b_s
-        
+
   PoSt:
     post_soundness = expt(2, -post_lambda)
     post_challenges = windows * post_window_challenges
