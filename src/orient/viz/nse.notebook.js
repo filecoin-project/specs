@@ -1,35 +1,42 @@
 combos = makeQuery([
   {
+    "!NSE": true,
+
     windows: 256,
     window_size_gib: 4,
     nodes_in_sequence: 8,
+
     post_window_challenges: 2,
-    expander_degree: 384,
-    butterfly_degree: 16,
-    expander_layers: 8,
-    butterfly_layers: 7,
     porep_lambda: 10,
     spacegap: 0.15,
     delta: 0.05,
 
-    "!NSE": true
+    expander_degree: 384,
+    butterfly_degree: 16,
+    expander_layers: 8,
+    butterfly_layers: 7,
+
+    rig_cost: 4750,
   },
   {
+    "!SDR": true,
     replica_size_gib: 32,
     porep_partitions: 8,
     wpost_sectors: 2350,
-    "!SDR": true,
     porep_time_commitment: (150 * 8)/4, // 150 for 4GiB, 4 GPU parallelization
-    cost_replicate: 0.014,
+    // cost_replicate: 0.014,
+
+    cost_attack_replica: 0.015 / 10,
     layers: 11,
-    parents: 37
+    parents: 37,
+
+    rig_cost: 2000,
   },
 ])
   .add({
     rig_memaccess_throughput_tb_s:  3,
     rig_hashing_throughput_tb_s: 0.016 * 32,
     rig_lifetime_years: 2,
-    rig_cost: 4750,
     rig_storage_lifetime_years: 2,
     rig_cost_storage_tb: 15,
     rig_hashing_sequential_throughput_gb_s: 2,
