@@ -21,21 +21,17 @@ Crypto:
   describe(snark_size, "Size of a single SNARK partition", bytes)
 
 Rigs:
+  describe(rig_cost_s, "Cost of running the rig for one second")
   rig_memaccess_throughput_tib_s = rig_memaccess_throughput_tb_s * tb_to_tib
   rig_memaccess_throughput_b_s = rig_memaccess_throughput_tib_s * b_in_tib
-  // rig_memaccess_throughput_access_s = rig_memaccess_throughput_b_s / node_size
-  // rig_memaccess_throughput_gaccess_s = rig_memaccess_throughput_access_s / (1000 * 1000 * 1000)  
 
   rig_hashing_throughput_tib_s = rig_hashing_throughput_tb_s * tb_to_tib
   rig_hashing_throughput_b_s = rig_hashing_throughput_tib_s * b_in_tib
 
   rig_hashing_sequential_throughput_gib_s = rig_hashing_sequential_throughput_gb_s * gb_to_gib
   rig_hashing_sequential_throughput_b_s = rig_hashing_sequential_throughput_gib_s * b_in_gib
-  // rig_hashing_throughput_hash_s = rig_hashing_throughput_b_s / node_size
-  // rig_hashing_throughput_ghash_s = rig_hashing_throughput_hash_s / (1000 * 1000 * 1000)  
-  describe(rig_cost_s, "Cost of running the rig for one second")
-  rig_cost_s = rig_cost / (rig_lifetime_years * secs_in_year)
 
+  rig_cost_s = rig_cost / (rig_lifetime_years * secs_in_year)
   rig_cost_storage_tib = rig_cost_storage_tb * tb_to_tib
   rig_cost_storage_tib = rig_cost_storage_b * b_in_tib
   rig_cost_storage_b_s = rig_cost_storage_b / (rig_storage_lifetime_years * secs_in_year)
@@ -63,19 +59,16 @@ PoRep:
   porep_time_snark_mins = porep_time_snark / secs_in_min
   porep_time_snark_s_per_gib = porep_time_snark / replica_size_gib
   porep_time_snark_mins_per_gib = porep_time_snark_mins / replica_size_gib
+
   describe(porep_time_replicate, "Time to replicate", seconds)
   describe(porep_time_replicate_per_b, "Time to replicate per bytes", seconds)
   porep_time_replicate_mins = porep_time_replicate / secs_in_min
   porep_time_replicate_hours = porep_time_replicate / secs_in_hour
   porep_time_replicate_per_b = porep_time_replicate / replica_size
 
-
   describe(post_time_snark, "Time to generate a PoSt SNARK", seconds)
   describe(post_proof_size, "Size of a PoSt SNARK proof", bytes)
   post_time_snark = snark_constraint_time * post_constraints
-
-
-
 
 PoRepSDR (SDR):
   porep_size_snark = porep_partitions * snark_size
@@ -83,6 +76,7 @@ PoRepSDR (SDR):
   post_partitions = post_constraints / snark_partition
   porep_time_replicate = (layers * (parents + 1) * replica_nodes * node_size) / rig_hashing_sequential_throughput_b_s
   replica_nodes = replica_size / node_size
+  cost_honest_replica = cost_replicate
 
 PoRepNSE (NSE):
   PaperToUbercalc:
@@ -138,9 +132,6 @@ PoRepNSE (NSE):
         describe(cost_honest_replica, "Cost to encode a replica", dollars)
         cost_honest_replica = memaccess_replica * cost_memaccess_node
 
-        amax = cost_attack_replica / cost_honest_storage_proving_period
-        describe(cost_honest_ratio, "Ratio of the cost of replica vs cost of storage for a year")
-        cost_honest_ratio = cost_honest_replica / cost_honest_storage_year
     Commitment:
       mtrees = expander_layers + butterfly_layers
       mtree_leaves = replica_nodes * mtrees
@@ -231,19 +222,22 @@ PoRepNSE (NSE):
       commrlast_inclusions_constraints = commrlast_inclusions * commrlast_inclusion_constraints
 
 Filecoin:
-  network_size = network_size_eib * b_in_eib
-  network_sectors = network_size / replica_size
   describe(network_post_size_in_pp, "Size of PoSt proofs in a proving period")
   describe(blocks_in_pp, "Number of blocks in a proving period")
   describe(proving_period_hours, "Duration of a proving period", seconds)
+
+  network_size = network_size_eib * b_in_eib
+  network_sectors = network_size / replica_size
   blocks_in_pp = tipset_size * (proving_period_hours * secs_in_hour) / block_time
   blocks_in_year = tipset_size * (secs_in_year) / block_time
+
   Costs:
     describe(cost_honest_storage_proving_period, "Cost of storage during a proving period", dollars)
-    cost_honest_storage_proving_period = rig_cost_storage_b_s * proving_period_hours * secs_in_hour * replica_size
     describe(cost_honest_storage_proving_period_node, "Cost of storing an individual node in a proving period", dollars)
-    cost_honest_storage_proving_period_node = rig_cost_storage_b_s *  proving_period_hours * secs_in_hour * 32
     describe(cost_honest_storage_year, "Cost of storing the replica for a year", dollars)
+
+    cost_honest_storage_proving_period = rig_cost_storage_b_s * proving_period_hours * secs_in_hour * replica_size
+    cost_honest_storage_proving_period_node = rig_cost_storage_b_s *  proving_period_hours * secs_in_hour * 32
     cost_honest_storage_year = rig_cost_storage_b_s *  secs_in_year * replica_size
 
     describe(cost_commitment, "Cost of commitment during PoRep", dollars)
@@ -267,17 +261,21 @@ Filecoin:
     cost_post_snark = post_time_snark * rig_cost_s
     cost_post_snark_per_gib = cost_post_snark / replica_size_gib
 
+    amax = cost_attack_replica / cost_honest_storage_proving_period
+    describe(cost_honest_ratio, "Ratio of the cost of replica vs cost of storage for a year")
+    cost_honest_ratio = cost_honest_replica / cost_honest_storage_year
 
   Proofs:
       describe(wpost_sectors, "Sectors proven in a WindowPoSt proof", sectors)
       wpost_sectors = snark_partition / post_constraints
+
       describe(wpost_storage_tib, "Amount of storage proven in a WindowPoSt proof", tib)
       wpost_storage_tib = wpost_sectors * replica_size_tib
 
       describe(wpost_footprint_b_per_tib_stored, "PoSt on-chain footprint per TiB", bytes)
+      describe(porep_footprint_b_per_gib_stored, "PoRep on-chain footprint per GiB", bytes)
       wpost_footprint_b_per_tib_stored = snark_size / wpost_storage_tib 
       porep_footprint_b_per_tib_stored = porep_size_snark / replica_size_tib 
-      describe(porep_footprint_b_per_gib_stored, "PoRep on-chain footprint per GiB", bytes)
       porep_footprint_b_per_gib_stored = porep_size_snark / replica_size_gib
 
       describe(network_proofs_size_in_year, "Size of the proofs on-chain in a year", bytes)
@@ -293,6 +291,7 @@ Filecoin:
         network_post_partitions_in_block = network_post_size_in_block / snark_size
         network_post_size_in_block = network_post_size_in_pp / blocks_in_pp
         network_post_size_in_block_kib = network_post_size_in_block / b_in_kib
+
       PoRepNetwork:
         network_porep_size_in_block = network_porep_size_in_block_kib * b_in_kib
         network_porep_size = network_sectors * porep_size_snark
