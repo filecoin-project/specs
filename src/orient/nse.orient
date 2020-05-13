@@ -75,8 +75,9 @@ PoRep:
   describe(cost_honest_replica, "Cost to encode a replica", dollars)
 
   // Note: these equations were found by quadratic fitting the results from CPUs
-  post_time_verification_ms = -0.000596269 * (porep_partitions * porep_partitions) + 1.588 * porep_partitions + 218.255
-  porep_time_verification_ms = -0.000596269 * (post_partitions * post_partitions) + 1.588 * post_partitions + 218.255
+  porep_time_verification_ms = -0.000596269 * (porep_partitions * porep_partitions) + 1.588 * porep_partitions + 218.255
+  // Note: a single window post is a single partition
+  post_time_verification_ms = -0.000596269 * (1) + 1.588 * (1) + 218.255
 
   post_time_verification = post_time_verification_ms * ms_in_secs
   porep_time_verification = porep_time_verification_ms * ms_in_secs
@@ -84,6 +85,8 @@ PoRep:
 PoRepSDR (SDR):
   porep_size_snark = porep_partitions * snark_size
   post_proof_size = post_partitions * snark_size
+  wpost_proof_size = snark_size
+  wpost_partitions = 1
   post_partitions = post_constraints / snark_partition
   porep_time_replicate = (layers * (parents + 1) * replica_nodes * node_size) / rig_hashing_sequential_throughput_b_s
   replica_nodes = replica_size / node_size
@@ -223,6 +226,8 @@ PoRepNSE (NSE):
     post_challenges = windows * post_window_challenges
     post_partitions = post_constraints / snark_partition
     post_proof_size = post_partitions * snark_size
+    wpost_proof_size = snark_size
+    wpost_partitions = 1
 
 
     SNARK:
@@ -298,9 +303,12 @@ Filecoin:
         pp_in_year = secs_in_year / (proving_period_hours * secs_in_hour)
         network_post_size_in_year = network_post_size_in_pp * pp_in_year
         network_post_size_in_year_gib = network_post_size_in_year / b_in_gib
-        network_post_size_in_pp = network_sectors * post_proof_size 
-        network_post_partitions_in_block = network_post_size_in_block / snark_size
-        network_post_size_in_block = network_post_size_in_pp / blocks_in_pp
+        // consider 1 post proof for multiple sectors
+        network_post_size_in_pp = network_post_partitions_in_pp * snark_size 
+        network_post_partitions_in_pp = network_sectors / wpost_sectors
+        network_post_partitions_in_block = network_post_partitions_in_pp / blocks_in_pp
+        network_post_proofs_in_block = network_post_partitions_in_block // one partition is one post proof 
+        network_post_size_in_block = network_post_partitions_in_block * snark_size
         network_post_size_in_block_kib = network_post_size_in_block / b_in_kib
 
       PoRepNetwork:
@@ -309,5 +317,6 @@ Filecoin:
         network_porep_size_gib = network_porep_size / b_in_gib
         network_porep_size_in_block = network_porep_size / blocks_in_year
         network_porep_partitions_in_block = network_porep_size_in_block / snark_size
+        network_porep_proofs_in_block = network_porep_partitions_in_block / porep_partitions
         end = 2
 
