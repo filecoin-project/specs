@@ -7,6 +7,7 @@ Utilities:
   gib_in_tib = 1024
   gib_in_pib = 1024 * 1024
   b_in_kib = 1024
+  ms_in_secs = 1 / 1000
   secs_in_month = (24 * 60 * 60 * 30)
   secs_in_year = (24  * 60 * 60 * 365)
   secs_in_day = (24 * 60 * 60)
@@ -72,6 +73,13 @@ PoRep:
 
   describe(cost_attack_replica, "Cost to attack", dollars)
   describe(cost_honest_replica, "Cost to encode a replica", dollars)
+
+  // Note: these equations were found by quadratic fitting the results from CPUs
+  post_time_verification_ms = -0.000596269 * (porep_partitions * porep_partitions) + 1.588 * porep_partitions + 218.255
+  porep_time_verification_ms = -0.000596269 * (post_partitions * post_partitions) + 1.588 * post_partitions + 218.255
+
+  post_time_verification = post_time_verification_ms * ms_in_secs
+  porep_time_verification = porep_time_verification_ms * ms_in_secs
 
 PoRepSDR (SDR):
   porep_size_snark = porep_partitions * snark_size

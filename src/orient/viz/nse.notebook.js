@@ -1,3 +1,19 @@
+createJsonDownloadButton(combos, 'nse.json', 'Download Ubercalc query')
+
+createJsonDownloadButton(solved_many, 'nse-results.json', "Download Ubercalc results")
+
+report_from_result(vars, solved_many[0], {})
+
+viewof filter = html`<input type="text">`
+
+orientableDebugger(await fetch_model(), solved_many, vars, filter)
+
+md`### Ubercalc`
+
+solved_many_pre = (await solve_many_chunk(combos))
+
+solved_many = solved_many_pre.filter(d => d !== null)
+
 combos = makeQuery([
   {
     "!NSE": true,
@@ -52,8 +68,6 @@ combos = makeQuery([
     commd_hash_time: 130e-9,
   })
   .add({
-  })
-  .add({
     node_size: 32,
     snark_partition: 100000000,
     snark_constraint_time: 0.00000317488 / 4,
@@ -67,23 +81,9 @@ combos = makeQuery([
   })
   .compile()
 
-createJsonDownloadButton(combos)
-
-report_from_result(vars, solved_many[0], {})
-
 function fetch_model() {
   return fetch('https://raw.githubusercontent.com/filecoin-project/specs/nse-calc/src/orient/nse.orient?time=' + new Date()).then(d => d.text())
 }
-
-viewof filter = html`<input type="text">`
-
-orientableDebugger(await fetch_model(), solved_many, vars, filter)
-
-solved_many_pre = (await solve_many_chunk(combos))
-
-solved_many = solved_many_pre.filter(d => d !== null)
-
-createJsonDownloadButton(solved_many)
 
 md`### Orient`
 
