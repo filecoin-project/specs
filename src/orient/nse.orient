@@ -308,5 +308,6 @@ Filecoin:
         network_porep_size = network_sectors * porep_size_snark
         network_porep_size_gib = network_porep_size / b_in_gib
         network_porep_size_in_block = network_porep_size / blocks_in_year
+        network_porep_partitions_in_block = network_porep_size_in_block / snark_size
         end = 2
 
