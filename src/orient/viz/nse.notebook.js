@@ -40,7 +40,6 @@ combos = makeQuery([
     porep_partitions: 8,
     wpost_sectors: 2350,
     porep_time_commitment: (150 * 8)/4, // 150 for 4GiB, 4 GPU parallelization
-    // cost_replicate: 0.014,
 
     cost_attack_replica: 0.015 / 10,
     layers: 11,
@@ -50,17 +49,14 @@ combos = makeQuery([
   },
 ])
   .add({
-    rig_cost_gpu: 3000
-  })
-  .add({
+    rig_cost_gpu: 3000,
     rig_memaccess_throughput_tb_s:  3,
     rig_hashing_throughput_tb_s: 0.016 * 32,
     rig_lifetime_years: 2,
     rig_storage_lifetime_years: 2,
     rig_cost_storage_tb: 15,
     rig_hashing_sequential_throughput_gb_s: 2,
-  })
-  .add({
+
     mtree_hash_name: 'poseidon',
     mtree_hash_time: 8.3e-7 / 4, // (divided by 4 since we have 4 GPUs) // ((8/7)*(2^27/8 -1))*32*8, // GPU 4s per GiB // CPU 5.803e-5,
     mtree_hash_blocks: 8,
@@ -69,14 +65,12 @@ combos = makeQuery([
     commd_hash_name: 'sha',
     commd_hash_constraints: 25840,
     commd_hash_time: 130e-9,
-  })
-  .add({
+
     node_size: 32,
     snark_partition: 100000000,
     snark_constraint_time: 0.00000317488 / 4,
-    snark_size: 192
-  })
-  .add({
+    snark_size: 192,
+
     proving_period_hours: 24,
     network_size_eib: 10,
     block_time: 30,
