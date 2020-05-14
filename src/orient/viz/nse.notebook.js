@@ -17,6 +17,7 @@ solved_many = solved_many_pre.filter(d => d !== null)
 combos = makeQuery([
   {
     "!NSE": true,
+    "!SDR": false,
 
     windows: 256,
     window_size_gib: 4,
@@ -36,6 +37,7 @@ combos = makeQuery([
   },
   {
     "!SDR": true,
+    "!NSE": false,
     replica_size_gib: 32,
     porep_partitions: 8,
     wpost_sectors: 2350,
