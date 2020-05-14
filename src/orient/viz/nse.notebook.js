@@ -50,6 +50,9 @@ combos = makeQuery([
   },
 ])
   .add({
+    rig_cost_gpu: 2000
+  })
+  .add({
     rig_memaccess_throughput_tb_s:  3,
     rig_hashing_throughput_tb_s: 0.016 * 32,
     rig_lifetime_years: 2,

@@ -22,7 +22,8 @@ Crypto:
   describe(snark_size, "Size of a single SNARK partition", bytes)
 
 Rigs:
-  describe(rig_cost_s, "Cost of running the rig for one second")
+  describe(rig_cost_s, "Cost of running the replication rig for one second")
+  describe(rig_cost_gpu_s, "Cost of running the GPUs rig for one second")
   rig_memaccess_throughput_tib_s = rig_memaccess_throughput_tb_s * tb_to_tib
   rig_memaccess_throughput_b_s = rig_memaccess_throughput_tib_s * b_in_tib
 
@@ -33,6 +34,7 @@ Rigs:
   rig_hashing_sequential_throughput_b_s = rig_hashing_sequential_throughput_gib_s * b_in_gib
 
   rig_cost_s = rig_cost / (rig_lifetime_years * secs_in_year)
+  rig_cost_gpu_s = rig_cost_gpu / (rig_lifetime_years * secs_in_year)
   rig_cost_storage_tib = rig_cost_storage_tb * tb_to_tib
   rig_cost_storage_tib = rig_cost_storage_b * b_in_tib
   rig_cost_storage_b_s = rig_cost_storage_b / (rig_storage_lifetime_years * secs_in_year)
@@ -261,10 +263,10 @@ Filecoin:
     describe(cost_porep, "Cost of Porep", dollars)
     describe(cost_porep_snark, "Cost of Porep SNARK", dollars)
     describe(cost_replicate, "Cost of PoRep replication", dollars)
-    cost_commitment = porep_time_commitment * rig_cost_s
+    cost_commitment = porep_time_commitment * rig_cost_gpu_s
     cost_commitment_per_gib = cost_commitment / replica_size_gib
 
-    cost_porep_snark = porep_time_snark * rig_cost_s
+    cost_porep_snark = porep_time_snark * rig_cost_gpu_s
     cost_porep_snark_per_gib = cost_porep_snark / replica_size_gib
 
     cost_replicate_per_gib = cost_replicate / replica_size_gib
@@ -275,7 +277,7 @@ Filecoin:
     describe(cost_post, "Cost of a PoSt proof", dollars)
     cost_post = cost_post_snark
     cost_post_snark_per_gib = cost_post_snark_per_gib
-    cost_post_snark = post_time_snark * rig_cost_s
+    cost_post_snark = post_time_snark * rig_cost_gpu_s
     cost_post_snark_per_gib = cost_post_snark / replica_size_gib
 
     amax = cost_attack_replica / cost_honest_storage_proving_period
