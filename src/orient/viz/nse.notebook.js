@@ -50,7 +50,7 @@ combos = makeQuery([
   },
 ])
   .add({
-    rig_cost_gpu: 2000
+    rig_cost_gpu: 3000
   })
   .add({
     rig_memaccess_throughput_tb_s:  3,
