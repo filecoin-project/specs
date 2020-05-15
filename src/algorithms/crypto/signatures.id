@@ -14,6 +14,6 @@ type Signature struct {
 }
 
 type SigType enum {
-    BLSSigType
     ECDSASigType
+    BLSSigType
 }
