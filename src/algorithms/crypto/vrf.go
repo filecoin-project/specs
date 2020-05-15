@@ -8,7 +8,7 @@ func (self *VRFResult_I) ValidateSyntax() bool {
 }
 
 func (self *VRFResult_I) Verify(input util.Bytes, pk VRFPublicKey) bool {
-	// return new(BLS).Verify(self.Output, pk.(*BLSPublicKey), input)
+	// return new(BLS).Verify(self.Proof, pk.(*BLSPublicKey), input)
 	return false
 }
 
@@ -21,7 +21,8 @@ func (self *VRFKeyPair_I) Generate(input util.Bytes) VRFResult {
 	// sig := new(BLS).Sign(input, self.SecretKey)
 	var blsSig util.Bytes
 	ret := &VRFResult_I{
-		Output_: blsSig,
+		Proof_: blsSig,
+		Digest_: blake2b.Sum256(blsSig)
 	}
 	return ret
 }

@@ -129,9 +129,8 @@ In short, the weight at each block is equal to its `ParentWeight` plus that bloc
 
 Delta weight is a term composed of a few elements:
 
-- wForkFactor: which seeks to cut the weight derived from rounds in which produced Tipsets do not correspond to what an honest chain is likely to have yielded (pointing to selfish mining or other non-collaborative miner behavior).
 - wPowerFactor: which adds weight to the chain proportional to the total power backing the chain, i.e. accounted for in the chain's power table.
-- wBlocksFactor: which adds weight to the chain proportional to the number of blocks mined in a given round. Like wForkFactor, it rewards miner cooperation (which will yield more blocks per round on expectation).
+- wBlocksFactor: which adds weight to the chain proportional to the number of tickets mined in a given epoch. It rewards miner cooperation (which will yield more blocks per round on expectation).
 
 The weight should be calculated using big integer arithmetic with order of operations defined above. We use brackets instead of parentheses below for legibility. We have:
 
@@ -140,16 +139,16 @@ The weight should be calculated using big integer arithmetic with order of opera
 For a given tipset `ts` in round `r+1`, we define:
 
 - `wPowerFactor[r+1]  = wFunction(totalPowerAtTipset(ts))`
-- wBlocksFactor[r+1] =  `wPowerFactor[r+1] * wRatio * b / e`
-  - with `b = |blocksInTipset(ts)|`
-  - `e = expected number of blocks per round in the protocol`
+- wBlocksFactor[r+1] =  `wPowerFactor[r+1] * wRatio * t / e`
+  - with `t = |ticketsInTipset(ts)|`
+  - `e = expected number of tickets per round in the protocol`
   - and `wRatio in ]0, 1[`
 Thus, for stability of weight across implementations, we take:
 - wBlocksFactor[r+1] =  `(wPowerFactor[r+1] * b * wRatio_num) / (e * wRatio_den)`
 
 We get:
 
-- `w[r+1] = w[r] + wFunction(totalPowerAtTipset(ts)) * 2^8 + (wFunction(totalPowerAtTipset(ts)) * len(ts.blocks) * wRatio_num * 2^8) / (e * wRatio_den)`
+- `w[r+1] = w[r] + wFunction(totalPowerAtTipset(ts)) * 2^8 + (wFunction(totalPowerAtTipset(ts)) * len(ts.tickets) * wRatio_num * 2^8) / (e * wRatio_den)`
  Using the 2^8 here to prevent precision loss ahead of the division in the wBlocksFactor.
 
  The exact value for these parameters remain to be determined, but for testing purposes, you may use:
