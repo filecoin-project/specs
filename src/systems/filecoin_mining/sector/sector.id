@@ -48,7 +48,7 @@ type UnsealedSectorInfo struct {
     UnsealedCID  abi.UnsealedSectorCID  // CommD
     Size         abi.SectorSize
     PieceCount   UVarint  // number of pieces in this sector (can get it from len(Pieces) too)
-    Pieces       [piece.PieceInfo]  // wont get externalized easy, -- it's big
+    Pieces       [piece.PieceInfo]  // won't get externalized easy, -- it's big
     // Deals       [smarkact.StorageDeal]
 }
 

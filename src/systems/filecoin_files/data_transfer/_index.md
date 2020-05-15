@@ -53,7 +53,7 @@ or potentially the same round trip, where the requesting party implicitly agrees
 8. The responder completes receiving data, and notifies any listeners
 
 The push flow is ideal for storage deals, where the client initiates the push
-once it verifies the the deal is signed and on chain
+once it verifies the deal is signed and on chain
 
 ## Pull Flow
 
@@ -83,18 +83,18 @@ The pull flow is ideal for retrieval deals, where the client initiates the pull 
 5. The requestors' data transfer module will send a pull request to the responder along with the data transfer voucher.
 6. The responder's data transfer module validates the data transfer request via a PullValidator provided as a dependency by the responder
 7. The responder's data transfer module schedules the transfer
-8. The responder sends a graphsync response along with a data transfer accepted response piggypacked
+8. The responder sends a graphsync response along with a data transfer accepted response piggybacked
 9. The requestor receives data and can produce an indication of progress
 10. The requestor completes receiving data, and notifies any listeners
 
 # Protocol
 
-A data transfer CAN be negotiated over the network via the {{<sref data_transfer_protocol "Data Transfer Protocol">}}, a Libp2p protocol type
+A data transfer CAN be negotiated over the network via the {{<sref data_transfer_protocol "Data Transfer Protocol">}}, a libp2p protocol type
 
 A Pull request expects a response. The requestor does not initiate the transfer
 until they know the request is accepted.
 
-The responder should send a response to a push request as well so the requestor can release the resources (if not accepted). However, if the Responder accepts the request they can immediately initiate the transfer
+The responder should send a response to a push request as well so the requestor can release the resources (if not accepted). However, if the Responder accepts the request they can immediately initiate the transfer.
 
 Using the Data Transfer Protocol as an independent libp2p communciation mechanism is not a hard requirement -- as long as both parties have an implementation of the Data Transfer Subsystem that can talk to the other, any
 transport mechanism (including offline mechanisms) is acceptable.

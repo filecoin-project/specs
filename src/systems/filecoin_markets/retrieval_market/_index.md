@@ -29,7 +29,7 @@ V0 of the protocol has participants send data over the retrieval protocol itself
 
 In V1, the retrieval markets will evolve to support sending arbitrary payload CID's & selectors within a piece. Further, it will piggy back on the Data Transfer system and Graphsync to handle transfer and verification, to support arbitrary selectors, and to reduce round trips.
 The Data Transfer System will accordingly be augmented to support pausing/resuming and sending intermediate vouchers to facilitate this.
-V1 will also include additional mechanisms for timeouts and cancellations. (to be specified)
+V1 will also include additional mechanisms for timeouts and cancellations (to be specified).
 
 Though the underlying protocols will change, the API interfaces for the client & provider will not change from V0 to V1.
 

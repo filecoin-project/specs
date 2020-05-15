@@ -129,7 +129,7 @@ We have describe three hash functions:
 
 ## Stacked DRG Graph
 
-The slow sequential encoding required is enforced by the depth robusness property of the SDR graph.
+The slow sequential encoding required is enforced by the depth robustness property of the SDR graph.
 
 **Encoding with SDR**: The data from a sector (of size `SECTOR_SIZE`) is divided in `NODE_SIZE` nodes (for a total of `GRAPH_SIZE` nodes) and arranged in a directed acyclic graph. The structure of the graph is used to label the nodes sequentially to generate a key with which to encode the original data: in order to label a node, its parents must be labeled (see the "Layer Labeling" section below). We repeat this process for `LAYERS` layers, where the input to a next layer is the output of the previous one.
 
@@ -179,7 +179,7 @@ This section describes how to compute the "base parents" of the SDR graph, which
 
 The properties of DRG graphs guarantee that a sector has been encoded with a slow, non-parallelizable process. We use the `BucketSample` algorithm that is based on DRSample ([ABH17](https://acmccs.github.io/papers/p1001-alwenA.pdf)) and described in [FBGB18](https://web.stanford.edu/~bfisch/porep_short.pdf) and generates a directed acyclic graph of in-degree `BASE_DEGREE`.
 
-`BucketSample` DRG graphs are random graphs that can be deterministically generated from a seed; different seed lead with high probability to different graphs. In SDR, we use the same seed `GRAPH_SEED` for each layer of the SDR graph such that they are all based on the same underlying DRG graph.
+`BucketSample` DRG graphs are random graphs that can be deterministically generated from a seed; different seeds lead with high probability to different graphs. In SDR, we use the same seed `GRAPH_SEED` for each layer of the SDR graph such that they are all based on the same underlying DRG graph.
 
 The parents of any node can be locally computed without computing the entire graph. We call the parents of a node calculated in this way *base parents*.
 

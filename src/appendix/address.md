@@ -249,7 +249,7 @@ Software decoding a Filecoin address must:
 * verify the protocol is a number of a known protocol.
 * verify the checksum is valid
 
-Decode an Address from a string by removing the network prefix, validating the address is of a know protocol, decoding the payload and checksum, and validating the checksum.
+Decode an Address from a string by removing the network prefix, validating the address is of a known protocol, decoding the payload and checksum, and validating the checksum.
 
 ```go
 func Decode(a string) Address {

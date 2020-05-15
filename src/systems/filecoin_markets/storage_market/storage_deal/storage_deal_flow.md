@@ -20,11 +20,11 @@ title: Storage Deal Flow
 
 # Sealing sectors
 
-- 4. Once the miner finishes packing a `Sector`, it generates a SectorPreCommitInfo and call PreCommitSector with a PreCommitDeposit. It must call ProveCommitSector with SectorProveCommitInfo within some bound to recover the deposit. Expired PreCommit message will result in PreCommitDeposit being burned. There are two types of sectors, Regular Sector and Committed Capacity Sector but all sectors have an explicit expiration epoch declared during PreCommit. For a Regular Sector with storage deals in it, all deals must expire before sector expiration. Miner gains power for this particular sector upon successful ProveCommit.
+- 4. Once the miner finishes packing a `Sector`, it generates a SectorPreCommitInfo and calls PreCommitSector with a PreCommitDeposit. It must call ProveCommitSector with SectorProveCommitInfo within some bound to recover the deposit. An expired PreCommit message will result in PreCommitDeposit being burned. There are two types of sectors, Regular Sector and Committed Capacity Sector but all sectors have an explicit expiration epoch declared during PreCommit. For a Regular Sector with storage deals in it, all deals must expire before sector expiration. Miner gains power for this particular sector upon successful ProveCommit.
 
 # Receive Challenge
 
-- 5. Miners enter the `Challenged` status when it receives a SurprisePoSt challenge from the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before the chain checks for SurprisePoSt expiry. Miners can only get out the challenge with `SubmitSurprisePoStResponse`.
+- 5. Miners enter the `Challenged` status when receiving a SurprisePoSt challenge from the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before the chain checks for SurprisePoSt expiry. Miners can only get out the challenge with `SubmitSurprisePoStResponse`.
 - 6. Miners are allowed to DeclareTemporaryFault when they are in the `Challenged` state but this will not change the list of sectors challenged as `Challenged` state specifies a list of sectors to be challenged which is a snapshot of all Active sectors at the time of challenge. Miners are also allowed to call ProveCommit which will add to their ClaimedPower but their Nominal and Consensus Power are still zero whe  they are in either Challenged or DetectedFault state.
 
 # Declare and Recover Faults
@@ -42,7 +42,7 @@ title: Storage Deal Flow
 
 # Sector Expiration
 
-- 10. Sector expiration is done via a scheduled Cron event `_rtCheckSectorExpiry`. Sector expires when its Expiration epoch is reached and sector expiration epoch must be greater than all its deal expiration epoch.
+- 10. Sector expiration is done via a scheduled Cron event `_rtCheckSectorExpiry`. Sector expires when its Expiration epoch is reached and sector expiration epoch must be greater than the expiration epoch of all its deals.
 
 # Deal Payment and slashing
 

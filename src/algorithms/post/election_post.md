@@ -26,7 +26,7 @@ To enable short PoSt response time, miners are required submit a PoSt when they 
 
 ## SurprisePoSt Cleanup
 
-In the absence of a posted `ElectionPoSt`, the chain randomly challenges a miner to submit a `SurprisePoSt` once per `ProvingPeriod` on expectation to ensure their storage is still accounted for. The process is largely the same as for `ElectionPoSt` but a successful `SurprisePoSt` does not entitle a miner to generate a blocks and gains them no reward. It allows them to maintain power in the power table. 
+In the absence of a posted `ElectionPoSt`, the chain randomly challenges a miner to submit a `SurprisePoSt` once per `ProvingPeriod` on expectation to ensure their storage is still accounted for. The process is largely the same as for `ElectionPoSt` but a successful `SurprisePoSt` does not entitle a miner to generate a block and gains them no reward. It allows them to maintain power in the power table.
 
 For every miner challenged, a `NotifyOfPoStSurpriseChallenge` is issued and sent as an on-chain message to the chosen `StorageMinerActor`.
 `PoStSurprise` will frequently be used by small miners who do not win blocks, and by miners as they are onboarding power to the network (since they will not be able to win ElectionPoSts to start).
@@ -96,7 +96,7 @@ def finalizeTicket(partialTicket):
 
 ```
 
-A single winning ticket and can be used to submit a block but a miner would want to check as many as possible to increase their potential rewards. The target ensures that on expectation, a miner's total power is expressed if they check all of their tickets, taking the `ElectionPoStSampleRate` into account.
+A single winning ticket can be used to submit a block but a miner would want to check as many as possible to increase their potential rewards. The target ensures that on expectation, a miner's total power is expressed if they check all of their tickets, taking the `ElectionPoStSampleRate` into account.
 
 5. **(generate a `PoStProof`)** for inclusion in the block header
 
