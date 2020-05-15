@@ -61,7 +61,7 @@ Negotiation begins once a client has discovered a miner whose `StorageAsk` meets
 
 Execution now moves to the `StorageProvider`
 
-4. The `StorageProvider` inspects the deal to verify that its parameters match it own internal criteria (such as price, piece size, deal duration, etc) -- and rejects the proposal if it doesn't (it sends a rejection to the client over the
+4. The `StorageProvider` inspects the deal to verify that the deal's parameters match its own internal criteria (such as price, piece size, deal duration, etc) -- and rejects the proposal if it doesn't (it sends a rejection to the client over the
 `Storage Deal Protocol`)
 5. The `StorageProvider` queries the `StorageMarketActor` to verify the `StorageClient` has deposited enough funds to make the deal (i.e. balance > total storage price) and rejects the proposal if it hasn't.
 6. If all criteria are met, the `StorageProvider` responds using the `Storage Deal Protocol` indicate an intent to accept the deal.
@@ -76,7 +76,7 @@ Execution now moves back to the `StorageClient`
 
 # Publishing
 
-Data is now transferred, both parties have agreed, and it's time to publish the deal. Given that the counter signature on a deal proposal is a standard message signature by the provider and the signed deal is an on-chain message, it is usually the `StorageProvider` that publishes the deal. However, if `StorageProvider` decides to send this signed on-chain message to the client before calling `PublishStorageDeal` then client can publish the deal on chain. Client's funds are not locked until the deal is published and a published deal that is not activated within some window will result in on-chain penalty.
+Data is now transferred, both parties have agreed, and it's time to publish the deal. Given that the counter signature on a deal proposal is a standard message signature by the provider and the signed deal is an on-chain message, it is usually the `StorageProvider` that publishes the deal. However, if `StorageProvider` decides to send this signed on-chain message to the client before calling `PublishStorageDeal` then client can publish the deal on chain. Client's funds are not locked until the deal is published and a published deal that is not activated within some window will result in an on-chain penalty.
 
 12. First, the `StorageProvider` adds collateral for the deal as needed to the `StorageMarketActor` (using `AddBalance`)
 13. Now, the `StorageProvider` prepares and signs the on-chain `StorageDeal` message with the `StorageDealProposal` signed by the client and its own signature. It can now either send this message back to the client or call `PublishStorageDeals` on the `StorageMarketActor` to publish the deal. It is recommended for `StorageProvider` to send back the signed message before `PublishStorageDeals` is called.
@@ -86,7 +86,7 @@ Data is now transferred, both parties have agreed, and it's time to publish the 
 
 Finally, the client verifies the deal.
 
-16. The `StorageClient` queries the node for the CID of the message published on chain (sent by the provider). It then inspects message parameters to make sure they match the expected deal
+16. The `StorageClient` queries the node for the CID of the message published on chain (sent by the provider). It then inspects the message parameters to make sure they match the expected deal.
 
 # Handoff
 
@@ -95,7 +95,7 @@ Now that a deal is published, it needs to be stored, sealed, and proven in order
 17. The `StorageProvider` writes the serialized, padded piece to a shared {{<sref filestore>}}. 
 18. The `StorageProvider` calls `HandleStorageDeal` on the `StorageMiner` with the published `StorageDeal` and filestore path.
 
-A note order of operations: the only requirement to publish a storage deal with the `StorageMarketActor` is that the `StorageDealProposal` is signed by the `StorageClient`, the publish message is signed by the `StorageProvider`, and both parties have deposited adequate funds/collateral in the `StorageMarketActor`. As such, it's not required that the steps listed above happen in exactly the order listed above. However, the above order is *recommended* because it generally minimizes the ability of either party to act maliciously.
+A note re order of operations: the only requirement to publish a storage deal with the `StorageMarketActor` is that the `StorageDealProposal` is signed by the `StorageClient`, the publish message is signed by the `StorageProvider`, and both parties have deposited adequate funds/collateral in the `StorageMarketActor`. As such, it's not required that the steps listed above happen in exactly the order listed above. However, the above order is *recommended* because it generally minimizes the ability of either party to act maliciously.
 
 # Data Types
 

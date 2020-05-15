@@ -45,7 +45,7 @@ Derived from a `Partial Ticket` as part of ElectionPoSt and used to run leader e
 
 ## Cid
 
-CID is short for Content Identifier, a self describing content address used throughout the ipfs ecosystem. For more detailed information, see [the github documentation for it](https://github.com/ipld/cid).
+CID is short for Content Identifier, a self describing content address used throughout the IPFS ecosystem. For more detailed information, see [the github documentation for it](https://github.com/ipld/cid).
 
 ## Client
 
@@ -55,7 +55,7 @@ A client is any user with an account who wishes to store data with a miner. A cl
 
 Collateral is Filecoin tokens pledged by an actor as a commitment to a promise. If the promise is respected, the collateral is returned. If the promise is broken, the collateral is not returned in full. For instance:
 
-- In becoming a Filecoin storage miner: the miner will put up collateral alongside their SEAL to
+- In becoming a Filecoin storage miner: the miner will put up collateral alongside their SEAL.
 - In a Filecoin deal: both the miner and client put up collateral to ensure their respect of deal terms.
 
 ## Commitment
@@ -268,7 +268,7 @@ Something that is verifiable can be checked for correctness by a third party.
 A verifiable function that guarantees a time delay given some hardware assumptions and a small set of requirements. These requirements are efficient proof verification, random output, and strong sequentiality. Verifiable delay functions are formally defined by [\[BBBF]](https://eprint.iacr.org/2018/601).
 
 ```text
-{proof, value} <—- VDF(public parameters, seed)
+{proof, value} <-- VDF(public parameters, seed)
 ```
 
 ## VM

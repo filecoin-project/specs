@@ -13,7 +13,7 @@ A deal has the following states:
 - `Active`: the deal has been proven and not yet expired.
 - `Deleted`: the deal has expired or the sector containing the deal has been terminated because of faults.
 
-Note that `Unpublished` and `Deleted` states not tracked on chain. To reduce on-chain footprint, an `OnChainDeal` struct is created when a deal is published and it keeps track of a `LastPaymentEpoch` which defaults to -1 when a deal is in the `Published` state. A deal transitions into the `Active` state when `LastPaymentEpoch` is positive.
+Note that `Unpublished` and `Deleted` states are not tracked on chain. To reduce on-chain footprint, an `OnChainDeal` struct is created when a deal is published and it keeps track of a `LastPaymentEpoch` which defaults to -1 when a deal is in the `Published` state. A deal transitions into the `Active` state when `LastPaymentEpoch` is positive.
 
 The following describes how a deal transitions between its different states.
 
