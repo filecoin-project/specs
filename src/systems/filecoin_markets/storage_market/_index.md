@@ -61,7 +61,7 @@ Negotiation begins once a client has discovered a miner whose `StorageAsk` meets
 
 Execution now moves to the `StorageProvider`
 
-4. The `StorageProvider` inspects the deal to verify that the deals parameters match its own internal criteria (such as price, piece size, deal duration, etc) -- and rejects the proposal if it doesn't (it sends a rejection to the client over the
+4. The `StorageProvider` inspects the deal to verify that the deal's parameters match its own internal criteria (such as price, piece size, deal duration, etc) -- and rejects the proposal if it doesn't (it sends a rejection to the client over the
 `Storage Deal Protocol`)
 5. The `StorageProvider` queries the `StorageMarketActor` to verify the `StorageClient` has deposited enough funds to make the deal (i.e. balance > total storage price) and rejects the proposal if it hasn't.
 6. If all criteria are met, the `StorageProvider` responds using the `Storage Deal Protocol` indicate an intent to accept the deal.
