@@ -3,7 +3,7 @@ title = "Filecoin Parameters"
 draft = false
 +++
 
-Some of these parameters are used around the code in the Filecoin subsystems and abi. Others are used as part of the proofs libraries. 
+Some of these parameters are used around the code in the Filecoin subsystems and ABI. Others are used as part of the proofs libraries.
 
 Most are generated/finalized using the [orient framework](https://github.com/filecoin-project/orient). It is used to modelize the Filecoin network.
 

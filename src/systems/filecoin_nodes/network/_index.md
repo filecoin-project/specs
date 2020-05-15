@@ -15,15 +15,15 @@ Here is the list of libp2p protocols used by Filecoin.
 	- [Draft spec](https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md)
 	- No filecoin specific modifications to the protocol id
 - Gossipsub: 
-	- block headers and messages are broadcasted through a Gossip PubSub protocol where nodes can subscribe to topics for blockchain data and receive messages in those topics. When receiving messages related to a topic, nodes processes the message and forwards it to its peers who also subscribed to the same topic.  
+	- block headers and messages are broadcasted through a Gossip PubSub protocol where nodes can subscribe to topics for blockchain data and receive messages in those topics. When receiving messages related to a topic, nodes process the message and forward it to peers who also subscribed to the same topic.
 	- Spec is [here](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub)
 	- No filecoin specific modifications to the protocol id.  However the topic identifiers MUST be of the form `fil/blocks/<network-name>` and `fil/msgs/<network-name>`
 - KademliaDHT: 
 	- Kademlia DHT is a distributed hash table with a logarithmic bound on the maximum number of lookups for a particular node. Kad DHT is used primarily for peer routing as well as peer discovery in the Filecoin protocol.
 	- Spec TODO [reference implementation](https://github.com/libp2p/go-libp2p-kad-dht)
-	- The protocol id must be of the form `fil/kad/<network-name>`
+	- The protocol id must be of the form `fil/<network-name>/kad/1.0.0`
 - Bootstrap List: 
-	- Bootstrap is a list of nodes that a new node attempts to connect upon joining the network. The list of bootstrap nodes and their addresses are defined by the users.
+	- Bootstrap is a list of nodes that a new node attempts to connect to upon joining the network. The list of bootstrap nodes and their addresses are defined by the users.
 - Peer Exchange: 
 	- Peer Exchange is a discovery protocol enabling peers to create and issue queries for desired peers against their existing peers
 	- spec [TODO](https://github.com/libp2p/specs/issues/222)

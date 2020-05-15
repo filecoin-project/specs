@@ -24,16 +24,16 @@ For instance if `From` sends `To` the following vouchers (voucher_val, voucher_n
 
 The multiple lanes enable two parties to use a single payment channel to adjudicate multiple independent sets of payments.
 
-Vouchers are signed by the sender and authenticated using a `Secret`, `PreImage` pair provided by the paying party. If the `PreImage` is indeed a pre-image of the `Secret` when used as input to some given algorithm (typically a one-way function like a hash), the `Voucher` is valid. The `Voucher` itself contains the `PreImage` but not the `Secret` (communicated separately to the receiving party). This enables multi-hop payments since an intermediary cannot redeem a voucher on their own. They can also be used to update the minimum height at which a channel will be closed. Likewise, vouchers can have `TimeLock`s to prevent they are being used too early, likewise a channel can have a `MinCloseHeight` to prevent it being closed prematurely (e.g. before the recipient has collected funds) by the sender.
+Vouchers are signed by the sender and authenticated using a `Secret`, `PreImage` pair provided by the paying party. If the `PreImage` is indeed a pre-image of the `Secret` when used as input to some given algorithm (typically a one-way function like a hash), the `Voucher` is valid. The `Voucher` itself contains the `PreImage` but not the `Secret` (communicated separately to the receiving party). This enables multi-hop payments since an intermediary cannot redeem a voucher on their own. They can also be used to update the minimum height at which a channel will be closed. Likewise, vouchers can have `TimeLock`s to prevent that they are being used too early, likewise a channel can have a `MinCloseHeight` to prevent it being closed prematurely (e.g. before the recipient has collected funds) by the sender.
 
 Once their transactions have completed, either party can choose to `Close` the channel, the recipient can then `Collect` the `ToPay` amount from the channel. `From` will be refunded the remaining balance in the channel.
 
 So we have:
 
 - \[off-chain\] - Two parties agree to a series of transactions (for instance as part of file retrieval) with party **A** paying party **B** up to some **total** sum of Filecoin over time.
-- \[on-chain\] - The {{<sref payment_channel_actor>}} is used called by A to open a payment channel `from` A `to` B and a lane is opened to increase the `balance` of the channel, triggering a transaction between A and the payment channel actor.
+- \[on-chain\] - The {{<sref payment_channel_actor>}} is used, called by A, to open a payment channel `from` A `to` B and a lane is opened to increase the `balance` of the channel, triggering a transaction between A and the payment channel actor.
 At any time, A can open new lanes to increase the total balance available in the channel (e.g. if A and B choose to do more transactions together).
-- \[off-chain\] - Throughout the transaction cycle (e.g. on every piece of data sent via a retrieval deal), party A sends a voucher to party B enabling B to redeem more payment from the payment lanes, and incentivizing B to continue providing a service (e.g. sending more data along).
+- \[off-chain\] - Throughout the transaction cycle (e.g. on every piece of data sent via a retrieval deal), party A sends a voucher to party B enabling B to redeem payment from the payment lanes, and incentivizing B to continue providing a service (e.g. sending more data along).
 - \[on-chain\] - At regular intervals, B can `Update` the payment channel balance available `ToSend` with the vouchers received (past their `timeLock`), decreasing the remaining `Value` of the payment channel.
 - \[on-chain\] - At the end of the cycle, past the `MinCloseHeight`, A can choose to `Close` the payment channel.
 - \[on-chain\] - B can choose to `Collect` the amount `ToSend` triggering a payment between the payment channel actor and B.

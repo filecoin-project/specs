@@ -189,15 +189,26 @@ EC enforces a version of soft finality whereby all miners at round N will reject
 
 Due to the existence of potential forks in EC, a miner can try to unduly influence protocol fairness. This means they may choose to disregard the protocol in order to gain an advantage over the power they should normally get from their storage on the network. A miner should be slashed if they are provably deviating from the honest protocol.
 
-This is detectable when a given miner submits two blocks that satisfy any of the following "consensus faults":
+This is detectable when a given miner submits two blocks that satisfy any of the following "consensus faults". In all cases, we must have:
+
+- both blocks were mined by the same miner
+- both blocks have valid signatures
+- first block's epoch is smaller or equal than second block
+
+Thereafter, the faults are:
 
 - (1) `double-fork mining fault`: two blocks mined at the same epoch.
+  - `B4.Epoch == B5.Epoch`
 {{< diagram src="diagrams/double_fork.dot.svg" title="Double-Fork Mining Fault" >}}
 
 - (2) `time-offset mining fault`: two blocks mined off of the same Tipset at different epochs (i.e. with different `ChallengeTickets` generated from the same input ticket).
+  - `B3.Parents == B4.Parents && B3.Epoch != B4.Epoch`
 {{< diagram src="diagrams/time_offset.dot.svg" title="Time-Offset Mining Fault" >}}
 
-- (3) `parent-grinding fault`: one block's parent is a Tipset that provably should have included a given block but does not. While it cannot be proven that a missing block was willfully omitted in general (i.e. network latency could simply mean the miner did not receive a particular block), it can when a miner has successfully mined a block two epochs in a row and omitted one. That is, this condition should be evoked when a miner omits their own prior block. When a miner's block at epoch e + 1 references a Tipset that does not include the block they mined at e both blocks can be submitted to prove this fault.
+- (3) `parent-grinding fault`: one block's parent is a Tipset that provably should have included a given block but does not. While it cannot be proven that a missing block was willfully omitted in general (i.e. network latency could simply mean the miner did not receive a particular block), it can when a miner has successfully mined a block two epochs in a row and omitted one. That is, this condition should be evoked when a miner omits their own prior block.
+  - Specifically, this can be proven with a "witness" block, that is by submitting blocks B2, B3, B4 where B2 is B4's parent and B3's sibling but B3 is not B4's parent.
+  - `!B4.Parents.Include(B3) && B4.Parents.Include(B2) && B3.Parents == B2.Parents && B3.Epoch == B2.Epoch`
+
 {{< diagram src="diagrams/parent_grinding.dot.svg" title="Parent-Grinding fault" >}}
 
 Any node that detects any of the above events should submit both block headers to the `StoragePowerActor`'s `ReportConsensusFault` method. The "slasher" will receive a portion of the offending miner's {{<sref pledge_collateral>}} as a reward for notifying the network of the fault. Consensus faults (except for `uncommitted power fault` below which falls under storage faults with impact on consensus) will tentatively result in all pledge collateral being slashed and the miner removed from the power table. Some portion of the pledge collateral is given to the slasher as a function of some initial share (`SLASHER_INITIAL_SHARE`) and growth rate (`SLASHER_SHARE_GROWTH_RATE`). Slasher's share of the slashed collateral increases as block elapses since the block when the fault is committed. Default growth rate results in slasher's share reaches 1 after 250 blocks. However, only the first slasher gets its share of the pledge collateral and the remaining pledge collateral will be burned. The longer a slasher waits, the higher the likelihood that the slashed collateral will be claimed by another slasher.

@@ -16,6 +16,9 @@ type GasAmount struct {
 }
 
 type UnsignedMessage struct {
+    // Version of this message (0 until we have to have a breaking change)
+    Version int64
+
     // Address of the receiving actor.
     To          addr.Address
     // Address of the sending actor.
@@ -26,14 +29,14 @@ type UnsignedMessage struct {
     // Amount of value to transfer from sender's to receiver's balance.
     Value       abi.TokenAmount
 
+    // GasPrice is a Gas-to-FIL cost
+    GasPrice    abi.TokenAmount
+    GasLimit    GasAmount
+
     // Optional method to invoke on receiver, zero for a plain value send.
     Method      abi.MethodNum
     /// Serialized parameters to the method (if method is non-zero).
     Params      abi.MethodParams
-
-    // GasPrice is a Gas-to-FIL cost
-    GasPrice    abi.TokenAmount
-    GasLimit    GasAmount
 }  // representation tuple
 
 type SignedMessage struct {

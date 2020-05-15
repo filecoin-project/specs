@@ -1,4 +1,3 @@
-
 # guidelines for editing this makefile:
 #
 # - keep it simple -- put complicated commands into scripts inside bin/ (eg install-deps.sh)
@@ -16,6 +15,7 @@ help:
 	@echo "	make -- filecoin spec build toolchain commands"
 	@echo ""
 	@echo "USAGE"
+	@echo " make deps-ga     run this once, to instlal & build partial dependencies for Github Actions"
 	@echo "	make deps-basic  run this once, to install & build basic dependencies"
 	@echo "	make build       run this every time you want to re-build artifacts"
 	@echo ""
@@ -30,6 +30,7 @@ help:
 	@echo ""
 	@echo "INSTALL DEPENDENCIES"
 	@echo "	make deps        install ALL dependencies of this tool chain"
+	@echo " make deps-ga     install Github Action specific dependencies"
 	@echo "	make deps-basic  install minimal dependencies of this tool chain"
 	@echo "	make deps-diag   install dependencies for rendering diagrams"
 	@echo "	make deps-orient install dependencies for running orient"
@@ -86,6 +87,9 @@ deps: deps-basic deps-diag deps-orient
 	@# make bins last, after installing other deps
 	@# so we re-invoke make.
 	make bins
+
+deps-ga:
+	bin/install-deps-ga.sh -y
 
 deps-basic:
 	bin/install-deps-basic.sh -y
