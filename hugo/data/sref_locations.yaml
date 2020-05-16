@@ -23,8 +23,9 @@ block_sync: [algorithms, block_sync]
 storage_power_consensus: [systems, filecoin_blockchain, storage_power_consensus]
 storage_power: [systems, filecoin_blockchain, storage_power_consensus, storage_power]
 tickets: [systems, filecoin_blockchain, storage_power_consensus, tickets]
-ticket_chain: [systems, filecoin_blockchain, storage_power_consensus, ticket_chain]
 ticket_generation: [systems, filecoin_blockchain, storage_power_consensus, ticket_generation]
+beacon_entries: [systems, filecoin_blockchain, storage_power_consensus, beacon_entries]
+drand: [libraries, drand]
 min_miner_size: [systems, filecoin_blockchain, storage_power_consensus, min_miner_size]
 
 ### Storage Market Actor

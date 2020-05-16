@@ -28,19 +28,17 @@ To create a block, the eligible miner must compute a few fields:
 - `ParentMessageReceipts` - the CID of the root of an AMT containing receipts produced while computing `ParentState`.
 - `Epoch` - the block's epoch, derived from the `Parents` epoch and the number of epochs it took to generate this block.
 - `Timestamp` - a Unix timestamp, in seconds, generated at block creation.
+- `BeaconEntries` - a set of drand entries generated since the last block (see {{<sref random_seed>}}).
 - `Ticket` - a new ticket generated from that in the prior epoch (see {{<sref ticket_generation>}}).
 - `Miner` - the block producer's miner actor address.
-- `ElectionPoStVerifyInfo` - The byproduct of running an ElectionPoSt yielding requisite on-chain information (see {{<sref election_post>}}), namely:
-  - An array of `PoStCandidate` objects, all of which include a winning partial ticket used to run leader election.
-  - `PoStRandomness` used to challenge the miner's sectors and generate the partial tickets.
-  - A `PoStProof` snark output to prove that the partial tickets were correctly generated.
 - `Messages` - The CID of a `TxMeta` object containing message proposed for inclusion in the new block:
   - Select a set of messages from the mempool to include in the block, satisfying block size and gas limits
   - Separate the messages into BLS signed messages and secpk signed messages
   - `TxMeta.BLSMessages`: The CID of the root of an AMT comprising the bare `UnsignedMessage`s
   - `TxMeta.SECPMessages`: the CID of the root of an AMT comprising the `SignedMessage`s
 - `BLSAggregate` - The aggregated signature of all messages in the block that used BLS signing.
-- `Signature` - A signature with the miner's worker account private key (must also match the ticket signature) over the block header's serialized representation (with empty signature). 
+- `Signature` - A signature with the miner's worker account private key (must also match the ticket signature) over the block header's serialized representation (with empty signature).
+- `ForkSignaling` - A uint64 flag used as part of signaling forks. Should be set to 0 by default.
 
 Note that the messages to be included in a block need not be evaluated in order to produce a valid block.
 A miner may wish to speculatively evaluate the messages anyway in order to optimize for including
