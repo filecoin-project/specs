@@ -9,7 +9,7 @@ TODO: remove stale .id/.go files
 
 Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high level, it operates by running a leader election every epoch in which, on expectation, a set number of participants may be eligible to submit a block. EC guarantees that these winners will be anonymous until they reveal themselves by submitting a proof of their election, the `ElectionProof`. Each winning miner can submit one such proof per round and will be rewarded accordingly.
 
-Each proof can be derived from a {{<sref random_seed>}}, as described below. All valid blocks submitted in a given round form a `Tipset`. Every block in a Tipset adds weight to its chain. The 'best' chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on how to select the heaviest chain, see {{<sref chain_selection>}}.
+Each proof can be derived from a {{<sref randomness "properly formatted beacon entry">}}, as described below. All valid blocks submitted in a given round form a `Tipset`. Every block in a Tipset adds weight to its chain. The 'best' chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on how to select the heaviest chain, see {{<sref chain_selection>}}.
 
 While on expectation at least one block will be generated at every round, in cases where no one finds a block in a given round, a miner can simply run leader election again for the next epoch with the appropriate random seed, thereby ensuring liveness in the protocol.
 
@@ -27,7 +27,7 @@ The {{<sref storage_power_consensus>}} subsystem uses access to EC to use the fo
 
 Expected Consensus is a consensus protocol that works by electing a miner from a weighted set in proportion to their power. In the case of Filecoin, participants and powers are drawn from the {{<sref power_table>}}, where power is equivalent to storage provided through time.
 
-Leader Election in Expected Consensus must be Secret, Fair and Verifiable. This is achieved through the use of randomness used to run the election. In the case of Filecoin's EC, the blockchain uses {{<sref random_seed "random seeds">}} provided by a {{<sref drand>}} beacon. These seeds are used as unbiasable randomness for Leader Election. Every block header contains an `ElectionProof` derived by the miner using the appropriate seed.
+Leader Election in Expected Consensus must be Secret, Fair and Verifiable. This is achieved through the use of randomness used to run the election. In the case of Filecoin's EC, the blockchain uses {{<sref beacon_entries>}} provided by a {{<sref drand>}} beacon. These seeds are used as unbiasable randomness for Leader Election. Every block header contains an `ElectionProof` derived by the miner using the appropriate seed.
 
 ### Running a leader election
 

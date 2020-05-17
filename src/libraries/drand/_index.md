@@ -58,14 +58,7 @@ Thereafter, the Filecoin client can call drand's endpoints:
 
 Drand is used as a randomness beacon for leader election in Filecoin. You can read more about that in {{<sref leader_election>}}. See drand used in the Filecoin lotus implementation [here](https://github.com/filecoin-project/lotus/blob/master/chain/beacon/drand/drand.go).
 
-While drand returns multiple values with every call to the beacon (see above), Filecoin blocks need only store a subset of these in order to track a full drand chain. We define the `BeaconEntry` below:
-
-```go
-type BeaconEntry struct {
-    Round       uint64
-    Signature   []byte
-}
-```
+While drand returns multiple values with every call to the beacon (see above), Filecoin blocks need only store a subset of these in order to track a full drand chain. This information can then be mixed with on-chain data for use in Filecoin. See {{<sref randomness>}} for more.
 
 #### Verifying an incoming drand value
 

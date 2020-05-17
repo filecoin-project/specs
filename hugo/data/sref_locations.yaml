@@ -25,6 +25,7 @@ storage_power: [systems, filecoin_blockchain, storage_power_consensus, storage_p
 tickets: [systems, filecoin_blockchain, storage_power_consensus, tickets]
 ticket_generation: [systems, filecoin_blockchain, storage_power_consensus, ticket_generation]
 beacon_entries: [systems, filecoin_blockchain, storage_power_consensus, beacon_entries]
+beacon_entry_validation: [systems, filecoin_blockchain, storage_power_consensus, beacon_entries_validation]
 drand: [libraries, drand]
 min_miner_size: [systems, filecoin_blockchain, storage_power_consensus, min_miner_size]
 

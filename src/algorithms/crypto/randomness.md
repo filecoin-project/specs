@@ -10,9 +10,20 @@ Randomness is used throughout the protocol in order to generate values and exten
 Random values are drawn from a {{<sref drand>}} beacon and appropriately formatted for usage.
 We describe this formatting below.
 
-## Encoding On-chain data for randomness
+## Encoding Random Beacon randomness for on-chain use
 
-Entropy from the drand beacon can be combined with other values to generate necessary randomness that can be
+Entropy from the drand beacon can be harvested into a more general data structure: a `BeaconEntry`, defined as follows:
+
+```go
+type BeaconEntry struct {
+    // Drand Round for the given randomness
+    Round       uint64
+    // Drand Signature for the given Randomness
+    Data   []byte
+}
+```
+
+The BeaconEntry is then combined with other values to generate necessary randomness that can be
 specific to (eg) a given miner address or epoch. To be used as part of entropy, these values are combined in 
 objects that can then be CBOR-serialized according to their algebraic datatypes.
 
@@ -25,9 +36,7 @@ certain {{<sref crypto_signatures>}} and {{<sref vrf>}} usage.
 
 ## Forming Randomness Seeds
 
-Drand randomness entries are used as a source of on-chain randomness (see {{<sref random_seed "random seeds">}}).
-
-The random seed is combined with a few elements for use as part of the protocol as follows:
+The beacon entry is combined with a few elements for use as part of the protocol as follows:
 
 - a DST (domain separation tag)
     - Different uses of randomness are distinguished by this type of personalization which ensures that randomness used for different purposes will not conflict with randomness used elsewhere in the protocol
@@ -37,7 +46,7 @@ The random seed is combined with a few elements for use as part of the protocol 
 
 While all elements are not needed for every use of entropy (e.g. the inclusion of the round number is not necessary prior to genesis or outside of leader election, other entropy is only used sometimes, etc), we draw randomness as follows for the sake of uniformity/simplicity in the overall protocol.
 
-In all cases, a drand entry is used as the base of randomness (see {{<sref random_seed>}}). In order to make randomness seed creation uniform, the protocol derives all such seeds in the same way, using blake2b as a hash function to generate a 256-bit output as follows:
+In all cases, a {{<sref drand>}} entry is used as the base of randomness. In order to make randomness seed creation uniform, the protocol derives all such seeds in the same way, using blake2b as a hash function to generate a 256-bit output as follows:
 
 In round `n`, for a given randomness lookback `l`, and serialized entropy `s`:
 

@@ -49,11 +49,13 @@ More precisely,
 {{<label beacon_entries>}}
 ## Beacon Entries
 
-The Filecoin protocol uses randomness produced by a {{<sref drand>}} beacon to seed unbiasable randomness.
+The Filecoin protocol uses randomness produced by a {{<sref drand>}} beacon to seed unbiasable randomness seeds for use in the chain (see {{<sref randomness>}}).
 
-- The {{<sref sector_sealer>}} uses drand entries as SealSeeds to bind sector commitments to a given subchain.
-- The {{<sref post_generator>}} likewise uses drand entires as PoStChallenges to prove sectors remain committed as of a given block.
-- They are drawn by the Storage Power subsystem as randomness in {{<sref leader_election>}} to determine their eligibility to mine a block.
+In turn these random seeds are used by:
+
+- The {{<sref sector_sealer>}} as SealSeeds to bind sector commitments to a given subchain.
+- The {{<sref post_generator>}} as PoStChallenges to prove sectors remain committed as of a given block.
+- The Storage Power subsystem as randomness in {{<sref leader_election>}} to determine their eligibility to mine a block.
 
 This randomness may be drawn from various Filecoin chain epochs by the respective protocols that use them according to their security requirements.
 
@@ -105,11 +107,11 @@ GetRandomSeedsForEpoch(epoch) []BeaconEntry {
 ```
 
 {{<label beacon_entry_validation>}}
-### Validating Beacon Entries
+### Validating Beacon Entries on block reception
 
 Per the above, a Filecoin chain will contain the entirety of the beacon's output from the Filecoin genesis to the current block.
 
-Given their role in leader election and other critical protocols in Filecoin, a block's beacon entries (see the {{<sref drand>}} output format) must be validated. This can be done by ensuring every beacon entry is a valid signature over the prior one in the chain, using drand's [`Verify`](https://github.com/drand/drand/blob/master/beacon/beacon.go#L72) endpoint as follows:
+Given their role in leader election and other critical protocols in Filecoin, a block's beacon entries must be validated for every block. See {{<sref drand>}} for details. This can be done by ensuring every beacon entry is a valid signature over the prior one in the chain, using drand's [`Verify`](https://github.com/drand/drand/blob/master/beacon/beacon.go#L72) endpoint as follows:
 
 ```go
 // This need not be done for the genesis block
@@ -128,7 +130,7 @@ ValidateBeaconEntries(blockHeader, priorBlockHeader) error {
         // walking back the entries to ensure they follow one another
         currEntry := entries[currIdx]
         prevEntry := entries[currIdx - 1]
-        err := drand.Verify(node.drandPubKey, prevEntry.Signature, currEntry.Signature, currEntry.Round)
+        err := drand.Verify(node.drandPubKey, prevEntry.Data, currEntry.Data, currEntry.Round)
         if err != nil {
             return err
         }

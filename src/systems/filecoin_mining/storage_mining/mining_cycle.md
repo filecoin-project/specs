@@ -23,7 +23,7 @@ After the chain has caught up to the current head using {{<sref chain_sync>}}. A
     - Blocks are validated as they come in {{<sref block "validation">}})
 - After an epoch's "cutoff", the miner should take all the valid blocks received for this epoch and assemble them into tipsets according to {{<sref tipset "tipset validation rules">}}
 - The miner then attempts to mine atop the heaviest tipset (as calculated with {{<sref chain_selection "EC's weight function">}}) using its smallest ticket to run leader election
-    - The miner runs {{<sref leader_election>}} using the most recent {{<sref random_seed>}} output by a {{<sref drand>}} beacon.
+    - The miner runs {{<sref leader_election>}} using the most recent {{<sref beacon_entries "random">}} output by a {{<sref drand>}} beacon.
         - if this yields a valid `ElectionProof`, the miner generates a new {{<sref tickets "ticket">}} and winning PoSt for inclusion in the block.
         - the miner then assembles a new block (see "block creation" below) and waits until this epoch's quantized timestamp to broadcast it 
 

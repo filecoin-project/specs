@@ -22,7 +22,7 @@ type BlockHeader struct {
     Epoch                  abi.ChainEpoch
     Timestamp              clock.UnixTime
     Ticket
-    BeaconEntries          []BeaconEntry
+    BeaconEntries          [BeaconEntry]
 
     Miner                  addr.Address
 	ElectionProof          *ElectionProof
@@ -54,6 +54,13 @@ type Block struct {
     Header        BlockHeader
     BLSMessages   [msg.UnsignedMessage]
     SECPMessages  [msg.SignedMessage]
+}
+
+type BeaconEntry struct {
+    // Drand Round for the given randomness
+    Round       uint64
+    // Drand Signature for the given Randomness
+    Data   []byte
 }
 
 // HACK: All of the below was duplicated from posting.id
