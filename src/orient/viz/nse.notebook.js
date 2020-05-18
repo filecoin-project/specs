@@ -57,7 +57,7 @@ combos = makeQuery([
     rig_lifetime_years: 2,
     rig_storage_lifetime_years: 2,
     rig_cost_storage_tb: 15,
-    rig_hashing_sequential_throughput_gb_s: 2,
+    rig_hashing_sequential_throughput_gb_s: 2.5,
 
     mtree_hash_name: 'poseidon',
     mtree_hash_time: 8.3e-7 / 4, // (divided by 4 since we have 4 GPUs) // ((8/7)*(2^27/8 -1))*32*8, // GPU 4s per GiB // CPU 5.803e-5,

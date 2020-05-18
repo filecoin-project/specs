@@ -77,9 +77,9 @@ PoRep:
   describe(cost_honest_replica, "Cost to encode a replica", dollars)
 
   // Note: these equations were found by quadratic fitting the results from CPUs
-  porep_time_verification_ms = -0.000596269 * (porep_partitions * porep_partitions) + 1.588 * porep_partitions + 218.255
+  porep_time_verification_ms = 40
   // Note: a single window post is a single partition
-  wpost_time_verification_ms = -0.000596269 * (1) + 1.588 * (1) + 218.255
+  wpost_time_verification_ms = 210
 
   post_time_verification = wpost_time_verification_ms * ms_in_secs
   porep_time_verification = porep_time_verification_ms * ms_in_secs
@@ -310,7 +310,11 @@ Filecoin:
         network_post_verification_in_block = network_post_proofs_in_block * post_time_verification
         network_porep_verification_in_block = network_porep_proofs_in_block * porep_time_verification
 
-        network_porep_verification_in_block_optimal = (-0.000596269 * (network_porep_partitions_in_block * network_porep_partitions_in_block) + 1.588 * network_porep_partitions_in_block + 218.255) * ms_in_secs
+        // fit {1, 35}, {10, 40}, {100, 85}, {1000, 515}
+        // -0.0000254043 x^2 + 0.505696 x + 34.7082 (quadratic)
+        network_porep_verification_in_block_optimal = (-0.0000254043 * (network_porep_partitions_in_block * network_porep_partitions_in_block) + 0.505696 * network_porep_partitions_in_block + 34.7082) * ms_in_secs
+        // fit {1, 210}, {10, 245}, {100, 370}, {1000, 1210}
+        // -0.000596269 x^2 + 1.588 x + 218.255 (quadratic)
         network_post_verification_in_block_optimal = (-0.000596269 * (network_post_partitions_in_block * network_post_partitions_in_block) + 1.588 * network_post_partitions_in_block + 218.255) * ms_in_secs
 
       PoStNetwork:
