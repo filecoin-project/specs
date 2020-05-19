@@ -1,6 +1,7 @@
 [
   {
     "!NSE": true,
+    "!SDR": false,
     "windows": 256,
     "window_size_gib": 4,
     "nodes_in_sequence": 8,
@@ -19,7 +20,7 @@
     "rig_lifetime_years": 2,
     "rig_storage_lifetime_years": 2,
     "rig_cost_storage_tb": 15,
-    "rig_hashing_sequential_throughput_gb_s": 2,
+    "rig_hashing_sequential_throughput_gb_s": 2.5,
     "mtree_hash_name": "poseidon",
     "mtree_hash_time": 2.075e-7,
     "mtree_hash_blocks": 8,
@@ -39,6 +40,7 @@
   },
   {
     "!SDR": true,
+    "!NSE": false,
     "replica_size_gib": 32,
     "porep_partitions": 8,
     "wpost_sectors": 2350,
@@ -53,7 +55,7 @@
     "rig_lifetime_years": 2,
     "rig_storage_lifetime_years": 2,
     "rig_cost_storage_tb": 15,
-    "rig_hashing_sequential_throughput_gb_s": 2,
+    "rig_hashing_sequential_throughput_gb_s": 2.5,
     "mtree_hash_name": "poseidon",
     "mtree_hash_time": 2.075e-7,
     "mtree_hash_blocks": 8,
