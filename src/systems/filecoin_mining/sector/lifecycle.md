@@ -6,7 +6,7 @@ In Filecoin, miners contribute storage capacity to the network in units of _sect
 
 #### Sector creation
 
-At creation, a sector's space (raw-byte power or sector size) and lifetime (duration) are defined. Together, these are referred to as 'spacetime'. The new sector may contain deals (either Deals or VerifiedDeals), Committed Capacity, or a mixture of both. 
+At creation, a sector's space (raw-byte power or sector size) and time (lifetime or duration) are defined. Together, these are referred to as 'spacetime'. The new sector may contain deals (Deals and/or VerifiedDeals), Committed Capacity, or a mixture of both. 
 
 The sector is then assigned a `SectorQuality`. which determines its Quality-Adjusted Power in the network, or consensus power.
 
@@ -31,4 +31,3 @@ Miners may also choose to terminate a sector voluntarily and accept a Terminatio
 #### Sector extensions
 
 Miners can extend the lifetime of a sector at any time, though the sector will be expected to remain live until it has reached the end of the new sector lifetime. This can be done by submitting a `ExtendedSectorExpiration` message to the chain.
-
