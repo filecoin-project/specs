@@ -2,11 +2,11 @@
 title: Sector Lifecycle
 ---
 
-In Filecoin, miners contribute storage capacity to the network in units of Sectors. These sectors work similar to real-life shipping containers; they are used provide a unique ID for storage / retrieval processes as well as ensuring the datas 'dimensions' conform with all other Sectors in the network.
+In Filecoin, miners contribute storage capacity to the network in units of Sectors. These sectors work similar to real-life shipping containers; they are used provide a unique ID for storage / retrieval processes as well as ensuring the data's 'dimensions' conform with all other Sectors in the network.
 
 #### Sector creation
 
-At creation, a sectors space (raw-byte power or sector size) and lifetime (duration) are defined. Together, these are referred to as 'spacetime'. The new sector may contain deals (either Deals or VerifiedDeals), Committed Capacity or a mixture of both. 
+At creation, a sector's space (raw-byte power or sector size) and lifetime (duration) are defined. Together, these are referred to as 'spacetime'. The new sector may contain deals (either Deals or VerifiedDeals), Committed Capacity or a mixture of both. 
 
 The sector is then assigned a `SectorQuality`. which determines its Quality-Adjusted Power in the network, or consensus power.
 
