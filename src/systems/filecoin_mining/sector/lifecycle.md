@@ -1,3 +1,7 @@
+---
+title: Sector Lifecycle
+---
+
 In Filecoin, miners contribute storage capacity to the network in units of Sectors. These sectors work similar to real-life shipping containers; they are used provide a unique ID for storage / retrieval processes as well as ensuring the datas 'dimensions' conform with all other Sectors in the network.
 
 #### Sector creation
