@@ -6,7 +6,7 @@ title: drand - Distributed Randomness
 DRand (Distributed Randomness) is a publicly verifiable random beacon protocol Filecoin relies on as a source of unbiasable entropy for leader election (see {{<sref leader_election>}}).
 
 At a high-level, the drand protocol runs a series of MPCs (Multi-Party Computations) in order to produce a series of deterministic, verifiable random values. Specifically, after a trusted setup, a known (to each other) group of n drand nodes sign a given message using t-of-n threshold BLS signatures in a series of successive rounds occuring at regular intervals (the drand round time).
-Any node that has gathered t of the signatures can reconstruct the full BLS signature. This signature is then hashed using SHA-512 in order to produce a collective random value which can be verified against the collective public key generated during the trusted setup.
+Any node that has gathered t of the signatures can reconstruct the full BLS signature. This signature can then be hashed in order to produce a collective random value which can be verified against the collective public key generated during the trusted setup. Note that while this can be done by the drand node, the random value (i.e. hashed value) should be checked by the consumer of the beacon. In Filecoin, we hash it using blake2b in order to obtain a 256 bit output.
 
 drand assumes that at least t of the n nodes are honest (and online -- for liveness). If this threshold is broken, the adversary can permanently halt randomness production but cannot otherwise bias the randomness.
 
@@ -22,8 +22,7 @@ By polling the appropriate endpoint (see below for specifics on the drand networ
 {
   "round": 367,
   "signature": "b62dd642e939191af1f9e15bef0f0b0e9562a5f570a12a231864afe468377e2a6424a92ccfc34ef1471cbd58c37c6b020cf75ce9446d2aa1252a090250b2b1441f8a2a0d22208dcc09332eaa0143c4a508be13de63978dbed273e3b9813130d5",
-  "previous_signature": "afc545efb57f591dbdf833c339b3369f569566a93e49578db46b6586299422483b7a2d595814046e2847494b401650a0050981e716e531b6f4b620909c2bf1476fd82cf788a110becbc77e55746a7cccd47fb171e8ae2eea2a22fcc6a512486d",
-  "randomness": "d7aed3686bf2be657e6d38c20999831308ee6244b68c8825676db580e7e3bec6"
+  "previous_signature": "afc545efb57f591dbdf833c339b3369f569566a93e49578db46b6586299422483b7a2d595814046e2847494b401650a0050981e716e531b6f4b620909c2bf1476fd82cf788a110becbc77e55746a7cccd47fb171e8ae2eea2a22fcc6a512486d"
 }
 ```
 
@@ -31,18 +30,17 @@ Specifically, we have:
 
 - `Signature`           -- the threshold BLS signature on the previous signature value `Previous` and the current round number `round`.
 - `PreviousSignature`   -- the threshold BLS signature from the previous drand round.
-- `Randomness`          --  the SHA256 hash of `Signature`, to be used as the random value for this round.
 - `Round`               -- the index of Randomness in the sequence of all random values produced by this drand network.
 
-Specifically, the message signed is the concatenation of the round number treated as a uint64 and the previous signature. At the moment, drand uses BLS signatures on the BN256 curves and the signature is made over G1.
+Specifically, the message signed is the concatenation of the round number treated as a uint64 and the previous signature. At the moment, drand uses BLS signatures on the BLS12-381 curve with the latest v7 RFC of hash-to-curve and the signature is made over G1 (for more see the [drand spec](https://github.com/drand/drand/blob/master/docs/SPECS.md#cryptographic-specification)).
 
 ### Polling the drand network
 
-Filecoin nodes can make use of [drand endpoints](https://github.com/drand/drand/blob/master/core/client_public.go) in working with a drand beacon.
+Filecoin nodes can make use of [drand endpoints](https://github.com/drand/drand/blob/master/client/client.go) in working with a drand beacon.
 
-To start, a Filecoin node must store a set of drand peer servers it will connect to to poll for values and the shared public key it expects them to have (TODO: explain how this list/key is obtained in below section). Polling is done using gRPCs (and protobufs).
+To start, a node must store a set of drand peer servers it will connect to to poll for values and the shared public key it expects them to have. In the case, of Filecoin, the node will be polling "relay nodes" rather than drand nodes directly. Simply put, the drand network will not be directly accessible by consumers, rather, highly-available relays will be set up to serve drand values over HTTP or gossipsub. See below section for more on the drand network configuration.
 
-On initialization, the Filecoin node can call the `Group` endpoint in order to obtain the beacon's [group file](https://github.com/drand/drand/blob/57a6056a24d4ebaa27a44852636807364624b9fc/key/group.go). Using this, the Filecoin node should:
+On initialization, the Filecoin node can call the `Group` endpoint in order to obtain the beacon's [group file](https://github.com/drand/drand/blob/57a6056a24d4ebaa27a44852636807364624b9fc/key/group.go). The client (node) should then have the hash of the group file (or the full file itself if it already has it) cached to verify the group it receives corresponds to the expected one. It should also cache:
 
 - cache the beacon's `Period`                           -- the period of time between each drand randomness generation
 - cache the beacon's `GenesisTime`                      -- at which the first round in the drand randomness chain is created
@@ -67,7 +65,7 @@ Upon receiving a new drand randomness value from a beacon, a Filecoin node shoul
 - that the `Signature` field is verified by the beacon's `PublicKey` as the beacon's signature of `SHA256(PreviousSignature || Round)`.
 - that the `Randomness` field is `SHA256(Signature)`.
 
-See [drand](https://github.com/drand/drand/blob/master/core/client_public.go#L93) for an example.
+See [drand](https://github.com/drand/drand/blob/master/beacon/beacon.go#L63) for an example.
 
 #### Fetching the appropriate drand value while mining
 
@@ -112,7 +110,7 @@ Note that based on the level of decentralization of the Filecoin network, we exp
 
 In any event, a heavier chain will emerge after the catch up period and mining can resume as normal.
 
-### Filecoin's drand network characteristics
+### drand network specification
 
 TODO once ready: @nikkolasg
 - Filecoin node access to randomness (how to connect, poll, etc)

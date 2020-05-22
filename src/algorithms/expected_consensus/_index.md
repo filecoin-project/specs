@@ -42,7 +42,7 @@ At a high-level, leader election works as follows:
 - They generate an `ElectionProof` from this seed by using a VRF to generate a signature over the seed at a given epoch, as defined in {{<sref randomness>}}. The `ElectionProof` is the VRF Proof.
   - If the `ElectionProof`'s normalized digest value (i.e. the VRF Digest) is below a miner-specific `ElectionTarget` determined by the miner's power in SPC, it is valid: the miner can craft a block (see {{<sref block_producer>}}). 
     - The `ElectionProof` Digest must be normalized according to both the `ExpectedLeadersPerEpoch` in EC (a network parameter) and the maximum value of the digest (based on the hash used to produce it).
-    - The `ElectionTarget` is set as the proportion of the miner's `QualityAdjustedPower` over the total network power. Accordingly leader election in EC is proportional to miner power.
+    - The `ElectionTarget` is set as the proportion of the miner's `TotalQualityAdjPower` over the total network quality-adjusted power. Accordingly leader election in EC is proportional to miner power.
   - Otherwise, the miner tries again in the next epoch.
 
 Conceptually, EC yields winners proportionally to their power since it enables each miner to generate a single `ElectionProof` whose digest can be normalized to yield a uniformly-drawn random number between 0 and 1. It is then compared to the miner's power in proportion to total network power (i.e. also between 0 and 1). The more powerful the miner, the more frequently their `ElectionProof`s will be valid.

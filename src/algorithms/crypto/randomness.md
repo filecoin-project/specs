@@ -18,7 +18,7 @@ Entropy from the drand beacon can be harvested into a more general data structur
 type BeaconEntry struct {
     // Drand Round for the given randomness
     Round       uint64
-    // Drand Signature for the given Randomness
+    // Drand Signature for the given Randomness, named Data as a more general name for random beacon output
     Data   []byte
 }
 ```
@@ -46,7 +46,7 @@ The beacon entry is combined with a few elements for use as part of the protocol
 
 While all elements are not needed for every use of entropy (e.g. the inclusion of the round number is not necessary prior to genesis or outside of leader election, other entropy is only used sometimes, etc), we draw randomness as follows for the sake of uniformity/simplicity in the overall protocol.
 
-In all cases, a {{<sref drand>}} entry is used as the base of randomness. In order to make randomness seed creation uniform, the protocol derives all such seeds in the same way, using blake2b as a hash function to generate a 256-bit output as follows:
+In all cases, a {{<sref drand>}} signature is used as the base of randomness: it is hashed using blake2b in order to obtain a usable randomness seed. In order to make randomness seed creation uniform, the protocol derives all such seeds in the same way, using blake2b as a hash function to generate a 256-bit output as follows:
 
 In round `n`, for a given randomness lookback `l`, and serialized entropy `s`:
 
