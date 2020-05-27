@@ -2,6 +2,7 @@
 title: Sector
 statusIcon: 🔁
 entries:
+- lifecycle
 - sectorset
 - posting
 - sealing
