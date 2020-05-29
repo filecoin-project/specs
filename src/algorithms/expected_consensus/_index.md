@@ -45,7 +45,7 @@ At a high-level, leader election works as follows:
     - The `ElectionTarget` is set as the proportion of the miner's `TotalQualityAdjPower` over the total network quality-adjusted power. Accordingly leader election in EC is proportional to miner power.
   - Otherwise, the miner tries again in the next epoch.
 
-Conceptually, EC yields winners proportionally to their power since it enables each miner to generate a single `ElectionProof` whose digest can be normalized to yield a uniformly-drawn random number between 0 and 1. It is then compared to the miner's power in proportion to total network power (i.e. also between 0 and 1). The more powerful the miner, the more frequently their `ElectionProof`s will be valid.
+Conceptually, EC yields winners proportionally to their power since it enables each miner to generate a single `ElectionProof` whose digest can be normalized to yield a uniformly-drawn random number between 0 and 1. It is then compared to the miner's power in proportion to total network quality-adjusted power (i.e. also between 0 and 1). The more powerful the miner, the more frequently their `ElectionProof`s will be valid.
 
 We show this below, removing division for ease of implementation:
 
