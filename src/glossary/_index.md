@@ -228,7 +228,7 @@ A sector is a contiguous array of bytes that a miner puts together, seals, and p
 
 ## Slashing
 
-It is important to understand that Filecoin implements two kinds of slashing: **Storage Fault Slashing** and **Consensus Fault Slashing**. Below are definitions of both types.
+Filecoin implements two kinds of slashing: **Storage Fault Slashing** and **Consensus Fault Slashing**. Below are definitions of both types.
 
 ### Storage fault slashing
 
