@@ -228,6 +228,24 @@ A sector is a contiguous array of bytes that a miner puts together, seals, and p
 
 ## Slashing
 
+Filecoin implements two kinds of slashing: **Storage Fault Slashing** and **Consensus Fault Slashing**. Below are definitions of both types.
+
+### Storage fault slashing
+
+Storage Fault Slashing is a term that is used to encompass a broader set of penalties, including (but not limited to) Fault Fees, Sector Penalties, and Termination Fees. These penalties are to be paid by miners if they fail to provide sector reliability or decide to voluntarily exit the network. 
+
+* **Fault Fee (FF):** A penalty that a miner incurs for each day a miner's sector is offline.
+* **Sector Penalty (SP):**  A penalty that a miner incurs for a faulted sector that was not declared faulted before a WindowPoSt check occurs. 
+    * The sector will pay FF after incurring an SP when the fault is detected.
+* **Termination Fee (TP):** A penalty that a miner incurs when a sector is voluntarily or involuntarily terminated and is removed from the network.
+
+### Consensus fault slashing
+
+Consensus Fault Slashing is the penalty that a miner incurs for committing consensus faults. This penalty is applied to miners that have acted maliciously against the network's consensus functionality.
+
+
+
+
 ## Smart contracts
 
 ## Storage
