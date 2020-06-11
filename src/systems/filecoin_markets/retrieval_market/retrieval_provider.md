@@ -10,6 +10,8 @@ The Retrieval Provider Depends On The Following Dependencies
 - **Filecoin Node**: A node implementation to query the chain for pieces and to setup and manage payment channels
 - **StorageMining Subsystem**: For unsealing sectors
 - **BlockStore**: Same as one used by data transfer module
+- **PieceStore**: for storing piece data
+- **Datastore**: for storing deal state for the state machine
 - **Data Transfer**: V1 only -- Module used for transferring payload. Reads from the blockstore.
 
 # API

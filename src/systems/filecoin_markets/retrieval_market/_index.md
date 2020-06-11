@@ -23,7 +23,7 @@ The main components are as follows:
 - A client module to query retrieval miners and initiate deals for retrieval
 - A provider module to respond to queries and deal proposals
 
-# VO & V1
+# V0 & V1
 
 V0 of the protocol has participants send data over the retrieval protocol itself in a series of Blocks encoded in Bitswap format and verify received blocks manually. It will only support fetching the payload CID which is at the root of PieceCID's `.car` File, and will only support fetching the whole DAG.
 
@@ -39,22 +39,22 @@ Though the underlying protocols will change, the API interfaces for the client &
 
 The baseline version of proposing and accepting a deal will work as follows:
 
-- The client finds a provider of a given piece with `FindProviders()`.
-- The client queries a provider to see if it meets its retrieval criteria (via Query Protocol)
-- The client sends a RetrievalDealProposal to the retrieval miner. (via RetrievalProtocol)
-- The provider validates the proposal and rejects it if it is invalid
-- If the request is valid, the provider responds to it with an accept message
-- The client creates a payment channel as neccesary and a lane, ensures there are free funds in the channel
-- The provider unseals the sector as neccesary
-- The provider sends blocks over the protocol until it requires payment
-- The client consumes blocks over the retrieval protocol and manually verifies them
-- When the provider requires payment to proceed, it sends payment request and does not send any more blocks
-- The client creates and stores a payment voucher off-chain
-- The client responds to the provider with a reference to the payment voucher
-- The provider redeems the payment voucher off-chain
-- The provider resumes sending blocks
-- The client consumes blocks until payment is required again
-- The process continues until the end of the query
+- The client finds a provider of a given piece with `FindProviders`.
+- The client queries a provider to see if it meets its retrieval criteria via Query Protocol.
+- The client sends a RetrievalDealProposal to the retrieval miner via RetrievalProtocol.
+- The provider validates the proposal and rejects it if it is invalid.
+- If the proposal is valid, the provider responds to it with an accept message.
+- The client creates a payment channel as necessary and a lane, ensures there are free funds in the channel.
+- The provider unseals the sector as necessary.
+- The provider sends blocks over the protocol until it requires the first payment according to the retrieval deal parameters.
+- The client consumes blocks over the retrieval protocol and manually verifies them.
+- When the provider requires payment to proceed, it sends payment request and does not send any more blocks.
+- The client creates and stores a payment voucher off-chain.
+- The client responds to the provider with a reference to the payment voucher.
+- The provider stores a copy of the payment voucher off-chain.
+- The provider resumes sending blocks until it requests the next payment.
+- The client consumes blocks until the provider requests the next payment.
+- The process continues until all blocks and requested vouchers have been exchanged.
 
 # Deal Flow (V1)
 
@@ -62,21 +62,27 @@ The baseline version of proposing and accepting a deal will work as follows:
 
 The evolved protocol for proposing and accepting a deal will work as follows:
 
-- The client finds a provider of a given piece with `FindProviders()`.
-- The client queries a provider to see if it meets its retrieval criteria (via Query Protocol)
+- The client finds a provider of a given piece with `FindProviders`.
+- The client queries a provider to see if it meets its retrieval criteria via Query Protocol.
 - The client schedules a `Data Transfer Pull Request` passing the `RetrievalDealProposal` as a voucher.
-- The provider validates the proposal and rejects it if it is invalid
-- If the proposal is valid, the provider responds with an accept message and begins monitoring the data transfer process
-- The client creates a payment channel as necessary and a lane, ensures there are free funds in the channel
-- The provider unseals the sector as necessary
-- The provider monitors data transfer as it sends blocks over the protocol, until it requires payment
-- When the provider requires payment, it pauses the data transfer and sends a request for payment as an intermediate voucher
-- The client receives the request for payment
-- The client creates and stores payment voucher off-chain
-- The client responds to provider with a reference to the payment voucher, sent as an intermediate voucher
-- The provider redeems the payment voucher off-chain
-- The provider resumes both the request and sending data
-- The process continues until the end of the query
+- The provider validates the proposal and rejects it if it is invalid.
+- If the proposal is valid, the provider responds with an accept message and begins monitoring the data transfer process.
+- The client creates a payment channel as necessary and a lane, ensures there are free funds in the channel.
+- The provider unseals the sector as necessary.
+- The provider monitors data transfer as it sends blocks over the protocol, until it requires payment.
+- When the provider requires payment, it pauses the data transfer and sends a request for payment as an intermediate voucher.
+- The client receives the request for payment.
+- The client creates and stores payment voucher off-chain.
+- The client responds to provider with a reference to the payment voucher, sent as an intermediate voucher.
+- The provider stores a copy of the payment voucher off-chain.
+- The provider resumes sending blocks until it requests the next payment.
+- The client consumes blocks until the provider requests the next payment.
+- The process continues until all blocks and requested vouchers have been exchanged.
+
+# On-Chain Reconciliation of Ledger Not Included
+Retrieval deal flow includes only the negotiation of a retrieval deal and exchange of data for vouchers
+off-chain. Please see the section on Payment Channel Actor for how to update payment channel state 
+and collect funds.
 
 # Bootstrapping Trust
 
