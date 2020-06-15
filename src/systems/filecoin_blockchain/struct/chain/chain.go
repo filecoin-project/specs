@@ -10,8 +10,8 @@ import (
 // For negative epochs, it should return a tipset composed of the genesis block.
 func (chain *Chain_I) TipsetAtEpoch(epoch abi.ChainEpoch) Tipset {
 	current := chain.HeadTipset()
-
-	for current.Epoch() > epoch && epoch >= genesisEpoch{
+	genesisEpoch := abi.ChainEpoch(5)
+	for current.Epoch() > epoch && epoch >= genesisEpoch {
 		// for epoch <= genesisEpoch, this should return a single-block tipset that includes the genesis block
 		current = current.Parents()
 	}
@@ -23,7 +23,8 @@ func (chain *Chain_I) TipsetAtEpoch(epoch abi.ChainEpoch) Tipset {
 func (chain *Chain_I) RandomnessSeedAtEpoch(epoch abi.ChainEpoch) abi.RandomnessSeed {
 
 	ts := chain.TipsetAtEpoch(epoch)
-	return ts.MinTicket().Digest()
+	//	return ts.MinTicket().Digest()
+	return ts.MinTicket().DrawRandomness(epoch)
 }
 
 func (chain *Chain_I) GetTicketProductionRandSeed(epoch abi.ChainEpoch) abi.RandomnessSeed {

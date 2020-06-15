@@ -3,7 +3,7 @@ package block
 import (
 	addr "github.com/filecoin-project/go-address"
 	abi "github.com/filecoin-project/specs-actors/actors/abi"
-	crypto "github.com/filecoin-project/specs/algorithms/randomness"
+	acrypto "github.com/filecoin-project/specs-actors/actors/crypto"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -12,6 +12,16 @@ func (tix *Ticket_I) ValidateSyntax() bool {
 	return tix.VRFResult_.ValidateSyntax()
 }
 
-func (tix *Ticket_I) Verify(proof util.Bytes, digest util.Bytes, pk filcrypto.VRFPublicKey) bool {
-	return tix.VRFResult_.Verify(proof, pk) && digest == blake2b.Sum256(proof)
+//func (tix *Ticket_I) Verify(proof util.Bytes, digest util.Bytes, pk filcrypto.VRFPublicKey) bool {
+//p := blake2b.Sum256(proof)
+//return tix.VRFResult_.Verify(proof, pk) && bytes.Compare(digest, p[:]) == 0
+//}
+
+func (tix *Ticket_I) Verify(randomness util.Bytes, pk filcrypto.VRFPublicKey, minerActorAddr addr.Address) bool {
+	input := acrypto.DeriveRandWithMinerAddr(acrypto.DomainSeparationTag_TicketProduction, randomness, minerActorAddr)
+	return tix.VRFResult_.Verify(input, pk)
+}
+
+func (tix *Ticket_I) DrawRandomness(epoch abi.ChainEpoch) util.Bytes {
+	return acrypto.DeriveRandWithEpoch(acrypto.DomainSeparationTag_TicketDrawing, tix.Output(), int(epoch))
 }
