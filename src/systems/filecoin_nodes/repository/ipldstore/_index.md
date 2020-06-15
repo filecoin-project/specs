@@ -11,7 +11,9 @@ IPLD is a set of libraries which allow for the interoperability of primitive has
 
 ## IPLD in filecoin
 
-On the Filecoin network, all datastructures are stored in [IPLD](https://ipld.io) format, a data format akin to json built for storage, retrieval and traversal of hash-linked data DAGs. Files and data stored on the Filecoin network are not required to be in IPLD format, though it is useful, as IPLD allows the use of selectors[link] to retrieve a smaller subset of the total stored data, as opposed to inefficiently downloading the data set entirely.
+On the Filecoin network, IPLD is used in two ways:
+- All system datastructures are stored in [IPLD](https://ipld.io) format, a data format akin to JSON but designed for storage, retrieval and traversal of hash-linked data DAGs.
+- Files and data stored on the Filecoin network may also be stored in IPLD format. While this is not required, it offers the benefit of supporting [selectors](https://github.com/ipld/specs/blob/master/selectors/selectors.md) to retrieve a smaller subset of the total stored data, as opposed to inefficiently downloading the data set entirely.
 
 <-- Inclusion of IPLD 'kinds' here, or irrelevant? -->
 
