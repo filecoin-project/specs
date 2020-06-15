@@ -5,7 +5,7 @@ title: "IpldStore - Local Storage for hash-linked data"
 
 {{< readfile file="../../../../libraries/ipld/ipld.id" code="true" lang="go" >}}
 
-IPLD is a set of libraries which allow for the interoperability of primitive hash-based data structures present in most distributed systems and protocols. It provides a fundamental 'common language' to cryptographic hashing, enabling data to be verifiably referenced and retrieved from other existing protocols. For example, a user can reference a git commit in a blockchain transaction to create an immutible copy and timestamp, or a data from a DHT can be refenced and linked to in a smart contract. <- assumption being made on last one -->
+IPLD is a set of libraries which allow for the interoperability of primitive hash-based data structures present in most distributed systems. It provides a fundamental 'common language' to cryptographic hashing, enabling data to be verifiably referenced and retrieved between two independent protocols. For example, a user can reference a git commit in a blockchain transaction to create an immutible copy and timestamp, or a data from a DHT can be refenced and linked to in a smart contract. <- assumption being made on last one -->
 
 <-- needs expansion of hash linked data, ipfs -->
 
