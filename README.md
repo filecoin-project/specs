@@ -96,6 +96,10 @@ For every subsystem in the Filecoin spec, it must always have a markdown file th
 <img src="src/diagrams/buildsys/buildsys.dot.svg" width="50%">
 -->
 
+#### Adding L1 - L4 sections
+
+The specification is broken down into 4 levels (`#.#.#.#`). The L1, L2 and L3 numbers in this sequence are determined by the directory structure extending from `/src/`; for example, `systems/filecoin_mining/sector/` resolves to `2.6.2.`. A further L4 subsection is added using the `##` header within a subsection's (in this case, the `sector` directory) `index.md` file.
+
 ### System Overview
 
 <img src="src/diagrams/overview1/overview.svg" />
