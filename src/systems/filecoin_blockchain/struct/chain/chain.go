@@ -10,7 +10,7 @@ import (
 // For negative epochs, it should return a tipset composed of the genesis block.
 func (chain *Chain_I) TipsetAtEpoch(epoch abi.ChainEpoch) Tipset {
 	current := chain.HeadTipset()
-	genesisEpoch := abi.ChainEpoch(5)
+	genesisEpoch := abi.ChainEpoch(0)
 	for current.Epoch() > epoch && epoch >= genesisEpoch {
 		// for epoch <= genesisEpoch, this should return a single-block tipset that includes the genesis block
 		current = current.Parents()
