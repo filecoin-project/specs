@@ -41,7 +41,7 @@ The beacon entry is combined with a few elements for use as part of the protocol
 - a DST (domain separation tag)
     - Different uses of randomness are distinguished by this type of personalization which ensures that randomness used for different purposes will not conflict with randomness used elsewhere in the protocol
 - the epoch number, ensuring
-    - liveness for leader election -- in the case no one is elected in a round and no new drand entry has appeared, the new epoch number will output new randomness for LE
+    - liveness for leader election -- in the case no one is elected in a round and no new beacon entry has appeared (i.e. if the beacon frequency is slower than that of block production in Filecoin), the new epoch number will output new randomness for LE (note that Filecoin uses liveness during a beacon outage).
     - other entropy, ensuring that randomness is modified as needed by other context-dependent entropy (e.g. a miner address if we want the randomness to be different for each miner).
 
 While all elements are not needed for every use of entropy (e.g. the inclusion of the round number is not necessary prior to genesis or outside of leader election, other entropy is only used sometimes, etc), we draw randomness as follows for the sake of uniformity/simplicity in the overall protocol.
@@ -52,7 +52,7 @@ In round `n`, for a given randomness lookback `l`, and serialized entropy `s`:
 
 ```text
 GetRandomness(dst, l, s):
-    ticketDigest = beacon.GetRandomnessForEpoch(n-l)
+    ticketDigest = beacon.GetBeaconEntryForEpoch(n-l)
 
     buffer = Bytes{}
     buffer.append(IntToBigEndianBytes(dst))

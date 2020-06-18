@@ -65,10 +65,12 @@ For instance, if the drand beacon is producing randomness twice as fast as Filec
 In all cases, Filecoin blocks must include all drand beacon outputs generated since the last epoch in the `BeaconEntries` field of the block header. Any use of randomness from a given Filecoin epoch should use the last valid drand entry included in a Filecoin block, as follows:
 
 ```go
-GetRandomnessForEpoch(epoch) []BeaconEntry {
+// Note that the below function is a temporary solution and likely to be
+// updated in future. 
+GetBeaconEntryForEpoch(epoch) []BeaconEntry {
     var rand Randomness
     for rand == nil {
-        seeds := GetRandomSeedsForEpoch(epoch)
+        seeds := GetBeaconEntriesForEpoch(epoch)
         if seeds == nil {
             epoch -= 1
         } else {
@@ -78,7 +80,7 @@ GetRandomnessForEpoch(epoch) []BeaconEntry {
     return rand
 }
 
-GetRandomSeedsForEpoch(epoch) []BeaconEntry {
+GetBeaconEntriesForEpoch(epoch) []BeaconEntry {
     maxDrandRound := MaxBeaconRoundForEpoch(epoch)
 
     if epoch == 0 {
@@ -90,7 +92,7 @@ GetRandomSeedsForEpoch(epoch) []BeaconEntry {
 
     prevMaxDrandRound := MaxBeaconRoundForEpoch(epoch - 1)
     if (maxDrandRound == prevMaxDrandRound) {
-        // no new drand randomness
+        // no new beacon randomness
         return nil
     }
 
@@ -159,8 +161,8 @@ The miner runs the beacon entry through a Verifiable Random Function (VRF) to ge
 
 To generate a ticket for a given epoch n:
 ```text
-randSeed = GetRandomnessForEpoch(n)
-newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(randSeed, minerActorAddress)))
+randSeed = GetBeaconEntryForEpoch(n)
+newTicketRandomness = VRF_miner(H(TicketProdDST || index || Serialization(randSeed, minerActorAddress)))
 ```
 
 We use the VRF from {{<sref vrf>}} for ticket generation (see the `PrepareNewTicket` method below).
