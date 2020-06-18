@@ -5,15 +5,20 @@ title: "IpldStore - Local Storage for hash-linked data"
 
 {{< readfile file="../../../../libraries/ipld/ipld.id" code="true" lang="go" >}}
 
-IPLD is a set of libraries which allow for the interoperability of primitive hash-based data structures present in most distributed systems. It provides a fundamental 'common language' to cryptographic hashing, enabling data to be verifiably referenced and retrieved between two independent protocols. For example, a user can reference a git commit in a blockchain transaction to create an immutible copy and timestamp, or a data from a DHT can be refenced and linked to in a smart contract. <- assumption being made on last one -->
+IPLD is a set of libraries which allow for the interoperability of content-addressed data structures present in most distributed systems. It provides a fundamental 'common language' to primitive cryptographic hashing, enabling data to be verifiably referenced and retrieved between two independent protocols. For example, a user can reference a git commit in a blockchain transaction to create an immutible copy and timestamp, or a data from a DHT can be refenced and linked to in a smart contract. 
 
-<-- needs expansion of hash linked data, ipfs -->
+For a more in-depth explanation of IPLD's role in Filecoin, see [this section] of the specification.
 
 ## IPLD in filecoin
 
 On the Filecoin network, IPLD is used in two ways:
+
 - All system datastructures are stored in [IPLD](https://ipld.io) format, a data format akin to JSON but designed for storage, retrieval and traversal of hash-linked data DAGs.
 - Files and data stored on the Filecoin network may also be stored in IPLD format. While this is not required, it offers the benefit of supporting [selectors](https://github.com/ipld/specs/blob/master/selectors/selectors.md) to retrieve a smaller subset of the total stored data, as opposed to inefficiently downloading the data set entirely.
+
+IPLD handles marshalling and unmarshalling via a suite of codecs. IPLD codecs may support the complete Data Model or part of the Data Model. Two codecs that support the complete Data Model are [DAG-CBOR](https://github.com/ipld/specs/blob/master/block-layer/codecs/dag-cbor.md) and [DAG-JSON](https://github.com/ipld/specs/blob/master/block-layer/codecs/dag-json.md). 
+
+Filecoin uses the **DAG-CBOR** codec for the serialization and deserialization of it's data structures and interacts with that data using the IPLD Data Model, upon which various tools are built. IPLD [Paths](https://github.com/ipld/specs/blob/master/data-model-layer/paths.md) are also used to address specific nodes within a linked data structure.
 
 <-- Inclusion of IPLD 'kinds' here, or irrelevant? -->
 
