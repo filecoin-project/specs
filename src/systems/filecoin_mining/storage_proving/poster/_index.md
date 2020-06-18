@@ -3,6 +3,7 @@ menuTitle: Sector Poster
 title: Sector Poster
 ---
 
+DEPRECATED: Seems old or inputs are not correct.
 
 {{< readfile file="post_generator.id" code="true" lang="go" >}}
 

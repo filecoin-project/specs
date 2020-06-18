@@ -4,14 +4,20 @@ title: Storage Power Actor
 
 # `StoragePowerActorState` implementation
 
+DEPRECATED: Old code, needs to be updated
+
 {{< readfile file="/docs/actors/actors/builtin/storage_power/storage_power_actor_state.go" code="true" lang="go" >}}
 
 # `StoragePowerActor` implementation
+
+DEPRECATED: Needs to be updated with WinningPoSt and with WindowedPoSt.
 
 {{< readfile file="/docs/actors/actors/builtin/storage_power/storage_power_actor.go" code="true" lang="go" >}}
 
 {{<label power_table>}}
 # The Power Table
+
+DEPRECATED: Needs to update QApower terminology, faults terminology and actors new method names, this section could be simplified a lot.
 
 The portion of blocks a given miner generates through leader election in EC (and so the block rewards they earn) is proportional to their `Power Fraction` over time. That is, a miner whose storage represents 1% of total storage on the network should mine 1% of blocks on expectation.
 

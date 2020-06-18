@@ -2,6 +2,8 @@
 title: Election PoSt
 ---
 
+DEPRECATED: Needs to be updated with WinningPoSt and with WindowedPoSt.
+
 This document describes Election-PoSt, the Proof-of-Spacetime used in Filecoin.
 
 At a high-level it marries `ElectionPoSt` with a `SurprisePoSt` fallback:

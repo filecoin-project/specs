@@ -38,6 +38,8 @@ However, given Filecoin's "useful Proof-of-Work" is achieved through file storag
 
 Claimed power is assigned to every sector as a static function of its `SectorStorageWeightDesc` which includes `SectorSize`, `Duration`, and `DealWeight`. DealWeight is a measure that maps size and duration of active deals in a sector during its lifetime to its impact on power and reward distribution. A CommittedCapacity Sector (see {{<sref storage_mining_subsystem "Sector Types">}}) will have a DealWeight of zero but all sectors have an explicit Duration which is defined from the ChainEpoch that the sector comes online in a ProveCommit message to the Expiration ChainEpoch of the sector. In principle, power is the number of votes a miner has in leader election and it is a point in time concept of storage. However, the exact function that maps `SectorStorageWeightDesc` to claimed `StoragePower` and `BlockReward` will be announced soon.
 
+DEPRECATED: Needs to be updated with QAPower and the latest work with faults.
+
 More precisely,
 
 - Claimed power = power from ProveCommit sectors minus sectors in TemporaryFault effective duration.

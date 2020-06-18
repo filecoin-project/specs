@@ -4,6 +4,8 @@ author = ["Chhi'med Kunzang"]
 draft = false
 +++
 
+DEPRECATED: Needs to be updated with WinningPoSt and with WindowedPoSt.
+
 This section describes parameters for Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
 
 | Parameter             | Type   | Value | Description                                                                                                                                                                                    |

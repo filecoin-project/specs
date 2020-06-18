@@ -2,6 +2,8 @@
 title: Sector Sealing
 ---
 
+DEPRECATED: Most content is correct, we should use correct constant names and more accurate sealing names.
+
 {{< readfile file="sealing.id" code="true" lang="go" >}}
 
 ## Drawing randomness for sector commitments
