@@ -7,7 +7,6 @@ title: "IpldStore - Local Storage for hash-linked data"
 
 IPLD is a set of libraries which allow for the interoperability of content-addressed data structures across different distributed systems. It provides a fundamental 'common language' to primitive cryptographic hashing, enabling data to be verifiably referenced and retrieved between two independent protocols. For example, a user can reference a git commit in a blockchain transaction to create an immutable copy and timestamp, or a data from a DHT can be referenced and linked to in a smart contract. 
 
-For a more in-depth explanation of IPLD's role in Filecoin, see [this section] of the specification.
 
 ## IPLD in filecoin
 
@@ -20,11 +19,7 @@ IPLD handles marshalling and unmarshalling via a suite of codecs. IPLD codecs ma
 
 Filecoin uses the **DAG-CBOR** codec for the serialization and deserialization of its data structures and interacts with that data using the IPLD Data Model, upon which various tools are built. IPLD [Paths](https://github.com/ipld/specs/blob/master/data-model-layer/paths.md) are also used to address specific nodes within a linked data structure.
 
-<-- Inclusion of IPLD 'kinds' here, or irrelevant? -->
-
 ### IpldStores
-
-<-- to be expanded on -->
 
 The Filecoin network relies primarily on two distinct IPLD GraphStores:
 
@@ -34,14 +29,3 @@ The Filecoin network relies primarily on two distinct IPLD GraphStores:
 The `ChainStore` is downloaded by a node from their peers during the bootstrapping phase of {{<sref chain_sync>}} and is stored by the node thereafter. It is updated on every new block reception, or if the node syncs to a new best chain.
 
 The `StateStore` is computed through the execution of all block messages in a given `ChainStore` and is stored by the node thereafter. It is updated with every new incoming block's processing by the {{<sref vm_interpreter>}}, and referenced accordingly by new blocks produced atop it in the block {{<sref block "block header">}}'s `ParentState` field.
-
-TODO:
-
-- What is an IpldStore
-  - local storage of dags
-- How to use IpldStores in filecoin
-  - pass it around
-- One ipldstore or many
-  - temporary caches
-  - intermediately computed state
-- Garbage Collection
