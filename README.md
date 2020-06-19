@@ -8,7 +8,7 @@ Note that the `master` branch of the specs moves quickly. We work to merge PRs a
 
 ## View Website
 
-https://filecoin-project.github.io/specs is the user-friendly website rendering, which we recommend for reading this repository. ~The website is updated automatically with every merge to `master`.~ Automatic updates are currently broken, so please read the contents of this repo for the latest spec.
+https://filecoin-project.github.io/specs is the user-friendly website rendering, which we recommend for reading this repository. The website is updated automatically with every merge to `master`.
 
 ## Contributing
 
