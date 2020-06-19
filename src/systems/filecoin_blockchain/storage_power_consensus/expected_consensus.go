@@ -14,7 +14,7 @@ func (self *ExpectedConsensus_I) ComputeChainWeight(tipset chain.Tipset) block.C
 	util.IMPL_FINISH()
 	return block.ChainWeight(0)
 	// see expected_consensus.md for detail
-	
+
 	// numTickets := 0
 	// for _, bl := range tipset.Blocks {
 	//		numTickets += bl.ElectionPoSt.Candidates
