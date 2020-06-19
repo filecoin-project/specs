@@ -2059,6 +2059,10 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+    </li>
+
+    <li>
+    
       
 
 
@@ -2496,6 +2500,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__sector__lifecycle" class="menu-item depth-4">
+    
+    
+        Sector Lifecycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4666,18 +4701,15 @@ https://github.com/alex-shpak/hugo-book
 Function</a>
 (VRF). A VRF uses a private key to produce a digest of
 an arbitrary message such that the output is unique per signer and per message.
-Any third party in possession of the corresponding public key, the message and
-the VRF output can verify if the digest has been computed correctly and from the
+Any third party in possession of the corresponding public key, the message, and
+the VRF output, can verify if the digest has been computed correctly and by the
 correct signer. Using a VRF in the ticket generation process allows anyone to
 verify if a block comes from an eligible block producer (see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Ticket Generation</a> for more details).</p>
 <p>BLS signature can be used as the basis to construct a VRF. Filecoin transforms
 the BLS signature scheme it uses (see <a href="../../../../#algorithms__crypto__signatures">Signatures</a> into a
-VRF, Filecoin uses the random oracle model and deterministically hash the
-signature to produce the final digest. Filecoin uses
-SHA256 as the hash function. The algorithm is the following:</p>
-<pre><code>VRFOutput = SHA256(DST || index || Serialization(BLSSignature(message)))
-</code></pre><p>where <code>DST</code> is a domain separation tag in order to treat the hash
-function as an independent random oracle in the VRF output (see <a href="../../../../#algorithms__crypto__randomness">Randomness</a>).</p>
+VRF, Filecoin uses the random oracle model and deterministically hashes the
+signature (using blake2b to produce a 256 bit output) to produce the final digest.</p>
+<p>These digests are often used as entropy for randomness in the protocol (see <a href="../../../../#algorithms__crypto__randomness">Randomness</a>).</p>
 <p>
 
 
@@ -4713,7 +4745,10 @@ function as an independent random oracle in the VRF output (see <a href="../../.
 
 <span class="kd">type</span> <span class="nx">VRFResult</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Output</span>            <span class="nx">Bytes</span>  <span class="c1">// @(internal)
-</span><span class="c1"></span>    <span class="nf">MaxValue</span><span class="p">()</span>        <span class="nx">Bytes</span>
+</span><span class="c1"></span>
+    <span class="nx">Proof</span>             <span class="nx">Bytes</span>
+    <span class="nx">Digest</span>            <span class="nx">Bytes</span>
+    <span class="nf">MaxValue</span><span class="p">()</span>        <span class="nx">Bytes</span>
     <span class="nf">ValidateSyntax</span><span class="p">()</span>  <span class="kt">bool</span>
 
     <span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span> <span class="nx">Bytes</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">VRFPublicKey</span><span class="p">)</span> <span class="kt">bool</span>
@@ -4745,7 +4780,10 @@ function as an independent random oracle in the VRF output (see <a href="../../.
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">crypto</span>
 
-<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+    <span class="s">&#34;golang.org/x/crypto/blake2b&#34;</span>
+<span class="p">)</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">VRFResult_I</span><span class="p">)</span> <span class="nf">ValidateSyntax</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
@@ -4753,7 +4791,7 @@ function as an independent random oracle in the VRF output (see <a href="../../.
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">VRFResult_I</span><span class="p">)</span> <span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">VRFPublicKey</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="c1">// return new(BLS).Verify(self.Output, pk.(*BLSPublicKey), input)
+    <span class="c1">// return new(BLS).Verify(self.Proof, pk.(*BLSPublicKey), input)
 </span><span class="c1"></span>    <span class="k">return</span> <span class="kc">false</span>
 <span class="p">}</span>
 
@@ -4765,8 +4803,11 @@ function as an independent random oracle in the VRF output (see <a href="../../.
 <span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">VRFKeyPair_I</span><span class="p">)</span> <span class="nf">Generate</span><span class="p">(</span><span class="nx">input</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">)</span> <span class="nx">VRFResult</span> <span class="p">{</span>
     <span class="c1">// sig := new(BLS).Sign(input, self.SecretKey)
 </span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">blsSig</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span>
+
+    <span class="nx">digest</span> <span class="o">:=</span> <span class="nx">blake2b</span><span class="p">.</span><span class="nf">Sum256</span><span class="p">(</span><span class="nx">blsSig</span><span class="p">)</span>
     <span class="nx">ret</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">VRFResult_I</span><span class="p">{</span>
-        <span class="nx">Output_</span><span class="p">:</span> <span class="nx">blsSig</span><span class="p">,</span>
+        <span class="nx">Proof_</span><span class="p">:</span>  <span class="nx">blsSig</span><span class="p">,</span>
+        <span class="nx">Digest_</span><span class="p">:</span> <span class="nx">digest</span><span class="p">[:],</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="nx">ret</span>
 <span class="p">}</span>

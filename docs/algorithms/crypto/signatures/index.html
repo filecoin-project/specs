@@ -2059,6 +2059,10 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+    </li>
+
+    <li>
+    
       
 
 
@@ -2496,6 +2500,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__sector__lifecycle" class="menu-item depth-4">
+    
+    
+        Sector Lifecycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4724,8 +4759,8 @@ and each type have additional functionality as explained below.</p>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SigType</span> <span class="nx">enum</span> <span class="p">{</span>
-    <span class="nx">BLSSigType</span>
     <span class="nx">ECDSASigType</span>
+    <span class="nx">BLSSigType</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4739,8 +4774,8 @@ authenticate the blockchain transactions. The main reason is to be able to
 validate transactions from other blockchain systems that uses secp256k1 (such as
 Bitcoin or exchanges in general). ECDSA signatures offer an additional
 useful functionality as well: to recover the public key from a given signature.
-That feature can allow to save space on the blockchain by extracting the public
-key locally from the signature rather than specify an ID of the public key.</p>
+This feature can allow space to be saved on the blockchain by extracting the public
+key locally from the signature rather than specifying an ID of the public key.</p>
 
 
 
@@ -4939,14 +4974,14 @@ candidates in recent blockchain systems:</p>
 the signature is always the same.  That feature removes an important security
 weakness of most randomized signature schemes: signer must never re-use the
 same randomness twice otherwise this reveals its private key. As well,
-deterministic signature are ideal candidate to reduce the attack surface in
+deterministic signatures are an ideal candidate to reduce the attack surface in
 terms of grinding, which is a real concern in recent proof of stake systems.</li>
 <li>BLS signatures are aggregatable: one can aggregate signatures from different
-signers into one single signature. That feature allows to drastically save
+signers into one single signature. This feature enables drastically saving
 space on the blockchain, especially when aggregating user transactions.</li>
 </ul>
 <p><strong>Aggregation Functionality</strong>: The aggregation functionality is commutative and
-associative, enabling to perform <em>partial</em> aggregation. For example, given
+associative, enabling <em>partial</em> aggregation. For example, given
 <code>(PK1, sig1), (PK2, sig2), (PK3, sig3)</code>, one can first aggregate <code>(PK12 = PK1 + PK2, sig12 = sig1 + sig2)</code> then aggregate with the third tuple to produce
 <code>(PK123 = PK12 + PK3, sig123 = sig12 + sig3)</code>.</p>
 <p><strong>Aggregation Security</strong>: The naive BLS signature aggregation scheme is
@@ -4961,12 +4996,12 @@ of measures, as explained <a href="https://crypto.stanford.edu/~dabo/pubs/papers
 <p>Fortunately, Filecoin can enforce the second condition to safely use the
 aggregation property:
 Filecoin uses aggregation only for aggregating the transaction&rsquo;s signature of a
-block. since Filecoin uses the account model to represent the state of the
-chain, each message for a given signer is used in combination of a nonce to
+block. Since Filecoin uses the account model to represent the state of the
+chain, each message for a given signer is used in combination with a nonce to
 avoid replay attacks. As a direct consequence, every transaction&rsquo;s message is
 unique thereby the aggregation is done on distinct messages.  Obviously, the
 <strong>assumption</strong> here is that the block producer <strong>enforces that distinction</strong> and
-the other miners will <strong>check every transactions</strong> to make sure they are valid.
+the other miners will <strong>check all transactions</strong> to make sure they are valid.
 The validity of a transaction in Filecoin&rsquo;s context implies that the signature
 is correctly formed over the message with the correct nonce.</p>
 

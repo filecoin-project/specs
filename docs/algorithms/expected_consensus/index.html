@@ -2060,6 +2060,10 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+    </li>
+
+    <li>
+    
       
 
 
@@ -2497,6 +2501,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector__lifecycle" class="menu-item depth-4">
+    
+    
+        Sector Lifecycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4761,8 +4796,12 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">block</span><span class="p">.</span><span class="nf">ChainWeight</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 	<span class="c1">// see expected_consensus.md for detail
 </span><span class="c1"></span>
-	<span class="c1">// wPowerFactor := self.log2b(spa.GetTotalPower())
-</span><span class="c1"></span>	<span class="c1">// wBlocksFactor_num := (wPowerFactor * len(tipset.Blocks) * self.wParams.wRatio_num)
+	<span class="c1">// numTickets := 0
+</span><span class="c1"></span>	<span class="c1">// for _, bl := range tipset.Blocks {
+</span><span class="c1"></span>	<span class="c1">//		numTickets += bl.ElectionPoSt.Candidates
+</span><span class="c1"></span>	<span class="c1">// }
+</span><span class="c1"></span>	<span class="c1">// wPowerFactor := self.log2b(spa.GetTotalPower())
+</span><span class="c1"></span>	<span class="c1">// wBlocksFactor_num := (wPowerFactor * numTickets * self.wParams.wRatio_num)
 </span><span class="c1"></span>	<span class="c1">// wBlocksFactor_den := self.expectedLeadersPerEpoch * self.wParams.wRatio_den
 </span><span class="c1"></span>	<span class="c1">// return tipset.ParentTipset.ChainWeight
 </span><span class="c1"></span>	<span class="c1">// 	+wPowerFactor * self.wParams.wPrecision
@@ -4906,6 +4945,11 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">tix</span><span class="p">.</span><span class="nx">VRFResult_</span><span class="p">.</span><span class="nf">ValidateSyntax</span><span class="p">()</span>
 <span class="p">}</span>
 
+<span class="c1">//func (tix *Ticket_I) Verify(proof util.Bytes, digest util.Bytes, pk filcrypto.VRFPublicKey) bool {
+</span><span class="c1">//p := blake2b.Sum256(proof)
+</span><span class="c1">//return tix.VRFResult_.Verify(proof, pk) &amp;&amp; bytes.Compare(digest, p[:]) == 0
+</span><span class="c1">//}
+</span><span class="c1"></span>
 <span class="kd">func</span> <span class="p">(</span><span class="nx">tix</span> <span class="o">*</span><span class="nx">Ticket_I</span><span class="p">)</span> <span class="nf">Verify</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="nx">input</span> <span class="o">:=</span> <span class="nx">acrypto</span><span class="p">.</span><span class="nf">DeriveRandWithMinerAddr</span><span class="p">(</span><span class="nx">acrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_TicketProduction</span><span class="p">,</span> <span class="nx">randomness</span><span class="p">,</span> <span class="nx">minerActorAddr</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">tix</span><span class="p">.</span><span class="nx">VRFResult_</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">pk</span><span class="p">)</span>
@@ -4984,19 +5028,18 @@ def TicketIsWinner(challengeTicket):
 <p>In short, the weight at each block is equal to its <code>ParentWeight</code> plus that block&rsquo;s delta weight. Details of Filecoin&rsquo;s chain weighting function <a href="https://observablehq.com/d/3812cd65c054082d">are included here</a>.</p>
 <p>Delta weight is a term composed of a few elements:</p>
 <ul>
-<li>wForkFactor: which seeks to cut the weight derived from rounds in which produced Tipsets do not correspond to what an honest chain is likely to have yielded (pointing to selfish mining or other non-collaborative miner behavior).</li>
 <li>wPowerFactor: which adds weight to the chain proportional to the total power backing the chain, i.e. accounted for in the chain&rsquo;s power table.</li>
-<li>wBlocksFactor: which adds weight to the chain proportional to the number of blocks mined in a given round. Like wForkFactor, it rewards miner cooperation (which will yield more blocks per round on expectation).</li>
+<li>wBlocksFactor: which adds weight to the chain proportional to the number of tickets mined in a given epoch. It rewards miner cooperation (which will yield more blocks per round on expectation).</li>
 </ul>
 <p>The weight should be calculated using big integer arithmetic with order of operations defined above. We use brackets instead of parentheses below for legibility. We have:</p>
 <p><code>w[r+1] = w[r] + (wPowerFactor[r+1] + wBlocksFactor[r+1]) * 2^8</code></p>
 <p>For a given tipset <code>ts</code> in round <code>r+1</code>, we define:</p>
 <ul>
 <li><code>wPowerFactor[r+1]  = wFunction(totalPowerAtTipset(ts))</code></li>
-<li>wBlocksFactor[r+1] =  <code>wPowerFactor[r+1] * wRatio * b / e</code>
+<li>wBlocksFactor[r+1] =  <code>wPowerFactor[r+1] * wRatio * t / e</code>
 <ul>
-<li>with <code>b = |blocksInTipset(ts)|</code></li>
-<li><code>e = expected number of blocks per round in the protocol</code></li>
+<li>with <code>t = |ticketsInTipset(ts)|</code></li>
+<li><code>e = expected number of tickets per round in the protocol</code></li>
 <li>and <code>wRatio in ]0, 1[</code>
 Thus, for stability of weight across implementations, we take:</li>
 </ul>
@@ -5005,7 +5048,7 @@ Thus, for stability of weight across implementations, we take:</li>
 </ul>
 <p>We get:</p>
 <ul>
-<li><code>w[r+1] = w[r] + wFunction(totalPowerAtTipset(ts)) * 2^8 + (wFunction(totalPowerAtTipset(ts)) * len(ts.blocks) * wRatio_num * 2^8) / (e * wRatio_den)</code>
+<li><code>w[r+1] = w[r] + wFunction(totalPowerAtTipset(ts)) * 2^8 + (wFunction(totalPowerAtTipset(ts)) * len(ts.tickets) * wRatio_num * 2^8) / (e * wRatio_den)</code>
 Using the 2^8 here to prevent precision loss ahead of the division in the wBlocksFactor.</li>
 </ul>
 <p>The exact value for these parameters remain to be determined, but for testing purposes, you may use:</p>
@@ -5036,10 +5079,18 @@ potentially long chain scans would be required to compute a given block&rsquo;s 
 <div id="algorithms__expected_consensus__consensus_faults"></div>
 <h2 id="consensus-faults">Consensus Faults</h2>
 <p>Due to the existence of potential forks in EC, a miner can try to unduly influence protocol fairness. This means they may choose to disregard the protocol in order to gain an advantage over the power they should normally get from their storage on the network. A miner should be slashed if they are provably deviating from the honest protocol.</p>
-<p>This is detectable when a given miner submits two blocks that satisfy any of the following &ldquo;consensus faults&rdquo;:</p>
+<p>This is detectable when a given miner submits two blocks that satisfy any of the following &ldquo;consensus faults&rdquo;. In all cases, we must have:</p>
+<ul>
+<li>both blocks were mined by the same miner</li>
+<li>both blocks have valid signatures</li>
+<li>first block&rsquo;s epoch is smaller or equal than second block</li>
+</ul>
+<p>Thereafter, the faults are:</p>
 <ul>
 <li>
-<p>(1) <code>double-fork mining fault</code>: two blocks mined at the same epoch.
+<p>(1) <code>double-fork mining fault</code>: two blocks mined at the same epoch.</p>
+<ul>
+<li><code>B4.Epoch == B5.Epoch</code>
 
 
 
@@ -5067,10 +5118,13 @@ potentially long chain scans would be required to compute a given block&rsquo;s 
 
 
 </div>
-</p>
+</li>
+</ul>
 </li>
 <li>
-<p>(2) <code>time-offset mining fault</code>: two blocks mined off of the same Tipset at different epochs (i.e. with different <code>ChallengeTickets</code> generated from the same input ticket).
+<p>(2) <code>time-offset mining fault</code>: two blocks mined off of the same Tipset at different epochs (i.e. with different <code>ChallengeTickets</code> generated from the same input ticket).</p>
+<ul>
+<li><code>B3.Parents == B4.Parents &amp;&amp; B3.Epoch != B4.Epoch</code>
 
 
 
@@ -5098,10 +5152,17 @@ potentially long chain scans would be required to compute a given block&rsquo;s 
 
 
 </div>
-</p>
+</li>
+</ul>
 </li>
 <li>
-<p>(3) <code>parent-grinding fault</code>: one block&rsquo;s parent is a Tipset that provably should have included a given block but does not. While it cannot be proven that a missing block was willfully omitted in general (i.e. network latency could simply mean the miner did not receive a particular block), it can when a miner has successfully mined a block two epochs in a row and omitted one. That is, this condition should be evoked when a miner omits their own prior block. When a miner&rsquo;s block at epoch e + 1 references a Tipset that does not include the block they mined at e both blocks can be submitted to prove this fault.
+<p>(3) <code>parent-grinding fault</code>: one block&rsquo;s parent is a Tipset that provably should have included a given block but does not. While it cannot be proven that a missing block was willfully omitted in general (i.e. network latency could simply mean the miner did not receive a particular block), it can when a miner has successfully mined a block two epochs in a row and omitted one. That is, this condition should be evoked when a miner omits their own prior block.</p>
+<ul>
+<li>Specifically, this can be proven with a &ldquo;witness&rdquo; block, that is by submitting blocks B2, B3, B4 where B2 is B4&rsquo;s parent and B3&rsquo;s sibling but B3 is not B4&rsquo;s parent.</li>
+<li><code>!B4.Parents.Include(B3) &amp;&amp; B4.Parents.Include(B2) &amp;&amp; B3.Parents == B2.Parents &amp;&amp; B3.Epoch == B2.Epoch</code></li>
+</ul>
+</li>
+</ul>
 
 
 
@@ -5129,9 +5190,7 @@ potentially long chain scans would be required to compute a given block&rsquo;s 
 
 
 </div>
-</p>
-</li>
-</ul>
+
 <p>Any node that detects any of the above events should submit both block headers to the <code>StoragePowerActor</code>'s <code>ReportConsensusFault</code> method. The &ldquo;slasher&rdquo; will receive a portion of the offending miner&rsquo;s <a href="../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor__pledge_collateral">Pledge Collateral</a> as a reward for notifying the network of the fault. Consensus faults (except for <code>uncommitted power fault</code> below which falls under storage faults with impact on consensus) will tentatively result in all pledge collateral being slashed and the miner removed from the power table. Some portion of the pledge collateral is given to the slasher as a function of some initial share (<code>SLASHER_INITIAL_SHARE</code>) and growth rate (<code>SLASHER_SHARE_GROWTH_RATE</code>). Slasher&rsquo;s share of the slashed collateral increases as block elapses since the block when the fault is committed. Default growth rate results in slasher&rsquo;s share reaches 1 after 250 blocks. However, only the first slasher gets its share of the pledge collateral and the remaining pledge collateral will be burned. The longer a slasher waits, the higher the likelihood that the slashed collateral will be claimed by another slasher.</p>
 <p>It is important to note that there exists a third type of consensus fault directly reported by the <code>CronActor</code> on <code>StorageDeal</code> failures via the <code>ReportUncommittedPowerFault</code> method:</p>
 <ul>

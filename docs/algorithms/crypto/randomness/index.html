@@ -2059,6 +2059,10 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+    </li>
+
+    <li>
+    
       
 
 
@@ -2496,6 +2500,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__sector__lifecycle" class="menu-item depth-4">
+    
+    
+        Sector Lifecycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4666,67 +4701,88 @@ https://github.com/alex-shpak/hugo-book
 Random values are drawn from the <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__ticket_chain">Ticket Chain</a> and appropriately formatted for usage.
 We describe this formatting below.</p>
 <h2 id="encoding-on-chain-data-for-randomness">Encoding On-chain data for randomness</h2>
-<p>Any randomness derived from on-chain values uses the following encodings to represent these values as bytes:</p>
-<ul>
-<li><strong>Bytes</strong>: Bytes</li>
-<li><strong>Ints</strong>: Big-endian uint64 representation</li>
-<li><strong>Strings</strong>: ASCII</li>
-<li><strong>Objects</strong>: Their specified Serialization, currently CBOR-based serialization defined on algebraic datatypes</li>
-</ul>
+<p>Entropy from the ticket-chain can be combined with other values to generate necessary randomness that can be
+specific to (eg) a given miner address or epoch. To be used as part of entropy, these values are combined in
+objects that can then be CBOR-serialized according to their algebraic datatypes.</p>
 <h2 id="domain-separation-tags">Domain Separation Tags</h2>
-<p>For <a href="../../../../#algorithms__crypto__signatures">Signatures</a> as well as <a href="../../../../#algorithms__crypto__vrf">Verifiable Random Function</a> usage in the protocol, we define Domain Separation Tags with which we prepend random inputs.</p>
-<p>The source of truth is defined below, but the currently defined DSTs are:</p>
+<p>Further, we define Domain Separation Tags with which we prepend random inputs when creating entropy.</p>
+<p>All randomness used in the protocol must be generated in conjunction with a unique DST, as well as
+certain <a href="../../../../#algorithms__crypto__signatures">Signatures</a> and <a href="../../../../#algorithms__crypto__vrf">Verifiable Random Function</a> usage.</p>
+<h2 id="drawing-tickets-for-randomness-from-the-chain">Drawing tickets for randomness from the chain</h2>
+<p>Tickets are used as a source of on-chain randomness, generated with each new block created (see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a>).</p>
+<p>A ticket is drawn from the chain for randomness as follows, for a given epoch <code>n</code>, and ticket sought at epoch <code>e</code>:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">RandomnessSeedAtEpoch(e):
+    While ticket is not set:
+        Set wantedTipsetHeight = e
+        if wantedTipsetHeight &lt;= genesis:
+            Set ticket = genesis ticket
+        else if blocks were mined at wantedTipsetHeight:
+            ReferenceTipset = TipsetAtHeight(wantedTipsetHeight)
+            Set ticket = minTicket in ReferenceTipset
+        If no blocks were mined at wantedTipsetHeight:
+            wantedTipsetHeight--
+            (Repeat)
+    return ticket.Digest()
+</code></pre></div><p>In plain language, this means:</p>
 <ul>
-<li>for drawing randomness from an on-chain ticket:
-<ul>
-<li><code>TicketDrawingDST = 1</code></li>
+<li>Choose the smallest ticket in the Tipset if it contains multiple blocks.</li>
+<li>When sampling a ticket from an epoch with no blocks, draw the min ticket from the prior epoch with blocks</li>
 </ul>
-</li>
-<li>for generating a new random ticket:
-<ul>
-<li><code>TicketProductionDST = 2</code></li>
-</ul>
-</li>
-<li>for generating randomness for running ElectionPoSt:
-<ul>
-<li><code>ElectionPoStChallengeSeedDST = 3</code></li>
-</ul>
-</li>
-<li>for generating randomness for running SurprisePoSt:
-<ul>
-<li><code>SurprisePoStChallengeSeedDST = 4</code></li>
-</ul>
-</li>
-<li>for selection of which miners to surprise:
-<ul>
-<li><code>SurprisePoStSelectMinersDST = 5</code></li>
-</ul>
-</li>
-<li>for selection of which sectors to sample:
-<ul>
-<li><code>SurprisePoStSampleSectors = 6</code></li>
-</ul>
-</li>
-</ul>
+<p>This ticket is then combined with a Domain Separation Tag, the round number sought and appropriate entropy to form randomness for various uses in the protocol.</p>
+<p>See the <code>RandomnessSeedAtEpoch</code> method below:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p style="color: #D74848"><b><i>Something's not right. The <code>../struct/chain/chain.go</code> file was not found.</i></b></p>
+
+</p>
 <h2 id="forming-randomness-seeds">Forming Randomness Seeds</h2>
-<p>Different uses of randomness require randomness seeds predicated on a variety of inputs. For instance, we have:</p>
+<p>The drawn ticket digest is combined with a few elements to make up randomness for use as part of the protocol.</p>
 <ul>
-<li><code>TicketDrawing</code> &ndash; uses ticket and epoch number</li>
-<li><code>TicketProduction</code> &ndash; uses ticket and miner actor addr</li>
-<li><code>PoStChallengeSeed</code> &ndash; uses ticket and miner actor addr</li>
-<li><code>SurprisePoStSelectMiners</code> &ndash; uses ticket and epoch number
-&hellip;</li>
+<li>a DST (domain separation tag)
+<ul>
+<li>Different uses of randomness are distinguished by this type of personalization which ensures that randomness used for different purposes will not conflict with randomness used elsewhere in the protocol</li>
 </ul>
-<p>In all cases, a ticket is used as the base of randomness (see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a>). In order to make randomness seed creation uniform, the protocol derives all such seeds in the same way, as follows (also see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a>):</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text"> For a given ticket&#39;s randomness ticket_randomness:
+</li>
+<li>the epoch number, ensuring
+<ul>
+<li>liveness for leader election &ndash; in the case of null rounds, the new epoch number will output new randomness for LE</li>
+<li>distinct values for randomness sought before genesis &ndash; where the genesis ticket will be returned</li>
+<li>For instance, if in epoch <code>curr</code>, a miner wants randomness from <code>lookback</code> epochs back where <code>curr - lookback &lt;= genesis</code>, the ticket randomness drawn would be based on <code>genesisTicket.digest</code> where the <code>genesisTicket</code> is the randomness included in the genesis block. Using the epoch as part of randomness composition ensures that randomness drawn at various epochs prior to genesis has different values.</li>
+</ul>
+</li>
+<li>other entropy,
+<ul>
+<li>ensuring that randomness is modified as needed by other context-dependent entropy (e.g. a miner address if we want the randomness to be different for each miner).</li>
+</ul>
+</li>
+</ul>
+<p>While all elements are not needed for every use of entropy (e.g. the inclusion of the round number is not necessary prior to genesis or outside of leader election, other entropy is only used sometimes, etc), we draw randomness as follows for the sake of uniformity/simplicity in the overall protocol.</p>
+<p>In all cases, a ticket is used as the base of randomness (see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a>). In order to make randomness seed creation uniform, the protocol derives all such seeds in the same way, using blake2b as a hash function to generate a 256-bit output as follows (also see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a>):</p>
+<p>In round <code>n</code>, for a given randomness lookback <code>l</code>, and serialized entropy <code>s</code>:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">GetRandomness(dst, l, s):
+    ticketDigest = RandomnessSeedAtEpoch(n-l)
 
-buffer = Bytes{}
-buffer.append(IntToBigEndianBytes(AppropriateDST))
-buffer.append(-1) // a flag to be used in cases where FIL might need longer randomness outputs. Currently unused
-buffer.append(ticket_randomness)
-buffer.append(other needed serialized inputs)
+    buffer = Bytes{}
+    buffer.append(IntToBigEndianBytes(dst))
+    buffer.append(randSeed)
+    buffer.append(n-l) // the sought epoch
+    buffer.append(s)
 
-randomness = SHA256(buffer)
+    return H(buffer)
 </code></pre></div><p>
 
 
@@ -4850,31 +4906,36 @@ randomness = SHA256(buffer)
 <span class="p">)</span>
 
 <span class="c1">// Returns the tipset at or immediately prior to `epoch`.
+</span><span class="c1">// For negative epochs, it should return a tipset composed of the genesis block.
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset</span> <span class="p">{</span>
     <span class="nx">current</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">HeadTipset</span><span class="p">()</span>
-    <span class="k">for</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Epoch</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">epoch</span> <span class="p">{</span>
-        <span class="nx">current</span> <span class="p">=</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Parents</span><span class="p">()</span>
+    <span class="nx">genesisEpoch</span> <span class="o">:=</span> <span class="nx">abi</span><span class="p">.</span><span class="nf">ChainEpoch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">for</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Epoch</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">epoch</span> <span class="o">&amp;&amp;</span> <span class="nx">epoch</span> <span class="o">&gt;=</span> <span class="nx">genesisEpoch</span> <span class="p">{</span>
+        <span class="c1">// for epoch &lt;= genesisEpoch, this should return a single-block tipset that includes the genesis block
+</span><span class="c1"></span>        <span class="nx">current</span> <span class="p">=</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Parents</span><span class="p">()</span>
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="nx">current</span>
 <span class="p">}</span>
 
 <span class="c1">// Draws randomness from the tipset at or immediately prior to `epoch`.
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span> <span class="p">{</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">RandomnessSeedAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span> <span class="p">{</span>
+
     <span class="nx">ts</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nx">ts</span><span class="p">.</span><span class="nf">MinTicket</span><span class="p">().</span><span class="nf">DrawRandomness</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
+    <span class="c1">//    return ts.MinTicket().Digest()
+</span><span class="c1"></span>    <span class="k">return</span> <span class="nx">ts</span><span class="p">.</span><span class="nf">MinTicket</span><span class="p">().</span><span class="nf">DrawRandomness</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">GetTicketProductionRandSeed</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">SPC_LOOKBACK_TICKET</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessSeedAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">SPC_LOOKBACK_TICKET</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">GetSealRandSeed</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">SPC_LOOKBACK_SEAL</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessSeedAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">SPC_LOOKBACK_SEAL</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">GetPoStChallengeRandSeed</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">SPC_LOOKBACK_POST</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessSeedAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">SPC_LOOKBACK_POST</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4882,6 +4943,22 @@ randomness = SHA256(buffer)
 
 
 </p>
+<h2 id="entropy-to-be-used-with-randomness">Entropy to be used with randomness</h2>
+<p>As stated above, different uses of randomness may require added entropy. The CBOR-serialization of the inputs to this entropy must be used.</p>
+<p>For instance, if using entropy from an object of type foo, its CBOR-serialization would be appended to the randomness in <code>GetRandomness()</code>. If using both an object of type foo and one of type bar for entropy, you may define an object of type baz (as below) which includes all needed entropy, and include its CBOR-serialization in <code>GetRandomness()</code>.</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">type baz struct {
+    firstObject     foo
+    secondObject    bar
+}
+</code></pre></div><p>Currently, we distinguish the following entropy needs in the Filecoin protocol (this list is not exhaustive):</p>
+<ul>
+<li>TicketProduction: requires MinerIDAddress</li>
+<li>ElectionPoStChallengeSeed: requires current epoch and MinerIDAddress &ndash; epoch is already mixed in from ticket drawing so in practice is the same as just adding MinerIDAddress as entropy</li>
+<li>WindowedPoStChallengeSeed: requires MinerIDAddress</li>
+<li>SealRandomness: requires MinerIDAddress</li>
+<li>InteractiveSealChallengeSeed: requires MinerIDAddress</li>
+</ul>
+<p>The above uses of the MinerIDAddress ensures that drawn randomness is distinct for every miner drawing this (regardless of whether they share worker keys or not, eg &ndash; in the case of randomness that is then signed as part of leader election or ticket production).</p>
 
 </article>
 
@@ -4898,7 +4975,9 @@ randomness = SHA256(buffer)
   <ul>
     <li><a href="#encoding-on-chain-data-for-randomness">Encoding On-chain data for randomness</a></li>
     <li><a href="#domain-separation-tags">Domain Separation Tags</a></li>
+    <li><a href="#drawing-tickets-for-randomness-from-the-chain">Drawing tickets for randomness from the chain</a></li>
     <li><a href="#forming-randomness-seeds">Forming Randomness Seeds</a></li>
+    <li><a href="#entropy-to-be-used-with-randomness">Entropy to be used with randomness</a></li>
   </ul>
 </nav>
   </aside>

@@ -2060,6 +2060,10 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+    </li>
+
+    <li>
+    
       
 
 
@@ -2497,6 +2501,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_mining__sector__lifecycle" class="menu-item depth-4">
+    
+    
+        Sector Lifecycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4869,7 +4904,12 @@ header and messages themselves, in particular the parent tipset and state on whi
 <li><code>ElectionPoSt.Candidates</code> contains well formed <code>PoStCandidate</code>s each of which has a <code>PartialTicket</code> yielding a winning <code>ChallengeTicket</code> in Expected Consensus.</li>
 </ul>
 </li>
-<li>a <code>Timestamp</code> in seconds lying within the quantized epoch window implied by the genesis block&rsquo;s timestamp and the block&rsquo;s <code>Epoch</code>,</li>
+<li>a <code>Timestamp</code> in seconds that must be
+<ul>
+<li>not in the future at time of reception</li>
+<li>of the precise value implied implied by the genesis block&rsquo;s timestamp, the network&rsquo;s block time and the block&rsquo;s <code>Epoch</code>,</li>
+</ul>
+</li>
 <li>all SECP messages correctly signed by their sending actor&rsquo;s worker account key,</li>
 <li>a <code>BLSAggregate</code> signature that signs the array of CIDs of the BLS messages referenced by the block
 with their sending actor&rsquo;s key.</li>

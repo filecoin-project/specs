@@ -10,5 +10,15 @@
 	<atom:link href="/docs/systems/filecoin_blockchain/index.xml" rel="self" type="application/rss+xml" />
     
     
+    <item>
+      <title>Genesis - starting the Blockchain</title>
+      <link>/docs/systems/filecoin_blockchain/bootstrap/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_blockchain/bootstrap/</guid>
+      <description>Network Bootstrapping starts with production of the genesis block.
+The genesis block will contain: - An initial participant set, including committed storage from these miners (pre-sealed using special-cased randomness) - An initial randomness ticket</description>
+    </item>
+    
   </channel>
 </rss>

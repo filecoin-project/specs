@@ -2059,6 +2059,10 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+    </li>
+
+    <li>
+    
       
 
 
@@ -2496,6 +2500,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector__lifecycle" class="menu-item depth-4">
+    
+    
+        Sector Lifecycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4732,18 +4767,18 @@ https://github.com/alex-shpak/hugo-book
 | 'f' or 't' |    '0'   | leb128-varint |
                   base10[...............]
 </code></pre><h3 id="protocol-1-libsecpk1-elliptic-curve-public-keys">Protocol 1: libsecpk1 Elliptic Curve Public Keys</h3>
-<p><strong>Protocol 1</strong> addresses represent secp256k1 public encryption keys. The payload field contains the <a href="https://blake2.net/">Blake2b 160</a> hash of the public key.</p>
+<p><strong>Protocol 1</strong> addresses represent secp256k1 public encryption keys. The payload field contains the <a href="https://blake2.net/">Blake2b 160</a> hash of the <strong>uncompressed</strong> public key (65 bytes).</p>
 <p><strong>Bytes</strong></p>
-<pre><code>|----------|---------------------|
-| protocol |        payload      |
-|----------|---------------------|
-|    1     | blake2b-160(PubKey) |
+<pre><code>|----------|----------------------------------|
+| protocol |               payload            |
+|----------|----------------------------------|
+|    1     | blake2b-160( PubKey [65 bytes] ) |
 </code></pre><p><strong>String</strong></p>
-<pre><code>|------------|----------|---------------------|----------|
-|  network   | protocol |      payload        | checksum |
-|------------|----------|---------------------|----------|
-| 'f' or 't' |    '1'   | blake2b-160(PubKey) |  4 bytes |
-                  base32[................................]
+<pre><code>|------------|----------|--------------------------------|----------|
+|  network   | protocol |      payload                   | checksum |
+|------------|----------|--------------------------------|----------|
+| 'f' or 't' |    '1'   | blake2b-160(PubKey [65 bytes]) |  4 bytes |
+                  base32[...........................................]
 </code></pre><h3 id="protocol-2-actor">Protocol 2: Actor</h3>
 <p><strong>Protocol 2</strong> addresses representing an Actor. The payload field contains the SHA256 hash of meaningful data produced as a result of creating the actor.</p>
 <p><strong>Bytes</strong></p>
@@ -4825,7 +4860,7 @@ https://github.com/alex-shpak/hugo-book
 <li>verify the protocol is a number of a known protocol.</li>
 <li>verify the checksum is valid</li>
 </ul>
-<p>Decode an Address from a string by removing the network prefix, validating the address is of a know protocol, decoding the payload and checksum, and validating the checksum.</p>
+<p>Decode an Address from a string by removing the network prefix, validating the address is of a known protocol, decoding the payload and checksum, and validating the checksum.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Decode</span><span class="p">(</span><span class="nx">a</span> <span class="kt">string</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span> <span class="p">&lt;</span> <span class="mi">3</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrInvalidLength</span><span class="p">)</span>

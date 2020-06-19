@@ -247,6 +247,10 @@
   </url>
   
   <url>
+    <loc>/docs/systems/filecoin_blockchain/bootstrap/</loc>
+  </url>
+  
+  <url>
     <loc>/docs/glossary/</loc>
   </url>
   
@@ -464,6 +468,10 @@
   
   <url>
     <loc>/docs/systems/filecoin_mining/sector_index/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/sector/lifecycle/</loc>
   </url>
   
   <url>

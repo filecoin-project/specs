@@ -2060,6 +2060,10 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+    </li>
+
+    <li>
+    
       
 
 
@@ -2497,6 +2501,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__sector__lifecycle" class="menu-item depth-4">
+    
+    
+        Sector Lifecycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4731,7 +4766,7 @@ seal the sector, and tell the Storage Market Actor that the deal is in a sector,
 </ol>
 <p>Execution now moves to the <code>StorageProvider</code></p>
 <ol start="4">
-<li>The <code>StorageProvider</code> inspects the deal to verify that its parameters match it own internal criteria (such as price, piece size, deal duration, etc) &ndash; and rejects the proposal if it doesn&rsquo;t (it sends a rejection to the client over the
+<li>The <code>StorageProvider</code> inspects the deal to verify that the deal&rsquo;s parameters match its own internal criteria (such as price, piece size, deal duration, etc) &ndash; and rejects the proposal if it doesn&rsquo;t (it sends a rejection to the client over the
 <code>Storage Deal Protocol</code>)</li>
 <li>The <code>StorageProvider</code> queries the <code>StorageMarketActor</code> to verify the <code>StorageClient</code> has deposited enough funds to make the deal (i.e. balance &gt; total storage price) and rejects the proposal if it hasn&rsquo;t.</li>
 <li>If all criteria are met, the <code>StorageProvider</code> responds using the <code>Storage Deal Protocol</code> indicate an intent to accept the deal.</li>
@@ -4742,10 +4777,10 @@ seal the sector, and tell the Storage Market Actor that the deal is in a sector,
 <li>The <code>StorageProvider</code> checks the voucher and verifies the CID matches a storage deal proposal it has received and verified but not put on chain already. If so, it accepts the data transfer request from the <code>StorageClient</code>.</li>
 <li>The <code>Data Transfer Module</code> now transfers for the payload data to be stored from the  <code>StorageClient</code> to the <code>StorageProvider</code> using <code>GraphSync</code>.</li>
 <li>Once complete, the <code>Data Transfer Module</code> notifies the <code>StorageProvider</code></li>
-<li>The <code>StorageProvider</code> recalculates the piece commitment (<code>CommP</code>) from the data that was transferred and verifies it matches the piece commitment in the the <code>StorageDealProposal</code></li>
+<li>The <code>StorageProvider</code> recalculates the piece commitment (<code>CommP</code>) from the data that was transferred and verifies it matches the piece commitment in the <code>StorageDealProposal</code></li>
 </ol>
 <h1 id="publishing">Publishing</h1>
-<p>Data is now transferred, both parties have agreed, and it&rsquo;s time to publish the deal. Given that the counter signature on a deal proposal is a standard message signature by the provider and the signed deal is an on-chain message, it is usually the <code>StorageProvider</code> that publishes the deal. However, if <code>StorageProvider</code> decides to send this signed on-chain message to the client before calling <code>PublishStorageDeal</code> then client can publish the deal on chain. Client&rsquo;s funds are not locked until the deal is published and a published deal that is not activated within some window will result in on-chain penalty.</p>
+<p>Data is now transferred, both parties have agreed, and it&rsquo;s time to publish the deal. Given that the counter signature on a deal proposal is a standard message signature by the provider and the signed deal is an on-chain message, it is usually the <code>StorageProvider</code> that publishes the deal. However, if <code>StorageProvider</code> decides to send this signed on-chain message to the client before calling <code>PublishStorageDeal</code> then client can publish the deal on chain. Client&rsquo;s funds are not locked until the deal is published and a published deal that is not activated within some window will result in an on-chain penalty.</p>
 <ol start="12">
 <li>First, the <code>StorageProvider</code> adds collateral for the deal as needed to the <code>StorageMarketActor</code> (using <code>AddBalance</code>)</li>
 <li>Now, the <code>StorageProvider</code> prepares and signs the on-chain <code>StorageDeal</code> message with the <code>StorageDealProposal</code> signed by the client and its own signature. It can now either send this message back to the client or call <code>PublishStorageDeals</code> on the <code>StorageMarketActor</code> to publish the deal. It is recommended for <code>StorageProvider</code> to send back the signed message before <code>PublishStorageDeals</code> is called.</li>
@@ -4754,7 +4789,7 @@ seal the sector, and tell the Storage Market Actor that the deal is in a sector,
 </ol>
 <p>Finally, the client verifies the deal.</p>
 <ol start="16">
-<li>The <code>StorageClient</code> queries the node for the CID of the message published on chain (sent by the provider). It then inspects message parameters to make sure they match the expected deal</li>
+<li>The <code>StorageClient</code> queries the node for the CID of the message published on chain (sent by the provider). It then inspects the message parameters to make sure they match the expected deal.</li>
 </ol>
 <h1 id="handoff">Handoff</h1>
 <p>Now that a deal is published, it needs to be stored, sealed, and proven in order for the provider to be paid. (see <a href="../../../../#systems__filecoin_markets__storage_market__storage_deal___index"></a> for more information about how deal payments are made) These later stages of a deal are handled by the <a href="../../../../#systems__filecoin_mining__storage_mining">Storage Miner</a>. So the final task for the Storage Market is to handoff to the Storage Mining Subsystem</p>
@@ -4762,7 +4797,7 @@ seal the sector, and tell the Storage Market Actor that the deal is in a sector,
 <li>The <code>StorageProvider</code> writes the serialized, padded piece to a shared <a href="../../../../#systems__filecoin_files__file__filestore">FileStore - Local Storage for Files</a>.</li>
 <li>The <code>StorageProvider</code> calls <code>HandleStorageDeal</code> on the <code>StorageMiner</code> with the published <code>StorageDeal</code> and filestore path.</li>
 </ol>
-<p>A note order of operations: the only requirement to publish a storage deal with the <code>StorageMarketActor</code> is that the <code>StorageDealProposal</code> is signed by the <code>StorageClient</code>, the publish message is signed by the <code>StorageProvider</code>, and both parties have deposited adequate funds/collateral in the <code>StorageMarketActor</code>. As such, it&rsquo;s not required that the steps listed above happen in exactly the order listed above. However, the above order is <em>recommended</em> because it generally minimizes the ability of either party to act maliciously.</p>
+<p>A note re order of operations: the only requirement to publish a storage deal with the <code>StorageMarketActor</code> is that the <code>StorageDealProposal</code> is signed by the <code>StorageClient</code>, the publish message is signed by the <code>StorageProvider</code>, and both parties have deposited adequate funds/collateral in the <code>StorageMarketActor</code>. As such, it&rsquo;s not required that the steps listed above happen in exactly the order listed above. However, the above order is <em>recommended</em> because it generally minimizes the ability of either party to act maliciously.</p>
 <h1 id="data-types">Data Types</h1>
 <p>The following data types unique to the Storage Market:</p>
 <p>

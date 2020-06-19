@@ -2059,6 +2059,10 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+    </li>
+
+    <li>
+    
       
 
 
@@ -2496,6 +2500,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../../#systems__filecoin_mining__sector__lifecycle" class="menu-item depth-4">
+    
+    
+        Sector Lifecycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4726,7 +4761,7 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li>
 <ol start="4">
-<li>Once the miner finishes packing a <code>Sector</code>, it generates a SectorPreCommitInfo and call PreCommitSector with a PreCommitDeposit. It must call ProveCommitSector with SectorProveCommitInfo within some bound to recover the deposit. Expired PreCommit message will result in PreCommitDeposit being burned. There are two types of sectors, Regular Sector and Committed Capacity Sector but all sectors have an explicit expiration epoch declared during PreCommit. For a Regular Sector with storage deals in it, all deals must expire before sector expiration. Miner gains power for this particular sector upon successful ProveCommit.</li>
+<li>Once the miner finishes packing a <code>Sector</code>, it generates a SectorPreCommitInfo and calls PreCommitSector with a PreCommitDeposit. It must call ProveCommitSector with SectorProveCommitInfo within some bound to recover the deposit. An expired PreCommit message will result in PreCommitDeposit being burned. There are two types of sectors, Regular Sector and Committed Capacity Sector but all sectors have an explicit expiration epoch declared during PreCommit. For a Regular Sector with storage deals in it, all deals must expire before sector expiration. Miner gains power for this particular sector upon successful ProveCommit.</li>
 </ol>
 </li>
 </ul>
@@ -4734,7 +4769,7 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li>
 <ol start="5">
-<li>Miners enter the <code>Challenged</code> status when it receives a SurprisePoSt challenge from the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before the chain checks for SurprisePoSt expiry. Miners can only get out the challenge with <code>SubmitSurprisePoStResponse</code>.</li>
+<li>Miners enter the <code>Challenged</code> status when receiving a SurprisePoSt challenge from the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before the chain checks for SurprisePoSt expiry. Miners can only get out the challenge with <code>SubmitSurprisePoStResponse</code>.</li>
 </ol>
 </li>
 <li>
@@ -4773,7 +4808,7 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li>
 <ol start="10">
-<li>Sector expiration is done via a scheduled Cron event <code>_rtCheckSectorExpiry</code>. Sector expires when its Expiration epoch is reached and sector expiration epoch must be greater than all its deal expiration epoch.</li>
+<li>Sector expiration is done via a scheduled Cron event <code>_rtCheckSectorExpiry</code>. Sector expires when its Expiration epoch is reached and sector expiration epoch must be greater than the expiration epoch of all its deals.</li>
 </ol>
 </li>
 </ul>

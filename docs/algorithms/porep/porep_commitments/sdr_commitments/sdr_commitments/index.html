@@ -2059,6 +2059,10 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+    </li>
+
+    <li>
+    
       
 
 
@@ -2496,6 +2500,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../../#systems__filecoin_mining__sector__lifecycle" class="menu-item depth-4">
+    
+    
+        Sector Lifecycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4662,47 +4697,12 @@ https://github.com/alex-shpak/hugo-book
       
 <article class="markdown">
   
-<div class="src src-lisp">
-<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp">  <span class="p">(</span><span class="nv">ql:quickload</span> <span class="ss">:orient</span><span class="p">)</span></code></pre></div>
-</div>
-<table>
-<tbody>
-<tr>
-<td>:ORIENT</td>
-</tr>
-</tbody>
-</table>
 <p>
 This section summarizes the Stacked DRG (SDR) Column Commitments algorithm described in <a href="https://www.overleaf.com/read/kcdhnxwptxbc">Tight PoS - ZigZag</a>.
 </p>
 <h2 id="headline-1">
 Graph
 </h2>
-<div class="src src-lisp">
-<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp">  <span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*layers*</span> <span class="mi">4</span><span class="p">)</span>
-  <span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*nodes*</span> <span class="mi">8</span><span class="p">)</span>
-
-  <span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*regenerate-sdr-graph*</span> <span class="no">nil</span><span class="p">)</span>
-
-  <span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*dumped-sdr-graph*</span> <span class="o">&#39;</span><span class="p">(</span><span class="ss">:NODES</span> <span class="mi">8</span> <span class="ss">:CHALLENGED-NODE</span> <span class="mi">7</span> <span class="ss">:LAYERS</span> <span class="mi">4</span> <span class="ss">:RENUMBERED-PERMUTATION</span>
-                                     <span class="p">(</span><span class="ss">:PERM-LIST</span> <span class="p">(</span><span class="mi">7</span> <span class="mi">4</span> <span class="mi">3</span> <span class="mi">6</span> <span class="mi">1</span> <span class="mi">8</span> <span class="mi">2</span> <span class="mi">5</span><span class="p">)</span> <span class="ss">:TYPE</span> <span class="nv">PERM</span><span class="p">)</span> <span class="ss">:REVERSED-PERMUTATION</span>
-                                     <span class="p">(</span><span class="ss">:PERM-LIST</span> <span class="p">(</span><span class="mi">3</span> <span class="mi">7</span> <span class="mi">8</span> <span class="mi">6</span> <span class="mi">5</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">2</span><span class="p">)</span> <span class="ss">:TYPE</span> <span class="nv">PERM</span><span class="p">)</span> <span class="ss">:TYPE</span> <span class="nv">SDR-GRAPH</span><span class="p">))</span>
-
-  <span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*sdr-graph*</span>  <span class="p">(</span><span class="k">if</span> <span class="vg">*regenerate-sdr-graph*</span>
-                                 <span class="p">(</span><span class="nv">make-sdr-graph</span> <span class="vg">*nodes*</span> <span class="vg">*layers*</span><span class="p">)</span>
-                                 <span class="p">(</span><span class="nv">load-from-plist</span> <span class="vg">*dumped-sdr-graph*</span><span class="p">)))</span>
-
-  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nv">lg</span> <span class="p">(</span><span class="nf">first</span> <span class="p">(</span><span class="nv">sdr-graph-layer-graphs</span> <span class="vg">*sdr-graph*</span><span class="p">))))</span>
-    <span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*comm-d-graph*</span> <span class="p">(</span><span class="nv">make-comm-d-layer-graph</span> <span class="p">(</span><span class="nv">layer-graph-nodes</span> <span class="nv">lg</span><span class="p">)</span> <span class="p">(</span><span class="nv">layer-graph-challenged-node</span> <span class="nv">lg</span><span class="p">)</span> <span class="ss">:parent</span> <span class="vg">*sdr-graph*</span><span class="p">))</span>
-    <span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*replica-graph*</span> <span class="p">(</span><span class="nv">make-replica-layer-graph</span> <span class="p">(</span><span class="nv">layer-graph-nodes</span> <span class="nv">lg</span><span class="p">)</span> <span class="p">(</span><span class="nv">layer-graph-challenged-node</span> <span class="nv">lg</span><span class="p">)</span> <span class="ss">:parent</span> <span class="vg">*sdr-graph*</span> <span class="ss">:layers</span> <span class="vg">*layers*</span><span class="p">)))</span>
-
-  <span class="p">(</span><span class="nv">dump</span> <span class="vg">*sdr-graph*</span><span class="p">)</span></code></pre></div>
-</div>
-<pre class="example">
-(:NODES 8 :CHALLENGED-NODE 7 :LAYERS 4 :RENUMBERED-PERMUTATION
- (:PERM-LIST (7 4 3 6 1 8 2 5) :TYPE PERM) :REVERSED-PERMUTATION
- (:PERM-LIST (3 7 8 6 5 1 4 2) :TYPE PERM) :TYPE SDR-GRAPH)
-</pre>
 <div class="src src-lisp">
 <div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">emit-legend</span> <span class="no">nil</span><span class="p">)</span></code></pre></div>
 </div>
@@ -4718,14 +4718,13 @@ single DRG parent and a single expander parent are shown. The immediate predeces
 but it is not tracked in the tables below.
 </p>
 <p>
-In order to have a compact and concrete example, we use a graph containing only src_lisp[:package fct]{<strong>nodes</strong>} {{{results(<code class="verbatim">8</code>)}}} nodes replicated in src_lisp[:package fct]{<strong>layers</strong>} {{{results(<code class="verbatim">4</code>)}}} layers.
+In order to have a compact and concrete example, we use a graph containing only <div class="src src-inline src-lisp">
+<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="vg">*layers*</span><span class="nv">}</span> <span class="nv">{{{results</span><span class="p">(</span><span class="nv">=4=</span><span class="p">)</span><span class="nv">}}</span></code></pre></div>
+</div> layers.
 </p>
 <h3 id="headline-2">
 Legend
 </h3>
-<div class="src src-dot">
-<pre><code class="language-dot" data-lang="dot">$input</code></pre>
-</div>
 <p>
 <img src="legend.png" alt="legend.png" title="legend.png" />
 </p>
@@ -4734,9 +4733,6 @@ Data Layer: $Comm_D$ Tree
 </h3>
 <div class="src src-lisp">
 <div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">emit-comm-d-layer-graph</span> <span class="vg">*comm-d-graph*</span><span class="p">)</span></code></pre></div>
-</div>
-<div class="src src-dot">
-<pre><code class="language-dot" data-lang="dot">$input</code></pre>
 </div>
 <p>
 <img src="data-layer.png" alt="data-layer.png" title="data-layer.png" />
@@ -4747,17 +4743,11 @@ Replica Column Layers: $Comm_C$ Tree
 <div class="src src-lisp">
 <div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">emit-layer-graph</span> <span class="p">(</span><span class="nf">nth</span> <span class="mi">0</span> <span class="p">(</span><span class="nv">sdr-graph-layer-graphs</span> <span class="vg">*sdr-graph*</span><span class="p">)))</span></code></pre></div>
 </div>
-<div class="src src-dot">
-<pre><code class="language-dot" data-lang="dot">$input</code></pre>
-</div>
 <p>
 <img src="layer-1.png" alt="layer-1.png" title="layer-1.png" />
 </p>
 <div class="src src-lisp">
 <div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">emit-layer-graph</span> <span class="p">(</span><span class="nf">nth</span> <span class="mi">1</span> <span class="p">(</span><span class="nv">sdr-graph-layer-graphs</span> <span class="vg">*sdr-graph*</span><span class="p">)))</span></code></pre></div>
-</div>
-<div class="src src-dot">
-<pre><code class="language-dot" data-lang="dot">$input</code></pre>
 </div>
 <p>
 <img src="layer-2.png" alt="layer-2.png" title="layer-2.png" />
@@ -4765,17 +4755,11 @@ Replica Column Layers: $Comm_C$ Tree
 <div class="src src-lisp">
 <div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">emit-layer-graph</span> <span class="p">(</span><span class="nf">nth</span> <span class="mi">2</span> <span class="p">(</span><span class="nv">sdr-graph-layer-graphs</span> <span class="vg">*sdr-graph*</span><span class="p">)))</span></code></pre></div>
 </div>
-<div class="src src-dot">
-<pre><code class="language-dot" data-lang="dot">$input</code></pre>
-</div>
 <p>
 <img src="layer-3.png" alt="layer-3.png" title="layer-3.png" />
 </p>
 <div class="src src-lisp">
 <div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">emit-layer-graph</span> <span class="p">(</span><span class="nf">nth</span> <span class="mi">3</span> <span class="p">(</span><span class="nv">sdr-graph-layer-graphs</span> <span class="vg">*sdr-graph*</span><span class="p">)))</span></code></pre></div>
-</div>
-<div class="src src-dot">
-<pre><code class="language-dot" data-lang="dot">$input</code></pre>
 </div>
 <p>
 <img src="layer-4.png" alt="layer-4.png" title="layer-4.png" />
@@ -4785,9 +4769,6 @@ Final Layer: $Comm_{R_{LAST}}$ Tree
 </h3>
 <div class="src src-lisp">
 <div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">emit-replica-layer-graph</span> <span class="vg">*replica-graph*</span><span class="p">)</span></code></pre></div>
-</div>
-<div class="src src-dot">
-<pre><code class="language-dot" data-lang="dot">$input</code></pre>
 </div>
 <p>
 <img src="replica-layer.png" alt="replica-layer.png" title="replica-layer.png" />
@@ -4817,7 +4798,9 @@ Definitions and Notation
 We will perform $L$ layers of SDR key generation over $N$ labeled nodes.
 </p>
 <p>
-In the running example, $L$ is src_lisp[:package fct]{<strong>layers</strong>} {{{results(<code class="verbatim">4</code>)}}} and $N$ is src_lisp[:package fct]{<strong>nodes</strong>} {{{results(<code class="verbatim">8</code>)}}}.
+In the running example, $L$ is <div class="src src-inline src-lisp">
+<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="vg">*nodes*</span><span class="nv">}</span> <span class="nv">{{{results</span><span class="p">(</span><span class="nv">=8=</span><span class="p">)</span><span class="nv">}}</span></code></pre></div>
+</div>.
 </p>
 <p>
 Merkle roots (commitments) are generated with the vector-commitment function $VC(…)$.
@@ -4836,9 +4819,6 @@ created. We will designate such proofs $l_i \rightarrow Comm$.
 We use the notation $e{_i}^{(l)}$, correlated in the table below with the $(l, i)$ notation used in the graphs above,
 where $l$ indexes layers, and $i$ indexes labels or columns.
 </p>
-<div class="src src-lisp">
-<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">notation-row</span> <span class="vg">*sdr-graph*</span> <span class="mi">1</span><span class="p">)</span></code></pre></div>
-</div>
 <table>
 <tbody>
 <tr>
@@ -4865,9 +4845,6 @@ where $l$ indexes layers, and $i$ indexes labels or columns.
 </tr>
 </tbody>
 </table>
-<div class="src src-lisp">
-<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">notation-row</span> <span class="vg">*sdr-graph*</span> <span class="mi">2</span><span class="p">)</span></code></pre></div>
-</div>
 <table>
 <tbody>
 <tr>
@@ -4897,9 +4874,6 @@ where $l$ indexes layers, and $i$ indexes labels or columns.
 <p>
 …
 </p>
-<div class="src src-lisp">
-<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">notation-row</span> <span class="vg">*sdr-graph*</span> <span class="mi">4</span><span class="p">)</span></code></pre></div>
-</div>
 <table>
 <tbody>
 <tr>
@@ -4929,9 +4903,6 @@ where $l$ indexes layers, and $i$ indexes labels or columns.
 <h3 id="headline-9">
 Initial Data Layer
 </h3>
-<div class="src src-lisp">
-<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">initial-layer</span> <span class="vg">*comm-d-graph*</span><span class="p">)</span></code></pre></div>
-</div>
 <table>
 <tbody>
 <tr>
@@ -4980,9 +4951,6 @@ SDR Replica Columns
 <h4 id="headline-13">
 Columns
 </h4>
-<div class="src src-lisp">
-<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">columns</span> <span class="vg">*sdr-graph*</span><span class="p">)</span></code></pre></div>
-</div>
 <table>
 <tbody>
 <tr>
@@ -5086,9 +5054,6 @@ Reveal $Comm_{R_{LAST}}$ and prove that $H(Comm_C || Comm_{R_{LAST}}) = Comm_R$.
 <h3 id="headline-18">
 Final Replica Layer
 </h3>
-<div class="src src-lisp">
-<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">final-layer</span> <span class="vg">*sdr-graph*</span><span class="p">)</span></code></pre></div>
-</div>
 <table>
 <tbody>
 <tr>

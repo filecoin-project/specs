@@ -16,6 +16,9 @@ type GasAmount struct {
 }
 
 type UnsignedMessage struct {
+    // Version of this message (0 until we have to have a breaking change)
+    Version     int64
+
     // Address of the receiving actor.
     To          addr.Address
     // Address of the sending actor.

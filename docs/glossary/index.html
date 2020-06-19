@@ -2060,6 +2060,10 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+    </li>
+
+    <li>
+    
       
 
 
@@ -2497,6 +2501,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../#systems__filecoin_mining__sector__lifecycle" class="menu-item depth-4">
+    
+    
+        Sector Lifecycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4686,13 +4721,13 @@ https://github.com/alex-shpak/hugo-book
 <h2 id="challenge-ticket">Challenge Ticket</h2>
 <p>Derived from a <code>Partial Ticket</code> as part of ElectionPoSt and used to run leader election.</p>
 <h2 id="cid">Cid</h2>
-<p>CID is short for Content Identifier, a self describing content address used throughout the ipfs ecosystem. For more detailed information, see <a href="https://github.com/ipld/cid">the github documentation for it</a>.</p>
+<p>CID is short for Content Identifier, a self describing content address used throughout the IPFS ecosystem. For more detailed information, see <a href="https://github.com/ipld/cid">the github documentation for it</a>.</p>
 <h2 id="client">Client</h2>
 <p>A client is any user with an account who wishes to store data with a miner. A client&rsquo;s account is used to pay for the storage, and helps to prove the clients ability to pay.</p>
 <h2 id="collateral">Collateral</h2>
 <p>Collateral is Filecoin tokens pledged by an actor as a commitment to a promise. If the promise is respected, the collateral is returned. If the promise is broken, the collateral is not returned in full. For instance:</p>
 <ul>
-<li>In becoming a Filecoin storage miner: the miner will put up collateral alongside their SEAL to</li>
+<li>In becoming a Filecoin storage miner: the miner will put up collateral alongside their SEAL.</li>
 <li>In a Filecoin deal: both the miner and client put up collateral to ensure their respect of deal terms.</li>
 </ul>
 <h2 id="commitment">Commitment</h2>
@@ -4783,6 +4818,20 @@ https://github.com/alex-shpak/hugo-book
 <h2 id="sector">Sector</h2>
 <p>A sector is a contiguous array of bytes that a miner puts together, seals, and performs Proofs of Spacetime on.</p>
 <h2 id="slashing">Slashing</h2>
+<p>Filecoin implements two kinds of slashing: <strong>Storage Fault Slashing</strong> and <strong>Consensus Fault Slashing</strong>. Below are definitions of both types.</p>
+<h3 id="storage-fault-slashing">Storage fault slashing</h3>
+<p>Storage Fault Slashing is a term that is used to encompass a broader set of penalties, including (but not limited to) Fault Fees, Sector Penalties, and Termination Fees. These penalties are to be paid by miners if they fail to provide sector reliability or decide to voluntarily exit the network.</p>
+<ul>
+<li><strong>Fault Fee (FF):</strong> A penalty that a miner incurs for each day a miner&rsquo;s sector is offline.</li>
+<li><strong>Sector Penalty (SP):</strong>  A penalty that a miner incurs for a faulted sector that was not declared faulted before a WindowPoSt check occurs.
+<ul>
+<li>The sector will pay FF after incurring an SP when the fault is detected.</li>
+</ul>
+</li>
+<li><strong>Termination Fee (TP):</strong> A penalty that a miner incurs when a sector is voluntarily or involuntarily terminated and is removed from the network.</li>
+</ul>
+<h3 id="consensus-fault-slashing">Consensus fault slashing</h3>
+<p>Consensus Fault Slashing is the penalty that a miner incurs for committing consensus faults. This penalty is applied to miners that have acted maliciously against the network&rsquo;s consensus functionality.</p>
 <h2 id="smart-contracts">Smart contracts</h2>
 <h2 id="storage">Storage</h2>
 <p>Storage widely refers to a place in which to store data in a given system.</p>
@@ -4797,7 +4846,7 @@ https://github.com/alex-shpak/hugo-book
 <h2 id="ticket">Ticket</h2>
 <p>A <code>ticket</code> is used as a source of randomness in EC leader election. Every block depends on one or more <code>ChallengeTicket</code> derived from a <code>PartialTicket</code> using input from a <code>RandomnessTicket</code> (naming PR welcome). One such new <code>RandomnessTicket</code> or <code>Ticket</code> is produced with every new block and included in its header</p>
 <h2 id="ticket-chain">Ticket Chain</h2>
-<p>Each chain in Filecoin can be associated to a given <code>ticket chain</code>. The <code>ticket chain</code> is assembled by taking the tickets (usually one) contained by the block with the smallest final ticket in each of the chain&rsquo;s <code>TipSet</code>s.</p>
+<p>Each chain in Filecoin can be associated with a given <code>ticket chain</code>. The <code>ticket chain</code> is assembled by taking the tickets (usually one) contained by the block with the smallest final ticket in each of the chain&rsquo;s <code>TipSet</code>s.</p>
 <p>Ticket comparison is done by interpreting the tickets&rsquo; Bytes as unsigned integers (little endian representation).</p>
 <h2 id="tipset">TipSet</h2>
 <p>A <code>TipSet</code> is a set of blocks that have the same parent set and same number of <code>tickets</code>, which implies they will have been mined at the same <code>height</code>. A <code>TipSet</code> can contain multiple blocks if more than one miner successfully mines a block at the same <code>height</code> as another miner.</p>
@@ -4805,7 +4854,7 @@ https://github.com/alex-shpak/hugo-book
 <p>Something that is verifiable can be checked for correctness by a third party.</p>
 <h2 id="vdf">VDF</h2>
 <p>A verifiable function that guarantees a time delay given some hardware assumptions and a small set of requirements. These requirements are efficient proof verification, random output, and strong sequentiality. Verifiable delay functions are formally defined by [[BBBF]](<a href="https://eprint.iacr.org/2018/601)">https://eprint.iacr.org/2018/601)</a>.</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">{proof, value} &lt;—- VDF(public parameters, seed)
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">{proof, value} &lt;-- VDF(public parameters, seed)
 </code></pre></div><h2 id="vm">VM</h2>
 <p>Virtual Machine. The Filecoin VM refers to the system by which changes are applied to the Filecoin system&rsquo;s state. The VM takes messages as input, and outputs state.</p>
 <h2 id="voucher">Voucher</h2>
@@ -4882,7 +4931,12 @@ https://github.com/alex-shpak/hugo-book
     <li><a href="#round">Round</a></li>
     <li><a href="#sealunseal">SEAL/UNSEAL</a></li>
     <li><a href="#sector">Sector</a></li>
-    <li><a href="#slashing">Slashing</a></li>
+    <li><a href="#slashing">Slashing</a>
+      <ul>
+        <li><a href="#storage-fault-slashing">Storage fault slashing</a></li>
+        <li><a href="#consensus-fault-slashing">Consensus fault slashing</a></li>
+      </ul>
+    </li>
     <li><a href="#smart-contracts">Smart contracts</a></li>
     <li><a href="#storage">Storage</a></li>
     <li><a href="#state">State</a></li>

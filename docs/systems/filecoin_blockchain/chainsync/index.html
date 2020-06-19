@@ -2060,6 +2060,10 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+    </li>
+
+    <li>
+    
       
 
 
@@ -2497,6 +2501,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__sector__lifecycle" class="menu-item depth-4">
+    
+    
+        Sector Lifecycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4665,7 +4700,7 @@ https://github.com/alex-shpak/hugo-book
 <h1 id="what-is-blockchain-synchronization">What is blockchain synchronization?</h1>
 <p>Blockchain synchronization (&ldquo;sync&rdquo;) is a key part of a blockchain system.
 It handles retrieval and propagation of blocks and transactions (messages), and
-thus in charge of distributed state replication.
+thus is in charge of distributed state replication.
 <strong>This process is security critical &ndash; problems here can be catastrophic to the
 operation of a blockchain.</strong></p>
 <h1 id="what-is-chainsync">What is ChainSync?</h1>
@@ -4748,7 +4783,7 @@ Filecoin Nodes must run <code>libp2p.Graphsync</code>.</li>
 <ul>
 <li><strong>(required)</strong> <code>libp2p.BootstrapList</code> a protocol that uses a persistent and user-configurable list of semi-trusted
 bootstrap peers. The default list includes a set of peers semi-trusted by the Filecoin Community.</li>
-<li><strong>(optional)</strong> <code>libp2p.KademliaDHT</code> a dht protocol that enables random queries across the entire network</li>
+<li><strong>(optional)</strong> <code>libp2p.KademliaDHT</code> a DHT protocol that enables random queries across the entire network</li>
 <li><strong>(required)</strong> <code>libp2p.Gossipsub</code> a pub/sub protocol that includes &ldquo;prune peer exchange&rdquo; by default, disseminating peer info as part of operation</li>
 <li><strong>(optional)</strong> <code>libp2p.PersistentPeerstore</code> a connectivity component that keeps persistent information about peers
 observed in the network throughout the lifetime of the node. This is useful because we resume and continually
@@ -5030,7 +5065,7 @@ efficient syncing than comparable blockchain synchronization protocols, as synci
 <li>No new blocks are reported to consumers/users of <code>ChainSync</code> yet.</li>
 <li>The chain state provided is the available <code>Blocks</code> and <code>StateTree</code> for all available epochs,
 specially the <code>FinalityTipset</code>.</li>
-<li>finality must not move forward here because there are serious attack vectors where a node can be forced to end up on the wrong fork if finality advances before validation is complete up to the block production fringe.</li>
+<li>Finality must not move forward here because there are serious attack vectors where a node can be forced to end up on the wrong fork if finality advances before validation is complete up to the block production fringe.</li>
 </ul>
 </li>
 <li>Validation must advance, all the way to the block production fringe:
@@ -5063,7 +5098,7 @@ This means all blocks <em>before</em> the best heads.</li>
 <li>once gaps between <code>ChainSync.FinalityTipset ... ChainSync.TargetHeads</code> are closed: move to <code>CHAIN_FOLLOW</code></li>
 <li>(Perhaps moving to <code>CHAIN_FOLLOW</code> when 1-2 blocks back in validation may be ok.
 <ul>
-<li>we dont know we have the right head until we validate it, so if other heads of similar height are right/better, we wont know till then.)</li>
+<li>we dont know we have the right head until we validate it, so if other heads of similar height are right/better, we won&rsquo;t know until then.)</li>
 </ul>
 </li>
 </ul>
@@ -5082,7 +5117,7 @@ This means all blocks <em>before</em> the best heads.</li>
 <ul>
 <li><code>BlockGap</code> is the number of remaining blocks to validate between the Validated blocks and <code>BestTargetHead</code>.
 <ul>
-<li>(ie how many epochs do we need to validate to have validated <code>BestTargetHead</code>. does not include null blocks)</li>
+<li>(ie how many epochs do we need to validate to have validated <code>BestTargetHead</code>, does not include null blocks)</li>
 </ul>
 </li>
 <li><code>EpochGap</code> is the number of epochs between the latest validated block, and <code>BestTargetHead</code> (includes null blocks).</li>
@@ -5121,12 +5156,12 @@ candidate <code>Blocks</code> and <code>StateTrees</code> for unfinalized epochs
 <ul>
 <li><code>TargetHeads</code> is changing, as <code>ChainSync</code> must be aware of the best heads at any time. reorgs happen, and our first set of peers could&rsquo;ve been bad, we keep discovering others.
 <ul>
-<li>Hello protocol is good, but it&rsquo;s polling. unless node is constantly polllng, wont see all the heads.</li>
+<li>Hello protocol is good, but it&rsquo;s polling. Unless node is constantly polllng, won&rsquo;t see all the heads.</li>
 <li><code>BlockPubsub</code> gives us the realtime view into what&rsquo;s actually going on.</li>
-<li>weight can also be close between 2+ possible chains (long-forked), and <code>ChainSync</code> must select the right one (which, we may not be able to distinguish until validating all the way)</li>
+<li>Weight can also be close between 2+ possible chains (long-forked), and <code>ChainSync</code> must select the right one (which, we may not be able to distinguish until validating all the way)</li>
 </ul>
 </li>
-<li>fetching + validation are strictly faster per round on average than blocks produced/block time (if they&rsquo;re not, will always fall behind), so we definitely catch up eventually (and even quickly). the last couple rounds can be close (&ldquo;almost got it, almost got it, there&rdquo;).</li>
+<li>fetching + validation are strictly faster per round on average than blocks produced/block time (if they&rsquo;re not, will always fall behind), so we definitely catch up eventually (and even quickly). The last couple rounds can be close (&ldquo;almost got it, almost got it, there&rdquo;).</li>
 </ul>
 <h2 id="general-notes-on-fetching-blocks">General notes on fetching Blocks</h2>
 <ul>
@@ -5175,7 +5210,7 @@ be checked and used to make syncing decisions without fetching the <code>Message
 </ul>
 <p>Notes:</p>
 <ul>
-<li>in <code>CHAIN_CATCHUP</code>, if a node is receiving/fetching hundreds/thousands of <code>BlockHeaders</code>, validating signatures can be very expensive, and can be deferred in favor of other validation. (ie lots of BlockHeaders coming in through network pipe, dont want to bound on sig verification, other checks can help dump blocks on the floor faster (BV0, BV2)</li>
+<li>in <code>CHAIN_CATCHUP</code>, if a node is receiving/fetching hundreds/thousands of <code>BlockHeaders</code>, validating signatures can be very expensive, and can be deferred in favor of other validation. (ie lots of BlockHeaders coming in through network pipe, don&rsquo;t want to bound on sig verification, other checks can help dump blocks on the floor faster (BV0, BV2)</li>
 <li>in <code>CHAIN_FOLLOW</code>, we&rsquo;re not receiving thousands, we&rsquo;re receiving maybe a dozen or 2 dozen packets in a few seconds. We receive cid w/ Sig and addr first (ideally fits in 1 packet), and can afford to (a) check if we already have the cid (if so done, cheap), or (b) if not, check if sig is correct before fetching header (expensive computation, but checking 1 sig is way faster than checking a ton). In practice likely that which one to do is dependent on miner tradeoffs. we&rsquo;ll recommend something but let miners decide, because one strat or the other may be much more effective depending on their hardware, on their bandwidth limitations, or their propensity to getting DOSed</li>
 </ul>
 <h2 id="progressive-block-propagation-or-blocksend">Progressive Block Propagation (or BlockSend)</h2>
@@ -5196,13 +5231,13 @@ be checked and used to make syncing decisions without fetching the <code>Message
 <ul>
 <li><strong>IMPORTANT NOTES</strong>:
 <ul>
-<li>these can be effectively pipelined. The <code>receiver</code> is in control of what to pull, and when. It is up them to decide when to trade-off RTTs for Bandwidth.</li>
+<li>These can be effectively pipelined. The <code>receiver</code> is in control of what to pull, and when. It is up them to decide when to trade-off RTTs for Bandwidth.</li>
 <li>If the <code>sender</code> is propagating the block at all to <code>receiver</code>, it is in their interest to provide the full content to <code>receiver</code> when asked. Otherwise the block may not get included at all.</li>
 <li>Lots of security assumptions here &ndash; this needs to be hyper verified, in both spec and code.</li>
 <li><code>sender</code> is a filecoin node running <code>ChainSync</code>, propagating a block via Gossipsub
 (as the originator, as another peer in the network, or just a Gossipsub router).</li>
 <li><code>receiver</code> is the local filecoin node running <code>ChainSync</code>, trying to get the blocks.</li>
-<li>for <code>receiver</code> to <code>Pull</code> things from <code>sender</code>, <code>receiver</code>must conntect to <code>sender</code>. Usually <code>sender</code> is sending to <code>receiver</code> because of the Gossipsub propagation rules. <code>receiver</code> could choose to <code>Pull</code> from any other node they are connected to, but it is most likely <code>sender</code> will have the needed information. They usually may be more well-connected in the network.</li>
+<li>For <code>receiver</code> to <code>Pull</code> things from <code>sender</code>, <code>receiver</code>must conntect to <code>sender</code>. Usually <code>sender</code> is sending to <code>receiver</code> because of the Gossipsub propagation rules. <code>receiver</code> could choose to <code>Pull</code> from any other node they are connected to, but it is most likely <code>sender</code> will have the needed information. They usually will be more well-connected in the network.</li>
 </ul>
 </li>
 <li><strong>Step 1. (sender) <code>Push BlockHeader</code></strong>:
@@ -5217,7 +5252,7 @@ be checked and used to make syncing decisions without fetching the <code>Message
 <ul>
 <li>This has many fields that can be validated before pulling the messages. (See <strong>Progressive Block Validation</strong>).</li>
 <li><strong>BV0</strong>, <strong>BV1</strong>, <strong>BV2</strong>, and <strong>BV3</strong> validation takes place before propagating <code>bh</code> to other nodes.</li>
-<li><code>receiver</code> MAY receive many advertisements for each winning block in an epoch in quick succession. this is because (a) many want propagation as fast as possible, (b) many want to make those network advertisements as light as reasonable, (c) we want to enable <code>receiver</code> to choose who to ask it from (usually the first party to advertise it, and that&rsquo;s what spec will recommend), and (d) want to be able to fall back to asking others if that fails (fail = dont get it in 1s or so)</li>
+<li><code>receiver</code> MAY receive many advertisements for each winning block in an epoch in quick succession. This is because (a) many want propagation as fast as possible, (b) many want to make those network advertisements as light as reasonable, (c) we want to enable <code>receiver</code> to choose who to ask it from (usually the first party to advertise it, and that&rsquo;s what spec will recommend), and (d) want to be able to fall back to asking others if that fails (fail = dont get it in 1s or so)</li>
 </ul>
 </li>
 </ul>
@@ -5237,9 +5272,9 @@ be checked and used to make syncing decisions without fetching the <code>Message
 </li>
 <li><strong>Step 3. (receiver) <code>Pull Messages</code></strong>:
 <ul>
-<li>if <code>receiver</code> <strong>DOES NOT</strong> already have the all messages for <code>b.BlockCID</code>, then:
+<li>If <code>receiver</code> <strong>DOES NOT</strong> already have the all messages for <code>b.BlockCID</code>, then:
 <ul>
-<li>if <code>receiver</code> has <em>some</em> of the messages:
+<li>If <code>receiver</code> has <em>some</em> of the messages:
 <ul>
 <li><code>receiver</code> requests missing <code>Messages</code> from <code>sender</code>:
 <ul>
@@ -5253,7 +5288,7 @@ be checked and used to make syncing decisions without fetching the <code>Message
 </li>
 </ul>
 </li>
-<li>if <code>receiver</code> does not have any of the messages (default safe but expensive thing to do):
+<li>If <code>receiver</code> does not have any of the messages (default safe but expensive thing to do):
 <ul>
 <li><code>receiver</code> requests all <code>Messages</code> from <code>sender</code>:
 <ul>
@@ -5269,7 +5304,7 @@ be checked and used to make syncing decisions without fetching the <code>Message
 </li>
 <li><strong>Step 4. (receiver) <code>Validate Block</code></strong>:
 <ul>
-<li>the only remaining thing to do is to complete Block Validation.</li>
+<li>The only remaining thing to do is to complete Block Validation.</li>
 </ul>
 </li>
 </ul>
@@ -5304,17 +5339,17 @@ be checked and used to make syncing decisions without fetching the <code>Message
 <ul>
 <li>A checkpoint is the CID of a block (not a tipset list of CIDs, or StateTree)</li>
 <li>The reason a block is OK is that it uniquely identifies a tipset.</li>
-<li>using tipsets directly would make Checkpoints harder to communicate. we want to make checkpoints a single hash, as short as we can have it. They will be shared in tweets, URLs, emails, printed into newspapers, etc. Compactness, ease of copy-paste, etc matters.</li>
-<li>we&rsquo;ll make human readable lists of checkpoints, and making &ldquo;lists of lists&rdquo; is more annoying.</li>
+<li>using tipsets directly would make Checkpoints harder to communicate. We want to make checkpoints a single hash, as short as we can have it. They will be shared in tweets, URLs, emails, printed into newspapers, etc. Compactness, ease of copy-paste, etc matters.</li>
+<li>We&rsquo;ll make human readable lists of checkpoints, and making &ldquo;lists of lists&rdquo; is more annoying.</li>
 <li>When we have <code>EC.E_PARENTS &gt; 5</code> or <code>= 10</code>, tipsets will get annoyingly large.</li>
-<li>the big quirk/weirdness with blocks it that it also must be in the chain. (if you relaxed that constraint you could end up in a weird case where a checkpoint isnt in the chain and that&rsquo;s weird/violates assumptions).</li>
+<li>The big quirk/weirdness with blocks it that it also must be in the chain. (If you relaxed that constraint you could end up in a weird case where a checkpoint isn&rsquo;t in the chain and that&rsquo;s weird/violates assumptions.)</li>
 </ul>
 <p><img src="https://user-images.githubusercontent.com/138401/67015561-8c929000-f0ab-11e9-847a-ec42f23b14da.png" alt=""></p>
 <h2 id="bootstrap-chain-stub">Bootstrap chain stub</h2>
 <ul>
-<li>the mainnet filecoin chain will need to start with a small chain stub of blocks.</li>
-<li>we must include some data in different blocks.</li>
-<li>we do need a genesis block &ndash; we derive randomness from the ticket there. Rather than special casing, it is easier/less complex to ensure a well-formed chain always, including at the beginning</li>
+<li>The mainnet filecoin chain will need to start with a small chain stub of blocks.</li>
+<li>We must include some data in different blocks.</li>
+<li>We do need a genesis block &ndash; we derive randomness from the ticket there. Rather than special casing, it is easier/less complex to ensure a well-formed chain always, including at the beginning</li>
 <li>A lot of code expects lookbacks, especially actor code. Rather than introducing a bunch of special case logic for what happens ostensibly once in network history (special case logic which adds complexity and likelihood of problems), it is easiest to assume the chain is always at least X blocks long, and the system lookback parameters are all fine and dont need to be scaled in the beginning of network&rsquo;s history.</li>
 </ul>
 <h2 id="partialgraph">PartialGraph</h2>
@@ -5322,7 +5357,7 @@ be checked and used to make syncing decisions without fetching the <code>Message
 <blockquote>
 <p>Is a graph necessarily connected, or is this just a bag of blocks, with each disconnected subgraph being reported in heads/tails?</p>
 </blockquote>
-<p>The latter.  the partial graph is a DAG fragment&ndash; including disconnected components.
+<p>The latter.  The partial graph is a DAG fragment&ndash; including disconnected components.
 here&rsquo;s a visual example, 4 example PartialGraphs, with Heads and Tails. (note they aren&rsquo;t tipsets)</p>
 <p><img src="https://user-images.githubusercontent.com/138401/67014349-90bdae00-f0a9-11e9-9f29-bdca6c673c4b.png" alt=""></p>
 </article>

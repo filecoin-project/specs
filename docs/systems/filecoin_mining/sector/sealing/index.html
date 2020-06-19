@@ -2059,6 +2059,10 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+    </li>
+
+    <li>
+    
       
 
 
@@ -2496,6 +2500,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_mining__sector__lifecycle" class="menu-item depth-4">
+    
+    
+        Sector Lifecycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4745,7 +4780,7 @@ https://github.com/alex-shpak/hugo-book
 <h2 id="drawing-randomness-for-sector-commitments">Drawing randomness for sector commitments</h2>
 <p><a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__ticket_chain">Tickets</a> are used as input to calculation of the ReplicaID in order to tie Proofs-of-Replication to a given chain, thereby preventing long-range attacks (from another miner in the future trying to reuse SEALs).</p>
 <p>The ticket has to be drawn from a finalized block in order to prevent the miner from potential losing storage (in case of a chain reorg) even though their storage is intact.</p>
-<p>Verification should ensure that the ticket was drawn no farther back than necessary by the miner. We note that tickets can uniquely be associated to a given round in the protocol (lest a hash collision be found), but that the round number is explicited by the miner in <code>commitSector</code>.</p>
+<p>Verification should ensure that the ticket was drawn no farther back than necessary by the miner. We note that tickets can uniquely be associated with a given round in the protocol (lest a hash collision be found), but that the round number is explicited by the miner in <code>commitSector</code>.</p>
 <p>We present precisely how ticket selection and verification should work. In the below, we use the following notation:</p>
 <ul>
 <li><code>F</code>&ndash; Finality (number of rounds)</li>

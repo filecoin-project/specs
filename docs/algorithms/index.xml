@@ -28,7 +28,7 @@ func (g *BlockValidationGraph_I) tryConnectBlockToFringe(block Block) { panic(&a
       
       <guid>/docs/algorithms/block_sync/</guid>
       <description>Name: Block Sync Protocol ID: /fil/sync/blk/0.0.1  The blocksync protocol is a small protocol that allows Filecoin nodes to request ranges of blocks from each other. It is a simple request/response protocol.
-The request requests a chain of a given length by the hash of its highest block. The Options allow the requester to specify whether or not blocks and messages to be included.
+The request requests a chain of a given length by the hash of its highest block. The Options allow the requester to specify whether or not blocks and messages are to be included.
 The response contains the requested chain in reverse iteration order.</description>
     </item>
     

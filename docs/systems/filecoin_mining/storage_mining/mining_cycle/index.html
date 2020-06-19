@@ -2059,6 +2059,10 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+    </li>
+
+    <li>
+    
       
 
 
@@ -2496,6 +2500,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_mining__sector__lifecycle" class="menu-item depth-4">
+    
+    
+        Sector Lifecycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4667,30 +4702,30 @@ https://github.com/alex-shpak/hugo-book
 <p>In order to mine blocks on the Filecoin blockchain a miner must be running <a href="../../../../../#systems__filecoin_blockchain__block__block_validation">Block Validation</a> at all times, keeping track of recent blocks received and the heaviest current chain (based on <a href="../../../../../#algorithms__expected_consensus___index">Expected Consensus</a>).</p>
 <p>With every new tipset, the miner can use their committed power to attempt to craft a new block.</p>
 <p>For additional details around how consensus works in Filecoin, see <a href="../../../../../#algorithms__expected_consensus___index">Expected Consensus</a>. For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner is eligible to mine a block itself, and other rules pertaining to the production of some artifacts required of valid blocks (e.g. Tickets, ElectionPoSt).</p>
-<h3 id="continuous-mining-cycle">Continuous Mining Cycle</h3>
-<p>After the chain has caught up to the current head using <a href="../../../../../#systems__filecoin_blockchain__chainsync">ChainSync - synchronizing the Blockchain</a>, the mining process is as follows:</p>
+<h3 id="mining-cycle">Mining Cycle</h3>
+<p>After the chain has caught up to the current head using <a href="../../../../../#systems__filecoin_blockchain__chainsync">ChainSync - synchronizing the Blockchain</a>. At a high-level, the mining process is as follows, (we go into more detail on epoch timing below):</p>
 <ul>
-<li>The node continuously receives and transmits messages using the <a href="../../../../../#systems__filecoin_blockchain__message_pool__message_syncer">Message Syncer</a></li>
-<li>At the same time it continuously <a href="../../../../../#algorithms__block_sync">receives blocks</a>
+<li>The node receives and transmits messages using the <a href="../../../../../#systems__filecoin_blockchain__message_pool__message_syncer">Message Syncer</a></li>
+<li>At the same time it <a href="../../../../../#algorithms__block_sync">receives blocks</a>
 <ul>
 <li>Each block has an associated timestamp and epoch (quantized time window in which it was crafted)</li>
-<li>Blocks are validated as they come in during an epoch (provided it is their epoch, see <a href="../../../../../#systems__filecoin_blockchain__struct__block___index">validation</a>)</li>
+<li>Blocks are validated as they come in <a href="../../../../../#systems__filecoin_blockchain__struct__block___index">validation</a>)</li>
 </ul>
 </li>
-<li>At the end of a given epoch, the miner should take all the valid blocks received for this epoch and assemble them into tipsets according to <a href="../../../../../#systems__filecoin_blockchain__struct__tipset___index">tipset validation rules</a></li>
+<li>After an epoch&rsquo;s &ldquo;cutoff&rdquo;, the miner should take all the valid blocks received for this epoch and assemble them into tipsets according to <a href="../../../../../#systems__filecoin_blockchain__struct__tipset___index">tipset validation rules</a></li>
 <li>The miner then attempts to mine atop the heaviest tipset (as calculated with <a href="../../../../../#algorithms__expected_consensus__chain_selection">EC&#39;s weight function</a>) using its smallest ticket to run leader election
 <ul>
 <li>The miner runs an <a href="../../../../../#algorithms__post__election_post">Election PoSt</a> on their sectors in order to generate partial tickets</li>
 <li>The miner uses these tickets in order to run <a href="../../../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a>
 <ul>
 <li>if successful, the miner generates a new <a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">randomness ticket</a> for inclusion in the block</li>
-<li>the miner then assembles a new block (see &ldquo;block creation&rdquo; below) and broadcasts it</li>
+<li>the miner then assembles a new block (see &ldquo;block creation&rdquo; below) and waits until this epoch&rsquo;s quantized timestamp to broadcast it</li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
-<p>This process is repeated until either the <a href="../../../../../#algorithms__post__election_post">Election PoSt</a> process yields a winning ticket (in EC) and a block published or a new valid <a href="../../../../../#systems__filecoin_blockchain__struct__tipset___index"></a> comes in from the network.</p>
+<p>This process is repeated until either the <a href="../../../../../#algorithms__post__election_post">Election PoSt</a> process yields a winning ticket (in EC) and the miner publishes a block or a new valid block comes in from the network.</p>
 <p>At any height <code>H</code>, there are three possible situations:</p>
 <ul>
 <li>The miner is eligible to mine a block: they produce their block and propagate it. They then resume mining at the next height <code>H+1</code>.</li>
@@ -4698,7 +4733,7 @@ https://github.com/alex-shpak/hugo-book
 <li>The miner is not eligible to mine a block and has received no blocks: prompted by their clock they run leader election again, incrementing the epoch number.</li>
 </ul>
 <p>Anytime a miner receives new valid blocks, it should evaluate what is the heaviest Tipset it knows about and mine atop it.</p>
-<h3 id="timing">Timing</h3>
+<h3 id="epoch-timing">Epoch Timing</h3>
 
 
 
@@ -4727,13 +4762,46 @@ https://github.com/alex-shpak/hugo-book
 
 </div>
 
-<p>The mining cycle relies on receiving and producing blocks concurrently.  The sequence of these events in time is given by the timing diagram above.  The upper row represents the conceptual consumption channel consisting of successive receiving periods <code>Rx</code> during which nodes validate and select blocks as chain heads.  The lower row is the conceptual production channel made up of a period of mining <code>M</code> followed by a period of transmission <code>Tx</code>.  The lengths of the periods are not to scale.</p>
-<p>Blocks are received and validated during <code>Rx</code> up to the end of the epoch.  At the beginning of the next epoch, the heaviest tipset is computed from the blocks received during <code>Rx</code>, used as the head to build on during <code>M</code>.  If mining is successful a block is transmitted during <code>Tx</code>.  The epoch boundaries are as shown.</p>
-<p>In a fully synchronized network most of period <code>Rx</code> does not see any network traffic, only the period lined up with <code>Tx</code>.  In practice we expect blocks from previous epochs to propagate during the remainder of <code>Rx</code>.  We also expect differences in operator mining time to cause additional variance.</p>
+<p>The timing diagram above describes the sequence of block creation &ldquo;mining&rdquo;, propagation and reception.</p>
 <p>This sequence of events applies only when the node is in the <code>CHAIN_FOLLOW</code> syncing mode.  Nodes in other syncing modes do not mine blocks.</p>
+<p>The upper row represents the conceptual consumption channel consisting of successive receiving periods <code>Rx</code> during which nodes validate incoming blocks.
+The lower row is the conceptual production channel made up of a period of mining <code>M</code> followed by a period of transmission <code>Tx</code> (which lasts long enough for blocks to propagate throughout the network).  The lengths of the periods are not to scale.</p>
+<p>The above diagram represents the important events within an epoch:</p>
+<ul>
+<li><strong>Epoch boundary</strong>: change of current epoch. New blocks mined are mined in new epoch, and timestamped accordingly.</li>
+<li><strong>Epoch cutoff</strong>: blocks from the prior epoch propagated on the network are no longer accepted. Miners can form a new tipset to mine on.</li>
+</ul>
+<p>In an epoch, blocks are received and validated during <code>Rx</code> up to the prior epoch&rsquo;s cutoff. At the cutoff, the miner computes the heaviest tipset from the blocks received during <code>Rx</code>, and uses it as the head to build on during the next mining period <code>M</code>.  If mining is successful, the miner sets the block&rsquo;s timestamp to the epoch boundary and waits until the boundary to release the block. While some blocks could be submitted a bit later, blocks are all transmitted during <code>Tx</code>, the transmission period.</p>
+<p>The timing validation rules are as follows:</p>
+<ul>
+<li>Blocks whose timestamps are not exactly on the epoch boundary are rejected.</li>
+<li>Blocks received with a timestamp in the future are rejected.</li>
+<li>Blocks received after the cutoff are rejected.
+<ul>
+<li>Note that those blocks are not invalid, just not considered for the miner&rsquo;s own tipset building. Tipsets received with such a block as a parent should be accepted.</li>
+</ul>
+</li>
+</ul>
+<p>In a fully synchronized network most of period <code>Rx</code> does not see any network traffic, only its beginning should. While there may be variance in operator mining time, most miners are expected to finish mining by the epoch boundary.</p>
+<p>Let&rsquo;s look at an example, both use a block-time of 30s, and a cutoff at 15s.</p>
+<ul>
+<li>T = 0: start of epoch n</li>
+<li>T in [0, 15]: miner A receives, validates and propagates incoming blocks. Valid blocks should have timestamp 0.</li>
+<li>T = 15: epoch cutoff for n-1, A assembles the heaviest tipset and starts mining atop it.</li>
+<li>T = 25: A successfully generates a block, sets its timestamp to 30, and waits until the epoch boundary (at 30) to release it.</li>
+<li>T = 30: start of epoch n + 1, A releases its block for epoch n.</li>
+<li>T in [30, 45]: A receives and validates incoming blocks, their timestamp is 30.</li>
+<li>T = 45: epoch cutoff for n, A forms tipsets and starts mining atop the heaviest.</li>
+<li>T = 60: start of epoch n + 2.</li>
+<li>T in [60, 75]: A receives and validates incoming blocks</li>
+<li>T = 67: A successfully generates a block, sets it timestamp to 60 and releases it.</li>
+<li>T = 75: epoch cutoff for n+1&hellip;</li>
+</ul>
+<p>Above, in epoch n, A mines fast, in epoch n+1 A mines slow. So long as the miner&rsquo;s block is between the epoch boundary and the cutoff, it will be accepted by other miners.</p>
+<p>In practice miners should not be releasing blocks close to the epoch cutoff. Implementations may choose to locally randomize the exact time of the cutoff in order to prevent such behavior (while this means it may accept/reject blocks others do not, in practice this will not affect the miners submitting blocks on time).</p>
 <h2 id="full-miner-lifecycle">Full Miner Lifecycle</h2>
 <h3 id="step-0-registration-and-market-participation">Step 0: Registration and Market participation</h3>
-<p>To initially become a miner, a miner first register a new miner actor on-chain. This is done through the storage power actor&rsquo;s <code>CreateStorageMiner</code> method. The call will then create a new miner actor instance and return its address.</p>
+<p>To initially become a miner, a miner first registers a new miner actor on-chain. This is done through the storage power actor&rsquo;s <code>CreateStorageMiner</code> method. The call will then create a new miner actor instance and return its address.</p>
 <p>The next step is to place one or more storage market asks on the market. This is done off-chain as part of storage market functions. A miner may create a single ask for their entire storage, or partition their storage up in some way with multiple asks (at potentially different prices).</p>
 <p>After that, they need to make deals with clients and begin filling up sectors with data. For more information on making deals, see the <a href="../../../../../#systems__filecoin_markets__storage_market___index">Storage Market</a>. The miner will need to put up storage deal collateral for the deals they have entered into.</p>
 <p>When they have a full sector, they should seal it. This is done by invoking the <a href="../../../../../#systems__filecoin_mining__storage_proving__sector_sealer">Sector Sealer</a>.</p>
@@ -4763,7 +4831,7 @@ https://github.com/alex-shpak/hugo-book
 <h3 id="future-work">Future Work</h3>
 <p>There are many ideas for improving upon the storage miner, here are ideas that may be potentially implemented in the future.</p>
 <ul>
-<li><strong>Sector Resealing</strong>: Miners should be able to &lsquo;re-seal&rsquo; sectors, to allow them to take a set of sectors with mostly expired pieces, and combine the not-yet-expired pieces into a single (or multiple) sectors.</li>
+<li><strong>Sector Resealing</strong>: Miners should be able to &rsquo;re-seal&rsquo; sectors, to allow them to take a set of sectors with mostly expired pieces, and combine the not-yet-expired pieces into a single (or multiple) sectors.</li>
 <li><strong>Sector Transfer</strong>: Miners should be able to re-delegate the responsibility of storing data to another miner. This is tricky for many reasons, and will not be implemented in the initial release of Filecoin, but could provide interesting capabilities down the road.</li>
 </ul>
 
@@ -4782,8 +4850,8 @@ https://github.com/alex-shpak/hugo-book
   <ul>
     <li><a href="#active-miner-mining-cycle">Active Miner Mining Cycle</a>
       <ul>
-        <li><a href="#continuous-mining-cycle">Continuous Mining Cycle</a></li>
-        <li><a href="#timing">Timing</a></li>
+        <li><a href="#mining-cycle">Mining Cycle</a></li>
+        <li><a href="#epoch-timing">Epoch Timing</a></li>
       </ul>
     </li>
     <li><a href="#full-miner-lifecycle">Full Miner Lifecycle</a>

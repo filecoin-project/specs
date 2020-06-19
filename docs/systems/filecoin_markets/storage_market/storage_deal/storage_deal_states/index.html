@@ -2059,6 +2059,10 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+    </li>
+
+    <li>
+    
       
 
 
@@ -2496,6 +2500,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../../#systems__filecoin_mining__sector__lifecycle" class="menu-item depth-4">
+    
+    
+        Sector Lifecycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4669,7 +4704,7 @@ https://github.com/alex-shpak/hugo-book
 <li><code>Active</code>: the deal has been proven and not yet expired.</li>
 <li><code>Deleted</code>: the deal has expired or the sector containing the deal has been terminated because of faults.</li>
 </ul>
-<p>Note that <code>Unpublished</code> and <code>Deleted</code> states not tracked on chain. To reduce on-chain footprint, an <code>OnChainDeal</code> struct is created when a deal is published and it keeps track of a <code>LastPaymentEpoch</code> which defaults to -1 when a deal is in the <code>Published</code> state. A deal transitions into the <code>Active</code> state when <code>LastPaymentEpoch</code> is positive.</p>
+<p>Note that <code>Unpublished</code> and <code>Deleted</code> states are not tracked on chain. To reduce on-chain footprint, an <code>OnChainDeal</code> struct is created when a deal is published and it keeps track of a <code>LastPaymentEpoch</code> which defaults to -1 when a deal is in the <code>Published</code> state. A deal transitions into the <code>Active</code> state when <code>LastPaymentEpoch</code> is positive.</p>
 <p>The following describes how a deal transitions between its different states.</p>
 <ul>
 <li><code>Unpublished -&gt; Published</code>: this is triggered by <code>StorageMarketActor.PublishStorageDeals</code> which validates new storage deals, locks necessary funds, generates deal IDs, and registers the storage deals in <code>StorageMarketActor</code>.</li>

@@ -2059,6 +2059,10 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+    </li>
+
+    <li>
+    
       
 
 
@@ -2496,6 +2500,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__sector__lifecycle" class="menu-item depth-4">
+    
+    
+        Sector Lifecycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4679,7 +4714,7 @@ Systems into separate programs, and even separate physical computers.</li>
 <li><strong>Security Isolation:</strong> some systems require higher operational security than others. System decoupling allows
 implementations to meet their security and functionality needs. A good example of this is separating Blockchain
 processing from Data Transfer.</li>
-<li><strong>Scalability:</strong> systems and various use cases may drive different performance requirements for different opertators.
+<li><strong>Scalability:</strong> systems, and various use cases, may drive different performance requirements for different opertators.
 System decoupling makes it easier for operators to scale their deployments along system boundaries.</li>
 </ul>
 <h1 id="filecoin-nodes-dont-need-all-the-systems">Filecoin Nodes don&rsquo;t need all the systems</h1>
@@ -4688,7 +4723,7 @@ Most systems are only needed for a subset of use cases.</p>
 <p>For example, the Blockchain System is required for synchronizing the chain, participating in secure consensus,
 storage mining, and chain validation.
 Many Filecoin Nodes do not need the chain and can perform their work by just fetching content from the latest
-StateTree, from a node they trust. Of course, such nodes</p>
+StateTree, from a node they trust.</p>
 <p>Note: Filecoin does not use the &ldquo;full node&rdquo; or &ldquo;light client&rdquo; terminology, in wide use in Bitcoin and other blockchain
 networks. In filecoin, these terms are not well defined. It is best to define nodes in terms of their capabilities,
 and therefore, in terms of the Systems they run. For example:</p>

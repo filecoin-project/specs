@@ -11,6 +11,16 @@
     
     
     <item>
+      <title>Sector Lifecycle</title>
+      <link>/docs/systems/filecoin_mining/sector/lifecycle/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_mining/sector/lifecycle/</guid>
+      <description>In Filecoin, miners contribute storage capacity to the network in units of sectors. These sectors work similar to real-life shipping containers; they are used provide a unique ID for storage / retrieval processes as well as ensuring the data&amp;rsquo;s &amp;lsquo;dimensions&amp;rsquo; conform with all other sectors in the network.
+Sector creation At creation, a sector&amp;rsquo;s space (raw-byte power or sector size) and time (lifetime or duration) are defined. Together, these are referred to as &amp;lsquo;spacetime&amp;rsquo;.</description>
+    </item>
+    
+    <item>
       <title>Sector PoSting</title>
       <link>/docs/systems/filecoin_mining/sector/posting/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>

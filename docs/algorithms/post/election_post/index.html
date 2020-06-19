@@ -2059,6 +2059,10 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+    </li>
+
+    <li>
+    
       
 
 
@@ -2496,6 +2500,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__sector__lifecycle" class="menu-item depth-4">
+    
+    
+        Sector Lifecycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4676,7 +4711,7 @@ https://github.com/alex-shpak/hugo-book
 <h2 id="electionpost">ElectionPoSt</h2>
 <p>To enable short PoSt response time, miners are required submit a PoSt when they are elected to mine a block, hence PoSt on election or ElectionPoSt. When miners win a block, they need to immediately generate a PoStProof and submit that in the block header along with the winning PartialTickets. Both the PartialTickets and PoStProof are checked at Block Validation by <code>StoragePowerConsenusSubsystem</code>. When a block is included, a special message is added that calls <code>SubmitElectionPoSt</code> which will process sector updates in the same way as successful <code>SubmitSurprisePoSt</code> do.</p>
 <h2 id="surprisepost-cleanup">SurprisePoSt Cleanup</h2>
-<p>In the absence of a posted <code>ElectionPoSt</code>, the chain randomly challenges a miner to submit a <code>SurprisePoSt</code> once per <code>ProvingPeriod</code> on expectation to ensure their storage is still accounted for. The process is largely the same as for <code>ElectionPoSt</code> but a successful <code>SurprisePoSt</code> does not entitle a miner to generate a blocks and gains them no reward. It allows them to maintain power in the power table.</p>
+<p>In the absence of a posted <code>ElectionPoSt</code>, the chain randomly challenges a miner to submit a <code>SurprisePoSt</code> once per <code>ProvingPeriod</code> on expectation to ensure their storage is still accounted for. The process is largely the same as for <code>ElectionPoSt</code> but a successful <code>SurprisePoSt</code> does not entitle a miner to generate a block and gains them no reward. It allows them to maintain power in the power table.</p>
 <p>For every miner challenged, a <code>NotifyOfPoStSurpriseChallenge</code> is issued and sent as an on-chain message to the chosen <code>StorageMinerActor</code>.
 <code>PoStSurprise</code> will frequently be used by small miners who do not win blocks, and by miners as they are onboarding power to the network (since they will not be able to win ElectionPoSts to start).</p>
 <h1 id="in-detail">In Detail</h1>
@@ -4738,7 +4773,7 @@ def checkTicketForWinners(partialTickets):
 def finalizeTicket(partialTicket):
     return H(ChallengeTicket) / 2^len(H)
 
-</code></pre></div><p>A single winning ticket and can be used to submit a block but a miner would want to check as many as possible to increase their potential rewards. The target ensures that on expectation, a miner&rsquo;s total power is expressed if they check all of their tickets, taking the <code>ElectionPoStSampleRate</code> into account.</p>
+</code></pre></div><p>A single winning ticket can be used to submit a block but a miner would want to check as many as possible to increase their potential rewards. The target ensures that on expectation, a miner&rsquo;s total power is expressed if they check all of their tickets, taking the <code>ElectionPoStSampleRate</code> into account.</p>
 <ol start="5">
 <li>
 <p><strong>(generate a <code>PoStProof</code>)</strong> for inclusion in the block header</p>

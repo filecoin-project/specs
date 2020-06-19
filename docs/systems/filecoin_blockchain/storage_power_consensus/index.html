@@ -2060,6 +2060,10 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+    </li>
+
+    <li>
+    
       
 
 
@@ -2497,6 +2501,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__sector__lifecycle" class="menu-item depth-4">
+    
+    
+        Sector Lifecycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4773,99 +4808,17 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 <li>They are drawn by the Storage Power subsystem as randomness in <a href="../../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> to determine their eligibility to mine a block</li>
 <li>They are drawn by the Storage Power subsystem in order to generate new tickets for future use.</li>
 </ul>
-<p>Each of these ticket uses may require drawing tickets at different chain epochs, according to the security requirements of the particular protocol making use of tickets. Specifically, the ticket output (which is a SHA256 output) is used for randomness.</p>
+<p>Each of these ticket uses may require drawing tickets at different chain epochs, according to the security requirements of the particular protocol making use of tickets. Specifically, the ticket Digest (which is a Blake2b output) is used for randomness.</p>
 <p>In Filecoin, every block header contains a single ticket.</p>
 <p>You can find the Ticket data structure <a href="../../../../#listings__data_structures">here</a>.</p>
-<h3 id="comparing-tickets-in-a-tipset">Comparing Tickets in a Tipset</h3>
-<p>Whenever comparing tickets is evoked in Filecoin, for instance when discussing selecting the &ldquo;min ticket&rdquo; in a Tipset, the comparison is that of the little endian representation of the ticket&rsquo;s VFOutput bytes.</p>
+<h3 id="comparing-tickets-in-a-tipset-and-using-ticket-values">Comparing Tickets in a Tipset and using ticket values</h3>
+<p>Whenever comparing tickets is evoked in Filecoin, for instance when discussing selecting the &ldquo;min ticket&rdquo; in a Tipset, the comparison is that of the ticket&rsquo;s VRFDigest&rsquo;s bytes.</p>
+<p>Likewise any use of a ticket&rsquo;s value, is that of its VRFDigest&rsquo;s bytes.</p>
 <div id="systems__filecoin_blockchain__storage_power_consensus__ticket_chain"></div>
 <h2 id="the-ticket-chain-and-drawing-randomness">The Ticket chain and drawing randomness</h2>
 <p>While each Filecoin block header contains a ticket field (see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a>), it is useful to think of a ticket chain abstraction.
 Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using tickets from epochs that did not yield leaders to produce randomness at a given epoch, tracking the canonical ticket of a subchain at a given height can be arduous to reason about in terms of blocks. To that end, it is helpful to create a ticket chain abstraction made up of only those tickets to be used for randomness generation at a given height.</p>
 <p>To read more about specifically how tickets are processed for randomness, see <a href="../../../../#algorithms__crypto__randomness">Randomness</a>.</p>
-<p>To sample a ticket for a given epoch n:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">Set referenceTipsetOffset = 0
-While true:
-    Set referenceTipsetHeight = n - referenceTipsetOffset
-    If blocks were mined at referenceTipsetHeight:
-        ReferenceTipset = TipsetAtHeight(referenceTipsetHeight)
-        Select the block in ReferenceTipset with the smallest final ticket, return its value (pastTicket).
-    If no blocks were mined at referenceTipsetHeight:
-        Increment referenceTipsetOffset
-        (Repeat)
-newRandomness = H(TicketDrawDST || index || Serialization(epoch || pastTicketOutput))
-</code></pre></div><p>In plain language, this means two things:</p>
-<ul>
-<li>Choose the smallest ticket in the Tipset if it contains multiple blocks.</li>
-<li>When sampling a ticket from an epoch with no blocks, draw the min ticket from the prior epoch with blocks and concatenate it with
-<ul>
-<li>the wanted epoch number</li>
-<li>hash this concatenation for a usable ticket value</li>
-</ul>
-</li>
-</ul>
-<p>See the <code>RandomnessAtEpoch</code> method below:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">chain</span>
-
-<span class="kn">import</span> <span class="p">(</span>
-	<span class="nx">abi</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/abi&#34;</span>
-	<span class="nx">builtin</span> <span class="s">&#34;github.com/filecoin-project/specs-actors/actors/builtin&#34;</span>
-	<span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
-<span class="p">)</span>
-
-<span class="c1">// Returns the tipset at or immediately prior to `epoch`.
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset</span> <span class="p">{</span>
-	<span class="nx">current</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">HeadTipset</span><span class="p">()</span>
-	<span class="k">for</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Epoch</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">epoch</span> <span class="p">{</span>
-		<span class="nx">current</span> <span class="p">=</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Parents</span><span class="p">()</span>
-	<span class="p">}</span>
-
-	<span class="k">return</span> <span class="nx">current</span>
-<span class="p">}</span>
-
-<span class="c1">// Draws randomness from the tipset at or immediately prior to `epoch`.
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span> <span class="p">{</span>
-	<span class="nx">ts</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
-	<span class="k">return</span> <span class="nx">ts</span><span class="p">.</span><span class="nf">MinTicket</span><span class="p">().</span><span class="nf">DrawRandomness</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">GetTicketProductionRandSeed</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">SPC_LOOKBACK_TICKET</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">GetSealRandSeed</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">SPC_LOOKBACK_SEAL</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">GetPoStChallengeRandSeed</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">abi</span><span class="p">.</span><span class="nx">RandomnessSeed</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">builtin</span><span class="p">.</span><span class="nx">SPC_LOOKBACK_POST</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div>
-
-
-
-
-</p>
-<p>The above means that ticket randomness is reseeded with every new block, but can indeed be derived by any miner for an arbitrary epoch number using a past epoch.</p>
 <div id="systems__filecoin_blockchain__storage_power_consensus__ticket_generation"></div>
 <h3 id="randomness-ticket-generation">Randomness Ticket generation</h3>
 <p>This section discusses how tickets are generated by EC for the <code>Ticket</code> field in every block header.</p>
@@ -5491,7 +5444,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
     <li><a href="#on-power">On Power</a></li>
     <li><a href="#tickets">Tickets</a>
       <ul>
-        <li><a href="#comparing-tickets-in-a-tipset">Comparing Tickets in a Tipset</a></li>
+        <li><a href="#comparing-tickets-in-a-tipset-and-using-ticket-values">Comparing Tickets in a Tipset and using ticket values</a></li>
       </ul>
     </li>
     <li><a href="#the-ticket-chain-and-drawing-randomness">The Ticket chain and drawing randomness</a>
