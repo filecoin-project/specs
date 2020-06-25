@@ -186,7 +186,7 @@ We use the VRF from {{<sref vrf>}} for ticket generation (see the `PrepareNewTic
 
 ### Ticket Validation
 
-Each Ticket should be generated from the prior one in the ticket-chain and verified accordingly as shown in `validateTicket` below.
+Each Ticket should be generated from the prior one in the VRF-chain and verified accordingly as shown in `validateTicket` below.
 
 {{< readfile file="storage_power_consensus_subsystem.id" code="true" lang="go" >}}
 {{< readfile file="storage_power_consensus_subsystem.go" code="true" lang="go" >}}

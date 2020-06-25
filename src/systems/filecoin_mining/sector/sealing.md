@@ -2,6 +2,8 @@
 title: Sector Sealing
 ---
 
+{{<label sealing>}}
+
 {{< readfile file="sealing.id" code="true" lang="go" >}}
 
 ## Drawing randomness for sector commitments

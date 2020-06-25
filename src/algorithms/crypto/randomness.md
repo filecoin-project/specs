@@ -66,6 +66,36 @@ GetRandomness(dst, l, s):
 {{< readfile file="/docs/actors/actors/crypto/randomness.go" code="true" lang="go" >}}
 {{< readfile file="/docs/systems/filecoin_blockchain/struct/chain/chain.go" code="true" lang="go" >}}
 
+## Drawing tickets from the VRF-chain for proof inclusion
+
+There are a few instances in which the protocol requires inclusion  to be drawn from the Filecoin blockchain's VRF-chain (which generates {{<sref tickets>}} with each new block), in order to tie certain proofs to a particular set of Filecoin blocks (i.e. a given chain or fork). This is notably the case for Seal Pre-commits (see {{<sref sealing>}}).
+
+A ticket is drawn from the chain for randomness as follows, for a given epoch `n`, and ticket sought at epoch `e`:
+```text
+GetRandomnessFromVRFChain(e):
+    While ticket is not set:
+        Set wantedTipsetHeight = e
+        if wantedTipsetHeight <= genesis:
+            Set ticket = genesis ticket
+        else if blocks were mined at wantedTipsetHeight:
+            ReferenceTipset = TipsetAtHeight(wantedTipsetHeight)
+            Set ticket = minTicket in ReferenceTipset
+        If no blocks were mined at wantedTipsetHeight:
+            wantedTipsetHeight--
+            (Repeat)
+    return ticket.Digest()
+```
+
+In plain language, this means:
+
+- Choose the smallest ticket in the Tipset if it contains multiple blocks.
+- When sampling a ticket from an epoch with no blocks, draw the min ticket from the prior epoch with blocks
+
+This ticket is then combined with a Domain Separation Tag, the round number sought and appropriate entropy to form randomness for various uses in the protocol.
+
+See the `GetRandomnessFromVRFChain` method below:
+{{< readfile file="../struct/chain/chain.go" code="true" lang="go" >}}
+
 ## Entropy to be used with randomness
 
 As stated above, different uses of randomness may require added entropy. The CBOR-serialization of the inputs to this entropy must be used.
