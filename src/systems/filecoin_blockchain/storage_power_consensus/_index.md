@@ -81,15 +81,25 @@ GetBeaconEntryForEpoch(epoch) BeaconEntry {
 }
 
 GetBeaconEntriesForEpoch(epoch) []BeaconEntry {
+
+    // special case genesis: the genesis block is pre-generated and so cannot include a beacon entry 
+    // (since it will not have been generated). Hence, we only start checking beacon entries at the first block after genesis.
+    // If that block includes a wrong beacon entry, we simply assume that a majority of honest miners at network birth will
+    // simply fork.
+    entries := []
+    if epoch == 0 {
+        return entries
+    }
+
     maxDrandRound := MaxBeaconRoundForEpoch(epoch)
 
-    if epoch == 0 {
-        // special case genesis: only fetch latest drand entry.
-        entries := []
+    // if checking the first post-genesis block, simply fetch the latest entry.
+    if epoch == 1 {
         rand := drand.Public(maxDrandRound)
         return append(entries, rand)
     }
 
+    // for the rest, fetch all drand entries generated between this epoch and last
     prevMaxDrandRound := MaxBeaconRoundForEpoch(epoch - 1)
     if (maxDrandRound == prevMaxDrandRound) {
         // no new beacon randomness
@@ -98,7 +108,6 @@ GetBeaconEntriesForEpoch(epoch) []BeaconEntry {
 
     entries := []
     curr := maxDrandRound
-    // fetch all drand entries generated between this epoch and last
     for curr > prevMaxDrandRound {
         rand := drand.Public(curr)
         entries = append(entries, rand)
