@@ -3,4 +3,4 @@ title: Payment Channel Actor
 ---
 {{<label payment_channel_actor>}}
 
-{{< readfile file="payment_channel_actor.id" code="true" lang="go" >}}
+{{< readfile file="/docs/actors/actors/builtin/paych/paych_state.go" code="true" lang="go" >}} {{< readfile file="/docs/actors/actors/builtin/paych/paych_actor.go" code="true" lang="go" >}}
