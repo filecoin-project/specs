@@ -113,6 +113,8 @@ GetBeaconEntriesForEpoch(epoch) []BeaconEntry {
         entries = append(entries, rand)
         curr -= 1
     }
+    // return entries in increasing order
+    reverse(entries)
     return entries
 }
 ```
