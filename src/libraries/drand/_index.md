@@ -91,7 +91,8 @@ MaxBeaconRoundForEpoch(filEpoch) {
         latestTs = ((uint64(filEpoch) * filEpochDuration) + filGenesisTime) - filEpochDuration
     }
     // determine the drand round number corresponding to this timestamp
-    dround := (latestTs - drandGenesisTime) / uint64(drandPeriod)
+    // keeping in mind that drand emits round 1 at the drandGenesisTime
+    dround := (latestTs - drandGenesisTime) / uint64(drandPeriod) + 1
     return dround
 }
 ```

@@ -67,7 +67,7 @@ In all cases, Filecoin blocks must include all drand beacon outputs generated si
 ```go
 // Note that the below function is a temporary solution and likely to be
 // updated in future. 
-GetBeaconEntryForEpoch(epoch) []BeaconEntry {
+GetBeaconEntryForEpoch(epoch) BeaconEntry {
     var rand Randomness
     for rand == nil {
         seeds := GetBeaconEntriesForEpoch(epoch)
@@ -84,9 +84,9 @@ GetBeaconEntriesForEpoch(epoch) []BeaconEntry {
     maxDrandRound := MaxBeaconRoundForEpoch(epoch)
 
     if epoch == 0 {
-        // special case genesis
+        // special case genesis: only fetch latest drand entry.
         entries := []
-        rand := drand.Public(curr)
+        rand := drand.Public(maxDrandRound)
         return append(entries, rand)
     }
 
@@ -122,12 +122,26 @@ ValidateBeaconEntries(blockHeader, priorBlockHeader) error {
     currEntries := blockHeader.BeaconEntries
     prevEntries := priorBlockHeader.BeaconEntries
 
+    maxRoundForEntry := MaxBeaconRoundForEpoch(blockHeader.Epoch)
+    // ensure entries are not repeated in blocks
+    lastBlocksLastEntry := prevEntries[len(prevEntries)-1]
+    if lastBlocksLastEntry == maxRound && len(currEntries) != 0 {
+        return errors.New("Did not expect a new entry in this round.")
+    }
+
+    // preparing to check that entries properly follow one another
     var entries []BeaconEntry
     // at currIdx == 0, must fetch last Fil block's last BeaconEntry
-    entries := append(entries, prevEntries[len(prevEntries)-1])
+    entries := append(entries, lastBlocksLastEntry)
     entries := append(entries, currEntries...)
 
     currIdx := len(entries) - 1
+    // ensure that the last entry in the header is not in the future (i.e. that this is not a Filecoin
+    // block being mined with a future known drand entry).
+    if entries[currIdx].Round != maxRoundForEntry {
+        return fmt.Errorf("expected final beacon entry in block to be at round %d, got %d", maxRound, last.Round)
+    }
+
     for currIdx >= 0 {
         // walking back the entries to ensure they follow one another
         currEntry := entries[currIdx]
