@@ -133,6 +133,12 @@ ValidateBeaconEntries(blockHeader, priorBlockHeader) error {
     currEntries := blockHeader.BeaconEntries
     prevEntries := priorBlockHeader.BeaconEntries
 
+    // special case for genesis block (it has no beacon entry and so the first verifiable value comes at height 2,
+    // as with GetBeaconEntriesForEpoch()
+    if priorBlockHeader.Epoch == 0 {
+        return nil
+    }
+
     maxRoundForEntry := MaxBeaconRoundForEpoch(blockHeader.Epoch)
     // ensure entries are not repeated in blocks
     lastBlocksLastEntry := prevEntries[len(prevEntries)-1]
