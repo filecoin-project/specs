@@ -103,7 +103,7 @@ GetBeaconEntriesForEpoch(epoch) []BeaconEntry {
     prevMaxDrandRound := MaxBeaconRoundForEpoch(epoch - 1)
     if (maxDrandRound == prevMaxDrandRound) {
         // no new beacon randomness
-        return nil
+        return entries
     }
 
     entries := []
