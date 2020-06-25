@@ -10,7 +10,7 @@ entries:
 
 Payment Channels are used in the Filecoin {{<sref retrieval_market>}} to enable efficient off-chain payments and accounting between parties for what is expected to be series of microtransactions, specifically those occurring as part of retrieval market data retrieval.
 
-Note that the following provides a high-level overview of payment channels and an accompanying interface. The lotus implementation of [vouchers](https://github.com/filecoin-project/lotus/blob/master/chain/types/voucher.go) and [payment channels](https://github.com/filecoin-project/lotus/tree/master/paych) are also good references.
+Note that the following provides a high-level overview of payment channels and an accompanying interface. The lotus implementation of [vouchers](https://github.com/filecoin-project/lotus/blob/master/chain/types/voucher.go) and [payment channels](https://github.com/filecoin-project/lotus/tree/master/paychmgr) are also good references.
 
 You can also read more about the {{<sref payment_channel_actor "Filecoin payment channel actor interface">}}.
 
