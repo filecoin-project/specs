@@ -38,3 +38,7 @@ func (chain *Chain_I) GetSealRandSeed(epoch abi.ChainEpoch) abi.RandomnessSeed {
 func (chain *Chain_I) GetPoStChallengeRandSeed(epoch abi.ChainEpoch) abi.RandomnessSeed {
 	return chain.RandomnessSeedAtEpoch(epoch - builtin.SPC_LOOKBACK_POST)
 }
+
+func (chain *Chain_I) RandomnessSeedAtEpoch(epoch abi.ChainEpoch) abi.RandomnessSeed {
+	panic("not implemented")
+}
