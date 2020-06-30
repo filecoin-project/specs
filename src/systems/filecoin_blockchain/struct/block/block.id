@@ -25,7 +25,7 @@ type BlockHeader struct {
     BeaconEntries          [BeaconEntry]
 
     Miner                  addr.Address
-	ElectionProof          &ElectionProof
+    ElectionProof          &ElectionProof
 
     // Fork Signal bitfield with bits used to advertise support for
     // proposed forks and reset if fork is executed.
@@ -62,9 +62,9 @@ type Block struct {
 
 type BeaconEntry struct {
     // Drand Round for the given randomness
-    Round   uint64
+    Round    uint64
     // Drand Signature for the given Randomness
-    Data    [byte]
+    Data     [byte]
 }
 
 // HACK: All of the below was duplicated from posting.id
