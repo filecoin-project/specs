@@ -36,6 +36,7 @@ To create a block, the eligible miner must compute a few fields:
   - Separate the messages into BLS signed messages and secpk signed messages
   - `TxMeta.BLSMessages`: The CID of the root of an AMT comprising the bare `UnsignedMessage`s
   - `TxMeta.SECPMessages`: the CID of the root of an AMT comprising the `SignedMessage`s
+- `BeaconEntries`: a list of beacon entries to derive randomness from
 - `BLSAggregate` - The aggregated signature of all messages in the block that used BLS signing.
 - `Signature` - A signature with the miner's worker account private key (must also match the ticket signature) over the block header's serialized representation (with empty signature).
 - `ForkSignaling` - A uint64 flag used as part of signaling forks. Should be set to 0 by default.
