@@ -99,7 +99,7 @@ MaxBeaconRoundForEpoch(filEpoch) {
 
 ### Edge cases and dealing with a drand outage
 
-It is important to note that any drand beacon outage will effectively halt Filecoin block production. Given that new randomness is not produced, Filecoin miners cannot generate new blocks.
+It is important to note that any drand beacon outage will effectively halt Filecoin block production. Given that new randomness is not produced, Filecoin miners cannot generate new blocks. Specifically, any call to the drand network for a new randomness entry during an outage should be blocking in Filecoin.
 
 After a beacon downtime, drand nodes will work to quickly catch up to the current round, as defined by wall clock time. In this way, the above time-to-round mapping in drand (see above) used by Filecoin remains an invariant after this catch-up following downtime.
 
