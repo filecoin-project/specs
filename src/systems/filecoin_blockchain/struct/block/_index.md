@@ -70,6 +70,7 @@ A semantically valid block must have:
     - not farther in the past than the soft finality as defined by SPC ${{<sref finality>}},
         - this rule only applied when receiving new gossip blocks (i.e. from the current chain head), not when syncing to the chain for the first time (e.g.)
 - `Miner` that is active in the storage power table in the parent tipset state,  
+- A valid list of `BeaconEntry` if not empty
 - a `Ticket` derived from the minimum ticket from the parent tipset's block headers, 
     - `Ticket.VRFResult` validly signed by the `Miner` actor's worker account public key,
 - `ElectionPoStOutput` yielding winning partial tickets that were generated validly, 
