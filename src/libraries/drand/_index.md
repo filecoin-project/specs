@@ -36,27 +36,45 @@ Specifically, the message signed is the concatenation of the round number treate
 
 ### Polling the drand network
 
-Filecoin nodes can make use of [drand endpoints](https://github.com/drand/drand/blob/master/client/client.go) in working with a drand beacon.
+Filecoin nodes fetches the drand entry from the distribution network of the
+selected drand network. TODO: define network's name/entrypoints when drand
+network's live.
 
-To start, a node must store a set of drand peer servers it will connect to to poll for values and the shared public key it expects them to have. In the case, of Filecoin, the node will be polling "relay nodes" rather than drand nodes directly. Simply put, the drand network will not be directly accessible by consumers, rather, highly-available relays will be set up to serve drand values over HTTP or gossipsub. See below section for more on the drand network configuration.
+drand distributes randomness via multiple distribution channels (HTTP servers,
+S3 buckets, gossiping...).  Simply put, the drand nodes themselves will not be
+directly accessible by consumers, rather, highly-available relays will be set up
+to serve drand values over these distribution channels. See below section for
+more on the drand network configuration.
 
-On initialization, the Filecoin node can call the `Group` endpoint in order to obtain the beacon's [group file](https://github.com/drand/drand/blob/57a6056a24d4ebaa27a44852636807364624b9fc/key/group.go). The client (node) should then have the hash of the group file (or the full file itself if it already has it) cached to verify the group it receives corresponds to the expected one. It should also cache:
+On initialization, Filecoin initializes a [drand
+client](https://github.com/drand/drand/tree/master/client) with an chain `info`
+that contains the following information:
+- `Period`                           -- the period of time between each drand randomness generation
+- `GenesisTime`                      -- at which the first round in the drand randomness chain is created
+- `PublicKey`                        -- the public key to verify randomness
+- `GenesisSeed`                      -- the seed that has been used for creating the first randomness
 
-- cache the beacon's `Period`                           -- the period of time between each drand randomness generation
-- cache the beacon's `GenesisTime`                      -- at which the first round in the drand randomness chain is created
-- verify that the beacon's `PublicKey` is appropriate   -- ie that the filecoin node connected to the right drand beacon
+Note that it is possible to simply store the hash of this chain info and to
+retrieve the contents from the drand distribution network as well on the `/info`
+endpoint.
 
 Thereafter, the Filecoin client can call drand's endpoints:
 
-- `LastPublic` to get the latest randomness value produced by the beacon
-- `Public` to get the randoomness value produced by the beacon at a given index
+- `/public/latest` to get the latest randomness value produced by the beacon
+- `/public/<round>` to get the randoomness value produced by the beacon at a given round
 
 {{<label drand>}}
 ### Using drand in Filecoin
 
-Drand is used as a randomness beacon for leader election in Filecoin. You can read more about that in {{<sref leader_election>}}. See drand used in the Filecoin lotus implementation [here](https://github.com/filecoin-project/lotus/blob/master/chain/beacon/drand/drand.go).
+Drand is used as a randomness beacon for leader election in Filecoin. You can
+read more about that in {{<sref leader_election>}}. See drand used in the
+Filecoin lotus implementation
+[here](https://github.com/filecoin-project/lotus/blob/master/chain/beacon/drand/drand.go).
 
-While drand returns multiple values with every call to the beacon (see above), Filecoin blocks need only store a subset of these in order to track a full drand chain. This information can then be mixed with on-chain data for use in Filecoin. See {{<sref randomness>}} for more.
+While drand returns multiple values with every call to the beacon (see above),
+Filecoin blocks need only store a subset of these in order to track a full drand
+chain. This information can then be mixed with on-chain data for use in
+Filecoin. See {{<sref randomness>}} for more.
 
 #### Verifying an incoming drand value
 
