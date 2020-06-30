@@ -44,6 +44,10 @@ type BlockHeader struct {
     //	ComputeUnsignedFingerprint() []
 }
 
+type ElectionProof struct {
+    VRFProof [byte]
+}
+
 type TxMeta struct {
     BLSMessages   &[&msg.UnsignedMessage]  // array-mapped trie
     SECPMessages  &[&msg.SignedMessage]  // array-mapped trie
