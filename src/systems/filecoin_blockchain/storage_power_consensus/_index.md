@@ -79,14 +79,18 @@ included in a Filecoin block, as follows:
 For operations such as Porep creation, proofs validations, anything that
 requires randomness from the VM point of view, the following method shows how to
 extract the drand entrie from the chain itself.
+Note that the round may span multiple filecoin epochs if drand is slower; the
+lowest epoch number block will contain the requested beacon entry. As well, if
+there has been null rounds where the beacon should have been inserted, we need
+to iterate on the chain to find where the entry is inserted.
 ```go
 func GetRandomnessSeed(e ChainEpoch) {
-  // get the minimum epoch number in this period associated with the requested epoch
-  // so if election period is 2, e = 11, then this function returns 10
-  minEpoch := getFirstEpochFromPeriod(e)
-  // get the drand round associated with this election period
-  // defined in the drand section
-  drandRound := MaxBeaconRoundForEpoch(minEpoch)
+  // get the drand round associated with the timestamp of this epoch.
+  drandRound := MaxBeaconRoundForEpoch(e)
+  // get the minimum drand timestamp associated with the drand round
+  drandTs := drandGenesisTime + (drandPeriod-1) * drandRound 
+  // get the minimum filecoin epoch associated with this timestamp
+  minEpoch := (drandTs - filGenesisTime) / filEpochDuration 
   for {
      // if this is not a null block, then it must have the entry we want
     if !chain.IsNullBlock(minEpoch) 
@@ -101,9 +105,7 @@ func GetRandomnessSeed(e ChainEpoch) {
   }
 }
 
-// NOTE: this functions requires the global `ElectionPeriod`
-func getFirstEpochFromPeriod(e ChainEpoch) {
-
+func getMostRecentPeriod(e ChainEpoch) {
   return floor(e / ElectionPeriod)
 }
 ```
