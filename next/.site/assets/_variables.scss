@@ -1,0 +1,9 @@
+/* You can override SASS variables here. */
+
+@import "plugins/dark";
+
+.mermaid {
+    width: auto;
+    height: 400px;
+    overflow: hidden;
+}
