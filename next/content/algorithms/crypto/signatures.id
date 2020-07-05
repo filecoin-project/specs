@@ -1,0 +1,19 @@
+type Message Bytes
+type SecretKey Bytes
+type PublicKey Bytes
+type SignatureBytes Bytes
+
+type SigKeyPair struct {
+    PublicKey
+    SecretKey
+}
+
+type Signature struct {
+    Type  SigType         @(internal)
+    Sig   SignatureBytes  @(internal)
+}
+
+type SigType enum {
+    ECDSASigType
+    BLSSigType
+}
