@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "cd .site && hugo server --bind=0.0.0.0"
+    "serve": "cd .site && hugo server --bind=0.0.0.0",
+    "build": "cd .site && hugo --gc --minify"
   },
   "author": "",
   "license": "MIT",

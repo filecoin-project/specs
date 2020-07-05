@@ -1,0 +1,40 @@
+{{ range .Site.Pages }}
+    {{ if in (slice "Algorithms" "Introduction") .Title}}
+        {{ $.Scratch.Set "counter" 0 }}
+        {{ $.Scratch.Set "counter-audit" 0 }}
+        {{ range .Data.Pages }}
+            {{ $.Scratch.Set "counter" (add ($.Scratch.Get "counter") 1) }}
+            {{ if .Params.audit }}
+                {{ $.Scratch.Set "counter-audit" (add ($.Scratch.Get "counter-audit") .Params.audit) }}
+            {{ end }}
+        {{ end }}
+
+        <details>
+            <summary>{{ .Title}} <i title="{{ humanize .Params.dashboardState }}" class="gg-{{ .Params.dashboardState }}"></i> <code>Last update: {{ dateFormat "02 Jan 06 15:04 UTC" .Lastmod.UTC }}</code></summary>
+          
+            <div class="markdown-inner">
+                <b>Audit:</b> <i class="gg-{{ if eq ($.Scratch.Get "counter-audit") ($.Scratch.Get "counter")}}stable{{else}}wip{{end}}"></i> {{$.Scratch.Get "counter-audit"}} / {{$.Scratch.Get "counter"}}<br> 
+                <b>Interface:</b> <i class="gg-incomplete"></i><br>
+                <b>Tests:</b> <i class="gg-wip"></i><br>
+            </div>
+            {{ range .Data.Pages }}
+                <div class="book-expand">
+                    <label>
+                    <div class="book-expand-head flex justify-between">
+                        <span>{{ .Title }} <i title="{{ humanize .Params.dashboardState }}" class="gg-{{ if .Params.dashboardState }}{{.Params.dashboardState}}{{else}}wip{{end}}"></i> <code>Last update: {{ dateFormat "02 Jan 06 15:04 UTC" .Lastmod.UTC }}</code></span>
+                        <span> ↕ </span>
+                    </div>
+                    <input type="checkbox" class="hidden" />
+                    <div class="book-expand-content markdown-inner">
+                        <b>Audit:</b> <i class="gg-{{ if eq .Params.audit 1}}permanent{{else}}wip{{end}}"></i><br> 
+                        <b>Interface:</b> <i class="gg-{{ if .Params.dashboardInterface }}{{ .Params.dashboardInterface }}{{else}}wip{{end}}"></i><br>
+                        <b>Tests:</b> <i class="gg-wip"></i><br>
+                    </div>
+                    </label>
+                </div>
+            {{ end }}
+        </details><br>
+
+        
+    {{ end }}
+{{ end }}

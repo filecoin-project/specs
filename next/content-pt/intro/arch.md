@@ -5,7 +5,7 @@ dashboardState: permanent
 dashboardInterface: incorrect
 ---
 
-# Architecture Diagrams
+# Architecture Diagramsss
 ---
 
 ## Filecoin Systems
@@ -37,7 +37,7 @@ Status Legend:
 
 ## Protocol Flow Diagram
 
-{{< svg src="/intro/full-deals-on-chain.mmd.svg" title="Deals on Chain" />}}
+{{< mermaid src="/intro/full-deals-on-chain.mmd" title="Deals on Chain"/>}}
 
 ## Parameter Calculation Dependency Graph
 

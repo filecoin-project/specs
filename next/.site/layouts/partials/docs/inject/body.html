@@ -1,0 +1,12 @@
+<script
+  type="module"
+  src="https://cdn.jsdelivr.net/npm/@pwabuilder/pwaupdate"
+></script>
+
+<pwa-update swpath="{{ "/sw.js" | relURL }}"></pwa-update>
+
+{{- if default true .Site.Params.BookSearch }}
+{{- $searchJSFile := printf "%s.search.js" .Language.Lang }}
+{{- $searchJS := resources.Get "search.js" | resources.ExecuteAsTemplate $searchJSFile . | resources.Minify | resources.Fingerprint }}
+<script defer src="{{ $searchJS.RelPermalink }}" integrity="{{ $searchJS.Data.Integrity }}"></script>
+{{ end -}}

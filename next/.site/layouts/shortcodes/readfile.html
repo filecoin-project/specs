@@ -1,0 +1,23 @@
+{{/* Get the filepath */}}
+{{/* Relative to content folder */}}
+{{ if eq (.Get "file" | printf "%.1s") "/" }}
+    {{ $.Scratch.Set "filepath" ( strings.TrimLeft "/" ( .Get "file" ))}}
+{{ else }}
+{{/* Relative to page */}}
+    {{ $.Scratch.Set "filepath" $.Page.Dir }}
+    {{ $.Scratch.Add "filepath" ( .Get "file" ) }}
+{{ end }}
+
+
+{{ if fileExists ($.Scratch.Get "filepath") }}
+    {{ if (.Get "lang") }}
+        {{ highlight ($.Scratch.Get "filepath" | readFile | safeHTML ) (.Get "lang") "" }}
+    {{ else }}
+        {{ $.Scratch.Get "filepath" | readFile | safeHTML }}
+    {{ end }}
+{{ else }}
+    <blockquote class="book-hint danger">
+      {{- printf "File '%s' not found from Page '%s'" ($.Scratch.Get "filepath") .Page.File }}
+    </blockquote>
+    {{- warnf "File '%s' not found from Page '%s'" ($.Scratch.Get "filepath") .Page.File }}
+{{ end }}

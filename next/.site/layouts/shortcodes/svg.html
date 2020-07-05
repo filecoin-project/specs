@@ -1,19 +1,7 @@
-{{ if not (.Page.Scratch.Get "mermaid") }}
-    <!-- Include mermaid only first time -->
-    <script src="{{ "mermaid.min.js" | relURL }}"></script>
-    <script>
-    mermaid.initialize({
-      startOnLoad:false,
-      theme: 'dark',
-      flowchart: { useMaxWidth:true }
-    });
-    </script>
-    {{ .Page.Scratch.Set "mermaid" true }}
-{{ end }}
-
 {{ if not (.Page.Scratch.Get "panzoom") }}
     <!-- Include mermaid only first time -->
-    <script src='https://unpkg.com/panzoom@9.2.4/dist/panzoom.min.js'></script>
+    <!-- <script src='https://unpkg.com/panzoom@9.2.4/dist/panzoom.min.js'></script> -->
+    <script src="https://unpkg.com/d3-zoomable@1.1.3/dist/d3-zoomable.min.js"></script>
     {{ .Page.Scratch.Set "panzoom" true }}
 {{ end }}
 
@@ -25,21 +13,20 @@
       {{ $.Scratch.Add "filepath" ( .Get "src" ) }}
     {{ end }}
     {{ if fileExists ($.Scratch.Get "filepath") }}
-      {{ $content := $.Scratch.Get "filepath" | readFile }}
+      {{ $content := $.Scratch.Get "filepath" | readFile | safeHTML }}
       {{ $uuid := delimit (shuffle (seq 1 9)) "" }}
       {{ $id := (print "mermaid-" $uuid) }}
       <div>
         <div id="{{ $id }}" class="mermaid{{ with .Get "class" }} {{ . }}{{ end }}">
+          {{- $content -}}
         </div>
         <div class="mermaid-caption">{{( .Get "title" )}}</div>
       </div>
       <script>
         var element = document.querySelector("#{{ $id }}");
-        var insertSvg = function(svgCode){
-            element.innerHTML = svgCode;
-            panzoom(element.querySelector('svg'), {  bounds: true })
-        };
-        mermaid.render('temp-{{ $uuid }}', {{- $content -}}, insertSvg)
+        var myZoom = zoomable();
+        myZoom(element)
+            .htmlEl(element.querySelector('svg'));
       </script>
     {{ else }}
       <blockquote class="book-hint danger">
@@ -51,14 +38,6 @@
   {{ $uuid := delimit (shuffle (seq 1 9)) "" }}
   {{ $id := (print "mermaid-" $uuid) }}
   <div id="{{ $id }}" class="mermaid{{ with .Get "class" }} {{ . }}{{ end }}">
+    {{- .Inner -}}
   </div>
-  <script>
-    console.log("{{ $uuid }}")
-    var element = document.querySelector("#{{ $id }}");
-    var insertSvg = function(svgCode){
-        element.innerHTML = svgCode;
-        panzoom(element.querySelector('svg'), {  bounds: true })
-    };
-    mermaid.render('temp-{{ $uuid }}', {{- .Inner -}}, insertSvg)
-  </script>
 {{ end }}

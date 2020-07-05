@@ -2,10 +2,10 @@
 title: Algorithms
 bookCollapseSection: true
 dashboardState: incorrect
-type: docs
 ---
 
-# Ubi loqui
+# Algos
+---
 
 ## Mentem genus facietque salire tempus bracchia
 
