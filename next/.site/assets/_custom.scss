@@ -55,12 +55,13 @@ summary {
     outline: none;
 }
 
-.markdown code {
+.markdown code, code {
     margin: 0 1px;
     display: inline-block;
     padding: 3px 6px;
     font-size: 85%;
     border-radius: 3px;
+    line-height: 16px;
     box-decoration-break: clone;
 }
 .book-brand img {
