@@ -1,0 +1,22 @@
+// type Encoding struct {
+//   Encode(buf Bytes) Bytes
+//   Decode(buf Bytes) Bytes
+// }
+//
+// // ErasureCoding is an Encoding that enables creating data that
+// // is highly tolerant to failures and erasures.
+// //
+// // ErasureCoding MAY make use of the internal structure of a piece,
+// // to encode individual leaf nodes together, or separately. It also
+// // must store the full serialized piece data, not just the leaf nodes.
+// type ErasureCoding struct {
+//   Encode(p Piece) Piece
+//   Decode(p Piece) Piece
+// }
+//
+// type ErasureCodingAlgorithm union {
+//   ReedSolomon  ErasureCoding
+//   OnlineCodes  ErasureCoding
+// //  RaptorCodes  ErasureCoding
+// //  TornadoCodes ErasureCoding
+// }

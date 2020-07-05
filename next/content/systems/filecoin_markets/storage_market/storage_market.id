@@ -1,0 +1,74 @@
+import abi "github.com/filecoin-project/specs-actors/actors/abi"
+import addr "github.com/filecoin-project/go-address"
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+import message "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+import cid "github.com/ipfs/go-cid"
+import smarkact "github.com/filecoin-project/specs-actors/actors/builtin/storage_market"
+
+type StorageDealStatus uint64
+
+// StorageAsk is the current price and parameters a miner is currently offering for storage
+// (analogous to an Ask in a financial market)
+type StorageAsk struct {
+    Price             abi.TokenAmount  // attoFIL per GiB per epoch
+    Collateral        abi.TokenAmount  // attoFIL per GiB per epoch
+
+    MinPieceSize      abi.PieceSize
+    // address of miner actor for deals
+    Miner             addr.Address
+    // the epoch at the time this ask was published
+    PublicationEpoch  abi.ChainEpoch
+    MaxDuration       abi.ChainEpoch
+    MinDuration       abi.ChainEpoch
+    // a miner should update sequence number each time it publishes an ask
+    // so that anyone with two asks from the same miner can determine which is
+    // more current
+    SeqNo             UVarint
+}
+
+// A SignedStorageAsk is an ask signed by the miner that is making the offer
+type SignedStorageAsk struct {
+    Ask        StorageAsk
+    Signature  filcrypto.Signature
+}
+
+// AskProtocolRequest is a request sent over the storage ask protocol to a miner 
+// to determine their current ask
+type AskProtocolRequest struct {
+    Miner addr.Address
+}
+
+// AskProtocolResponse is the response a miner sends over the ask protocol with
+// a signed version of their most recent storage ask
+type AskProtocolResponse struct {
+    Ask SignedStorageAsk
+}
+
+// DealProtocolRequest is a request sent by a storage client to 
+// a storage provider on the storage deal protocol to propose a storage deal
+type DealProtocolRequest struct {
+    // The deal being proposed
+    DealProposal  smarkact.StorageDealProposal
+    // root of the data to be transferred
+    Payload       cid.Cid
+}
+
+// DealProtocolResponse is a response sent by a storage miner 
+// on the storage deal protocol with the current status of a storage
+// deal proposal
+type DealProtocolResponse struct {
+    // The CID of the storage deal proposal 
+    Proposal        &smarkact.StorageDealProposal
+
+    // Status of deal
+    State           StorageDealStatus
+    // any additional information about status
+    Message         string
+
+    // CID of message published on chain, once it is published
+    PublishMessage  &message.SignedMessage
+}
+
+type StorageDataTransferVoucher struct {
+    Proposal &smarkact.StorageDealProposal
+}

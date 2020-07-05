@@ -1,0 +1,15 @@
+import repo "github.com/filecoin-project/specs/systems/filecoin_nodes/repository"
+import filestore "github.com/filecoin-project/specs/systems/filecoin_files/file"
+import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
+import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+import message_pool "github.com/filecoin-project/specs/systems/filecoin_blockchain/message_pool"
+
+type FilecoinNode struct {
+    Node         libp2p.Node
+
+    Repository   repo.Repository
+    FileStore    filestore.FileStore
+    Clock        clock.UTCClock
+
+    MessagePool  message_pool.MessagePoolSubsystem
+}

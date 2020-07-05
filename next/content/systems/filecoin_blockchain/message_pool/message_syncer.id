@@ -1,0 +1,23 @@
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+
+// MessageSyncer is a component of the MessagePool. It is in charge of receiving and
+// propagating Messages. It a libp2p pubsub protocol.
+type MessageSyncer struct {
+    /*
+	// NewMessageReceived is a channel that returns message objects as they arrive.
+	// It is a notification for MessageSyncer's client (usually the MessagePool).
+	NewMessageReceived() MessageChan
+
+	pubsub pubsub.PubSub
+	sub    *pubsub.Subscription
+	mchan  MessageChan
+	*/
+
+    // SubmitMessage is called to send out a set of messages to the rest of the
+    // network. This is used for messages added locally. All messages enter the network
+    // through one of these calls, in at least one filecoin node. They
+    // are then propagated to other filecoin nodes via the MessagePool
+    // subsystem. Other nodes receive and propagate Messages via their
+    // own MessagePools   
+    SubmitMessage(m msg.SignedMessage) error
+}

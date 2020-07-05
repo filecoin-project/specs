@@ -1,0 +1,52 @@
+import abi "github.com/filecoin-project/specs-actors/actors/abi"
+import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
+import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
+
+type SectorID struct {}
+
+type Booting struct {}
+type CatchingUp struct {}
+type Synchronized struct {}
+type SyncState union {
+    Booting
+    CatchingUp
+    Synchronized
+}
+
+type BlockchainSubsystem struct @(mutable) {
+    Clock              &clock.UTCClock
+
+    LatestEpoch()      abi.ChainEpoch
+    BestChain()        chain.Chain
+    CandidateChains()  [chain.Chain]
+
+    // // Receiving blocks and tipset
+    // should be channels or notifications
+    NewTipsets()
+    NewBestTipset()
+
+    // validateBlockSemantics(Block)
+    SyncState()        SyncState
+
+    // call by StorageClient in StorageDealMake
+    VerifySectorExists(sectorId SectorID) bool
+
+    // call by BlockSyncer in BlockReception
+    HandleBlock(block block.Block) bool
+
+    // call by BlockchainSubsystem itself in BlockProduction
+    ValidateBlock(block block.Block) bool
+
+    // call by BlockchainSubsystem itself in BlockProduction
+    // apply messages in the parent tipset to the StateTree
+    // and verify state root
+    TryGenerateStateTree(block block.Block) st.StateTree
+
+    // call by clock in BlockReception upon new epoch
+    AssembleTipsets() [chain.Tipset]
+
+    // call by BlockchainSubsystem itself in BlockReception upon new epoch
+    ChooseTipset(tipsets [chain.Tipset]) chain.Tipset
+}

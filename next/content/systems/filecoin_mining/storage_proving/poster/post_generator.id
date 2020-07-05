@@ -1,0 +1,39 @@
+import abi "github.com/filecoin-project/specs-actors/actors/abi"
+import sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
+
+type UInt64 UInt
+
+// TODO: move this to somewhere the blockchain can import
+// candidates:
+// - filproofs - may have to learn about Sectors (and if we move Seal stuff, Deals)
+// - "blockchain/builtins" or something like that - a component in the blockchain that handles storage verification
+type PoStSubmission struct {
+    PostProof   abi.PoStProof
+    ChainEpoch  abi.ChainEpoch
+}
+
+type PoStGenerator struct {
+    SectorStore sector_index.SectorStore
+
+    GeneratePoStCandidates(
+        challengeSeed   abi.PoStRandomness
+        candidateCount  UInt
+        sectors         [abi.SectorID]
+    ) [abi.PoStCandidate]
+
+    CreateElectionPoStProof(
+        randomness  abi.PoStRandomness
+        witness     [abi.PoStCandidate]
+    ) [abi.PoStProof]
+
+    CreateSurprisePoStProof(
+        randomness  abi.PoStRandomness
+        witness     [abi.PoStCandidate]
+    ) [abi.PoStProof]
+
+    // FIXME: Verification shouldn't require a PoStGenerator. Move this.
+    VerifyPoStProof(
+        Proof          abi.PoStProof
+        challengeSeed  abi.PoStRandomness
+    ) bool
+}

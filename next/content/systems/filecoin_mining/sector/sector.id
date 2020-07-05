@@ -1,0 +1,60 @@
+import abi "github.com/filecoin-project/specs-actors/actors/abi"
+import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+import smarkact "github.com/filecoin-project/specs-actors/actors/builtin/storage_market"
+
+type Bytes32 Bytes
+type Commitment Bytes32  // TODO
+
+type FaultSet CompactSectorSet
+type StorageFaultType int
+
+// SectorInDetail describes all the bits of information associated
+// with each sector.
+// - ID   - a unique identifier assigned once the Sector is registered on chain
+// - Size - the size of the sector. there are a set of allowable sizes
+//
+// NOTE: do not use this struct. It is for illustrative purposes only.
+type SectorInDetail struct {
+    ID    abi.SectorID
+    Size  abi.SectorSize
+
+    Unsealed struct {
+        CID     abi.UnsealedSectorCID
+        Deals   [smarkact.StorageDeal]
+        Pieces  [piece.Piece]
+        // Pieces Tree<Piece> // some tree for proofs
+        Bytes
+    }
+
+    Sealed struct {
+        CID              abi.SealedSectorCID
+        Bytes
+        RegisteredProof  abi.RegisteredProof
+    }
+}
+
+// SectorInfo is an object that gathers all the information miners know about their
+// sectors. This is meant to be used for a local index.
+type SectorInfo struct {
+    ID                  abi.SectorID
+    UnsealedInfo        UnsealedSectorInfo
+    SealedInfo          SealedSectorInfo
+    SealVerifyInfo      abi.SealVerifyInfo
+    PersistentProofAux
+}
+
+// UnsealedSectorInfo is an object that tracks the relevant data to keep in a sector
+type UnsealedSectorInfo struct {
+    UnsealedCID  abi.UnsealedSectorCID  // CommD
+    Size         abi.SectorSize
+    PieceCount   UVarint  // number of pieces in this sector (can get it from len(Pieces) too)
+    Pieces       [piece.PieceInfo]  // won't get externalized easy, -- it's big
+    // Deals       [smarkact.StorageDeal]
+}
+
+// SealedSectorInfo keeps around information about a sector that has been sealed.
+type SealedSectorInfo struct {
+    SealedCID  abi.SealedSectorCID
+    Size       abi.SectorSize
+    SealArgs   SealArguments
+}

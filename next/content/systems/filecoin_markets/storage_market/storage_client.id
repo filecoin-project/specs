@@ -1,0 +1,65 @@
+import abi "github.com/filecoin-project/specs-actors/actors/abi"
+import addr "github.com/filecoin-project/go-address"
+import message "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+import peer "github.com/libp2p/go-libp2p-core/peer"
+import cid "github.com/ipfs/go-cid"
+import smarkact "github.com/filecoin-project/specs-actors/actors/builtin/storage_market"
+
+// ClientLocalDealInfo is the information about a storage deal that storage client tracks
+// locally about a deal until it goes on chain. It is persisted to local storage
+// and updated as the deal goes through stages leading up to its being published
+type ClientLocalDealInfo struct {
+    ProposalCid     &smarkact.StorageDealProposal
+    Proposal        smarkact.StorageDealProposal
+    State           StorageDealStatus
+    MinerPeerID     peer.ID
+    MinerWorker     addr.Address
+    DealID          abi.DealID
+    PublishMessage  &message.SignedMessage
+}
+
+// ProposeStorageDealResult is the returned data when ProposeStorageDeal
+// is called on a storage client
+type ProposeStorageDealResult struct {
+    ProposalCid &smarkact.StorageDealProposal
+}
+
+type StorageProviderInfo struct {
+    Address     addr.Address  // actor address
+    SectorSize  uint64
+    PeerID      peer.ID
+}
+
+type StorageClient struct {
+    // ListProviders queries chain state and returns active storage providers
+    ListProviders()   (providers [StorageProviderInfo], error)
+
+    // ListDeals lists on-chain deals associated with this client
+    ListDeals()       (deals [smarkact.StorageDeal], error)
+
+    // ListInProgressDeals lists deals that are in progress or rejected
+    // - but not on chain
+    ListLocalDeals()  (deals [ClientLocalDealInfo], error)
+
+    // GetInProgressDeal looks up an in progress deal by proposal CID
+    GetInProgressDeal(proposalCID &smarkact.StorageDealProposal) (ClientLocalDealInfo, error)
+
+    // GetAsk returns the current ask for a storage provider
+    GetAsk(info StorageProviderInfo) (StorageAsk, error)
+
+    // ProposeStorageDeal initiates deal negotiation with a Storage Provider
+    ProposeStorageDeal(
+        info                StorageProviderInfo
+        payloadCid          cid.Cid
+        proposalExpiration  abi.ChainEpoch
+        duration            abi.ChainEpoch
+        price               abi.TokenAmount
+        collateral          abi.TokenAmount
+    ) (ProposeStorageDealResult, error)
+
+    // GetPaymentEscrow returns the current funds available for deal payment
+    GetPaymentEscrow() (abi.TokenAmount, error)
+
+    // AddPaymentEscrow adds storage collateral
+    AddPaymentEscrow(amount abi.TokenAmount) error
+}
