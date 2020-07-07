@@ -117,17 +117,36 @@ MaxBeaconRoundForEpoch(filEpoch) {
 
 ### Edge cases and dealing with a drand outage
 
-It is important to note that any drand beacon outage will effectively halt Filecoin block production. Given that new randomness is not produced, Filecoin miners cannot generate new blocks.
+It is important to note that any drand beacon outage will effectively halt
+Filecoin block production. Given that new randomness is not produced, Filecoin
+miners cannot generate new blocks. Specifically, any call to the drand network
+for a new randomness entry during an outage should be blocking in Filecoin.
 
-After a beacon downtime, drand nodes will work to quickly catch up to the current round, as defined by wall clock time. In this way, the above time-to-round mapping in drand (see above) used by Filecoin remains an invariant after this catch-up following downtime.
+After a beacon downtime, drand nodes will work to quickly catch up to the
+current round, as defined by wall clock time. In this way, the above
+time-to-round mapping in drand (see above) used by Filecoin remains an invariant
+after this catch-up following downtime.
 
-So while Filecoin miners were not able to mine during the drand outage, they will quickly be able to run leader election thereafter, given a rapid production of drand values. We call this a "catch up" period.
+So while Filecoin miners were not able to mine during the drand outage, they
+will quickly be able to run leader election thereafter, given a rapid production
+of drand values. We call this a "catch up" period.
 
-During the catch up period, Filecoin nodes will backdate their blocks in order to continue using the same time-to-round mapping to determine which drand round should be integrated according to the time. Miners can then choose to publish their null blocks for the outage period (including the appropriate drand entries throughout the blocks, per the time-to-round mapping), or (as is more likely) try to craft valid blocks that might have been created during the outage.
+During the catch up period, Filecoin nodes will backdate their blocks in order
+to continue using the same time-to-round mapping to determine which drand round
+should be integrated according to the time. Miners can then choose to publish
+their null blocks for the outage period (including the appropriate drand entries
+throughout the blocks, per the time-to-round mapping), or (as is more likely)
+try to craft valid blocks that might have been created during the outage.
 
-Note that based on the level of decentralization of the Filecoin network, we expect to see varying levels of miner collaboration during this period. This is because there are two incentives at play: trying to mine valid blocks from during the outage to collect block rewards, not falling behind a heavier chain being mined by a majority of miners that may or may not have ignored a portion of these blocks.
+Note that based on the level of decentralization of the Filecoin network, we
+expect to see varying levels of miner collaboration during this period. This is
+because there are two incentives at play: trying to mine valid blocks from
+during the outage to collect block rewards, not falling behind a heavier chain
+being mined by a majority of miners that may or may not have ignored a portion
+of these blocks.
 
-In any event, a heavier chain will emerge after the catch up period and mining can resume as normal.
+In any event, a heavier chain will emerge after the catch up period and mining
+can resume as normal.
 
 ### drand network specification
 

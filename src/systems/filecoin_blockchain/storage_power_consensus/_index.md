@@ -68,7 +68,9 @@ the Filecoin network is twice as fast as drand, we might expect a random value
 every other Filecoin epoch. Accordingly, depending on both networks'
 configurations, certain Filecoin blocks could contain multiple or no drand
 entries.
-
+Furthermore, it must be that any call to the drand network for a new randomness
+entry during an outage should be blocking, as noted with the `drand.Public()`
+calls below.
 In all cases, Filecoin blocks must include all drand beacon outputs generated
 since the last epoch in the `BeaconEntries` field of the block header. Any use
 of randomness from a given Filecoin epoch should use the last valid drand entry
@@ -84,29 +86,34 @@ lowest epoch number block will contain the requested beacon entry. As well, if
 there has been null rounds where the beacon should have been inserted, we need
 to iterate on the chain to find where the entry is inserted.
 ```go
-func GetRandomnessSeed(e ChainEpoch) {
+func GetRandomnessSeed(e ChainEpoch, head ChainEpoch) {
   // get the drand round associated with the timestamp of this epoch.
   drandRound := MaxBeaconRoundForEpoch(e)
   // get the minimum drand timestamp associated with the drand round
   drandTs := drandGenesisTime + (drandPeriod-1) * drandRound 
   // get the minimum filecoin epoch associated with this timestamp
   minEpoch := (drandTs - filGenesisTime) / filEpochDuration 
-  for {
+  for minEpoch < head {
      // if this is not a null block, then it must have the entry we want
     if !chain.IsNullBlock(minEpoch) 
          // it may be the first or the last entry depending on the reason why
          // there was a null block before. If the drand entry is 
          // not assicated with this block, it means the block is invalid - but
          // this is caught up by the block validation logic.
-         returns chain.Block(minEpoch).Get(drandRound)
+         returns getDrandEntryFromBlockHeader(chain.Block(minEpoch))
     // otherwise, we need to continue progressing on the chain, i.e. maybe no
     // miner were elected or filecoin / drand outage
     minEpoch++
   }
 }
 
-func getMostRecentPeriod(e ChainEpoch) {
-  return floor(e / ElectionPeriod)
+func getDrandEntryFromBlockHeader(block,round) (DrandEntry,error) {
+    for _,dr := range block.DrandEntries {
+        if dr.Round == round {
+            return dr
+        }
+    }
+    return errors.New("drand entry not found in block")
 }
 ```
 
