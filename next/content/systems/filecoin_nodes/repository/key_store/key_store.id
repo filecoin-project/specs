@@ -1,0 +1,8 @@
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+import address "github.com/filecoin-project/go-address"
+
+type KeyStore struct {
+    MinerAddress  address.Address
+    OwnerKey      filcrypto.VRFKeyPair
+    WorkerKey     filcrypto.VRFKeyPair
+}

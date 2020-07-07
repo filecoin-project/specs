@@ -1,0 +1,494 @@
+<svg id="mermaid-1572064173479" width="100%" xmlns="http://www.w3.org/2000/svg" height="100%" style="max-width:1250px;" viewBox="-50 -10 1250 1451"><style>
+
+
+
+#mermaid-1572064173479 .label {
+  font-family: 'trebuchet ms', verdana, arial;
+  font-family: var(--mermaid-font-family);
+  color: #333; }
+
+#mermaid-1572064173479 .label text {
+  fill: #333; }
+
+#mermaid-1572064173479 .node rect,
+#mermaid-1572064173479 .node circle,
+#mermaid-1572064173479 .node ellipse,
+#mermaid-1572064173479 .node polygon {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 1px; }
+
+#mermaid-1572064173479 .node .label {
+  text-align: center; }
+
+#mermaid-1572064173479 .node.clickable {
+  cursor: pointer; }
+
+#mermaid-1572064173479 .arrowheadPath {
+  fill: #333333; }
+
+#mermaid-1572064173479 .edgePath .path {
+  stroke: #333333;
+  stroke-width: 1.5px; }
+
+#mermaid-1572064173479 .edgeLabel {
+  background-color: #e8e8e8;
+  text-align: center; }
+
+#mermaid-1572064173479 .cluster rect {
+  fill: #ffffde;
+  stroke: #aaaa33;
+  stroke-width: 1px; }
+
+#mermaid-1572064173479 .cluster text {
+  fill: #333; }
+
+#mermaid-1572064173479 div.mermaidTooltip {
+  position: absolute;
+  text-align: center;
+  max-width: 200px;
+  padding: 2px;
+  font-family: 'trebuchet ms', verdana, arial;
+  font-family: var(--mermaid-font-family);
+  font-size: 12px;
+  background: #ffffde;
+  border: 1px solid #aaaa33;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 100; }
+
+#mermaid-1572064173479 .actor {
+  stroke: #CCCCFF;
+  fill: #ECECFF; }
+
+#mermaid-1572064173479 text.actor {
+  fill: black;
+  stroke: none; }
+
+#mermaid-1572064173479 .actor-line {
+  stroke: grey; }
+
+#mermaid-1572064173479 .messageLine0 {
+  stroke-width: 1.5;
+  stroke-dasharray: '2 2';
+  stroke: #333; }
+
+#mermaid-1572064173479 .messageLine1 {
+  stroke-width: 1.5;
+  stroke-dasharray: '2 2';
+  stroke: #333; }
+
+#mermaid-1572064173479 #arrowhead {
+  fill: #333; }
+
+#mermaid-1572064173479 .sequenceNumber {
+  fill: white; }
+
+#mermaid-1572064173479 #sequencenumber {
+  fill: #333; }
+
+#mermaid-1572064173479 #crosshead path {
+  fill: #333 !important;
+  stroke: #333 !important; }
+
+#mermaid-1572064173479 .messageText {
+  fill: #333;
+  stroke: none; }
+
+#mermaid-1572064173479 .labelBox {
+  stroke: #CCCCFF;
+  fill: #ECECFF; }
+
+#mermaid-1572064173479 .labelText {
+  fill: black;
+  stroke: none; }
+
+#mermaid-1572064173479 .loopText {
+  fill: black;
+  stroke: none; }
+
+#mermaid-1572064173479 .loopLine {
+  stroke-width: 2;
+  stroke-dasharray: '2 2';
+  stroke: #CCCCFF; }
+
+#mermaid-1572064173479 .note {
+  stroke: #aaaa33;
+  fill: #fff5ad; }
+
+#mermaid-1572064173479 .noteText {
+  fill: black;
+  stroke: none;
+  font-family: 'trebuchet ms', verdana, arial;
+  font-family: var(--mermaid-font-family);
+  font-size: 14px; }
+
+#mermaid-1572064173479 .activation0 {
+  fill: #f4f4f4;
+  stroke: #666; }
+
+#mermaid-1572064173479 .activation1 {
+  fill: #f4f4f4;
+  stroke: #666; }
+
+#mermaid-1572064173479 .activation2 {
+  fill: #f4f4f4;
+  stroke: #666; }
+
+
+#mermaid-1572064173479 .mermaid-main-font {
+  font-family: "trebuchet ms", verdana, arial;
+  font-family: var(--mermaid-font-family); }
+
+#mermaid-1572064173479 .section {
+  stroke: none;
+  opacity: 0.2; }
+
+#mermaid-1572064173479 .section0 {
+  fill: rgba(102, 102, 255, 0.49); }
+
+#mermaid-1572064173479 .section2 {
+  fill: #fff400; }
+
+#mermaid-1572064173479 .section1,
+#mermaid-1572064173479 .section3 {
+  fill: white;
+  opacity: 0.2; }
+
+#mermaid-1572064173479 .sectionTitle0 {
+  fill: #333; }
+
+#mermaid-1572064173479 .sectionTitle1 {
+  fill: #333; }
+
+#mermaid-1572064173479 .sectionTitle2 {
+  fill: #333; }
+
+#mermaid-1572064173479 .sectionTitle3 {
+  fill: #333; }
+
+#mermaid-1572064173479 .sectionTitle {
+  text-anchor: start;
+  font-size: 11px;
+  text-height: 14px;
+  font-family: 'trebuchet ms', verdana, arial;
+  font-family: var(--mermaid-font-family); }
+
+
+#mermaid-1572064173479 .grid .tick {
+  stroke: lightgrey;
+  opacity: 0.3;
+  shape-rendering: crispEdges; }
+#mermaid-1572064173479   .grid .tick text {
+    font-family: 'trebuchet ms', verdana, arial;
+    font-family: var(--mermaid-font-family); }
+
+#mermaid-1572064173479 .grid path {
+  stroke-width: 0; }
+
+
+#mermaid-1572064173479 .today {
+  fill: none;
+  stroke: red;
+  stroke-width: 2px; }
+
+
+
+#mermaid-1572064173479 .task {
+  stroke-width: 2; }
+
+#mermaid-1572064173479 .taskText {
+  text-anchor: middle;
+  font-family: 'trebuchet ms', verdana, arial;
+  font-family: var(--mermaid-font-family); }
+
+#mermaid-1572064173479 .taskText:not([font-size]) {
+  font-size: 11px; }
+
+#mermaid-1572064173479 .taskTextOutsideRight {
+  fill: black;
+  text-anchor: start;
+  font-size: 11px;
+  font-family: 'trebuchet ms', verdana, arial;
+  font-family: var(--mermaid-font-family); }
+
+#mermaid-1572064173479 .taskTextOutsideLeft {
+  fill: black;
+  text-anchor: end;
+  font-size: 11px; }
+
+
+#mermaid-1572064173479 .task.clickable {
+  cursor: pointer; }
+
+#mermaid-1572064173479 .taskText.clickable {
+  cursor: pointer;
+  fill: #003163 !important;
+  font-weight: bold; }
+
+#mermaid-1572064173479 .taskTextOutsideLeft.clickable {
+  cursor: pointer;
+  fill: #003163 !important;
+  font-weight: bold; }
+
+#mermaid-1572064173479 .taskTextOutsideRight.clickable {
+  cursor: pointer;
+  fill: #003163 !important;
+  font-weight: bold; }
+
+
+#mermaid-1572064173479 .taskText0,
+#mermaid-1572064173479 .taskText1,
+#mermaid-1572064173479 .taskText2,
+#mermaid-1572064173479 .taskText3 {
+  fill: white; }
+
+#mermaid-1572064173479 .task0,
+#mermaid-1572064173479 .task1,
+#mermaid-1572064173479 .task2,
+#mermaid-1572064173479 .task3 {
+  fill: #8a90dd;
+  stroke: #534fbc; }
+
+#mermaid-1572064173479 .taskTextOutside0,
+#mermaid-1572064173479 .taskTextOutside2 {
+  fill: black; }
+
+#mermaid-1572064173479 .taskTextOutside1,
+#mermaid-1572064173479 .taskTextOutside3 {
+  fill: black; }
+
+
+#mermaid-1572064173479 .active0,
+#mermaid-1572064173479 .active1,
+#mermaid-1572064173479 .active2,
+#mermaid-1572064173479 .active3 {
+  fill: #bfc7ff;
+  stroke: #534fbc; }
+
+#mermaid-1572064173479 .activeText0,
+#mermaid-1572064173479 .activeText1,
+#mermaid-1572064173479 .activeText2,
+#mermaid-1572064173479 .activeText3 {
+  fill: black !important; }
+
+
+#mermaid-1572064173479 .done0,
+#mermaid-1572064173479 .done1,
+#mermaid-1572064173479 .done2,
+#mermaid-1572064173479 .done3 {
+  stroke: grey;
+  fill: lightgrey;
+  stroke-width: 2; }
+
+#mermaid-1572064173479 .doneText0,
+#mermaid-1572064173479 .doneText1,
+#mermaid-1572064173479 .doneText2,
+#mermaid-1572064173479 .doneText3 {
+  fill: black !important; }
+
+
+#mermaid-1572064173479 .crit0,
+#mermaid-1572064173479 .crit1,
+#mermaid-1572064173479 .crit2,
+#mermaid-1572064173479 .crit3 {
+  stroke: #ff8888;
+  fill: red;
+  stroke-width: 2; }
+
+#mermaid-1572064173479 .activeCrit0,
+#mermaid-1572064173479 .activeCrit1,
+#mermaid-1572064173479 .activeCrit2,
+#mermaid-1572064173479 .activeCrit3 {
+  stroke: #ff8888;
+  fill: #bfc7ff;
+  stroke-width: 2; }
+
+#mermaid-1572064173479 .doneCrit0,
+#mermaid-1572064173479 .doneCrit1,
+#mermaid-1572064173479 .doneCrit2,
+#mermaid-1572064173479 .doneCrit3 {
+  stroke: #ff8888;
+  fill: lightgrey;
+  stroke-width: 2;
+  cursor: pointer;
+  shape-rendering: crispEdges; }
+
+#mermaid-1572064173479 .milestone {
+  transform: rotate(45deg) scale(0.8, 0.8); }
+
+#mermaid-1572064173479 .milestoneText {
+  font-style: italic; }
+
+#mermaid-1572064173479 .doneCritText0,
+#mermaid-1572064173479 .doneCritText1,
+#mermaid-1572064173479 .doneCritText2,
+#mermaid-1572064173479 .doneCritText3 {
+  fill: black !important; }
+
+#mermaid-1572064173479 .activeCritText0,
+#mermaid-1572064173479 .activeCritText1,
+#mermaid-1572064173479 .activeCritText2,
+#mermaid-1572064173479 .activeCritText3 {
+  fill: black !important; }
+
+#mermaid-1572064173479 .titleText {
+  text-anchor: middle;
+  font-size: 18px;
+  fill: black;
+  font-family: 'trebuchet ms', verdana, arial;
+  font-family: var(--mermaid-font-family); }
+
+#mermaid-1572064173479 g.classGroup text {
+  fill: #9370DB;
+  stroke: none;
+  font-family: 'trebuchet ms', verdana, arial;
+  font-family: var(--mermaid-font-family);
+  font-size: 10px; }
+#mermaid-1572064173479   g.classGroup text .title {
+    font-weight: bolder; }
+
+#mermaid-1572064173479 g.classGroup rect {
+  fill: #ECECFF;
+  stroke: #9370DB; }
+
+#mermaid-1572064173479 g.classGroup line {
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1572064173479 .classLabel .box {
+  stroke: none;
+  stroke-width: 0;
+  fill: #ECECFF;
+  opacity: 0.5; }
+
+#mermaid-1572064173479 .classLabel .label {
+  fill: #9370DB;
+  font-size: 10px; }
+
+#mermaid-1572064173479 .relation {
+  stroke: #9370DB;
+  stroke-width: 1;
+  fill: none; }
+
+#mermaid-1572064173479 #compositionStart {
+  fill: #9370DB;
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1572064173479 #compositionEnd {
+  fill: #9370DB;
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1572064173479 #aggregationStart {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1572064173479 #aggregationEnd {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1572064173479 #dependencyStart {
+  fill: #9370DB;
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1572064173479 #dependencyEnd {
+  fill: #9370DB;
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1572064173479 #extensionStart {
+  fill: #9370DB;
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1572064173479 #extensionEnd {
+  fill: #9370DB;
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1572064173479 .commit-id,
+#mermaid-1572064173479 .commit-msg,
+#mermaid-1572064173479 .branch-label {
+  fill: lightgrey;
+  color: lightgrey;
+  font-family: 'trebuchet ms', verdana, arial;
+  font-family: var(--mermaid-font-family); }
+
+#mermaid-1572064173479 .pieTitleText {
+  text-anchor: middle;
+  font-size: 25px;
+  fill: black;
+  font-family: 'trebuchet ms', verdana, arial;
+  font-family: var(--mermaid-font-family); }
+
+#mermaid-1572064173479 .slice {
+  font-family: 'trebuchet ms', verdana, arial;
+  font-family: var(--mermaid-font-family); }
+
+#mermaid-1572064173479 g.stateGroup text {
+  fill: #9370DB;
+  stroke: none;
+  font-size: 10px;
+  font-family: 'trebuchet ms', verdana, arial;
+  font-family: var(--mermaid-font-family); }
+
+#mermaid-1572064173479 g.stateGroup text {
+  fill: #9370DB;
+  stroke: none;
+  font-size: 10px; }
+
+#mermaid-1572064173479 g.stateGroup .state-title {
+  font-weight: bolder;
+  fill: black; }
+
+#mermaid-1572064173479 g.stateGroup rect {
+  fill: #ECECFF;
+  stroke: #9370DB; }
+
+#mermaid-1572064173479 g.stateGroup line {
+  stroke: #9370DB;
+  stroke-width: 1; }
+
+#mermaid-1572064173479 .transition {
+  stroke: #9370DB;
+  stroke-width: 1;
+  fill: none; }
+
+#mermaid-1572064173479 .stateGroup .composit {
+  fill: white;
+  border-bottom: 1px; }
+
+#mermaid-1572064173479 .state-note {
+  stroke: #aaaa33;
+  fill: #fff5ad; }
+#mermaid-1572064173479   .state-note text {
+    fill: black;
+    stroke: none;
+    font-size: 10px; }
+
+#mermaid-1572064173479 .stateLabel .box {
+  stroke: none;
+  stroke-width: 0;
+  fill: #ECECFF;
+  opacity: 0.5; }
+
+#mermaid-1572064173479 .stateLabel text {
+  fill: black;
+  font-size: 10px;
+  font-weight: bold;
+  font-family: 'trebuchet ms', verdana, arial;
+  font-family: var(--mermaid-font-family); }
+
+:root {
+  --mermaid-font-family: '"trebuchet ms", verdana, arial';
+  --mermaid-font-family: "Comic Sans MS", "Comic Sans", cursive; }
+
+:root { --mermaid-font-family: "trebuchet ms", verdana, arial;}</style><style>#mermaid-1572064173479 {
+    color: rgba(0, 0, 0, 0.65);
+    font: ;
+  }</style><g></g><g><line id="actor226" x1="75" y1="5" x2="75" y2="1440" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="0" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="75" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="75" dy="0">StorageClient</tspan></text></g><g><line id="actor227" x1="275" y1="5" x2="275" y2="1440" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="200" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="275" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="275" dy="0">StorageProvider</tspan></text></g><g><line id="actor228" x1="475" y1="5" x2="475" y2="1440" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="400" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="475" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="475" dy="0">StorageMiningSubsystem</tspan></text></g><g><line id="actor229" x1="675" y1="5" x2="675" y2="1440" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="600" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="675" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="675" dy="0">StorageMarketActor</tspan></text></g><g><line id="actor230" x1="875" y1="5" x2="875" y2="1440" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="800" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="875" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="875" dy="0">StorageMinerActor</tspan></text></g><g><line id="actor231" x1="1075" y1="5" x2="1075" y2="1440" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1000" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1075" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="1075" dy="0">CronActor</tspan></text></g><defs><marker id="arrowhead" refX="5" refY="2" markerWidth="6" markerHeight="4" orient="auto"><path d="M 0,0 V 4 L6,2 Z"></path></marker></defs><defs><marker id="crosshead" markerWidth="15" markerHeight="8" orient="auto" refX="16" refY="4"><path fill="black" stroke="#000000" stroke-width="1px" d="M 9,2 V 6 L16,4 Z" style="stroke-dasharray: 0, 0;"></path><path fill="none" stroke="#000000" stroke-width="1px" d="M 0,1 L 6,7 M 6,1 L 0,7" style="stroke-dasharray: 0, 0;"></path></marker></defs><defs><marker id="sequencenumber" refX="15" refY="15" markerWidth="60" markerHeight="40" orient="auto"><circle cx="15" cy="15" r="6"></circle></marker></defs><g><text x="375" y="93" class="messageText" style="text-anchor: middle;">AddBalance()</text><line x1="75" y1="100" x2="675" y2="100" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="475" y="128" class="messageText" style="text-anchor: middle;">AddBalance()</text><line x1="275" y1="135" x2="675" y2="135" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="175" y="163" class="messageText" style="text-anchor: middle;">OnNewStorageDealProposal(proposal, payloadCID)</text><line x1="75" y1="170" x2="275" y2="170" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><rect x="270" y="172" fill="#EDF2AE" stroke="#666" width="10" height="33" rx="0" ry="0" class="activation0"></rect></g><g><text x="172.5" y="198" class="messageText" style="text-anchor: middle;">NotifyOfStorageDealProposalStatus(ProposalRejected)</text><line x1="270" y1="205" x2="75" y2="205" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="175" y="233" class="messageText" style="text-anchor: middle;">OnNewStorageDealProposal(proposal, payloadCID)</text><line x1="75" y1="240" x2="275" y2="240" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><rect x="270" y="242" fill="#EDF2AE" stroke="#666" width="10" height="33" rx="0" ry="0" class="activation0"></rect></g><g><text x="172.5" y="268" class="messageText" style="text-anchor: middle;">NotifyOfStorageDealProposalStatus(ProposalAccepted)</text><line x1="270" y1="275" x2="75" y2="275" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="175" y="303" class="messageText" style="text-anchor: middle;">graphsync.Pull(payloadCID)</text><line x1="275" y1="310" x2="75" y2="310" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><rect x="70" y="312" fill="#EDF2AE" stroke="#666" width="10" height="33" rx="0" ry="0" class="activation0"></rect></g><g><text x="177.5" y="338" class="messageText" style="text-anchor: middle;">graphsync.Push(payload IPLD)</text><line x1="80" y1="345" x2="275" y2="345" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="275" y="373" class="messageText" style="text-anchor: middle;">OnReceivingPayload(payloadCID)</text><path d="M 275,380 C 335,370 335,410 275,400" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><rect x="270" y="412" fill="#EDF2AE" stroke="#666" width="10" height="228" rx="0" ry="0" class="activation0"></rect></g><g><text x="280" y="438" class="messageText" style="text-anchor: middle;">verifyStorageDealProposal(proposal)</text><path d="M 280,445 C 340,435 340,475 280,465" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="280" y="503" class="messageText" style="text-anchor: middle;">verifyPieceCID(proposal, payloadCID)</text><path d="M 280,510 C 340,500 340,540 280,530" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="280" y="568" class="messageText" style="text-anchor: middle;">signStorageDealProposal(proposal)</text><path d="M 280,575 C 340,565 340,605 280,595" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="172.5" y="633" class="messageText" style="text-anchor: middle;">NotifyOfStorageDealProposalStatus(ProposalSigned)</text><line x1="270" y1="640" x2="75" y2="640" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="275" y="668" class="messageText" style="text-anchor: middle;">publishStorageDealMessage(message)</text><path d="M 275,675 C 335,665 335,705 275,695" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="475" y="733" class="messageText" style="text-anchor: middle;">PublishStorageDeal(message)</text><line x1="275" y1="740" x2="675" y2="740" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><rect x="670" y="742" fill="#EDF2AE" stroke="#666" width="10" height="163" rx="0" ry="0" class="activation0"></rect></g><g><text x="680" y="768" class="messageText" style="text-anchor: middle;">generateStorageDealID()</text><path d="M 680,775 C 740,765 740,805 680,795" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="680" y="833" class="messageText" style="text-anchor: middle;">lockFund()</text><path d="M 680,840 C 740,830 740,870 680,860" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="472.5" y="898" class="messageText" style="text-anchor: middle;">dealID</text><line x1="670" y1="905" x2="275" y2="905" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="175" y="933" class="messageText" style="text-anchor: middle;">NotifyOfStorageDealStatus(DealPublished)</text><line x1="275" y1="940" x2="75" y2="940" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="375" y="968" class="messageText" style="text-anchor: middle;">HandleStorageDeal(deal)</text><line x1="275" y1="975" x2="475" y2="975" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="675" y="1003" class="messageText" style="text-anchor: middle;">CommitSector()</text><line x1="475" y1="1010" x2="875" y2="1010" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="175" y="1038" class="messageText" style="text-anchor: middle;">NotifyOfStorageDealStatus(DealCommitted)</text><line x1="275" y1="1045" x2="75" y2="1045" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="975" y="1073" class="messageText" style="text-anchor: middle;">NotifyOfPoStChallenge()</text><line x1="1075" y1="1080" x2="875" y2="1080" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="675" y="1108" class="messageText" style="text-anchor: middle;">SubmitPoSt()</text><line x1="475" y1="1115" x2="875" y2="1115" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="875" y="1143" class="messageText" style="text-anchor: middle;">activateSector</text><path d="M 875,1150 C 935,1140 935,1180 875,1170" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="575" y="1208" class="messageText" style="text-anchor: middle;">NotifyOfOnChainDealStatus(DealActive)</text><line x1="875" y1="1215" x2="275" y2="1215" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="175" y="1243" class="messageText" style="text-anchor: middle;">NotifyOfStorageDealStatus(DealActive)</text><line x1="275" y1="1250" x2="75" y2="1250" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="975" y="1278" class="messageText" style="text-anchor: middle;">NotifyOfPoStChallenge()/CheckPoStSubmissionHappened()</text><line x1="1075" y1="1285" x2="875" y2="1285" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="575" y="1313" class="messageText" style="text-anchor: middle;">NotifyOfOnChainDealStatus(DealExpired/DealFailing)</text><line x1="875" y1="1320" x2="275" y2="1320" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="175" y="1348" class="messageText" style="text-anchor: middle;">NotifyOfStorageDealStatus(DealExpired/DealFailing)</text><line x1="275" y1="1355" x2="75" y2="1355" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><rect x="0" y="1375" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="75" y="1407.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="75" dy="0">StorageClient</tspan></text></g><g><rect x="200" y="1375" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="275" y="1407.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="275" dy="0">StorageProvider</tspan></text></g><g><rect x="400" y="1375" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="475" y="1407.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="475" dy="0">StorageMiningSubsystem</tspan></text></g><g><rect x="600" y="1375" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="675" y="1407.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="675" dy="0">StorageMarketActor</tspan></text></g><g><rect x="800" y="1375" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="875" y="1407.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="875" dy="0">StorageMinerActor</tspan></text></g><g><rect x="1000" y="1375" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1075" y="1407.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="1075" dy="0">CronActor</tspan></text></g></svg>

@@ -1,0 +1,98 @@
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
+
+type ChainSync struct {
+    // LastTrustedCheckpoint is the most recent TrustedCheckpoint
+    // ChainSync is aware of. This is used as the starting point from
+    // which to synchronize the chain. (See block/checkpoints)
+    LastTrustedCheckpoint  chain.TrustedCheckpoint
+
+    // VGraph is the ValidationGraph ChainSync uses to track all
+    // Blocks and decide which blocks to validate, when.
+    VGraph                 ValidationGraph
+}
+
+type ValidationGraph struct {
+    // CacheChainStore is the ipld Datastore through which to load and store
+    // chain datastructures that may be temporary and may be garbage collected.
+    CacheChainStore  ipld.GraphStore
+
+    // Graph is a datastructure that provides efficient access to all
+    // nodes needed for validation, and keeps both forward and back links.
+    // Graph graph.BlockGraph
+
+    // FinalityTipset contains the latest finalized tipset -- this is the
+    // local node's notion of finality. It will not automatically unwind
+    // history before this point. All automatic ChainSync is forward from
+    // this tipset.
+    //
+    // This is what we use to check state against for users/clients of the
+    // blockchain subsystem. If users request FinalityEpoch, it corresponds
+    // to FinalityTipset.
+    FinalityTipset   PartialGraph
+
+    // ValidG contains all the blocks we have validated, but are not
+    // yet declared Final. This means all the blocks connected into the
+    // main blockchain, but not yet past finality (ie after FinalityTipset)
+    ValidG           PartialGraph
+
+    // FetchedG is the set of unvalidated Blocks fully connected
+    // to the validated graph. These are ready to be validated, all the
+    // data is local, and are ordered by total ChainWeight.
+    FetchedG         PartialGraph
+
+    // ConnectedG is the set of connected Blocks (BlockHeaders) fully connected
+    // to the ToValidateG graph. These are close to ready to be validated.
+    // Data may or not may not be local. Ordered by total ChainWeight.
+    ConnectedG       PartialGraph
+
+    // UnconnectedG is the set of connected Blocks (BlockHeaders), which
+    // may or may not connect back to the growing blockchain. This set
+    // could contain the heaviest chain, and could contain attackers'
+    // blocks.
+    UnconnectedG     PartialGraph
+
+    // TargetHeads is a list of candidate blocks sorted by likelihood of being the
+    // best chain. (eg sorted by block.ChainWeight, even if not validated yet)
+    // TargetHeads SHOULD be a small set (<10)
+    //
+    // Obviously bad heads SHOULD be pruned out:
+    // - Clearly invalid ChainWeight (lower than BestHead or too high)
+    // - Heads that are not advancing in BlockPubsub
+    TargetHeads      [&block.BlockHeader]
+
+    // BestTargetHead is the single best candidate head
+    // BestTargetHead == TargetHeads[0]
+    BestTargetHead   &block.BlockHeader
+}
+
+// PartialGraph is a datastructure used to track a set of blocks, and
+// provide efficient access to the Roots/Heads and Leaves/Tails of the
+// subgraph.
+type PartialGraph struct {
+    // fullGraph provides acess to all nodes
+    fullGraph  BlockGraph
+
+    // Blocks is the set of all blocks in this PartialGraph
+    Blocks     {&block.BlockHeader: struct {}}
+
+    // Heads is the set of root/head blocks
+    Heads      [&block.BlockHeader]
+
+    // Tails is the set of leaf/tail blocks
+    Tails      [&block.BlockHeader]
+
+    // Add adds given BlockCID to the PartialGraph, updating Blocks,
+    // Roots, and Leaves as needed.
+    Add(c &block.BlockHeader)
+
+    // Remove deletes given BlockCID from the PartialGraph, updating
+    // Blocks, Roots, and Leaves as needed.
+    Remove(c &block.BlockHeader)
+}
+
+type BlockGraph struct {// TODO
+    Parents(b &block.BlockHeader) chain.Tipset
+    Children(b &block.BlockHeader) [block.Block]
+}

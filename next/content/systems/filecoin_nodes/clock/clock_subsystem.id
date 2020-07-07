@@ -1,0 +1,19 @@
+type UnixTime int64  // unix timestamp
+
+// UTCClock is a normal, system clock reporting UTC time.
+// It should be kept in sync, with drift less than 1 second.
+type UTCClock struct {
+    NowUTCUnix() UnixTime
+}
+
+// ChainEpoch represents a round of a blockchain protocol.
+type ChainEpoch int64
+
+// ChainEpochClock is a clock that represents epochs of the protocol.
+type ChainEpochClock struct {
+    // GenesisTime is the time of the first block. EpochClock counts
+    // up from there.
+    GenesisTime              UnixTime
+
+    EpochAtTime(t UnixTime)  ChainEpoch
+}

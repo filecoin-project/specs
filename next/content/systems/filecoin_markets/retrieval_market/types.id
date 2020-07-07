@@ -1,0 +1,117 @@
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import addr "github.com/filecoin-project/go-address"
+import abi "github.com/filecoin-project/specs-actors/actors/abi"
+import peer "github.com/libp2p/go-libp2p-core/peer"
+import cid "github.com/ipfs/go-cid"
+
+type PaymentVoucher struct {}
+
+type RetrievalPeer struct {
+    Address  addr.Address
+    ID       peer.ID  // optional
+}
+
+type Available struct {}
+type Unavailable struct {}
+type Unknown struct {}
+
+type RetrievalQueryResponseStatus union {
+    Available
+    Unavailable
+}
+
+type RetrievalQueryItemStatus union {
+    Available
+    Unavailable
+    Unknown
+}
+
+type RetrievalQueryParams struct {
+    PayloadCID                  cid.Cid  // optional, query if miner has this cid in this piece. some miners may not be able to respond.
+    Selector                    ipld.Selector  // optional, query if miner has this cid in this piece. some miners may not be able to respond.
+    MaxPricePerByte             abi.TokenAmount  // optional, tell miner uninterested if more expensive than this
+    MinPaymentInterval          UInt  // optional, tell miner uninterested unless payment interval is greater than this
+    MinPaymentIntervalIncrease  UInt  // optional, tell miner uninterested unless payment interval increase is greater than this
+}
+
+type RetrievalQuery struct {
+    PieceCID abi.PieceCID  // V0
+    RetrievalQueryParams  // V1
+}
+
+type RetrievalQueryResponse struct {
+    Status                      RetrievalQueryResponseStatus
+    PayloadCIDFound             RetrievalQueryItemStatus  // V1 - if a PayloadCid was requested, the result
+    SelectorFound               RetrievalQueryItemStatus  // V1 - if a Selector was requested, the result
+
+    Size                        uint64  // Total size of piece in bytes
+    ExpectedPayloadSize         uint64  // V1 - optional, if PayloadCID + selector are specified and miner knows, can offer an expected size
+
+    PaymentAddress              addr.Address  // address to send funds to -- may be different than miner addr
+    MinPricePerByte             abi.TokenAmount
+    MaxPaymentInterval          UInt
+    MaxPaymentIntervalIncrease  UInt
+
+    PieceRetrievalPrice()  // == MinPricePerByte * Size
+    PayloadRetrievalPrice()  // V1 - optional == MinPricePerByte * ExpectedPayloadSize
+}
+
+type Accepted struct {}
+type Failed struct {}
+type Rejected struct {}
+type Unsealing struct {}
+type FundsNeeded struct {}
+type Ongoing struct {}
+type FundsNeededLastPayment struct {}
+type Completed struct {}
+type DealNotFound struct {}
+
+type DealStatus union {
+    Accepted
+    Failed
+    Rejected
+    Unsealing
+    FundsNeeded
+    Ongoing
+    FundsNeededLastPayment
+    Completed
+    DealNotFound
+}
+
+type RetrievalParams struct {
+    PayloadCID               cid.Cid  // V1
+    Selector                 ipld.Selector  // V1
+    PricePerByte             abi.TokenAmount
+    PaymentInterval          UInt
+    PaymentIntervalIncrease  UInt
+}
+
+type RetrievalDealID UInt
+
+type RetrievalDealProposal struct {
+    PieceCID         abi.PieceCID
+    ID               RetrievalDealID  // V1 - an identifier for the retrieval
+    RetrievalParams
+}
+
+type Block struct {
+    Prefix  Bytes
+    Data    Bytes
+}
+
+type RetrievalDealResponse struct {
+    Status       DealStatus
+    ID           RetrievalDealID  // V1 - an identifier for the retrieval
+
+    // payment required to proceed
+    PaymentOwed  abi.TokenAmount
+
+    Message      string
+    Blocks       [Block]  // V0 only
+}
+
+type RetrievalDealPayment struct {
+    ID              RetrievalDealID  // V1 - an identifier for the retrieval
+    PaymentChannel  addr.Address
+    PaymentVoucher
+}

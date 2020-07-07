@@ -1,0 +1,17 @@
+// Path is an opaque locator for a file (e.g. in a unix-style filesystem).
+type Path string
+
+// File is a variable length data container.
+// The File interface is modeled after a unix-style file, but abstracts the
+// underlying storage system.
+type File interface {
+    Path()   Path
+    Size()   int
+    Close()  error
+
+    // Read reads from File into buf, starting at offset, and for size bytes.
+    Read(offset int, size int, buf Bytes) struct {size int, e error}
+
+    // Write writes from buf into File, starting at offset, and for size bytes.
+    Write(offset int, size int, buf Bytes) struct {size int, e error}
+}

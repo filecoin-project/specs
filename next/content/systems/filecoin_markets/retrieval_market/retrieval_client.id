@@ -1,0 +1,54 @@
+import abi "github.com/filecoin-project/specs-actors/actors/abi"
+import addr "github.com/filecoin-project/go-address"
+import peer "github.com/libp2p/go-libp2p-core/peer"
+
+type RetrievalClientDealState struct {
+    RetrievalDealProposal
+    Status                 DealStatus
+    Sender                 peer.ID
+    TotalReceived          UInt
+    FundsSpent             abi.TokenAmount
+}
+
+type Open struct {}
+type FundsExpended struct {}
+type Progress struct {}
+type Error struct {}
+type Complete struct {}
+
+type RetrievalClientEvent union {
+    Open
+    FundsExpended  // when totalFunds is expended
+    Progress
+    Error
+    Complete
+}
+
+type RetrievalClientSubscriber struct {
+    OnEvent(event RetrievalClientEvent, RetrievalClientDealState)
+}
+
+type RetrievalClient struct {
+    // V0
+    FindProviders(pieceCID abi.PieceCID) [RetrievalPeer]
+    Query(
+        p         RetrievalPeer
+        pieceCID  abi.PieceCID
+        params    RetrievalQueryParams
+    ) RetrievalQueryResponse
+    Retrieve(
+        pieceCID      abi.PieceCID
+        params        RetrievalParams
+        totalFunds    abi.TokenAmount
+        miner         peer.ID
+        clientWallet  addr.Address
+        minerWallet   addr.Address
+    ) RetrievalDealID
+    SubscribeToEvents(subscriber RetrievalClientSubscriber)
+
+    // V1
+    AddMoreFunds(id RetrievalDealID, amount abi.TokenAmount) error
+    CancelDeal(id RetrievalDealID) error
+    RetrievalStatus(id RetrievalDealID)
+    ListDeals() {RetrievalDealID: RetrievalClientDealState}
+}
