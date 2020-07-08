@@ -14,7 +14,7 @@ enableGitInfo = true
 [markup.goldmark.renderer]
   unsafe = true
 [markup.tableOfContents]
-  startLevel = 1
+  startLevel = 2
 [markup.highlight]
   style = "dracula"
 

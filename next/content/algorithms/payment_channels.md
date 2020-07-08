@@ -1,5 +1,6 @@
 ---
 title: "Payment Channels"
+weight: 4
 ---
 
 # Payment Channels

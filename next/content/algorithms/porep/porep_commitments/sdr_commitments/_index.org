@@ -4,6 +4,9 @@
 #+HUGO_BASE_DIR: ../../../..
 #+OPTIONS: author:nil creator:nil timestamp:nil
 
+* Stacked DRG Commitments
+
+
 #+begin_src lisp :exports none
   (ql:quickload :orient)
 #+end_src
@@ -64,7 +67,7 @@ $input
 #+END_SRC
 
 #+RESULTS:
-[[file:legend.png]]
+[[legend.png]]
 
 ** Data Layer: $Comm_D$ Tree
 #+NAME: data-layer

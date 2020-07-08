@@ -1,16 +1,18 @@
 {{/* Get the filepath */}}
 {{/* Relative to content folder */}}
-{{ if eq (.Get "file" | printf "%.1s") "/" }}
-    {{ $.Scratch.Set "filepath" ( strings.TrimLeft "/" ( .Get "file" ))}}
+{{ if eq (.Get "src" | printf "%.1s") "/" }}
+    {{ $.Scratch.Set "filepath" ( strings.TrimLeft "/" ( .Get "src" ))}}
 {{ else }}
 {{/* Relative to page */}}
     {{ $.Scratch.Set "filepath" $.Page.Dir }}
-    {{ $.Scratch.Add "filepath" ( .Get "file" ) }}
+    {{ $.Scratch.Add "filepath" ( .Get "src" ) }}
 {{ end }}
 
 
 {{ if fileExists ($.Scratch.Get "filepath") }}
-    {{ if (.Get "lang") }}
+    {{if eq (.Get "markdown") "true" }}
+        {{ $.Scratch.Get "filepath" | readFile | markdownify }}
+    {{ else if (.Get "lang") }}
         {{ highlight ($.Scratch.Get "filepath" | readFile | safeHTML ) (.Get "lang") "" }}
     {{ else }}
         {{ $.Scratch.Get "filepath" | readFile | safeHTML }}

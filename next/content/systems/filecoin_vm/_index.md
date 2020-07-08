@@ -1,18 +1,11 @@
 ---
-menuIcon: 💻
-menuTitle: "**Virtual Machine**"
-title: VM - Virtual Machine
-entries:
-- actor
-- state_tree
-- indices
-- message
-- runtime
-- sysactors
-- interpreter
+title: Virtual Machine
+description: VM - Virtual Machine
+bookCollapseSection: true
+weight: 3
 ---
 
-# Virtual Machine
+# VM - Virtual Machine
 ---
 
 {{< hint danger >}}

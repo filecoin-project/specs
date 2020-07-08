@@ -2,8 +2,8 @@
 title: Introduction
 weight: 1
 dashboardState: incomplete
+bookCollapseSection: true
 ---
-
 
 # Introduction
 ---

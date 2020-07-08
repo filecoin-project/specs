@@ -1,5 +1,6 @@
 ---
 title: "GossipSub"
+weight: 6
 ---
 # Gossip Sub
 

@@ -1,7 +1,8 @@
 ---
-menuIcon: ⚖️
-menuTitle: "**Market**"
-title: "Markets in Filecoin"
+title: "Market"
+description: "Markets in Filecoin"
+bookCollapseSection: true
+weight: 7
 entries:
 - storage_market
 - retrieval_market

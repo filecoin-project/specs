@@ -1,0 +1,17 @@
+// imported as ipld.Object
+
+import cid "github.com/ipfs/go-cid"
+
+type Object interface {
+    CID() cid.Cid
+
+    // Populate(v interface{}) error
+}
+
+type GraphStore struct {
+    // Retrieves a serialized value from the store by CID. Returns the value and whether it was found.
+    Get(c cid.Cid) (util.Bytes, bool)
+
+    // Puts a serialized value in the store, returning the CID.
+    Put(value util.Bytes) (c cid.Cid)
+}

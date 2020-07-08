@@ -1,7 +1,7 @@
 ---
-menuIcon: 📑
-menuTitle: "**Files & Data**"
 title: Files & Data
+bookCollapseSection: true
+weight: 2
 entries:
 - file
 - piece

@@ -38,6 +38,32 @@ graph TD
 		
 {{</ mermaid >}}
 ```
+
+### `hint`
+```html
+{{< hint [info|warning|danger] >}}
+**Markdown content**  
+Lorem markdownum insigne. Olympo signis Delphis! Retexi Nereius nova develat
+stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa
+{{< /hint >}}
+```
+
+# Frontmatter
+```md
+title: Libraries
+description: Libraries used from Filecoin
+weight: 3
+bookCollapseSection: true
+bookhidden: true
+```
+
+# References
+Just like any other link but just relative to the content folder like below.
+```md
+[Minimum Miner Size](systems/filecoin_blockchain/storage_power_consensus#minimum-miner-size)
+```
+
+
 ## References
 - [hugo theme book](https://themes.gohugo.io//theme/hugo-book/docs/shortcodes/columns/)
 - [Katex](https://katex.org/)

@@ -1,6 +1,7 @@
 ---
-menuIcon: ⚙️
-title: "**Filecoin Nodes**"
+title: "Filecoin Nodes"
+bookCollapseSection: true
+weight: 1
 entries:
 - node_types
 - repository

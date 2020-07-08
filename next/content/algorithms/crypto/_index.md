@@ -1,6 +1,7 @@
 ---
 title: "Cryptographic Primitives"
-suppressMenu: true
+bookCollapseSection: true
+weight: 7
 entries:
   - signatures
   - vrf

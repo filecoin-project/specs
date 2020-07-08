@@ -1,5 +1,6 @@
 ---
 title: Stacked DRG PoRep
+weight: 1
 ---
 
 # Stacked DRG PoRep
@@ -84,8 +85,15 @@ Glossary:
 
 The following public parameters are used in the Stacked DRG Replication and Proof Generation algorithms:
 
-TODO: the Appendix should explain why we picked those values
-TODO: Just interpolate a table of the Orient parameters and reconcile naming.
+{{< hint warning >}}
+TODO:  
+The Appendix should explain why we picked those values  
+
+Just interpolate a table of the Orient parameters and reconcile naming.
+{{< /hint >}}
+
+
+
 
 | name | type | description | value |
 | --- | --- | --- | ---: |
@@ -137,7 +145,11 @@ The slow sequential encoding required is enforced by the depth robustness proper
 
 **Encoding with SDR**: The data from a sector (of size `SECTOR_SIZE`) is divided in `NODE_SIZE` nodes (for a total of `GRAPH_SIZE` nodes) and arranged in a directed acyclic graph. The structure of the graph is used to label the nodes sequentially to generate a key with which to encode the original data: in order to label a node, its parents must be labeled (see the "Layer Labeling" section below). We repeat this process for `LAYERS` layers, where the input to a next layer is the output of the previous one.
 
-**Generating the SDR graph**: The SDR graph is divided in `LAYERS` layers. Each layer is a directed acyclic graph and it combines a Depth Robust Graph (DRG) and a Bipartite Expander graph. [TODO: this isn't quite right.]
+**Generating the SDR graph**: The SDR graph is divided in `LAYERS` layers. Each layer is a directed acyclic graph and it combines a Depth Robust Graph (DRG) and a Bipartite Expander graph.
+{{< hint warning >}}
+TODO:  
+this isn't quite right.
+{{< /hint >}}
 
 We provide an algorithm (`SDR`) which computes the parents of a node. In high level, the parents of a node are computed by combining two algorithms: some parents (`BASE_DEGREE` of them) are computed via the `BucketSample` algorithm extended with a direct ordering of nodes, others (`EXPANSION_DEGREE` of them) are computed via the `Chung` algorithm. 
 
@@ -171,7 +183,9 @@ Overview: Compute the DRG and Bipartite Expander parents using respectively `Buc
 
 We provide below a more succinct representation of the algorithm:
 
+{{< hint warning >}}
 TODO: Reference to code in filproofs/algorithms.go  — or restructure all this.
+{{< /hint >}}
 
 #### Time-space tradeoff
 
@@ -193,12 +207,17 @@ visiting nodes whose indexes are sequential will result in a graph traversal in 
 
 ### `ChungExpander`: Bipartite Expander Graphs
 
+{{< hint warning >}}
 TODO: explain why we link nodes in the current layer
+{{< /hint >}}
+
 
 Each node in layers other than the first has `EXPANSION_DEGREE` parents generated via the `ChungExpander`
 algorithm. Note that the indexes returned refer to labels from the *previous* layer. TODO: Make this all clearer with explicit notation.
 
-// TODO: link to relevant filproofs/algorithms.go
+{{< hint warning >}}
+TODO: link to relevant filproofs/algorithms.go
+{{< /hint >}}
 
 #### Time-Space tradeoff
 
@@ -208,7 +227,9 @@ Computing these parents can be expensive (especially due to the hashing required
 
 We use three rounds of `Feistel` to generate a permutation to compute the parents of the Bipartite Expander graph.
 
+{{< hint warning >}}
 TODO: link to filproofs/feistel
+{{< /hint >}}
 
 # Replication
 
@@ -216,7 +237,9 @@ TODO: link to filproofs/feistel
 
 Before running the `Replicate` algorithm, the prover must ensure that the sector is correctly formatted with a valid "Storage Format" described in [Filecoin Client Data Processing](client-data.md#storage-format) (currently `paddedfr32v1` is the required default).
 
+{{< hint warning >}}
 TODO: inputs are missing
+{{< /hint >}}
 
 The Replication Algorithm  proceeds as follows:
 
@@ -241,10 +264,14 @@ CommD, TreeD = RepHash(data)
 
 ## Layer Labeling
 
+{{< hint warning >}}
 TODO: Define `Graph`. We need to decide if this is an object we'll explicitly define or if its properties (e.g., `GRAPH_SIZE`) are just part of the replication parameters and all the functions just refer to the _same_ graphs being manipulated across the entire replication process. (At the moment I've avoided defining a `Graph` structure as in other specs I didn't see any object methods, just standalone functions.)
+{{< /hint >}}
 
+{{< hint warning >}}
+TODO: link to filproofs/algorithms
+{{< /hint >}}
 
-// TODO: link to filproofs/algorithms
 
 # Proof Generation
 
@@ -254,20 +281,25 @@ Overview:
 - Proof Generation
 - Circuit Proof Generation
 
+{{< hint warning >}}
 TODO: write a single algorithm which includes the spec below
+{{< /hint >}}
 
 ## Challenge Generation
-
+{{< hint warning >}}
 TODO: Link to filproofs/algorithms
+{{< /hint >}}
 
 Calculate `LAYER_CHALLENGES : [LAYERS]uint`: Number of challenges per layer. (This will be passed to the SDR circuit proof.)
 
 Derive challenges for each layer (call `DeriveChallenges()`).
 
 ## Witness Generation
-
-TODO: link to filproofs/algorithms
+{{< hint warning >}}
+TODO: Link to filproofs/algorithms
+{{< /hint >}}
 
 ## Layer Challenge Counts
-
+{{< hint warning >}}
 TODO: we should just list current parameters and show this as a calculation for correctness, this should not mandatory to implement.
+{{< /hint >}}

@@ -1,5 +1,6 @@
 ---
 title: Stacked DRG - Offline PoRep Circuit Spec
+weight: 3
 ---
 
 # Stacked DRG - Offline PoRep Circuit Spec

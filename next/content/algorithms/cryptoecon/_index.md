@@ -1,6 +1,9 @@
 ---
-menuTitle: Cryptoecon
-title: Cryptoecon -- Placeholders
+title: Cryptoecon
+weight: 8
+---
+
+# Cryptoecon
 ---
 
 The Filecoin network is a complex multi-agent economic system. This section aims to explain some mechanisms and parameters in the system that can help achieve network-level goals. For now, just lists some key mechanisms and parameters that are still subject to changes during testnet but that must be resolved before mainnet launch. Note that this is a list of economic levers that are in consideration and not all of them will be used in mainnet. Some may be added or changed after mainnet launch, through the FIP process, requiring a **network upgrade**.
@@ -14,4 +17,7 @@ The Filecoin network is a complex multi-agent economic system. This section aims
 7. **Reward for pledged but unused storage** - explicit reward for available but unused storage.
 8. **Minimum miner size** - the minimum size of sectors a storage miner must have to produce blocks. There are several security and scalability parameters that depend on this.
 
-(This list is incomplete, you can help by expanding it.)
+{{< hint warning >}}
+This list is incomplete, you can help by expanding it.
+{{< /hint >}}
+

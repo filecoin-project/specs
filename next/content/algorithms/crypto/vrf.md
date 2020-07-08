@@ -1,5 +1,6 @@
 ---
 title: "Verifiable Random Function"
+weight: 10
 ---
 
 # Verifiable Random Function

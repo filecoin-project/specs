@@ -1,7 +1,8 @@
 ---
-menuIcon: ⛏
-menuTitle: "**Storage Mining**"
-title: "Storage Mining System - proving storage for producing blocks"
+title: "Storage Mining"
+description: Storage Mining System - proving storage for producing blocks
+bookCollapseSection: true
+weight: 6
 entries:
 - storage_mining
 - sector

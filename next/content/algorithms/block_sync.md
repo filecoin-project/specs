@@ -1,5 +1,6 @@
 ---
 title: "BlockSync"
+weight: 5
 ---
 
 # BlockSync

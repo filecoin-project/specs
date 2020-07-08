@@ -1,7 +1,11 @@
 ---
 title: "PoRep Commitments"
-suppressMenu: true
-entries:
-  - sdr_commitments
+weight: 2
 ---
 
+# PoRep Commitments
+---
+
+{{< hint warning >}}
+TODO: Description
+{{< /hint >}}

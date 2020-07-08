@@ -1,9 +1,10 @@
 ---
 title: Proof-of-Replication
-entries:
-- stacked_drg
-- porep_commitments
-- stacked_drg_circuit
+bookCollapseSection: true
+weight: 2
 ---
 
-See [Filecoin Paper](https://filecoin.io/filecoin.pdf)
+# Proof-of-Replication
+---
+
+{{< pdf src="https://filecoin.io/filecoin.pdf" title="Filecoin Paper">}}

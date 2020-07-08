@@ -1,16 +1,10 @@
 ---
 title: "Expected Consensus"
+weight: 1
 ---
 
 # Expected Consensus
 ---
-
-
-{{< hint danger >}}
-Issue with label
-{{< /hint >}}
-
-{{/* <label expected_consensus> */}}
 
 ## Algorithm
 

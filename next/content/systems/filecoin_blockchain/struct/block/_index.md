@@ -4,28 +4,17 @@ title: Block
 
 # Block
 ---
-
-{{< hint danger >}}
-Issue with label
-{{< /hint >}}
-
-{{/* <label block> */}}
-# Block
 The Block is a unit of the Filecoin blockchain.
 
 A block header contains information relevant to a particular point in time over which the network may achieve consensus.
 
-**Note:** A block is functionally the same as a block header in the Filecoin protocol. While a block header contains Merkle links to the full system state, messages, and message receipts, a block can be thought of as the full set of this information (not just the Merkle roots, but rather the full data of the state tree, message tree, receipts tree, etc.). Because a full block is quite large, our chain consists of block headers rather than full blocks. We often use the terms `block` and `block header` interchangeably.
+> **Note:** A block is functionally the same as a block header in the Filecoin protocol. While a block header contains Merkle links to the full system state, messages, and message receipts, a block can be thought of as the full set of this information (not just the Merkle roots, but rather the full data of the state tree, message tree, receipts tree, etc.). Because a full block is quite large, our chain consists of block headers rather than full blocks. We often use the terms `block` and `block header` interchangeably.
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
+{{< embed src="block.id" lang="go" >}}
 
-{{/* < readfile file="block.id" code="true" lang="go" > */}}
+{{< embed src="election.id" lang="go" >}}
 
-{{/* < readfile file="election.id" code="true" lang="go" > */}}
-
-# Block syntax validation
+## Block syntax validation
 
 Syntax validation refers to validation that may be performed on a block and its messages 
 without reference to outside information such as the parent state tree.
@@ -61,7 +50,7 @@ public key from the parent tipset state, so signature validation forms part of s
 Similarly, message signature validation requires lookup of the public key associated with 
 each message's `From` account actor in the block's parent state.
 
-# Block semantic validation
+## Block semantic validation
 
 Semantic validation refers to validation that requires reference to information outside the block
 header and messages themselves, in particular the parent tipset and state on which the block is built.

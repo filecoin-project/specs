@@ -1,6 +1,7 @@
 ---
-menuIcon: 📀
-title: "**Token**"
+title: "Token"
+bookCollapseSection: true
+weight: 5
 entries:
 - wallets
 - payment_channels
