@@ -1,0 +1,30 @@
+{{- if not (.Page.Scratch.Get "katex") -}}
+<!-- Include katext only first time -->
+<link rel="stylesheet" href="{{ "katex/katex.min.css" | relURL }}" />
+<script defer src="{{ "katex/katex.min.js" | relURL }}"></script>
+<script defer src="{{ "katex/auto-render.min.js" | relURL }}" onload='renderMathInElement(document.body, {
+  delimiters: [
+   {left: "$$", right: "$$", display: true},
+   {left: "$", right: "$", display: false},
+  ]
+});'></script>
+<style>
+.katex-display {
+  margin: 0;
+}
+.katex-display > .katex {
+  text-align: left;
+}
+</style>
+
+
+{{- .Page.Scratch.Set "katex" true -}}
+{{- end -}}
+
+<!-- NOTE vmx 2020-07-08: I've modified the katex shortcode to take the raw
+  input, without any further processing. I also configured KaTeX to use `$`
+  and `$$` as recognized delimiters. So whenever some code within a `katex`
+  shortcode contains `$` or `$$`, it will render it with KaTeX. -->
+<span {{- with .Get "class" }} class="{{ . }}"{{ end }}>
+  {{ .Inner }}
+</span>
