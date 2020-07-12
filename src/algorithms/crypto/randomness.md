@@ -68,7 +68,8 @@ GetRandomness(dst, l, s):
 
 ## Drawing tickets from the VRF-chain for proof inclusion
 
-There are a few instances in which the protocol requires inclusion  to be drawn from the Filecoin blockchain's VRF-chain (which generates {{<sref tickets>}} with each new block), in order to tie certain proofs to a particular set of Filecoin blocks (i.e. a given chain or fork). This is notably the case for Seal Pre-commits (see {{<sref sealing>}}).
+In some places, the protocol needs randomness drawn from the Filecoin blockchain's VRF-chain (which generates {{<sref tickets>}} with each new block) rather than from the random beacon, in order to tie certain proofs to a particular set of Filecoin blocks (i.e. a given chain or fork).
+In particular, `SealRandomness` must be taken from the VRF chain, in order to ensure that no other fork can replay the Seal (see {{<sref sealing>}} for more).
 
 A ticket is drawn from the chain for randomness as follows, for a given epoch `n`, and ticket sought at epoch `e`:
 ```text
