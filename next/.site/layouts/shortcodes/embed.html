@@ -4,10 +4,9 @@
     {{ $.Scratch.Set "filepath" ( strings.TrimLeft "/" ( .Get "src" ))}}
 {{ else }}
 {{/* Relative to page */}}
-    {{ $.Scratch.Set "filepath" $.Page.Dir }}
+    {{ $.Scratch.Set "filepath" $.Page.File.Dir }}
     {{ $.Scratch.Add "filepath" ( .Get "src" ) }}
 {{ end }}
-
 
 {{ if fileExists ($.Scratch.Get "filepath") }}
     {{if eq (.Get "markdown") "true" }}

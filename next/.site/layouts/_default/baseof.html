@@ -73,7 +73,11 @@
 
 {{ define "main" }}
   <article class="markdown">
-    {{- .Content -}}
+    {{- if eq .Title "Home" -}}
+      {{ with .GetPage "/intro" }}{{ .Content }}{{end}}
+    {{- else -}}
+      {{- .Content -}}
+    {{- end -}}
   </article>
 {{ end }}
 
