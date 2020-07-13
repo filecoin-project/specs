@@ -47,7 +47,7 @@ to serve drand values over these distribution channels. See below section for
 more on the drand network configuration.
 
 On initialization, Filecoin initializes a [drand
-client](https://github.com/drand/drand/tree/master/client) with an chain `info`
+client](https://github.com/drand/drand/tree/master/client) with chain `info`
 that contains the following information:
 - `Period`                           -- the period of time between each drand randomness generation
 - `GenesisTime`                      -- at which the first round in the drand randomness chain is created

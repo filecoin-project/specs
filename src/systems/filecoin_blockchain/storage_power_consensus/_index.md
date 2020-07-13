@@ -74,13 +74,13 @@ calls below.
 In all cases, Filecoin blocks must include all drand beacon outputs generated
 since the last epoch in the `BeaconEntries` field of the block header. Any use
 of randomness from a given Filecoin epoch should use the last valid drand entry
-included in a Filecoin block, as follows:
+included in a Filecoin block. This is shown below.
 
 ### Get drand randomness for VM
 
 For operations such as Porep creation, proofs validations, anything that
-requires randomness from the VM point of view, the following method shows how to
-extract the drand entrie from the chain itself.
+requires randomness for the Filecoin VM, the following method shows how to
+extract the drand entry from the chain.
 Note that the round may span multiple filecoin epochs if drand is slower; the
 lowest epoch number block will contain the requested beacon entry. As well, if
 there has been null rounds where the beacon should have been inserted, we need
@@ -99,7 +99,7 @@ func GetRandomnessSeed(e ChainEpoch, head ChainEpoch) {
          // it may be the first or the last entry depending on the reason why
          // there was a null block before. If the drand entry is 
          // not assicated with this block, it means the block is invalid - but
-         // this is caught up by the block validation logic.
+         // this condition is caught by the block validation logic.
          returns getDrandEntryFromBlockHeader(chain.Block(minEpoch))
     // otherwise, we need to continue progressing on the chain, i.e. maybe no
     // miner were elected or filecoin / drand outage
