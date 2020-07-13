@@ -8,11 +8,11 @@ title: Sector Sealer
 {{< hint danger >}}
 Issue with label
 {{< /hint >}}
-{{/* <label sector_sealer> */}}
+{{/* <label sector_sealer>}}
 
 Sector Sealer
 
 {{< hint danger >}}
 Issue with readfile
 {{< /hint >}}
-{{/* < readfile file="sector_sealer.id" code="true" lang="go" > */}}
+{{<embed src="sector_sealer.id"  lang="go" >}}

@@ -1,13 +1,14 @@
 ---
-menuTitle: Genesis
-statusIcon: 🔁
-title: Genesis - starting the Blockchain
+title: Genesis
+description: Genesis - starting the Blockchain
+weight: 6
 ---
 
-# Genesis
+# Genesis - starting the Blockchain
 ---
-
+{{< hint warning >}}
 **WARNING:** This section is not yet complete.
+{{< /hint >}}
 
 Network Bootstrapping starts with production of the genesis block. 
 

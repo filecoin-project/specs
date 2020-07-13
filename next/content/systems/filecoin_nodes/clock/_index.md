@@ -1,21 +1,13 @@
 ---
 title: Clock
-statusIcon: ✅
+weight: 4
 ---
 
 # Clock
 ---
 
-{{< hint danger >}}
-Issue with label
-{{< /hint >}}
-{{/* <label clock> */}}
-
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="clock_subsystem.id" code="true" lang="go" > */}}
-{{/* < readfile file="clock_subsystem.go" code="true" lang="go" > */}}
+{{<embed src="clock_subsystem.id" lang="go" >}}
+{{<embed src="clock_subsystem.go" lang="go" >}}
 
 
 Filecoin assumes weak clock synchrony amongst participants in the system. That is, the system relies on participants having access to a globally synchronized clock (tolerating some bounded drift).
@@ -26,13 +18,13 @@ Filecoin relies on this system clock in order to secure consensus.  Specifically
 ## Clock uses
 The Filecoin system clock is used:
 
-- by syncing nodes to validate that incoming blocks were mined in the appropriate epoch given their timestamp (see [Block Validation](\missing-link)).  This is possible because the system clock maps all times to a unique epoch number totally determined by the start time in the genesis block.
+- by syncing nodes to validate that incoming blocks were mined in the appropriate epoch given their timestamp (see [Block Validation](block#block-syntax-validation)).  This is possible because the system clock maps all times to a unique epoch number totally determined by the start time in the genesis block.
 - by syncing nodes to drop blocks coming from a future epoch
-- by mining nodes to maintain protocol liveness by allowing participants to try leader election in the next round if no one has produced a block in the current round (see [Storage Power Consensus](\missing-link)).
+- by mining nodes to maintain protocol liveness by allowing participants to try leader election in the next round if no one has produced a block in the current round (see [Storage Power Consensus](storage_power_consensus)).
 
 In order to allow miners to do the above, the system clock must:
 
-1. Have low enough clock drift (sub 1s) relative to other nodes so that blocks are not mined in epochs considered future epochs from the persective of other nodes (those blocks should not be validated until the proper epoch/time as per [validation rules](\link-to-block)).
+1. Have low enough clock drift (sub 1s) relative to other nodes so that blocks are not mined in epochs considered future epochs from the persective of other nodes (those blocks should not be validated until the proper epoch/time as per [validation rules](block#block-semantic-validation)).
 2. Set epoch number on node initialization equal to `epoch = Floor[(current_time - genesis_time) / epoch_time]`
 
 It is expected that other subsystems will register to a NewRound() event from the clock subsystem.

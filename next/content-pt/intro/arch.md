@@ -18,14 +18,14 @@ dashboardInterface: incorrect
 {{< /details >}}
 
 
-{{< svg src="/.assets/overview.dot.svg" title="Protocol Overview Diagram" />}}
+{{< svg src="/.assets/overview.dot.svg" title="Protocol Overview Diagram" >}}
 
 ## Protocol Flow Diagram
 
-{{< svg src="/.assets/full-deals-on-chain.mmd.svg" title="Deals on Chain" />}}
+{{< svg src="/.assets/full-deals-on-chain.mmd.svg" title="Deals on Chain" >}}
 
 ## Parameter Calculation Dependency Graph
 
 This is a diagram of the model for parameter calculation. This is made with [orient](https://github.com/filecoin-project/orient), our tool for modeling and solving for constraints.
 
-{{< svg src="/.assets/filecoin.dot.svg" title="Protocol Overview Diagram" />}}
+{{< svg src="/.assets/filecoin.dot.svg" title="Protocol Overview Diagram" >}}

@@ -11,4 +11,4 @@ Sector Sealer
 {{< hint danger >}}
 Issue with readfile
 {{< /hint >}}
-{{/* < readfile file="sealer.id" code="true" lang="go" > */}}
+{{<embed src="sealer.id"  lang="go" >}}

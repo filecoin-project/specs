@@ -1,11 +1,12 @@
 ---
 title: "Retrieval Client"
+weight: 3
 ---
 
 # Retrieval Client
 ---
 
-# Client Dependencies
+## Client Dependencies
 
 The Retrieval Client Depends On The Following Dependencies
 
@@ -14,10 +15,6 @@ The Retrieval Client Depends On The Following Dependencies
 - **BlockStore**: Same as one used by data transfer module
 - **Data Transfer**: V1 only --Module used for transferring payload. Writes to the blockstore.
 
-# API
+## API
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-
-{{/* < readfile file="retrieval_client.id" code="true" lang="go" > */}}
+{{<embed src="retrieval_client.id" lang="go" >}}

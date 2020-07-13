@@ -1,11 +1,12 @@
 ---
 title: Retrieval Miner Node
+weight: 6
 ---
 
 # Retrieval Miner Node
 ---
 
-```
+```go
 type RetrievalMinerNode interface {
   FilecoinNode
 

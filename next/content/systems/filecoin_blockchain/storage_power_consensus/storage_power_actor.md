@@ -5,28 +5,15 @@ title: Storage Power Actor
 # Storage Power Actor
 ---
 
-# `StoragePowerActorState` implementation
+## `StoragePowerActorState` implementation
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
+{{< embed src="/docs/actors/actors/builtin/storage_power/storage_power_actor_state.go" lang="go" >}}
 
-{{/* < readfile file="/docs/actors/actors/builtin/storage_power/storage_power_actor_state.go" code="true" lang="go" > */}}
+## `StoragePowerActor` implementation
 
-# `StoragePowerActor` implementation
+{{< embed src="/docs/actors/actors/builtin/storage_power/storage_power_actor.go" lang="go" >}}
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-
-{{/* < readfile file="/docs/actors/actors/builtin/storage_power/storage_power_actor.go" code="true" lang="go" > */}}
-
-{{< hint danger >}}
-Issue with label
-{{< /hint >}}
-
-{{/* <label power_table> */}}
-# The Power Table
+## The Power Table
 
 The portion of blocks a given miner generates through leader election in EC (and so the block rewards they earn) is proportional to their `Power Fraction` over time. That is, a miner whose storage represents 1% of total storage on the network should mine 1% of blocks on expectation.
 
@@ -48,12 +35,7 @@ The Miner lifecycle in the power table should be roughly as follows:
 
 To summarize, only sectors in the Active state will command power. A Sector becomes Active when it is added upon ProveCommit. Power is immediately decremented upon when TemporaryFault begins on an Active sector or when the miner is in Challenged or DetectedFault state. Power will be restored when TemporaryFault has ended and when the miner successfully responds to a SurprisePoSt challenge. A sector's power is removed when it is terminated through either miner invocation or normal expiration. 
 
-{{< hint danger >}}
-Issue with label
-{{< /hint >}}
-
-{{/* <label pledge_collateral> */}}
-# Pledge Collateral
+## Pledge Collateral
 
 Consensus in Filecoin is secured in part by economic incentives enforced by Pledge Collateral.
 

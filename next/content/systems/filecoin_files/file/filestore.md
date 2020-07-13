@@ -1,9 +1,8 @@
 ---
-menuTitle: FileStore
 title: "FileStore - Local Storage for Files"
 ---
 
-# Filestore
+# FileStore - Local Storage for Files
 ---
 
 The `FileStore` is an abstraction used to refer to any underlying system or device
@@ -13,13 +12,9 @@ implementations make it easy for end-users to replace the underlying storage sys
 whatever suits their needs. The simplest version of `FileStore` is just the host operating
 system's file system.
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
+{{< embed src="filestore.id" lang="go" >}}
 
-{{/* < readfile file="filestore.id" code="true" lang="go" > */}}
-
-# Varying user needs
+## Varying user needs
 
 Filecoin user needs vary significantly, and many users -- especially miners -- will implement
 complex storage architectures underneath and around Filecoin. The `FileStore` abstraction is here
@@ -28,7 +23,7 @@ storage in the Filecoin Protocol is defined in terms of this `FileStore` interfa
 it easy for implementations to make swappable, and for end-users to swap out with their system
 of choice.
 
-# Implementation examples
+## Implementation examples
 
 The `FileStore` interface may be implemented by many kinds of backing data storage systems. For example:
 

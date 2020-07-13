@@ -5,14 +5,11 @@ title: Sector Sealing
 # Sector Sealing
 ---
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="sealing.id" code="true" lang="go" > */}}
+{{<embed src="sealing.id" lang="go" >}}
 
 ## Drawing randomness for sector commitments
 
-[Tickets](\link-to-ticket-chain) are used as input to calculation of the ReplicaID in order to tie Proofs-of-Replication to a given chain, thereby preventing long-range attacks (from another miner in the future trying to reuse SEALs).
+[Tickets](storage_power_consensus#the-ticket-chain-and-drawing-randomness "The Ticket chain and drawing randomness") are used as input to calculation of the ReplicaID in order to tie Proofs-of-Replication to a given chain, thereby preventing long-range attacks (from another miner in the future trying to reuse SEALs).
 
 The ticket has to be drawn from a finalized block in order to prevent the miner from potential losing storage (in case of a chain reorg) even though their storage is intact.
 
@@ -31,17 +28,17 @@ We expect Filecoin will be able to produce estimates for sector commitment time 
 `(estimate, variance) <--- SEALTime(sectors)`
 G and T will be selected using these.
 
-#### Picking a Ticket to Seal
+## Picking a Ticket to Seal
 
 When starting to prepare a SEAL in round X, the miner should draw a ticket from X-F with which to compute the SEAL.
 
-#### Verifying a Seal's ticket
+## Verifying a Seal's ticket
 
 When verifying a SEAL in round Z, a verifier should ensure that the ticket used to generate the SEAL is found in the range of rounds [Z-T-F-G, Z-T-F+G].
 
-#### In Detail
+### In Detail
 
-```
+```text
                                Prover
            ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
           │
@@ -70,6 +67,6 @@ We break this down as follows:
   - (approximate) SEAL time (T)
 - Because T is an approximate value, and to account for network delay and variance in SEAL time across miners, the verifier allows for G offset from the assumed value of `X-F`: `Z-T-F`, hence verifying that the ticket is drawn from the range `[Z-T-F-G, Z-T-F+G]`.
 
-#### In Practice
+### In Practice
 
 The Filecoin protocol will include a `MAX_SEAL_TIME` for each sector size and proof type.

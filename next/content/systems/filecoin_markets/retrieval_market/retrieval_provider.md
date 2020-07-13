@@ -1,11 +1,12 @@
 ---
 title: "Retrieval Provider (Miner)"
+weight: 4
 ---
 
 # Retrieval Provider (Miner)
 ---
 
-# Provider Dependencies
+## Provider Dependencies
 
 The Retrieval Provider Depends On The Following Dependencies
 
@@ -15,10 +16,6 @@ The Retrieval Provider Depends On The Following Dependencies
 - **BlockStore**: Same as one used by data transfer module
 - **Data Transfer**: V1 only -- Module used for transferring payload. Reads from the blockstore.
 
-# API
+## API
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-
-{{/* < readfile file="retrieval_provider.id" code="true" lang="go" > */}}
+{{<embed src="retrieval_provider.id" lang="go" >}}

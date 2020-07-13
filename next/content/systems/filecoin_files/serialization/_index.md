@@ -1,10 +1,12 @@
 ---
-menuTitle: Formats and Serialization
-statusIcon: 🔁
-title: Data Formats and Serialization 
+title: Formats and Serialization 
+weight: 4
+dashboardAudit: 1
+dashboardState: wip
+dashboardInterface: stable
 ---
 
-# Formats and Serialization
+# Data Formats and Serialization
 ---
 
 Filecoin seeks to make use of as few data formats as needed, with well-specced serialization rules to
@@ -13,15 +15,15 @@ Filecoin protocol.
 
 Read more on design considerations [here for CBOR-usage](https://github.com/filecoin-project/specs/issues/621) and [here for int types in Filecoin](https://github.com/filecoin-project/specs/issues/615).
 
-### Data Formats
+## Data Formats
 
 Filecoin in-memory data types are mostly straightforward.
 Implementations should support two integer types: Int (meaning native 64-bit integer), and BigInt (meaning arbitrary length)
 and avoid dealing with floating-point numbers to minimize interoperability issues across programming languages and implementations.
 
-You can also read more on [data formats as part of randomness generation](\link-to-randomness) in the Filecoin protocol.
+You can also read more on [data formats as part of randomness generation]({{< ref "randomness" >}}) in the Filecoin protocol.
 
-### Serialization
+## Serialization
 
 Data `Serialization` in Filecoin ensures a consistent format for serializing in-memory data for transfer
 in-flight and in-storage. Serialization is critical to protocol security and interoperability across

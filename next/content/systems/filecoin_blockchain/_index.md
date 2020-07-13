@@ -3,6 +3,9 @@ menuIcon: 📦
 title: "Blockchain"
 bookCollapseSection: true
 weight: 4
+dashboardAudit: 1
+dashboardState: permanent
+dashboardInterface: stable
 ---
 
 # Blockchain

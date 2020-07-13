@@ -1,16 +1,13 @@
 ---
-menuTitle: Runtime
-statusIcon: 🔁
-title: VM Runtime Environment (Inside the VM)
-entries:
-- exitcode
-- gascost
+title: Runtime
+weight: 5
+bookCollapseSection: true
 ---
 
 # VM Runtime Environment (Inside the VM)
 ---
 
-# Receipts
+## Receipts
 
 A `MessageReceipt` contains the result of a top-level message execution.
 
@@ -20,30 +17,18 @@ A syntactically valid receipt has:
 - a non empty `ReturnValue` only if the exit code is zero,
 - a non-negative `GasUsed`.
 
-# `vm/runtime` interface
+## `vm/runtime` interface
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="/docs/actors/actors/runtime/runtime.go" code="true" lang="go" > */}}
+{{<embed src="/docs/actors/actors/runtime/runtime.go" lang="go" >}}
 
-# `vm/runtime` implementation
+## `vm/runtime` implementation
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="impl/runtime.go" code="true" lang="go" > */}}
+{{<embed src="impl/runtime.go" lang="go" >}}
 
-# Code Loading
+## Code Loading
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="impl/codeload.go" code="true" lang="go" > */}}
+{{<embed src="impl/codeload.go" lang="go" >}}
 
-# Exit codes
+## Exit codes
 
-{{< hint danger >}}
-Issue with label
-{{< /hint >}}
-{{/* < readfile file="/docs/actors/actors/runtime/exitcode/vm_exitcodes.go" code="true" lang="go" > */}}
+{{<embed src="/docs/actors/actors/runtime/exitcode/vm_exitcodes.go" lang="go" >}}

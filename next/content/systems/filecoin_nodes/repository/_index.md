@@ -1,11 +1,7 @@
 ---
-menuTitle: Repository
-statusIcon: ✅
-title: "Repository - Local Storage for Chain Data and Systems"
-entries:
-  - config
-  - key_store
-  - ipldstore
+title: Repository
+weight: 2
+bookCollapseSection: true
 ---
 
 # Repository - Local Storage for Chain Data and Systems
@@ -17,7 +13,4 @@ The repo is accessible to the node's systems and subsystems and acts as local st
 
 It stores the node's keys, the IPLD datastructures of stateful objects and node configs.
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="repository_subsystem.id" code="true" lang="go" > */}}
+{{<embed src="repository_subsystem.id" lang="go" >}}

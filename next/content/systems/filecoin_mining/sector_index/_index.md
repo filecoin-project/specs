@@ -1,11 +1,7 @@
 ---
 title: Sector Index
-statusIcon: ✅
-entries:
-- sector
-- sector_index
-- sector_builder
-- sector_store
+weight: 3
+bookCollapseSection: true
 ---
 
 # Sector Index
@@ -14,4 +10,4 @@ entries:
 {{< hint danger >}}
 Issue with readfile
 {{< /hint >}}
-{{/* < readfile file="sector_index_subsystem.id" code="true" lang="go" > */}}
+{{<embed src="sector_index_subsystem.id"  lang="go" >}}

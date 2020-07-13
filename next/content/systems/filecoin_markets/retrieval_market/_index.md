@@ -1,24 +1,19 @@
 ---
-menuTitle: Retrieval Market
-statusIcon: ✅
-title: "Retrieval Market in Filecoin"
-entries:
-- retrieval_peer_resolver
-- retrieval_protocols
-- retrieval_client
-- retrieval_provider
+title: Retrieval Market
+bookCollapseSection: true
+weight: 2
 ---
 
-# Retrieval Market
+# Retrieval Market in Filecoin
 ---
 
-# Components
+## Components
 
 The `retrieval market` refers to the process of negotiating deals for a provider to serve stored data to a client.
 
 The main components are as follows:
 
-- A payment channel actor (see [Payment Channel Actor](\missing-link) for details)
+- A payment channel actor (see {{<link payment_channel_actor>}} for details)
 - 2 `libp2p` services - 
    - a protocol for making queries
    - a protocol for negotiating and carrying out retrieval deals (will disappear as a seperate libp2p protocol as retrieval markets evolve)
@@ -26,7 +21,7 @@ The main components are as follows:
 - A client module to query retrieval miners and initiate deals for retrieval
 - A provider module to respond to queries and deal proposals
 
-# VO & V1
+## VO & V1
 
 V0 of the protocol has participants send data over the retrieval protocol itself in a series of Blocks encoded in Bitswap format and verify received blocks manually. It will only support fetching the payload CID which is at the root of PieceCID's `.car` File, and will only support fetching the whole DAG.
 
@@ -36,13 +31,9 @@ V1 will also include additional mechanisms for timeouts and cancellations (to be
 
 Though the underlying protocols will change, the API interfaces for the client & provider will not change from V0 to V1.
 
-# Deal Flow (V0)
+## Deal Flow (V0)
 
-{{< hint danger >}}
-SVG Diagram
-{{< /hint >}}
-
-{{/* < diagram src="retrieval_flow_v0.mmd.svg" title="Retrieval Flow - V0" > */}}
+{{<svg src="retrieval_flow_v0.mmd.svg" title="Retrieval Flow - V0" >}}
 
 The baseline version of proposing and accepting a deal will work as follows:
 
@@ -63,13 +54,9 @@ The baseline version of proposing and accepting a deal will work as follows:
 - The client consumes blocks until payment is required again
 - The process continues until the end of the query
 
-# Deal Flow (V1)
+## Deal Flow (V1)
 
-{{< hint danger >}}
-SVG Diagram
-{{< /hint >}}
-
-{{/* < diagram src="retrieval_flow_v1.mmd.svg" title="Retrieval Flow - V1" > */}}
+{{<svg src="retrieval_flow_v1.mmd.svg" title="Retrieval Flow - V1" >}}
 
 The evolved protocol for proposing and accepting a deal will work as follows:
 
@@ -89,7 +76,7 @@ The evolved protocol for proposing and accepting a deal will work as follows:
 - The provider resumes both the request and sending data
 - The process continues until the end of the query
 
-# Bootstrapping Trust
+## Bootstrapping Trust
 
 Neither the client nor the provider have any specific reason to trust the other. Therefore, payment for a retrieval deal is done incrementally, sending vouchers as bytes are sent and verified.
 
@@ -106,10 +93,6 @@ The trust process is as follows:
    - The process continues till the end of the retrieval, when the last payment will simply be for the remainder of bytes
 - Additional trust mechanisms in the V1 version of the protocol will include agreed upon timeouts and cancellation fees
 
-# Common Data Types
+## Common Data Types
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-
-{{/* < readfile file="types.id" code="true" lang="go" > */}}
+{{<embed src="types.id" lang="go" >}}

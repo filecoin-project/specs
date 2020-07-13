@@ -1,5 +1,6 @@
 ---
 title: "Storage Provider"
+weight: 3
 ---
 
 # Storage Provider
@@ -9,9 +10,6 @@ The `StorageProvider` is a module that handles incoming queries for Asks and pro
 
 Because most of what a Storage Provider does is respond to actions initiated by a `StorageClient`, most of its public facing methods relate to getting current status on deals, as opposed to initiating new actions. However, a user of the `StorageProvider` module can update the current Ask for the provider.
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="storage_provider.id" code="true" lang="go" > */}}
+{{< embed src="storage_provider.id" lang="go" >}}
 
 <!-- # Storage Provider State Machine -->

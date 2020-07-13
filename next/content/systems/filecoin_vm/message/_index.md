@@ -1,7 +1,6 @@
 ---
-menuTitle: Message
-statusIcon: ✅
-title: VM Message - Actor Method Invocation
+title: Message
+weight: 4
 ---
 
 # VM Message - Actor Method Invocation
@@ -21,11 +20,7 @@ for the gas units consumed by a message's execution (including all nested messag
 gas price they determine. A block producer chooses which messages to include in a block and is
 rewarded according to each message's gas price and consumption, forming a market.
 
-{{< hint danger >}}
-Issue with label
-{{< /hint >}}
-{{/* <label message_syntax> */}}
-# Message syntax validation
+## Message syntax validation
 
 A syntactically invalid message must not be transmitted, retained in a message pool, or
 included in a block.
@@ -47,7 +42,7 @@ When transmitted individually (before inclusion in a block), a message is packag
 
 - has a total serialized size no greater than `message.MessageMaxSize`.
 
-# Message semantic validation
+## Message semantic validation
 
 Semantic validation refers to validation requiring information outside of the message itself.
 
@@ -72,9 +67,6 @@ be applied to cannot be known before the message is executed _as part of a tipse
 does not know whether another block will precede it in the tipset, thus altering the state to
 which the block's messages will apply from the declared parent state.
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="message.id" code="true" lang="go" > */}}
+{{<embed src="message.id" lang="go" >}}
 
-{{/* < readfile file="message.go" code="true" lang="go" > */}}
+{{<embed src="message.go" lang="go" >}}

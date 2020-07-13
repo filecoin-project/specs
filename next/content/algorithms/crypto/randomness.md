@@ -66,7 +66,7 @@ Issue with readfile
 {{< /hint >}}
 
 See the `RandomnessSeedAtEpoch` method below:
-{{</* readfile file="../struct/chain/chain.go" code="true" lang="go" */>}}
+{{</* readfile file="../struct/chain/chain.go"  lang="go" */>}}
 
 ## Forming Randomness Seeds
 
@@ -104,8 +104,8 @@ GetRandomness(dst, l, s):
 Issue with readfile
 {{< /hint >}}
 
-{{</* readfile file="/docs/actors/actors/crypto/randomness.go" code="true" lang="go" */>}}
-{{</* readfile file="/docs/systems/filecoin_blockchain/struct/chain/chain.go" code="true" lang="go" */>}}
+{{</* readfile file="/docs/actors/actors/crypto/randomness.go"  lang="go" */>}}
+{{</* readfile file="/docs/systems/filecoin_blockchain/struct/chain/chain.go"  lang="go" */>}}
 
 ## Entropy to be used with randomness
 

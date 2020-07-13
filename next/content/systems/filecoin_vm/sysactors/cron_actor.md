@@ -1,12 +1,9 @@
 ---
 title: CronActor
+weight: 2
 ---
 
 # CronActor
 ---
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-
-{{/* < readfile file="/docs/actors/actors/builtin/cron/cron_actor.go" code="true" lang="go" > */}}
+{{<embed src="/docs/actors/actors/builtin/cron/cron_actor.go"  lang="go">}}

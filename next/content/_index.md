@@ -28,12 +28,6 @@ over time, without requiring further interaction from the original parties
 
 ## Status Overview
 
-<i class="gg-incorrect"></i> Incorrect
-<i class="gg-wip"></i> WIP
-<i class="gg-incomplete"></i> Incomplete
-<i class="gg-stable"></i> Stable
-<i class="gg-permanent"></i> Permanent
-
 {{< dashboard name="Introduction" >}}
 
 ## Overview Diagram
@@ -45,17 +39,17 @@ over time, without requiring further interaction from the original parties
   - move data_transfers into Token
 {{< /details >}}
 
-{{< svg src=".assets/overview.dot.svg" title="Protocol Overview Diagram" />}}
+{{< svg src=".assets/overview.dot.svg" title="Protocol Overview Diagram" >}}
 
 ## Protocol Flow Diagram
 
-{{< svg src=".assets/full-deals-on-chain.mmd.svg" title="Deals on Chain" />}}
+{{< svg src=".assets/full-deals-on-chain.mmd.svg" title="Deals on Chain" >}}
 
 ## Parameter Calculation Dependency Graph
 
 This is a diagram of the model for parameter calculation. This is made with [orient](https://github.com/filecoin-project/orient), our tool for modeling and solving for constraints.
 
-{{< svg src="/.assets/filecoin.dot.svg" title="Protocol Overview Diagram" />}}
+{{< svg src="/.assets/filecoin.dot.svg" title="Protocol Overview Diagram" >}}
 
 
 ## Key Concepts

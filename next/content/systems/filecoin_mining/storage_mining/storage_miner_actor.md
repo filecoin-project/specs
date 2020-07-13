@@ -8,15 +8,15 @@ title: Storage Miner Actor
 {{< hint danger >}}
 Issue with label
 {{< /hint >}}
-{{/* <label storage_miner_actor> */}}
+{{/* <label storage_miner_actor>}}
 
 # `StorageMinerActorState` implementation
 
 {{< hint danger >}}
 Issue with readfile
 {{< /hint >}}
-{{/* < readfile file="/docs/actors/actors/builtin/storage_miner/storage_miner_actor_state.go" code="true" lang="go" > */}}
+{{<embed src="/docs/actors/actors/builtin/storage_miner/storage_miner_actor_state.go"  lang="go" >}}
 
 # `StorageMinerActorCode` implementation
 
-{{/* < readfile file="/docs/actors/actors/builtin/storage_miner/storage_miner_actor.go" code="true" lang="go" > */}}
+{{<embed src="/docs/actors/actors/builtin/storage_miner/storage_miner_actor.go"  lang="go" >}}

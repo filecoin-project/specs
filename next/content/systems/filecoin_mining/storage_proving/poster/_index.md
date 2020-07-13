@@ -9,8 +9,8 @@ title: Sector Poster
 {{< hint danger >}}
 Issue with readfile
 {{< /hint >}}
-{{/* < readfile file="post_generator.id" code="true" lang="go" > */}}
+{{<embed src="post_generator.id"  lang="go" >}}
 
-{{/* < readfile file="post_generator.go" code="true" lang="go" > */}}
+{{<embed src="post_generator.go"  lang="go" >}}
 
 # PoSt Generator object

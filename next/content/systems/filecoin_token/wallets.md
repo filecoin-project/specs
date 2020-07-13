@@ -1,7 +1,6 @@
 ---
-menuTitle: Wallet
-statusIcon: 🛑
-title: FIL Wallet
+title: Wallet
+weight: 1
 ---
 
 # FIL Wallet

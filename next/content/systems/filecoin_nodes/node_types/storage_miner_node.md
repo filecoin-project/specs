@@ -1,11 +1,12 @@
 ---
 title: Storage Miner Node
+weight: 5
 ---
 
 # Storage Miner Node
 ---
 
-```
+```go
 type StorageMinerNode interface {
   FilecoinNode
 

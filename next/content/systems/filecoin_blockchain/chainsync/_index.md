@@ -1,18 +1,13 @@
 ---
-menuTitle: ChainSync
-statusIcon: ✅
-title: ChainSync - synchronizing the Blockchain
+title: ChainSync
+weight: 3
+description: ChainSync - synchronizing the Blockchain
 ---
 
-# ChainSync
+# ChainSync - synchronizing the Blockchain
 ---
 
-{{< hint danger >}}
-Issue with label
-{{< /hint >}}
-
-{{/* <label chain_sync> */}}
-# What is blockchain synchronization?
+## What is blockchain synchronization?
 
 Blockchain synchronization ("sync") is a key part of a blockchain system.
 It handles retrieval and propagation of blocks and transactions (messages), and
@@ -20,14 +15,14 @@ thus is in charge of distributed state replication.
 **This process is security critical -- problems here can be catastrophic to the
 operation of a blockchain.**
 
-# What is ChainSync?
+## What is ChainSync?
 
 `ChainSync` is the protocol Filecoin uses to synchronize its blockchain. It is
 specific to Filecoin's choices in state representation and consensus rules,
 but is general enough that it can serve other blockchains. `ChainSync` is a
 group of smaller protocols, which handle different parts of the sync process.
 
-# Terms and Concepts
+## Terms and Concepts
 
 - `LastCheckpoint` the last hard social-consensus oriented checkpoint that `ChainSync` is aware of.
   This consensus checkpoint defines the minimum finality, and a minimum of history to build on.
@@ -38,7 +33,7 @@ group of smaller protocols, which handle different parts of the sync process.
 - `BestTargetHead` the single best chain head `BlockCID` to try to sync to.
   This is the first element of `TargetHeads`
 
-# ChainSync Summary
+## ChainSync Summary
 
 At a high level, `ChainSync` does the following:
 
@@ -64,7 +59,7 @@ At a high level, `ChainSync` does the following:
   - Step 2. Receive, validate, and propagate received `Blocks`
   - Step 3. Now with greater certainty of having the best chain, finalize Tipsets, and advance chain state.
 
-# libp2p Network Protocols
+## libp2p Network Protocols
 
 As a networking-heavy protocol, `ChainSync` makes heavy use of `libp2p`. In particular, we use three sets of protocols:
 
@@ -102,7 +97,7 @@ More concretely, we use these protocols:
   - **(required)** `libp2p.Graphsync` the data transfer protocol nodes must support for providing blockchain and user data
   - **(optional)** `BlockSync` a blockchain data transfer protocol that can be used by some nodes
 
-# Subcomponents
+## Subcomponents
 
 Aside from `libp2p`, `ChainSync` uses or relies on the following components:
 
@@ -117,12 +112,12 @@ Aside from `libp2p`, `ChainSync` uses or relies on the following components:
   - `chainsync.AncestryGraph` a datastructure to efficiently link `Blocks`, `Tipsets`, and `PartialChains`
   - `chainsync.ValidationGraph` a datastructure for efficient and secure validation of `Blocks` and `Tipsets`
 
-## Graphsync in ChainSync
+### Graphsync in ChainSync
 
 `ChainSync` is written in terms of `Graphsync`. `ChainSync` adds blockchain and filecoin-specific
 synchronization functionality that is critical for Filecoin security.
 
-### Rate Limiting Graphsync responses (SHOULD)
+#### Rate Limiting Graphsync responses (SHOULD)
 
 When running Graphsync, Filecoin nodes must respond to graphsync queries. Filecoin requires nodes
 to provide critical data structures to others, otherwise the network will not function. During
@@ -160,7 +155,7 @@ We recommend the following:
   - Introspect Graphsync requests and filter/deny/rate limit suspicious ones
 
 
-## Previous BlockSync protocol
+### Previous BlockSync protocol
 
 Prior versions of this spec recommended a `BlockSync` protocol. This protocol definition is
 [available here](https://github.com/filecoin-project/specs/blob/prevspec/network-protocols.md#blocksync).
@@ -170,21 +165,18 @@ MAY opt to use additional protocols to achieve the results.
 That said, Nodes MUST implement the version of `ChainSync` as described in this spec in order to
 be considered implementations of Filecoin. Test suites will assume this protocol.
 
-# ChainSync State Machine
+## ChainSync State Machine
 
 `ChainSync` uses the following _conceptual_ state machine. Since this is a _conceptual_ state machine,
 implementations MAY deviate from implementing precisely these states, or dividing them strictly.
 Implementations MAY blur the lines between the states. If so, implementations MUST ensure security
 of the altered protocol.
 
-State Machine:
-{{< hint danger >}}
-Issue with diagram
-{{< /hint >}}
-{{/* < diagram src="chainsync_fsm.dot.svg" title="ChainSync State Machine" > */}}
+{{< svg src="chainsync_fsm.dot.svg" title="ChainSync State Machine" >}}
 
 
-## ChainSync FSM: `INIT`
+
+### ChainSync FSM: `INIT`
 
 - beginning state. no network connections, not synchronizing.
 - local state is loaded: internal data structures (eg chain, cache) are loaded
@@ -204,7 +196,7 @@ Issue with diagram
 - **transitions out:**
   - once done verifying things: move to `BOOTSTRAP`
 
-## ChainSync FSM: `BOOTSTRAP`
+### ChainSync FSM: `BOOTSTRAP`
 
 - `network.Bootstrap()`: establish connections to peers until we satisfy security requirement
   - for better security, use many different `libp2p.PeerDiscovery` protocols
@@ -225,7 +217,7 @@ Issue with diagram
     - if node does not have the `Blocks` or `StateTree` corresponding to `LastTrustedCheckpoint`: move to `SYNC_CHECKPOINT`
     - otherwise: move to `CHAIN_CATCHUP`
 
-## ChainSync FSM: `SYNC_CHECKPOINT`
+### ChainSync FSM: `SYNC_CHECKPOINT`
 
 - While in this state:
   - `ChainSync` is well-bootstrapped, but does not yet have the `Blocks` or `StateTree` for `LastTrustedCheckpoint`
@@ -267,7 +259,7 @@ Issue with diagram
 - **transitions out:**
   - once node receives and verifies complete `StateTree` for `LastTrustedCheckpoint`: move to `CHAIN_CATCHUP`
 
-## ChainSync FSM: `CHAIN_CATCHUP`
+### ChainSync FSM: `CHAIN_CATCHUP`
 
 - While in this state:
   - `ChainSync` is well-bootstrapped, and has an initial **trusted** `StateTree` to start from.
@@ -300,7 +292,7 @@ Issue with diagram
   - (Perhaps moving to `CHAIN_FOLLOW` when 1-2 blocks back in validation may be ok.
     - we dont know we have the right head until we validate it, so if other heads of similar height are right/better, we won't know until then.)
 
-## ChainSync FSM: `CHAIN_FOLLOW`
+### ChainSync FSM: `CHAIN_FOLLOW`
 
 - While in this state:
   - `ChainSync` is well-bootstrapped, and has an initial **trusted** `StateTree` to start from.
@@ -329,9 +321,9 @@ Issue with diagram
   - if `EpochGap > MaxEpochGap`: move to `CHAIN_CATCHUP`
   - if node is shut down: move to `INIT`
 
-# Block Fetching, Validation, and Propagation
+## Block Fetching, Validation, and Propagation
 
-## Notes on changing `TargetHeads` while syncing
+### Notes on changing `TargetHeads` while syncing
 
 - `TargetHeads` is changing, as `ChainSync` must be aware of the best heads at any time. reorgs happen, and our first set of peers could've been bad, we keep discovering others.
   - Hello protocol is good, but it's polling. Unless node is constantly polllng, won't see all the heads.
@@ -339,7 +331,7 @@ Issue with diagram
   - Weight can also be close between 2+ possible chains (long-forked), and `ChainSync` must select the right one (which, we may not be able to distinguish until validating all the way)
 - fetching + validation are strictly faster per round on average than blocks produced/block time (if they're not, will always fall behind), so we definitely catch up eventually (and even quickly). The last couple rounds can be close ("almost got it, almost got it, there").
 
-## General notes on fetching Blocks
+### General notes on fetching Blocks
 
 - `ChainSync` selects and maintains a set of the most likely heads to be correct from among those received
   via `BlockPubsub`. As more blocks are received, the set of `TargetHeads` is reevaluated.
@@ -354,7 +346,7 @@ Issue with diagram
 - `ChainSync` delays syncing `Messages` until they are needed. Much of the structure of the partial chains can
   be checked and used to make syncing decisions without fetching the `Messages`.
 
-## Progressive Block Validation
+### Progressive Block Validation
 
 - [Blocks](\missing-link) may be validated in progressive stages, in order to minimize resource expenditure.
 - Validation computation is considerable, and a serious DOS attack vector.
@@ -371,11 +363,11 @@ Issue with diagram
   - **BV4 - Message Signatures**:
   - **BV5 - State tree**: Parent tipset message execution produces the claimed state tree root and receipts.
 
-Notes:
-- in `CHAIN_CATCHUP`, if a node is receiving/fetching hundreds/thousands of `BlockHeaders`, validating signatures can be very expensive, and can be deferred in favor of other validation. (ie lots of BlockHeaders coming in through network pipe, don't want to bound on sig verification, other checks can help dump blocks on the floor faster (BV0, BV2)
-- in `CHAIN_FOLLOW`, we're not receiving thousands, we're receiving maybe a dozen or 2 dozen packets in a few seconds. We receive cid w/ Sig and addr first (ideally fits in 1 packet), and can afford to (a) check if we already have the cid (if so done, cheap), or (b) if not, check if sig is correct before fetching header (expensive computation, but checking 1 sig is way faster than checking a ton). In practice likely that which one to do is dependent on miner tradeoffs. we'll recommend something but let miners decide, because one strat or the other may be much more effective depending on their hardware, on their bandwidth limitations, or their propensity to getting DOSed
+>Notes:
+>- in `CHAIN_CATCHUP`, if a node is receiving/fetching hundreds/thousands of `BlockHeaders`, validating signatures can be very expensive, and can be deferred in favor of other validation. (ie lots of BlockHeaders coming in through network pipe, don't want to bound on sig verification, other checks can help dump blocks on the floor faster (BV0, BV2)
+>- in `CHAIN_FOLLOW`, we're not receiving thousands, we're receiving maybe a dozen or 2 dozen packets in a few seconds. We receive cid w/ Sig and addr first (ideally fits in 1 packet), and can afford to (a) check if we already have the cid (if so done, cheap), or (b) if not, check if sig is correct before fetching header (expensive computation, but checking 1 sig is way faster than checking a ton). In practice likely that which one to do is dependent on miner tradeoffs. we'll recommend something but let miners decide, because one strat or the other may be much more effective depending on their hardware, on their bandwidth limitations, or their propensity to getting DOSed
 
-## Progressive Block Propagation (or BlockSend)
+### Progressive Block Propagation (or BlockSend)
 
 - In order to make Block propagation more efficient, we trade off network round trips for bandwidth usage.
 - **Motivating observations:**
@@ -412,7 +404,7 @@ Notes:
           - If `receiver` has _some_ of the messages:
               - `receiver` requests missing `Messages` from `sender`:
                   - `Graphsync.Pull(sender, SelectAll(bm[3], bm[10], bm[50], ...))` or
-                  - ```
+                  - ```go
                     for m in bm {
                       Graphsync.Pull(sender, SelectAll(m))
                     }
@@ -446,22 +438,22 @@ Notes:
 
 -->
 
-# Calculations
+## Calculations
 
 
-## Security Parameters
+### Security Parameters
 
 - `Peers` >= 32 -- direct connections
   - ideally `Peers` >= {64, 128}
 -
 
-## Pubsub Bandwidth
+### Pubsub Bandwidth
 
 These bandwidth calculations are used to motivate choices in `ChainSync`.
 
 If you imagine that you will receive the header once per gossipsub peer (or if lucky, half of them), and that there is EC.E_LEADERS=10 blocks per round, then we're talking the difference between:
 
-```
+```text
 16 peers, 1 pkt  -- 1 * 16 * 10 = 160 dup pkts (256KB) in <5s
 16 peers, 4 pkts -- 4 * 16 * 10 = 640 dup pkts (1MB)   in <5s
 
@@ -475,9 +467,9 @@ If you imagine that you will receive the header once per gossipsub peer (or if l
 2MB in <5s may not be worth saving-- and maybe gossipsub can be much better about supressing dups.
 
 
-# Notes (TODO: move elsewhere)
+## Notes (TODO: move elsewhere)
 
-## Checkpoints
+### Checkpoints
 
 - A checkpoint is the CID of a block (not a tipset list of CIDs, or StateTree)
 - The reason a block is OK is that it uniquely identifies a tipset.
@@ -489,14 +481,14 @@ If you imagine that you will receive the header once per gossipsub peer (or if l
 
 ![](https://user-images.githubusercontent.com/138401/67015561-8c929000-f0ab-11e9-847a-ec42f23b14da.png)
 
-## Bootstrap chain stub
+### Bootstrap chain stub
 
 - The mainnet filecoin chain will need to start with a small chain stub of blocks.
 - We must include some data in different blocks.
 - We do need a genesis block -- we derive randomness from the ticket there. Rather than special casing, it is easier/less complex to ensure a well-formed chain always, including at the beginning
 - A lot of code expects lookbacks, especially actor code. Rather than introducing a bunch of special case logic for what happens ostensibly once in network history (special case logic which adds complexity and likelihood of problems), it is easiest to assume the chain is always at least X blocks long, and the system lookback parameters are all fine and dont need to be scaled in the beginning of network's history.
 
-## PartialGraph
+### PartialGraph
 
 The `PartialGraph` of blocks.
 

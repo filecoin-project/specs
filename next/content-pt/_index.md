@@ -47,17 +47,17 @@ over time, without requiring further interaction from the original parties
 {{< /details >}}
 
 
-{{< svg src="/intro/overview.dot.svg" title="Protocol Overview Diagram" />}}
+{{< svg src="/intro/overview.dot.svg" title="Protocol Overview Diagram" >}}
 
 ## Protocol Flow Diagram
 
-{{< svg src="/intro/full-deals-on-chain.mmd.svg" title="Deals on Chain" />}}
+{{< svg src="/intro/full-deals-on-chain.mmd.svg" title="Deals on Chain" >}}
 
 ## Parameter Calculation Dependency Graph
 
 This is a diagram of the model for parameter calculation. This is made with [orient](https://github.com/filecoin-project/orient), our tool for modeling and solving for constraints.
 
-{{< svg src="/intro/filecoin.dot.svg" title="Protocol Overview Diagram" />}}
+{{< svg src="/intro/filecoin.dot.svg" title="Protocol Overview Diagram" >}}
 
 
 ## Key Concepts

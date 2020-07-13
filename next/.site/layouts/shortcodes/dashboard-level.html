@@ -5,7 +5,7 @@
 <i class="gg-permanent"></i> Permanent
 
 {{ range .Site.Pages }}
-    {{ if in (slice "Files & Data" "Blockchain" "Market" "Storage Mining" "Filecoin Nodes" "Token" "Virtual Machine") .Title}}
+    {{ if in (slice ($.Get "name")) .Title}}
         {{ $.Scratch.Set "counter" 0 }}
         {{ $.Scratch.Set "counter-audit" 0 }}
         {{ range .Data.Pages }}
@@ -14,7 +14,7 @@
                 {{ $.Scratch.Set "counter-audit" (add ($.Scratch.Get "counter-audit") .Params.dashboardAudit) }}
             {{ end }}
         {{ end }}
-        <details>
+        <details {{ if eq ($.Get "open") "true" }}open{{ end }}>
             <summary>{{ .Title}} <i title="{{ humanize .Params.dashboardState }}" class="gg-{{ .Params.dashboardState }}"></i> <code>Last update: {{ dateFormat "02 Jan 06 15:04 UTC" .Lastmod.UTC }}</code></summary>
           
             <div class="markdown-inner">

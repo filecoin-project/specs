@@ -8,7 +8,7 @@ title: Storage Mining Cycle
 {{< hint danger >}}
 Issue with label
 {{< /hint >}}
-{{/* <label mining_cycle> */}}
+{{/* <label mining_cycle>}}
 
 Block miners should constantly be performing Proofs of SpaceTime using [Election PoSt](\missing-link), and checking the outputted partial tickets to run [Leader Election](\missing-link) and determine whether they can propose a block at each epoch. Epochs are currently set to take around X seconds, in order to account for election PoSt and network propagation around the world. The details of the mining cycle are defined here.
 
@@ -50,7 +50,7 @@ Anytime a miner receives new valid blocks, it should evaluate what is the heavie
 {{< hint danger >}}
 Issue with SVG Diagram
 {{< /hint >}}
-{{/* < diagram src="./diagrams/timing.png" title="Mining Cycle Timing" > */}}
+{{/* < diagram src="./diagrams/timing.png" title="Mining Cycle Timing" >}}
 
 The timing diagram above describes the sequence of block creation "mining", propagation and reception.
 

@@ -1,11 +1,9 @@
 ---
 title: InitActor
+weight: 1
 ---
 
 # InitActor
 ---
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="/docs/actors/actors/builtin/init/init_actor.go" code="true" lang="go" > */}}
+{{<embed src="/docs/actors/actors/builtin/init/init_actor.go" lang="go">}}

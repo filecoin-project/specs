@@ -1,15 +1,12 @@
 ---
 title: Network Interface
-statusIcon: 🔁
+weight: 3
 ---
 
 # Interface
 ---
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="network.id" code="true" lang="go" > */}}
+{{<embed src="network.id" lang="go" >}}
 
 
 Filecoin nodes use the libp2p protocol for peer discovery, peer routing, and message multicast, and so on. Libp2p is a set of modular protocols common to the peer-to-peer networking stack. Nodes open connections with one another and mount different protocols or streams over the same connection. In the initial handshake, nodes exchange the protocols that each of them supports and all Filecoin related protcols will be mounted under `/fil/...` protocol identifiers.
@@ -40,9 +37,9 @@ Here is the list of libp2p protocols used by Filecoin.
 	- Hello protocol handles new connections to filecoin nodes to facilitate discovery
 	- the protocol string is `fil/hello/1.0.0`. 
 
-# Hello Spec 
+## Hello Spec 
 
-## Protocol Flow
+### Protocol Flow
 
 `fil/hello` is a filecoin specific protocol built on the libp2p stack.  It consists of two conceptual
 procedures: `hello_connect` and `hello_listen`.   
@@ -53,11 +50,8 @@ procedures: `hello_connect` and `hello_listen`.
 
 where stream and connection operations are all standard libp2p operations.  Nodes running the Hello Protocol should consume the incoming Hello Message and use it to help manage peers and sync the chain.
 
-## Messages
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="hello.id" code="true" lang="go" > */}}
+### Messages
+{{<embed src="hello.id" lang="go" >}}
 
 
 When writing the `HelloMessage` to the stream the peer must inspect its current head to provide accurate information.  When writing the `LatencyMessage` to the stream the peer should set `TArrival` immediately upon receipt and `TSent` immediately before writing the message to the stream.

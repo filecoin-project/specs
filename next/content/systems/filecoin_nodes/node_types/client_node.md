@@ -1,11 +1,12 @@
 ---
 title: Client Node
+weight: 4
 ---
 
 # Client Node
 ---
 
-```
+```go
 type ClientNode struct {
   FilecoinNode
 

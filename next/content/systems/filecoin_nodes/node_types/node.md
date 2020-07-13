@@ -1,11 +1,9 @@
 ---
 title: Node Interface
+weight: 1
 ---
 
 # Node Interface
 ---
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="../node_base/filecoin_node.id" code="true" lang="go" > */}}
+{{<embed src="../node_base/filecoin_node.id" lang="go" >}}

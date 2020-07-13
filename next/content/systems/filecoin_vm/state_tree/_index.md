@@ -1,6 +1,6 @@
 ---
 title: State Tree
-statusIcon: 🔁
+weight: 2
 ---
 
 # State Tree
@@ -8,12 +8,10 @@ statusIcon: 🔁
 
 The State Tree is the output of applying operations on the Filecoin Blockchain.
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="state_tree.id" code="true" lang="go" > */}}
+{{<embed src="state_tree.id" lang="go" >}}
 
-
+{{<hint warning>}}
 TODO
 
 - Add ConvenienceAPI state to provide more user-friendly views.
+{{</hint>}}

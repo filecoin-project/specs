@@ -1,21 +1,12 @@
 ---
-menuTitle: Actor
-statusIcon: ✅
-title: VM Actor Interface
-entries:
-- address
+title: Actor
+weight: 1
 ---
 
 # VM Actor Interface
 ---
 
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="actor.id" code="true" lang="go" > */}}
+{{<embed src="actor.id" lang="go" >}}
 
-{{< hint danger >}}
-Issue with label
-{{< /hint >}}
-{{/* < readfile file="actor.go" code="true" lang="go" > */}}
+{{<embed src="actor.go" lang="go" >}}

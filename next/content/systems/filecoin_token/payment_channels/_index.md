@@ -1,24 +1,17 @@
 ---
-menuTitle: "Payment Channels"
-statusIcon: 🔁
-title: "Payment Channels"
-entries:
-- payment_channel_actor
+title: Payment Channels
+weight: 2
+bookCollapseSection: true
 ---
 
 # Payment Channels
 ---
 
-{{< hint danger >}}
-Issue with label
-{{< /hint >}}
-{{/* <label payment_channels> */}}
-
-Payment Channels are used in the Filecoin [Retrieval Market](\missing-link) to enable efficient off-chain payments and accounting between parties for what is expected to be series of microtransactions, specifically those occurring as part of retrieval market data retrieval.
+Payment Channels are used in the Filecoin [Retrieval Market](retrieval_market) to enable efficient off-chain payments and accounting between parties for what is expected to be series of microtransactions, specifically those occurring as part of retrieval market data retrieval.
 
 Note that the following provides a high-level overview of payment channels and an accompanying interface. The lotus implementation of [vouchers](https://github.com/filecoin-project/lotus/blob/master/chain/types/voucher.go) and [payment channels](https://github.com/filecoin-project/lotus/tree/master/paych) are also good references.
 
-You can also read more about the [Filecoin payment channel actor interface](link-to-payment-channel-actor).
+You can also read more about the [Filecoin payment channel actor interface](payment_channel_actor).
 
 In short, the payment channel actor can be used to open long-lived, flexible payment channels between users. Each channel can be funded by adding to their balance. 
 The goal of the payment channel actor is to enable a series of off-chain microtransactions to be reconciled on-chain at a later time with fewer messages. Accordingly, the expectation is `From` will send to `To` vouchers of successively greater `Value` and increasing `Nonce`s. When they choose to, `To` can `Update` the channel to update the balance available `ToSend` to them in the channel, and can choose to `Collect` this balance at any time (incurring a gas cost).
@@ -37,7 +30,7 @@ Once their transactions have completed, either party can choose to `Close` the c
 So we have:
 
 - \[off-chain\] - Two parties agree to a series of transactions (for instance as part of file retrieval) with party **A** paying party **B** up to some **total** sum of Filecoin over time.
-- \[on-chain\] - The [Payment Channel Actor](\missing-link) is used, called by A, to open a payment channel `from` A `to` B and a lane is opened to increase the `balance` of the channel, triggering a transaction between A and the payment channel actor.
+- \[on-chain\] - The [Payment Channel Actor](payment_channel_actor.md) is used, called by A, to open a payment channel `from` A `to` B and a lane is opened to increase the `balance` of the channel, triggering a transaction between A and the payment channel actor.
 At any time, A can open new lanes to increase the total balance available in the channel (e.g. if A and B choose to do more transactions together).
 - \[off-chain\] - Throughout the transaction cycle (e.g. on every piece of data sent via a retrieval deal), party A sends a voucher to party B enabling B to redeem payment from the payment lanes, and incentivizing B to continue providing a service (e.g. sending more data along).
 - \[on-chain\] - At regular intervals, B can `Update` the payment channel balance available `ToSend` with the vouchers received (past their `timeLock`), decreasing the remaining `Value` of the payment channel.

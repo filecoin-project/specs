@@ -1,27 +1,25 @@
 ---
-menuTitle: Data Transfer
-statusIcon: ✅
-title: "Data Transfer in Filecoin"
+title: Data Transfer
+weight: 3
+dashboardAudit: 1
+dashboardState: permanent
+dashboardInterface: stable
 ---
 
-# Data Transfer
+# Data Transfer in Filecoin
 ---
 
 _Data Transfer_ is a system for transferring all or part of a `Piece` across the network when a deal is made.
 
-# Modules
+## Modules
 
 This diagram shows how Data Transfer and its modules fit into the picture with the Storage and Retrieval Markets.
 In particular, note how the Data Transfer Request Validators from the markets are plugged into the Data Transfer module,
 but their code belongs in the Markets system.
-
-{{< hint danger >}}
-Issue with SVG Diagram
-{{< /hint >}}
-{{/* < diagram src="data-transfer-modules.png" title="Data Transfer - Push Flow" > */}}
+{{< figure src="data-transfer-modules.png" title="Data Transfer - Push Flow" zoom="true">}}
 
 
-# Terminology
+## Terminology
 
 - **Push Request**: A request to send data to the other party
 - **Pull Request**: A request to have the other party send data
@@ -33,7 +31,7 @@ Issue with SVG Diagram
 - **Subscriber**: An external component that monitors progress of a data transfer by subscribing to data transfer events, such as progress or completion.
 - **GraphSync**: The default underlying transfer protocol used by the Scheduler. The full graphsync specification can be found at [https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md](https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md)
 
-# Request Phases
+## Request Phases
 
 There are two basic phases to any data transfer:
 
@@ -43,14 +41,11 @@ There are two basic phases to any data transfer:
 Note that the Negotiation and Transfer stages can occur in separate round trips,
 or potentially the same round trip, where the requesting party implicitly agrees by sending the request, and the responding party can agree and immediately send or receive data.
 
-# Example Flows
+## Example Flows
 
-## Push Flow
+### Push Flow
 
-{{< hint danger >}}
-Issue with SVG Diagram
-{{< /hint >}}
-{{/* < diagram src="push-flow.mmd.svg" title="Data Transfer - Push Flow" > */}}
+{{< svg src="push-flow.mmd.svg" title="Data Transfer - Push Flow" >}}
 
 1. A requestor initiates a Push transfer when it wants to send data to another party.
 2. The requestors' data transfer module will send a push request to the responder along with the data transfer voucher. It also puts the data transfer in the scheduler queue, meaning it expects the responder to initiate a transfer once the request is verified
@@ -64,13 +59,9 @@ Issue with SVG Diagram
 The push flow is ideal for storage deals, where the client initiates the push
 once it verifies the deal is signed and on chain
 
-## Pull Flow
+### Pull Flow
 
-{{< hint danger >}}
-SVG diagram
-{{< /hint >}}
-
-{{/* < diagram src="pull-flow.mmd.svg" title="Data Transfer - Pull Flow" > */}}
+{{< svg src="pull-flow.mmd.svg" title="Data Transfer - Pull Flow" >}}
 
 1. A requestor initiates a Pull transfer when it wants to receive data from another party.
 2. The requestors' data transfer module will send a pull request to the responder along with the data transfer voucher.
@@ -85,13 +76,9 @@ SVG diagram
 
 The pull flow is ideal for retrieval deals, where the client initiates the pull when the deal is agreed upon.
 
-# Alternater Pull Flow - Single Round Trip
+## Alternater Pull Flow - Single Round Trip
 
-{{< hint danger >}}
-SVG Diagram
-{{< /hint >}}
-
-{{/* < diagram src="alternate-pull-flow.mmd.svg" title="Data Transfer - Single Round Trip Pull Flow" > */}}
+{{< svg src="alternate-pull-flow.mmd.svg" title="Data Transfer - Single Round Trip Pull Flow" >}}
 
 1. A requestor initiates a Pull transfer when it wants to receive data from another party.
 2. The requestor’s DTM schedules the data transfer
@@ -104,7 +91,7 @@ SVG Diagram
 9. The requestor receives data and can produce an indication of progress
 10. The requestor completes receiving data, and notifies any listeners
 
-# Protocol
+## Protocol
 
 A data transfer CAN be negotiated over the network via the [Data Transfer Protocol](\missing-link), a libp2p protocol type
 
@@ -116,10 +103,6 @@ The responder should send a response to a push request as well so the requestor 
 Using the Data Transfer Protocol as an independent libp2p communciation mechanism is not a hard requirement -- as long as both parties have an implementation of the Data Transfer Subsystem that can talk to the other, any
 transport mechanism (including offline mechanisms) is acceptable.
 
-# Data Structures
+## Data Structures
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-
-{{/* < readfile file="data_transfer_subsystem.id" code="true" lang="go" > */}}
+{{< embed src="data_transfer_subsystem.id" lang="go" >}}

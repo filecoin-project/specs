@@ -1,12 +1,9 @@
 ---
 title: AccountActor
+weight: 3
 ---
 
 # AccountActor
 ---
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-
-{{/* < readfile file="/docs/actors/actors/builtin/account/account_actor.go" code="true" lang="go" > */}}
+{{<embed src="/docs/actors/actors/builtin/account/account_actor.go" lang="go" >}}

@@ -3,21 +3,17 @@ title: "Storage Mining"
 description: Storage Mining System - proving storage for producing blocks
 bookCollapseSection: true
 weight: 6
-entries:
-- storage_mining
-- sector
-- sector_index
-- storage_proving
+dashboardAudit: 1
+dashboardState: permanent
+dashboardInterface: stable
 ---
 
 # Storage Mining
 ---
 
-{{< hint danger >}}
-Issue with incTocMap
-{{< /hint >}}
-{{/* < incTocMap "/docs/systems/filecoin_mining" 2 > */}}
 
+## Status Overview
+{{< dashboard-level name="Storage Mining" open="true">}}
 
 The Storage Mining System is the part of the Filecoin Protocol that deals with storing Client's
 data, producing proof artifacts that demonstrate correct storage behavior, and managing the work

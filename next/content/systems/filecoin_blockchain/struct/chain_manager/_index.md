@@ -1,5 +1,6 @@
 ---
 title: Chain Manager
+weight: 4
 ---
 
 # Chain Manager
@@ -12,15 +13,15 @@ In so doing, the _chain manager_ is the central subsystem that handles bookkeepi
 The chain manager interfaces and functions are included here, but we expand on important details below for clarity.
 
 
-# Chain Expansion
+## Chain Expansion
 
-## Incoming block reception
+### Incoming block reception
 
 Once a block has been received and passes syntactic and semantic validation it must be added to the local datastore, regardless whether it is understood as the best tip at this point. Future blocks from other miners may be mined on top of it and in that case we will want to have it around to avoid refetching.
 
-**NOTE:** To make certain validation checks simpler, blocks should be indexed by height and by parent set. That way sets of blocks with a given height and common parents may be quickly queried. It may also be useful to compute and cache the resultant aggregate state of blocks in these sets, this saves extra state computation when checking which state root to start a block at when it has multiple parents.
+> **NOTE:** To make certain validation checks simpler, blocks should be indexed by height and by parent set. That way sets of blocks with a given height and common parents may be quickly queried. It may also be useful to compute and cache the resultant aggregate state of blocks in these sets, this saves extra state computation when checking which state root to start a block at when it has multiple parents.
 
-Chain selection is a crucial component of how the Filecoin blockchain works. Every chain has an associated weight accounting for the number of blocks mined on it and so the power (storage) they track. It is always preferable to mine atop a heavier Tipset rather than a lighter one. While a miner may be foregoing block rewards earned in the past, this lighter chain is likely to be abandoned by other miners forfeiting any block reward earned as miners converge on a final chain. For more on this, see [chain selection](expected-consensus.md#chain-selection) in the Expected Consensus spec.
+Chain selection is a crucial component of how the Filecoin blockchain works. Every chain has an associated weight accounting for the number of blocks mined on it and so the power (storage) they track. It is always preferable to mine atop a heavier Tipset rather than a lighter one. While a miner may be foregoing block rewards earned in the past, this lighter chain is likely to be abandoned by other miners forfeiting any block reward earned as miners converge on a final chain. For more on this, see [chain selection](algorithms/expected_consensus/#chain-selection) in the Expected Consensus spec.
 
 However, ahead of finality, a given subchain may be abandoned in order of another, heavier one mined in a given round. In order to rapidly adapt to this, the chain manager must maintain and update all subchains being considered up to finality.
 

@@ -46,7 +46,7 @@ and each type have additional functionality as explained below.
 Issue with readfile
 {{< /hint >}}
 
-{{</* readfile file="signatures.id" code="true" lang="go" */>}}
+{{</* readfile file="signatures.id"  lang="go" */>}}
 
 ### ECDSA Signatures
 
@@ -62,7 +62,7 @@ key locally from the signature rather than specifying an ID of the public key.
 Issue with readfile
 {{< /hint >}}
 
-{{</* readfile file="ecdsa.id" code="true" lang="go" */>}}
+{{</* readfile file="ecdsa.id"  lang="go" */>}}
 
 **Wire Format**: Filecoin uses the standard secp256k1 signature serialization,
 as described below. For more details on how the Filecoin `Signature` type is
@@ -95,8 +95,8 @@ Filecoin uses the [BLS signature scheme](https://datatracker.ietf.org/doc/draft-
 Issue with readfile
 {{< /hint >}}
 
-{{</* readfile file="bls.id" code="true" lang="go" */>}}
-{{</* readfile file="bls.go" code="true" lang="go" */>}}
+{{</* readfile file="bls.id"  lang="go" */>}}
+{{</* readfile file="bls.go"  lang="go" */>}}
 
 **Choice of group**: The BLS signature requires the use of a pairing-equipped
 curve which generally yield three groups: G_1, G_2 and G_T. In the BLS signature

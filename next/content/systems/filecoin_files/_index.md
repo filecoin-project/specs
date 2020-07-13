@@ -2,12 +2,9 @@
 title: Files & Data
 bookCollapseSection: true
 weight: 2
-entries:
-- file
-- piece
-# - error_correction # TODO
-- data_transfer
-- serialization
+dashboardAudit: 1
+dashboardState: stable
+dashboardInterface: stable
 ---
 
 # Files & Data
@@ -18,7 +15,8 @@ This section details data structures and tooling related to working with files,
 chunking, encoding, graph representations, `Pieces`, storage abstractions, and more.
 
 {{< hint danger >}}
-Issue with incTocMap
+Include the dashboard
 {{< /hint >}}
+## Status Overview
 
-{{/* < incTocMap "/docs/systems/filecoin_files" 1 > */}}
+{{< dashboard-level name="Files & Data" open="true">}}

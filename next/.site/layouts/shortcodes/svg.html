@@ -14,11 +14,11 @@
       {{ $content := $.Scratch.Get "filepath" | readFile | safeHTML }}
       {{ $uuid := delimit (shuffle (seq 1 9)) "" }}
       {{ $id := (print "diagrams-" $uuid) }}
-      <div>
-        <div id="{{ $id }}" class="diagrams svg{{ with .Get "class" }} {{ . }}{{ end }}">
+      <div class="diagrams-container">
+        <div title="{{ .Get "title" }}" id="{{ $id }}" class="diagrams svg{{ with .Get "class" }} {{ . }}{{ end }}">
           {{- $content -}}
         </div>
-        <div class="diagrams-caption">{{( .Get "title" )}}</div>
+        <div title="{{ .Get "title" }}" class="diagrams-caption">{{( .Get "title" )}} <a href="#{{ anchorize ( .Get "title" ) }}">#</a></div>
       </div>
       <script>
         var element = document.querySelector("#{{ $id }}");
@@ -30,9 +30,4 @@
       </blockquote>
       {{- warnf "File '%s' not found from Page '%s'" ($.Scratch.Get "filepath") .Page.File }}
     {{ end }}
-{{ else }}
-  <div class="diagrams{{ with .Get "class" }} {{ . }}{{ end }}">
-    {{- .Inner -}}
-    <div class="diagrams-caption">{{( .Get "title" )}}</div>
-  </div>
 {{ end }}

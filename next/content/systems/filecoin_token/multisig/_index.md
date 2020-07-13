@@ -1,9 +1,6 @@
 ---
-menuTitle: Multisig Wallet
-statusIcon: ✅
-title: Multisig - Wallet requiring multiple signatures
-entries:
-- multisig_actor
+title: Multisig Wallet
+description: Multisig - Wallet requiring multiple signatures
+weight: 3
+bookCollapseSection: true
 ---
-
-# Multisig Wallet

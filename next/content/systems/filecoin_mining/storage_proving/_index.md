@@ -1,9 +1,7 @@
 ---
 title: Storage Proving
-statusIcon: ✅
-entries:
-- sealer
-- poster
+weight: 4
+bookCollapseSection: true
 ---
 
 # Storage Proving
@@ -14,4 +12,4 @@ Filecoin Proving Subsystem
 {{< hint danger >}}
 Issue with readfile
 {{< /hint >}}
-{{/* < readfile file="storage_proving_subsystem.id" code="true" lang="go" > */}}
+{{<embed src="storage_proving_subsystem.id"  lang="go" >}}

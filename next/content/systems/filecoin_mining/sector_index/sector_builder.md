@@ -8,4 +8,4 @@ title: Sector Builder
 {{< hint danger >}}
 Issue with readfile
 {{< /hint >}}
-{{/* < readfile file="sector_builder.id" code="true" lang="go" > */}}
+{{<embed src="sector_builder.id"  lang="go" >}}

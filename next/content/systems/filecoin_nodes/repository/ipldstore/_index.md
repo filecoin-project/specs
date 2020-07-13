@@ -1,19 +1,16 @@
 ---
-menuTitle: IpldStore
-title: "IpldStore - Local Storage for hash-linked data"
+title: IPLD Store
+weight: 3
 ---
 
-# IpldStore - Local Storage for hash-linked data
+# IPLD Store - Local Storage for hash-linked data
 ---
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="../../../../libraries/ipld/ipld.id" code="true" lang="go" > */}}
+{{<embed src="../../../../libraries/ipld/ipld.id" lang="go" >}}
 
 IPLD is a set of libraries which allow for the interoperability of content-addressed data structures across different distributed systems. It provides a fundamental 'common language' to primitive cryptographic hashing, enabling data to be verifiably referenced and retrieved between two independent protocols. For example, a user can reference a git commit in a blockchain transaction to create an immutable copy and timestamp, or a data from a DHT can be referenced and linked to in a smart contract. 
 
-### The Data Model
+## The Data Model
 
 At its core, IPLD defines a [Data Model](https://github.com/ipld/specs/blob/master/data-model-layer/data-model.md) for representing data. The Data Model is designed for practical implementation across a wide variety of programming languages, while maintaining usability for content-addressed data and a broad range of generalized tools that interact with that data. 
 
@@ -36,8 +33,8 @@ IPLD provides a consistent and coherent abstraction above data that allows Filec
 The Filecoin network relies primarily on two distinct IPLD GraphStores:
 
 - One `ChainStore` which stores the blockchain, including block headers, associated messages, etc.
-- One `StateStore` which stores the payload state from a given blockchain, or the `stateTree` resulting from all block messages in a given chain being applied to the genesis state by the [Filecoin VM](\link-to-sys-vm).
+- One `StateStore` which stores the payload state from a given blockchain, or the `stateTree` resulting from all block messages in a given chain being applied to the genesis state by the [Filecoin VM](systems/filecoin_vm).
 
-The `ChainStore` is downloaded by a node from their peers during the bootstrapping phase of [Chain Sync](\missing-link) and is stored by the node thereafter. It is updated on every new block reception, or if the node syncs to a new best chain.
+The `ChainStore` is downloaded by a node from their peers during the bootstrapping phase of [Chain Sync](chainsync) and is stored by the node thereafter. It is updated on every new block reception, or if the node syncs to a new best chain.
 
-The `StateStore` is computed through the execution of all block messages in a given `ChainStore` and is stored by the node thereafter. It is updated with every new incoming block's processing by the [VM Interpreter](\missing-link), and referenced accordingly by new blocks produced atop it in the [block header's](\link-to-block) `ParentState` field.
+The `StateStore` is computed through the execution of all block messages in a given `ChainStore` and is stored by the node thereafter. It is updated with every new incoming block's processing by the [VM Interpreter](interpreter), and referenced accordingly by new blocks produced atop it in the [block header's](block) `ParentState` field.

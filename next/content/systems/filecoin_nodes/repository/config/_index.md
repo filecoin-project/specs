@@ -1,6 +1,6 @@
 ---
-menuTitle: Config
-title: "Config - Local Storage for ConfigurationValues"
+title: Config
+weight: 1
 ---
 
 # Config - Local Storage for Configuration Values
@@ -8,7 +8,4 @@ title: "Config - Local Storage for ConfigurationValues"
 
 Filecoin Node configuration
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="config.id" code="true" lang="go" > */}}
+{{<embed src="config.id" lang="go" >}}

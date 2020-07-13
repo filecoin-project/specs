@@ -1,10 +1,9 @@
 ---
-menuTitle: Deal States
-statusIcon: 🔁
-title: Storage Deal States
+title: Deal States
+weight: 2
 ---
 
-# Deal States
+# Storage Deal States
 ---
 
 All on-chain economic activities in Filecoin start with the deal. This section aims to explain different states of a deal and their relationship with other concepts in the protocol such as Power, Payment, and Collaterals.
@@ -34,7 +33,4 @@ Given deal states and their transitions, the following are the relationships bet
 - `Deal Payment`: happens on `_onSuccessfulPoSt` and at deal/sector expiration through `_submitPowerReport`, paying out `StoragePricePerEpoch` for each epoch since the last PoSt.
 - `Deal Collateral`: no storage deal collateral will be slashed for `NewDeclaredFaults` and `NewDetectedFaults` but instead some pledge collateral will be slashed given these faults' impact on consensus power. In the event of `NewTerminatedFaults`, all storage deal collateral and some pledge collateral will be slashed. Provider and client storage deal collaterals will be returned when a deal or a sector has expired. If a sector recovers from `Failing` within the `MAX_CONSECUTIVE_FAULTS` threshold, deals in that sector are still considered active. However, miners may need to top up pledge collateral when they try to `RecoverFaults` given the earlier slashing.
 
-{{< hint danger >}}
-SVG Diagram
-{{< /hint >}}
-{{/* < diagram src="diagrams/deal-payment.mmd.svg" title="Deal States Sequence Diagram" > */}}
+{{<svg src="diagrams/deal-payment.mmd.svg" title="Deal States Sequence Diagram" >}}

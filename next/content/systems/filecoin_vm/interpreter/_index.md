@@ -1,16 +1,10 @@
 ---
-menuTitle: Interpreter
-statusIcon: 🔁
-title: VM Interpreter - Message Invocation (Outside VM)
+title: Interpreter
+weight: 7
 ---
 
 # VM Interpreter - Message Invocation (Outside VM)
 ---
-
-{{< hint danger >}}
-Issue with label
-{{< /hint >}}
-{{/* <label vm_interpreter> */}}
 
 The VM interpreter orchestrates the execution of messages from a tipset on that tipset's parent state,
 producing a new state and a sequence of message receipts. The CIDs of this new state and of the receipt
@@ -74,7 +68,7 @@ The sequence of executions for a tipset is thus summarised:
 
 # Message validity and failure
 Every message in a valid block can be processed and produce a receipt (note that block validity
-implies all messages are syntactically valid -- see [Message Syntax](\missing-link) -- and correctly signed).
+implies all messages are syntactically valid -- see [Message Syntax](message#message-syntax-validation) -- and correctly signed).
 However, execution may or may not succeed, depending on the state to which the message is applied. If the execution
 of a message fails, the corresponding receipt will carry a non-zero exit code. 
 
@@ -106,25 +100,16 @@ maximum gas cost, `GasLimit * GasPrice` (miner penalized),
 Note that if the `To` actor does not exist in state and the address is a valid `H(pubkey)` address, 
 it will be created as an account actor.
 
-(You can see the _old_ VM interpreter [here](docs/systems/filecoin_vm/vm_interpreter_old) )
+(You can see the _old_ VM interpreter [here](vm_interpreter_old) )
 
 # `vm/interpreter` interface
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="vm_interpreter.id" code="true" lang="go" > */}}
+{{<embed src="vm_interpreter.id"  lang="go" >}}
 
 # `vm/interpreter` implementation
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-{{/* < readfile file="vm_interpreter.go" code="true" lang="go" > */}}
+{{<embed src="vm_interpreter.go"  lang="go" >}}
 
 # `vm/interpreter/registry`
 
-{{< hint danger >}}
-Issue with label
-{{< /hint >}}
-{{/* < readfile file="vm_registry.go" code="true" lang="go" > */}}
+{{<embed src="vm_registry.go"  lang="go" >}}

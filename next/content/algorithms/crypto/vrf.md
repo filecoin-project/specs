@@ -32,5 +32,5 @@ These digests are often used as entropy for randomness in the protocol (see [Ran
 Issue with readfile
 {{< /hint >}}
 
-{{</* readfile file="vrf.id" code="true" lang="go" */>}}
-{{</* readfile file="vrf.go" code="true" lang="go" */>}}
+{{</* readfile file="vrf.id"  lang="go" */>}}
+{{</* readfile file="vrf.go"  lang="go" */>}}

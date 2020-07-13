@@ -1,21 +1,20 @@
 ---
 title: Message Syncer
+weight: 1
 ---
 
 # Message Syncer
+---
 
-{{< hint danger >}}
-Issue with label
-{{< /hint >}}
-
-{{/* <label message_syncer> */}}
-
+{{< hint warning >}}
 TODO:
 
 - explain message syncer works
 - include the message syncer code
+{{< /hint >}}
 
-# Message Propagation
+
+## Message Propagation
 
 Messages are propagated over the libp2p pubsub channel `/fil/messages`. On this channel, every serialised `SignedMessage` is announced (see [Message](\missing-link)).
 

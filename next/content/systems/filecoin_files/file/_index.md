@@ -1,15 +1,13 @@
 ---
 title: File
-statusIcon: ✅
-entries:
-- filestore
+weight: 1
+bookCollapseSection: true
+dashboardAudit: 1
+dashboardState: permanent
+dashboardInterface: stable
 ---
 
 # File
 ---
-
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
  
-{{/* < readfile file="file.id" code="true" lang="go" > */}}
+{{< embed src="file.id" lang="go" >}}

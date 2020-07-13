@@ -8,7 +8,7 @@ title: SectorStore
 {{< hint danger >}}
 Issue with readfile
 {{< /hint >}}
-{{/* < readfile file="sector_store.id" code="true" lang="go" > */}}
+{{<embed src="sector_store.id"  lang="go" >}}
 
 TODO
 
