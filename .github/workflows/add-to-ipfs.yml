@@ -39,7 +39,7 @@ jobs:
           sudo chown -R root:root $GITHUB_WORKSPACE
           sudo make build
 
-      - uses: ipfs-shipyard/ipfs-github-action@v1
+      - uses: ipfs-shipyard/ipfs-github-action@v1.0.0
         with:
           path_to_add: $GITHUB_WORKSPACE/build/website
           cluster_host: /dnsaddr/cluster.ipfs.io
