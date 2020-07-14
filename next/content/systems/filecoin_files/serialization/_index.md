@@ -21,7 +21,7 @@ Filecoin in-memory data types are mostly straightforward.
 Implementations should support two integer types: Int (meaning native 64-bit integer), and BigInt (meaning arbitrary length)
 and avoid dealing with floating-point numbers to minimize interoperability issues across programming languages and implementations.
 
-You can also read more on [data formats as part of randomness generation]({{< ref "randomness" >}}) in the Filecoin protocol.
+You can also read more on [data formats as part of randomness generation](randomness) in the Filecoin protocol.
 
 ## Serialization
 

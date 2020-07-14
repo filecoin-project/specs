@@ -16,7 +16,8 @@ _Data Transfer_ is a system for transferring all or part of a `Piece` across the
 This diagram shows how Data Transfer and its modules fit into the picture with the Storage and Retrieval Markets.
 In particular, note how the Data Transfer Request Validators from the markets are plugged into the Data Transfer module,
 but their code belongs in the Markets system.
-{{< figure src="data-transfer-modules.png" title="Data Transfer - Push Flow" zoom="true">}}
+
+{{<figure src="data-transfer-modules.png" title="Data Transfer - Push Flow" zoom="true">}}
 
 
 ## Terminology
@@ -29,7 +30,7 @@ but their code belongs in the Markets system.
 - **Request Validator**: The data transfer module only initiates a transfer when the responder can validate that the request is tied directly to either an existing storage deal or retrieval deal. Validation is not performed by the data transfer module itself. Instead, a request validator inspects the data transfer voucher to determine whether to respond to the request.
 - **Scheduler**:  Once a request is negotiated and validated, actual transfer is managed by a scheduler on both sides. The scheduler is part of the data transfer module but is isolated from the negotiation process. It has access to an underlying verifiable transport protocol and uses it to send data and track progress.
 - **Subscriber**: An external component that monitors progress of a data transfer by subscribing to data transfer events, such as progress or completion.
-- **GraphSync**: The default underlying transfer protocol used by the Scheduler. The full graphsync specification can be found at [https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md](https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md)
+- **GraphSync**: The default underlying transfer protocol used by the Scheduler. The full graphsync specification can be found [here](https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md)
 
 ## Request Phases
 
@@ -45,7 +46,7 @@ or potentially the same round trip, where the requesting party implicitly agrees
 
 ### Push Flow
 
-{{< svg src="push-flow.mmd.svg" title="Data Transfer - Push Flow" >}}
+{{<svg src="push-flow.mmd.svg" title="Data Transfer - Push Flow">}}
 
 1. A requestor initiates a Push transfer when it wants to send data to another party.
 2. The requestors' data transfer module will send a push request to the responder along with the data transfer voucher. It also puts the data transfer in the scheduler queue, meaning it expects the responder to initiate a transfer once the request is verified
@@ -93,7 +94,7 @@ The pull flow is ideal for retrieval deals, where the client initiates the pull 
 
 ## Protocol
 
-A data transfer CAN be negotiated over the network via the [Data Transfer Protocol](\missing-link), a libp2p protocol type
+A data transfer CAN be negotiated over the network via the [Data Transfer Protocol](data_transfer_protocol), a libp2p protocol type
 
 A Pull request expects a response. The requestor does not initiate the transfer
 until they know the request is accepted.

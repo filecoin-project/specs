@@ -1,6 +1,9 @@
 ---
 title: Interpreter
 weight: 7
+dashboardAudit: 0
+dashboardState: wip
+dashboardInterface: wip
 ---
 
 # VM Interpreter - Message Invocation (Outside VM)

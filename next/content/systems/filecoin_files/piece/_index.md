@@ -20,7 +20,7 @@ of a piece and its proving tree, including both full and bandwidth-optimized
 piece data structures.
 
 
-{{< figure src="diagrams/pieces.png" title="Pieces, Proving Trees, and Piece Data Structures" zoom="true">}}
+{{< figure src="pieces.png" title="Pieces, Proving Trees, and Piece Data Structures" zoom="true">}}
 
 
 {{< embed src="piece.id" lang="go" >}}

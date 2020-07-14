@@ -38,7 +38,7 @@
       {{- partial "docs/title" .Page -}}
     </a>
   {{ else }}
-    <a href="{{ range first 1 (sort .Page.Pages "Weight" "asc") }}{{ .RelPermalink }}{{ end }}" class="
+    <a href="{{ (index .Page.Pages.ByWeight 0).RelPermalink }}" class="
         {{- if and .Page.Params.bookCollapseSection .Page.IsSection }}collapsed {{ end }}
         {{- if eq .CurrentPage .Page }}active{{ end }}">
       {{- partial "docs/title" .Page -}}

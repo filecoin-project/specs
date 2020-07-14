@@ -1,6 +1,6 @@
 ---
 title: "Key Concepts"
-audit: 1
+audit: 2
 ---
 
 # Key Concepts
@@ -18,13 +18,13 @@ For clarity, we refer the following types of entities to describe implementation
   Depending on the choice of language and the particular component, this might
   correspond to a single software module,
   a thread or process running some main loop, a disk-backed database, or a variety of other design choices.
-  For example, the [ChainSync](./../algorithms/block_sync.md#example) is a component: it could be implemented
+  For example, the [ChainSync](chainsync) is a component: it could be implemented
   as a process or thread running a single specified main loop, which waits for network messages
   and responds accordingly by recording and/or forwarding block data.
 
 - **_APIs_** are messages that can be sent to components.
   A client's view of a given sub-protocol, such as a request to a miner node's
-  [Storage Provider](/missing-link) component to store files in the storage market,
+  [Storage Provider](storage_provider) component to store files in the storage market,
   may require the execution of a series of APIs.
 
 - **_Nodes_** are complete software and hardware systems that interact with the protocol.
@@ -34,8 +34,8 @@ For clarity, we refer the following types of entities to describe implementation
   The term _full node_ refers to a system that runs all of the above components, and supports all of the APIs detailed in the spec.
 
 - **_Subsystems_** are conceptual divisions of the entire Filecoin protocol, either in terms of complete protocols
-  (such as the [Storage Market](/storage_market) or [Retrieval Market](/retrieval_market)), or in terms of functionality
-  (such as the [VM - Virtual Machine](/sys_vm)). They do not necessarily correspond to any particular node or software component.
+  (such as the [Storage Market](storage_market) or [Retrieval Market](retrieval_market)), or in terms of functionality
+  (such as the [VM - Virtual Machine](intro/filecoin_vm)). They do not necessarily correspond to any particular node or software component.
 
 - **_Actors_** are virtual entities embodied in the state of the Filecoin VM.
   Protocol actors are analogous to participants in smart contracts;

@@ -11,8 +11,9 @@ dashboardInterface: stable
 # VM - Virtual Machine
 ---
 
-{{< hint danger >}}
-include dashboard
-{{< /hint >}}
+## Status Overview
+
+{{<dashboard-level name="Virtual Machine" open="true">}}
+
 
 {{<embed src="vm.id" lang="go" >}}

@@ -5,7 +5,7 @@
 <i class="gg-permanent"></i> Permanent
 
 {{ range .Site.Pages }}
-    {{ if in (slice ($.Get "name")) .Title}}
+    {{ if in (slice ($.Page.Title)) .Title}}
         {{ $.Scratch.Set "counter" 0 }}
         {{ $.Scratch.Set "counter-audit" 0 }}
         {{ range .Data.Pages }}

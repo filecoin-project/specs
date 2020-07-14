@@ -1,6 +1,9 @@
 ---
 title: Actor
 weight: 1
+dashboardAudit: 0
+dashboardState: stable
+dashboardInterface: stable
 ---
 
 # VM Actor Interface

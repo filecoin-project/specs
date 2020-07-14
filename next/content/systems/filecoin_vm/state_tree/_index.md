@@ -1,6 +1,9 @@
 ---
 title: State Tree
 weight: 2
+dashboardAudit: 0
+dashboardState: wip
+dashboardInterface: stable
 ---
 
 # State Tree

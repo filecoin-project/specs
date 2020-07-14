@@ -1,5 +1,5 @@
 ---
-title: "FileStore - Local Storage for Files"
+title: FileStore
 ---
 
 # FileStore - Local Storage for Files

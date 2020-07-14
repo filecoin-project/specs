@@ -2,6 +2,9 @@
 title: System Actors
 weight: 6
 bookCollapseSection: true
+dashboardAudit: 0
+dashboardState: wip
+dashboardInterface: wip
 ---
 
 # System Actors

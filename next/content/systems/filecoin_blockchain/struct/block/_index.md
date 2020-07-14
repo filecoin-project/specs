@@ -59,14 +59,14 @@ header and messages themselves, in particular the parent tipset and state on whi
 A semantically valid block must have:
 
 - `Parents` listed in lexicographic order of their header's `Ticket`,
-- `Parents` all reference valid blocks and form a valid [Tipset](\missing-link),
+- `Parents` all reference valid blocks and form a valid [Tipset](tipset),
 - `ParentState` matching the state tree produced by executing the parent tipset's messages (as defined by the VM interpreter) against that tipset's parent state,
 - `ParentMessageReceipts` identifying the receipt list produced by parent tipset execution, with one receipt for each unique message from the parent tipset, 
 - `ParentWeight` matching the weight of the chain up to and including the parent tipset,
 - `Epoch` greater than that of its parents, and 
     - not in the future according to the node's local clock reading of the current epoch,
         - blocks with future epochs should not be rejected, but should not be evaluated (validated or included in a tipset) until the appropriate epoch
-    - not farther in the past than the soft finality as defined by SPC [Finality](\missing-link),
+    - not farther in the past than the soft finality as defined by SPC [Finality](expected_consensus#finality-in-ec),
         - this rule only applied when receiving new gossip blocks (i.e. from the current chain head), not when syncing to the chain for the first time (e.g.)
 - `Miner` that is active in the storage power table in the parent tipset state,  
 - a `Ticket` derived from the minimum ticket from the parent tipset's block headers, 

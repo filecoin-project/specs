@@ -8,7 +8,7 @@ weight: 5
 
 ## Mining Blocks
 
-A miner registered with the storage power actor may begin generating and checking election tickets if it has proven storage meeting the [Minimum Miner Size](systems/filecoin_blockchain/storage_power_consensus#minimum-miner-size) threshold requirement. 
+A miner registered with the storage power actor may begin generating and checking election tickets if it has proven storage meeting the [Minimum Miner Size](storage_power_consensus#minimum-miner-size) threshold requirement. 
 
 In order to do so, the miner must be running chain validation, and be keeping track of the most recent blocks received. A miner's new block will be based on parents from the previous epoch.
 
@@ -19,20 +19,20 @@ if no blocks were received for that epoch). Using the state produced by this tip
 scratch winning ElectionPoSt ticket(s). 
 Armed with the requisite `ElectionPoStOutput`, as well as a new randomness ticket generated in this epoch, a miner can produce a new block.
 
-See [VM Interpreter](systems/filecoin_vm/interpreter) for details of parent tipset evaluation, and [Block](systems/filecoin_blockchain/struct/block/#block) for constraints 
+See [VM Interpreter](interpreter) for details of parent tipset evaluation, and [Block](block) for constraints 
 on valid block header values. 
 
 To create a block, the eligible miner must compute a few fields:
 
 - `Parents` - the CIDs of the parent tipset's blocks.
-- `ParentWeight` - the parent chain's weight (see [Chain Selection](algorithms/expected_consensus/#chain-selection)).
-- `ParentState` - the CID of the state root from the parent tipset state evaluation (see the [VM Interpreter](systems/filecoin_vm/interpreter)).
+- `ParentWeight` - the parent chain's weight (see [Chain Selection](expected_consensus#chain-selection)).
+- `ParentState` - the CID of the state root from the parent tipset state evaluation (see the [VM Interpreter](interpreter)).
 - `ParentMessageReceipts` - the CID of the root of an AMT containing receipts produced while computing `ParentState`.
 - `Epoch` - the block's epoch, derived from the `Parents` epoch and the number of epochs it took to generate this block.
 - `Timestamp` - a Unix timestamp, in seconds, generated at block creation.
-- `Ticket` - a new ticket generated from that in the prior epoch (see [Ticket Generation](systems/filecoin_blockchain/storage_power_consensus/#randomness-ticket-generation)).
+- `Ticket` - a new ticket generated from that in the prior epoch (see [Ticket Generation](storage_power_consensus#randomness-ticket-generation)).
 - `Miner` - the block producer's miner actor address.
-- `ElectionPoStVerifyInfo` - The byproduct of running an ElectionPoSt yielding requisite on-chain information (see [Election Post](/algorithms/post/election_post)), namely:
+- `ElectionPoStVerifyInfo` - The byproduct of running an ElectionPoSt yielding requisite on-chain information (see [Election Post](election_post)), namely:
   - An array of `PoStCandidate` objects, all of which include a winning partial ticket used to run leader election.
   - `PoStRandomness` used to challenge the miner's sectors and generate the partial tickets.
   - A `PoStProof` snark output to prove that the partial tickets were correctly generated.
