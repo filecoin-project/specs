@@ -19,15 +19,9 @@ yarn serve
 # open http://localhost:1313/ in the browser
 ```
 # Shortcodes
-### `Mermaid`
+### `Mermaid` 
+Inline mermaid syntax rendering
 ```html
-<!-- Relative path -->
-{{< mermaid file="full-deals-on-chain.mmd" />}}
-
-<!-- From hugo content folder -->
-{{< mermaid file="/intro/full-deals-on-chain.mmd" />}}
-
-<!-- Inline -->
 {{< mermaid >}}
 graph TD
   A[Christmas] -->|Get money| B(Go shopping)
@@ -40,7 +34,7 @@ graph TD
 ```
 
 ### `svg`
-This shortcode includes zoom and pad feature.
+This shortcode includes zoom and pad features.
 ```html
 <!-- Relative path -->
 {{< svg src="pull-flow.mmd.svg" title="Data Transfer - Pull Flow" >}}
@@ -51,7 +45,8 @@ This shortcode includes zoom and pad feature.
 
 ### `hint`
 ```md
-{{< hint [info|warning|danger] >}}
+<!-- info|warning|danger -->
+{{< hint info >}}
 **Markdown content**  
 Lorem markdownum insigne. Olympo signis Delphis! Retexi Nereius nova develat
 stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa
@@ -96,7 +91,7 @@ Random plain text context ...
 
 ```
 # Document header
-The first heading should be # Head with the dashs like below and should refer to the overall title of the document. The left nav **only** start on the second level of headings. 
+The first heading should be # Head with `---` like below and should refer to the overall title of the document. The right nav **only** starts on the second level of headings. 
 
 ```md
 ---
@@ -109,7 +104,7 @@ title: Storage Power Actor
 ## Header for a section in this document
 Some text
 
-### Sub header for the previous section
+### Sub header for the a nested section
 
 ## Another top level header
 ```

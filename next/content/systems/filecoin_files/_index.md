@@ -16,4 +16,4 @@ chunking, encoding, graph representations, `Pieces`, storage abstractions, and m
 
 ## Status Overview
 
-{{< dashboard-level name="Files & Data" open="true">}}
+{{< dashboard-level open="true">}}
