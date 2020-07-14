@@ -1,9 +1,12 @@
 ---
 title: "Reserved Ranges"
-weight: 3
+weight: 2
 ---
 
-# Actor ID Reserved Ranges
+# Reserved Ranges
+---
+
+## Actor ID Reserved Ranges
 
 | Actor                | ID |
 |---|---|
@@ -17,7 +20,7 @@ weight: 3
 
 All values below 100 are reserved for singleton actors. The first non-singleton actor starts at 100.
 
-# Method Reserved Ranges
+## Method Reserved Ranges
 
 | Method               | ID |
 |---|---|
@@ -26,7 +29,7 @@ All values below 100 are reserved for singleton actors. The first non-singleton 
 
 All other positive values are free for actors to use. For the canonical list, see TODO LINK TO ACTOR CODE WHEN DONE.
 
-# Error Codes
+## Error Codes
 
 {{< hint warning >}}
 TODO
