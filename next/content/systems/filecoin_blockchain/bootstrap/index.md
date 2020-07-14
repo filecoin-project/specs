@@ -2,6 +2,7 @@
 title: Genesis
 description: Genesis - starting the Blockchain
 weight: 6
+draft: true
 ---
 
 # Genesis - starting the Blockchain

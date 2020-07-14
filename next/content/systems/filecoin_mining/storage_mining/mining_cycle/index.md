@@ -5,37 +5,32 @@ title: Storage Mining Cycle
 # Storage Mining Cycle
 ---
 
-{{< hint danger >}}
-Issue with label
-{{< /hint >}}
-{{/* <label mining_cycle>}}
-
-Block miners should constantly be performing Proofs of SpaceTime using [Election PoSt](\missing-link), and checking the outputted partial tickets to run [Leader Election](\missing-link) and determine whether they can propose a block at each epoch. Epochs are currently set to take around X seconds, in order to account for election PoSt and network propagation around the world. The details of the mining cycle are defined here.
+Block miners should constantly be performing Proofs of SpaceTime using [Election PoSt](election_post), and checking the outputted partial tickets to run [Leader Election](expected_consensus#secret-leader-election) and determine whether they can propose a block at each epoch. Epochs are currently set to take around X seconds, in order to account for election PoSt and network propagation around the world. The details of the mining cycle are defined here.
 
 ## Active Miner Mining Cycle
 
-In order to mine blocks on the Filecoin blockchain a miner must be running [Block Validation](\missing-link) at all times, keeping track of recent blocks received and the heaviest current chain (based on [Expected Consensus](\missing-link)).
+In order to mine blocks on the Filecoin blockchain a miner must be running [Block Validation](block) at all times, keeping track of recent blocks received and the heaviest current chain (based on [Expected Consensus](expected_consensus)).
 
 With every new tipset, the miner can use their committed power to attempt to craft a new block.
 
-For additional details around how consensus works in Filecoin, see [Expected Consensus](\missing-link). For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner is eligible to mine a block itself, and other rules pertaining to the production of some artifacts required of valid blocks (e.g. Tickets, ElectionPoSt).
+For additional details around how consensus works in Filecoin, see [Expected Consensus](expected_consensus). For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner is eligible to mine a block itself, and other rules pertaining to the production of some artifacts required of valid blocks (e.g. Tickets, ElectionPoSt).
 
 ### Mining Cycle
 
-After the chain has caught up to the current head using [ChainSync](\missing-link). At a high-level, the mining process is as follows, (we go into more detail on epoch timing below):
+After the chain has caught up to the current head using [ChainSync](chainsync). At a high-level, the mining process is as follows, (we go into more detail on epoch timing below):
 
-- The node receives and transmits messages using the [Message Syncer](\missing-link)
-- At the same time it [receives blocks](\link-to-block-sync)
+- The node receives and transmits messages using the [Message Syncer](message_syncer)
+- At the same time it [receives blocks](block_sync)
     - Each block has an associated timestamp and epoch (quantized time window in which it was crafted)
-    - Blocks are validated as they come in [block validation](\link-to-block)
-- After an epoch's "cutoff", the miner should take all the valid blocks received for this epoch and assemble them into tipsets according to [Tipset](\missing-link) validation rules
-- The miner then attempts to mine atop the heaviest tipset (as calculated with [EC's weight function](\link-to-chain-selection)) using its smallest ticket to run leader election
-    - The miner runs an [Election PoSt](\missing-link) on their sectors in order to generate partial tickets
-    - The miner uses these tickets in order to run [Leader Election](\missing-link) 
-        - if successful, the miner generates a new [Randomness Ticket](\link-to-tickets) for inclusion in the block
+    - Blocks are validated as they come in [block validation](block)
+- After an epoch's "cutoff", the miner should take all the valid blocks received for this epoch and assemble them into tipsets according to [Tipset](tipset) validation rules
+- The miner then attempts to mine atop the heaviest tipset (as calculated with [EC's weight function](expected_consensus#chain-selection)) using its smallest ticket to run leader election
+    - The miner runs an [Election PoSt](election_post) on their sectors in order to generate partial tickets
+    - The miner uses these tickets in order to run [Leader Election](expected_consensus#secret-leader-election) 
+        - if successful, the miner generates a new [Randomness Ticket](storage_power_consensus#tickets) for inclusion in the block
         - the miner then assembles a new block (see "block creation" below) and waits until this epoch's quantized timestamp to broadcast it 
 
-This process is repeated until either the [Election PoSt](\missing-link) process yields a winning ticket (in EC) and the miner publishes a block or a new valid block comes in from the network.
+This process is repeated until either the [Election PoSt](election_post) process yields a winning ticket (in EC) and the miner publishes a block or a new valid block comes in from the network.
 
 At any height `H`, there are three possible situations:
 
@@ -47,10 +42,7 @@ Anytime a miner receives new valid blocks, it should evaluate what is the heavie
 
 ### Epoch Timing
 
-{{< hint danger >}}
-Issue with SVG Diagram
-{{< /hint >}}
-{{/* < diagram src="./diagrams/timing.png" title="Mining Cycle Timing" >}}
+{{<figure src="timing.png" title="Mining Cycle Timing">}}
 
 The timing diagram above describes the sequence of block creation "mining", propagation and reception.
 
@@ -101,13 +93,13 @@ To initially become a miner, a miner first registers a new miner actor on-chain.
 
 The next step is to place one or more storage market asks on the market. This is done off-chain as part of storage market functions. A miner may create a single ask for their entire storage, or partition their storage up in some way with multiple asks (at potentially different prices).
 
-After that, they need to make deals with clients and begin filling up sectors with data. For more information on making deals, see the [Storage Market](\missing-link). The miner will need to put up storage deal collateral for the deals they have entered into.
+After that, they need to make deals with clients and begin filling up sectors with data. For more information on making deals, see the [Storage Market](storage_market). The miner will need to put up storage deal collateral for the deals they have entered into.
 
-When they have a full sector, they should seal it. This is done by invoking the [Sector Sealer](\missing-link).
+When they have a full sector, they should seal it. This is done by invoking the [Sector Sealer](sealer).
 
 #### Owner/Worker distinction
 
-The miner actor has two distinct 'controller' [addresses](\link-to-app-address). One is the worker, which is the address which will be responsible for doing all of the work, submitting proofs, committing new sectors, and all other day to day activities. The owner address is the address that created the miner, paid the collateral, and has block rewards paid out to it. The reason for the distinction is to allow different parties to fulfil the different roles. One example would be for the owner to be a multisig wallet, or a cold storage key, and the worker key to be a 'hot wallet' key.
+The miner actor has two distinct 'controller' [addresses](address). One is the worker, which is the address which will be responsible for doing all of the work, submitting proofs, committing new sectors, and all other day to day activities. The owner address is the address that created the miner, paid the collateral, and has block rewards paid out to it. The reason for the distinction is to allow different parties to fulfil the different roles. One example would be for the owner to be a multisig wallet, or a cold storage key, and the worker key to be a 'hot wallet' key.
 
 #### Changing Worker Addresses
 
@@ -115,15 +107,15 @@ Note that any change to worker keys after registration must be appropriately del
 
 ### Step 1: Committing Sectors
 
-When the miner has completed their first seal, they should post it on-chain using the [Storage Miner Actor's](\missing-link) `ProveCommitSector` function. The miner will need to put up pledge collateral in proportion to the amount of storage they commit on chain. Miner will now gain power for this particular sector upon successful `ProveCommitSector`.
+When the miner has completed their first seal, they should post it on-chain using the [Storage Miner Actor's](storage_miner_actor) `ProveCommitSector` function. The miner will need to put up pledge collateral in proportion to the amount of storage they commit on chain. Miner will now gain power for this particular sector upon successful `ProveCommitSector`.
 
-You can read more about sectors [here](\link-to-sectors) and how sector relates to power [here](\link-to-storage-power).
+You can read more about sectors [here](sector) and how sector relates to power [here](storage_power_consensus#on-power).
 
 ### Step 2: Running Elections
 
 Once the miner has power on the network, they can begin to submit `ElectionPoSts`. To do so, the miner must run a PoSt on a subset of their sectors in every round, using the outputted partial tickets to run leader election.
 
-If the miner finds winning tickets, they are eligible to generate a new block and earn block rewards using the [Block Producer](\missing-link).
+If the miner finds winning tickets, they are eligible to generate a new block and earn block rewards using the [Block Producer](block_producer).
 
 Every successful PoSt submission will delay the next SurprisePoSt challenge the miner will receive.
 
@@ -135,7 +127,7 @@ In this period, the miner can still:
 
 ### Faults
 
-If a miner detects [Storage Faults](\missing-link) among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the `DeclareTemporaryFaults()` method of the Storage Miner Actor. 
+If a miner detects [Storage Faults](faults#storage-faults) among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the `DeclareTemporaryFaults()` method of the Storage Miner Actor. 
 
 The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of winning Election and SurprisePoSts. By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can specify how long the duration of their TemporaryFault and pay a TemporaryFaultFee.
 

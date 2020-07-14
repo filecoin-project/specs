@@ -7,36 +7,36 @@ bookCollapseSection: true
 # Storage Power Consensus
 ---
 
-The Storage Power Consensus subsystem is the main interface which enables Filecoin nodes to agree on the state of the system. SPC accounts for individual storage miners' effective power over consensus in given chains in its [Power Table](\missing-link). It also runs [Expected Consensus](\missing-link) (the underlying consensus algorithm in use by Filecoin), enabling storage miners to run leader election and generate new blocks updating the state of the Filecoin system.
+The Storage Power Consensus subsystem is the main interface which enables Filecoin nodes to agree on the state of the system. SPC accounts for individual storage miners' effective power over consensus in given chains in its [Power Table](storage_power_actor#the-power-table). It also runs [Expected Consensus](expected_consensus) (the underlying consensus algorithm in use by Filecoin), enabling storage miners to run leader election and generate new blocks updating the state of the Filecoin system.
 
 Succinctly, the SPC subsystem offers the following services:
 
-- Access to the [Power Table](\missing-link) for every subchain, accounting for individual storage miner power and total power on-chain.
-- Access to [Expected Consensus](\missing-link) for individual storage miners, enabling:
+- Access to the [Power Table](storage_power_actor#the-power-table) for every subchain, accounting for individual storage miner power and total power on-chain.
+- Access to [Expected Consensus](expected_consensus) for individual storage miners, enabling:
 
-    - Access to verifiable randomness [Tickets](\missing-link) as needed in the rest of the protocol.
-    - Running [Leader Election](\missing-link) to produce new blocks.
-    - Running [Chain Selection](\missing-link) across subchains using EC's weighting function.
-    - Identification of [the most recently finalized tipset](\link-to-finality), for use by all protocol participants.
+    - Access to verifiable randomness [Tickets](storage_power_consensus#tickets) as needed in the rest of the protocol.
+    - Running [Leader Election](expected_consensus#secret-leader-election) to produce new blocks.
+    - Running [Chain Selection](chainsync) across subchains using EC's weighting function.
+    - Identification of [the most recently finalized tipset](expected_consensus#finality-in-ec), for use by all protocol participants.
 
 Much of the Storage Power Consensus' subsystem functionality is detailed in the code below but we touch upon some of its behaviors in more detail.
 
-{{< embed src="storage_power_consensus_subsystem.id" lang="go" >}}
+{{<embed src="storage_power_consensus_subsystem.id" lang="go">}}
 
 ## Distinguishing between storage miners and block miners
 
 There are two ways to earn Filecoin tokens in the Filecoin network:
 
-- By participating in the [Storage Market](\missing-link) as a storage provider and being paid by clients for file storage deals.
+- By participating in the [Storage Market](storage_market) as a storage provider and being paid by clients for file storage deals.
 - By mining new blocks on the network, helping modify system state and secure the Filecoin consensus mechanism.
 
-We must distinguish between both types of "miners" (storage and block miners). [Leader Election](\missing-link) in Filecoin is predicated on a miner's storage power. Thus, while all block miners will be storage miners, the reverse is not necessarily true.
+We must distinguish between both types of "miners" (storage and block miners). [Leader Election](expected_consensus#secret-leader-election) in Filecoin is predicated on a miner's storage power. Thus, while all block miners will be storage miners, the reverse is not necessarily true.
 
-However, given Filecoin's "useful Proof-of-Work" is achieved through file storage (PoRep and PoSt), there is little overhead cost for storage miners to participate in leader election. Such a [Storage Miner Actor](\missing-link) need only register with the [Storage Power Actor](\missing-link) in order to participate in Expected Consensus and mine blocks.
+However, given Filecoin's "useful Proof-of-Work" is achieved through file storage (PoRep and PoSt), there is little overhead cost for storage miners to participate in leader election. Such a [Storage Miner Actor](storage_miner_actor) need only register with the [Storage Power Actor](storage_power_actor) in order to participate in Expected Consensus and mine blocks.
 
 ## On Power
 
-Claimed power is assigned to every sector as a static function of its `SectorStorageWeightDesc` which includes `SectorSize`, `Duration`, and `DealWeight`. DealWeight is a measure that maps size and duration of active deals in a sector during its lifetime to its impact on power and reward distribution. A CommittedCapacity Sector (see Sector Types in [Storage Mining Subsystem](\missing-link)) will have a DealWeight of zero but all sectors have an explicit Duration which is defined from the ChainEpoch that the sector comes online in a ProveCommit message to the Expiration ChainEpoch of the sector. In principle, power is the number of votes a miner has in leader election and it is a point in time concept of storage. However, the exact function that maps `SectorStorageWeightDesc` to claimed `StoragePower` and `BlockReward` will be announced soon.
+Claimed power is assigned to every sector as a static function of its `SectorStorageWeightDesc` which includes `SectorSize`, `Duration`, and `DealWeight`. DealWeight is a measure that maps size and duration of active deals in a sector during its lifetime to its impact on power and reward distribution. A CommittedCapacity Sector (see Sector Types in [Storage Mining Subsystem](storage_mining)) will have a DealWeight of zero but all sectors have an explicit Duration which is defined from the ChainEpoch that the sector comes online in a ProveCommit message to the Expiration ChainEpoch of the sector. In principle, power is the number of votes a miner has in leader election and it is a point in time concept of storage. However, the exact function that maps `SectorStorageWeightDesc` to claimed `StoragePower` and `BlockReward` will be announced soon.
 
 More precisely,
 
@@ -48,16 +48,16 @@ More precisely,
 
 Tickets are used across the Filecoin protocol as sources of randomness:
 
-- The [Sector Sealers](\missing-link) uses tickets as SealSeeds to bind sector commitments to a given subchain.
-- The [Storage Miner](\missing-link) likewise uses tickets as PoStChallenges to prove sectors remain committed as of a given block.
-- They are drawn by the Storage Power subsystem as randomness in [Leader Election](\missing-link) to determine their eligibility to mine a block
+- The [Sector Sealers](sealing) uses tickets as SealSeeds to bind sector commitments to a given subchain.
+- The [Storage Miner](storage_mining) likewise uses tickets as PoStChallenges to prove sectors remain committed as of a given block.
+- They are drawn by the Storage Power subsystem as randomness in [Leader Election](election_post) to determine their eligibility to mine a block
 - They are drawn by the Storage Power subsystem in order to generate new tickets for future use.
 
 Each of these ticket uses may require drawing tickets at different chain epochs, according to the security requirements of the particular protocol making use of tickets. Specifically, the ticket Digest (which is a Blake2b output) is used for randomness.
 
 In Filecoin, every block header contains a single ticket.
 
-You can find the Ticket data structure [here](\link-to-data-structures).
+You can find the Ticket data structure [here](data_structures).
 
 ### Comparing Tickets in a Tipset and using ticket values
 
@@ -67,10 +67,10 @@ Likewise any use of a ticket's value, is that of its VRFDigest's bytes.
 
 ## The Ticket chain and drawing randomness
 
-While each Filecoin block header contains a ticket field (see [Tickets](\missing-link)), it is useful to think of a ticket chain abstraction.
+While each Filecoin block header contains a ticket field (see [Tickets](storage_power_consensus#tickets)), it is useful to think of a ticket chain abstraction.
 Due to the nature of Filecoin's Tipsets and the possibility of using tickets from epochs that did not yield leaders to produce randomness at a given epoch, tracking the canonical ticket of a subchain at a given height can be arduous to reason about in terms of blocks. To that end, it is helpful to create a ticket chain abstraction made up of only those tickets to be used for randomness generation at a given height.
 
-To read more about specifically how tickets are processed for randomness, see [Randomness](\missing-link).
+To read more about specifically how tickets are processed for randomness, see [Randomness](randomness).
 
 ### Randomness Ticket generation
 
@@ -88,7 +88,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 The VRF's deterministic output adds entropy to the ticket chain, limiting a miner's ability to alter one block to influence a future ticket (given a miner does not know who will win a given round in advance).
 
-We use the [Verifiable Random Functions](\missing-link) for ticket generation in EC (see the `PrepareNewTicket` method below).
+We use the [Verifiable Random Functions](vrf) for ticket generation in EC (see the `PrepareNewTicket` method below).
 
 {{< embed src="../../filecoin_mining/storage_mining/storage_mining_subsystem.go" lang="go" >}}
 

@@ -1,6 +1,5 @@
 ---
-title: "Storage Mining"
-description: Storage Mining System - proving storage for producing blocks
+title: Storage Mining
 bookCollapseSection: true
 weight: 6
 dashboardAudit: 1
@@ -8,12 +7,8 @@ dashboardState: permanent
 dashboardInterface: stable
 ---
 
-# Storage Mining
+# Storage Mining System - proving storage for producing blocks
 ---
-
-
-## Status Overview
-{{< dashboard-level name="Storage Mining" open="true">}}
 
 The Storage Mining System is the part of the Filecoin Protocol that deals with storing Client's
 data, producing proof artifacts that demonstrate correct storage behavior, and managing the work
@@ -30,3 +25,6 @@ important that the **protocol constraints** are satisfied. The **protocol constr
 spelled out in clear detail (an unclear, unmentioned constraint is a "spec error").  It is up
 to implementers who deviate from the algorithms presented here to ensure their modifications
 satisfy those constraints, especially those relating to protocol security.
+
+## Status Overview
+{{< dashboard-level open="true">}}

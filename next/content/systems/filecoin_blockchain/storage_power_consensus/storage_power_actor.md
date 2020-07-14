@@ -41,9 +41,9 @@ Consensus in Filecoin is secured in part by economic incentives enforced by Pled
 
 Pledge collateral amount is committed based on power pledged to the system (i.e. proportional to number of sectors committed and sector size for a miner). It is a system-wide parameter and is committed to the `StoragePowerActor`. Pledge collateral can be posted by the `StorageMinerActor` at any time by a miner and its requirement is dependent on miner's power. Details around pledge collateral will be announced soon.
 
-Pledge Collateral will be slashed when [Consensus Faults](\missing-link) are reported to the `StoragePowerActor`'s `ReportConsensusFault` method, when a miner fails a SurprisePoSt (DetectedFault), or when a miner terminates a sector earlier than its duration.
+Pledge Collateral will be slashed when [Consensus Faults](expected_consensus#consensus-faults) are reported to the `StoragePowerActor`'s `ReportConsensusFault` method, when a miner fails a SurprisePoSt (DetectedFault), or when a miner terminates a sector earlier than its duration.
 
 Pledge Collateral is slashed for any fault affecting storage-power consensus, these include:
 
-- faults to expected consensus in particular (see [Consensus Faults](\missing-link))  which will be reported by a slasher to the `StoragePowerActor` in exchange for a reward.
-- faults affecting consensus power more generally, specifically uncommitted power faults (i.e. [Storage Faults](\missing-links)) which will be reported by the `CronActor` automatically or when a miner terminates a sector earlier than its promised duration.
+- faults to expected consensus in particular (see [Consensus Faults](expected_consensus#consensus-faults))  which will be reported by a slasher to the `StoragePowerActor` in exchange for a reward.
+- faults affecting consensus power more generally, specifically uncommitted power faults (i.e. [Storage Faults](faults#storage-faults)) which will be reported by the `CronActor` automatically or when a miner terminates a sector earlier than its promised duration.

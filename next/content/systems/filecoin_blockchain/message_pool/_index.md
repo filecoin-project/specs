@@ -19,8 +19,8 @@ Clients that use a message pool include:
 
 The message pool subsystem is made of two components:
 
-- The [Message Syncer](\missing-link) -- which receives and propagates messages.
-- [Message Storage](\missing-link) -- which caches messages according to a given policy.
+- The [Message Syncer](message_syncer.md) -- which receives and propagates messages.
+- [Message Storage](message_storage.md) -- which caches messages according to a given policy.
 
 {{< hint warning >}}
 TODOs:

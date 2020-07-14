@@ -46,7 +46,7 @@ This shortcode includes zoom and pad feature.
 {{< svg src="pull-flow.mmd.svg" title="Data Transfer - Pull Flow" >}}
 
 <!-- From hugo content folder -->
-{{< svg src="systems/pull-flow.mmd.svg" title="Data Transfer - Pull Flow" >}}
+{{< svg src="/systems/pull-flow.mmd.svg" title="Data Transfer - Pull Flow" >}}
 ```
 
 ### `hint`
@@ -65,10 +65,10 @@ stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa
 ### `embed`
 ```md
 # src relative to the page
-{{< embed src="piece_store.id" lang="go" >}}
+{{<embed src="piece_store.id" lang="go">}}
 
 # src relative to content folder
-{{< embed src="/systems/piece_store.id" lang="go" >}}
+{{<embed src="/systems/piece_store.id" lang="go">}}
 ```
 
 
@@ -116,7 +116,7 @@ Some text
 
 
 # References
-## Markdown links 
+## Markdown links **(Recommended)**
 These links use "portable links" just like `relref` so you can just give it the name of the file and it will fetch the correct relative link and title for the `<a href="/relative/path" title="page title">` automatically.
 You can override the `<a>` title by passing a second `string` in the link definition.
 

@@ -1,15 +1,14 @@
 ---
-title: SectorStore
+title: Sector Store
 ---
 
-# SectorStore
+# Sector Store
 ---
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
 {{<embed src="sector_store.id"  lang="go" >}}
 
+{{<hint warning>}}
 TODO
 
 - talk about how sectors are stored
+{{</hint>}}
