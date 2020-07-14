@@ -1,21 +1,14 @@
-name: github pages deploy
+name: Add to IPFS 
 
-on:
-  push:
-    branches:
-      - master
+on: [push]
 
 jobs:
-  build-deploy:
+  add-to-ipfs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
         with:
           submodules: true
-
-      - uses: webfactory/ssh-agent@v0.2.0
-        with:
-          ssh-private-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
 
       - name: Install Go
         run: |
@@ -37,13 +30,6 @@ jobs:
           sudo echo 'PATH=$GOROOT/bin:$GOPATH/bin' >>~/.profile
           source ~/.profile
 
-      - name: Debug
-        run: |
-          pwd
-          go env
-          which go
-          go version
-
       - name: Install deps-ga
         run: |
           sudo make deps-ga
@@ -61,19 +47,3 @@ jobs:
           cluster_password: ${{ secrets.CLUSTER_PASSWORD }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Deploy using SSH
-        env:
-          DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          sudo chown -R runner $GITHUB_WORKSPACE
-          sudo chown -R runner .git/
-          eval "$(ssh-agent -s)"
-          ssh-add - <<< "${DEPLOY_KEY}"
-
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
-          git config --local user.email "no-reply-spec-deploy@protocol.ai"
-          git config --local user.name "no-reply-spec-deploy"
-
-          bin/publish-to-gh-pages.sh
