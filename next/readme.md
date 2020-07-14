@@ -146,7 +146,7 @@ For short snippets of math text you can just use the `{{<katex>}}` shortcode, bu
 
 Parses math typesetting with [KaTeX](https://katex.org/docs/api.html)   
 
-Example http://localhost:1313/math-mode/ 
+Check this example [example](https://deploy-preview-969--fil-spec-staging.netlify.app/math-mode/)
 
 > Some syntax like `\_` can't go through HUGO markdown parser and for that reason we need to wrap math text with code blocks, code fendes or the shortcode `{{<plain>}}`. See examples below.
 ### Add `math-mode` prop to the Frontmatter
