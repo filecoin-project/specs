@@ -96,6 +96,10 @@ blockquote {
     overflow: auto;
 }
 
+.markdown>h1:first-of-type {
+    margin-top: 0;
+}
+
 .markdown code, code {
     margin: 0 1px;
     padding: 3px 6px;

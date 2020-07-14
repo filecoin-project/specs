@@ -4,8 +4,7 @@ bookhidden: true
 math-mode: true
 ---
 
-# Introduction
----
+
 {{<plain hidden>}}
 $$
 \gdef\createporepbatch{\textsf{create_porep_batch}}
@@ -362,9 +361,12 @@ $$
 $$
 {{</plain>}}
 
-# SDR Spec
+# Math mode
+---
 
-## Merkle Proofs
+## SDR Spec
+
+### Merkle Proofs
 
 **Implementation:**
 * [`storage_proofs::merkle::MerkleTreeWrapper::gen_proof()`]()
