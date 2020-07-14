@@ -1,0 +1,7 @@
+{{- if eq (.Get 0) "hidden" -}}
+<span style="display: none;">
+  {{- trim .Inner "\n" -}}
+</span>
+{{- else -}}
+{{- trim .Inner "\n" -}}
+{{- end -}}

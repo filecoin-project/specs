@@ -141,6 +141,62 @@ Theres also `link` shortcode which will fetch the title of the page automaticall
 # <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Storage Power Consensus">Storage Power Consensus</a>
 ```
 
+## Math mode
+For short snippets of math text you can just use the `{{<katex>}}` shortcode, but if you need to write lots of math in a page you can just use `math-mode` and avoid writting the katex shortcode everywhere.
+
+Parses math typesetting with [KaTeX](https://katex.org/docs/api.html)   
+
+Example http://localhost:1313/math-mode/ 
+
+> Some syntax like `\_` can't go through HUGO markdown parser and for that reason we need to wrap math text with code blocks, code fendes or the shortcode `{{<plain>}}`. See examples below.
+### Add `math-mode` prop to the Frontmatter
+```md
+---
+title: Math Mode
+math-mode: true
+---
+```
+
+### Wrap `def`, `gdef`, etc.
+Math text needs to be wrapped to avoid Hugo's Markdown parser. When wrapping defs or any math block that doesn't need to be rendered the recommended option is to use the shortcode `{{<plain hidden}}` with the hidden argument.
+
+```md
+{{<plain hidden>}}
+$$
+\gdef\createporepbatch{\textsf{create_porep_batch}}
+\gdef\GrothProof{\textsf{Groth16Proof}}
+\gdef\Groth{\textsf{Groth16}}
+\gdef\GrothEvaluationKey{\textsf{Groth16EvaluationKey}}
+\gdef\GrothVerificationKey{\textsf{Groth16VerificationKey}}
+{{</plain>}}
+```
+
+### Wrap inline math text with code blocks
+```md
+The index of a node in a `$\BinTree$` layer `$l$`. The leftmost node in a tree has `$\index_l = 0$`.
+```
+
+### Wrap math blocks with code fences
+~~~md
+```text
+$\overline{\underline{\Function \BinTree\dot\createproof(c: \NodeIndex) \rightarrow \BinTreeProof_c}}$
+$\line{1}{\bi}{\leaf: \Safe = \BinTree\dot\leaves[c]}$
+$\line{2}{\bi}{\root: \Safe = \BinTree\dot\root}$
+
+$\line{3}{\bi}{\path: \BinPathElement^{[\BinTreeDepth]}= [\ ]}$
+$\line{4}{\bi}{\for l \in [\BinTreeDepth]:}$
+$\line{5}{\bi}{\quad \index_l: [\len(\BinTree\dot\layer_l)] = c \gg l}$
+$\line{6}{\bi}{\quad \missing: \Bit = \index_l \AND 1}$
+$\line{7}{\bi}{\quad \sibling: \Safe = \if \missing = 0:}$
+$\quad\quad\quad \BinTree\dot\layer_l[\index_l + 1]$
+$\quad\quad\thin \else:$
+$\quad\quad\quad \BinTree\dot\layer_l[\index_l - 1]$
+$\line{8}{\bi}{\quad \path\dot\push(\BinPathElement \thin \{\ \sibling, \thin \missing\ \} \thin )}$
+
+$\line{9}{\bi}{\return \BinTreeProof_c \thin \{\ \leaf, \thin \root, \thin \path\ \}}$
+```
+~~~
+
 ## References
 - [hugo theme book](https://themes.gohugo.io//theme/hugo-book/docs/shortcodes/columns/)
 - [Katex](https://katex.org/)
