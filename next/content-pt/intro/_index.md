@@ -2,9 +2,8 @@
 title: Introduction
 weight: 1
 dashboardState: incomplete
-type: docs
+bookCollapseSection: true
 ---
-
 
 # Introdução
 ---
@@ -30,14 +29,6 @@ and other contract mechanisms recorded on the chain continue to be processed
 over time, without requiring further interaction from the original parties
 (such as the clients who requested the data storage).
 
-# Dashboard
-
-<i class="gg-incorrect"></i> Incorrect
-<i class="gg-wip"></i> WIP
-<i class="gg-incomplete"></i> Incomplete
-<i class="gg-stable"></i> Stable
-<i class="gg-permanent"></i> Permanent
-
-
+# Status Overview
 
 {{< dashboard name="Introduction" >}}

@@ -19,7 +19,7 @@
     {{ if eq (.Get "src" | printf "%.1s") "/" }}
       {{ $.Scratch.Set "filepath" ( .Get "src" ) }}
     {{ else }}
-      {{ $.Scratch.Set "filepath" $.Page.Dir }}
+      {{ $.Scratch.Set "filepath" $.Page.File.Dir }}
       {{ $.Scratch.Add "filepath" ( .Get "src" ) }}
     {{ end }}
     {{ if fileExists ($.Scratch.Get "filepath") }}

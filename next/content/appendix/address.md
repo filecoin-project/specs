@@ -1,5 +1,6 @@
 ---
 title: "Address"
+weight: 2
 ---
 
 # Filecoin Address
@@ -34,7 +35,7 @@ When represented as bytes a filecoin address contains the following:
 
 * A **protocol indicator** byte that identifies the type and version of this address.
 * The **payload** used to uniquely identify the actor according to the protocol.
-```
+```text
 |----------|---------|
 | protocol | payload |
 |----------|---------|
@@ -50,7 +51,7 @@ When encoded to a string a filecoin address contains the following:
 * A **payload** used to uniquely identify the actor according to the protocol.
 * A **checksum** used to validate the address.
 
-```
+```text
 |------------|----------|---------|----------|
 |  network   | protocol | payload | checksum |
 |------------|----------|---------|----------|
@@ -92,7 +93,7 @@ const (
 
 **Bytes**
 
-```
+```text
 |----------|---------------|
 | protocol |    payload    |
 |----------|---------------|
@@ -101,7 +102,7 @@ const (
 
 **String**
 
-```
+```text
 |------------|----------|---------------|
 |  network   | protocol |    payload    |
 |------------|----------|---------------|
@@ -115,7 +116,7 @@ const (
 
 **Bytes**
 
-```
+```text
 |----------|----------------------------------|
 | protocol |               payload            |
 |----------|----------------------------------|
@@ -124,7 +125,7 @@ const (
 
 **String**
 
-```
+```text
 |------------|----------|--------------------------------|----------|
 |  network   | protocol |      payload                   | checksum |
 |------------|----------|--------------------------------|----------|
@@ -138,7 +139,7 @@ const (
 
 **Bytes**
 
-```
+```text
 |----------|---------------------|
 | protocol |        payload      |
 |----------|---------------------|
@@ -147,7 +148,7 @@ const (
 
 **String**
 
-```
+```text
 |------------|----------|-----------------------|----------|
 |  network   | protocol |         payload       | checksum |
 |------------|----------|-----------------------|----------|
@@ -161,7 +162,7 @@ const (
 
 **Bytes**
 
-```
+```text
 |----------|---------------------|
 | protocol |        payload      |
 |----------|---------------------|
@@ -170,7 +171,7 @@ const (
 
 **String**
 
-```
+```text
 |------------|----------|---------------------|----------|
 |  network   | protocol |      payload        | checksum |
 |------------|----------|---------------------|----------|
@@ -322,7 +323,7 @@ this address spec. Test vectors are presented as newline-delimited address/hex
 fields. The 'address' field, when parsed, should produce raw bytes that match
 the corresponding item in the 'hex' field. For example:
 
-```
+```text
 address1
 hex1
 
@@ -332,7 +333,7 @@ hex2
 
 ## ID Type Addresses
 
-```
+```text
 f00
 0000
 
@@ -352,7 +353,7 @@ f018446744073709551615
 
 ## Secp256k1 Type Addresses
 
-```
+```text
 f17uoq6tp427uzv7fztkbsnn64iwotfrristwpryy
 01fd1d0f4dfcd7e99afcb99a8326b7dc459d32c628
 
@@ -371,7 +372,7 @@ f12fiakbhe2gwd5cnmrenekasyn6v5tnaxaqizq6a
 
 ## Actor Type Addresses
 
-```
+```text
 f24vg6ut43yw2h2jqydgbg2xq7x6f4kub3bg6as6i
 02e54dea4f9bc5b47d261819826d5e1fbf8bc5503b
 
@@ -393,7 +394,7 @@ f2gfvuyh7v2sx3patm5k23wdzmhyhtmqctasbr23y
 To aid in readability, these addresses are line-wrapped. Address and hex pairs
 are separated by `---`.
 
-```
+```text
 f3vvmn62lofvhjd2ugzca6sof2j2ubwok6cj4xxbfzz
 4yuxfkgobpihhd2thlanmsh3w2ptld2gqkn2jvlss4a
 ---
