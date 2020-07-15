@@ -13,11 +13,6 @@ At a high-level it marries `ElectionPoSt` with a `SurprisePoSt` fallback:
 - By coupling leader election and PoSt, `ElectionPoSt` ensures that miners must do the work to prove their sectors at every round in order to earn block rewards.
 - Small miners may not win on a regular basis however, `SurprisePoSt` thus comes in as a lower-bound to how often miners must PoSt and helps ensure the Power Table does not grow stale for its long-tail of smaller miners.
 
-{{< hint danger >}}
-Issue with label
-{{< /hint >}}
-
-{{</* label pledge_collateral */>}}
 # Overview
 
 Election PoSt couples the PoSt process with block production, meaning that in order to produce a block, the miner must produce a valid PoSt proof (snark output). Specifically, a subset of non-faulted sectors the miner is storing (i.e. eligible sectors) allows them to attempt a leader election using a PartialTicket any of which could yield a valid ChallengeTicket for leader election. The probability of scratching a winning ChallengeTicket is dependent on sector size and total storage. Miners are rewarded in proportion to the quantity of winning ChallengeTickets they generate in a given epoch, thereby incentivizing a miner to check as much of their storage as allowed in order to express their full power in a leader election. The number of election proofs a miner can generate in a given epoch will determine the block reward it earns.
@@ -48,7 +43,7 @@ Filecoin's ElectionPoSt process makes use of two calls to the system library:
 - `GenerateCandidates` which takes in the miner's sectors and a wanted number of Challenge Tickets and generates a number of inclusion proofs for a number of challenged sectors chosen randomly in proportion to the requested number of challenged tickets.
 - `GeneratePoSt` takes a set of ChallengeTickets and generates a __*Proof of Spacetime*__ for them, proving the miner storage as a whole.
 
-As stated above, a miner is incentivized to repeat this process at every block time in order to check whether they were elected leaders (see [Expected Consensus](\missing-link)). The rationality assumption made by ElectionPoSt is thus that storing files continuously and earning block rewards accordingly will be more profitable to miners than regenerating data at various epochs to sporadically participate in leader election.
+As stated above, a miner is incentivized to repeat this process at every block time in order to check whether they were elected leaders (see [Expected Consensus](expected_consensus)). The rationality assumption made by ElectionPoSt is thus that storing files continuously and earning block rewards accordingly will be more profitable to miners than regenerating data at various epochs to sporadically participate in leader election.
 
 At every epoch, each miner will challenge a portion of sectors `numSectorsSampled` from their `Proving Set` at random, according to some `ElectionPoStSampleRate` with each sector being issued K PoSt challenges (coverage may not be perfect).
 
@@ -89,7 +84,7 @@ Note also that even with `numSectorsSampled == len(ProvingSet)`, this process ma
     - `PartialTicket = H(post_randomness || minerID ||S_ j || C_1_Output || … || C_K_Output)`
 
 4. **(check Challenge Ticket(s) for winners)**
-Given returned PartialTickets, miner checks them for winning tickets using the target set by expected consensus in [Expected Consensus](\missing-link) (per the `TicketIsWinner()` method below).
+Given returned PartialTickets, miner checks them for winning tickets using the target set by expected consensus in [Expected Consensus](expected_consensus) (per the `TicketIsWinner()` method below).
 
 ```text
 winningTickets = []
@@ -233,9 +228,9 @@ Only faults which have been reported at challenge time, will be accounted for. I
 - Faults cannot be declared during a ChallengePeriod
 - Faults cannot be recovered during a ChallengePeriod
 
-Accordingly, if the miner does not respond to the challenge, they will lose all their Power and a portion of their pledge collateral. This is considered a `DetectedFault` and all sectors in the `ProvingSet` will be marked as `Failing`. The miner will get challenged again in the next proving period. If the miner does not provide a valid response to `MAX_CONSECUTIVE_FAULTS` challenges in a row, their pledge collateral is slashed and their sectors are permanently terminated. Their storage deal collateral is slashed accordingly (see [Storage Deal States](\missing-link) for more).
+Accordingly, if the miner does not respond to the challenge, they will lose all their Power and a portion of their pledge collateral. This is considered a `DetectedFault` and all sectors in the `ProvingSet` will be marked as `Failing`. The miner will get challenged again in the next proving period. If the miner does not provide a valid response to `MAX_CONSECUTIVE_FAULTS` challenges in a row, their pledge collateral is slashed and their sectors are permanently terminated. Their storage deal collateral is slashed accordingly (see [Storage Deal States](storage_deal_states) for more).
 
-Any faulted sectors will not count toward miner power in [Expected Consensus](\missing-link). Through these `Detected` and `Declared` faults, the power table should closely track power in the network.
+Any faulted sectors will not count toward miner power in [Expected Consensus](expected_consensus). Through these `Detected` and `Declared` faults, the power table should closely track power in the network.
 
 ## Fault Recovery
 
@@ -252,7 +247,7 @@ Each reported fault carries a penality with it.
 
 # Miner Onboarding
 
-Storage Power Consensus participants are subject to a [Minimum Miner Size](\missing-link), meaning miners smaller than `MIN_MINER_SIZE_STOR` of active (or in-deal) storage cannot produce valid electionPoSts. 
+Storage Power Consensus participants are subject to a [Minimum Miner Size](storage_power_consensus#minimum-miner-size), meaning miners smaller than `MIN_MINER_SIZE_STOR` of active (or in-deal) storage cannot produce valid electionPoSts. 
 
 These miners' power does not count as part of the total network power, nor are they able to sumit electionPoSts but they can still run and transmit SurprisePosts as messages to be added on-chain. These miners can also be faulted as usual for lacking to prove their power after a challenge. 
 
