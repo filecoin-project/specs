@@ -4,13 +4,12 @@ weight: 5
 ---
 
 # BlockSync
+---
 
 {{< hint info >}}
 **Name**: Block Sync  
 **Protocol ID**: `/fil/sync/blk/0.0.1`
 {{< /hint >}}
-
-
 
 The blocksync protocol is a small protocol that allows Filecoin nodes to request ranges of blocks from each other. It is a simple request/response protocol.
 

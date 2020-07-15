@@ -2,6 +2,8 @@
 #+HUGO_SECTION: algorithms/post
 #+HUGO_BASE_DIR: ../../
 
+* Proof of Spacetime Paramerters
+
 This section describes parameters for Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
 
 #+begin_src lisp :package orient.lang :exports none

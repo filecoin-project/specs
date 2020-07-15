@@ -1,13 +1,10 @@
 ---
 title: "Signatures"
+weight: 1
 ---
 
 # Signatures
 ---
-
-{{< hint danger >}}
-Issue with readfile throughout
-{{< /hint >}}
 
 Signatures are cryptographic functions that attest to the origin of a particular
 message. In the context of Filecoin, signatures are used to send and receive
@@ -22,15 +19,15 @@ Filecoin uses signatures to verify the authenticity of the following objects (no
 exhaustive list):
 
 - Messages: Users authenticate their transactions to the blockchain.
-- Tickets: Miner authenticates its ticket (see [Storage Miner](\missing-link)).
+- Tickets: Miner authenticates its ticket (see [Storage Miner](filecoin_mining)).
 - Blocks: Block leader signs over all data in the block. 
 
 ## Messages
 
-To generate a signature for the [Message](\missing-link) type, compute the signature over the message's CID (taken as a byte array).
+To generate a signature for the [Message](message) type, compute the signature over the message's CID (taken as a byte array).
 
 **Note**: for each specific use of a signature scheme, it is recommended to use a domain separation tag to treat the hash function as an independent random oracle. These tags are indicated in the relevant places throughout the specs.
-Read more about this in [Randomness](\missing-link).
+Read more about this in [Randomness](randomness).
 
 ## Signature Types
 
@@ -42,11 +39,7 @@ Filecoin currently uses two types of signatures:
 Both signature types fulfill the `Signature` interface 
 and each type have additional functionality as explained below.
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-
-{{</* readfile file="signatures.id"  lang="go" */>}}
+{{<embed src="signatures.id" lang="go">}}
 
 ### ECDSA Signatures
 
@@ -58,15 +51,11 @@ useful functionality as well: to recover the public key from a given signature.
 This feature can allow space to be saved on the blockchain by extracting the public
 key locally from the signature rather than specifying an ID of the public key.
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-
-{{</* readfile file="ecdsa.id"  lang="go" */>}}
+{{<embed src="ecdsa.id" lang="go">}}
 
 **Wire Format**: Filecoin uses the standard secp256k1 signature serialization,
 as described below. For more details on how the Filecoin `Signature` type is
-serialized, see [Signature](\missing-link).
+serialized, see [Signature](signatures).
 
 ```
 SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
@@ -91,12 +80,8 @@ SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
 
 Filecoin uses the [BLS signature scheme](https://datatracker.ietf.org/doc/draft-boneh-bls-signature/) over the [BLS12-381](BLS12-381](https://electriccoin.co/blog/new-snark-curve/) group of elliptic curves. You can find the default Rust implementation in [Filecoin's repo](https://github.com/filecoin-project/bls-signatures/).
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-
-{{</* readfile file="bls.id"  lang="go" */>}}
-{{</* readfile file="bls.go"  lang="go" */>}}
+{{<embed src="bls.id" lang="go">}}
+{{<embed src="bls.go" lang="go">}}
 
 **Choice of group**: The BLS signature requires the use of a pairing-equipped
 curve which generally yield three groups: G_1, G_2 and G_T. In the BLS signature

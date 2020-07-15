@@ -8,6 +8,9 @@ entries:
   - randomness
 ---
 
+# Cryptographic Primitives
+---
+
   - Merkle tree/DAG
   - Vector commitment scheme
   - zkSNARK

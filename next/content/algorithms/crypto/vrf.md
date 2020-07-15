@@ -1,16 +1,10 @@
 ---
 title: "Verifiable Random Function"
-weight: 10
+weight: 2
 ---
 
 # Verifiable Random Function
 ---
-
-{{< hint danger >}}
-Issue with label
-{{< /hint >}}
-
-{{</* label vrf */>}}
 
 Filecoin uses the notion of a [Verifiable Random
 Function](https://people.csail.mit.edu/silvio/Selected%20Scientific%20Papers/Pseudo%20Randomness/Verifiable_Random_Functions.pdf)
@@ -19,18 +13,14 @@ an arbitrary message such that the output is unique per signer and per message.
 Any third party in possession of the corresponding public key, the message, and
 the VRF output, can verify if the digest has been computed correctly and by the
 correct signer. Using a VRF in the ticket generation process allows anyone to
-verify if a block comes from an eligible block producer (see [Ticket Generation (Tickets)](\missing-link) for more details).
+verify if a block comes from an eligible block producer (see [Ticket Generation](storage_power_consensus#tickets) for more details).
 
 BLS signature can be used as the basis to construct a VRF. Filecoin transforms
-the BLS signature scheme it uses (see [Signatures](\missing-link) into a
+the BLS signature scheme it uses (see [Signatures](signatures) into a
 VRF, Filecoin uses the random oracle model and deterministically hashes the
 signature (using blake2b to produce a 256 bit output) to produce the final digest.
 
-These digests are often used as entropy for randomness in the protocol (see [Randomness](\missing-link)).
+These digests are often used as entropy for randomness in the protocol (see [Randomness](randomness)).
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-
-{{</* readfile file="vrf.id"  lang="go" */>}}
-{{</* readfile file="vrf.go"  lang="go" */>}}
+{{<embed src="vrf.id" lang="go">}}
+{{<embed src="vrf.go" lang="go">}}
