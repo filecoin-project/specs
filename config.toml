@@ -1,6 +1,6 @@
 # baseURL = '/'
 title = 'Filecoin Spec'
-theme = 'book'
+# theme = 'book'
 
 # Book configuration
 disablePathToLower = true
@@ -97,6 +97,8 @@ enableGitInfo = true
   BookServiceWorker = false
 
 [module]
+  [[module.imports]]
+    path = "github.com/alex-shpak/hugo-book"
   [[module.imports]]
     path = "github.com/filecoin-project/specs-actors"
     [[module.imports.mounts]]
