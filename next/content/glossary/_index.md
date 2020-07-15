@@ -31,8 +31,6 @@ An ask contains the terms on which a miner is willing to provide services. Stora
 
 A block in the Filecoin blockchain is a chunk of data appended to the shared history of the network including transactions, messages, etc. and representing the state of the storage network at a given point in time.
 
-See [Data Structures]()
-
 ## Bootstrapping
 
 ## Chain weight
@@ -60,8 +58,6 @@ Collateral is Filecoin tokens pledged by an actor as a commitment to a promise. 
 
 ## Commitment
 
-See [Filecoin Proofs](proofs.md)
-
 ## Confirmation
 
 ## Consensus
@@ -87,10 +83,6 @@ A fault occurs when a proof is not posted in the Filecoin system within the prov
 Files are what clients bring to the filecoin system to store. A file is split up into `pieces`, which are what is actually stored by the network.
 
 ## Finality
-
-## Piece Inclusion Proof
-
-See [Filecoin Proofs](proofs.md)
 
 ## Gas, Fees, Prices
 
@@ -166,11 +158,9 @@ See `Power Fraction`.
 
 A miner's `Power Fraction` or `Power` is the ratio of their committed storage as of their last PoSt submission over Filecoin's total committed storage as of the current block. It is used in leader election.
 
-##  Power table
-{{< hint warning >}}
-TODO: fix sref
-{{< /hint >}}
-The {{/*<sref power_table>*/}} is an abstraction provided by the Filecoin storage market that lists the `power` of every miner in the system.
+##  Power Table
+
+The Power Table is an abstraction provided by the Filecoin storage market that lists the `power` of every miner in the system.
 
 ## Protocol
 
@@ -285,7 +275,7 @@ Something that is verifiable can be checked for correctness by a third party.
 
 ## VDF
 
-A verifiable function that guarantees a time delay given some hardware assumptions and a small set of requirements. These requirements are efficient proof verification, random output, and strong sequentiality. Verifiable delay functions are formally defined by [\[BBBF]](https://eprint.iacr.org/2018/601).
+A verifiable function that guarantees a time delay given some hardware assumptions and a small set of requirements. These requirements are efficient proof verification, random output, and strong sequentiality. Verifiable delay functions are formally defined by [BBBF](https://eprint.iacr.org/2018/601).
 
 ```text
 {proof, value} <-- VDF(public parameters, seed)
@@ -309,7 +299,7 @@ A verifiable random function that receives {Secret Key (SK), seed} and outputs {
 
 ## Weight
 
-Every mined block has a computed `weight`. Together, the `weights` of all the blocks in a branch of the chain determines the cumulative `weight` of that branch. Filecoin's Expected Consensus is a GHOSTy or heaviest-chain protocol, where chain selection is done on the basis of an explicit weighting function. Filecoin’s `weight` function currently seeks to incentivize collaboration amongst miners as well as the addition of storage to the network. The specific weighting function is defined in [Chain Weighting](expected-consensus.md#chain-weighting).
+Every mined block has a computed `weight`. Together, the `weights` of all the blocks in a branch of the chain determines the cumulative `weight` of that branch. Filecoin's Expected Consensus is a GHOSTy or heaviest-chain protocol, where chain selection is done on the basis of an explicit weighting function. Filecoin’s `weight` function currently seeks to incentivize collaboration amongst miners as well as the addition of storage to the network. The specific weighting function is defined in [Chain Weighting](expected-consensus#chain-weighting).
 
 ## zkSNARK
 
