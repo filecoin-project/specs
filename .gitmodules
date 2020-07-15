@@ -1,9 +1,0 @@
-[submodule "orient"]
-	path = orient
-	url = https://github.com/filecoin-project/orient.git
-[submodule "src/actors"]
-	path = src/actors
-	url = https://github.com/filecoin-project/specs-actors.git
-[submodule "next/.site/themes/book"]
-	path = next/.site/themes/book
-	url = https://github.com/alex-shpak/hugo-book
