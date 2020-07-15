@@ -35,9 +35,7 @@ An ask contains the terms on which a miner is willing to provide services. Stora
 
 A block in the Filecoin blockchain is a chunk of data appended to the shared history of the network including transactions, messages, etc. and representing the state of the storage network at a given point in time.
 
-See [Data Structures](data_structures)
-
-### Bootstrapping
+## Bootstrapping
 
 ### Chain weight
 
@@ -64,9 +62,7 @@ Collateral is Filecoin tokens pledged by an actor as a commitment to a promise. 
 
 ### Commitment
 
-See [Filecoin Proofs](filproofs)
-
-### Confirmation
+## Confirmation
 
 ### Consensus
 
@@ -92,11 +88,7 @@ Files are what clients bring to the filecoin system to store. A file is split up
 
 ### Finality
 
-### Piece Inclusion Proof
-
-See [Filecoin Proofs](filproofs)
-
-### Gas, Fees, Prices
+## Gas, Fees, Prices
 
 ### Generation Attack Threshold
 
@@ -170,8 +162,9 @@ See `Power Fraction`.
 
 A miner's `Power Fraction` or `Power` is the ratio of their committed storage as of their last PoSt submission over Filecoin's total committed storage as of the current block. It is used in leader election.
 
-###  Power table
-The [Power Table](storage_power_actor#the-power-table) is an abstraction provided by the Filecoin storage market that lists the `power` of every miner in the system.
+##  Power Table
+
+The Power Table is an abstraction provided by the Filecoin storage market that lists the `power` of every miner in the system.
 
 ### Protocol
 
@@ -310,7 +303,7 @@ A verifiable random function that receives {Secret Key (SK), seed} and outputs {
 
 ### Weight
 
-Every mined block has a computed `weight`. Together, the `weights` of all the blocks in a branch of the chain determines the cumulative `weight` of that branch. Filecoin's Expected Consensus is a GHOSTy or heaviest-chain protocol, where chain selection is done on the basis of an explicit weighting function. Filecoin’s `weight` function currently seeks to incentivize collaboration amongst miners as well as the addition of storage to the network. The specific weighting function is defined in [Chain Weighting](expected_consensus#chain-weighting).
+Every mined block has a computed `weight`. Together, the `weights` of all the blocks in a branch of the chain determines the cumulative `weight` of that branch. Filecoin's Expected Consensus is a GHOSTy or heaviest-chain protocol, where chain selection is done on the basis of an explicit weighting function. Filecoin’s `weight` function currently seeks to incentivize collaboration amongst miners as well as the addition of storage to the network. The specific weighting function is defined in [Chain Weighting](expected-consensus#chain-weighting).
 
 ### zkSNARK
 
