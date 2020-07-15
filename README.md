@@ -7,10 +7,10 @@ yarn install
 ```
 
 ## Develop
+You need to have Go installed https://golang.org/doc/install
 
-### Update submodules
-```sh
-git submodule update --init
+```bash
+brew install go
 ```
 
 ### Serve with Live Reload
