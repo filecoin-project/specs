@@ -5,7 +5,6 @@ weight: 1
 
 # Block
 ---
-The Block is a unit of the Filecoin blockchain.
 
 A block header contains information relevant to a particular point in time over which the network may achieve consensus.
 
