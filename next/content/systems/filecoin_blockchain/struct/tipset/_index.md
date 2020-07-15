@@ -5,7 +5,7 @@ weight: 2
 
 # Tipset
 ---
-Expected Consensus probabilistically elects multiple leaders in each epoch meaning a Filecoin chain may contain zero or multiple blocks at each epoch (one per elected miner). Blocks from the same epoch are assembled into tipsets. The [VM Interpreter](filecoin_vm/interpreter) modifies the Filecoin state tree by executing all messages in a tipset (after de-duplication of identical messages included in more than one block). 
+Expected Consensus probabilistically elects multiple leaders in each epoch meaning a Filecoin chain may contain zero or multiple blocks at each epoch (one per elected miner). Blocks from the same epoch are assembled into tipsets. The [VM Interpreter](interpreter) modifies the Filecoin state tree by executing all messages in a tipset (after de-duplication of identical messages included in more than one block). 
 
 Each block references a parent tipset and validates _that tipset's state_, while proposing messages to be included for the current epoch. The state to which a new block's messages apply cannot be known until that block is incorporated into a tipset. It is thus not meaningful to execute the messages from a single block in isolation: a new state tree is only known once all messages in that block's tipset are executed. 
  

@@ -10,19 +10,19 @@ weight: 2
 
 ## `StorageMarketActorState` implementation
 
-{{< embed src="/docs/actors/actors/builtin/storage_market/storage_market_actor_state.go" lang="go" >}}
+{{<embed src="/docs/actors/actors/builtin/storage_market/storage_market_actor_state.go" lang="go" >}}
 
 ## `StorageMarketActor` implementation
 
-{{< embed src="/docs/actors/actors/builtin/storage_market/storage_market_actor.go" lang="go" >}}
+{{<embed src="/docs/actors/actors/builtin/storage_market/storage_market_actor.go" lang="go" >}}
 
 ## `StorageMarketActor` implementation
 
-{{< embed src="/docs/actors/actors/builtin/storage_market/storage_market_actor.go" lang="go" >}}
+{{<embed src="/docs/actors/actors/builtin/storage_market/storage_market_actor.go" lang="go" >}}
 
 ## Storage Deal Collateral
 
 There are two types of Storage Deal Collateral, ProviderDealCollateral and ClientDealCollateral. Both types of `StorageDealCollateral` are held in the `StorageMarketActor`.
 Their values are agreed upon by the storage provider and client off-chain, but must be greater than a protocol-defined minimum in any deal. Storage providers will choose to offer greater provider deal collateral to signal high-quality storage to clients. Provider deal collateral is only slashed when a sector is terminated other than normal expiration. If a miner enters Temporary Fault for a sector and later recovers from it, no deal collateral will be slashed.
 
-Upon graceful deal expiration, storage providers must wait for finality number of epochs (as defined in [Finality]({{< ref "expected_consensus#finality-in-ec" >}})) before being able to withdraw their `StorageDealCollateral` from the `StorageMarketActor`.
+Upon graceful deal expiration, storage providers must wait for finality number of epochs (as defined in [Finality](expected_consensus#finality-in-ec)) before being able to withdraw their `StorageDealCollateral` from the `StorageMarketActor`.

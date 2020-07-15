@@ -4,6 +4,7 @@ weight: 4
 ---
 
 # Payment Channels
+---
 
 In order for the Filecoin Markets to work in a timely manner, we need to be able to have off-chain payments. This is a solved problem (at least, for our purposes in v0). Payment channels have been implemented and used in bitcoin, ethereum and many other networks.
 

@@ -1,19 +1,22 @@
-+++
-title = "Filecoin Parameters"
-draft = false
-+++
+---
+title: Filecoin Parameters
+weight: 3
+---
+
+# Filecoin Parameters
+---
 
 Some of these parameters are used around the code in the Filecoin subsystems and ABI. Others are used as part of the proofs libraries.
 
 Most are generated/finalized using the [orient framework](https://github.com/filecoin-project/orient). It is used to modelize the Filecoin network.
 
-{{% hint warning %}}
+{{<hint warning>}}
 ⚠️ **WARNING:** Filecoin is not yet launched, and we are finishing protocol spec and implementations. Parameters are set here as placeholders and highly likely to change to fit product and security requirements.
-{{% /hint %}}
+{{</hint>}}
 
 ## Code parameters
 
-{{< embed src="../systems/filecoin_nodes/node_base/network_params.go" lang="go" >}}
+{{<embed src="../systems/filecoin_nodes/node_base/network_params.go" lang="go" >}}
 
 ## Orient parameters
 

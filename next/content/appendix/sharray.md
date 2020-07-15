@@ -8,11 +8,11 @@ weight: 1
 
 The Sharray is an IPLD tree structure used to store an array of items. It is designed for usecases that know all items at the time of creation and do not need insertion or deletion.
 
-# IPLD Representation
+## IPLD Representation
 
 Each sharray node is represented by an IPLD node of the following schema:
 
-```
+```text
 type Node struct {
   height Int
   items [Item]
@@ -25,7 +25,7 @@ type Node struct {
 
 We use DAG-CBOR for serialization, and blake2b-256 for hashing.
 
-# Construction
+## Construction
 
 The tree must not be sparse.
 Given an array of size `N` and a fixed width of `W`:
@@ -37,9 +37,9 @@ Given an array of size `N` and a fixed width of `W`:
 - Leaves (nodes with a height of 0) contain array values.
 - Inner nodes (nodes with height greater than zero) contain the cids of their child nodes.
 
-# Operations
+## Operations
 
-## `create(items)`
+### `create(items)`
 
 > Create a sharray from a given set of items
 
@@ -85,7 +85,7 @@ func create(items []Item) Cid {
 }
 ```
 
-## `get(i)`
+### `get(i)`
 
 > Get the element at index `i`
 
