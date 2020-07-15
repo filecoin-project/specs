@@ -1,166 +1,208 @@
-# Filecoin Specification
+## Install
 
-[![CircleCI](https://circleci.com/gh/filecoin-project/specs/tree/master.svg?style=svg)](https://circleci.com/gh/filecoin-project/specs/tree/master)
-
-This is the [Filecoin Specification](https://github.com/filecoin-project/specs), a repository that contains documents, code, models, and diagrams that constitute the specification of the [Filecoin Protocol](https://filecoin.io). This repository is the singular source of truth for the Filecoin Protocol. All implementations of the Filecoin Protocol should match and comply with the descriptions, interfaces, code, and models defined in this specification.
-
-Note that the `master` branch of the specs moves quickly. We work to merge PRs as fast as possible into master, which means changes or reversals are possible here. Accordingly, we periodically compile swaths of spec along with a high-level difflog into the `release` branch. As the spec stabilizes, this practice will change.
-
-## View Website
-
-https://filecoin-project.github.io/specs is the user-friendly website rendering, which we recommend for reading this repository. The website is updated automatically with every merge to `master`.
-
-## Contributing
-
-Please [read the spec process](https://filecoin-project.github.io/specs/#intro__process). Please file PRs on github with fixes.
+```sh
+git clone https://github.com/filecoin-project/specs.git
+cd next # until we move this top level
+yarn install
+```
 
 ## Develop
 
-### Install
-
-- Make sure you have installed `go` on your machine.
-
-```
-git clone https://github.com/filecoin-project/specs filecoin-specs
-cd filecoin-specs
-make deps-basic
+### Update submodules
+```sh
+git submodule update --init
 ```
 
-### Build
-
+### Serve with Live Reload
+```sh
+yarn serve
+# open http://localhost:1313/ in the browser
 ```
-make build
-```
-
-### Serve
-
-```
-make serve
-```
-
-This will write out an HTTP address to check out with your browser. Most likely: http://localhost:1313
-
-### Update actors
-
-The actor code lives in https://github.com/filecoin-project/specs-actors. It is imported:
-
-- into the compilation as a Go module, configured in src/build_go.mod
-- into the webside as a Git submodule at src/actors
-
-To change the code, edit in the home repository and then update _both_ the build_go.mod and submodule to point to the new ref.
-You should probably make a release of the specs-actors repo for ease of referring to it as a Go module.
-
-### Website
-
-```
-make website
+# Shortcodes
+### `Mermaid` 
+Inline mermaid syntax rendering
+```html
+{{< mermaid >}}
+graph TD
+  A[Christmas] -->|Get money| B(Go shopping)
+  B --> C{Let me think}
+  C -->|One| D[Laptop]
+  C -->|Two| E[iPhone]
+  C -->|Three| F[fa:fa-car Car]
+		
+{{</ mermaid >}}
 ```
 
-### Diagrams
+### `svg`
+This shortcode includes zoom and pad features.
+```html
+<!-- Relative path -->
+{{< svg src="pull-flow.mmd.svg" title="Data Transfer - Pull Flow" >}}
 
-Install dependencies for diagram making
-
-```
-make deps-diag
-```
-
-Render diagrams
-
-```
-make diagrams
+<!-- From hugo content folder -->
+{{< svg src="/systems/pull-flow.mmd.svg" title="Data Transfer - Pull Flow" >}}
 ```
 
-Make sure to check in your rendered output (`*.dot.svg` and `*.mmd.svg`) so that others dont need to install diagram building deps.
+### `hint`
+```md
+<!-- info|warning|danger -->
+{{< hint info >}}
+**Markdown content**  
+Lorem markdownum insigne. Olympo signis Delphis! Retexi Nereius nova develat
+stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa
+{{< /hint >}}
+```
+### `figure`
+```md
+{{< figure src="diagrams/pieces.png" title="Pieces, Proving Trees, and Piece Data Structures" zoom="true">}}
+```
 
-### Orient and Org mode
+### `embed`
+```md
+# src relative to the page
+{{<embed src="piece_store.id" lang="go">}}
 
-Install dependencies for org mode and orient
+# src relative to content folder
+{{<embed src="/systems/piece_store.id" lang="go">}}
+```
+
+
+# Frontmatter
+```md
+title: Libraries
+description: Libraries used from Filecoin
+weight: 3
+bookCollapseSection: true
+bookhidden: true
+dashboardAudit: 1
+dashboardState: wip
+dashboardInterface: stable
+```
+
+# Code fences
+
+They should **always** have a lang, if you don't know or don't care just use `text`
+
+```text
+
+```text
+Random plain text context ...
+``
 
 ```
-make deps-orient
+# Document header
+The first heading should be # Head with `---` like below and should refer to the overall title of the document. The right nav **only** starts on the second level of headings. 
+
+```md
+---
+title: Storage Power Actor
+---
+
+# Storage Power Actor
+---
+
+## Header for a section in this document
+Some text
+
+### Sub header for the a nested section
+
+## Another top level header
 ```
 
-Without these, you won't be able to compile `.org` files, and they may be missing from the document output.
 
-## Overviews
+# References
+## Markdown links **(Recommended)**
+These links use "portable links" just like `relref` so you can just give it the name of the file and it will fetch the correct relative link and title for the `<a href="/relative/path" title="page title">` automatically.
+You can override the `<a>` title by passing a second `string` in the link definition.
 
-### Build System Overview
+**Note**: When using anchors the title can't be fetched automatically.
+```md
+[Storage Power](storage_power_consensus)
+# <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Storage Power Consensus">Storage Power</a>
 
-Given the complexity of the protocol, a build system is introduced to leverage the power of modern programs and improve understanding, efficiency, consistency, and velocity of Filecoin spec development. The Filecoin spec is organized into subcomponents as defined in `src/` with high-level and introductory sections in `Introduction` and `Algorithmns`, detailed spec on different Filecoin systems in `Systems`, followed by `Listings`, `Glossary`, and `Appendix`.
+[Storage Power](storage_power_consensus "Title to override the page original title")
+# <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Title to override the page original title">Storage Power</a>
 
-For every subsystem in the Filecoin spec, it must always have a markdown file that specifies the component. Wherever possible and necessary, an `.id` file should be included to automatically generate compiled `.go` files that can be tested to ensure build consistency and served from `hugo`. Similarly, contributors should include an `.orient` file that describes mathematical constraints in a component of the system. `Orient`, a language created to write constraints and models about the system, is used to perform ubercalc and generate artifacts about the system. To facilitate in line code display, an `.org` file can also be included to interweave output from ubercalc and markdown.
+[Tickets](storage_power_consensus#the-ticket-chain-and-drawing-randomness "The Ticket chain and drawing randomness")
+# <a href="/systems/filecoin_blockchain/storage_power_consensus#the-ticket-chain-and-drawing-randomness" title="The Ticket chain and drawing randomness">Tickets</a>
 
- <!--
- An architectural diagram of the build system can be found below.
-  This is outdated. fix it and bring back.
-<img src="src/diagrams/buildsys/buildsys.dot.svg" width="50%">
--->
-
-#### Adding new sections
-
-The specification is broken down into 5 levels (`#.#.#.#.#`). The L1 and L2 numbers in this sequence are determined by the first two directories extending from `/src/`; for example, `/src/systems/filecoin_mining/` resolves to `2.6.`.
-
-The L3 number is generated by creating an additional directory within a L2 directory, containing its own appropriately formatted `index.md`. This new directory name must then be added to the `entries` field of the L2 `index.md` file, sequentially ordered as they are to be within the specification.
-
-Further L4 and L5 subsections are added using the `##` and `###` headers respectively within a the content of a L3 section's `index.md` file.
-
-### System Overview
-
-<img src="src/diagrams/overview1/overview.svg" />
-
-## Detailed Build Usage
-
-```makefile
-> make help
-SYNOPSIS
-  make -- filecoin spec build toolchain commands
-
-USAGE
-  make deps-basic  run this once, to install & build basic dependencies
-  make build       run this every time you want to re-build artifacts
-
-MAIN TARGETS
-  make help        description of the targets (this message)
-  make build       build all final artifacts (website only for now)
-  make test        run all test cases (test-code only for now)
-  make drafts      publish artifacts to ipfs and show an address
-  make publish     publish final artifacts to spec website (github pages)
-  make clean       removes all build artifacts. you shouldn't need this
-  make serve       start hugo in serving mode -- must run 'make build' on changes manually
-
-INSTALL DEPENDENCIES
-  make deps        install ALL dependencies of this tool chain
-  make deps-basic  install minimal dependencies of this tool chain
-  make deps-diag   install dependencies for rendering diagrams
-  make deps-orient install dependencies for running orient
-  make deps-ouser  install dependencies for orient user-environment tooling
-  make bins        compile some build tools whose source is in this repo
-
-INTERMEDIATE TARGETS
-  make website     build the website artifact
-  make diagrams    build diagram artifacts ({dot, mmd} -> svg)
-  make org2md      run org mode to markdown compilation
-
-HUGO TARGETS
-  make hugo-src    copy sources into hugo dir
-  make build-hugo  run the hugo part of the pipeline
-  make watch-hugo  watch and rebuild hugo
-
-CODE TARGETS
-  make gen-code    generate code artifacts (eg id -> go)
-  make test-code   run test cases in code artifacts
-  make build-code  build all src go code (test it)
-  make clean-code  remove build code artifacts
-  make watch-code  watch and rebuild code
-
-CLEAN TARGETS
-  make clean       remove all build artifacts
-  make clean-deps  remove (some of) the dependencies installed in this repo
-  make clean-hugo  remove intermediate hugo artifacts
-  make clean-code  remove build code artifacts
-
-WATCH TARGETS
-  make serve-and-watch -j2  serve, watch, and rebuild all - works for live edit
-  make watch-code           watch and rebuild code
-  make watch-hugo           watch and rebuild hugo
 ```
+
+## Hugo Cross Refs
+Check Hugo's documentation [here](https://gohugo.io/content-management/shortcodes/#ref-and-relref)
+```md
+[Random]({{<relref "randomness">}})
+[Pledge Collateral]({{<relref "storage_power_actor#pledge-collateral">}})
+```
+## Link shortcode
+Theres also `link` shortcode which will fetch the title of the page automatically and use it for the `<a>` text and title, but **DOES NOT** work with anchors (`#anchor-id`)
+```md
+{{<link storage_power_consensus>}}
+# <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Storage Power Consensus">Storage Power Consensus</a>
+```
+
+## Math mode
+For short snippets of math text you can just use the `{{<katex>}}` shortcode, but if you need to write lots of math in a page you can just use `math-mode` and avoid writting the katex shortcode everywhere.
+
+Parses math typesetting with [KaTeX](https://katex.org/docs/api.html)   
+
+Check this example [example](https://deploy-preview-969--fil-spec-staging.netlify.app/math-mode/)
+
+> Some syntax like `\_` can't go through HUGO markdown parser and for that reason we need to wrap math text with code blocks, code fendes or the shortcode `{{<plain>}}`. See examples below.
+### Add `math-mode` prop to the Frontmatter
+```md
+---
+title: Math Mode
+math-mode: true
+---
+```
+
+### Wrap `def`, `gdef`, etc.
+Math text needs to be wrapped to avoid Hugo's Markdown parser. When wrapping defs or any math block that doesn't need to be rendered the recommended option is to use the shortcode `{{<plain hidden}}` with the hidden argument.
+
+```md
+{{<plain hidden>}}
+$$
+\gdef\createporepbatch{\textsf{create_porep_batch}}
+\gdef\GrothProof{\textsf{Groth16Proof}}
+\gdef\Groth{\textsf{Groth16}}
+\gdef\GrothEvaluationKey{\textsf{Groth16EvaluationKey}}
+\gdef\GrothVerificationKey{\textsf{Groth16VerificationKey}}
+{{</plain>}}
+```
+
+### Wrap inline math text with code blocks
+```md
+The index of a node in a `$\BinTree$` layer `$l$`. The leftmost node in a tree has `$\index_l = 0$`.
+```
+
+### Wrap math blocks with code fences
+~~~md
+```text
+$\overline{\underline{\Function \BinTree\dot\createproof(c: \NodeIndex) \rightarrow \BinTreeProof_c}}$
+$\line{1}{\bi}{\leaf: \Safe = \BinTree\dot\leaves[c]}$
+$\line{2}{\bi}{\root: \Safe = \BinTree\dot\root}$
+
+$\line{3}{\bi}{\path: \BinPathElement^{[\BinTreeDepth]}= [\ ]}$
+$\line{4}{\bi}{\for l \in [\BinTreeDepth]:}$
+$\line{5}{\bi}{\quad \index_l: [\len(\BinTree\dot\layer_l)] = c \gg l}$
+$\line{6}{\bi}{\quad \missing: \Bit = \index_l \AND 1}$
+$\line{7}{\bi}{\quad \sibling: \Safe = \if \missing = 0:}$
+$\quad\quad\quad \BinTree\dot\layer_l[\index_l + 1]$
+$\quad\quad\thin \else:$
+$\quad\quad\quad \BinTree\dot\layer_l[\index_l - 1]$
+$\line{8}{\bi}{\quad \path\dot\push(\BinPathElement \thin \{\ \sibling, \thin \missing\ \} \thin )}$
+
+$\line{9}{\bi}{\return \BinTreeProof_c \thin \{\ \leaf, \thin \root, \thin \path\ \}}$
+```
+~~~
+
+## References
+- [hugo theme book](https://themes.gohugo.io//theme/hugo-book/docs/shortcodes/columns/)
+- [Katex](https://katex.org/)
+- [Mermaid](https://mermaid-js.github.io/mermaid/#/)
+  - [config](https://github.com/mermaid-js/mermaid/blob/master/docs/mermaidAPI.md#mermaidapi-configuration-defaults)
+  - [editor](https://mermaid-js.github.io/mermaid-live-editor)
+- [Pan/Zoom for SVG](https://github.com/anvaka/panzoom)
+- [Icons](https://css.gg/)
+- [Working with submodules](https://github.blog/2016-02-01-working-with-submodules/)
