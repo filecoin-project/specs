@@ -2,7 +2,6 @@
 
 ```sh
 git clone https://github.com/filecoin-project/specs.git
-cd next # until we move this top level
 yarn install
 ```
 

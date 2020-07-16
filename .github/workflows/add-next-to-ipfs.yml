@@ -1,0 +1,29 @@
+name: Add to IPFS 
+
+on: [push]
+
+jobs:
+  add-next-to-ipfs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.14.4'
+
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '12'
+      
+      - run: npm install
+      - run: npm run build
+
+      - uses: ipfs-shipyard/ipfs-github-action@v1.0.0
+        with:
+          path_to_add: public
+          cluster_host: /dnsaddr/cluster.ipfs.io
+          cluster_user: ${{ secrets.CLUSTER_USER }}
+          cluster_password: ${{ secrets.CLUSTER_PASSWORD }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
