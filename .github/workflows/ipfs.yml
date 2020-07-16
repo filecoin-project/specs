@@ -3,7 +3,7 @@ name: Add to IPFS
 on: [push]
 
 jobs:
-  add-next-to-ipfs:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
