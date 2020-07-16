@@ -1,6 +1,8 @@
 # baseURL = '/'
 title = 'Filecoin Spec'
 # theme = 'book'
+canonifyurls = false
+relativeURLs = true
 
 # Book configuration
 disablePathToLower = true

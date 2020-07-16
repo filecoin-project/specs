@@ -5,6 +5,9 @@ bookCollapseSection: true
 weight: 2
 ---
 
+# Systems
+---
+
 In this section we are detailing all the system components one by one in increasing level of complexity and/or interdependence to other system components. The interaction of the components between each other is only briefly discussed where appropriate, but the overall workflow is given in the Introduction section. In particular, in this section we discuss:
 
 - Filecoin Nodes: the different types of nodes that participate in the Filecoin Network, as well as important parts and processes that these nodes run, such as the key store and IPLD store, as well as the network interface to libp2p.
