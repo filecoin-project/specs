@@ -31,10 +31,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
+      - run: echo /ipfs/${{ steps.ipfs.outputs.cid }}
+
+      - run: echo ${{ github.ref }}
+
       # This branch updates a dnslink for a domain if the current branch should be deployed to prod.
       # see https://github.com/ipfs-shipyard/js-dnslink-dnsimple
       - run: npx dnslink-dnsimple --domain beta.spec.filecoin.io --link /ipfs/${{ steps.ipfs.outputs.cid }}
         env:
           DNSIMPLE_TOKEN: ${{ secrets.DNSIMPLE_TOKEN }}
         # TODO: change to master once merged.
-        if: github.ref == 'ref/head/feat/dnslink'
+        if: github.ref == 'refs/heads/feat/dnslink'
