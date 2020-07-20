@@ -41,4 +41,4 @@ jobs:
         env:
           DNSIMPLE_TOKEN: ${{ secrets.DNSIMPLE_TOKEN }}
         # TODO: change to master once merged.
-        if: github.ref == 'refs/heads/feat/new-setup'
+        if: github.ref == 'refs/heads/beta'
