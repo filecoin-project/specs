@@ -10,7 +10,7 @@ jobs:
 
       - uses: actions/setup-go@v2
         with:
-          go-version: '1.14.4'
+          go-version: '1.14'
 
       - uses: actions/setup-node@v2-beta
         with:
@@ -19,7 +19,10 @@ jobs:
       - run: npm install
       - run: npm run build
 
+      # Pin the built site to ipfs-cluster, output the cid as `steps.ipfs.outputs.cid`
+      # see: https://github.com/ipfs-shipyard/ipfs-github-action
       - uses: ipfs-shipyard/ipfs-github-action@v1.0.0
+        id: ipfs
         with:
           path_to_add: public
           cluster_host: /dnsaddr/cluster.ipfs.io
@@ -27,3 +30,15 @@ jobs:
           cluster_password: ${{ secrets.CLUSTER_PASSWORD }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - run: echo /ipfs/${{ steps.ipfs.outputs.cid }}
+
+      - run: echo ${{ github.ref }}
+
+      # This branch updates a dnslink for a domain if the current branch should be deployed to prod.
+      # see https://github.com/ipfs-shipyard/js-dnslink-dnsimple
+      - run: npx dnslink-dnsimple --domain beta.spec.filecoin.io --link /ipfs/${{ steps.ipfs.outputs.cid }}
+        env:
+          DNSIMPLE_TOKEN: ${{ secrets.DNSIMPLE_TOKEN }}
+        # TODO: change to master once merged.
+        if: github.ref == 'refs/heads/feat/new-setup'
