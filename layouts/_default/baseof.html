@@ -34,6 +34,12 @@
 
     {{ if default true (default .Site.Params.BookToC .Params.BookToC) }}
     <aside class="book-toc">
+      <div class="book-toc-toggles">
+        <label class="dark-mode-toggle-label" for="dark-mode-toggle">
+          <i class="gg-dark-mode"></i> DARK MODE
+        </label>
+        <button id="dark-mode-toggle" class="dark-mode-toggle toggle" type="button" aria-pressed="false"></button>
+      </div>
       {{ template "toc" . }} <!-- Table of Contents -->
     </aside>
     {{ end }}
