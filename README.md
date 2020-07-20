@@ -8,6 +8,9 @@ Note that the `beta` branch of the specs moves quickly. We work to merge PRs as 
 
 https://beta.spec.filecoin.io is the user-friendly website rendering, which we recommend for reading this repository. The website is updated automatically with every merge to `beta`.
 
+## Previous version
+You can find the previous version of the Filecoin Spec in the master branch [here](https://github.com/filecoin-project/specs/tree/master).
+
 ## Install
 
 ```sh
