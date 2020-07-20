@@ -10,15 +10,12 @@ weight: 2
 
 ## `StorageMarketActorState` implementation
 
-{{<embed src="/docs/actors/actors/builtin/storage_market/storage_market_actor_state.go" lang="go" >}}
+{{<embed src="/specs-actors/actors/builtin/market/market_state.go" lang="go" >}}
 
 ## `StorageMarketActor` implementation
 
-{{<embed src="/docs/actors/actors/builtin/storage_market/storage_market_actor.go" lang="go" >}}
+{{<embed src="/specs-actors/actors/builtin/market/market_actor.go" lang="go" >}}
 
-## `StorageMarketActor` implementation
-
-{{<embed src="/docs/actors/actors/builtin/storage_market/storage_market_actor.go" lang="go" >}}
 
 ## Storage Deal Collateral
 
