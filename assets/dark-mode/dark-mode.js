@@ -1,6 +1,4 @@
-
 document.addEventListener("DOMContentLoaded", function(event) {
-
   // Swap the active css based on the users color-scheme preference.
   const btn = document.querySelector('.dark-mode-toggle')
   const lightMode = document.getElementById('light-mode-link')
@@ -12,25 +10,31 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   // Listen for a click on the button 
   btn.addEventListener('click', function () {
-    // toggle all the things
+    // toggle the theme name
     theme = (theme === 'light' ? 'dark' : 'light')
-    console.log(theme)
-    lightMode.disabled = theme === 'dark'
-    darkMode.disabled = theme !== 'dark'
-    btn.setAttribute('aria-pressed', theme === 'dark')
+    
+    if (theme === 'dark') {
+      enableDarkMode()
+    } else {
+      enableLightMode()
+    }
     localStorage.setItem('theme', theme)
   })
+
+  function enableLightMode () {
+    lightMode.disabled = false
+    darkMode.disabled = true
+    btn.setAttribute('aria-pressed', false)
+  }
 
   function enableDarkMode () {
     darkMode.disabled = false
     lightMode.disabled = true
     btn.setAttribute('aria-pressed', true)
-    localStorage.setItem('theme', 'dark')
   }
 
   // Light is default, so enable dark if user previously chose it.
   if (theme === 'dark') {
-    console.log('snap')
     enableDarkMode()
   }
 
