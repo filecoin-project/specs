@@ -1,70 +1,44 @@
-name: github pages deploy
+name: CI 
 
-on:
-  push:
-    branches:
-      - master
+on: [push]
 
 jobs:
-  build-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v2
         with:
-          submodules: true
+          go-version: '1.14'
 
-      - uses: webfactory/ssh-agent@v0.2.0
+      - uses: actions/setup-node@v2-beta
         with:
-          ssh-private-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          node-version: '12'
+      
+      - run: npm install
+      - run: npm run build
 
-      - name: Install Go
-        run: |
-          sudo apt-get remove golang-go
-          sudo apt-get remove --auto-remove golang-go
-          sudo rm -rf /usr/local/go
-          sudo rm -rf /usr/local/go1.12
-          sudo rm -rf /usr/local/go1.27
-          sudo apt-get update
-          wget https://dl.google.com/go/go1.14.4.linux-amd64.tar.gz
-          sudo tar -xvf go1.14.4.linux-amd64.tar.gz
-          sudo chown -R root:root ./go
-          sudo cp -r go /usr/local
-          sudo cp -r go /usr/local/go1.12
-          sudo cp -r go /usr/local/go1.27
-          sudo ln -sf /usr/local/go/bin/go /usr/bin/go
-          sudo echo 'GOROOT=/usr/local/go' >> ~/.profile
-          sudo echo 'GOPATH=$HOME/work' >>~/.profile
-          sudo echo 'PATH=$GOROOT/bin:$GOPATH/bin' >>~/.profile
-          source ~/.profile
-
-      - name: Debug
-        run: |
-          pwd
-          go env
-          which go
-          go version
-
-      - name: Install deps-ga
-        run: |
-          sudo make deps-ga
-
-      - name: Build
-        run: |
-          sudo chown -R root:root /home/runner/work/specs
-          sudo make build
-
-      - name: Deploy using SSH
+      # Pin the built site to ipfs-cluster, output the cid as `steps.ipfs.outputs.cid`
+      # see: https://github.com/ipfs-shipyard/ipfs-github-action
+      - uses: ipfs-shipyard/ipfs-github-action@v1.0.0
+        id: ipfs
+        with:
+          path_to_add: public
+          cluster_host: /dnsaddr/cluster.ipfs.io
+          cluster_user: ${{ secrets.CLUSTER_USER }}
+          cluster_password: ${{ secrets.CLUSTER_PASSWORD }}
         env:
-          DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          sudo chown -R runner /home/runner/work/specs/specs
-          sudo chown -R runner .git/
-          eval "$(ssh-agent -s)"
-          ssh-add - <<< "${DEPLOY_KEY}"
+      
+      - run: echo /ipfs/${{ steps.ipfs.outputs.cid }}
 
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
-          git config --local user.email "no-reply-spec-deploy@protocol.ai"
-          git config --local user.name "no-reply-spec-deploy"
+      - run: echo ${{ github.ref }}
 
-          bin/publish-to-gh-pages.sh
+      # This branch updates a dnslink for a domain if the current branch should be deployed to prod.
+      # see https://github.com/ipfs-shipyard/js-dnslink-dnsimple
+      - run: npx dnslink-dnsimple --domain beta.spec.filecoin.io --link /ipfs/${{ steps.ipfs.outputs.cid }}
+        env:
+          DNSIMPLE_TOKEN: ${{ secrets.DNSIMPLE_TOKEN }}
+        # TODO: change to master once merged.
+        if: github.ref == 'refs/heads/feat/new-setup'

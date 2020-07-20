@@ -1,3 +1,13 @@
+# Filecoin Specification
+
+This is the [Filecoin Specification](https://github.com/filecoin-project/specs), a repository that contains documents, code, models, and diagrams that constitute the specification of the [Filecoin Protocol](https://filecoin.io). This repository is the singular source of truth for the Filecoin Protocol. All implementations of the Filecoin Protocol should match and comply with the descriptions, interfaces, code, and models defined in this specification.
+
+Note that the `beta` branch of the specs moves quickly. We work to merge PRs as fast as possible into master, which means changes or reversals are possible here. Accordingly, we periodically compile swaths of spec along with a high-level difflog into the `release` branch. As the spec stabilizes, this practice will change.
+
+## Website
+
+https://beta.spec.filecoin.io is the user-friendly website rendering, which we recommend for reading this repository. The website is updated automatically with every merge to `beta`.
+
 ## Install
 
 ```sh
@@ -17,7 +27,33 @@ brew install go
 yarn serve
 # open http://localhost:1313/ in the browser
 ```
-# Shortcodes
+
+### External modules
+External modules should be added as [Hugo Modules](https://gohugo.io/hugo-modules/)
+You can find examples in the `config.toml`
+
+```toml
+[module]
+  [[module.imports]]
+    path = "github.com/filecoin-project/specs-actors"
+    [[module.imports.mounts]]
+    source = "actors"
+    target = "content/modules/actors"
+```
+This makes files from external repos available for Hugo rendering.  
+
+These modules can be updated with 
+
+```sh
+hugo mod get -u
+```
+or use specific version with
+
+```sh
+hugo mod get github.com/filecoin-project/specs-actors@v0.7.2
+```
+
+## Shortcodes
 ### `Mermaid` 
 Inline mermaid syntax rendering
 ```html
@@ -65,31 +101,7 @@ stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa
 {{<embed src="/systems/piece_store.id" lang="go">}}
 ```
 
-
-# Frontmatter
-```md
-title: Libraries
-description: Libraries used from Filecoin
-weight: 3
-bookCollapseSection: true
-bookhidden: true
-dashboardAudit: 1
-dashboardState: wip
-dashboardInterface: stable
-```
-
-# Code fences
-
-They should **always** have a lang, if you don't know or don't care just use `text`
-
-```text
-
-```text
-Random plain text context ...
-``
-
-```
-# Document header
+## Page Header
 The first heading should be # Head with `---` like below and should refer to the overall title of the document. The right nav **only** starts on the second level of headings. 
 
 ```md
@@ -108,13 +120,37 @@ Some text
 ## Another top level header
 ```
 
+## Frontmatter
+```md
+title: Libraries
+description: Libraries used from Filecoin
+weight: 3
+bookCollapseSection: true
+bookhidden: true
+dashboardAudit: 1
+dashboardState: wip
+dashboardInterface: stable
+```
 
-# References
-## Markdown links **(Recommended)**
+## Code fences
+
+Code fences should **always** have a lang, if you don't know or don't care just use `text`
+
+```text
+
+```text
+Random plain text context ...
+``
+
+```
+
+
+## References
+### Markdown links **(Recommended)**
 These links use "portable links" just like `relref` so you can just give it the name of the file and it will fetch the correct relative link and title for the `<a href="/relative/path" title="page title">` automatically.
 You can override the `<a>` title by passing a second `string` in the link definition.
 
-**Note**: When using anchors the title can't be fetched automatically.
+> **Note**: When using anchors the title can't be fetched automatically.
 ```md
 [Storage Power](storage_power_consensus)
 # <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Storage Power Consensus">Storage Power</a>
@@ -127,13 +163,13 @@ You can override the `<a>` title by passing a second `string` in the link defini
 
 ```
 
-## Hugo Cross Refs
+### Hugo Cross Refs
 Check Hugo's documentation [here](https://gohugo.io/content-management/shortcodes/#ref-and-relref)
 ```md
 [Random]({{<relref "randomness">}})
 [Pledge Collateral]({{<relref "storage_power_actor#pledge-collateral">}})
 ```
-## Link shortcode
+### Link shortcode
 Theres also `link` shortcode which will fetch the title of the page automatically and use it for the `<a>` text and title, but **DOES NOT** work with anchors (`#anchor-id`)
 ```md
 {{<link storage_power_consensus>}}
