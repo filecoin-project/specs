@@ -7,16 +7,17 @@
 </head>
 
 <body dir={{ .Site.Language.LanguageDirection }}>
-  <input type="checkbox" class="hidden" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
   <main class="container flex">
-    <header class="book-header">
-      {{ template "header" . }} <!-- Mobile layout header -->
-    </header>
     <aside class="book-menu">
       {{ template "menu" . }} <!-- Left menu Content -->
     </aside>
 
     <div class="book-page">
+      <header class="book-header">
+        {{ template "header" . }} <!-- Mobile layout header -->
+      </header>
 
       {{ partial "docs/inject/content-before" . }}
       {{ template "main" . }} <!-- Page Content -->
@@ -52,7 +53,6 @@
   {{ partial "docs/header" . }}
 
   {{ if default true (default .Site.Params.BookToC .Params.BookToC) }}
-    <input type="checkbox" class="hidden" id="toc-control" />
     <aside class="hidden clearfix">
       {{ template "toc" . }}
     </aside>

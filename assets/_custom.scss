@@ -145,45 +145,9 @@ blockquote {
 }
 
 @media screen and (max-width: 56rem) {
-    .book-page {
-        margin-top: 50px;
-    }
-    .book-header {
-        display: block;
-        position: fixed;
-        width: 100%;
-        height: 50px;
-        padding-left: 12px;
-        padding-right: 12px;
-        line-height: 50px;
-        background-color: #090909;
-        z-index: 20;
-        border-bottom: 1px solid #232323;
-        margin-bottom: 0;
-        aside {
-            p {
-                font-size: 12px;
-                font-weight: 700;
-            }
-            i[class^=gg-] {
-                display: inline-block;
-                margin-left: 0;
-                margin-right: 0;
-                vertical-align: text-top;
-                font-size: 10px;
-                transform: scale(0.7);
-            }
-        }
-    }
-    .book-menu nav {
-        z-index: 21;
-    }
-    #toc-control:checked+aside {
-        line-height: 1.15;
-        background-color: #090909;
-        width: 100%;
-        height: auto;
-        position: absolute;
+    // hide in-page contents menu... 2 hamburgers is too much.
+    .book-header label[for="toc-control"] {
+        visibility: hidden;
     }
 }
 
