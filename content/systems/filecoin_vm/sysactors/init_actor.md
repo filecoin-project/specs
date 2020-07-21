@@ -6,4 +6,4 @@ weight: 1
 # InitActor
 ---
 
-{{<embed src="/specs-actors/actors/builtin/init/init_actor.go" lang="go">}}
+{{<embed src="/modules/actors/builtin/init/init_actor.go" lang="go">}}

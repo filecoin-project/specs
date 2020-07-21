@@ -15,5 +15,5 @@ This section describes the storage deal data type and a technical outline for de
 
 ## Data Types
 
-{{< embed src="/specs-actors/actors/builtin/market/deal.go" lang="go" >}}
+{{< embed src="/modules/actors/builtin/market/deal.go" lang="go" >}}
 
