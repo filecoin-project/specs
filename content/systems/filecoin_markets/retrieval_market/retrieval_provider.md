@@ -8,7 +8,7 @@ weight: 4
 
 ## Provider Dependencies
 
-The Retrieval Provider Depends On The Following Dependencies
+The Retrieval Provider depends on the following dependencies
 
 - **Host**: A libp2p host (set setup the libp2p protocols)
 - **Filecoin Node**: A node implementation to query the chain for pieces and to setup and manage payment channels
