@@ -3,8 +3,7 @@ title: Piece
 weight: 2
 bookCollapseSection: true
 dashboardAudit: 1
-dashboardState: permanent
-dashboardInterface: stable
+dashboardState: stable
 ---
 
 # Piece - Part of a file

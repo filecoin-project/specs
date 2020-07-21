@@ -4,8 +4,7 @@ description: VM - Virtual Machine
 bookCollapseSection: true
 weight: 3
 dashboardAudit: 1
-dashboardState: permanent
-dashboardInterface: stable
+dashboardState: stable
 ---
 
 # VM - Virtual Machine

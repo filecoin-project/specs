@@ -4,7 +4,6 @@ weight: 1
 bookCollapseSection: true
 dashboardAudit: 1
 dashboardState: wip
-dashboardInterface: stable
 ---
 
 # Storage Market in Filecoin

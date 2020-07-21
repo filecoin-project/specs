@@ -4,6 +4,7 @@
 
 // @import "plugins/numbered";
 @import "plugins/scrollbars";
+@import "table-sort";
 
 // SVG Diagrams
 .diagrams-container {
@@ -212,23 +213,23 @@ h5 {
 
 // Colors
 .color-incorrect {
-    color: #BF616A;
+    color: #ff0010;
 }
 
 .color-wip {
-    color: #D08770;
+    color: #ff6f00;
 }
 
 .color-incomplete {
-    color: #EBCB8B;
+    color: #ffef00;
 }
 
 .color-stable {
-    color: #5E81AC;
+    color: #0090ff;
 }
 
 .color-permanent {
-    color: #A3BE8C;
+    color: #90ff00;
 }
 
 i[class^="gg-"] {

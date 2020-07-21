@@ -1,11 +1,9 @@
 ---
-menuIcon: 📦
 title: "Blockchain"
 bookCollapseSection: true
 weight: 4
 dashboardAudit: 0
 dashboardState: incomplete
-dashboardInterface: wip
 ---
 
 # Blockchain

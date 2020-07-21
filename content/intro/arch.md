@@ -1,8 +1,9 @@
 ---
 title: "Architecture Diagrams"
 audit: 1
-dashboardState: permanent
-dashboardInterface: incorrect
+dashboardState: stable
+dashboardWeight: 2
+dashboardAudit: 0
 ---
 
 # Architecture Diagrams

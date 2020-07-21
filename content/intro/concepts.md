@@ -1,6 +1,7 @@
 ---
 title: "Key Concepts"
 audit: 2
+dashboardWeight: 1
 ---
 
 # Key Concepts

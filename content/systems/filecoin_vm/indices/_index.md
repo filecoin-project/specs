@@ -3,7 +3,6 @@ title: Indices
 weight: 3
 dashboardAudit: 0
 dashboardState: incomplete
-dashboardInterface: incomplete
 ---
 
 # Macroeconomic Indices
