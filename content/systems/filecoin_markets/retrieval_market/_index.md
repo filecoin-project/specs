@@ -44,7 +44,7 @@ The baseline version of proposing and accepting a deal in V0 of the retrieval ma
 - The client sends a RetrievalDealProposal to the retrieval miner. (via RetrievalProtocol)
 - The provider validates the proposal and rejects it if it is invalid
 - If the request is valid, the provider responds to it with an accept message
-- The client creates a payment channel as neccesary and a "lane" (see [Payment Channels](payment_channels) for more details) and ensures there are enough funds in the channel
+- The client creates a payment channel as neccesary and a "lane" for more details) and ensures there are enough funds in the channel
 - The provider unseals the sector as necessary
 - The provider sends blocks over the protocol until it requires payment
 - The client consumes blocks over the retrieval protocol and manually verifies them
