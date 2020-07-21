@@ -201,23 +201,28 @@ This is detectable when a given miner submits two blocks that satisfy any of the
 - both blocks have valid signatures
 - first block's epoch is smaller or equal than second block
 
-Thereafter, the faults are:
+### Types of faults
 
-- 1. **double-fork mining fault**: two blocks mined at the same epoch.
+1. **Double-Fork Mining Fault**: two blocks mined at the same epoch (even if they have the same tipset).
    - `B4.Epoch == B5.Epoch` 
 {{< svg src="diagrams/double_fork.dot.svg" title="Double-Fork Mining Fault" >}}
 
-- 2. **time-offset mining fault**: two blocks mined off of the same Tipset at different epochs (i.e. with different `ChallengeTickets` generated from the same input ticket).
+2. **Time-Offset Mining Fault**: two blocks mined off of the same Tipset at different epochs.
    - `B3.Parents == B4.Parents && B3.Epoch != B4.Epoch`
 {{< svg src="diagrams/time_offset.dot.svg" title="Time-Offset Mining Fault" >}}
 
-- 3. **parent-grinding fault**: one block's parent is a Tipset that provably should have included a given block but does not. While it cannot be proven that a missing block was willfully omitted in general (i.e. network latency could simply mean the miner did not receive a particular block), it can when a miner has successfully mined a block two epochs in a row and omitted one. That is, this condition should be evoked when a miner omits their own prior block.
+3. **Parent-Grinding Fault**: one block's parent is a Tipset that provably should have included a given block but does not. While it cannot be proven that a missing block was willfully omitted in general (i.e. network latency could simply mean the miner did not receive a particular block), it can when a miner has successfully mined a block two epochs in a row and omitted one. That is, this condition should be evoked when a miner omits their own prior block.
 Specifically, this can be proven with a "witness" block, that is by submitting blocks B2, B3, B4 where B2 is B4's parent and B3's sibling but B3 is not B4's parent.
     - `!B4.Parents.Include(B3) && B4.Parents.Include(B2) && B3.Parents == B2.Parents && B3.Epoch == B2.Epoch`
 {{< svg src="diagrams/parent_grinding.dot.svg" title="Parent-Grinding fault" >}}
 
-Any node that detects any of the above events should submit both block headers to the `StoragePowerActor`'s `ReportConsensusFault` method. The "slasher" will receive a portion of the offending miner's [Pledge Collateral](storage_power_actor#pledge-collateral) as a reward for notifying the network of the fault. Consensus faults (except for **uncommitted power fault** below which falls under storage faults with impact on consensus) will tentatively result in all pledge collateral being slashed and the miner removed from the power table. Some portion of the pledge collateral is given to the slasher as a function of some initial share (`SLASHER_INITIAL_SHARE`) and growth rate (`SLASHER_SHARE_GROWTH_RATE`). Slasher's share of the slashed collateral increases as block elapses since the block when the fault is committed. Default growth rate results in slasher's share reaches 1 after 250 blocks. However, only the first slasher gets its share of the pledge collateral and the remaining pledge collateral will be burned. The longer a slasher waits, the higher the likelihood that the slashed collateral will be claimed by another slasher.
+### Penalization for faults
+A single consensus fault results into:
+- miner termination and removal of power from the power table,
+- loss of all pledge collateral (which includes the initial pledge and blocks rewards yet to be vested)
 
-It is important to note that there exists a third type of consensus fault directly reported by the `CronActor` on `StorageDeal` failures via the `ReportUncommittedPowerFault` method:
+### Detection and Reporting
 
-- 4. **uncommitted power fault** which occurs when a miner fails to submit their `PostProof` and is thus participating in leader election with undue power (see [Storage Faults](faults#storage-faults)).
+A node that detects and report a consensus fault is called "slasher", any user in Filecoin can be a slasher. They can report consensus faults by calling the `ReportConsensusFault` on the `StorageMinerActor` of the faulty miner. The slasher is rewarded with a portion of the offending miner's [Pledge Collateral](storage_power_actor#pledge-collateral) for notifying the network of the consensu fault.
+
+The reward give to the slasher is a function of some initial share (`SLASHER_INITIAL_SHARE`) and growth rate (`SLASHER_SHARE_GROWTH_RATE`) and it has a maximum `maxReporterShare`. Slasher's share increases exponentially as epoch elapses since the block when the fault is committed (see `RewardForConsensusSlashReport`). Only the first slasher gets their share of the pledge collateral and the remaining pledge collateral is burned. The longer a slasher waits, the higher the likelihood that the slashed collateral will be claimed by another slasher.
