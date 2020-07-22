@@ -21,44 +21,16 @@ The main components are as follows:
 - A client module to query retrieval miners and initiate deals for retrieval
 - A provider module to respond to queries and deal proposals
 
-## VO & V1
 
-V0 of the protocol has participants send data over the retrieval protocol itself in a series of Blocks encoded in Bitswap format and verify received blocks manually. It will only support fetching the payload CID which is at the root of PieceCID's `.car` File, and will only support fetching the whole DAG.
-
-In V1, the retrieval market has evolved to support sending arbitrary payload CIDs & selectors within a piece. Further, it piggybacks on the Data Transfer system and Graphsync to handle transfer and verification, to support arbitrary selectors, and to reduce round trips.
+The retrieval market has evolved to support sending arbitrary payload CIDs & selectors within a piece. Further, it piggybacks on the Data Transfer system and Graphsync to handle transfer and verification, to support arbitrary selectors, and to reduce round trips.
 The Data Transfer System is augmented accordingly to support pausing/resuming and sending intermediate vouchers to facilitate this.
-V1 will also include additional mechanisms for timeouts and cancellations (to be specified).
+Additional features, which are yet to be specified include mechanisms for timeouts and cancellations.
 
-Although the underlying protocols will change, the API interfaces for the client & provider have not changed from V0 to V1.
 
-## Deal Flow (V0)
 
-NOTE: V0 is now obsolete, as V1 has been implemented and is being used.
+## Deal Flow in the Retrieval Market
 
-{{<svg src="retrieval_flow_v0.mmd.svg" title="Retrieval Flow - V0" >}}
-
-The baseline version of proposing and accepting a deal in V0 of the retrieval market works as follows:
-
-- The client finds a provider of a given piece with `FindProviders()`.
-- The client queries a provider to see if it meets its retrieval criteria (via Query Protocol)
-- The client sends a RetrievalDealProposal to the retrieval miner. (via RetrievalProtocol)
-- The provider validates the proposal and rejects it if it is invalid
-- If the request is valid, the provider responds to it with an accept message
-- The client creates a payment channel as neccesary and a "lane" for more details) and ensures there are enough funds in the channel
-- The provider unseals the sector as necessary
-- The provider sends blocks over the protocol until it requires payment
-- The client consumes blocks over the retrieval protocol and manually verifies them
-- When the provider requires payment to proceed, it sends payment request and does not send any more blocks
-- The client creates and stores a payment voucher off-chain
-- The client responds to the provider with a reference to the payment voucher
-- The provider redeems the payment voucher off-chain
-- The provider resumes sending blocks
-- The client consumes blocks until payment is required again
-- The process continues until the end of the query
-
-## Deal Flow (V1)
-
-{{<svg src="retrieval_flow_v1.mmd.svg" title="Retrieval Flow - V1" >}}
+{{<svg src="retrieval_flow_v1.mmd.svg" title="Retrieval Flow" >}}
 
 The evolved Filecoin Retrieval Market protocol, currently in use, for proposing and accepting a deal works as follows:
 
