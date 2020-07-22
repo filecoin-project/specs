@@ -1,0 +1,17 @@
+<div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="{{ "svg/menu.svg" | relURL }}" class="book-icon" alt="Menu" />
+  </label>
+  
+  <a href="{{ .Site.BaseURL | relLangURL }}">
+    <img src="{{ "filecoin-logo.svg" | relURL }}" alt="" style="height:40px;" />
+  </a>
+  <div style="width:24px;">
+    {{ if default true (default .Site.Params.BookToC .Params.BookToC) }}
+      <label for="toc-control">
+        {{ .Params.BookToC }}
+        <i class="gg-menu-motion" alt="Table of Contents"></i>
+      </label>
+    {{ end }}
+  </div>
+</div>
