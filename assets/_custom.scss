@@ -145,18 +145,28 @@ blockquote {
 }
 
 @media screen and (max-width: 56rem) {
-    // hide in-page contents menu... 2 hamburgers is too much.
-    .book-header label[for="toc-control"] {
-        visibility: hidden;
+    .toc {
+        text-align: right;
+    }
+    .toc-label {
+        margin: 0 0 2rem;
+        font-weight:700;
+        font-size:10px;
+        .gg-menu-motion {
+            display: none;
+        }
+    }
+    .book-header {
+        margin-bottom: 2rem;
     }
 }
 
 .book-toc {
-    p {
+    .toc-label {
         font-size: 10px;
         font-weight: 700;
     }
-    i[class^=gg-] {
+    .gg-menu-motion {
         display: inline-block;
         margin-left: 0;
         margin-right: 0;
