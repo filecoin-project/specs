@@ -3,6 +3,11 @@ title: "Notation, Constants, and Types"
 weight: 2
 math-mode: true
 description: "Notation, Constants, and Types for Stacked DRG PoRep"
+
+dashboardWeight: 2
+dashboardState: stable
+dashboardAudit: 1
+dashboardTests: 0
 ---
 
 {{< plain hidden >}}

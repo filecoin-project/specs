@@ -2,8 +2,10 @@
 title: Runtime
 weight: 5
 bookCollapseSection: true
+dashboardWeight: 1
+dashboardState: incomplete
 dashboardAudit: 0
-dashboardState: wip
+dashboardTests: 0
 ---
 
 # VM Runtime Environment (Inside the VM)

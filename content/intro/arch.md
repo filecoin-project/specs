@@ -1,8 +1,8 @@
 ---
 title: "Architecture Diagrams"
 audit: 1
-dashboardState: stable
-dashboardWeight: 2
+dashboardWeight: 0.2
+dashboardState: incomplete
 dashboardAudit: 0
 ---
 

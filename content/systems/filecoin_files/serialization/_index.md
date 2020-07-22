@@ -1,8 +1,10 @@
 ---
 title: Formats and Serialization 
 weight: 4
-dashboardAudit: 1
-dashboardState: wip
+dashboardWeight: 1
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Data Formats and Serialization

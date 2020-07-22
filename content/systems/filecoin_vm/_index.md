@@ -3,8 +3,10 @@ title: Virtual Machine
 description: VM - Virtual Machine
 bookCollapseSection: true
 weight: 3
-dashboardAudit: 1
-dashboardState: stable
+dashboardWeight: 2
+dashboardState: wip
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # VM - Virtual Machine

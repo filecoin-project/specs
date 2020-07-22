@@ -1,6 +1,10 @@
 ---
 title: "Expected Consensus"
 weight: 1
+dashboardWeight: 2
+dashboardState: incomplete
+dashboardAudit: 1
+dashboardTests: 0
 ---
 
 # Expected Consensus

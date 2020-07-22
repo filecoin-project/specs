@@ -1,8 +1,9 @@
 ---
 title: "Filecoin VM"
 weight: 3
-dashboardAudit: 0
+dashboardWeight: 0.2
 dashboardState: incomplete
+dashboardAudit: 0
 ---
 
 # Filecoin VM

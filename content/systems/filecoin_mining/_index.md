@@ -2,8 +2,10 @@
 title: Storage Mining
 bookCollapseSection: true
 weight: 6
-dashboardAudit: 1
-dashboardState: stable
+dashboardWeight: 2
+dashboardState: wip
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Storage Mining System - proving storage for producing blocks

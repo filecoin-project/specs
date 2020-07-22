@@ -1,6 +1,10 @@
 ---
 title: "GossipSub"
 weight: 6
+dashboardWeight: 1.5
+dashboardState: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # GossipSub

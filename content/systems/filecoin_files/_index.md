@@ -2,7 +2,11 @@
 title: Files & Data
 bookCollapseSection: true
 weight: 2
-dashboardState: stable
+
+dashboardWeight: 1.5
+dashboardState: wip
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Files & Data

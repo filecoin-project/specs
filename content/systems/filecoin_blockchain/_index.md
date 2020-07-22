@@ -2,8 +2,10 @@
 title: "Blockchain"
 bookCollapseSection: true
 weight: 4
+dashboardWeight: 2
+dashboardState: wip
 dashboardAudit: 0
-dashboardState: incomplete
+dashboardTests: 0
 ---
 
 # Blockchain

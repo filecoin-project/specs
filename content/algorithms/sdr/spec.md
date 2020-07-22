@@ -3,6 +3,11 @@ title: "Specification"
 weight: 1
 math-mode: true
 description: "Stacked DRG Proof of Replication Specification"
+
+dashboardWeight: 2
+dashboardState: stable
+dashboardAudit: 1
+dashboardTests: 0
 ---
 
 {{< plain hidden >}}

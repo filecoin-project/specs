@@ -2,6 +2,10 @@
 title: Message Pool
 weight: 2
 bookCollapseSection: true
+dashboardWeight: 2
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Message Pool

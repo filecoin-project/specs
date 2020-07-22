@@ -3,8 +3,10 @@ title: "Market"
 description: "Markets in Filecoin"
 bookCollapseSection: true
 weight: 7
-dashboardAudit: 1
-dashboardState: wip
+dashboardWeight: 2
+dashboardState: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Markets

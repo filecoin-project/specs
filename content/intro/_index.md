@@ -1,9 +1,11 @@
 ---
 title: Introduction
 weight: 1
-dashboardState: incomplete
 bookCollapseSection: true
-dashboardaudit: 0
+
+dashboardWeight: 0.2
+dashboardState: incomplete
+dashboardAudit: 0
 ---
 
 # Introduction

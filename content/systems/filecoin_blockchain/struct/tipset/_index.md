@@ -1,6 +1,10 @@
 ---
 title: Tipset
 weight: 2
+dashboardWeight: 1.5
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Tipset

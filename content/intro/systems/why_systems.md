@@ -1,6 +1,9 @@
 ---
 title: What are Systems?
 weight: 1
+dashboardWeight: 0.2
+dashboardState: incomplete
+dashboardAudit: 0
 ---
 
 # What are Systems? How do they work?

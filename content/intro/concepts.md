@@ -1,7 +1,9 @@
 ---
 title: "Key Concepts"
 audit: 2
-dashboardWeight: 1
+dashboardWeight: 0.2
+dashboardState: incomplete
+dashboardAudit: 0
 ---
 
 # Key Concepts
