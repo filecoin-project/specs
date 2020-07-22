@@ -1,7 +1,7 @@
 <script src="https://unpkg.com/tablesort@5.2.1/dist/tablesort.min.js"></script>
 <script src="https://unpkg.com/tablesort@5.2.1/dist/sorts/tablesort.number.min.js"></script>
 {{- with .Site.GetPage "/" -}}
-<table id="dashboard" class="sort">
+<table id="dashboard" class="sort Dashboard">
     <thead>
         <tr>
             <th>Section</th>
@@ -19,89 +19,48 @@
 <script>
     new Tablesort(document.getElementById('dashboard')); 
 </script>
+
+<!-- Children Template -->
 {{ define "dashboard-section-children" }}
-    {{- $scratch := newScratch -}}
     {{- $level := .level -}}
     {{- $level = mul $level 10 -}}
     {{- $pages := where .Section.Pages "Params.bookhidden" "ne" true -}}
     {{- $pages2 := where $pages "Params.dashboardhidden" "ne" true -}}
     {{- range sort $pages2 "Weight" "asc" -}}
         {{- $level = add $level 1 -}}
-        {{- $scratch.Set "dashboard-weigth" 0 -}}
-        {{- $scratch.Set "dashboard-audit" 0 -}}
         {{- if .IsSection -}}
-            <tr>
-                <td style="max-width:250px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">{{- delimit (split $level "") "." }} <a title="{{.Title}}" href="{{.Permalink}}">{{.Title}}</a></td>
-                <!-- Weight -->
-                <td>{{- (default ($scratch.Get "dashboard-weigth") .Params.dashboardWeight) -}}</td>
-                <!-- State -->
-                {{ $color := "#6c8293"}}
-                {{- if eq .Params.dashboardState "incorrect" -}}
-                    {{ $color = "#ff0010" }}
-                {{- else if eq .Params.dashboardState "wip" -}}
-                    {{ $color = "#ff6f00" }}
-                {{- else if eq .Params.dashboardState "incomplete" -}}
-                    {{ $color = "#ffef00" }}
-                {{- else if eq .Params.dashboardState "stable" -}}
-                    {{ $color = "#90ff00" }}
-                {{- end -}}
-                <td style="background-color:{{- $color -}};color: black">{{- (default "N/A" (humanize .Params.dashboardState)) -}}</td>
-                <!-- Audit -->
-                {{- $audit := (default ($scratch.Get "dashboard-audit") .Params.dashboardaudit) -}}
-                {{ $color1 := "#6c8293"}}
-                {{- if eq $audit 0 -}}
-                    {{ $color1 = "#ff0010" }}
-                {{- else if gt $audit 0 -}}
-                    {{ $color1 = "#90ff00" }}
-                {{- end -}}
-                <td style="background-color:{{- $color1 -}};color: transparent;">{{$audit}}</td>
-                <!-- Tests -->
-                {{- $tests := .Params.dashboardTests -}}
-                {{ $color2 := "#6c8293"}}
-                {{- if eq $tests 0 -}}
-                    {{ $color2 = "#ff0010" }}
-                {{- else if gt $tests 0 -}}
-                    {{ $color2 = "#90ff00" }}
-                {{- end -}}
-                <td style="background-color:{{- $color2 -}};color: black"></td>
-            </tr>
+            {{ template "dashboard-tr" (dict "Page" . "Level" $level) }}
             {{ template "dashboard-section-children" (dict "Section" . "level" $level) }}
         {{ else if and .IsPage .Content }}
-        <tr>
-            <td style="max-width:250px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">{{- delimit (split $level "") "." }} <a title="{{.Title}}" href="{{.Permalink}}">{{.Title}}</a></td>
-            <!-- Weight -->
-            <td>{{- (default 0 .Params.dashboardWeight) -}}</td>
-            <!-- State -->
-            {{ $color := "#6c8293"}}
-            {{- if eq .Params.dashboardState "incorrect" -}}
-                {{ $color = "#ff0010" }}
-            {{- else if eq .Params.dashboardState "wip" -}}
-                {{ $color = "#ff6f00" }}
-            {{- else if eq .Params.dashboardState "incomplete" -}}
-                {{ $color = "#ffef00" }}
-            {{- else if eq .Params.dashboardState "stable" -}}
-                {{ $color = "#90ff00" }}
-            {{- end -}}
-            <td style="background-color:{{- $color -}};color: black">{{- (default "N/A" (humanize .Params.dashboardState)) -}}</td>
-            <!-- Audit -->
-            {{- $audit := (default ($scratch.Get "dashboard-audit") .Params.dashboardAudit) -}}
-            {{ $color1 := "#6c8293"}}
-            {{- if eq $audit 0 -}}
-                {{ $color1 = "#ff0010" }}
-            {{- else if gt $audit 0 -}}
-                {{ $color1 = "#90ff00" }}
-            {{- end -}}
-            <td style="background-color:{{- $color1 -}};color: black;color: transparent;">{{$audit}}</td>
-            <!-- Tests -->
-            {{- $tests := .Params.dashboardTests -}}
-            {{ $color2 := "#6c8293"}}
-            {{- if eq $tests 0 -}}
-                {{ $color2 = "#ff0010" }}
-            {{- else if gt $tests 0 -}}
-                {{ $color2 = "#90ff00" }}
-            {{- end -}}
-            <td style="background-color:{{- $color2 -}};color: black"></td>
-        </tr>
+            {{ template "dashboard-tr" (dict "Page" . "Level" $level) }}
         {{ end }}
     {{ end }}
 {{ end }}
+
+<!-- Children TR template -->
+{{- define "dashboard-tr" -}}
+<tr>
+    <!-- Section -->
+    <td class="Dashboard-section">{{- delimit (split .Level "") "." }} 
+        <a title="{{.Page.Title}}" href="{{.Page.Permalink}}">{{.Page.Title}}</a>
+    </td>
+
+    <!-- Weight -->
+    <td>{{- (default 0 .Page.Params.dashboardWeight) -}}</td>
+    
+    <!-- State -->
+    <td class="text-black bg-na bg-{{- .Page.Params.dashboardState }} ">
+        {{- if eq .Page.Params.dashboardState "wip" -}}
+            WIP
+        {{- else -}}
+            {{- (default "N/A" (humanize .Page.Params.dashboardState)) -}}
+        {{- end -}}
+    </td>
+    
+    <!-- Audit -->
+    <td class="text-transparent {{ if gt .Page.Params.dashboardaudit 0 }}bg-stable{{ else }}bg-incorrect{{end}}">{{ .Page.Params.dashboardaudit }}</td>
+    
+    <!-- Tests -->
+    <td class="text-black {{- if gt .Page.Params.dashboardTests 0 -}}bg-stable{{ else }} bg-incorrect {{end}}">{{ .Page.Params.dashboardTests }}</td>
+</tr>
+{{- end -}}
