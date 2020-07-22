@@ -144,9 +144,9 @@ bookhidden: true
 dashboardWeight: 2
 <!-- This is used in the dashboard to describe the state of the page content options are "incorrect", "wip", "incomplete" and "stable" -->
 dashboardState: stable
-<!-- This is used in the dashboard to describe if the theory of the page has been audited -->
+<!-- This is used in the dashboard to describe if the theory of the page has been audited, options are 1 or 0 -->
 dashboardAudit: 1
-<!-- This is used in the dashboard to describe if the page content has compliance tests -->
+<!-- This is used in the dashboard to describe if the page content has compliance tests, options are 0 or numbers of tests -->
 dashboardTests: 0
 ```
 
