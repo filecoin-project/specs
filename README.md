@@ -45,7 +45,7 @@ This makes files from external repos available for Hugo rendering and allows for
 The configuration above gives the following information:
 
 - `path`: gives the repository you want to mount content from.
-- `source`: the folder in the mounted repository on which you mount the the local Hugo site. This is the "root" seen from your Hugo site where you pull content from. In the above case, this means that the source on the mounted repository is `https://github.com/filecoin-project/specs-actors/actors/`.
+- `source`: the folder from the repository referenced in the `path` that we want to mount into  our local Hugo filesystem. This is the "root" seen from your Hugo site where you pull content from. In the above case, this means that the source that will be mounted is `https://github.com/filecoin-project/specs-actors/actors/`.
 - `target`: the folder in your local Hugo site where the mounted content appears. In our case folder `content` is where we include all Hugo content.
 
 Putting everything together in an example: if you want to link to the file `xyz.go` from `https://github.com/filecoin-project/specs-actors/actors/xyz-folder/xyz.go`, from any file within the local folder `content` (or any of its subfolders), then with the above configuration you have to include:
