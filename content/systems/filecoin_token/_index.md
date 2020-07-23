@@ -10,7 +10,3 @@ dashboardTests: 0
 
 # Token
 ---
-
-## Status Overview
-
-{{<dashboard-level open="true">}}
