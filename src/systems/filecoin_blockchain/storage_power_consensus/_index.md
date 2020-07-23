@@ -118,7 +118,7 @@ func getDrandEntryFromBlockHeader(block,round) (DrandEntry,error) {
 }
 ```
 
-### Get randomness from drand network
+### Fetch randomness from drand network
 
 When mining, a miner can fetch entries from the drand network to include them in
 the new block by calling the method `GetBeaconEntriesForEpoch`.
