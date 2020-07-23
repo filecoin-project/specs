@@ -11,8 +11,8 @@ dashboardTests: 0
 
 ## `StorageMinerActorState` implementation
 
-{{<embed src="/docs/actors/actors/builtin/storage_miner/storage_miner_actor_state.go"  lang="go" >}}
+{{<embed src="/modules/actors/builtin/miner/miner_state.go"  lang="go" >}}
 
 ## `StorageMinerActorCode` implementation
 
-{{<embed src="/docs/actors/actors/builtin/storage_miner/storage_miner_actor.go"  lang="go" >}}
+{{<embed src="/modules/actors/builtin/miner/miner_actor.go"  lang="go" >}}

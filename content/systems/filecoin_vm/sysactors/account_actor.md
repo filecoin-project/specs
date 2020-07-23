@@ -10,4 +10,4 @@ dashboardTests: 0
 # AccountActor
 ---
 
-{{<embed src="/docs/actors/actors/builtin/account/account_actor.go" lang="go" >}}
+{{<embed src="/modules/actors/builtin/account/account_actor.go" lang="go" >}}
