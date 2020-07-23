@@ -1,0 +1,48 @@
+<b>Lotus</b>:
+<ul>
+    {{ $urlPre := "https://codecov.io/api/gh/filecoin-project/lotus" }}
+    {{ $data := getJSON $urlPre }}
+    
+    <li>
+        {{ if $data.commit.totals.c }}{{ $data.commit.totals.c }}%{{ else }}Coverage N/A{{end}}
+    </li>
+    <li>
+        {{ if $data.commit.ci_passed }}CI passing{{ else }}CI Failing{{end}}
+    </li>
+</ul>
+
+<b>go-filecoin</b>:
+<ul>
+    {{ $urlPre := "https://codecov.io/api/gh/filecoin-project/go-filecoin" }}
+    {{ $data := getJSON $urlPre }}
+    <li>
+        {{ if $data.commit.totals.c }}{{ $data.commit.totals.c }}%{{ else }}Coverage N/A{{end}}
+    </li>
+    <li>
+        {{ if $data.commit.ci_passed }}CI passing{{ else }}CI Failing{{end}}
+    </li>
+</ul>
+
+<b>forest</b>:
+<ul>
+    {{ $urlPre := "https://codecov.io/api/gh/ChainSafe/forest" }}
+    {{ $data := getJSON $urlPre }}
+    <li>
+        {{ if $data.commit.totals.c }}{{ $data.commit.totals.c }}%{{ else }}Coverage N/A{{end}}
+    </li>
+    <li>
+        {{ if $data.commit.ci_passed }}CI passing{{ else }}CI Failing{{end}}
+    </li>
+</ul>
+
+<b>cpp-filecoin</b>:
+<ul>
+    {{ $urlPre := "https://codecov.io/api/gh/filecoin-project/cpp-filecoin" }}
+    {{ $data := getJSON $urlPre }}
+    <li>
+        {{ if $data.commit.totals.c }}{{ $data.commit.totals.c }}%{{ else }}Coverage N/A{{end}}
+    </li>
+    <li>
+        {{ if $data.commit.ci_passed }}CI passing{{ else }}CI Failing{{end}}
+    </li>
+</ul>
