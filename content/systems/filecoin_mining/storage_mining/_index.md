@@ -2,6 +2,10 @@
 title: Storage Miner
 bookCollapseSection: true
 weight: 1
+dashboardWeight: 2
+dashboardState: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Storage Miner

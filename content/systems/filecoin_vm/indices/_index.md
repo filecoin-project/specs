@@ -1,9 +1,10 @@
 ---
 title: Indices
 weight: 3
-dashboardAudit: 0
+dashboardWeight: 1
 dashboardState: incomplete
-dashboardInterface: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Macroeconomic Indices

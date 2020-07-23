@@ -2,9 +2,10 @@
 title: Storage Market
 weight: 1
 bookCollapseSection: true
+dashboardWeight: 2
+dashboardState: incomplete
 dashboardAudit: 1
-dashboardState: wip
-dashboardInterface: stable
+dashboardTests: 0
 ---
 
 # Storage Market in Filecoin

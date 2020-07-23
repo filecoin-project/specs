@@ -2,10 +2,10 @@
 title: "Cryptographic Primitives"
 bookCollapseSection: true
 weight: 7
-entries:
-  - signatures
-  - vrf
-  - randomness
+dashboardWeight: 2
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Cryptographic Primitives

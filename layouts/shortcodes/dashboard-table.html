@@ -1,0 +1,74 @@
+<script src="https://unpkg.com/tablesort@5.2.1/dist/tablesort.min.js"></script>
+<script src="https://unpkg.com/tablesort@5.2.1/dist/sorts/tablesort.number.min.js"></script>
+{{- with .Site.GetPage "/" -}}
+<table id="dashboard" class="sort Dashboard">
+    <thead>
+        <tr>
+            <th>Section</th>
+            <th>Weight</th>
+            <th>State</th>
+            <th>Theory Audit</th>
+            <th>Compliance Tests</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{- template "dashboard-section-children" (dict "Section" . "level" 0) -}}
+    </tbody>
+</table>
+{{- end -}}
+<script>
+    new Tablesort(document.getElementById('dashboard')); 
+</script>
+
+<!-- Children Template -->
+{{ define "dashboard-section-children" }}
+    {{- $level := .level -}}
+    {{- $level = mul $level 10 -}}
+    {{- $pages := where .Section.Pages "Params.bookhidden" "ne" true -}}
+    {{- $pages2 := where $pages "Params.dashboardhidden" "ne" true -}}
+    {{- range sort $pages2 "Weight" "asc" -}}
+        {{- $level = add $level 1 -}}
+        {{- if .IsSection -}}
+            {{ template "dashboard-tr" (dict "Page" . "Level" $level) }}
+            {{ template "dashboard-section-children" (dict "Section" . "level" $level) }}
+        {{ else if and .IsPage .Content }}
+            {{ template "dashboard-tr" (dict "Page" . "Level" $level) }}
+        {{ end }}
+    {{ end }}
+{{ end }}
+
+<!-- Children TR template -->
+{{- define "dashboard-tr" -}}
+<tr>
+    <!-- Section -->
+    <td class="Dashboard-section">{{- delimit (split .Level "") "." }} 
+        <a title="{{.Page.Title}}" href="{{.Page.Permalink}}">{{.Page.Title}}</a>
+    </td>
+
+    <!-- Weight -->
+    <td>{{- (default 0 .Page.Params.dashboardWeight) -}}</td>
+    
+    <!-- State -->
+    <td class="text-black bg-na bg-{{- .Page.Params.dashboardState }} ">
+        {{- if eq .Page.Params.dashboardState "wip" -}}
+            WIP
+        {{- else -}}
+            {{- (default "N/A" (humanize .Page.Params.dashboardState)) -}}
+        {{- end -}}
+    </td>
+    
+    <!-- Audit -->
+    <td class="text-transparent {{ if gt .Page.Params.dashboardaudit 0 }}bg-stable{{ else }}bg-incorrect{{end}}">{{ .Page.Params.dashboardaudit }}</td>
+    
+    <!-- Tests -->
+    <td class="text-black {{- if gt .Page.Params.dashboardTests 0 -}}bg-stable{{ else if eq .Page.Params.dashboardTests 0 }} bg-incorrect {{ else }} bg-na {{ end }}">
+        {{- if eq .Page.Params.dashboardTests 0 -}}
+            {{ .Page.Params.dashboardTests }}
+        {{- else if gt .Page.Params.dashboardTests 0 -}}
+            {{ .Page.Params.dashboardTests }}
+        {{- else -}}
+            N/A
+        {{- end -}}
+    </td>
+</tr>
+{{- end -}}

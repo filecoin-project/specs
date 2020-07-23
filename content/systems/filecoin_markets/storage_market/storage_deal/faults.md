@@ -1,6 +1,10 @@
 ---
 title: "Faults"
 weight: 3
+dashboardWeight: 2
+dashboardState: incomplete
+dashboardAudit: 1
+dashboardTests: 0
 ---
 
 # Faults

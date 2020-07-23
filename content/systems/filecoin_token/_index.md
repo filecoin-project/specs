@@ -2,9 +2,10 @@
 title: "Token"
 bookCollapseSection: true
 weight: 5
-dashboardAudit: 1
+dashboardWeight: 1
 dashboardState: incorrect
-dashboardInterface: stable
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Token

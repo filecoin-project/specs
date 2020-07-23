@@ -1,5 +1,9 @@
 ---
 title: Storage Miner Actor
+dashboardWeight: 2
+dashboardState: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Storage Miner Actor

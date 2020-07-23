@@ -126,15 +126,28 @@ Some text
 ```
 
 ## Frontmatter
+
+Description for all the available frontmatter properties
+
 ```md
-title: Libraries
+<!-- Page Title to be used in the navigation -->
+title: Libraries 
+<!-- Small description for html metadata, if not present the first couple of paragraphs will be used instead -->
 description: Libraries used from Filecoin
+<!-- This will be used to order the navigation and any other listing of pages -->
 weight: 3
+<!-- This will make a page section collapse in the navigation -->
 bookCollapseSection: true
+<!-- This will hidden the page from the navigation -->
 bookhidden: true
+<!-- This is used in the dashboard to describe the importance of the page content -->
+dashboardWeight: 2
+<!-- This is used in the dashboard to describe the state of the page content options are "incorrect", "wip", "incomplete" and "stable" -->
+dashboardState: stable
+<!-- This is used in the dashboard to describe if the theory of the page has been audited, options are 1 or 0 -->
 dashboardAudit: 1
-dashboardState: wip
-dashboardInterface: stable
+<!-- This is used in the dashboard to describe if the page content has compliance tests, options are 0 or numbers of tests -->
+dashboardTests: 0
 ```
 
 ## Code fences

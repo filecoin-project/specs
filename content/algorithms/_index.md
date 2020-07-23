@@ -1,7 +1,10 @@
 ---
 title: Algorithms
 bookCollapseSection: true
-dashboardState: incorrect
-type: docs
 weight: 4
+
+dashboardWeight: 2
+dashboardState: wip
+dashboardAudit: 0
+dashboardTests: 0
 ---

@@ -1,5 +1,9 @@
 ---
 title: Storage Power Actor
+dashboardWeight: 2
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Storage Power Actor
