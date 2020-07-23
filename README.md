@@ -40,7 +40,7 @@ You can find examples in the `config.toml`
     source = "actors"
     target = "content/modules/actors"
 ```
-This makes files from external repos available for Hugo rendering and allows for linking to up-to-date sites that are directly pulled from other repositories.
+This makes files from external repos available for Hugo rendering and allows for linking to up-to-date files that are directly pulled from other repositories.
 
 The configuration above gives the following information:
 
