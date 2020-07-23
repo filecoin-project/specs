@@ -99,7 +99,7 @@ func GetRandomnessFromBeacon(e ChainEpoch, head ChainEpoch) {
     if !chain.IsNullBlock(minEpoch) 
          // it may be the first or the last entry depending on the reason why
          // there was a null block before. If the drand entry is 
-         // not assicated with this block, it means the block is invalid - but
+         // not associated with this block, it means the block is invalid - but
          // this condition is caught by the block validation logic.
          returns getDrandEntryFromBlockHeader(chain.Block(minEpoch))
     // otherwise, we need to continue progressing on the chain, i.e. maybe no
