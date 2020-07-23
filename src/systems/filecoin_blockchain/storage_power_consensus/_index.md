@@ -85,8 +85,9 @@ Note that the round may span multiple filecoin epochs if drand is slower; the
 lowest epoch number block will contain the requested beacon entry. As well, if
 there has been null rounds where the beacon should have been inserted, we need
 to iterate on the chain to find where the entry is inserted.
+
 ```go
-func GetRandomnessSeed(e ChainEpoch, head ChainEpoch) {
+func GetRandomnessFromBeacon(e ChainEpoch, head ChainEpoch) {
   // get the drand round associated with the timestamp of this epoch.
   drandRound := MaxBeaconRoundForEpoch(e)
   // get the minimum drand timestamp associated with the drand round
