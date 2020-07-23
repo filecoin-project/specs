@@ -1,6 +1,5 @@
 ---
 title: Algorithms
-bookCollapseSection: true
 weight: 4
 
 dashboardWeight: 2

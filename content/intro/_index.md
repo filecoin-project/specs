@@ -1,7 +1,6 @@
 ---
 title: Introduction
 weight: 1
-bookCollapseSection: true
 
 dashboardWeight: 0.2
 dashboardState: incomplete
