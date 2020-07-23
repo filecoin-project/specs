@@ -146,45 +146,19 @@ blockquote {
 }
 
 @media screen and (max-width: 56rem) {
-    .book-page {
-        margin-top: 50px;
+    .toc {
+        text-align: right;
     }
-    .book-header {
-        display: block;
-        position: fixed;
-        width: 100%;
-        height: 50px;
-        padding-left: 12px;
-        padding-right: 12px;
-        line-height: 50px;
-        background-color: #090909;
-        z-index: 20;
-        border-bottom: 1px solid #232323;
-        margin-bottom: 0;
-        aside {
-            p {
-                font-size: 12px;
-                font-weight: 700;
-            }
-            i[class^=gg-] {
-                display: inline-block;
-                margin-left: 0;
-                margin-right: 0;
-                vertical-align: text-top;
-                font-size: 10px;
-                transform: scale(0.7);
-            }
+    .toc-label {
+        margin: 0 0 2rem;
+        font-weight:700;
+        font-size:10px;
+        .gg-menu-motion {
+            display: none;
         }
     }
-    .book-menu nav {
-        z-index: 21;
-    }
-    #toc-control:checked+aside {
-        line-height: 1.15;
-        background-color: #090909;
-        width: 100%;
-        height: auto;
-        position: absolute;
+    .book-header {
+        margin-bottom: 2rem;
     }
 }
 
@@ -197,15 +171,15 @@ blockquote {
     .book-toc-toggles:hover {
         opacity: 1;
     }
-    .book-toc-contents {
+    .toc {
         top:78px;
     }
-    p, .dark-mode-toggle-label {
+    .toc-label, .dark-mode-toggle-label {
         font-size: 10px;
         font-weight: 700;
         display: block;
     }
-    i[class^=gg-] {
+    .gg-menu-motion, .gg-dark-mode {
         display: inline-block;
         margin-left: 0;
         margin-right: 0;

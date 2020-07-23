@@ -2,6 +2,7 @@
 title: "Specification"
 weight: 1
 math-mode: true
+description: "Stacked DRG Proof of Replication Specification"
 ---
 
 {{< plain hidden >}}

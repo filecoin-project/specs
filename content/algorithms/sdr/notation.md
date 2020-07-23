@@ -2,6 +2,7 @@
 title: "Notation, Constants, and Types"
 weight: 2
 math-mode: true
+description: "Notation, Constants, and Types for Stacked DRG PoRep"
 ---
 
 {{< plain hidden >}}
