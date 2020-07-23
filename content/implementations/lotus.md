@@ -1,9 +1,10 @@
 ---
 title: Lotus
+weight: 1
 
 implAudit: 0
-implCov: 0
 implSpecCompliance: 0
+implRepo: https://github.com/filecoin-project/lotus
 ---
 
 # Lotus

@@ -34,4 +34,8 @@ over time, without requiring further interaction from the original parties
 ## Spec Status Overview
 {{<dashboard-progress>}}
 
-{{<dashboard-table>}}
+{{<dashboard-spec>}}
+
+## Implementations Status
+
+{{<dashboard-impl>}}

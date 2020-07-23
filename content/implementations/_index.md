@@ -1,6 +1,8 @@
 ---
 title: Implementations
 weight: 8
+
+dashboardhidden: true
 ---
 
 # Filecoin Implementations
@@ -8,12 +10,7 @@ weight: 8
 
 In the meantime, you can follow each implementation’s progress at its respective repo on GitHub:
 
-go-filecoin (written in Go)
-lotus (written in Go)
-fuhon (written in C++)
-forest (written in Rust)
+{{<dashboard-impl>}}
 
 https://filecoin.io/blog/announcing-filecoin-implementations-in-rust-and-c++/
 
-
-{{<json>}}
