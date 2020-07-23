@@ -23,8 +23,8 @@
             {{- end -}}
         {{- end -}}
     {{- end -}}
-    {{- $perc := div (mul $stable 100) $count -}}
-    {{- $perc2 := div (mul $stableWeight 100) $countWeight -}}
+    {{- $perc := lang.NumFmt 2 (div (float (mul $stable 100))  (float $count)) -}}
+    {{- $perc2 := lang.NumFmt 2 (div (mul $stableWeight 100) $countWeight) -}}
 
     <h3>Progress</h3>
     <div class="meter">
