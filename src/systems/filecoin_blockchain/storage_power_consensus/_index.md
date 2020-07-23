@@ -78,7 +78,7 @@ included in a Filecoin block. This is shown below.
 
 ### Get drand randomness for VM
 
-For operations such as Porep creation, proofs validations, anything that
+For operations such as PoRep creation, proof validations, or anything that
 requires randomness for the Filecoin VM, the following method shows how to
 extract the drand entry from the chain.
 Note that the round may span multiple filecoin epochs if drand is slower; the
