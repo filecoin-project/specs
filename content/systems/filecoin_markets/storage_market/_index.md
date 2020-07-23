@@ -99,7 +99,18 @@ Now that a deal is published, it needs to be stored, sealed, and proven in order
 17.  The `StorageProvider` writes the serialized, padded piece to a shared [Filestore](filestore). 
 18.  The `StorageProvider` calls `HandleStorageDeal` on the `StorageMiner` with the published `StorageDeal` and filestore path (in Go this is the `io.Reader`).
 
-A note re order of operations: the only requirement to publish a storage deal with the `StorageMarketActor` is that the `StorageDealProposal` is signed by the `StorageClient`, the publish message is signed by the `StorageProvider`, and both parties have deposited adequate funds/collateral in the `StorageMarketActor`. As such, it's not required that the steps listed above happen in this exact order. However, the above order is *recommended* because it generally minimizes the ability of either party to act maliciously.
+A note regarding the order of operations: the only requirement to publish a storage deal with the `StorageMarketActor` is that the `StorageDealProposal` is signed by the `StorageClient`, the publish message is signed by the `StorageProvider`, and both parties have deposited adequate funds/collateral in the `StorageMarketActor`. As such, it's not required that the steps listed above happen in this exact order. However, the above order is _recommended_ because it generally minimizes the ability of either party to act maliciously.
+
+## Data Representation in the Storage Market
+
+Data submitted to the Filecoin network go through several transformations before they come to the format at which the `StorageProvider` stores it. Here we provide a summary of these transformations.
+
+1. When a piece of data, or file is submitted to Filecoin (in some raw system format) it is transformed into a _UnixFS DAG style data representation_. The hash that represents the root of the IPLD DAG of the UnixFS file is the _Payload CID_, which is used in the Retrieval Market.
+2. In order to make a _Filecoin Piece_ the UnixFS IPLD DAG is serialised into a .car file, which is also raw bytes.
+3. The resulting .car file is _padded_ with some extra data.
+4. The next step is to calculate the Merkle root out of the hashes of individual Pieces. The resulting root of the Merkle tree is the **Piece CID**. This is also referred to as **CommP**. Note that at this stage the data is still unsealed.
+5. At this point, the Piece is included in a Sector together with data from other deals. The `StorageProvider` then calculates Merkle root for all the Pieces inside the sector. The root of this tree is _CommD_. This is the _unsealed sector CID_.
+6. The `StorageProvider` is then sealing the sector and the root of the resulting Merkle root is the _CommR_.
 
 ## Data Types
 
