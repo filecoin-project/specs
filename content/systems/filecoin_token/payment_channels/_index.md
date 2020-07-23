@@ -15,7 +15,7 @@ Payment Channels are used in the Filecoin [Retrieval Market](retrieval_market) t
 In particular, given that there is no proving method provided for the act of sending data from a provider (miner) to a client, there is no trust anchor between the two. Therefore, in order to avoid mis-behaviour, Filecoin is making use of payment channels in order to realise a step-wise "data transfer <-> payment" relationship between the provider and the recipient of data. Clients issue requests for data that miners are responding to. The miner is entitled to ask for interim payments, the volume-oriented interval for which is agreed in the Deal phase. In order to facilitate this process, the Filecoin client is creating a payment channel once the provider has agreed on the proposed deal. The client should also lock in the payment channel monetary value equal to the one needed for retrieval of the entire block of data requested. Every time a provider is completing transfer of the pre-specified amount of data, they can request a payment. The client is responding to this payment with a voucher which the provider can redeem (immediately or later).
 
 
-Redeeming a voucher is not transferring funds from the payment channel to the provider's account, that is, it is not an on-chain operation. Instead, redeeming a voucher denotes the fact that data volume worth of `voucher_val` has been transferred to the client and the corresponding value is locked on the provider's side of payment channel. It is not until the voucher is submitted on-chain through `Collect` that the funds are dispatched to the provider's account.
+Redeeming a voucher is not transferring funds from the payment channel to the provider's account, that is, it is not an on-chain operation. Instead, redeeming a voucher denotes the fact that data-volume worth of `voucher_val` has been transferred to the client and the corresponding value is locked on the provider's side of payment channel. It is not until the voucher is submitted on-chain through `Collect` that the funds are dispatched to the provider's account.
 
 The following provides a high-level overview of payment channels as these are implemented in Filecoin and an accompanying interface. The lotus implementation of [vouchers](https://github.com/filecoin-project/lotus/blob/master/chain/types/voucher.go) and [payment channels](https://github.com/filecoin-project/lotus/blob/master/paychmgr/paych.go) are also good references.
 
@@ -24,13 +24,64 @@ You can also read more about the [Filecoin payment channel actor interface](paym
 In short, the payment channel actor can be used to open long-lived, flexible payment channels between users. Each channel can be funded by adding to their balance. 
 The goal of the payment channel actor is to enable a series of off-chain microtransactions to be reconciled on-chain at a later time with fewer messages. 
 
+The payment channel state structure looks like this:
+
+```go
+// A given payment channel actor is established by From (normally the client/receipent of data)
+// to enable off-chain microtransactions to To (normally provider/sender of data) to be reconciled
+// and tallied on chain.
+type State struct {
+	// Channel owner, who has funded the actor
+	From addr.Address
+	// Recipient of payouts from channel
+	To addr.Address
+
+	// Amount successfully redeemed through the payment channel, paid out on `Collect()`
+	ToSend abi.TokenAmount
+
+	// Height at which the channel can be `Collected`
+	SettlingAt abi.ChainEpoch
+	// Height before which the channel `ToSend` cannot be collected
+	MinSettleHeight abi.ChainEpoch
+
+	// Collections of lane states for the channel, maintained in ID order.
+	LaneStates []*LaneState
+}
+```
+
+
 The structure of the voucher looks like this:
 
-```text
-From	: address of recipient of data (Client)
-To		: address of sender of data (Provider)
-Value	: value of service (agreed on Deal)
-Nonce	: lane- and voucher-specific identifier
+```go
+// A voucher is sent by `From` to `To` off-chain in order to enable
+// `To` to redeem payments on-chain in the future
+type SignedVoucher struct {
+	// ChannelAddr is the address of the payment channel this signed voucher is valid for
+	ChannelAddr addr.Address
+	// TimeLockMin sets a min epoch before which the voucher cannot be redeemed
+	TimeLockMin abi.ChainEpoch
+	// TimeLockMax sets a max epoch beyond which the voucher cannot be redeemed
+	// TimeLockMax set to 0 means no timeout
+	TimeLockMax abi.ChainEpoch
+	// (optional) The SecretPreImage is used by `To` to validate
+	SecretPreimage []byte
+	// (optional) Extra can be specified by `From` to add a verification method to the voucher
+	Extra *ModVerifyParams
+	// Specifies which lane the Voucher merges into (will be created if does not exist)
+	Lane uint64
+	// Nonce is set by `From` to prevent redemption of stale vouchers on a lane
+	Nonce uint64
+	// Amount voucher can be redeemed for
+	Amount big.Int
+	// (optional) MinSettleHeight can extend channel MinSettleHeight if needed
+	MinSettleHeight abi.ChainEpoch
+
+	// (optional) Set of lanes to be merged into `Lane`
+	Merges []Merge
+
+	// Sender's signature over the voucher
+	Signature *crypto.Signature
+}
 ```
 
 The client (`From`) is sending vouchers to the provider (`To`). The `Value` indicated in the voucher is progressively increasing together with the `Nonce` to indicate the value available to the provider to redeem, based on the data that the latter has sent. The provider can `Update` the balance of the channel and the balance `ToSend` to them. The provider can choose to `Collect` this balance at any time by submitting the redeemed vouchers on chain and incurring the corresponding gas cost.
@@ -48,7 +99,7 @@ The multiple lanes enable two parties to use a single payment channel to adjudic
 
 Vouchers are signed by the sender and authenticated using a `Secret`, `PreImage` pair provided by the paying party. If the `PreImage` is indeed a pre-image of the `Secret` when used as input to some given algorithm (typically a one-way function like a hash), the `Voucher` is valid. The `Voucher` itself contains the `PreImage` but not the `Secret` (communicated separately to the receiving party). This enables multi-hop payments since an intermediary cannot redeem a voucher on their own. Vouchers can also be used to update the minimum height at which a channel will be settled (i.e., closed), or have `TimeLock`s to prevent recipients (`To`) of the voucher from using them (redeeming them) too early. A channel can also have a `MinCloseHeight` to prevent it being closed prematurely (e.g. before the recipient has collected funds) by the sender.
 
-Once their transactions have completed, either party can choose to `Settle` (i.e., close) the channel. There is a two-hour period after `Settle` during which the recipient can submit any outstanding vouchers. Once the vouchers are submitted, the recipient can then `Collect` the `ToPay` amount from the channel. `From` will be refunded the remaining balance in the channel (if any).
+Once their transactions have completed, either party can choose to `Settle` (i.e., close) the channel. There is a 12hr period after `Settle` during which the recipient can submit any outstanding vouchers. Once the vouchers are submitted, the recipient can then `Collect` the `ToPay` amount from the channel. `From` will be refunded the remaining balance in the channel (if any).
 
 Summarising we have the following set of actions and their relation to the chain:
 
@@ -58,5 +109,5 @@ At any time, A can open new lanes to increase the total balance available in the
 - \[off-chain\] - Throughout the transaction cycle (e.g. on every piece of data sent via a retrieval deal), party A sends a voucher to party B enabling B to redeem payment from the payment lanes, and incentivizing B to continue providing a service (e.g. sending more data along).
 - \[on-chain\] - At regular intervals, B can redeem vouchers and `Update` the payment channel balance available `ToSend` with the vouchers received (past their `timeLock`), decreasing the remaining `Value` of the payment channel.
 - \[on-chain\] - At the end of the cycle, past the `MinCloseHeight`, A can choose to `Settle` the payment channel.
-- \[off-chain\] - B has a 2hr period to submit any outstanding vouchers after the channel has been `Settled`, after which period B will lose any monetary value that corresponds to non-submitted vouchers.
+- \[off-chain\] - B has a 12hr period to submit any outstanding vouchers after the channel has been `Settled`, after which period B will lose any monetary value that corresponds to non-submitted vouchers.
 - \[on-chain\] - B can choose to `Collect` the amount `ToSend` triggering a payment between the payment channel actor and B.
