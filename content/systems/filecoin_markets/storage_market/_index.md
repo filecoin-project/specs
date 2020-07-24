@@ -44,7 +44,7 @@ The following diagram outlines the phases of deal flow within the storage market
 
 # Discovery
 
-Discovery is the client process of identifying storage providers (i.e. a miner) who (subject to agreement on the deal's terms) are offering to store the client's data. There are many ways in which a client can use to identify a provider to store their data. The list below outlines the minimum discovery services a filecoin implementation MUST provide. As the network evolves, third parties may build systems that supplement or enhance these services.
+Discovery is the client process of identifying storage providers (i.e. a miner) who (subject to agreement on the deal's terms) are offering to store the client's data. There are many ways which a client can use to identify a provider to store their data. The list below outlines the minimum discovery services a filecoin implementation MUST provide. As the network evolves, third parties may build systems that supplement or enhance these services.
 
 Discovery involves identifying providers and determining their current `StorageAsk`. The steps are as follows:
 1. A client queries the chain to retrieve a list of Storage Miner Actors who have registerd as miners with the StoragePowerActor.
@@ -105,7 +105,7 @@ A note regarding the order of operations: the only requirement to publish a stor
 
 Data submitted to the Filecoin network go through several transformations before they come to the format at which the `StorageProvider` stores it. Here we provide a summary of these transformations.
 
-1. When a piece of data, or file is submitted to Filecoin (in some raw system format) it is transformed into a _UnixFS DAG style data representation_. The hash that represents the root of the IPLD DAG of the UnixFS file is the _Payload CID_, which is used in the Retrieval Market.
+1. When a piece of data, or file is submitted to Filecoin (in some raw system format) it is transformed into a _UnixFS DAG style data representation_ (in case it is not in this format already, e.g., from IPFS-based applications). The hash that represents the root of the IPLD DAG of the UnixFS file is the _Payload CID_, which is used in the Retrieval Market.
 2. In order to make a _Filecoin Piece_ the UnixFS IPLD DAG is serialised into a .car file, which is also raw bytes.
 3. The resulting .car file is _padded_ with some extra data.
 4. The next step is to calculate the Merkle root out of the hashes of individual Pieces. The resulting root of the Merkle tree is the **Piece CID**. This is also referred to as **CommP**. Note that at this stage the data is still unsealed.
