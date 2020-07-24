@@ -12,9 +12,4 @@ dashboardTests: 0
 # VM - Virtual Machine
 ---
 
-## Status Overview
-
-{{<dashboard-level name="Virtual Machine" open="true">}}
-
-
 {{<embed src="vm.id" lang="go" >}}
