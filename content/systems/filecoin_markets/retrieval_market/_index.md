@@ -14,15 +14,14 @@ The `retrieval market` refers to the process of negotiating deals for a provider
 The main components are as follows:
 
 - A payment channel actor (see {{<link payment_channel_actor>}} for details)
-- Two `libp2p` services - 
-   - a protocol for making queries
-   - a protocol for negotiating and carrying out retrieval deals. The intention for this protocol is to become a separate libp2p protocol as the retrieval market design evolves in the near future.
+- A Data Transfer subsystem and protocol used to query retrieval miners and initiate retrieval deals
 - A chain-based content routing interface
-- A client module to query retrieval miners and initiate deals for retrieval
 - A provider module to respond to queries and deal proposals
 
-The retrieval market has evolved to support sending arbitrary payload CIDs & selectors within a piece. Further, it piggybacks on the Data Transfer system and Graphsync to handle transfer and verification, to support arbitrary selectors, and to reduce round trips.
+The retrieval market operate by piggybacking on the Data Transfer system and Graphsync to handle transfer and verification, to support arbitrary selectors, and to reduce round trips. The retrieval market can support sending arbitrary payload CIDs & selectors within a piece. 
+
 The Data Transfer System is augmented accordingly to support pausing/resuming and sending intermediate vouchers to facilitate this.
+
 Additional features, which are yet to be specified include mechanisms for timeouts and cancellations.
 
 
@@ -30,7 +29,7 @@ Additional features, which are yet to be specified include mechanisms for timeou
 
 {{<svg src="retrieval_flow_v1.mmd.svg" title="Retrieval Flow" >}}
 
-The evolved Filecoin Retrieval Market protocol, currently in use, for proposing and accepting a deal works as follows:
+The Filecoin Retrieval Market protocol for proposing and accepting a deal works as follows:
 
 - The client finds a provider of a given piece with `FindProviders()`.
 - The client queries a provider to see if it meets its retrieval criteria (via Query Protocol)
@@ -44,7 +43,7 @@ The evolved Filecoin Retrieval Market protocol, currently in use, for proposing 
 - The client receives the request for payment.
 - The client creates and stores a payment voucher off-chain.
 - The client responds to the provider with a reference to the payment voucher, sent as an intermediate voucher (i.e., acknowledging receipt of a part of the data and channel or lane value).
-- The provider redeems the payment voucher off-chain.
+- The provider validates the voucher sent by the client and saves it to be redeemed on-chain later
 - The provider resumes sending data and requesting intermediate payments.
 - The process continues until the end of the data transfer.
 
@@ -56,8 +55,8 @@ Some extra notes worth making with regard to the above process are as follows:
 - The payment indicated in the voucher is not taken out of the payment channel funds upon creation and exchange of vouchers between the client and the provider.
 - In order for money to be transferred to the provider's payment channel side, the provider has to *redeem* the voucher
 - In order for money to be taken out of the payment channel, the provider has to submit the voucher on-chain and `Collect` the funds.
-- Both redeeming and collecting vouchers/funds can be done at any time during the data transfer, but collecting funds involves the blockchain, which means that it incurs gas cost.
-- Once the data transfer is complete, there is a 12hr period within which the provider has to submit the redeemed vouchers on-chain in order to collect the funds. Otherwise, the client is free to close the channel, in which case, the provider loses the funds.
+- Both redeeming and collecting vouchers/funds can be done at any time during the data transfer, but redeeming vouchers and collecting funds involves the blockchain, which further means that it incurs gas cost.
+- Once the data transfer is complete, the client or provider may Settle the channel. There is then a 12hr period within which the provider has to submit the redeemed vouchers on-chain in order to collect the funds. Once the 12hr period is complete, the client may collect any unclaimed funds from the channel, and the provider loses the funds for vouchers they did not submit.
 - The provider can ask for a small payment ahead of the transfer, before they start unsealing data. The payment is meant to support the providers' computational cost of unsealing the first chunk of data (where chunk is the agreed step-wise data transfer). This process is needed in order to avoid clients from carrying out a DoS attack, according to which they start several deals and cause the provider to engage a large amount of computational resources.
 
 ## Bootstrapping Trust
