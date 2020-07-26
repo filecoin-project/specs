@@ -32,7 +32,7 @@ $$
 \gdef\lebinrep#1{{\llcorner #1 \lrcorner_{\lower{2pt}{2, \textsf{le}}}}}
 \gdef\bebinrep#1{{\llcorner #1 \lrcorner_{\lower{2pt}{2, \textsf{be}}}}}
 \gdef\lebytesbinrep#1{{\llcorner #1 \lrcorner_{\lower{2pt}{2, \textsf{le-bytes}}}}}
-\gdef\fesitelrounds{\textsf{fesitel\_rounds}}
+\gdef\feistelrounds{\textsf{feistel\_rounds}}
 \gdef\int{\textsf{int}}
 \gdef\lebytes{\textsf{le-bytes}}
 \gdef\lebytestolebits{\textsf{le\_bytes\_to\_le\_bits}}
@@ -312,7 +312,7 @@ $$
 \gdef\graphid{\textsf{graph\_id}}
 \gdef\createfeistelkeys{\textsf{create\_feistel\_keys}}
 \gdef\FeistelKeys{\textsf{FeistelKeys}}
-\gdef\feistelrounds{\textsf{fesitel\_rounds}}
+\gdef\feistelrounds{\textsf{feistel\_rounds}}
 \gdef\feistel{\textsf{feistel}}
 \gdef\ExpEdgeIndex{\textsf{ExpEdgeIndex}}
 \gdef\loop{\textsf{loop}}
@@ -380,7 +380,7 @@ $$
 ## Merkle Proofs
 
 **Implementation:**
-* [`storage_proofs::merkle::MerkleTreeWrapper::gen_proof()`]()
+* [`storage_proofs::merkle::MerkleTreeWrapper::gen_proof()`](https://github.com/filecoin-project/rust-fil-proofs/blob/e4e3375158ed5d3be4635c47a826812bc9e1a459/storage-proofs/core/src/merkle/tree.rs#L92)
 * [`merkle_light::merkle::MerkleTree::gen_proof()`](https://github.com/filecoin-project/merkle_light/blob/64a468807c594d306d12d943dd90cc5f88d0d6b0/src/merkle.rs#L918)
 
 **Additional Notation:**
@@ -390,7 +390,7 @@ The index of a node in a `$\BinTree$` layer `$l$`. The leftmost node in a tree h
 
 ### BinTreeProofs
 
-The method `$\BinTreeProof\dot\createproof$` is used to create a Merkle proof for a challenge node `$c$`.
+The method `$\BinTree\dot\createproof$` is used to create a Merkle proof for a challenge node `$c$`.
 
 ```text
 $\overline{\underline{\Function \BinTree\dot\createproof(c: \NodeIndex) \rightarrow \BinTreeProof_c}}$
@@ -415,7 +415,7 @@ $\line{9}{\bi}{\return \BinTreeProof_c \thin \{\ \leaf, \thin \root, \thin \path
 
 ### OctTreeProofs
 
-The method `$\OctTreeProof\dot\createproof$` is used to create a Merkle proof for a challenge node `$c$`.
+The method `$\OctTree\dot\createproof$` is used to create a Merkle proof for a challenge node `$c$`.
 
 **Additional Notation:**
 
@@ -535,7 +535,7 @@ $\line{1}{\bi}{\return \sum_{l \in [\OctTreeDepth]}{\path[l]\dot\missing * 8^l}}
 
 Filecoin utilizes the topological properties of depth robust graphs (DRG's) to build a sequential and regeneration resistant encoding scheme. We stack `$N_\layers$` of DRG's, each containing `$N_\nodes$` nodes, on top of one another and connect each adjacent pair of DRG layers via the edges of bipartite expander. The source layer of each expander is the DRG at layer `$l$` and the sink layer is the DRG at layer `$l + 1$`. The resulting graph is termed a Stacked-DRG. 
 
-For every node `$v \in [N_\nodes]$` in the DRG at layer `$l \in [N_\layers]$`, we generate `$d_\drg$` number of DRG parent for `$v$` in layer `$l$`. DRG parents are generated using the [Bucket Sampling algorithm](https://eprint.iacr.org/2017/443.pdf). For every node `$v$` in layers `$l > 0$` we generate `$d_\exp$` number of expander parents for `$v$` where the parents are in layer `$l - 1$`. Expander parents are generated using a psuedorandom permutation (PRP) `$\pi: [N_\nodes] \rightarrow [N_\nodes]$` which maps a node in the DRG layer `$l$` to a node in the the DRG layer `$l - 1$`. The psudeorandom permutation is generated using a `$N_\fesitelrounds$`-round Feistel network whose round function is the keyed hash function `$\Blake$`, where round keys are specified by the constant `$\FeistelKeys$`.
+For every node `$v \in [N_\nodes]$` in the DRG at layer `$l \in [N_\layers]$`, we generate `$d_\drg$` number of DRG parent for `$v$` in layer `$l$`. DRG parents are generated using the [Bucket Sampling algorithm](https://eprint.iacr.org/2017/443.pdf). For every node `$v$` in layers `$l > 0$` we generate `$d_\exp$` number of expander parents for `$v$` where the parents are in layer `$l - 1$`. Expander parents are generated using a psuedorandom permutation (PRP) `$\pi: [N_\nodes] \rightarrow [N_\nodes]$` which maps a node in the DRG layer `$l$` to a node in the the DRG layer `$l - 1$`. The psudeorandom permutation is generated using a `$N_\feistelrounds$`-round Feistel network whose round function is the keyed hash function `$\Blake$`, where round keys are specified by the constant `$\FeistelKeys$`.
 
 ### DRG
 
@@ -572,24 +572,27 @@ The distance `$u_\meta$` is from `$v_\meta$` in the metagraph.
 
 ```text
 $\overline{\underline{\Function \getdrgparents(v: \NodeIndex) \rightarrow \NodeIndex^{[d_\drg]}}}$
-$\line{1}{\bi}{\DrgSeed_{\PorepID, v}: \Byte^{[32]} = \DrgSeed_\PorepID \concat \leencode(v) \as \Byte^{[4]}}$
-$\line{2}{\bi}{\rng_{\PorepID, v} = \ChaCha{8}\cc\fromseed(\DrgSeed_{\PorepID, v})}$
+$\line{1}{\bi}{\if v \in \{0, 1\}:}$
+$\line{2}{\bi}{\quad \return 0^{[d_\drg]}}$
 
-$\line{3}{\bi}{\mathbf{u}_\drg: \textsf{NodeIndex}^{[d_\drg]} = [\ ]}$
+$\line{3}{\bi}{\DrgSeed_{\PorepID, v}: \Byte^{[32]} = \DrgSeed_\PorepID \concat \leencode(v) \as \Byte^{[4]}}$
+$\line{4}{\bi}{\rng_{\PorepID, v} = \ChaCha{8}\cc\fromseed(\DrgSeed_{\PorepID, v})}$
 
-$\line{4}{\bi}{v_\meta = v * d_\textsf{meta}}$
-$\line{5}{\bi}{N_\buckets = \lceil \log_2(v_\meta) \rceil}$
-$\line{6}{\bi}{\for \each \in [d_\meta]:}$
-$\line{7}{\bi}{\quad b \xleftarrow[\rng]{}  [1, N_\buckets + 1]}$
-$\line{8}{\bi}{\quad \dist_{\max, b} = \textsf{min}(v_\meta, 2^b)}$
-$\line{9}{\bi}{\quad \dist_{\min, b} = \textsf{max}(d_{\max, b} / 2, 2)}$
-$\line{10}{}{\quad \dist_{u_\meta} \xleftarrow[\rng]{} [\dist_{\min, b} \thin, \dist_{\max, b}]}$
-$\line{11}{}{\quad u_\meta = v_\meta - \dist_{u_\meta}}$
-$\line{12}{}{\quad u: \NodeIndex = \lfloor u_\meta / d_\meta \rfloor}$
-$\line{13}{}{\quad \mathbf{u}_\drg\dot\push(u)}$
+$\line{5}{\bi}{\mathbf{u}_\drg: \textsf{NodeIndex}^{[d_\drg]} = [\ ]}$
 
-$\line{14}{}{\mathbf{u}_\drg\dot\push(v - 1)}$
-$\line{15}{}{\return \mathbf{u}_\drg}$
+$\line{6}{\bi}{v_\meta = v * d_\textsf{meta}}$
+$\line{7}{\bi}{N_\buckets = \lceil \log_2(v_\meta) \rceil}$
+$\line{8}{\bi}{\for \each \in [d_\meta]:}$
+$\line{9}{\bi}{\quad b \xleftarrow[\rng]{}  [1, N_\buckets + 1]}$
+$\line{10}{}{\quad \dist_{\max, b} = \textsf{min}(v_\meta, 2^b)}$
+$\line{11}{}{\quad \dist_{\min, b} = \textsf{max}(\dist_{\max, b} / 2, 2)}$
+$\line{12}{}{\quad \dist_{u_\meta} \xleftarrow[\rng]{} [\dist_{\min, b} \thin, \dist_{\max, b}]}$
+$\line{13}{}{\quad u_\meta = v_\meta - \dist_{u_\meta}}$
+$\line{14}{}{\quad u: \NodeIndex = \lfloor u_\meta / d_\meta \rfloor}$
+$\line{15}{}{\quad \mathbf{u}_\drg\dot\push(u)}$
+
+$\line{16}{}{\mathbf{u}_\drg\dot\push(v - 1)}$
+$\line{17}{}{\return \mathbf{u}_\drg}$
 ```
 
 ### Expander
@@ -612,8 +615,8 @@ The index of an expander edge in the child `$v$`'s layer `$l$` and the parent `$
 ```text
 $\overline{\underline{\Function \getexpparents(v: \NodeIndex) \rightarrow \NodeIndex^{[d_\exp]}}}$
 $\line{1}{\bi}{\mathbf{u}_\exp: \NodeIndex^{[d_\exp]} = [\ ]}$
-$\line{2}{\bi}{\for p\in [d_E]:}$
-$\line{3}{\bi}{\quad e_l = v * d_E + p}$
+$\line{2}{\bi}{\for p\in [d_\exp]:}$
+$\line{3}{\bi}{\quad e_l = v * d_\exp + p}$
 $\line{4}{\bi}{\quad e_{l - 1} = \feistel(e_l)}$
 $\line{5}{\bi}{\quad u: \NodeIndex = \lfloor e_{l - 1} / d_\exp \rfloor}$
 $\line{6}{\bi}{\quad \mathbf{u}_\exp\dot\push(u)}$
@@ -622,7 +625,7 @@ $\line{7}{\bi}{\return \mathbf{u}_\exp}$
 
 ### Feistel Network PRP
 
-The function `$\feistel$` runs an `$N_\feistelrounds = 4$` round Feistel network as a psuedorandom permutation (PRP) over the set of expander edges `$[d_\exp * N_\nodes] = [2^{33}]$` in a Stacked-DRG layer.
+The function `$\feistel$` runs an `$N_\feistelrounds$` round Feistel network as a psuedorandom permutation (PRP) over the set of expander edges `$[d_\exp * N_\nodes] = [2^{33}]$` in a Stacked-DRG layer.
 
 **Implementation:** [`storage_proofs::core::crypto::feistel::permute()`](https://github.com/filecoin-project/rust-fil-proofs/blob/d15b4307abe384d49ab2ce76b57377204f935cec/storage-proofs/core/src/crypto/feistel.rs#L34)
 
@@ -651,30 +654,33 @@ The `$\ell_\mask^\bit = 17$` least significant bits of a round's Blake2b `$\dige
 
 ```text
 $\overline{\underline{\Function \feistel(\input: \ExpEdgeIndex) \rightarrow \ExpEdgeIndex\ }\thin}$
-$\line{1}{\bi}{\output: \u{64}_{(34)} = \varnothing}$
+$\line{1}{\bi}{\textsf{loop}:}$
+$\line{2}{\bi}{\quad \right_r: \u{64}_{(17)} = \input \AND \mathsf{RightMask}}$
+$\line{3}{\bi}{\quad \left_r: \u{64}_{(17)} = (\input \AND \LeftMask) \gg \ell_\mask^\bit}$
 
-$\line{2}{\bi}{\while \output \notin [N_\expedges]:}$
-$\line{3}{\bi}{\quad \right_r: \u{64}_{(17)} = \input \AND \mathsf{RightMask}}$
-$\line{4}{\bi}{\quad \left_r: \u{64}_{(17)} = (\input \AND \LeftMask) \gg \ell_\mask^\bit}$
+$\line{4}{\bi}{\quad \for \key_r \in \FeistelKeys_\PorepID:}$
+$\line{5}{\bi}{\quad\quad \preimage: \Byte^{[16]} = \beencode(\right_r) \as \Byte^{[8]} \concat \beencode(\key_r) \as \Byte^{[8]}}$
+$\line{6}{\bi}{\quad\quad \digest: \Byte^{[8]} = \Blake(\preimage)[..8]}$
+$\line{7}{\bi}{\quad\quad \digest: \u{64} = \bedecode(\digest)}$
+$\line{8}{\bi}{\quad\quad \digestright: \u{64}_{(17)} = \digest \AND \RightMask}$
 
-$\line{5}{\bi}{\quad \for \key_r \in \FeistelKeys_\PorepID:}$
-$\line{6}{\bi}{\quad\quad \preimage: \Byte^{[16]} = \beencode(\right_r) \as \Byte^{[8]} \concat \beencode(\key_r) \as \Byte^{[8]}}$
-$\line{7}{\bi}{\quad\quad \digest: \Byte^{[8]} = \Blake(\preimage)[..8]}$
-$\line{8}{\bi}{\quad\quad \digest: \u{64} = \bedecode(\digest)}$
-$\line{9}{\bi}{\quad\quad \digestright: \u{64}_{(17)} = \digest \AND \RightMask}$
+$\line{9}{\bi}{\quad\quad \left_{r + 1}: \u{64}_{(17)} = \right_r}$
+$\line{10}{}{\quad\quad \right_{r + 1}: \u{64}_{(17)} = \left_r \xor \digestright}$
 
-$\line{10}{}{\quad\quad \left_{r + 1}: \u{64}_{(17)} = \right_r}$
-$\line{11}{}{\quad\quad \right_{r + 1}: \u{64}_{(17)} = \left_r \xor \digestright}$
+$\line{11}{}{\quad\quad \left_r \thin, \right_r = \left_{r + 1} \thin, \right_{r + 1}}$
 
-$\line{12}{}{\quad\quad \left_r, \right_r = \left_{r + 1}, \right_{r + 1}}$
+$\line{12}{}{\quad \output: \u{64}_{(34)} = (\left_r \ll \ell_\mask^\bit) \OR \right_r}$
 
-$\line{13}{}{\quad \output: \u{64}_{(34)} = (\left_r \ll \ell_\mask^\bit) \OR \right_r}$
-$\line{14}{}{\return \output}$
+$\line{13}{}{\quad \if \output \in [N_\expedges]:}$
+$\line{14}{}{\quad\quad \return \output}$
+
+$\line{15}{}{\quad \input: \u{64}_{(34)} = \output}$
 ```
 
 **Code Comments:**
-* **Line 1:** Initializes the output of the network to the null value `$\varnothing \thin$`. The value of `$\output$` is a `$34 = 2 * \ell_\mask^\bit$`-bit integer and may not be a valid expander graph edge index after `$N_\feistelrounds$` rounds.
-* **Line 2:** The network runs at least once and reruns if `$\output$`'s most significant bit (its 34th bit) is set to `$1$` (`$\output$` is not a valid `$\u{33}$` expander edge index).
+* **Line 1:** Loops forever until the `$\textsf{return}$` statement is reached (loops until `$\output$` is a valid `$\ExpEdgeIndex$`).
+* **Lines 13-14:** Checks if `$\output$` is a valid `$\ExpEdgeIndex$` (true iff. the most-significant bit, the 34th bit, is 0), otherwise the Feistel network is rerun.
+* **Line 15:** Signifies that the next Feistel network's input has it's most-significant, its 34th bit, set to 1 (as opposed to the argument `$\input: \ExpEdgeIndex \equiv \u{64}_{(33)}$`, which does not have its 34th bit set).
 
 ### All Parents
 
@@ -948,10 +954,10 @@ The function `$\getporepchallenges$` creates the PoRep challenge set for a repli
 $\overline{\Function\ \getporepchallenges( \quad}$
 $\quad \ReplicaID,$
 $\quad \R_\porepchallenges: \Byte^{[32]},$
-$\quad k: [N_\poreppartitions],$
+$\quad k: [N_{\poreppartitions / \batch}],$
 $\underline{) \rightarrow \PorepChallenges_{R, k} \qquad\qquad\qquad}$
 $\line{1}{\bi}{\challenges: \NodeIndex^{[N_{\porepchallenges / k}]} = [\ ]}$
-$\line{2}{\bi}{\for \challengeindex \in [N_\porepchallenges]:}$
+$\line{2}{\bi}{\for \challengeindex \in [N_{\porepchallenges / k}]:}$
 $\line{3}{\bi}{\quad \challengeindex_\porepbatch: \u{32} = k * N_{\porepchallenges / k} + \challengeindex}$
 $\line{4}{\bi}{\quad \preimage: \Byte^{[68]} =}$
 $\quad\quad\quad \leencode(\ReplicaID) \as \Byte^{[32]}$
@@ -988,7 +994,7 @@ $\quad \TreeR,$
 $\quad \Labels,$
 $\quad \R_\porepchallenges: \Byte^{[32]},$
 $\underline{) \rightarrow \PorepPartitionProof_{R, k} \qquad\qquad\qquad}$
-$\line{1}{\bi}{\PorepPartitionProof_{R, k}: \PorepChallengeProof^{\thin[N_\porepchallenges]} = [\ ]}$
+$\line{1}{\bi}{\PorepPartitionProof_{R, k}: \PorepChallengeProof^{\thin[N_{\porepchallenges / k}]} = [\ ]}$
 $\line{2}{\bi}{\PorepChallenges_{R, k} = \getporepchallenges(\ReplicaID, \R_\porepchallenges, k)}$
 
 $\line{3}{\bi}{\for c \in \PorepChallenges_{R, k}:}$
@@ -1029,7 +1035,7 @@ $\line{14}{}{\return \PorepPartitionProof_{R, k}}$
 ```text
 $\overline{\Function\ \verifyvanillaporepproof(}$
 $\quad \PorepPartitionProof_{R, k} \thin,$
-$\quad k: [N_\poreppartitions],$
+$\quad k: [N_{\poreppartitions / \batch}],$
 $\quad \ReplicaID,$
 $\quad \CommD,$
 $\quad \CommCR,$
@@ -1199,7 +1205,7 @@ $\line{10}{}{\cs\dot\assert(\calculatedcommcr_\auxb = \commcr_\pubb)}$
 
 $\line{11}{}{\PorepChallenges_k = \getporepchallenges(\ReplicaID, \R_\porepchallenges, k)}$
 
-$\line{12}{}{\for i \in [N_\porepchallenges]}:$
+$\line{12}{}{\for i \in [N_{\porepchallenges / k}]}:$
 $\line{13}{}{\quad c: \NodeIndex = \PorepChallenges[i]}$
 $\line{14}{}{\quad \TreeDProof_c, \ColumnProof_c, \TreeRProof_c, \ParentColumnProofs_{\mathbf{u}_\total}}$
 $\quad\quad\quad \Leftarrow \PorepPartitionProof[i]$
@@ -1382,7 +1388,7 @@ $\line{16}{}{\return \PartitionProof_{k \thin \aww}}$
 
 **Additional Notation:**
 
-`$k: N_{\postpartitions, \P \thin \aww}$`\
+`$k: N_{\postpartitions / \batch, \P \thin \aww}$`\
 The number of partitions in a Winning or Window PoSt batch is dependent on the length of the PoSt prover `$\P$`'s replica set.
 
 `$\nreplicas_k$`\
@@ -1399,7 +1405,7 @@ The index of a Merkle challenge in a challenged replica `$R$` and the index of t
 ```text
 $\overline{\Function \verifyvanillapostproof( \bi}$
 $\quad \PostPartitionProof_{k \thin \aww},$
-$\quad k: [N_{\postpartitions, \P \thin \aww}],$
+$\quad k: [N_{\postpartitions / \batch, \P \thin \aww}],$
 $\quad \PostReplicas_{\V, k \thin \aww},$
 $\quad N_{\postreplicas / k \thin \aww},$
 $\quad N_{\postchallenges / R \thin \aww},$
