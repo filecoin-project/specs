@@ -27,7 +27,7 @@ $$
 \gdef\lebinrep#1{{\llcorner #1 \lrcorner_{2, \textsf{le}}}}
 \gdef\bebinrep#1{{\llcorner #1 \lrcorner_{2, \textsf{be}}}}
 \gdef\lebytesbinrep#1{{\llcorner #1 \lrcorner_{2, \textsf{le-bytes}}}}
-\gdef\fesitelrounds{\textsf{fesitel\_rounds}}
+\gdef\feistelrounds{\textsf{feistel\_rounds}}
 \gdef\int{\textsf{int}}
 \gdef\lebytes{\textsf{le-bytes}}
 \gdef\lebytestolebits{\textsf{le\_bytes\_to\_le\_bits}}
@@ -306,7 +306,7 @@ $$
 \gdef\graphid{\textsf{graph\_id}}
 \gdef\createfeistelkeys{\textsf{create\_feistel\_keys}}
 \gdef\FeistelKeys{\textsf{FeistelKeys}}
-\gdef\feistelrounds{\textsf{fesitel\_rounds}}
+\gdef\feistelrounds{\textsf{feistel\_rounds}}
 \gdef\feistel{\textsf{feistel}}
 \gdef\ExpEdgeIndex{\textsf{ExpEdgeIndex}}
 \gdef\loop{\textsf{loop}}
@@ -403,8 +403,12 @@ Creates a bit-string where each of the `$n$` bits is set to `$0$` or `$1$` respe
 `$\u{64}_{(17)}$`\
 A 64-bit unsigned integer where only the least significant 17 bits are utilized (can be `$0$` or `$1$`, the remaining unutilized 47 bits are unused and set to `$0$`).
 
-`$\Fq \equiv [q] \equiv 0, \ldots, q - 1$`\
-A field element. An element of curve BLS12-381's scalar field, an unsigned integer in `$[q]$` equipped with the field's binary operations. The scalar field has prime order `$q$`.
+`$\Fq \equiv [q]$`\
+An element of the scalar field that arises from BLS12-381's subgroup of prime order `$q$`. Where `$q$`, given in hex and decimal, is:
+```text
+$\quad q = \text{73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001}_{16}$
+$\quad q = 52435875175126190479447740508185965837690552500527637822603658699938581184513_{10}$
+```
 
 `$[a, b] = a, a + 1, \ldots, b$`\
 The range of integers from `$a$` up to and including `$b$` (both endpoints are inclusive). There is an **ambiguity in notation** between this and the construction of a two element array. The notation `$[a, b]$` **always refers to a range except in the cases where we pass a two element array as an argument into the hash functions `$\Sha{254}_2$` and `$\Poseidon_2$`**.
@@ -518,7 +522,7 @@ The maximum integer number of bits that can be safely casted (casted without the
 `$\ell_\block^\bit = 256 \Bits$`\
 The bit length of a `$\Sha{256}$` block.
 
-`$d_\exp = 6$`\
+`$d_\drg = 6$`\
 The degree of each DRG. The number of DRG parents generated for each node. The total number of parents generated for nodes in the first Stacked DRG layer.
 
 `$d_\meta = d_\drg - 1 = 5$`\
@@ -541,16 +545,13 @@ The number of bits that are masked by a Feistel network bitmask.
 
 `$\RightMask: \u{64}_{(17)} = 2^{\ell_\mask^\bit} - 1 \qquad\quad\quad\bi\ = 0000000000000000011111111111111111_2$`\
 `$\LeftMask: \u{64}_{(17 \ldotdot 34)} = \RightMask \ll \ell_\mask^\bit = 1111111111111111100000000000000000_2$`\
-The Fesitel network's right-half and left-half bitmasks. Each bitmask contains `$\ell_\mask^\bit$` bits set to `$1$`. Both bitmasks are represented in binary as `$34 = 2 * \ell_\mask^\bit$` digits. Note that `$\RightMask$`'s lowest 17 bits are utilized and `$\LeftMask$`'s lowest 17th-34th bits are utilized.
+The Feistel network's right-half and left-half bitmasks. Each bitmask contains `$\ell_\mask^\bit$` bits set to `$1$`. Both bitmasks are represented in binary as `$34 = 2 * \ell_\mask^\bit$` digits. Note that `$\RightMask$`'s lowest 17 bits are utilized and `$\LeftMask$`'s lowest 17th-34th bits are utilized.
 
-`$N_\feistelrounds = 4$`\
+`$N_\feistelrounds = 3$`\
 The number of rounds per Feistel network.
 
 `$N_\layers = 11$`\
 The number of DRG layers in the Stacked DRG.
-
-`$N_\buckets = \lceil \log_2(N_\nodes) \rceil = 30$`\
-The number of buckets used in the Bucket Sample algorithm to generate DRG parents.
 
 `$N_\parentlabels = 37$`\
 The number of parent labels factored into each node label.
@@ -558,10 +559,6 @@ The number of parent labels factored into each node label.
 `$\BinTreeDepth = \log_2(N_\nodes) = 30$`\
 `$\OctTreeDepth = \log_8(N_\nodes) = 10$`\
 The depth of a `$\BinTree$` and `$\OctTree$` respectively. The number of tree layers is the tree's depth `$+ 1 \thin$`. The Merkle hash arity of trees are 2 and 8 respectively.
-
-`$q = \text{73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001}_{16}$`\
-`$q = 52435875175126190479447740508185965837690552500527637822603658699938581184513_{10}$`\
-The (prime) order of the `$\textsf{BLS12-381}$` scalar field (given in hex and decimal).
 
 `$N_{\poreppartitions / \batch} = 10$`\
 `$N_{\postpartitions / \batch, \P, \thin \winning} \leq \len(\PostReplicas_{\P, \batch})$`\
@@ -585,7 +582,7 @@ The number of Merkle challenges per challenged replica `$R$` in a PoSt partition
 
 `$\GrothEvaluationKey_{\langle \textsf{circ} \rangle} = \text{<set during}\ \textsf{circ} \text{'s trusted setup>}$`\
 `$\GrothVerificationKey_{\langle \textsf{circ} \rangle} = \text{<set during}\ \textsf{circ} \text{'s trusted setup>}$`\
-The Groth16 keypair sued to generate and verify SNARKs for a circuit definition `$\textsf{circ}$` (PoRep, Winning PoSt, Window PoSt each for a given protocol sector size).
+The Groth16 keypair used to generate and verify SNARKs for a circuit definition `$\textsf{circ}$` (PoRep, Winning PoSt, Window PoSt each for a given protocol sector size).
 
 `$\DrgStringID: {\Byte_\utf}^{[*]} = ``\text{Filecoin\_DRSample}"$`\
 `$\FeistelStringID: {\Byte_\utf}^{[*]} = ``\text{Filecoin\_Feistel}"$`\
@@ -602,7 +599,7 @@ The version ID of the PoRep in use. PoRep versions are parameterized by the trip
 Each `$\PorepVersion$`'s has an associated nonce used to generate the PoRep versions `$\PorepID$`. Currently all PoRep vefrsion's have a nonce of `$0$`.
 
 `$\FeistelKeysBytes_\PorepID: \Byte^{[32]} = \Sha{256}(\FeistelStringID \concat \PorepID)$`\
-The byte array representing the concatenation of the Feistel network's `$N_\feistelrounds = 4$` 64-bit round keys. All PoRep's corresponding to the version `$\PorepID$` use the same Fesistel keys.\
+The byte array representing the concatenation of the Feistel network's `$N_\feistelrounds$` 64-bit round keys. All PoRep's corresponding to the version `$\PorepID$` use the same Fesistel keys.\
 **Implementation:** [`storage_proofs::core::crypto::derive_porep_domain_seed()`](https://github.com/filecoin-project/rust-fil-proofs/blob/b9126bf56cfd2c73ce4ce1f6cb46fe001450f326/storage-proofs/core/src/crypto/mod.rs#L13)
 
 ```text
@@ -610,7 +607,6 @@ $\FeistelKeys_\PorepID: \u{64}^{[N_\feistelrounds]}\thin =\thin [$
 $\quad \ledecode(\FeistelKeysBytes_\PorepID[\ldotdot 8]) \thin,$
 $\quad \ledecode(\FeistelKeysBytes_\PorepID[8 \ldotdot 16]) \thin,$
 $\quad \ledecode(\FeistelKeysBytes_\PorepID[16 \ldotdot 24]) \thin,$
-$\quad \ledecode(\FeistelKeysBytes_\PorepID[24 \ldotdot]) \thin,$
 $]$
 ```
 The Feistel round keys used by every PoRep having version `$\PorepID$`.\
@@ -657,9 +653,9 @@ The index of a layer in the Stacked DRG. **This document indexes layers a starti
 `$l_v \in [N_\layers]$`\
 The Stacked-DRG layer that a node `$v$` resides in.
 
-`$k \in [N_\poreppartitions]$`\
-`$k \in [N_{\postpartitions \thin \aww}]$`\
-The index of a PoRep or PoSt partition.
+`$k \in [N_{\poreppartitions / \batch}]$`\
+`$k \in [N_{\postpartitions / \batch, \P, \aww}]$`\
+The index of a PoRep or PoSt partition proof within a proof batch.
 
 `$c: \NodeIndex$`\
 A Merkle challenge.
