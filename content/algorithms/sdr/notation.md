@@ -504,8 +504,8 @@ $\line{3}{\bi}{\quad x\dot\push(x[i \MOD m])}$
 
 **Implementation:** [`filecoin_proofs::constants`](https://github.com/filecoin-project/rust-fil-proofs/blob/d088e7b997c13a59e66c062a9ceb110f991c9849/filecoin-proofs/src/constants.rs)
 
-`$\ell_\sector^\byte = 32\ \textsf{GiB} = 32 * 1024 * 1024 * 1024\ \textsf{Bytes}$`\
-The byte length of a sector `$D$`.
+`$\ell_\sector^\byte = \langle 32\ \text{GiB}, 64\ \text{GiB} \rangle$`\
+The byte length of a sector. A sector can be 32GiB or 64GiB long. If a value is not explicity stated, assume that `$\ell_\sector^\byte = 32\ \text{GiB}$`.
 
 `$\ell_\node^\byte = \ell_\Fq^\byte = 32\ \textsf{Bytes}$`\
 The byte length of a node.
@@ -560,18 +560,15 @@ The number of parent labels factored into each node label.
 `$\OctTreeDepth = \log_8(N_\nodes) = 10$`\
 The depth of a `$\BinTree$` and `$\OctTree$` respectively. The number of tree layers is the tree's depth `$+ 1 \thin$`. The Merkle hash arity of trees are 2 and 8 respectively.
 
-`$N_{\poreppartitions / \batch} = 10$`\
-`$N_{\postpartitions / \batch, \P, \thin \winning} \leq \len(\PostReplicas_{\P, \batch})$`\
-`$N_{\postpartitions / \batch, \P, \thin \window} \leq \len(\PostReplicas_{\P, \batch})$`\
-The number of partition proofs per PoRep, Winning PoSt, and Window PoSt proof batch. The number of PoSt partition proofs in a batch is specific to the size of the PoSt prover `$\P$`'s replica set `$\PostReplicas_{\P, \batch}$` at the time of batch proof generation.
-
 `$N_{\porepreplicas / k} = 1$`\
 `$N_{\postreplicas / k, \winning} = 1$`\
-`$N_{\postreplicas / k, \window} = 2349$`\
-The number of challenged replicas per PoRep, Winning PoSt, and Window PoSt partition proof.
+`$N_{\postreplicas / k, \window} = \big[ \hspace{1pt} \ell_\sector^\byte = 32\ \text{GiB} \mathbin{?} 2349 \mathbin{:} 2300 \hspace{1pt} \big]$`\
+The number of challenged replicas per PoRep, Winning PoSt, and Window PoSt partition proof. The number of replicas challenged per Window PoSt partition proof is dependent on the sector size.
 
-`$N_{\postreplicas / k \thin \aww} \in \{ N_{\postreplicas / k \thin, \winning}, N_{\postreplicas / k, \window} \}$`\
-Notational shortand meaning "either Winning of Window PoSt, determined by context".
+`$N_{\poreppartitions / \batch} = 10$`\
+`$N_{\postpartitions / \batch, \P, \thin \winning} \leq \len(\PostReplicas_{\P, \batch})$`\
+`$N_{\postpartitions / \batch, \P, \thin \window} = 1$`\
+The number of partition proofs per PoRep, Winning PoSt, and Window PoSt proof batch. The number of Winning PoSt partition proofs in a batch is determined by the size of the PoSt prover `$\P$`'s replica set `$\PostReplicas_{\P, \batch}$` at the time of batch proof generation.
 
 `$N_{\porepchallenges / k} \equiv N_{\porepchallenges / R} = 176$`\
 The number of Merkle challenges per PoRep partition proof. PoRep partition proofs are generated using a single replica `$R$`.
