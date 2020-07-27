@@ -28,7 +28,9 @@
     {{- $pages2 := where $pages "Params.dashboardhidden" "ne" true -}}
     {{- range sort $pages2 "Weight" "asc" -}}
         {{- $level = add $level 1 -}}
-        {{- if .IsSection -}}
+        {{- if (or (lt $level 200) (gt $level 10000)) -}}
+            {{ template "dashboard-section-children" (dict "Section" . "level" $level) }}
+        {{- else if .IsSection -}}
             {{ template "dashboard-tr" (dict "Page" . "Level" $level) }}
             {{ template "dashboard-section-children" (dict "Section" . "level" $level) }}
         {{ else if and .IsPage .Content }}
