@@ -1,5 +1,10 @@
 ---
 title: PieceStore
+
+dashboardWeight: 1.5
+dashboardState: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # PieceStore - Storing and indexing pieces

@@ -1,0 +1,55 @@
+{{- with .Site.GetPage "/" -}}
+    {{- $level := 0 -}}
+    {{- template "dashboard-progress" (dict "Site" $.Site "level" $level) -}}
+{{- end -}}
+
+<!-- Children Template -->
+{{ define "dashboard-progress" }}
+    {{- $count := .level -}}
+    {{- $countWeight:= 0 -}}
+    {{- $stable := 0 -}}
+    {{- $stableWeight := 0 -}}
+    {{- $pages := where .Site.AllPages "Params.bookhidden" "ne" true -}}
+    {{- $pages2 := where $pages "Params.dashboardhidden" "ne" true -}}
+    {{- $pages3 := where $pages2 "Kind" "in" (slice "section" "page") -}}
+    {{- $pages4 := where $pages3 "Language.Lang" "eq" "en" -}}
+    {{- range sort $pages4 "Weight" "asc" -}}
+        {{- if .Params.dashboardState -}}
+            {{- $count = add $count 1 -}}
+            {{- $countWeight = add $countWeight (mul 1 (float .Params.dashboardWeight)) -}}
+            {{- if eq .Params.dashboardState "stable" -}}
+                {{- $stable = add $stable 1 -}}
+                {{- $stableWeight = add $stableWeight (mul 1 (float .Params.dashboardWeight)) -}}
+            {{- end -}}
+        {{- end -}}
+    {{- end -}}
+    {{- $perc := lang.NumFmt 2 (div (float (mul $stable 100))  (float $count)) -}}
+    {{- $perc2 := lang.NumFmt 2 (div (mul $stableWeight 100) $countWeight) -}}
+
+    <h3>Progress</h3>
+    <div class="meter">
+        <span style="width: {{$perc}}%">{{$perc}}%</span>
+    </div>
+    <h3>Consequence</h3>
+    <div class="meter">
+        <span style="width: {{$perc2}}%">{{$perc2}}%</span>
+    </div>
+    <style>
+        .meter { 
+            height: 20px;  /* Can be anything */
+            position: relative;
+            background: #555;
+            border-radius: 4px;
+            color: white;
+        }
+        .meter > span {
+            display: block;
+            height: 100%;
+            line-height: 20px;
+            text-align: right;
+            border-radius: 4px;
+            background-color: #0090ff;
+            overflow: hidden;
+          }
+    </style>
+{{ end }}

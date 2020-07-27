@@ -1,8 +1,10 @@
 ---
 title: Introduction
 weight: 1
+
+dashboardWeight: 0.2
 dashboardState: incomplete
-bookCollapseSection: true
+dashboardAudit: 0
 ---
 
 # Introduction
@@ -29,6 +31,11 @@ and other contract mechanisms recorded on the chain continue to be processed
 over time, without requiring further interaction from the original parties
 (such as the clients who requested the data storage).
 
-# Status Overview
+## Spec Status Overview
+{{<dashboard-progress>}}
 
-{{< dashboard name="Introduction" >}}
+{{<dashboard-spec>}}
+
+## Implementations Status
+
+{{<dashboard-impl>}}

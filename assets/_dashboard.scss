@@ -1,0 +1,17 @@
+.Dashboard tr th,
+.Dashboard tr td {
+    padding: 0 1rem !important;
+    font-size: 12px;
+    text-align: center;
+}
+.Dashboard tr td:first-child {
+    text-align: left;
+}
+
+.Dashboard-section {
+    // max-width:250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+

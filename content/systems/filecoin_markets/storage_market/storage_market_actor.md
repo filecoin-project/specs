@@ -1,6 +1,10 @@
 ---
 title: Storage Market Actor
 weight: 2
+dashboardWeight: 2
+dashboardState: incomplete
+dashboardAudit: 1
+dashboardTests: 0
 ---
 
 # Storage Market Actor
@@ -10,15 +14,12 @@ weight: 2
 
 ## `StorageMarketActorState` implementation
 
-{{<embed src="/docs/actors/actors/builtin/storage_market/storage_market_actor_state.go" lang="go" >}}
+{{<embed src="/modules/actors/builtin/market/market_state.go" lang="go" >}}
 
 ## `StorageMarketActor` implementation
 
-{{<embed src="/docs/actors/actors/builtin/storage_market/storage_market_actor.go" lang="go" >}}
+{{<embed src="/modules/actors/builtin/market/market_actor.go" lang="go" >}}
 
-## `StorageMarketActor` implementation
-
-{{<embed src="/docs/actors/actors/builtin/storage_market/storage_market_actor.go" lang="go" >}}
 
 ## Storage Deal Collateral
 

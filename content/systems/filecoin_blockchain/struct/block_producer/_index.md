@@ -1,6 +1,10 @@
 ---
 title: Block Producer
 weight: 5
+dashboardWeight: 1.5
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Block Producer

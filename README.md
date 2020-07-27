@@ -45,7 +45,19 @@ You can find examples in the `config.toml`
     source = "actors"
     target = "content/modules/actors"
 ```
-This makes files from external repos available for Hugo rendering.  
+This makes files from external repos available for Hugo rendering and allows for linking to up-to-date files that are directly pulled from other repositories.
+
+The configuration above gives the following information:
+
+- `path`: gives the repository you want to mount content from.
+- `source`: the folder from the repository referenced in the `path` that we want to mount into  our local Hugo filesystem. This is the "root" seen from your Hugo site where you pull content from. In the above case, this means that the source that will be mounted is `https://github.com/filecoin-project/specs-actors/actors/`.
+- `target`: the folder in your local Hugo site where the mounted content appears. In our case folder `content` is where we include all Hugo content.
+
+Putting everything together in an example: if you want to link to the file `xyz.go` from `https://github.com/filecoin-project/specs-actors/actors/xyz-folder/xyz.go`, from any file within the local folder `content` (or any of its subfolders), then with the above configuration you have to include:
+
+```
+{{<embed src="/modules/actors/xyz-folder/xyz.go"  lang="go">}}
+```
 
 These modules can be updated with 
 
@@ -126,15 +138,28 @@ Some text
 ```
 
 ## Frontmatter
+
+Description for all the available frontmatter properties
+
 ```md
-title: Libraries
+<!-- Page Title to be used in the navigation -->
+title: Libraries 
+<!-- Small description for html metadata, if not present the first couple of paragraphs will be used instead -->
 description: Libraries used from Filecoin
+<!-- This will be used to order the navigation and any other listing of pages -->
 weight: 3
+<!-- This will make a page section collapse in the navigation -->
 bookCollapseSection: true
+<!-- This will hidden the page from the navigation -->
 bookhidden: true
+<!-- This is used in the dashboard to describe the importance of the page content -->
+dashboardWeight: 2
+<!-- This is used in the dashboard to describe the state of the page content options are "incorrect", "wip", "incomplete" and "stable" -->
+dashboardState: stable
+<!-- This is used in the dashboard to describe if the theory of the page has been audited, options are 1 or 0 -->
 dashboardAudit: 1
-dashboardState: wip
-dashboardInterface: stable
+<!-- This is used in the dashboard to describe if the page content has compliance tests, options are 0 or numbers of tests -->
+dashboardTests: 0
 ```
 
 ## Code fences

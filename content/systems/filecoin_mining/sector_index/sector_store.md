@@ -1,5 +1,9 @@
 ---
 title: Sector Store
+dashboardWeight: 1
+dashboardState: wip
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Sector Store

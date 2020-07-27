@@ -1,6 +1,10 @@
 ---
 title: "Randomness"
 weight: 3
+dashboardWeight: 2
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Randomness
@@ -85,11 +89,7 @@ GetRandomness(dst, l, s):
     return H(buffer)
 ```
 
-{{< hint danger >}}
-Issue with readfile
-{{< /hint >}}
-
-{{<embed src="/docs/actors/actors/crypto/randomness.go"  lang="go">}}
+{{<embed src="/modules/actors/crypto/randomness.go"  lang="go">}}
 {{<embed src="/systems/filecoin_blockchain/struct/chain/chain.go" lang="go">}}
 
 ## Entropy to be used with randomness

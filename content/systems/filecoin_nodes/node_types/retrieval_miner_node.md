@@ -1,6 +1,10 @@
 ---
 title: Retrieval Miner Node
 weight: 6
+dashboardWeight: 1
+dashboardState: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Retrieval Miner Node

@@ -2,6 +2,10 @@
 title: Storage Deal
 weight: 1
 bookCollapseSection: true
+dashboardWeight: 2
+dashboardState: incomplete
+dashboardAudit: 1
+dashboardTests: 0
 ---
 
 # Storage Deals
@@ -15,5 +19,5 @@ This section describes the storage deal data type and a technical outline for de
 
 ## Data Types
 
-{{< embed src="/docs/actors/actors/builtin/storage_market/storage_deal.go" lang="go" >}}
+{{< embed src="/modules/actors/builtin/market/deal.go" lang="go" >}}
 

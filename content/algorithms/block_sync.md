@@ -1,6 +1,10 @@
 ---
 title: "BlockSync"
 weight: 5
+dashboardWeight: 1
+dashboardState: wip
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # BlockSync

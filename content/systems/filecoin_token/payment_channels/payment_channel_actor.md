@@ -1,5 +1,9 @@
 ---
 title: Payment Channel Actor
+dashboardWeight: 1
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Payment Channel Actor

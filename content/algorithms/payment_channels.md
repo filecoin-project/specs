@@ -1,6 +1,10 @@
 ---
 title: "Payment Channels"
 weight: 4
+dashboardWeight: 1
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Payment Channels

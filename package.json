@@ -5,14 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "hugo server --bind=0.0.0.0 --disableFastRender",
+    "serve": "hugo server --bind=0.0.0.0",
     "build": "hugo --gc --minify"
   },
   "author": "",
   "license": "MIT",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
-    "hugo-extended": "^0.73.0"
+    "hugo-extended": "^0.74.2"
   }
 }

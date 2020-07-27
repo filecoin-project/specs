@@ -2,9 +2,10 @@
 title: Runtime
 weight: 5
 bookCollapseSection: true
+dashboardWeight: 1
+dashboardState: incomplete
 dashboardAudit: 0
-dashboardState: wip
-dashboardInterface: wip
+dashboardTests: 0
 ---
 
 # VM Runtime Environment (Inside the VM)
@@ -22,7 +23,7 @@ A syntactically valid receipt has:
 
 ## `vm/runtime` interface
 
-{{<embed src="/docs/actors/actors/runtime/runtime.go" lang="go" >}}
+{{<embed src="/modules/actors/runtime/runtime.go" lang="go" >}}
 
 ## `vm/runtime` implementation
 
@@ -34,4 +35,4 @@ A syntactically valid receipt has:
 
 ## Exit codes
 
-{{<embed src="/docs/actors/actors/runtime/exitcode/vm_exitcodes.go" lang="go" >}}
+{{<embed src="/modules/actors/runtime/exitcode/common.go" lang="go" >}}
