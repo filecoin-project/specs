@@ -18,7 +18,9 @@
         <div title="{{ .Get "title" }}" id="{{ $id }}" class="diagrams svg{{ with .Get "class" }} {{ . }}{{ end }}">
           {{- $content -}}
         </div>
-        <div title="{{ .Get "title" }}" class="diagrams-caption">{{( .Get "title" )}} <a href="#{{ anchorize ( .Get "title" ) }}">#</a></div>
+        <div title="{{ .Get "title" }}" class="diagrams-caption">{{( .Get "title" )}} <a href="#{{ anchorize ( .Get "title" ) }}">#</a>
+          (<a href="{{ $.Scratch.Get "filepath" | relURL }}" target="_blank">open in new tab</a>)
+        </div>
       </div>
       <script>
         var element = document.querySelector("#{{ $id }}");
