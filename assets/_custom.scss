@@ -77,8 +77,7 @@
     padding: 1px .5rem;
     border: 0;
     border-radius: .25rem;
-    background: rgba(255,255,255,.1);
-    color: #e9ecef;
+    background: $book-search-results-bg;
     margin-top: 3px;
 }
 
@@ -89,9 +88,7 @@
 #book-search-input {
     outline: none;
 }
-#book-search-input:focus {
-    background: rgba(255,255,255,.2);
-}
+
 // Tweaks
 summary {
     outline: none;
