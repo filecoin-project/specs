@@ -5,8 +5,7 @@
   const lightMode = document.getElementById('light-mode-link')
   const darkMode = document.getElementById('dark-mode-link')
   const btn = document.querySelector('.dark-mode-toggle')
-  const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)').matches 
-  let theme = prefersDarkScheme ? 'dark' : 'light'
+  let theme = 'light'
 
   function enableLightMode () {
     lightMode.disabled = false
@@ -20,16 +19,11 @@
     btn.setAttribute('aria-pressed', theme === 'dark')
   }
   
-  // enable dark theme optimistically on OS with dark theme enabled to reduce flashing of white theme.
-  if (prefersDarkScheme) {
-    enableDarkMode()
-  }
-
   // wait for localstorage...
   const previousChoice = localStorage.getItem('theme')
   theme = previousChoice || theme
   
-  // Light is default, so enable dark if user previously chose it but their OS pref is light.
+  // Light is default, so enable dark if user previously chose it.
   if (theme === 'dark') {
     enableDarkMode()
   }
