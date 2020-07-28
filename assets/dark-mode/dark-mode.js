@@ -32,6 +32,9 @@
   // Light is default, so enable dark if user previously chose it but their OS pref is light.
   if (theme === 'dark') {
     enableDarkMode()
+  } else {
+    // needed to catch those OS darkmoders who want their specs to be light mode.
+    enableLightMode()
   }
 
   // set up the toggle once the DOM is ready.
