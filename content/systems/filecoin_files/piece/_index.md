@@ -31,7 +31,7 @@ It is important to highlight that data submitted to the Filecoin network go thro
 
 1. When a piece of data, or file is submitted to Filecoin (in some raw system format) it is transformed into a _UnixFS DAG style data representation_ (in case it is not in this format already, e.g., from IPFS-based applications). The hash that represents the root of the IPLD DAG of the UnixFS file is the _Payload CID_, which is used in the Retrieval Market. The Payload CID is identical to an IPFS CID.
 2. In order to make a _Filecoin Piece_ the UnixFS IPLD DAG is serialised into a ["Content-Addressable aRchive" (.car)](https://github.com/ipld/specs/blob/master/block-layer/content-addressable-archives.md#summary) file, which is in raw bytes format.
-3. The resulting .car file is _padded_ with extra bits.
+3. The resulting .car file is _padded_ with extra bits in order to get it to "power of 2" size. This is done in order for the file to make a binary Merkle tree. This means that two zero (0) bits need to be added to every 254 bits (to make the 256 bits). In case more padding is needed in order to reach the 254 bit threshold, then these bits are also filled with zeros.
 4. The next step is to calculate the Merkle root out of the hashes of the Piece. The resulting root of the Merkle tree is the **Piece CID**. This is also referred to as _CommP_ or _Piece Commitment_.
 5. At this point, the Piece is included in a Sector together with data from other deals. The `StorageProvider` then calculates Merkle root for all the Pieces inside the Sector. The root of this tree is _CommD_ (aka _Commitment of Data_ or `UnsealedSectorCID`).
 6. The `StorageProvider` is then sealing the sector and the root of the resulting Merkle root is the _CommR_ (or _Commitment of Replication_).
