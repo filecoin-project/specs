@@ -34,7 +34,9 @@ It is important to highlight that data submitted to the Filecoin network go thro
 3. The resulting .car file is _padded_ with extra bits in order to get it to "power of 2" size. This is done in order for the file to make a binary Merkle tree. This means that two zero (0) bits need to be added to every 254 bits (to make the 256 bits). In case more padding is needed in order to reach the 254 bit threshold, then these bits are also filled with zeros.
 4. The next step is to calculate the Merkle root out of the hashes of the Piece. The resulting root of the Merkle tree is the **Piece CID**. This is also referred to as _CommP_ or _Piece Commitment_.
 5. At this point, the Piece is included in a Sector together with data from other deals. The `StorageProvider` then calculates Merkle root for all the Pieces inside the Sector. The root of this tree is _CommD_ (aka _Commitment of Data_ or `UnsealedSectorCID`).
-6. The `StorageProvider` is then sealing the sector and the root of the resulting Merkle root is the _CommR_ (or _Commitment of Replication_).
+6. The `StorageProvider` is then sealing the sector and the root of the resulting Merkle root is the _CommRLast_.
+7. Proof of Replication (PoRep), SDR in particular, generates another Merkle root hash called _CommC_, which proves that the data whose commitment is _CommD_ has indeed been replicated.
+8. Finally, _CommR_ (or _Commitment of Replication_) is the hash of CommC || CommRLast.
 
 {{< hint info >}}
 The code below is out-of-date
