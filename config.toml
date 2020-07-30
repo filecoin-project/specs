@@ -86,8 +86,8 @@ enableGitInfo = true
   # Note: site url must be registered with aloglia first. They handle the scraping of beta.spec.filecoin.io
   AlgoliaDocSearch = true
   AlgoliaDocSearchVersion = '2.6.3'
-  AlgoliaDocSearchApiKey = '25626fae796133dc1e734c6bcaaeac3c'
-  AlgoliaDocSearchIndex = 'docsearch'
+  AlgoliaDocSearchApiKey = 'f4d5272fc1ca4438044a57094d3f8b3b'
+  AlgoliaDocSearchIndex = 'filecoin_spec'
 
   # (Optional, default true) Enables comments template on pages
   # By default partals/docs/comments.html includes Disqus template
