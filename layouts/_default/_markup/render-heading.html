@@ -1,0 +1,26 @@
+
+{{- $pathParts := split .Page.File.Path "/" -}}
+{{- $pathSize := len $pathParts -}}
+{{- $level := 0 -}}
+{{- $anchor := "" -}}
+
+{{- if eq .Page.File.LogicalName "_index.md" -}}
+  {{- $level = add (sub $pathSize 1) (sub .Level 1) -}}
+  {{- if eq .Level 1 -}}
+    {{- $anchor = printf "%s" (delimit $pathParts "$") -}}
+  {{- else -}}
+    {{- $anchor = printf "%s--%s" (delimit $pathParts "$") .Anchor -}}
+  {{- end -}}
+{{- else -}}
+  {{ $level = add $pathSize (sub .Level 1) }}
+  {{- if eq .Level 1 -}}
+    {{- $anchor = printf "%s" (delimit $pathParts "$") -}}
+  {{- else -}}
+    {{- $anchor = printf "%s--%s" (delimit $pathParts "$") .Anchor -}}
+  {{- end -}}
+{{- end -}}
+
+<h{{ $level }} id="{{ $anchor | safeURL }}">
+  {{ .Text | safeHTML }}
+  <a class="anchor" href="#{{ $anchor | safeURL }}">#</a>
+</h{{ $level }}>

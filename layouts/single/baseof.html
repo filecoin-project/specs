@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.Language.Lang }}" dir={{ .Site.Language.LanguageDirection }}>
+
+<head>
+  {{ partial "single/html-head" . }}
+  {{ partial "docs/inject/head" . }}
+</head>
+
+<body dir={{ .Site.Language.LanguageDirection }}>
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      {{ template "menu" . }} <!-- Left menu Content -->
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        {{ template "header" . }} <!-- Mobile layout header -->
+      </header>
+
+      {{ partial "docs/inject/content-before" . }}
+      {{ template "main" . }} <!-- Page Content -->
+      {{ partial "docs/inject/content-after" . }}
+
+      <footer class="book-footer">
+        {{ template "footer" . }} <!-- Footer under page content -->
+        {{ partial "docs/inject/footer" . }}
+      </footer>
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+  </main>
+
+  {{ partial "single/inject/body" . }}
+</script>
+</body>
+
+</html>
+
+{{ define "menu" }}
+  {{ partial "single/menu" . }}
+{{ end }}
+
+{{ define "header" }}
+  {{ partial "docs/header" . }}
+{{ end }}
+
+{{ define "footer" }}
+  {{ partial "docs/footer" . }}
+{{ end }}
+
+{{ define "main" }}
+<article class="markdown">
+    {{ with .Site.GetPage "/" }}
+        {{- $pages := where .Pages "Params.bookhidden" "ne" true -}}
+        {{ range sort $pages "Weight" "asc" }}
+            {{ .Content }}
+            {{- template "mainChildren" (dict "Section" . ) -}}
+        {{ end }}
+    {{ end }}
+  </article>
+{{ end }}
+
+{{ define "mainChildren" }}
+    {{- $pages := where .Section.Pages "Params.bookhidden" "ne" true -}}
+    {{ range sort $pages "Weight" "asc" }}
+      {{ .Content }}
+      {{- template "mainChildren" (dict "Section" . ) -}}
+    {{ end }}
+{{ end }}

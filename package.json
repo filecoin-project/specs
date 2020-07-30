@@ -12,6 +12,7 @@
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
+    "debounce-fn": "^4.0.0",
     "hugo-extended": "^0.74.2"
   }
 }

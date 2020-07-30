@@ -2,11 +2,12 @@
 
 // Addons
 
-// @import "plugins/numbered";
+@import "plugins/numbered";
 @import "plugins/scrollbars";
 @import "table-sort";
 @import "colors";
 @import "dashboard";
+@import "plugins/toc";
 
 // SVG Diagrams
 .diagrams-container {
@@ -91,12 +92,34 @@
 #book-search-input:focus {
     background: rgba(255,255,255,.2);
 }
+
 // Tweaks
+html {
+    scroll-behavior: auto;
+    touch-action: auto;
+}
+
 summary {
     outline: none;
 }
 blockquote {
     overflow: auto;
+}
+.book-menu nav {
+    width: 16rem;
+    padding: 1rem;
+    background: #090909;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    overflow-x: initial;
+    overflow-y: hidden;
+}
+
+.book-menu nav .toc {
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 90%;
 }
 
 .markdown>h1:first-of-type {
@@ -132,18 +155,18 @@ blockquote {
     padding: 0;
     height: 90vh;
 }
-.book-menu > nav::-webkit-scrollbar,
+.book-menu > nav .toc::-webkit-scrollbar,
 .book-toc > div nav::-webkit-scrollbar{
     width: 8px;
 }
 
-.book-menu > nav::-webkit-scrollbar-thumb,
+.book-menu > nav .toc::-webkit-scrollbar-thumb,
 .book-toc > div nav::-webkit-scrollbar-thumb{
     background: transparent;
 }
 
-.book-menu > nav:hover::-webkit-scrollbar-thumb,
-.book-toc > div nav:hover::-webkit-scrollbar-thumb{
+.book-menu > nav:hover .toc::-webkit-scrollbar-thumb,
+.book-toc > div nav:hover .toc::-webkit-scrollbar-thumb{
     background: rgba(255,255,255,.1);
 }
 
