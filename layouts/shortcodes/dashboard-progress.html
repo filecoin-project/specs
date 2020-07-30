@@ -25,14 +25,9 @@
     {{- end -}}
     {{- $perc := lang.NumFmt 2 (div (float (mul $stable 100))  (float $count)) -}}
     {{- $perc2 := lang.NumFmt 2 (div (mul $stableWeight 100) $countWeight) -}}
-
-    <h3>Progress</h3>
+    
     <div class="meter">
         <span style="width: {{$perc}}%">{{$perc}}%</span>
-    </div>
-    <h3>Consequence</h3>
-    <div class="meter">
-        <span style="width: {{$perc2}}%">{{$perc2}}%</span>
     </div>
     <style>
         .meter { 

@@ -8,7 +8,6 @@
             <th>Weight</th>
             <th>State</th>
             <th>Theory Audit</th>
-            <th>Compliance Tests</th>
         </tr>
     </thead>
     <tbody>
@@ -61,16 +60,5 @@
     
     <!-- Audit -->
     <td class="text-transparent {{ if gt .Page.Params.dashboardaudit 0 }}bg-stable{{ else }}bg-incorrect{{end}}">{{ .Page.Params.dashboardaudit }}</td>
-    
-    <!-- Tests -->
-    <td class="text-black {{- if gt .Page.Params.dashboardTests 0 -}}bg-stable{{ else if eq .Page.Params.dashboardTests 0 }} bg-incorrect {{ else }} bg-na {{ end }}">
-        {{- if eq .Page.Params.dashboardTests 0 -}}
-            {{ .Page.Params.dashboardTests }}
-        {{- else if gt .Page.Params.dashboardTests 0 -}}
-            {{ .Page.Params.dashboardTests }}
-        {{- else -}}
-            N/A
-        {{- end -}}
-    </td>
 </tr>
 {{- end -}}
