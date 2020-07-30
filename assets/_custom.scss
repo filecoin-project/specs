@@ -4,6 +4,7 @@
 
 // @import "plugins/numbered";
 @import "plugins/scrollbars";
+@import "plugins/toggles";
 @import "table-sort";
 @import "colors";
 @import "dashboard";
@@ -76,8 +77,7 @@
     padding: 1px .5rem;
     border: 0;
     border-radius: .25rem;
-    background: rgba(255,255,255,.1);
-    color: #e9ecef;
+    background: $book-search-results-bg;
     margin-top: 3px;
 }
 
@@ -88,9 +88,7 @@
 #book-search-input {
     outline: none;
 }
-#book-search-input:focus {
-    background: rgba(255,255,255,.2);
-}
+
 // Tweaks
 summary {
     outline: none;
@@ -165,26 +163,51 @@ blockquote {
 }
 
 .book-toc {
-    .toc-label {
+    .book-toc-toggles {
+        top:0px;
+        opacity: 0.4;
+        transition: opacity 0.3s ease-in-out;
+    }
+    .book-toc-toggles:hover {
+        opacity: 1;
+    }
+    .toc {
+        top:78px;
+    }
+    .toc-label, .dark-mode-toggle-label {
         font-size: 10px;
         font-weight: 700;
+        display: block;
     }
-    .gg-menu-motion {
+    .gg-menu-motion, .gg-dark-mode {
         display: inline-block;
         margin-left: 0;
         margin-right: 0;
-        vertical-align: text-top;
+        vertical-align: middle;
         font-size: 10px;
         transform: scale(0.7);
     }
 }
 
-h1,
-h2,
-h3,
-h4,
-h5 {
-  color: rgba(255,255,255,0.87)
+// Colors
+.color-incorrect {
+    color: #BF616A;
+}
+
+.color-wip {
+    color: #D08770;
+}
+
+.color-incomplete {
+    color: #EBCB8B;
+}
+
+.color-stable {
+    color: #5E81AC;
+}
+
+.color-permanent {
+    color: #A3BE8C;
 }
 
 i[class^="gg-"] {
@@ -381,3 +404,44 @@ i[class^="gg-"] {
     border-radius: 4px;
     background: currentColor
 } 
+
+.gg-dark-mode {
+    box-sizing: border-box;
+    position: relative;
+    display: block;
+    transform: scale(var(--ggs,1));
+    border:2px solid;
+    border-radius:100px;
+    width:20px;
+    height:20px
+}
+
+.gg-dark-mode::after,
+.gg-dark-mode::before {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    display: block
+}
+
+.gg-dark-mode::before {
+    border:5px solid;
+    border-top-left-radius:100px;
+    border-bottom-left-radius:100px;
+    border-right: 0;
+    width:9px;
+    height:18px;
+    top:-1px;
+    left:-1px
+}
+
+.gg-dark-mode::after {
+    border:4px solid;
+    border-top-right-radius:100px;
+    border-bottom-right-radius:100px;
+    border-left: 0;
+    width:4px;
+    height:8px;
+    right:4px;
+    top:4px
+}
