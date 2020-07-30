@@ -5,3 +5,9 @@
   <ul id="book-search-results"></ul>
 </div>
 {{ end }}
+
+{{ if default true .Site.Params.AlgoliaDocSearch }}
+  <div class="book-search">
+    <input type="search" id="book-search-input" placeholder="{{ i18n "Search [s]" }}" aria-label="{{ i18n "Search" }}" maxlength="64" data-hotkeys="s/" />
+  </div>
+{{ end }}

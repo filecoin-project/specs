@@ -80,7 +80,14 @@ enableGitInfo = true
   # (Optional, default true) Enables search function with flexsearch,
   # Index is built on fly, therefore it might slowdown your website.
   # Configuration for indexing can be adjusted in i18n folder per language.
-  BookSearch = true
+  BookSearch = false
+
+  # (Optional, default false) Enables search function with Algolia https://docsearch.algolia.com/,
+  # Note: site url must be registered with aloglia first. They handle the scraping of beta.spec.filecoin.io
+  AlgoliaDocSearch = true
+  AlgoliaDocSearchVersion = '2.6.3'
+  AlgoliaDocSearchApiKey = '25626fae796133dc1e734c6bcaaeac3c'
+  AlgoliaDocSearchIndex = 'docsearch'
 
   # (Optional, default true) Enables comments template on pages
   # By default partals/docs/comments.html includes Disqus template
