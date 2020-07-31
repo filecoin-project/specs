@@ -1,0 +1,7 @@
+{{ if .dashboardState }}
+<label class="state-badge">
+  <a class="state-badge-link" href="#">
+    <span class="state-badge-key">state</span><span class="state-badge-value text-black bg-{{ .dashboardState }}">{{ .dashboardState }}</span>
+  </a>
+</label>
+{{ end }}

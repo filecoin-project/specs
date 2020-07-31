@@ -23,4 +23,7 @@
 <h{{ $level }} id="{{ $anchor | safeURL }}">
   {{ .Text | safeHTML }}
   <a class="anchor" href="#{{ $anchor | safeURL }}">#</a>
+  <span style="float:right">
+  {{ partial "state-badge.html" .Page.Params }}
+  </span>
 </h{{ $level }}>
