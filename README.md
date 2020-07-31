@@ -175,8 +175,7 @@ Random plain text context ...
 ```
 
 
-## References
-### Markdown links **(Recommended)**
+## References - Markdown links
 These links use "portable links" just like `relref` so you can just give it the name of the file and it will fetch the correct relative link and title for the `<a href="/relative/path" title="page title">` automatically.
 You can override the `<a>` title by passing a second `string` in the link definition.
 
@@ -191,19 +190,6 @@ You can override the `<a>` title by passing a second `string` in the link defini
 [Tickets](storage_power_consensus#the-ticket-chain-and-drawing-randomness "The Ticket chain and drawing randomness")
 # <a href="/systems/filecoin_blockchain/storage_power_consensus#the-ticket-chain-and-drawing-randomness" title="The Ticket chain and drawing randomness">Tickets</a>
 
-```
-
-### Hugo Cross Refs
-Check Hugo's documentation [here](https://gohugo.io/content-management/shortcodes/#ref-and-relref)
-```md
-[Random]({{<relref "randomness">}})
-[Pledge Collateral]({{<relref "storage_power_actor#pledge-collateral">}})
-```
-### Link shortcode
-Theres also `link` shortcode which will fetch the title of the page automatically and use it for the `<a>` text and title, but **DOES NOT** work with anchors (`#anchor-id`)
-```md
-{{<link storage_power_consensus>}}
-# <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Storage Power Consensus">Storage Power Consensus</a>
 ```
 
 ## Math mode
