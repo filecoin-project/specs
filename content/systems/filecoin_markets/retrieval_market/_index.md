@@ -17,7 +17,7 @@ The `retrieval market` refers to the process of negotiating deals for a provider
 
 The main components are as follows:
 
-- A payment channel actor (see {{<link payment_channel_actor>}} for details)
+- A payment channel actor (see [Payment Channel Actor](payment_channel_actor) for details)
 - 2 `libp2p` services - 
    - a protocol for making queries
    - a protocol for negotiating and carrying out retrieval deals (will disappear as a seperate libp2p protocol as retrieval markets evolve)
