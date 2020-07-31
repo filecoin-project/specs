@@ -403,4 +403,22 @@ i[class^="gg-"] {
     box-shadow: 4px -6px 0,8px -12px 0;
     border-radius: 4px;
     background: currentColor
-} 
+}
+
+.state-badge {
+    font-size: 10px;
+    font-weight: 500;   
+}
+.state-badge-link {
+    text-decoration: none !important;
+    color: white !important;
+    &:hover {
+        text-decoration: none;
+    }
+}
+.state-badge-key, .state-badge-value {
+    padding: 2px 5px;
+}
+.state-badge-key {
+    background-color: #555;
+}
