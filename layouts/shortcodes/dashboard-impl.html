@@ -1,11 +1,10 @@
-<table id="dashboard-impls" class="sort">
+<table id="dashboard-impls" class="sort Dashboard">
     <thead>
         <tr>
             <th>Implementation</th>
-            <th>Test Coverage</th>
-            <th>Compliance Tests</th>
-            <th>Audit</th>
             <th>CI</th>
+            <th>Test Coverage</th>
+            <th>Security Audit</th>
         </tr>
     </thead>
     <tbody>
@@ -26,26 +25,28 @@
         {{ $color := "bg-na"}}
         {{ if gt $cov 0 }}
             {{ $color = "bg-incorrect"}}
-        {{ else if gt $cov 25 }}
+        {{ end }}
+        {{ if gt $cov 20 }}
             {{ $color = "bg-wip"}}
-        {{ else if gt $cov 50 }}
+        {{ end }}
+        {{ if gt $cov 45 }}
             {{ $color = "bg-incomplete"}}
-        {{ else if gt $cov 75 }}
+        {{ end }}
+        {{ if gt $cov 70 }}
             {{ $color = "bg-stable"}}
         {{ end }}
         <tr>
             <td><a title="{{.Title}}" href="{{.Permalink}}">{{.Title}}</a></td>
-            <td class="text-black {{ $color }}">
-                {{ if $data.commit.totals.c }}{{ math.Round $data.commit.totals.c }}%{{ else }}N/A{{end}}
+            <td class="text-black {{ if eq $data.commit.ci_passed  true }}bg-stable{{ else if eq $data.commit.ci_passed false }}bg-incorrect {{ else }}bg-na{{end}}">
+                {{ if eq $data.commit.ci_passed  true }}Passed{{ else if eq $data.commit.ci_passed false }}Failed{{ else }}Unknown{{ end }}
             </td>
-            <td class="text-transparent {{ if gt .Page.Params.implSpecCompliance 0 }}bg-stable{{ else }}bg-incorrect{{end}}">
-                {{ .Page.Params.implSpecCompliance }}
+            <td class="text-black {{ $color }}">
+                <a class="text-black" href="https://codecov.io/gh/{{ $path }}" title="Open on codecov.io">
+                    {{ if $data.commit.totals.c }}{{ math.Round $data.commit.totals.c }}%{{ else }}N/A{{end}}
+                </a>
             </td>
             <td class="text-transparent {{ if gt .Page.Params.implAudit 0 }}bg-stable{{ else }}bg-incorrect{{end}}">
                 {{ .Page.Params.implAudit }}
-            </td>
-            <td class="text-transparent {{ if eq $data.commit.ci_passed  true }}bg-stable{{ else if eq $data.commit.ci_passed false }}bg-incorrect {{ else }}bg-na{{end}}">
-                
             </td>
         </tr>
         
