@@ -14,12 +14,15 @@
       {{ $content := $.Scratch.Get "filepath" | readFile | safeHTML }}
       {{ $uuid := delimit (shuffle (seq 1 9)) "" }}
       {{ $id := (print "diagrams-" $uuid) }}
-      <div class="diagrams-container">
+      <figure class="diagrams-container">
         <div title="{{ .Get "title" }}" id="{{ $id }}" class="diagrams svg{{ with .Get "class" }} {{ . }}{{ end }}">
           {{- $content -}}
         </div>
-        <div title="{{ .Get "title" }}" class="diagrams-caption">{{( .Get "title" )}} <a href="#{{ anchorize ( .Get "title" ) }}">#</a></div>
-      </div>
+        <figcaption title="{{ .Get "title" }}" class="diagrams-caption">
+          Figure: {{( .Get "title" )}}
+          <a class="diagrams-link" title="Open diagram in new tab" href="{{ $.Scratch.Get "filepath" | relURL }}" target="_blank">Open in tab</a>
+        </figcaption>
+      </figure>
       <script>
         var element = document.querySelector("#{{ $id }}");
         zoomable()(element).htmlEl(element.querySelector('svg'));

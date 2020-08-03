@@ -16,7 +16,9 @@
 
 // SVG Diagrams
 .diagrams-container {
-    margin: 20px 20px;
+    margin: 20px 0px;
+    border: 1px solid $gray-200;
+    border-radius: $border-radius;
 }
 .diagrams {
     width: auto;
@@ -33,9 +35,15 @@
     cursor: grabbing;
 }
 .diagrams-caption {
-    text-align: center;
-    a {
+    // background-color: #e9ecef;
+    border-top: 1px solid #e9ecef;
+    padding: 0.5rem;
+    font-size: 12px;
+    font-weight: 500;
+    .diagrams-link {
         text-decoration: none !important;
+        float:right;
+        font-weight: 400;
     }
 }
 

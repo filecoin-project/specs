@@ -1,0 +1,52 @@
+strict digraph G {
+  node [shape=box]
+  graph [ranksep="1", nodesep="1"]
+
+  { // editable inputs
+    node [fillcolor=lightyellow, style=filled]
+    ".md"
+    ".ipld"
+    ".go"
+    ".orient"
+    ".org"
+    ".dot"
+  }
+
+  { // outputs
+    node [fillcolor=lightgreen, style=filled]
+   "[website]"
+   "spec.pdf"
+  }
+
+  { // programs
+    node [shape=none]
+    "emacs"
+    "dot"
+    "orient"
+    "bin/codeGen"
+    "hugo"
+    "go test"
+    "make website"
+    "make pdf"
+  }
+
+
+  ".org" -> "<emacs>" -> ".md"
+  ".md" -> "hugo build" -> ".html"
+
+  ".orient" -> "orient" -> "<emacs>" -> ".md"
+  ".orient" -> "orient" -> ".dot"
+  ".orient" -> "orient" -> ".html"
+
+  ".dot" -> "dot" -> ".svg"
+
+  ".ipld" -> "bin/codeGen" -> ".go"
+  ".go" -> "go test" -> "[ok]"
+  ".go" -> "hugo build" -> ".html"
+
+  ".html" -> "make website" -> "[website]"
+  ".svg" -> "make website" -> "[website]"
+
+  ".md" -> "make pdf" -> "spec.pdf"
+  ".svg" -> "make pdf" -> "spec.pdf"
+}
