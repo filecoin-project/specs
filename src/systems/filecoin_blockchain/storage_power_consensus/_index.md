@@ -87,7 +87,7 @@ there has been null rounds where the beacon should have been inserted, we need
 to iterate on the chain to find where the entry is inserted.
 
 ```go
-func GetRandomnessFromBeacon(e ChainEpoch, head ChainEpoch) {
+func GetRandomnessFromBeacon(e ChainEpoch, head ChainEpoch) (DrandEntry,error) {
   // get the drand round associated with the timestamp of this epoch.
   drandRound := MaxBeaconRoundForEpoch(e)
   // get the minimum drand timestamp associated with the drand round
@@ -97,10 +97,10 @@ func GetRandomnessFromBeacon(e ChainEpoch, head ChainEpoch) {
   for minEpoch < head {
      // if this is not a null block, then it must have the entry we want
     if !chain.IsNullBlock(minEpoch) 
-         // it may be the first or the last entry depending on the reason why
-         // there was a null block before. If the drand entry is 
-         // not associated with this block, it means the block is invalid - but
-         // this condition is caught by the block validation logic.
+         // the requested drand entry must be in the list of drand entries
+         // included in this block. If it is not the case, 
+         // it means the block is invalid - but this condition is caught by the 
+         // block validation logic.
          returns getDrandEntryFromBlockHeader(chain.Block(minEpoch))
     // otherwise, we need to continue progressing on the chain, i.e. maybe no
     // miner were elected or filecoin / drand outage
