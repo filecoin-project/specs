@@ -12,7 +12,7 @@ $endLevel: 6;
         $content: $content + 'counter(h#{$n})"."';
       }
 
-      > h#{$currentLevel}::before {
+      h#{$currentLevel}::before {
         content: unquote($content) " ";
       }
     }

@@ -20,7 +20,7 @@ function initToc () {
         headingLabelCallback: (label) => {
           return label.replace('#', '')
         },
-        headingsOffset: 50,
+        headingsOffset: 1
     });
 }
 
@@ -28,7 +28,10 @@ function initPanZoom () {
   console.log('init panzoom')
   var elements = document.querySelectorAll(".zoomable")
   elements.forEach(function (el) {
-    panzoom(el.querySelector('*:first-child'))
+    panzoom(el.querySelector('*:first-child'), {
+      maxZoom: 10,
+      minZoom: 0.5
+    })
   })
 }
 

@@ -53,10 +53,8 @@
   <div class="markdown">
     {{- $pages := where .Pages "Params.bookhidden" "ne" true -}}
     {{ range sort $pages "Weight" "asc" }}
-      <section class="{{ .Title }}">
-        {{ .Content }}
-        {{- template "mainChildren" (dict "Section" . ) -}}
-      </section>
+      {{ .Content }}
+      {{- template "mainChildren" (dict "Section" . ) -}}
     {{ end }}
   </div>
 {{ end }}

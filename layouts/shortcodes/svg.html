@@ -11,7 +11,7 @@
       {{ $id := (print "diagrams-" $uuid) }}
       <figure class="diagrams-container">
         <div title="{{ .Get "title" }}" id="{{ $id }}" class="diagrams svg{{ with .Get "class" }} {{ . }}{{ end }} zoomable">
-          {{- $content -}}
+          <img src="{{ $.Scratch.Get "filepath" }}" loading="lazy" height="100%" />
         </div>
         <figcaption title="{{ .Get "title" }}" class="diagrams-caption">
           Figure: {{( .Get "title" )}}
