@@ -50,21 +50,27 @@
 {{ end }}
 
 {{ define "main" }}
-<article class="markdown">
-    {{ with .Site.GetPage "/" }}
-        {{- $pages := where .Pages "Params.bookhidden" "ne" true -}}
-        {{ range sort $pages "Weight" "asc" }}
-            {{ .Content }}
-            {{- template "mainChildren" (dict "Section" . ) -}}
-        {{ end }}
+  <div class="markdown">
+    {{- $pages := where .Pages "Params.bookhidden" "ne" true -}}
+    {{ range sort $pages "Weight" "asc" }}
+      <section class="{{ .Title }}">
+        {{ .Content }}
+        {{- template "mainChildren" (dict "Section" . ) -}}
+      </section>
     {{ end }}
-  </article>
+  </div>
 {{ end }}
 
 {{ define "mainChildren" }}
     {{- $pages := where .Section.Pages "Params.bookhidden" "ne" true -}}
     {{ range sort $pages "Weight" "asc" }}
-      {{ .Content }}
-      {{- template "mainChildren" (dict "Section" . ) -}}
+      {{ if default false (index .Params "math-mode") }}
+        <div class="math-mode">
+        {{ .Content }}
+        </div>
+      {{ else }}
+        {{ .Content }}
+      {{ end }}
+        {{- template "mainChildren" (dict "Section" . ) -}}
     {{ end }}
 {{ end }}

@@ -1,6 +1,14 @@
+import '@pwabuilder/pwaupdate'
 import toc from './toc/index.js'
+import panzoom from 'panzoom'
+import tablesort from 'tablesort'
 
-const run = function() {
+// Note: the tablesort lib is not ESM friendly, and the sorts expect `Tablesort` to be available on the global
+window.Tablesort = tablesort
+require('tablesort/dist/sorts/tablesort.number.min.js')
+
+function initToc () {
+  console.log('init toc')
     toc.init({
         tocSelector: '.toc',
         contentSelector: '.markdown',
@@ -16,4 +24,22 @@ const run = function() {
     });
 }
 
-run()
+function initPanZoom () {
+  console.log('init panzoom')
+  var elements = document.querySelectorAll(".zoomable")
+  elements.forEach(function (el) {
+    panzoom(el.querySelector('*:first-child'))
+  })
+}
+
+function initTableSort () {
+  console.log('init tablesort')
+  var elements = document.querySelectorAll(".tablesort")
+  elements.forEach(function (el) {
+    tablesort(el);
+  })
+}
+
+initToc()
+initPanZoom()
+initTableSort()

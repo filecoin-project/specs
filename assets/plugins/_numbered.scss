@@ -3,7 +3,7 @@ $endLevel: 6;
 
 .book-page .markdown {
   @for $currentLevel from $startLevel through $endLevel {
-    > header.level-#{$currentLevel} {
+    header.level-#{$currentLevel} {
       counter-increment: h#{$currentLevel};
       counter-reset: h#{$currentLevel + 1};
 
