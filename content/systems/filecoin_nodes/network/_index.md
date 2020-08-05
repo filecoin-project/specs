@@ -9,52 +9,17 @@ dashboardTests: 0
 
 # Interface
 
+<!--
 {{<embed src="network.id" lang="go" >}}
+-->
 
+Filecoin nodes use several protocols of the libp2p networking stack for peer discovery, peer routing and block and message propagation. Libp2p is a modular networking stack for peer-to-peer networks. It includes several protocols and mechanisms to enable efficient, secure and resilient peer-to-peer communication. Libp2p nodes open connections with one another and mount different protocols or streams over the same connection. In the initial handshake, nodes exchange the protocols that each of them supports and all Filecoin related protocols will be mounted under `/fil/...` protocol identifiers.
 
-Filecoin nodes use the libp2p protocol for peer discovery, peer routing, and message multicast, and so on. Libp2p is a set of modular protocols common to the peer-to-peer networking stack. Nodes open connections with one another and mount different protocols or streams over the same connection. In the initial handshake, nodes exchange the protocols that each of them supports and all Filecoin related protcols will be mounted under `/fil/...` protocol identifiers.
-
+The complete specification of libp2p can be found at [https://github.com/libp2p/specs](https://github.com/libp2p/specs).
 Here is the list of libp2p protocols used by Filecoin.
 
-- Graphsync: 
-	- Graphsync is used to transfer blockchain and user data
-	- [Draft spec](https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md)
-	- No filecoin specific modifications to the protocol id
-- Gossipsub: 
-	- block headers and messages are broadcasted through a Gossip PubSub protocol where nodes can subscribe to topics for blockchain data and receive messages in those topics. When receiving messages related to a topic, nodes process the message and forward it to peers who also subscribed to the same topic.
-	- Spec is [here](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub)
-	- No filecoin specific modifications to the protocol id.  However the topic identifiers MUST be of the form `fil/blocks/<network-name>` and `fil/msgs/<network-name>`
-- KademliaDHT: 
-	- Kademlia DHT is a distributed hash table with a logarithmic bound on the maximum number of lookups for a particular node. Kad DHT is used primarily for peer routing as well as peer discovery in the Filecoin protocol.
-	- Spec TODO [reference implementation](https://github.com/libp2p/go-libp2p-kad-dht)
-	- The protocol id must be of the form `fil/<network-name>/kad/1.0.0`
-- Bootstrap List: 
-	- Bootstrap is a list of nodes that a new node attempts to connect to upon joining the network. The list of bootstrap nodes and their addresses are defined by the users.
-- Peer Exchange: 
-	- Peer Exchange is a discovery protocol enabling peers to create and issue queries for desired peers against their existing peers
-	- spec [TODO](https://github.com/libp2p/specs/issues/222)
-	- No Filecoin specific modifications to the protocol id.
-- DNSDiscovery: Design and spec needed before implementing
-- HTTPDiscovery: Design and spec needed before implementing
-- Hello:
-	- Hello protocol handles new connections to filecoin nodes to facilitate discovery
-	- the protocol string is `fil/hello/1.0.0`. 
-
-## Hello Spec 
-
-### Protocol Flow
-
-`fil/hello` is a filecoin specific protocol built on the libp2p stack.  It consists of two conceptual
-procedures: `hello_connect` and `hello_listen`.   
-
-`hello_listen`: `on new stream` -> `read peer hello msg from stream` -> `write latency message to stream` -> `close stream`
-
-`hello_connect`: `on connected` -> `open stream` -> `write own hello msg to stream` -> `read peer latency msg from stream`  -> `close stream`
-
-where stream and connection operations are all standard libp2p operations.  Nodes running the Hello Protocol should consume the incoming Hello Message and use it to help manage peers and sync the chain.
-
-### Messages
-{{<embed src="hello.id" lang="go" >}}
-
-
-When writing the `HelloMessage` to the stream the peer must inspect its current head to provide accurate information.  When writing the `LatencyMessage` to the stream the peer should set `TArrival` immediately upon receipt and `TSent` immediately before writing the message to the stream.
+- Graphsync: Graphsync is a protocol to synchronize graphs across peers. It is used to reference, address, request and transfer blockchain and user data between Filecoin nodes. The [draft specification of GraphSync](https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md) provides more details on the concepts, the interfaces and the network messages used by GraphSync. There are no Filecoin-specific modifications to the protocol id.
+- Gossipsub: Block headers and Transaction messages are propagating through the Filecoin network using a gossip-based pubsub protocol acronymed _GossipSub_. As is traditionally the case with pubsub protocols, nodes subscribe to topics and receive messages published on those topics. When nodes receive messages from a topic they are subscribed to, they run a validation process and i) pass the message to the application, ii) forward the message further to nodes they know off being subscribed to the same topic. Furthermore, v1.1 version of GossipSub, which is the one used in Filecoin is enhanced with security mechanisms that make the protocol resilient against security attacks. The [GossipSub Specification](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub) provides all the protocol details pertaining to its design and implementation, as well as specific settings for the protocols parameters. There have been no filecoin specific modifications to the protocol id. However the topic identifiers MUST be of the form `fil/blocks/<network-name>` and `fil/msgs/<network-name>`
+- Kademlia DHT: The Kademlia DHT is a distributed hash table with a logarithmic bound on the maximum number of lookups for a particular node. In the Filecoin network, the Kademlia DHT is used primarily for peer discovery and peer routing. In particular, when a node wants to store data in the Filecoin network, they get a list of miners and their node information. This node information includes (among other things) the PeerID of the miner. In order to connect to the miner and exchange data, the node that wants to store data in the network has to find the Multiaddress of the miner, which they do by queering the DHT. The [libp2p Kad DHT Specification](https://github.com/libp2p/go-libp2p-kad-dht) provides implementation details of the DHT structure. For the Filecoin network, the protocol id must be of the form `fil/<network-name>/kad/1.0.0`.
+- Bootstrap List: This is a list of nodes that a new node attempts to connect to upon joining the network. The list of bootstrap nodes and their addresses are defined by the users.
+- Peer Exchange: This protocol is the realisation of the peer discovery process discussed above in the Kademlia DHT point. It enables peers to find information and addresses of other peers in the network by interfacing with the DHT and create and issue queries for the peers they want to reach out to.
