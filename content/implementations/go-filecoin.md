@@ -4,8 +4,7 @@ weight: 2
 implAudit: 0
 implSpecCompliance: 0
 implRepos: 
-  - https://github.com/filecoin-project/go-filecoin
-implLang: go
+  - { lang: go, repo: https://github.com/filecoin-project/go-filecoin }
 ---
 
 # Filecoin (go-filecoin)

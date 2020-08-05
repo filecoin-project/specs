@@ -5,13 +5,13 @@ weight: 1
 implAudit: 0
 implSpecCompliance: 0
 implRepos: 
-  - https://github.com/filecoin-project/lotus
-  - https://github.com/filecoin-project/storage-fsm
-  - https://github.com/filecoin-project/sector-storage
-  - https://github.com/filecoin-project/specs-storage
-  - https://github.com/filecoin-project/go-fil-markets
-  - https://github.com/filecoin-project/specs-actors
-implLang: go
+  - { lang: go,   repo: https://github.com/filecoin-project/lotus }
+  - { lang: go,   repo: https://github.com/filecoin-project/storage-fsm }
+  - { lang: go,   repo: https://github.com/filecoin-project/sector-storage }
+  - { lang: go,   repo: https://github.com/filecoin-project/specs-storage }
+  - { lang: go,   repo: https://github.com/filecoin-project/go-fil-markets }
+  - { lang: go,   repo: https://github.com/filecoin-project/specs-actors }
+  - { lang: rust, repo: https://github.com/filecoin-project/rust-fil-proofs }
 ---
 
 # Lotus

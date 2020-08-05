@@ -18,7 +18,9 @@
 {{ define "dashboard-impls-children" }}
     {{- $pages := where .Section.Pages "Params.bookhidden" "ne" true -}}
     {{- range $impl := (sort $pages "Weight" "asc") -}}
-        {{- range $repoUrl := .Params.implRepos -}}
+        {{- range $repoUrlIndex, $repoItem := .Params.implRepos -}}
+            {{ $repoUrl := $repoItem.repo }}
+            {{ $repoLang := $repoItem.lang }}
             {{ $parts := split $repoUrl "/" }}
             {{ $size := len $parts }}
             {{ $repoName := (index $parts (sub $size 1)) }}
@@ -41,9 +43,13 @@
                 {{ $color = "bg-stable"}}
             {{ end }}
             <tr>
-                <td><a title="{{ $impl.Title }}" href="{{ $impl.Permalink }}">{{ $impl.Title }}</a></td>
+                {{ if eq $repoUrlIndex 0 }}
+                <td {{ if gt (len $impl.Params.implRepos) 1 }}rowspan="{{ len $impl.Params.implRepos }}"{{ end }}>
+                    <a title="{{ $impl.Title }}" href="{{ $impl.Permalink }}">{{ $impl.Title }}</a>
+                </td>
+                {{ end }}
                 <td style="text-align:left"><a title="{{ $repoName }}" href="{{ $repoUrl }}">{{ $repoName }}</a></td>
-                <td>{{ $impl.Params.implLang }}</td>
+                <td>{{ $repoLang }}</td>
                 <td class="text-black {{ if eq $data.commit.ci_passed  true }}bg-stable{{ else if eq $data.commit.ci_passed false }}bg-incorrect {{ else }}bg-na{{end}}">
                     {{ if eq $data.commit.ci_passed  true }}Passed{{ else if eq $data.commit.ci_passed false }}Failed{{ else }}Unknown{{ end }}
                 </td>
