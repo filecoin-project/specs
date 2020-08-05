@@ -10,7 +10,16 @@ dashboardTests: 0
 # IPLD Store - Local Storage for hash-linked data
 
 
-IPLD is a set of libraries which allow for the interoperability of content-addressed data structures across different distributed systems. It provides a fundamental 'common language' to primitive cryptographic hashing, enabling data to be verifiably referenced and retrieved between two independent protocols. For example, a user can reference a git commit in a blockchain transaction to create an immutable copy and timestamp, or a data from a DHT can be referenced and linked to in a smart contract. 
+The InterPlanetary Linked Data (IPLD) is a set of libraries which allow for the interoperability of content-addressed data structures across different distributed systems an protocols. It provides a fundamental 'common language' to primitive cryptographic hashing, enabling data to be verifiably referenced and retrieved between two independent protocols. For example, a user can reference an IPFS directory in an Ethereum transaction or smart contract.
+
+IPLD is fundamentally comprised of three layers:
+
+- the Block Layer, which focuses on block formats and addressing, how blocks can advertise or self-describe their codec
+- the Data Model Layer, which defines a set of required types that need to be included in any implementation - discussed in more detail below.
+- the Schema Layer, which allows for extension of the Data Model to interact with more complex structures without the need for custom translation abstractions.
+
+Further details about IPLD can be found in its [specification](https://github.com/ipld/specs).
+
 
 ## The Data Model
 
@@ -22,13 +31,11 @@ Applications interact with IPLD via the Data Model, and IPLD handles marshalling
 
 ## IPLD in Filecoin
 
-On the Filecoin network, IPLD is used in two ways:
+IPLD is used in two ways in the Filecoin network:
+- All system datastructures are stored using DAG-CBOR ( an IPLD codec). DAG-CBOR is a more strict subset of CBOR with a predefined tagging scheme, designed for storage, retrieval and traversal of hash-linked data DAGs.
+- Files and data stored on the Filecoin network are also stored using various IPLD codecs (not necessarily DAG-CBOR).
 
-- All system datastructures are stored in [IPLD](https://ipld.io) format, a data format akin to JSON but designed for storage, retrieval and traversal of hash-linked data DAGs.
-- Files and data stored on the Filecoin network may also be stored in IPLD format. While this is not required, it offers the benefit of supporting [selectors](https://github.com/ipld/specs/blob/master/selectors/selectors.md) to retrieve a smaller subset of the total stored data, as opposed to inefficiently downloading the data set entirely.
-
-IPLD provides a consistent and coherent abstraction above data that allows Filecoin to build and interact with complex, multi-block data structures, such as HAMT and Sharray. Filecoin uses the **DAG-CBOR** codec for the serialization and deserialization of its data structures and interacts with that data using the IPLD Data Model, upon which various tools are built. IPLD [Paths](https://github.com/ipld/specs/blob/master/data-model-layer/paths.md) are also used to address specific nodes within a linked data structure.
-
+IPLD provides a consistent and coherent abstraction above data that allows Filecoin to build and interact with complex, multi-block data structures, such as HAMT and AMT. Filecoin uses the DAG-CBOR codec for the serialization and deserialization of its data structures and interacts with that data using the IPLD Data Model, upon which various tools are built. IPLD Selectors can also be used to address specific nodes within a linked data structure.
 
 ### IpldStores
 

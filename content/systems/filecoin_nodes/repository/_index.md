@@ -16,4 +16,10 @@ The repository is accessible to the node's systems and subsystems and acts as lo
 
 The repository stores the node's keys, the IPLD data structures of stateful objects as well as the node configuration settings.
 
+<!--
+{{< hint info >}}
+**Code out of date**  
+{{< /hint >}}
+
 {{<embed src="repository_subsystem.id" lang="go" >}}
+-->
