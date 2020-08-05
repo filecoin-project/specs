@@ -52,7 +52,7 @@ In round `n`, for a given randomness lookback `l`, and serialized entropy `s`:
 
 ```text
 GetRandomness(dst, l, s):
-    ticketDigest = beacon.GetBeaconEntryForEpoch(n-l)
+    ticketDigest = beacon.GetRandomnessFromBeacon(n-l)
 
     buffer = Bytes{}
     buffer.append(IntToBigEndianBytes(dst))

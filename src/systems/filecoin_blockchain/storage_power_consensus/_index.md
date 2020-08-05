@@ -162,24 +162,6 @@ GetBeaconEntriesForEpoch(epoch) []BeaconEntry {
 }
 ```
 
-XXX: is it ever used this function ?
-```go
-// Note that the below function is a temporary solution and likely to be
-// updated in future. 
-GetBeaconEntryForEpoch(epoch) BeaconEntry {
-    var rand Randomness
-    for rand == nil {
-        seeds := GetBeaconEntriesForEpoch(epoch)
-        if seeds == nil {
-            epoch -= 1
-        } else {
-            rand = seeds[len(seeds)-1].Randomness
-        }
-    }
-    return rand
-}
-```
-
 
 {{<label beacon_entry_validation>}}
 ### Validating Beacon Entries on block reception
@@ -248,7 +230,7 @@ The miner runs the beacon entry through a Verifiable Random Function (VRF) to ge
 
 To generate a ticket for a given epoch n:
 ```text
-randSeed = GetBeaconEntryForEpoch(n)
+randSeed = GetRandomnessFromBeacon(n)
 newTicketRandomness = VRF_miner(H(TicketProdDST || index || Serialization(randSeed, minerActorAddress)))
 ```
 
