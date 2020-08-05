@@ -3,7 +3,9 @@ title: Forest
 weight: 3
 implAudit: 0
 implSpecCompliance: 0
-implRepo: https://github.com/ChainSafe/forest
+implRepos:
+ - https://github.com/ChainSafe/forest
+implLang: rust  
 ---
 
 # Forest is an implementation of Filecoin written in Rust
