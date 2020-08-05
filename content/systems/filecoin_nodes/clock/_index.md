@@ -31,7 +31,7 @@ In order to allow miners to do the above, the system clock must:
 1. Have low enough clock drift (sub 1s) relative to other nodes so that blocks are not mined in epochs considered future epochs from the persective of other nodes (those blocks should not be validated until the proper epoch/time as per [validation rules](block#block-semantic-validation)).
 2. Set epoch number on node initialization equal to `epoch = Floor[(current_time - genesis_time) / epoch_time]`
 
-It is expected that other subsystems will register to a NewRound() event from the clock subsystem.
+It is expected that other subsystems will register to a `NewRound()` event from the clock subsystem.
 
 ## Clock Requirements
 
@@ -46,7 +46,6 @@ Computer-grade clock crystals can be expected to have drift rates on the order o
     - `time.google.com` (more on [Google Public NTP](https://developers.google.com/time))
     - `ntp-b.nist.gov` ([NIST](https://tf.nist.gov/tf-cgi/servers.cgi) servers require registration)
   - We further recommend making 3 measurements in order to drop by using the network to drop outliers
-  - See how [go-ethereum does this](https://github.com/ethereum/go-ethereum/blob/master/p2p/discv5/ntp.go) for inspiration
 - clients MAY consider using cesium clocks instead for accurate synchrony within larger mining operations
 
 Mining operations have a strong incentive to prevent their clock from drifting ahead more than one epoch to keep their block submissions from being rejected.  Likewise they have an incentive to prevent their clocks from drifting behind more than one epoch to avoid partitioning themselves off from the synchronized nodes in the network.
