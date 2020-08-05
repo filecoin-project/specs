@@ -9,7 +9,11 @@
 @import "colors";
 @import "dashboard";
 @import "plugins/toc";
-@import "node_modules/katex/dist/katex.min.css";
+@import "katex";
+
+.markdown {
+    overflow-x: hidden;
+}
 
 .markdown h1, .markdown h2, .markdown h3, .markdown h4, .markdown h5, .markdown h6 {
     display: inline;
