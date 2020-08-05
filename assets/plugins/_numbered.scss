@@ -2,19 +2,26 @@ $startLevel: 1;
 $endLevel: 6;
 
 .book-page .markdown {
+  counter-reset: h1 h2 h3 h4 h5 h6;
+}
+
+.book-page .markdown {
   @for $currentLevel from $startLevel through $endLevel {
-    header.level-#{$currentLevel} {
+    $counterSet: "";
+    @for $x from $currentLevel through $endLevel {
+      $counterSet: $counterSet + ' h#{$x + 1} 0';
+    }
+    h#{$currentLevel} {
+      counter-set: unquote($counterSet);
       counter-increment: h#{$currentLevel};
-      counter-reset: h#{$currentLevel + 1};
+    }
+    $content: "";
+    @for $n from $startLevel through $currentLevel {
+      $content: $content + 'counter(h#{$n})"."';
+    }
 
-      $content: "";
-      @for $n from $startLevel through $currentLevel {
-        $content: $content + 'counter(h#{$n})"."';
-      }
-
-      h#{$currentLevel}::before {
-        content: unquote($content) " ";
-      }
+    h#{$currentLevel}::before {
+      content: unquote($content) " ";
     }
   }
 }
