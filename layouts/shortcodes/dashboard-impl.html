@@ -1,8 +1,7 @@
 <table id="dashboard-impls" class="sort Dashboard">
     <thead>
         <tr>
-            <th style="width:20%">Project</th>
-            <th>Module</th>
+            <th style="width:20%">Repo</th>
             <th>Language</th>
             <th>CI</th>
             <th>Test Coverage</th>
@@ -43,11 +42,6 @@
                 {{ $color = "bg-stable"}}
             {{ end }}
             <tr>
-                {{ if eq $repoUrlIndex 0 }}
-                <td {{ if gt (len $impl.Params.implRepos) 1 }}rowspan="{{ len $impl.Params.implRepos }}"{{ end }}>
-                    <a title="{{ $impl.Title }}" href="{{ $impl.Permalink }}">{{ $impl.Title }}</a>
-                </td>
-                {{ end }}
                 <td style="text-align:left"><a title="{{ $repoName }}" href="{{ $repoUrl }}">{{ $repoName }}</a></td>
                 <td>{{ $repoLang }}</td>
                 <td class="text-black {{ if eq $data.commit.ci_passed  true }}bg-stable{{ else if eq $data.commit.ci_passed false }}bg-incorrect {{ else }}bg-na{{end}}">
