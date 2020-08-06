@@ -13,14 +13,14 @@ function initToc () {
         tocSelector: '.toc',
         contentSelector: '.markdown',
         headingSelector: 'h1, h2, h3, h4, h5, h6',
-        hasInnerContainers: false,
+        hasInnerContainers: true,
         orderedList: true,
         smoothScroll: false,
-        collapseDepth: 2,
+        collapseDepth: 3,
         headingLabelCallback: (label) => {
           return label.replace('#', '')
         },
-        headingsOffset: 1
+        headingsOffset: 40
     });
 }
 

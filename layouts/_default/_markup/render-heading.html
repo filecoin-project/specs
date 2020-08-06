@@ -19,11 +19,9 @@
     {{- $anchor = printf "%s--%s" (delimit $pathParts "$") .Anchor -}}
   {{- end -}}
 {{- end -}}
-<header style="margin-top:2.4rem;" class="level-{{ $level }} section-{{ index $pathParts 0}}">
+<header class="level-{{ $level }} section-{{ index $pathParts 0}}">
   <h{{ $level }} id="{{ $anchor | safeURL }}">{{ .Text | safeHTML }} <a class="anchor" href="#{{ $anchor | safeURL }}">#</a></h{{ $level }}>
   {{if or (eq $level 2) (eq $level 3)}}
-  <span style="float:right">
-    {{ partial "state-badge.html" .Page.Params }}
-  </span>
+  {{ partial "state-badge.html" .Page.Params }}
   {{end}}
 </header>

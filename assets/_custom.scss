@@ -16,7 +16,9 @@
 }
 
 .markdown h1, .markdown h2, .markdown h3, .markdown h4, .markdown h5, .markdown h6 {
-    display: inline;
+    display: inline-block;
+    margin: 0;
+    padding-top: 1.5rem;
 }
 
 // SVG Diagrams
@@ -112,6 +114,25 @@ html {
     scroll-behavior: auto;
     touch-action: auto;
 }
+.container {
+    max-width: 89rem;
+}
+.book-menu {
+    flex: 0 0 20rem;
+}
+.book-page {
+    padding-top: 2.2rem;
+    padding-left: 2rem;
+    max-width: 52rem;
+    header {
+        position: relative;
+        .state-badge {
+            position: absolute;
+            bottom: 0.4em;
+            right: 0;
+        }
+    }
+}
 
 summary {
     outline: none;
@@ -120,8 +141,8 @@ blockquote {
     overflow: auto;
 }
 .book-menu nav {
-    width: 16rem;
-    padding: 1rem;
+    width: 20rem;
+    padding: 1rem 0.2rem 4rem 1rem;
     position: fixed;
     top: 0;
     bottom: 0;
@@ -132,7 +153,7 @@ blockquote {
 .book-menu nav .toc {
     overflow-x: hidden;
     overflow-y: auto;
-    height: 90%;
+    height: 100%;
 }
 
 .markdown>h1:first-of-type {
@@ -184,6 +205,16 @@ blockquote {
 }
 
 @media screen and (max-width: 56rem) {
+    .book-page {
+        padding-left:1rem;
+    }
+    .book-menu {
+        visibility: hidden;
+        margin-inline-start: -20rem;
+    }
+    #menu-control:checked~main .book-menu nav {
+        transform: translateX(20rem);
+    }
     .toc {
         text-align: right;
     }

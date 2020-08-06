@@ -123,7 +123,7 @@ tocbot.init = function (customOptions) {
     this._scrollListener = debounce(() => {
         buildHtml.updateToc(headingsArray, this.tocEl)
         updateTocScroll(options, this.tocEl)
-    }, {wait: 200})
+    }, {wait: 200, before: true})
 
     this._scrollListener()
 

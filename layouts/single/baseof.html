@@ -29,6 +29,18 @@
 
       <label for="menu-control" class="hidden book-menu-overlay"></label>
     </div>
+
+
+    {{ if default true (default .Site.Params.BookToC .Params.BookToC) }}
+    <aside class="book-toc">
+      <div class="book-toc-toggles">
+        <label class="dark-mode-toggle-label" for="dark-mode-toggle">
+          <i class="gg-dark-mode"></i> DARK MODE
+        </label>
+        <button id="dark-mode-toggle" class="dark-mode-toggle toggle" type="button" aria-pressed="false"></button>
+      </div>
+    </aside>
+    {{ end }}
   </main>
 
   {{ partial "single/inject/body" . }}
@@ -53,8 +65,10 @@
   <div class="markdown">
     {{- $pages := where .Pages "Params.bookhidden" "ne" true -}}
     {{ range sort $pages "Weight" "asc" }}
+      <section class="{{.Title}}">
       {{ .Content }}
       {{- template "mainChildren" (dict "Section" . ) -}}
+      </section>
     {{ end }}
   </div>
 {{ end }}
