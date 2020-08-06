@@ -38,7 +38,7 @@
 <tr>
     <!-- Section -->
     <td class="Dashboard-section">{{- delimit (split .Level "") "." }} 
-        <a title="{{.Page.Title}}" href="{{.Page.Permalink}}">{{.Page.Title}}</a>
+        {{ template "portable-link" (dict "Destination" .Page.File.Path "Text" .Page.Title "Page" .Page) }}
     </td>
 
     <!-- Weight -->
