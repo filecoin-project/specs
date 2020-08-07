@@ -37,6 +37,8 @@ type BlockHeader struct {
     // Signatures
     Signature              filcrypto.Signature
 
+    BaseFee                abi.TokenAmount
+
     //	SerializeSigned()            []byte
     //	ComputeUnsignedFingerprint() []
 }
