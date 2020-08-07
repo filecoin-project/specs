@@ -91,7 +91,7 @@ type SignedVoucher struct {
 }
 ```
 
-Over the course of a transaction cycle, each participant in the payment channel can send `voucher`s to other participants. The payment channel's sender (`From`) account holder will send a signed voucher with a given nonce to the receipient (`To`) account holder.
+Over the course of a transaction cycle, each participant in the payment channel can send `voucher`s to the other participant. The payment channel's sender (`From`) account holder will send a signed voucher with a given nonce to the receipient (`To`) account holder.
 
 For instance, if the sender (`From` address) has sent to the recipient (`To` address) the following three vouchers (voucher_val, voucher_nonce) for a lane with 100 FIL to be redeemed: (10, 1), (20, 2), (30, 3), then the recipient could choose to redeem (30, 3) bringing the lane's value to 70 (100 - 30) and cancelling the preceding vouchers, i.e., they would not be able to redeem (10, 1) or (20, 2) anymore. However, they could redeem (20, 2), that is, 20 FIL, and then follow up with (30, 3) to redeem the remaining 10 FIL later.
 
