@@ -49,7 +49,7 @@ Before continuing with the details of the Payment Channel and its components and
 - `Settle`: this process starts closing the channel. It can be called by either the channel creator (sender) or the channel recipient.
 - `Collect`: with this process funds are eventually transferred from the sender to the recipient. This process incurs transaction/gas costs.
 
-Throughout the interaction between the two parties, the channel sender (`From` address) is sending vouchers to the recipient (`To` address). The `Value` indicated in the signed message, i.e., _voucher_, from the sender to the recipient is progressively increasing together with the `Nonce` to indicate the value available to the provider to _redeem_. The `Value` is based on the service that the recipient has provided to the sender of the channel. The recipient can `Update` the balance of the channel and the balance `ToSend` to them. The recipient can choose to `Collect` this balance at any time incurring the corresponding gas cost.
+Throughout the interaction between the two parties, the channel sender (`From` address) is sending vouchers to the recipient (`To` address). The `Value` indicated in the voucher, from the sender to the recipient is progressively increasing (with every new voucher issued) to indicate the value available for the provider to _redeem_. The `Value` is based on the service that the recipient has provided to the sender of the channel. The recipient can `Update` the balance of the channel and the balance `ToSend` to them. The recipient can choose to `Collect` this balance at any time incurring the corresponding gas cost.
 
 ## Vouchers
 
@@ -102,7 +102,7 @@ Once their transactions have completed, either party can choose to `Settle` (i.e
 
 ## Lanes
 
-In addition, payment channels in Filecoin can be split into `lane`s created as part of updating the channel state with a payment `voucher`. Each lane has an associated `nonce` and amount of tokens it can be `redeemed` for. Lanes can be thought of as transactions for several different services provided by the channel recipient to the channel sender. The `nonce` plays the role of a sequence number of vouchers within a given lane, where a voucher with a higher nonce replaces, but does not invalidate a voucher with a lower nonce - the recipient can still redeem or collect a lower-nonce voucher.
+In addition, payment channels in Filecoin can be split into `lane`s created as part of updating the channel state with a payment `voucher`. Each lane has an associated `nonce` and amount of tokens it can be `redeemed` for. Lanes can be thought of as transactions for several different services provided by the channel recipient to the channel sender. The `nonce` plays the role of a sequence number of vouchers within a given lane, where a voucher with a higher nonce replaces a voucher with a lower nonce.
 
 Payment channel lanes allow for a lot of accounting between parties to be done off-chain and reconciled via single updates to the payment channel. The multiple lanes enable two parties to use a single payment channel to adjudicate multiple independent sets of payments.
 
