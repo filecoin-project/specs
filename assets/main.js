@@ -1,28 +1,12 @@
 import '@pwabuilder/pwaupdate'
-import toc from './toc/index.js'
+import { initToc } from './toc.js'
 import panzoom from 'panzoom'
 import tablesort from 'tablesort'
+import Gumshoe from 'gumshoejs'
 
 // Note: the tablesort lib is not ESM friendly, and the sorts expect `Tablesort` to be available on the global
 window.Tablesort = tablesort
 require('tablesort/dist/sorts/tablesort.number.min.js')
-
-function initToc () {
-  console.log('init toc')
-    toc.init({
-        tocSelector: '.toc',
-        contentSelector: '.markdown',
-        headingSelector: 'h1, h2, h3, h4, h5, h6',
-        hasInnerContainers: true,
-        orderedList: true,
-        smoothScroll: false,
-        collapseDepth: 3,
-        headingLabelCallback: (label) => {
-          return label.replace('#', '')
-        },
-        headingsOffset: 40
-    });
-}
 
 function initPanZoom () {
   console.log('init panzoom')
@@ -43,6 +27,42 @@ function initTableSort () {
   })
 }
 
-initToc()
-initPanZoom()
-initTableSort()
+function initTocDepthSlider () {
+  var slider = document.getElementById('toc-depth-slider')
+  var toc = document.querySelector('.toc')
+  
+  slider.addEventListener('change', (event) => {
+    handleSliderChange(Number(event.target.value))
+  })
+
+  function handleSliderChange (depth) {
+    console.log('handleSliderChange', depth)
+    for (let i = 0; i < 6; i++) {
+      toc.querySelectorAll(`.depth-${i}`).forEach(el => {
+        if (i < depth) {
+          el.classList.remove('maybe-hide')
+        } else {
+          el.classList.add('maybe-hide')
+        }
+      })
+    }
+  }
+  // init to the current value
+  handleSliderChange(slider.value)
+}
+
+function initTocScrollSpy () {
+  console.log('initTocScrollSpy')
+  var spy = new Gumshoe('.toc a', {
+    nested: true,
+    nestedClass: 'active-parent'
+  })
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  initToc({tocSelector:'.toc', contentSelector: '.markdown'})
+  initTocDepthSlider()
+  initTocScrollSpy()
+  initPanZoom()
+  initTableSort()
+});

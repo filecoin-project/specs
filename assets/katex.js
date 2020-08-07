@@ -16,4 +16,6 @@ function initKatex () {
   })
 }
 
-initKatex()
+window.addEventListener('load', () => {
+  setTimeout(initKatex, 2000)
+});

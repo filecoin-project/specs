@@ -1,51 +1,55 @@
 .toc {
   overflow-y: auto;
-}
-.toc > .toc-list {
-  overflow: hidden;
-  position: relative;
-}
-.toc > .toc-list li {
-  list-style: none;
-}
-.toc-list {
-  margin: 0;
-  padding-left: 10px;
-}
-a.toc-link {
-  color: currentColor;
-  height: 100%;
-}
-.is-collapsible {
-  max-height: 1000px;
-  overflow: hidden;
-//   transition: all 300ms ease-in-out;
-}
-.is-collapsed {
-  max-height: 0;
-}
-.is-position-fixed {
-  position: fixed !important;
-  top: 0;
-}
-.is-active-link {
-  font-weight: 700;
-}
-.toc-link::before {
-  background-color: #eee;
-  content: " ";
-  display: inline-block;
-  height: inherit;
-  left: 0;
-  margin-top: -1px;
-  position: absolute;
-  width: 2px;
-}
-.is-active-link::before {
-  background-color: #54bc4b;
+  > ol {
+    overflow: hidden;
+    position: relative;
+    > li {
+      font-weight: 500;
+    } 
+  }
+  > ol li {
+    list-style: none;
+  }
+  > ol > li > ol {
+    padding-bottom: 1rem;
+    font-weight: 400;
+  }
+  ol {
+    margin: 0;
+    padding-left: 10px;
+  }
+  a {
+    color: currentColor;
+    height: 100%;
+  }
+  li::before {
+    // background-color: $gray-200;
+    content: " ";
+    display: inline-block;
+    height: inherit;
+    left: 0;
+    margin-top: -1px;
+    position: absolute;
+    width: 2px;
+  }
+
+  ol .active::before {
+    // background-color: #0090ff;
+  }
+  
+  li:not(.active-parent) > .maybe-hide > li:not(.active) {
+    display:none;
+  }
+  li.active,
+  li.active-parent,
+  .maybe-hide li.active-parent,
+  li.active-parent > .maybe-hide > li {
+    display: block;
+  }
 }
 
-.toc-list li {
+
+ol li {
   padding: 0 0;
   line-height: 2;
   font-size: 14px;
@@ -60,21 +64,22 @@ a.toc-link {
   }
 }
 
-.toc .toc-list .is-active-link::before {
-  background-color: #0090ff;
-}
-
-.toc .toc-link::before {
-  background-color: $gray-200;
+// override book theme which would put the number outside the link and thus not be clickable
+.book-menu nav .toc ol li::before {
   content: " ";
   display: inline-block;
-  height: inherit;
-  left: 0;
-  margin-top: -1px;
-  position: absolute;
-  width: 2px;
 }
-
-.toc > .toc-list > .toc-list-item > .toc-list {
-  padding-bottom: 0.6rem;
+.book-menu nav ol li.active::before {
+  content: "⨎";
+  // display: inline;
+  color: rgb(14,120,254);
+}
+.book-menu nav ol li a::before {
+  content: counters(item,".")" ";
+  color: $gray-600;
+  // font-family: monaco, monospace;
+  // font-size:12px;
+}
+.book-menu nav ol li.active > a::before {
+  color: rgb(14,120,254)
 }

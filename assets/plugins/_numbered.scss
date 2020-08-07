@@ -13,6 +13,7 @@ $endLevel: 6;
     }
     h#{$currentLevel} {
       counter-set: unquote($counterSet);
+      // counter-reset: h#{$currentLevel + 1};
       counter-increment: h#{$currentLevel};
     }
     $content: "";
