@@ -2,7 +2,7 @@
 title: "BlockSync"
 weight: 5
 dashboardWeight: 1
-dashboardState: wip
+dashboardState: stable
 dashboardAudit: 0
 dashboardTests: 0
 ---
@@ -15,11 +15,17 @@ dashboardTests: 0
 **Protocol ID**: `/fil/sync/blk/0.0.1`
 {{< /hint >}}
 
-The blocksync protocol is a small protocol that allows Filecoin nodes to request ranges of blocks from each other. It is a simple request/response protocol.
+BlockSync is a simple request/response protocol that allows Filecoin nodes to request ranges of blocks from each other, when they have run out of sync, e.g., during downtime. Given that the Filecoin blockchain is extended in Tipsets (i.e., groups of blocks), rather than in blocks, the BlockSync protocol should also operate in terms of Tipsets.
 
-The request requests a chain of a given length by the hash of its highest block. The `Options` allow the requester to specify whether or not blocks and messages are to be included.
+The request message requests a chain segment of a given length by the hash of its highest block. It is worth noting that this does not necessarily apply to the head (i.e., latest tipset) of the current chain, but it can also apply to earlier segments. For example, if the current height is at 5000, but a node is missing blocks between 4500-4700, then the `Head` requested is 4700 and the length is 200.
 
-The response contains the requested chain in reverse iteration order. Each item in the `Chain` array contains the blocks for that tipset if the `Blocks` option bit in the request was set, and if the `Messages` bit was set, the messages across all blocks in that tipset. The `MsgIncludes` array contains one array of integers for each block in the `Blocks` array. Each of the arrays in `MsgIncludes` contains a list of indexes of messages from the `Messages` array that are in each `Block` in the blocks array.
+The `Options` allow the requester to specify whether they want to receive block headers only, the transaction messages included in every block or both.
+
+The response contains the requested chain segment in reverse iteration order. Each item in the `Chain` array contains either the block headers for that tipset if the `Blocks` option bit in the request was set, or the messages across all blocks in that tipset, if the `Messages` bit was set, or both, if both option bits were set.
+
+The `MsgIncludes` array contains one array of integers for each block in the `Blocks` array. Each of the `Blocks` arrays in `MsgIncludes` contains a list of message indexes from the `Messages` array that are in each `Block` in the blocks array.
+
+If not all tipsets requested could be fetched, but the `Head` of the chain segment requested was fetched, then this is not considered an error, given that the node can continue extending the chain from the `Head` onwards.
 
 ```go
 type BlockSyncRequest struct {
@@ -60,7 +66,8 @@ type TipSetBundle struct {
 type Status enum {
     ## All is well.
     | Success 0
-    ## Sent back fewer blocks than requested.
+    ## We could not fetch all blocks requested (but at least we returned
+	## the `Head` requested). Not considered an error.
     | PartialResponse 101
     ## Request.Start not found.
     | BlockNotFound 201
