@@ -12,7 +12,7 @@ dashboardTests: 0
 
 ## Algorithm
 
-Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high level, it operates by running a leader election on every round during which, on expectation, one participant may be eligible to submit a block. EC guarantees that this winner will be anonymous until they reveal themselves by submitting a proof of their election. The miner can submit a proof per round and will be rewarded proportionally to its power. **Each miner will submit a proof for election (Leader Election step 1) and a proof of storage (winning PoSt step 2).** All valid blocks submitted in a given round form a `Tipset`. Every block in a Tipset adds weight to its chain. The 'best' chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on how to select the heaviest chain, see [Chain Selection](expected_consensus#chain-selection).
+Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high level, it operates by running a leader election on every round during which, on expectation, one participant may be eligible to submit a block. EC guarantees that this winner will be anonymous until they reveal themselves by submitting a proof of their election. The miner can submit a proof per round and will be rewarded proportionally to its power. **Each miner will submit a proof for election (Leader Election - Step 1) and a proof of storage (Winning PoSt - Step 2).** All valid blocks submitted in a given round form a `Tipset`. Every block in a Tipset adds weight to its chain. The 'best' chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on how to select the heaviest chain, see [Chain Selection](expected_consensus#chain-selection).
 
 Every block is associated with a randomness value. This randomness value is generated from [DRAND](https://drand.love), an unbiasable randomness generator, through a beacon. When the miner wants to publish a new block, they invoke the `getRandomness` function providing the chain height (i.e., epoch) as input. The randomness value is returned through the DRAND beacon and included in the block. For the details of DRAND and its implementation, please consult the project's [documentation](https://drand.love/docs/overview/) and [specification](https://drand.love/docs/specification/).
 
@@ -71,7 +71,7 @@ A miner will use the election proof/ticket to uniformly draw a value from 0 to 1
 
 #### Winning a block
 
-**Step 1:* Check for leader election
+**Step 1:** Check for leader election
 
 A miner checks if they are elected for the current epoch by running `GenerateElectionProof`. 
 
