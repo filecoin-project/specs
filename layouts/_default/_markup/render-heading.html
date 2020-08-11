@@ -19,9 +19,16 @@
     {{- $anchor = printf "%s--%s" (delimit $pathParts "$") .Anchor -}}
   {{- end -}}
 {{- end -}}
-<header class="level-{{ $level }} section-{{ index $pathParts 0}}">
-  <h{{ $level }} id="{{ $anchor | safeURL }}">{{ .Text | safeHTML }} <a class="anchor" href="#{{ $anchor | safeURL }}">#</a></h{{ $level }}>
-  {{if or (eq $level 2) (eq $level 3)}}
-  {{ partial "state-badge.html" .Page.Params }}
-  {{end}}
-</header>
+ 
+{{/* 
+  - headings get numbered by css; changing the nesting requires updating numbered.scss.
+  - heading text is grabbed by toc.js as the ToC link text
+*/}}
+<h{{ $level }} id="{{ $anchor | safeURL }}" class="level-{{ $level }}">
+  <a href="#{{ $anchor | safeURL }}">{{ .Text | safeHTML }}</a>
+</h{{ $level }}>
+<div class="section-badges">
+{{- if or (eq $level 2) (eq $level 3) -}}
+  {{- partial "state-badge.html" .Page.Params -}}
+{{- end -}}
+</div>

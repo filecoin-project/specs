@@ -7,13 +7,8 @@ $endLevel: 6;
 
 .book-page .markdown {
   @for $currentLevel from $startLevel through $endLevel {
-    $counterSet: "";
-    @for $x from $currentLevel through $endLevel {
-      $counterSet: $counterSet + ' h#{$x + 1} 0';
-    }
     h#{$currentLevel} {
-      counter-set: unquote($counterSet);
-      // counter-reset: h#{$currentLevel + 1};
+      counter-reset: h#{$currentLevel + 1} 0;
       counter-increment: h#{$currentLevel};
     }
     $content: "";
@@ -35,10 +30,20 @@ $endLevel: 6;
       counter-reset: item;
     }
 
-    &:before {
-      content: counters(item, ".") ". ";
+    a:before {
+      content: counters(item, ".") " ";
       float: left;
       margin-inline-end: $padding-4;
+      color: $gray-600;
+    }
+    &.active {
+      &::before {
+        content: "⨎";
+        color: $blue;
+      }
+      > a::before {
+        color: $blue;
+      }
     }
   }
 }

@@ -23,32 +23,23 @@
     height: 100%;
   }
   li::before {
-    // background-color: $gray-200;
     content: " ";
     display: inline-block;
     height: inherit;
     left: 0;
     margin-top: -1px;
     position: absolute;
-    width: 2px;
   }
-
-  ol .active::before {
-    // background-color: #0090ff;
-  }
-  
   li:not(.active-parent) > .maybe-hide > li:not(.active) {
-    display:none;
+    height:0;
   }
   li.active,
   li.active-parent,
   .maybe-hide li.active-parent,
   li.active-parent > .maybe-hide > li {
-    display: block;
+    height: auto;
   }
 }
-
-
 ol li {
   padding: 0 0;
   line-height: 2;
@@ -59,27 +50,4 @@ ol li {
   a.toc-link {
     height: 100%;
   }
-  a.is-active-link {
-    line-height: 20px;
-  }
-}
-
-// override book theme which would put the number outside the link and thus not be clickable
-.book-menu nav .toc ol li::before {
-  content: " ";
-  display: inline-block;
-}
-.book-menu nav ol li.active::before {
-  content: "⨎";
-  // display: inline;
-  color: rgb(14,120,254);
-}
-.book-menu nav ol li a::before {
-  content: counters(item,".")" ";
-  color: $gray-600;
-  // font-family: monaco, monospace;
-  // font-size:12px;
-}
-.book-menu nav ol li.active > a::before {
-  color: rgb(14,120,254)
 }

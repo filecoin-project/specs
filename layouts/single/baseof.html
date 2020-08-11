@@ -65,7 +65,8 @@
   <div class="markdown">
     {{- $pages := where .Pages "Params.bookhidden" "ne" true -}}
     {{ range sort $pages "Weight" "asc" }}
-      <section class="{{.Title}}">
+      {{- $pathParts := split .Page.File.Path "/" -}}
+      <section class="section-{{ index $pathParts 0}}">
       {{ .Content }}
       {{- template "mainChildren" (dict "Section" . ) -}}
       </section>

@@ -81,5 +81,7 @@ function createList(depth) {
 }
 
 function cleanHeadingText (el) {
-  return el.innerText.replace('#', '')
+  // in the current dom, the first child of the h{1-6} el is the text we want
+  console.log(el.textContent, el)
+  return el.textContent.trim()
 }

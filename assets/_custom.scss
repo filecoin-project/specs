@@ -13,12 +13,30 @@
 
 .markdown {
     overflow-x: hidden;
+    h1, h2, h3, h4, h5, h6 {
+        padding-top: 1.5rem;
+        margin-bottom: 1rem;
+        a {
+            color: inherit;
+            text-decoration: none;
+            &:visited {
+                color:inherit;
+            }
+            &:hover {
+                text-decoration: none;
+                &::after {
+                    font-size: 70%;
+                    padding-left:0.3em;
+                    color: $color-link;
+                    content: " #"
+                }
+            }
+        }
+    }
 }
-
-.markdown h1, .markdown h2, .markdown h3, .markdown h4, .markdown h5, .markdown h6 {
-    display: inline-block;
-    margin: 0;
-    padding-top: 1.5rem;
+.section-badges {
+    float: right;
+    margin-top:-2.5rem;
 }
 
 // SVG Diagrams
@@ -121,7 +139,7 @@ html {
     flex: 0 0 20rem;
 }
 .book-page {
-    padding-top: 2.2rem;
+    padding-top: 0rem;
     padding-left: 2rem;
     max-width: 52rem;
     header {
