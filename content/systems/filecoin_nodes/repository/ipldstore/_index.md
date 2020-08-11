@@ -2,7 +2,7 @@
 title: IPLD Store
 weight: 3
 dashboardWeight: 1
-dashboardState: wip
+dashboardState: stable
 dashboardAudit: wip
 dashboardTests: 0
 ---
@@ -10,7 +10,7 @@ dashboardTests: 0
 # IPLD Store - Local Storage for hash-linked data
 
 
-The InterPlanetary Linked Data (IPLD) is a set of libraries which allow for the interoperability of content-addressed data structures across different distributed systems an protocols. It provides a fundamental 'common language' to primitive cryptographic hashing, enabling data to be verifiably referenced and retrieved between two independent protocols. For example, a user can reference an IPFS directory in an Ethereum transaction or smart contract.
+InterPlanetary Linked Data (IPLD) is a set of libraries which allow for the interoperability of content-addressed data structures across different distributed systems and protocols. It provides a fundamental 'common language' to primitive cryptographic hashing, enabling data structures to be verifiably referenced and retrieved between two independent protocols. For example, a user can reference an IPFS directory in an Ethereum transaction or smart contract.
 
 IPLD is fundamentally comprised of three layers:
 
@@ -32,7 +32,7 @@ Applications interact with IPLD via the Data Model, and IPLD handles marshalling
 ## IPLD in Filecoin
 
 IPLD is used in two ways in the Filecoin network:
-- All system datastructures are stored using DAG-CBOR ( an IPLD codec). DAG-CBOR is a more strict subset of CBOR with a predefined tagging scheme, designed for storage, retrieval and traversal of hash-linked data DAGs.
+- All system datastructures are stored using DAG-CBOR (an IPLD codec). DAG-CBOR is a more strict subset of CBOR with a predefined tagging scheme, designed for storage, retrieval and traversal of hash-linked data DAGs. As compared to CBOR, DAG-CBOR can guarantee determinism.
 - Files and data stored on the Filecoin network are also stored using various IPLD codecs (not necessarily DAG-CBOR).
 
 IPLD provides a consistent and coherent abstraction above data that allows Filecoin to build and interact with complex, multi-block data structures, such as HAMT and AMT. Filecoin uses the DAG-CBOR codec for the serialization and deserialization of its data structures and interacts with that data using the IPLD Data Model, upon which various tools are built. IPLD Selectors can also be used to address specific nodes within a linked data structure.
