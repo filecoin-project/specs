@@ -261,19 +261,21 @@ blockquote {
     .toc {
         top:78px;
     }
-    .toc-label, .dark-mode-toggle-label {
-        font-size: 10px;
-        font-weight: 700;
-        display: block;
-    }
-    .gg-menu-motion, .gg-dark-mode {
-        display: inline-block;
-        margin-left: 0;
-        margin-right: 0;
-        vertical-align: middle;
-        font-size: 10px;
-        transform: scale(0.7);
-    }
+}
+
+.toc-label, .dark-mode-toggle-label {
+    font-size: 10px;
+    font-weight: 700;
+    display: block;
+    color:$gray-600;
+}
+.gg-menu-motion, .gg-dark-mode {
+    display: inline-block;
+    margin-left: 0;
+    margin-right: 0;
+    vertical-align: middle;
+    font-size: 10px;
+    transform: scale(0.7);
 }
 
 // Colors
