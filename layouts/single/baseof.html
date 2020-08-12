@@ -8,16 +8,15 @@
 
 <body dir={{ .Site.Language.LanguageDirection }}>
   <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <header class="book-header">
+    {{ template "header" . }} <!-- Mobile layout header -->
+  </header>
   <main class="container flex">
     <aside class="book-menu">
       {{ template "menu" . }} <!-- Left menu Content -->
     </aside>
 
     <div class="book-page">
-      <header class="book-header">
-        {{ template "header" . }} <!-- Mobile layout header -->
-      </header>
-
       {{ partial "docs/inject/content-before" . }}
       {{ template "main" . }} <!-- Page Content -->
       {{ partial "docs/inject/content-after" . }}

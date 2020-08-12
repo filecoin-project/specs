@@ -142,14 +142,6 @@ html {
     padding-top: 0rem;
     padding-left: 2rem;
     max-width: 52rem;
-    header {
-        position: relative;
-        .state-badge {
-            position: absolute;
-            bottom: 0.4em;
-            right: 0;
-        }
-    }
 }
 
 summary {
@@ -233,11 +225,7 @@ blockquote {
     #menu-control:checked~main .book-menu nav {
         transform: translateX(20rem);
     }
-    .toc {
-        text-align: right;
-    }
     .toc-label {
-        margin: 0 0 2rem;
         font-weight:700;
         font-size:10px;
         .gg-menu-motion {
@@ -246,6 +234,15 @@ blockquote {
     }
     .book-header {
         margin-bottom: 2rem;
+        position: fixed;
+        width: 100%;
+        background: white;
+        z-index: 1;
+        padding: 5px 0.6rem;
+        box-shadow: 1px 0 2px 0px rgba(0,0,0,0.2);
+    }
+    #toc-depth-slider {
+        display:none;
     }
 }
 
