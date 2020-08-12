@@ -62,11 +62,11 @@ Edge cases:
 
 ### Explanations
 
-_Relationship between `maxDrandRound` and `prevMaxDrandRound`_
+#### _Relationship between `maxDrandRound` and `prevMaxDrandRound`_
 
 The values of `maxDrandRound` and `prevMaxDrandRound` can be equal in case Drand did not produce any value in two subsequent Filecoin epochs, e.g., when a `DrandRound` has ended up being 61 seconds, while the default Filecoin epoch is 30 seconds.
 
-_Randomness during the first epoch / Genesis Block_
+#### _Randomness during the first epoch / Genesis Block_
 
 The following is a sequence of things for the first few epochs after the Genesis Block is generated.
 
@@ -75,7 +75,7 @@ The following is a sequence of things for the first few epochs after the Genesis
 - At the second epoch, the "main chain" 2-nd epoch block contains a DRAND entry that should point to the first DRAND entry.
 - Miners will build on the block(s) produced during the first epoch without knowing if the randomness is valid or not. However, on the second epoch, miners will be able to verify if the randomness included in the first epoch is correct.
 
-_DRAND Outage_
+#### _DRAND Outage_
 
 A DRAND outage is causing severe problems to the Filecoin blockchain, which cannot continue its normal operation, as miners cannot associate the creation time (i.e., epoch) of their blocks with the randomness value produced during that epoch.
 
@@ -97,7 +97,7 @@ Algorithm:
 
 ### Explanations
 
-_Filecoin Timestamp_
+#### _Filecoin Timestamp_
 
 The Filecoin Timestamp in the first few epochs is generated as follows:
 
@@ -106,7 +106,7 @@ The Filecoin Timestamp in the first few epochs is generated as follows:
 - Epoch 2 is `Filecoin Genesis time + 2*Filecoin Epoch` timestamp
 - Epoch 3 is `Filecoin Genesis time + 3*Filecoin Epoch` timestamp
 
-_Filecoin Timestamp Calculation_
+#### _Filecoin Timestamp Calculation_
 
 When computing the Filecoin timestamp one epoch has to be subtracted according to:
 
@@ -115,7 +115,7 @@ latestTs = ((uint64(filEpoch) * filEpochDuration) + filGenesisTime) - filEpochDu
 ```
 This is because Filecoin takes the DRAND value that corresponds to the previous Filecoin epoch of the one when the block is created. That allows the miner to have the DRAND value when it creates the block which is necessary for leader election.
 
-_Update of `MaxBeaconRoundForEpoch` relative to DRAND round and Filecoin epoch_
+#### _Update of `MaxBeaconRoundForEpoch` relative to DRAND round and Filecoin epoch_
 
 The `MaxBeaconRoundForEpoch` function might return no updated values in case the DRAND round duration is longer than the Filecoin epoch. For instance, in case DRAND round is 60 sec and Filecoin epoch is 30 sec, then for two subsequent epochs the function will return the same value.
 
