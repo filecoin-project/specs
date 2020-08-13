@@ -9,6 +9,90 @@ dashboardAudit: 0
 # Filecoin Parameters
 ---
 
+## `SectorMaximumLifetimeSDR`
+
+actors/abi/sector.go
+
+```go
+const SectorMaximumLifetimeSDR = ChainEpoch(1_262_277 * 5)
+```
+
+**Description:** This parameter is denoting the maximum duration (i.e., from activation to expiration) of a sector sealed with SDR.
+
+**Motivation:** The setting guarantees that SDR is secure in the _cost model_ for WindowPoSt and in the _time model_ for WinningPoSt. The setting is based on estimation of hardware latency improvement and hardware and software cost reduction over time.
+
+---
+
+---
+
+actors/builtin/market/policy.go
+
+```go
+const DealUpdatesInterval = builtin.EpochsInDay
+```
+**Description:** The number of blocks between payouts for deals
+
+---
+
+```go
+var ProvCollateralPercentSupplyNum = big.NewInt(5)
+var ProvCollateralPercentSupplyDenom = big.NewInt(100)
+```
+
+**Description:** The percentage of normalized circulating supply that must be covered by provider collateral in a deal.
+
+---
+
+```go
+var DealMinDuration = abi.ChainEpoch(180 * builtin.EpochsInDay)
+var DealMaxDuration = abi.ChainEpoch(540 * builtin.EpochsInDay)
+```
+
+**Description:** Minimum & Maximum Deal Duration, set at 100 and 540 days, respectively.
+
+---
+
+---
+
+actors/builtin/miner/monies.go
+
+
+```go
+var PreCommitDepositFactor = 20
+```
+
+**Description:** Amount of deposit for PreCommitting a sector. This deposit is lost if a PreCommit is not followed up by a ProveCommit, within a predefined time period.
+
+---
+
+```go
+var InitialPledgeFactor = 20
+var PreCommitDepositProjectionPeriod = abi.ChainEpoch(PreCommitDepositFactor) * builtin.EpochsInDay
+var InitialPledgeProjectionPeriod = abi.ChainEpoch(InitialPledgeFactor) * builtin.EpochsInDay
+```
+
+**Description:** Amount of Pledge collateral to be deposited per sector (in expected block rewards per day)
+// IP = IPBase(precommit time) + AdditionalIP(precommit time)
+// IPBase(t) = BR(t, InitialPledgeProjectionPeriod)
+// AdditionalIP(t) = LockTarget(t)*PledgeShare(t)
+// LockTarget = (LockTargetFactorNum / LockTargetFactorDenom) * FILCirculatingSupply(t)
+// PledgeShare(t) = sectorQAPower / max(BaselinePower(t), NetworkQAPower(t))
+// PARAM_FINISH
+
+```go
+var LockTargetFactorNum = big.NewInt(3)
+var LockTargetFactorDenom = big.NewInt(10)
+```
+
+**Description:** Fraction of available supply that the AdditionalIP targets to lock.
+
+
+
+
+
+
+
+
 Some of these parameters are used around the code in the Filecoin subsystems and ABI. Others are used as part of the proofs libraries.
 
 Most are generated/finalized using the [orient framework](https://github.com/filecoin-project/orient). It is used to modelize the Filecoin network.
