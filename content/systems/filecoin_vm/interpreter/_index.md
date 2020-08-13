@@ -20,7 +20,7 @@ The messages from all the blocks in a tipset must be executed in order to produc
 All messages from the first block are executed before those of second and subsequent blocks in the
 tipset. For each block, BLS-aggregated messages are executed first, then SECP signed messages.
 
-# Implicit messages
+## Implicit messages
 
 In addition to the messages explicitly included in each block, a few state changes at each epoch
 are made by implicit messages. Implicit messages are not transmitted between nodes, but constructed
@@ -42,7 +42,7 @@ They must succeed (have an exit code of zero) in order for the new state to be c
 Receipts for implicit messages are not included in the receipt list; only explicit messages have an
 explicit receipt. 
 
-# Gas payments
+## Gas payments
 
 In most cases, the sender of a message pays the miner which produced the block including that message
 a gas fee for its execution.
@@ -51,7 +51,7 @@ The gas payments for each message execution are paid to the miner owner account 
 that message is executed. There are no encumbrances to either the block reward or gas fees earned: 
 both may be spent immediately.  
 
-# Duplicate messages
+## Duplicate messages
 
 Since different miners produce blocks in the same epoch, multiple blocks in a single tipset may 
 include the same message (identified by the same CID). 
@@ -70,7 +70,7 @@ The sequence of executions for a tipset is thus summarised:
 - [... subsequent blocks ...]
 - cron tick 
 
-# Message validity and failure
+## Message validity and failure
 Every message in a valid block can be processed and produce a receipt (note that block validity
 implies all messages are syntactically valid -- see [Message Syntax](message#message-syntax-validation) -- and correctly signed).
 However, execution may or may not succeed, depending on the state to which the message is applied. If the execution
@@ -106,14 +106,14 @@ it will be created as an account actor.
 
 (You can see the _old_ VM interpreter [here](vm_interpreter_old) )
 
-# `vm/interpreter` interface
+## `vm/interpreter` interface
 
 {{<embed src="vm_interpreter.id"  lang="go" >}}
 
-# `vm/interpreter` implementation
+## `vm/interpreter` implementation
 
 {{<embed src="vm_interpreter.go"  lang="go" >}}
 
-# `vm/interpreter/registry`
+## `vm/interpreter/registry`
 
 {{<embed src="vm_registry.go"  lang="go" >}}
