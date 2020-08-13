@@ -1,25 +1,35 @@
+{{/* 
+  render-heading.html is a hugo hook called for each heading in each markdown doc, 
+  allowing us to control the HTML generated and fix the id generation to work for
+  a single page site, and add anchors and state badges.
+*/}}
 
-{{- $pathParts := split .Page.File.Path "/" -}}
+{{/* get rid of unwanted filename noise */}}
+{{- $path := strings.TrimSuffix "/_index.md" .Page.File.Path }}
+{{- $path = strings.TrimSuffix ".md" $path }}
+{{- $pathParts := split $path "/" -}}
 {{- $pathSize := len $pathParts -}}
-{{- $level := 0 -}}
+
+{{/* 
+  .Level is the heading number from the original markdown, e.g 1 for an h1.
+  $level is the corrected heading number given the depth of the file in the tree.
+*/}}
+{{- $level := add $pathSize (sub .Level 1) -}}
 {{- $anchor := "" -}}
 
-{{- if eq .Page.File.LogicalName "_index.md" -}}
-  {{- $level = add (sub $pathSize 1) (sub .Level 1) -}}
-  {{- if eq .Level 1 -}}
-    {{- $anchor = printf "%s" (delimit $pathParts "$") -}}
-  {{- else -}}
-    {{- $anchor = printf "%s--%s" (delimit $pathParts "$") .Anchor -}}
-  {{- end -}}
+{{/* 
+  each markdown doc must have exactly 1 h1 element.
+  e.g. in intro/_index.md, the h1 gets the id #intro... 
+  
+  ...while the subsequent headings have the .Anchor appended which is a hugo provided id derived from the heading text.
+  e.g  in intro/_index.md <h2>Spec Status</h2> gets the id #intro__spec-status
+*/}}
+{{- if eq .Level 1 -}}
+  {{- $anchor = (delimit $pathParts "__") -}}
 {{- else -}}
-  {{ $level = add $pathSize (sub .Level 1) }}
-  {{- if eq .Level 1 -}}
-    {{- $anchor = printf "%s" (delimit $pathParts "$") -}}
-  {{- else -}}
-    {{- $anchor = printf "%s--%s" (delimit $pathParts "$") .Anchor -}}
-  {{- end -}}
+  {{- $anchor = printf "%s__%s" (delimit $pathParts "__") .Anchor -}}
 {{- end -}}
- 
+
 {{/* 
   - headings get numbered by css; changing the nesting requires updating numbered.scss.
   - heading text is grabbed by toc.js as the ToC link text

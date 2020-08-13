@@ -28,19 +28,19 @@ function buildTocModel (contentSelector) {
       text: cleanHeadingText(el),
       children: []
     }
-    if (!prevSibling || node.tagName[1] === prevSibling.tagName[1])  {
+    if (!prevSibling || headingNum(node) === headingNum(prevSibling))  {
       parents[parents.length - 1].children.push(node)
       prevSibling = node
       
-      // quick and dirty check for is h3 > h2 ?
-    } else if (node.tagName[1] > prevSibling.tagName[1]) {
+      // is h3 > h2 ?
+    } else if (headingNum(node) > headingNum(prevSibling)) {
       parents.push(prevSibling)
       prevSibling.children.push(node)
       prevSibling = node
     } else {
       // h2 or h1 after an h3... gotta find out how far to unwind, parents may not be contiguous in a bad doc, so we walk.
       let prevParent = parents.pop()
-      while (node.tagName[1] <= prevParent.tagName[1]) {
+      while (headingNum(node) <= headingNum(prevParent)) {
         prevParent = parents.pop()
       }
       prevParent.children.push(node)
@@ -81,7 +81,9 @@ function createList(depth) {
 }
 
 function cleanHeadingText (el) {
-  // in the current dom, the first child of the h{1-6} el is the text we want
-  console.log(el.textContent, el)
   return el.textContent.trim()
+}
+
+function headingNum (el) {
+  return Number(el.tagName[1])
 }
