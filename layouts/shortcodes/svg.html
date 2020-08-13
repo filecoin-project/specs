@@ -1,0 +1,36 @@
+{{ if not (.Page.Scratch.Get "panzoom") }}
+    <script src="https://unpkg.com/d3-zoomable@1.1.3/dist/d3-zoomable.min.js"></script>
+    {{ .Page.Scratch.Set "panzoom" true }}
+{{ end }}
+
+{{ if (.Get "src") }}
+    {{ if eq (.Get "src" | printf "%.1s") "/" }}
+      {{ $.Scratch.Set "filepath" ( .Get "src" ) }}
+    {{ else }}
+      {{ $.Scratch.Set "filepath" $.Page.File.Dir }}
+      {{ $.Scratch.Add "filepath" ( .Get "src" ) }}
+    {{ end }}
+    {{ if fileExists ($.Scratch.Get "filepath") }}
+      {{ $content := $.Scratch.Get "filepath" | readFile | safeHTML }}
+      {{ $uuid := delimit (shuffle (seq 1 9)) "" }}
+      {{ $id := (print "diagrams-" $uuid) }}
+      <figure class="diagrams-container">
+        <div title="{{ .Get "title" }}" id="{{ $id }}" class="diagrams svg{{ with .Get "class" }} {{ . }}{{ end }}">
+          {{- $content -}}
+        </div>
+        <figcaption title="{{ .Get "title" }}" class="diagrams-caption">
+          Figure: {{( .Get "title" )}}
+          <a class="diagrams-link" title="Open diagram in new tab" href="{{ $.Scratch.Get "filepath" | relURL }}" target="_blank">Open in tab</a>
+        </figcaption>
+      </figure>
+      <script>
+        var element = document.querySelector("#{{ $id }}");
+        zoomable()(element).htmlEl(element.querySelector('svg'));
+      </script>
+    {{ else }}
+      <blockquote class="book-hint danger">
+        {{- printf "File '%s' not found from Page '%s'" ($.Scratch.Get "filepath") .Page.File }}
+      </blockquote>
+      {{- warnf "File '%s' not found from Page '%s'" ($.Scratch.Get "filepath") .Page.File }}
+    {{ end }}
+{{ end }}
