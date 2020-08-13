@@ -362,7 +362,7 @@ of the altered protocol.
   - **BV0 - Syntax**: Serialization, typing, value ranges.
   - **BV1 - Plausible Consensus**: Plausible miner, weight, and epoch values (e.g from chain state at `b.ChainEpoch - consensus.LookbackParameter`).
   - **BV2 - Block Signature**
-  - **BV3 - Beacon entries**: Valid random beacon entries have been inserted in the block (see {{<sref beacon_entry_validation>>}}).
+  - **BV3 - Beacon entries**: Valid random beacon entries have been inserted in the block (see [beacon entry validation](storage_power_consensus#validating-beacon-entries-on-block-reception)).
   - **BV4 - ElectionProof**: A valid election proof was generated.
   - **BV5 - WinningPoSt**: Correct PoSt generated.
   - **BV6 - Chain ancestry and finality**: Verify block links back to trusted chain, not prior to finality.

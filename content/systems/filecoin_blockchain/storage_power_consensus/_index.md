@@ -57,7 +57,7 @@ The Filecoin protocol uses randomness produced by a [drand](drand) beacon to see
 In turn these random seeds are used by:
 
 - The [sector_sealer](sealing) as SealSeeds to bind sector commitments to a given subchain.
-- The [post_generator](post_generator) as PoStChallenges to prove sectors remain committed as of a given block.
+- The [post_generator](poster) as PoStChallenges to prove sectors remain committed as of a given block.
 - The Storage Power subsystem as randomness in [leader_election](election_post) to determine their eligibility to mine a block.
 
 This randomness may be drawn from various Filecoin chain epochs by the respective protocols that use them according to their security requirements.
@@ -125,7 +125,8 @@ func getDrandEntryFromBlockHeader(block,round) (DrandEntry,error) {
 
 When mining, a miner can fetch entries from the drand network to include them in
 the new block by calling the method `GetBeaconEntriesForEpoch`.
-```
+
+```go
 GetBeaconEntriesForEpoch(epoch) []BeaconEntry {
 
     // special case genesis: the genesis block is pre-generated and so cannot include a beacon entry 
@@ -169,7 +170,7 @@ GetBeaconEntriesForEpoch(epoch) []BeaconEntry {
 
 Per the above, a Filecoin chain will contain the entirety of the beacon's output from the Filecoin genesis to the current block.
 
-Given their role in leader election and other critical protocols in Filecoin, a block's beacon entries must be validated for every block. See [drand](drand) for details. This can be done by ensuring every beacon entry is a valid signature over the prior one in the chain, using drand's [`Verify`](https://github.com/drand/drand/blob/master/beacon/beacon.go#L72) endpoint as follows:
+Given their role in leader election and other critical protocols in Filecoin, a block's beacon entries must be validated for every block. See [drand](drand) for details. This can be done by ensuring every beacon entry is a valid signature over the prior one in the chain, using drand's [`Verify`](https://github.com/drand/drand/blob/763e9a252cf59060c675ced0562e8eba506971c1/chain/beacon.go#L76) endpoint as follows:
 
 ```go
 // This need not be done for the genesis block
@@ -269,7 +270,7 @@ NOTE: The below values are currently placeholders.
 We currently set:
 
 - `MIN_MINER_SIZE_STOR = 100 * (1 << 40) Bytes` (100 TiB)
-- `MIN_MINER_SIZE_TARG = 3
+- `MIN_MINER_SIZE_TARG = 3`
 
 ## Network recovery after halting
 

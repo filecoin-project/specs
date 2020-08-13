@@ -33,7 +33,7 @@ The [Storage Power Consensus](storage_power_consensus) subsystem uses access to 
 
 Expected Consensus is a consensus protocol that works by electing a miner from a weighted set in proportion to their power. In the case of Filecoin, participants and powers are drawn from the [The Power Table](storage_power_actor#the-power-table), where power is equivalent to storage provided through time.
 
-Leader Election in Expected Consensus must be Secret, Fair and Verifiable. This is achieved through the use of randomness used to run the election. In the case of Filecoin's EC, the blockchain uses {{<sref beacon_entries>}} provided by a {{<sref drand>}} beacon. These seeds are used as unbiasable randomness for Leader Election. Every block header contains an `ElectionProof` derived by the miner using the appropriate seed.
+Leader Election in Expected Consensus must be Secret, Fair and Verifiable. This is achieved through the use of randomness used to run the election. In the case of Filecoin's EC, the blockchain uses [Beacon Entries](storage_power_consensus#beacon-entries) provided by a [drand](drand) beacon. These seeds are used as unbiasable randomness for Leader Election. Every block header contains an `ElectionProof` derived by the miner using the appropriate seed.
 
 ### Running a leader election
 
@@ -45,8 +45,8 @@ Design goals here include:
 At a high-level, leader election works as follows:
 
 - A miner draws an appropriate random seed for this epoch
-- They generate an `ElectionProof` from this seed by using a VRF to generate a signature over the seed at a given epoch, as defined in {{<sref randomness>}}. The `ElectionProof` is the VRF Proof.
-  - If the `ElectionProof`'s normalized digest value (i.e. the VRF Digest) is below a miner-specific `ElectionTarget` determined by the miner's power in SPC, it is valid: the miner can craft a block (see {{<sref block_producer>}}). 
+- They generate an `ElectionProof` from this seed by using a VRF to generate a signature over the seed at a given epoch, as defined in [Randomness](randomness). The `ElectionProof` is the VRF Proof.
+  - If the `ElectionProof`'s normalized digest value (i.e. the VRF Digest) is below a miner-specific `ElectionTarget` determined by the miner's power in SPC, it is valid: the miner can craft a block (see [Block Producer](block_producer)). 
     - The `ElectionProof` Digest must be normalized according to both the `ExpectedLeadersPerEpoch` in EC (a network parameter) and the maximum value of the digest (based on the hash used to produce it).
     - The `ElectionTarget` is set as the proportion of the miner's `TotalQualityAdjPower` over the total network quality-adjusted power. Accordingly leader election in EC is proportional to miner power.
   - Otherwise, the miner tries again in the next epoch.
@@ -140,7 +140,7 @@ potentially long chain scans would be required to compute a given block's weight
 
 ### Selecting between Tipsets with equal weight
 
-When selecting between Tipsets of equal weight, a miner chooses the one with the smallest ticket (see {{<sref tickets>}}).
+When selecting between Tipsets of equal weight, a miner chooses the one with the smallest ticket (see [Tickets](storage_power_consensus#tickets)).
 
 In the case where two Tipsets of equal weight have the same min ticket, the miner will compare the next smallest ticket in the Tipset (and select the Tipset with the next smaller ticket). This continues until one Tipset is selected.
 

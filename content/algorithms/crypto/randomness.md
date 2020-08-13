@@ -73,8 +73,8 @@ GetRandomness(dst, l, s):
 
 ## Drawing tickets from the VRF-chain for proof inclusion
 
-In some places, the protocol needs randomness drawn from the Filecoin blockchain's VRF-chain (which generates {{<sref tickets>}} with each new block) rather than from the random beacon, in order to tie certain proofs to a particular set of Filecoin blocks (i.e. a given chain or fork).
-In particular, `SealRandomness` must be taken from the VRF chain, in order to ensure that no other fork can replay the Seal (see {{<sref sealing>}} for more).
+In some places, the protocol needs randomness drawn from the Filecoin blockchain's VRF-chain (which generates [tickets](storage_power_consensus#tickets) with each new block) rather than from the random beacon, in order to tie certain proofs to a particular set of Filecoin blocks (i.e. a given chain or fork).
+In particular, `SealRandomness` must be taken from the VRF chain, in order to ensure that no other fork can replay the Seal (see [sealing](sealing) for more).
 
 A ticket is drawn from the chain for randomness as follows, for a given epoch `n`, and ticket sought at epoch `e`:
 ```text
@@ -100,7 +100,7 @@ In plain language, this means:
 This ticket is then combined with a Domain Separation Tag, the round number sought and appropriate entropy to form randomness for various uses in the protocol.
 
 See the `GetRandomnessFromVRFChain` method below:
-{{< readfile file="../struct/chain/chain.go" code="true" lang="go" >}}
+{{<embed src="/systems/filecoin_blockchain/struct/chain/chain.go" lang="go">}}
 
 ## Entropy to be used with randomness
 

@@ -34,7 +34,7 @@ To create a block, the eligible miner must compute a few fields:
 - `ParentMessageReceipts` - the CID of the root of an AMT containing receipts produced while computing `ParentState`.
 - `Epoch` - the block's epoch, derived from the `Parents` epoch and the number of epochs it took to generate this block.
 - `Timestamp` - a Unix timestamp, in seconds, generated at block creation.
-- `BeaconEntries` - a set of drand entries generated since the last block (see [Beacon Entries](storage_power_consensus#beacon_entries)).
+- `BeaconEntries` - a set of drand entries generated since the last block (see [Beacon Entries](storage_power_consensus#beacon-entries)).
 - `Ticket` - a new ticket generated from that in the prior epoch (see [Ticket Generation](storage_power_consensus#randomness-ticket-generation)).
 - `Miner` - the block producer's miner actor address.
 - `Messages` - The CID of a `TxMeta` object containing message proposed for inclusion in the new block:
