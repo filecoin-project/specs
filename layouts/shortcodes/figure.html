@@ -1,8 +1,3 @@
-{{ if not (.Page.Scratch.Get "panzoom") }}
-    <script src="https://unpkg.com/d3-zoomable@1.1.3/dist/d3-zoomable.min.js"></script>
-    {{ .Page.Scratch.Set "panzoom" true }}
-{{ end }}
-
 {{ if (.Get "src") }}
   {{ if eq (.Get "src" | printf "%.4s") "http" }}
       <figure>
@@ -20,7 +15,7 @@
         <figure >
           {{ $src := .Page.Resources.GetMatch ( .Get "src" ) }}
           {{ with $src }} 
-          <div id="{{ $id }}" class="figure">
+          <div id="{{ $id }}" class="figure {{ if ($.Get "zoom")}}zoomable{{ end }}">
             <img src="{{ .RelPermalink }}" height="{{ .Height }}" width="{{ .Width }}" loading="lazy" alt="{{ $.Get "title" }}"/>
           </div>
           {{ end }}
@@ -28,12 +23,6 @@
             {{ .Get "title" }}
           </figcaption>
         </figure>
-        {{ if (.Get "zoom")}}
-          <script>
-            var element = document.querySelector("#{{ $id }}");
-            zoomable()(element).htmlEl(element.querySelector('img'));
-          </script>
-        {{ end }}
       {{ else }}
         <blockquote class="book-hint danger">
           {{- printf "File '%s' not found from Page '%s'" ($.Scratch.Get "filepath") .Page.File }}
