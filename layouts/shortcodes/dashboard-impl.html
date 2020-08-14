@@ -1,11 +1,11 @@
-<table id="dashboard-impls" class="sort">
+<table id="dashboard-impls" class="sort Dashboard">
     <thead>
         <tr>
-            <th>Implementation</th>
-            <th>Test Coverage</th>
-            <th>Compliance Tests</th>
-            <th>Audit</th>
+            <th style="width:20%">Repo</th>
+            <th>Language</th>
             <th>CI</th>
+            <th>Test Coverage</th>
+            <th>Security Audit</th>
         </tr>
     </thead>
     <tbody>
@@ -16,38 +16,46 @@
 <!-- Children Template -->
 {{ define "dashboard-impls-children" }}
     {{- $pages := where .Section.Pages "Params.bookhidden" "ne" true -}}
-    {{- range sort $pages "Weight" "asc" -}}
-        {{ $parts := split .Params.implRepo "/" }}
-        {{ $size := len $parts }}
-        {{ $path := delimit (slice (index $parts (sub $size 2)) (index $parts (sub $size 1))) "/" }}
-        {{ $url := printf "https://codecov.io/api/gh/%s" $path }}
-        {{ $data := getJSON $url }}
-        {{ $cov := $data.commit.totals.c }}
-        {{ $color := "bg-na"}}
-        {{ if gt $cov 0 }}
-            {{ $color = "bg-incorrect"}}
-        {{ else if gt $cov 25 }}
-            {{ $color = "bg-wip"}}
-        {{ else if gt $cov 50 }}
-            {{ $color = "bg-incomplete"}}
-        {{ else if gt $cov 75 }}
-            {{ $color = "bg-stable"}}
+    {{- range $impl := (sort $pages "Weight" "asc") -}}
+        {{- range $repoUrlIndex, $repoItem := .Params.implRepos -}}
+            {{ $repoUrl := $repoItem.repo }}
+            {{ $repoLang := $repoItem.lang }}
+            {{ $parts := split $repoUrl "/" }}
+            {{ $size := len $parts }}
+            {{ $repoName := (index $parts (sub $size 1)) }}
+            {{ $repoOrg := (index $parts (sub $size 2)) }}
+            {{ $path := delimit (slice $repoOrg $repoName) "/" }}
+            {{ $url := printf "https://codecov.io/api/gh/%s" $path }}
+            {{ $data := getJSON $url }}
+            {{ $cov := $data.commit.totals.c }}
+            {{ $color := "bg-na"}}
+            {{ if gt $cov 0 }}
+                {{ $color = "bg-incorrect"}}
+            {{ end }}
+            {{ if gt $cov 20 }}
+                {{ $color = "bg-wip"}}
+            {{ end }}
+            {{ if gt $cov 45 }}
+                {{ $color = "bg-incomplete"}}
+            {{ end }}
+            {{ if gt $cov 70 }}
+                {{ $color = "bg-stable"}}
+            {{ end }}
+            <tr>
+                <td style="text-align:left"><a title="{{ $repoName }}" href="{{ $repoUrl }}">{{ $repoName }}</a></td>
+                <td>{{ $repoLang }}</td>
+                <td class="text-black {{ if eq $data.commit.ci_passed  true }}bg-stable{{ else if eq $data.commit.ci_passed false }}bg-incorrect {{ else }}bg-na{{end}}">
+                    {{ if eq $data.commit.ci_passed  true }}Passed{{ else if eq $data.commit.ci_passed false }}Failed{{ else }}Unknown{{ end }}
+                </td>
+                <td class="text-black {{ $color }}">
+                    <a class="text-black" href="https://codecov.io/gh/{{ $path }}" title="Open on codecov.io">
+                        {{ if $data.commit.totals.c }}{{ math.Round $data.commit.totals.c }}%{{ else }}Unknown{{end}}
+                    </a>
+                </td>
+                <td class="text-transparent {{ if gt $impl.Params.implAudit 0 }}bg-stable{{ else }}bg-incorrect{{end}}">
+                    {{ $impl.Params.implAudit }}
+                </td>
+            </tr>
         {{ end }}
-        <tr>
-            <td><a title="{{.Title}}" href="{{.Permalink}}">{{.Title}}</a></td>
-            <td class="text-black {{ $color }}">
-                {{ if $data.commit.totals.c }}{{ math.Round $data.commit.totals.c }}%{{ else }}N/A{{end}}
-            </td>
-            <td class="text-transparent {{ if gt .Page.Params.implSpecCompliance 0 }}bg-stable{{ else }}bg-incorrect{{end}}">
-                {{ .Page.Params.implSpecCompliance }}
-            </td>
-            <td class="text-transparent {{ if gt .Page.Params.implAudit 0 }}bg-stable{{ else }}bg-incorrect{{end}}">
-                {{ .Page.Params.implAudit }}
-            </td>
-            <td class="text-transparent {{ if eq $data.commit.ci_passed  true }}bg-stable{{ else if eq $data.commit.ci_passed false }}bg-incorrect {{ else }}bg-na{{end}}">
-                
-            </td>
-        </tr>
-        
     {{ end }}
 {{ end }}

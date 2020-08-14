@@ -1,0 +1,25 @@
+{{ $js := resources.Get "main.js" | js.Build "main.js"}}
+<script defer src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
+
+{{ $js := resources.Get "katex.js" | js.Build "katex.js"}}
+<script defer src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
+
+<pwa-update swpath="{{ "/sw.js" | relURL }}"></pwa-update>
+
+{{- if .Site.Params.AlgoliaDocSearch -}}
+<script src="https://cdn.jsdelivr.net/npm/docsearch.js@{{- .Site.Params.AlgoliaDocSearchVersion -}}/dist/cdn/docsearch.min.js"></script>
+<script>
+  docsearch({
+    // Your apiKey and indexName will be given to you once
+    // we create your config
+    apiKey: {{- .Site.Params.AlgoliaDocSearchApiKey  -}},
+    indexName: {{- .Site.Params.AlgoliaDocSearchIndex -}},
+    //appId: '<APP_ID>', // Should be only included if you are running DocSearch on your own.
+    // Replace inputSelector with a CSS selector
+    // matching your search input
+    inputSelector: '#book-search-input',
+    // Set debug to true to inspect the dropdown
+    debug: true,
+  });
+</script>
+{{- end -}}
