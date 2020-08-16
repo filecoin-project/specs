@@ -2,9 +2,10 @@
 title: Piece
 weight: 2
 bookCollapseSection: true
-dashboardAudit: 1
-dashboardState: permanent
-dashboardInterface: stable
+dashboardWeight: 1.5
+dashboardState: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Piece - Part of a file

@@ -1,19 +1,15 @@
 ---
-menuIcon: 📦
 title: "Blockchain"
 bookCollapseSection: true
 weight: 4
+dashboardWeight: 2
+dashboardState: wip
 dashboardAudit: 0
-dashboardState: incomplete
-dashboardInterface: wip
+dashboardTests: 0
 ---
 
 # Blockchain
 ---
-
-## Status Overview
-
-{{<dashboard-level open="true">}}
 
 The Filecoin Blockchain is a distributed virtual machine that achieves consensus, processes messages, accounts for storage, and maintains security in the Filecoin Protocol. It is the main interface linking various actors in the Filecoin system.
 

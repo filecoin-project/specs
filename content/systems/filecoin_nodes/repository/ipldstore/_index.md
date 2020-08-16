@@ -1,6 +1,10 @@
 ---
 title: IPLD Store
 weight: 3
+dashboardWeight: 1
+dashboardState: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # IPLD Store - Local Storage for hash-linked data

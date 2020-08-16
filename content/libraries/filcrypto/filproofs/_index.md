@@ -1,6 +1,10 @@
 ---
 title: FIL Proofs
 description: Filecoin Storage Proofs
+dashboardWeight: 1.5
+dashboardState: wip
+dashboardAudit: 0
+dashboardTests: 0
 ---
 # Filecoin Storage Proofs
 ---

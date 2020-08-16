@@ -2,6 +2,10 @@
 title: ChainSync
 weight: 3
 description: ChainSync - synchronizing the Blockchain
+dashboardWeight: 2
+dashboardState: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # ChainSync - synchronizing the Blockchain
@@ -358,10 +362,12 @@ of the altered protocol.
   - **BV0 - Syntax**: Serialization, typing, value ranges.
   - **BV1 - Plausible Consensus**: Plausible miner, weight, and epoch values (e.g from chain state at `b.ChainEpoch - consensus.LookbackParameter`).
   - **BV2 - Block Signature**
-  - **BV3 - ElectionPoSt**: Correct PoSt with a winning ticket.
-  - **BV4 - Chain ancestry and finality**: Verify block links back to trusted chain, not prior to finality.
-  - **BV4 - Message Signatures**:
-  - **BV5 - State tree**: Parent tipset message execution produces the claimed state tree root and receipts.
+  - **BV3 - Beacon entries**: Valid random beacon entries have been inserted in the block (see [beacon entry validation](storage_power_consensus#validating-beacon-entries-on-block-reception)).
+  - **BV4 - ElectionProof**: A valid election proof was generated.
+  - **BV5 - WinningPoSt**: Correct PoSt generated.
+  - **BV6 - Chain ancestry and finality**: Verify block links back to trusted chain, not prior to finality.
+  - **BV7 - Message Signatures**:
+  - **BV8 - State tree**: Parent tipset message execution produces the claimed state tree root and receipts.
 
 >Notes:
 >- in `CHAIN_CATCHUP`, if a node is receiving/fetching hundreds/thousands of `BlockHeaders`, validating signatures can be very expensive, and can be deferred in favor of other validation. (ie lots of BlockHeaders coming in through network pipe, don't want to bound on sig verification, other checks can help dump blocks on the floor faster (BV0, BV2)

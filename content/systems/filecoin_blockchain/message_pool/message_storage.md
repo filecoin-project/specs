@@ -1,6 +1,10 @@
 ---
 title: Message Storage
 weight: 2
+dashboardWeight: 2
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Message Storage

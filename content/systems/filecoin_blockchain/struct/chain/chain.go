@@ -20,7 +20,7 @@ func (chain *Chain_I) TipsetAtEpoch(epoch abi.ChainEpoch) Tipset {
 }
 
 // Draws randomness from the tipset at or immediately prior to `epoch`.
-func (chain *Chain_I) RandomnessSeedAtEpoch(epoch abi.ChainEpoch) abi.RandomnessSeed {
+func (chain *Chain_I) GetRandomnessFromVRFChain(epoch abi.ChainEpoch) abi.RandomnessSeed {
 
 	ts := chain.TipsetAtEpoch(epoch)
 	//	return ts.MinTicket().Digest()
@@ -37,4 +37,8 @@ func (chain *Chain_I) GetSealRandSeed(epoch abi.ChainEpoch) abi.RandomnessSeed {
 
 func (chain *Chain_I) GetPoStChallengeRandSeed(epoch abi.ChainEpoch) abi.RandomnessSeed {
 	return chain.RandomnessSeedAtEpoch(epoch - builtin.SPC_LOOKBACK_POST)
+}
+
+func (chain *Chain_I) RandomnessSeedAtEpoch(epoch abi.ChainEpoch) abi.RandomnessSeed {
+	panic("not implemented")
 }
