@@ -1,6 +1,10 @@
 ---
 title: Cryptoecon
 weight: 8
+dashboardWeight: 2
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Cryptoecon

@@ -1,3 +1,18 @@
+
+# Filecoin Specification
+![CI](https://github.com/filecoin-project/specs/workflows/CI/badge.svg)
+
+This is the [Filecoin Specification](https://github.com/filecoin-project/specs), a repository that contains documents, code, models, and diagrams that constitute the specification of the [Filecoin Protocol](https://filecoin.io). This repository is the singular source of truth for the Filecoin Protocol. All implementations of the Filecoin Protocol should match and comply with the descriptions, interfaces, code, and models defined in this specification.
+
+Note that the `beta` branch of the specs moves quickly. We work to merge PRs as fast as possible into master, which means changes or reversals are possible here. Accordingly, we periodically compile swaths of spec along with a high-level difflog into the `release` branch. As the spec stabilizes, this practice will change.
+
+## Website
+
+https://beta.spec.filecoin.io is the user-friendly website rendering, which we recommend for reading this repository. The website is updated automatically with every merge to `beta`.
+
+## Previous version
+You can find the previous version of the Filecoin Spec in the master branch [here](https://github.com/filecoin-project/specs/tree/master).
+
 ## Install
 
 ```sh
@@ -17,7 +32,45 @@ brew install go
 yarn serve
 # open http://localhost:1313/ in the browser
 ```
-# Shortcodes
+
+### External modules
+External modules should be added as [Hugo Modules](https://gohugo.io/hugo-modules/)
+You can find examples in the `config.toml`
+
+```toml
+[module]
+  [[module.imports]]
+    path = "github.com/filecoin-project/specs-actors"
+    [[module.imports.mounts]]
+    source = "actors"
+    target = "content/modules/actors"
+```
+This makes files from external repos available for Hugo rendering and allows for linking to up-to-date files that are directly pulled from other repositories.
+
+The configuration above gives the following information:
+
+- `path`: gives the repository you want to mount content from.
+- `source`: the folder from the repository referenced in the `path` that we want to mount into  our local Hugo filesystem. This is the "root" seen from your Hugo site where you pull content from. In the above case, this means that the source that will be mounted is `https://github.com/filecoin-project/specs-actors/actors/`.
+- `target`: the folder in your local Hugo site where the mounted content appears. In our case folder `content` is where we include all Hugo content.
+
+Putting everything together in an example: if you want to link to the file `xyz.go` from `https://github.com/filecoin-project/specs-actors/actors/xyz-folder/xyz.go`, from any file within the local folder `content` (or any of its subfolders), then with the above configuration you have to include:
+
+```
+{{<embed src="/modules/actors/xyz-folder/xyz.go"  lang="go">}}
+```
+
+These modules can be updated with 
+
+```sh
+hugo mod get -u
+```
+or use specific version with
+
+```sh
+hugo mod get github.com/filecoin-project/specs-actors@v0.7.2
+```
+
+## Shortcodes
 ### `Mermaid` 
 Inline mermaid syntax rendering
 ```html
@@ -65,31 +118,7 @@ stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa
 {{<embed src="/systems/piece_store.id" lang="go">}}
 ```
 
-
-# Frontmatter
-```md
-title: Libraries
-description: Libraries used from Filecoin
-weight: 3
-bookCollapseSection: true
-bookhidden: true
-dashboardAudit: 1
-dashboardState: wip
-dashboardInterface: stable
-```
-
-# Code fences
-
-They should **always** have a lang, if you don't know or don't care just use `text`
-
-```text
-
-```text
-Random plain text context ...
-``
-
-```
-# Document header
+## Page Header
 The first heading should be # Head with `---` like below and should refer to the overall title of the document. The right nav **only** starts on the second level of headings. 
 
 ```md
@@ -108,13 +137,49 @@ Some text
 ## Another top level header
 ```
 
+## Frontmatter
 
-# References
-## Markdown links **(Recommended)**
+Description for all the available frontmatter properties
+
+```md
+<!-- Page Title to be used in the navigation -->
+title: Libraries 
+<!-- Small description for html metadata, if not present the first couple of paragraphs will be used instead -->
+description: Libraries used from Filecoin
+<!-- This will be used to order the navigation and any other listing of pages -->
+weight: 3
+<!-- This will make a page section collapse in the navigation -->
+bookCollapseSection: true
+<!-- This will hidden the page from the navigation -->
+bookhidden: true
+<!-- This is used in the dashboard to describe the importance of the page content -->
+dashboardWeight: 2
+<!-- This is used in the dashboard to describe the state of the page content options are "incorrect", "wip", "incomplete" and "stable" -->
+dashboardState: stable
+<!-- This is used in the dashboard to describe if the theory of the page has been audited, options are 1 or 0 -->
+dashboardAudit: 1
+<!-- This is used in the dashboard to describe if the page content has compliance tests, options are 0 or numbers of tests -->
+dashboardTests: 0
+```
+
+## Code fences
+
+Code fences should **always** have a lang, if you don't know or don't care just use `text`
+
+```text
+
+```text
+Random plain text context ...
+``
+
+```
+
+
+## References - Markdown links
 These links use "portable links" just like `relref` so you can just give it the name of the file and it will fetch the correct relative link and title for the `<a href="/relative/path" title="page title">` automatically.
 You can override the `<a>` title by passing a second `string` in the link definition.
 
-**Note**: When using anchors the title can't be fetched automatically.
+> **Note**: When using anchors the title can't be fetched automatically.
 ```md
 [Storage Power](storage_power_consensus)
 # <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Storage Power Consensus">Storage Power</a>
@@ -125,19 +190,6 @@ You can override the `<a>` title by passing a second `string` in the link defini
 [Tickets](storage_power_consensus#the-ticket-chain-and-drawing-randomness "The Ticket chain and drawing randomness")
 # <a href="/systems/filecoin_blockchain/storage_power_consensus#the-ticket-chain-and-drawing-randomness" title="The Ticket chain and drawing randomness">Tickets</a>
 
-```
-
-## Hugo Cross Refs
-Check Hugo's documentation [here](https://gohugo.io/content-management/shortcodes/#ref-and-relref)
-```md
-[Random]({{<relref "randomness">}})
-[Pledge Collateral]({{<relref "storage_power_actor#pledge-collateral">}})
-```
-## Link shortcode
-Theres also `link` shortcode which will fetch the title of the page automatically and use it for the `<a>` text and title, but **DOES NOT** work with anchors (`#anchor-id`)
-```md
-{{<link storage_power_consensus>}}
-# <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Storage Power Consensus">Storage Power Consensus</a>
 ```
 
 ## Math mode

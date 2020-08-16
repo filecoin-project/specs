@@ -1,5 +1,9 @@
 ---
 title: Storage Mining Cycle
+dashboardWeight: 2
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Storage Mining Cycle
@@ -23,14 +27,13 @@ After the chain has caught up to the current head using [ChainSync](chainsync). 
 - At the same time it [receives blocks](block_sync)
     - Each block has an associated timestamp and epoch (quantized time window in which it was crafted)
     - Blocks are validated as they come in [block validation](block)
-- After an epoch's "cutoff", the miner should take all the valid blocks received for this epoch and assemble them into tipsets according to [Tipset](tipset) validation rules
+- After an epoch's "cutoff", the miner should take all the valid blocks received for this epoch and assemble them into tipsets according to [Tipset validation rules](tipset) 
 - The miner then attempts to mine atop the heaviest tipset (as calculated with [EC's weight function](expected_consensus#chain-selection)) using its smallest ticket to run leader election
-    - The miner runs an [Election PoSt](election_post) on their sectors in order to generate partial tickets
-    - The miner uses these tickets in order to run [Leader Election](expected_consensus#secret-leader-election) 
-        - if successful, the miner generates a new [Randomness Ticket](storage_power_consensus#tickets) for inclusion in the block
+    - The miner runs [Leader Election](expected_consensus#secret-leader-election) using the most recent [random](storage_power_consensus#beacon-entries)  output by a [drand](drand) beacon.
+        - if this yields a valid `ElectionProof`, the miner generates a new [ticket](storage_power_consensus#tickets) and winning PoSt for inclusion in the block.
         - the miner then assembles a new block (see "block creation" below) and waits until this epoch's quantized timestamp to broadcast it 
 
-This process is repeated until either the [Election PoSt](election_post) process yields a winning ticket (in EC) and the miner publishes a block or a new valid block comes in from the network.
+This process is repeated until either the [Leader Election](expected_consensus#secret-leader-election) process yields a winning ticket (in EC) and the miner publishes a block or a new valid block comes in from the network.
 
 At any height `H`, there are three possible situations:
 

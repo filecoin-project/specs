@@ -2,9 +2,10 @@
 title: Storage Market
 weight: 1
 bookCollapseSection: true
+dashboardWeight: 2
+dashboardState: incomplete
 dashboardAudit: 1
-dashboardState: wip
-dashboardInterface: stable
+dashboardTests: 0
 ---
 
 # Storage Market in Filecoin
@@ -42,7 +43,7 @@ The following diagram outlines the phases of deal flow within the storage market
 
 {{<svg src="storage_market_flow.mmd.svg" title="Storage Market Deal Flow" >}}
 
-# Discovery
+## Discovery
 
 Discovery is the client process of identifying storage providers (i.e. a miner) who (subject to agreement on the deal's terms) are offering to store the client's data. There are many ways which a client can use to identify a provider to store their data. The list below outlines the minimum discovery services a filecoin implementation MUST provide. As the network evolves, third parties may build systems that supplement or enhance these services.
 

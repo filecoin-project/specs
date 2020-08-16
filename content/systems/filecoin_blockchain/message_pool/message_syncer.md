@@ -1,6 +1,10 @@
 ---
 title: Message Syncer
 weight: 1
+dashboardWeight: 2
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Message Syncer

@@ -1,6 +1,10 @@
 #+TITLE: PoSt Parameters
 #+HUGO_SECTION: algorithms/post
 #+HUGO_BASE_DIR: ../../
+#+dashboardWeight: 2
+#+dashboardState: incorrect
+#+dashboardAudit: 0
+#+dashboardTests: 0
 
 * Proof of Spacetime Paramerters
 

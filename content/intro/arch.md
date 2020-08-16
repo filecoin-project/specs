@@ -1,8 +1,9 @@
 ---
 title: "Architecture Diagrams"
 audit: 1
-dashboardState: permanent
-dashboardInterface: incorrect
+dashboardWeight: 0.2
+dashboardState: incomplete
+dashboardAudit: 0
 ---
 
 # Architecture Diagrams
@@ -18,14 +19,14 @@ dashboardInterface: incorrect
 {{< /details >}}
 
 
-{{< svg src="/.assets/overview.dot.svg" title="Protocol Overview Diagram" >}}
+{{< svg src="diagrams/overview1/overview.dot.svg" title="Protocol Overview Diagram" >}}
 
 ## Protocol Flow Diagram
 
-{{< svg src="/.assets/full-deals-on-chain.mmd.svg" title="Deals on Chain" >}}
+{{< svg src="diagrams/sequence/full-deals-on-chain.mmd.svg" title="Deals on Chain" >}}
 
 ## Parameter Calculation Dependency Graph
 
 This is a diagram of the model for parameter calculation. This is made with [orient](https://github.com/filecoin-project/orient), our tool for modeling and solving for constraints.
 
-{{< svg src="/.assets/filecoin.dot.svg" title="Protocol Overview Diagram" >}}
+{{< svg src="diagrams/orient/filecoin.dot.svg" title="Protocol Overview Diagram" >}}

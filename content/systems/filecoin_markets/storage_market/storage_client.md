@@ -1,6 +1,10 @@
 ---
 title: Storage Client
 weight: 4
+dashboardWeight: 2
+dashboardState: incomplete
+dashboardAudit: 1
+dashboardTests: 0
 ---
 
 # Storage Client

@@ -1,6 +1,10 @@
 ---
 title: CID
 description: CIDs - Content IDentifiers
+dashboardWeight: 1
+dashboardState: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # CIDs - Content IDentifiers

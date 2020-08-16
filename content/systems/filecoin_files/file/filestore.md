@@ -1,5 +1,9 @@
 ---
 title: FileStore
+dashboardWeight: 1
+dashboardState: stable
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # FileStore - Local Storage for Files
