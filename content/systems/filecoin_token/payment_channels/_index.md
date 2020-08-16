@@ -74,7 +74,7 @@ type SignedVoucher struct {
 	SecretPreimage []byte
 	// (optional) Extra can be specified by `From` to add a verification method to the voucher
 	Extra *ModVerifyParams
-	// Specifies which lane the Voucher merges into (will be created if does not exist)
+	// Specifies which lane the Voucher is added to (will be created if does not exist)
 	Lane uint64
 	// Nonce is set by `From` to prevent redemption of stale vouchers on a lane
 	Nonce uint64
