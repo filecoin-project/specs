@@ -2,9 +2,10 @@
 title: Payment Channels
 weight: 2
 bookCollapseSection: true
-dashboardAudit: 1
-dashboardState: Stable
-dashboardInterface: wip
+dashboardWeight: 1
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Payment Channels

@@ -1,3 +1,4 @@
 ---
 title: Home
+type: single
 ---

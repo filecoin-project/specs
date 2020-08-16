@@ -1,5 +1,9 @@
 ---
 title: Storage Miner Actor
+dashboardWeight: 2
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Storage Miner Actor
@@ -7,8 +11,8 @@ title: Storage Miner Actor
 
 ## `StorageMinerActorState` implementation
 
-{{<embed src="/docs/actors/actors/builtin/storage_miner/storage_miner_actor_state.go"  lang="go" >}}
+{{<embed src="/modules/actors/builtin/miner/miner_state.go"  lang="go" >}}
 
 ## `StorageMinerActorCode` implementation
 
-{{<embed src="/docs/actors/actors/builtin/storage_miner/storage_miner_actor.go"  lang="go" >}}
+{{<embed src="/modules/actors/builtin/miner/miner_actor.go"  lang="go" >}}

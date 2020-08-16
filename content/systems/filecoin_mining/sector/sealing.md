@@ -1,5 +1,9 @@
 ---
 title: Sector Sealing
+dashboardWeight: 2
+dashboardState: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Sector Sealing

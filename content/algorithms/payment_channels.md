@@ -1,6 +1,10 @@
 ---
 title: "Payment Channels"
 weight: 4
+dashboardWeight: 1
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Payment Channels
@@ -32,7 +36,7 @@ Lane state can be easily tracked on-chain with a compact bitfield.
 
 In a situation where peers A and B  have several different payment channels between them, the scenario may frequently come up where A has multiple payment channel updates from B to apply. Submitting each of these individually would cost a noticeable amount in fees, and put excess unnecessary load on the chain. To remedy this, A can contact B and ask them for a single payment channel update for the combined value of all the updates they have (minus some fee to incent B to actually want to do this). This aggregated update would contain a list of the IDs of the other payment channels that it is superceding so that A cannot also cash out on the originals.
 
-# Payment Reconciliation
+## Payment Reconciliation
 
 The filecoin storage market will (likely) have many independent payments between the same parties. These payments will be secured through payment channels, set up initially on chain, but utilized almost entirely off-chain. The point at which they need to touch the chain is when miners wish to cash out their earnings. A naive solution to this problem would have miners perform one on-chain action per file stored for a particular client. This would not scale well. Instead, we need a system where the miner and client can have some additional off-chain communication and end up with the miner submitting only a single message to the chain.
 
