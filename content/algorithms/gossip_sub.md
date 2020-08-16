@@ -1,6 +1,10 @@
 ---
 title: "GossipSub"
 weight: 6
+dashboardWeight: 1.5
+dashboardState: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # GossipSub
@@ -10,7 +14,7 @@ Messages and block headers along side the message references are propagated usin
 
 Further more, every full node must implement and offer the bitswap protocol and provide all Cid Referenced objects, it knows of, through it. This allows any node to fetch missing pieces (e.g. `Message`) from any node it is connected to. However, the node should fan out these requests to multiple nodes and not bombard any single node with too many requests at a time. A node may implement throttling and DDoS protection to prevent such a bombardment.
 
-# Bitswap
+## Bitswap
 
 Run bitswap to fetch and serve data (such as blockdata and messages) to and from other filecoin nodes. This is used to fill in missing bits during block propagation, and also to fetch data during sync.
 

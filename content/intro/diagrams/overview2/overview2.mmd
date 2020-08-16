@@ -1,0 +1,71 @@
+graph TB
+
+
+  subgraph FilesAndData
+    Pos2
+    File
+    Piece
+    DataTransfer
+  end
+
+  subgraph FilecoinNode
+    Pos1
+
+    P2PNode
+    subgraph Repository
+      Config
+      IpldStore
+      KeyStore
+    end
+    Clock
+    FileStore
+  end
+
+
+  subgraph libraries
+    Pos0
+
+    subgraph multiformats
+      multihash
+      multiaddr
+    end
+    subgraph libp2p
+      subgraph libp2pCore
+        p2p.Node
+        p2p.PeerID
+        p2p.PeerInfo
+        p2p.Node --> p2p.PeerID
+        p2p.Node --> p2p.PeerInfo
+      end
+      subgraph libp2pProtocols
+        Gossipsub
+        BootstrapList
+      end
+    end
+    subgraph ipld
+      ipld.CID
+      ipld.Selector
+      ipld.GraphStore
+    end
+    subgraph ipfs
+      Bitswap
+      Graphsync
+      UnixFS
+      DagImports
+    end
+
+    Bitswap -.-> p2p.Node
+    Graphsync -.-> p2p.Node
+    Graphsync -.-> ipld.Selector
+    Gossipsub -.-> p2p.Node
+    BootstrapList -.-> p2p.Node
+    p2p.PeerID -.-> multihash
+    p2p.PeerInfo -.-> multiaddr
+    ipld.CID-.->multihash
+  end
+
+  P2PNode -.-> p2p.Node
+  IpldStore -.-> ipld.GraphStore
+
+  Pos2 --> Pos1
+  Pos1 --> Pos0

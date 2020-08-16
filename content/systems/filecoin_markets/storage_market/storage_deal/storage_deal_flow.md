@@ -1,6 +1,10 @@
 ---
 title: Deal Flow
 weight: 1
+dashboardWeight: 2
+dashboardState: incomplete
+dashboardAudit: 1
+dashboardTests: 0
 ---
 
 # Storage Deal Flow

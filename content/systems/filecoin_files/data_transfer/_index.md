@@ -1,9 +1,10 @@
 ---
 title: Data Transfer
 weight: 3
-dashboardAudit: 1
-dashboardState: permanent
-dashboardInterface: stable
+dashboardWeight: 1
+dashboardState: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Data Transfer in Filecoin

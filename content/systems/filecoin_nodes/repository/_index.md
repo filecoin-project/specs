@@ -2,6 +2,10 @@
 title: Repository
 weight: 2
 bookCollapseSection: true
+dashboardWeight: 1
+dashboardState: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Repository - Local Storage for Chain Data and Systems

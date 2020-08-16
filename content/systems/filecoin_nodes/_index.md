@@ -2,9 +2,10 @@
 title: Filecoin Nodes
 bookCollapseSection: true
 weight: 1
-dashboardAudit: 1
+dashboardWeight: 1
 dashboardState: incomplete
-dashboardInterface: stable
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Filecoin Nodes

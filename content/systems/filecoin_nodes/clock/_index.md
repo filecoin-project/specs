@@ -1,6 +1,10 @@
 ---
 title: Clock
 weight: 4
+dashboardWeight: 1
+dashboardState: stable
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Clock

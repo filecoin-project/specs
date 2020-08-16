@@ -1,0 +1,40 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0,viewport-fit=cover">
+<meta name="description" content="{{ default .Summary .Description }}">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+{{- $manifest := resources.Get "site.webmanifest" | resources.ExecuteAsTemplate "site.webmanifest" . }}
+<link rel="manifest" href="{{ $manifest.RelPermalink }}">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#0090ff">
+<meta name="msapplication-TileColor" content="#2b5797">
+<meta name="theme-color" content="#0090ff">
+
+{{- template "_internal/opengraph.html" . -}}
+
+<title>{{ partial "docs/title" . }} | {{ .Site.Title -}}</title>
+
+{{- range .Translations }}
+<link rel="alternate" hreflang="{{ .Language.Lang }}" href="{{ .Permalink }}" title="{{ partial "docs/title" . }}">
+{{ end -}}
+
+<!-- Theme stylesheet, you can customize scss by creating `assets/custom.scss` in your website -->
+{{- $styles := resources.Get "book.scss" | resources.ExecuteAsTemplate "book.scss" . | resources.ToCSS | resources.Minify | resources.Fingerprint }}
+<link rel="stylesheet" href="{{ $styles.RelPermalink }}" integrity="{{ $styles.Data.Integrity }}">
+
+{{- if .Site.Params.BookServiceWorker }}
+{{- $swJS := resources.Get "sw-register.js" | resources.ExecuteAsTemplate "sw.js" . | resources.Minify | resources.Fingerprint }}
+<script defer src="{{ $swJS.RelPermalink }}" integrity="{{ $swJS.Data.Integrity }}"></script>
+{{ end -}}
+
+{{- template "_internal/google_analytics_async.html" . -}}
+
+<!-- RSS -->
+{{- with .OutputFormats.Get "rss" -}}
+  {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
+{{ end -}}
+
+{{ "<!--" | safeHTML }}
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+{{ "-->" | safeHTML }}

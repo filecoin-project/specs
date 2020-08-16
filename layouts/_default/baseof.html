@@ -7,16 +7,17 @@
 </head>
 
 <body dir={{ .Site.Language.LanguageDirection }}>
-  <input type="checkbox" class="hidden" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
   <main class="container flex">
-    <header class="book-header">
-      {{ template "header" . }} <!-- Mobile layout header -->
-    </header>
     <aside class="book-menu">
       {{ template "menu" . }} <!-- Left menu Content -->
     </aside>
 
     <div class="book-page">
+      <header class="book-header">
+        {{ template "header" . }} <!-- Mobile layout header -->
+      </header>
 
       {{ partial "docs/inject/content-before" . }}
       {{ template "main" . }} <!-- Page Content -->
@@ -34,6 +35,12 @@
 
     {{ if default true (default .Site.Params.BookToC .Params.BookToC) }}
     <aside class="book-toc">
+      <div class="book-toc-toggles">
+        <label class="dark-mode-toggle-label" for="dark-mode-toggle">
+          <i class="gg-dark-mode"></i> DARK MODE
+        </label>
+        <button id="dark-mode-toggle" class="dark-mode-toggle toggle" type="button" aria-pressed="false"></button>
+      </div>
       {{ template "toc" . }} <!-- Table of Contents -->
     </aside>
     {{ end }}
@@ -52,7 +59,6 @@
   {{ partial "docs/header" . }}
 
   {{ if default true (default .Site.Params.BookToC .Params.BookToC) }}
-    <input type="checkbox" class="hidden" id="toc-control" />
     <aside class="hidden clearfix">
       {{ template "toc" . }}
     </aside>

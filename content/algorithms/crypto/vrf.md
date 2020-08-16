@@ -1,6 +1,10 @@
 ---
 title: "Verifiable Random Function"
 weight: 2
+dashboardWeight: 2
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Verifiable Random Function
