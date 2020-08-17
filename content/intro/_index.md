@@ -31,7 +31,7 @@ and other contract mechanisms recorded on the chain continue to be processed
 over time, without requiring further interaction from the original parties
 (such as the clients who requested the data storage).
 
-## Spec Status Overview
+## Spec Status
 
 Each section of the spec must be stable and audited before it is considered done. The state of each section is tracked below. 
 
@@ -39,7 +39,7 @@ Each section of the spec must be stable and audited before it is considered done
 - The **Theory Audit** column shows the date of the last theory audit with a link to the report.
 - The **Weight** column is used to highlight the relative criticality of a section against the others.
 
-### Legend
+### Spec Status Legend
 
 <table class="Dashboard"">
   <thead>
@@ -68,7 +68,7 @@ Each section of the spec must be stable and audited before it is considered done
   </tbody>
 </table>
 
-### Spec Status
+### Spec Status Overview
 
 {{<dashboard-spec>}}
 
@@ -79,8 +79,7 @@ This progress bar shows what percentage of the spec sections are considered stab
 {{<dashboard-progress>}}
 
 
-
-## Implementations Status
+### Implementations Status
 
 Known implementations of the filecoin spec are tracked below, with their current CI build status, their test coverage as reported by [codecov.io](https://codecov.io), and a link to their last security audit report where one exists.
 
