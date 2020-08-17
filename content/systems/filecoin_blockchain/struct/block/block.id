@@ -22,9 +22,10 @@ type BlockHeader struct {
     Epoch                  abi.ChainEpoch
     Timestamp              clock.UnixTime
     Ticket
+    BeaconEntries          [BeaconEntry]
 
     Miner                  addr.Address
-    ElectionPoStOutput     ElectionPoStVerifyInfo
+    ElectionProof          &ElectionProof
 
     // Fork Signal bitfield with bits used to advertise support for
     // proposed forks and reset if fork is executed.
@@ -37,8 +38,14 @@ type BlockHeader struct {
     // Signatures
     Signature              filcrypto.Signature
 
+	ForkSignaling          uint64
+    
     //	SerializeSigned()            []byte
     //	ComputeUnsignedFingerprint() []
+}
+
+type ElectionProof struct {
+    VRFProof [byte]
 }
 
 type TxMeta struct {
@@ -51,6 +58,13 @@ type Block struct {
     Header        BlockHeader
     BLSMessages   [msg.UnsignedMessage]
     SECPMessages  [msg.SignedMessage]
+}
+
+type BeaconEntry struct {
+    // Drand Round for the given randomness
+    Round    uint64
+    // Drand Signature for the given Randomness
+    Data     [byte]
 }
 
 // HACK: All of the below was duplicated from posting.id

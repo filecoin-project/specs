@@ -1,7 +1,5 @@
-<script src="https://unpkg.com/tablesort@5.2.1/dist/tablesort.min.js"></script>
-<script src="https://unpkg.com/tablesort@5.2.1/dist/sorts/tablesort.number.min.js"></script>
 {{- with .Site.GetPage "/" -}}
-<table id="dashboard" class="sort Dashboard">
+<table id="dashboard" class="sort Dashboard tablesort">
     <thead>
         <tr>
             <th>Section</th>
@@ -15,9 +13,6 @@
     </tbody>
 </table>
 {{- end -}}
-<script>
-    new Tablesort(document.getElementById('dashboard')); 
-</script>
 
 <!-- Children Template -->
 {{ define "dashboard-section-children" }}
@@ -43,7 +38,7 @@
 <tr>
     <!-- Section -->
     <td class="Dashboard-section">{{- delimit (split .Level "") "." }} 
-        <a title="{{.Page.Title}}" href="{{.Page.Permalink}}">{{.Page.Title}}</a>
+        {{ template "portable-link" (dict "Destination" .Page.File.Path "Text" .Page.Title "Page" .Page) }}
     </td>
 
     <!-- Weight -->

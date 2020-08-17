@@ -2,6 +2,7 @@
 title: Proof-of-Replication
 bookCollapseSection: true
 weight: 2
+bookhidden: true
 ---
 
 # Proof-of-Replication

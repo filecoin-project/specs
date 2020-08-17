@@ -28,7 +28,3 @@ Via the distributed implementation of the Filecoin VM, storage deals
 and other contract mechanisms recorded on the chain continue to be processed
 over time, without requiring further interaction from the original parties
 (such as the clients who requested the data storage).
-
-# Status Overview
-
-{{< dashboard name="Introduction" >}}

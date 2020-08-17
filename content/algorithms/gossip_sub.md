@@ -17,6 +17,7 @@ GossipSub is a gossip-based pubsub protocol that is utilising two types of links
 1. _Mesh links_ build the GossipSub mesh. Each node connects to the mesh through a number of connections, `D`, which indicates the degree of the network. The degree, `D`, is accompanied by two thresholds, `D_low` and `D_high` that act as boundaries. When the number of connections increases above `D_high`, the node _prunes_ some of the connections, while when it decreases below `D_low` the node _grafts_ new connections. Both of these happen in order to keep the degree in the area `<D_low, D_high>`.
 2. _Gossip links_ augment the message propagation performance of the protocol. Gossiping allows the network to operate on a low degree and therefore, keep traffic under certain levels.
 
+
 ## Control Messages
 
 The protocol defines five control messages and a heartbeat:

@@ -1,9 +1,10 @@
 ---
-title: Fuhon (cpp-filecoin) 
+title: Fuhon
 weight: 4
 implAudit: 0
 implSpecCompliance: 0
-implRepo: https://github.com/filecoin-project/cpp-filecoin
+implRepos: 
+  - { lang: c++, repo: https://github.com/filecoin-project/cpp-filecoin }
 ---
 
 # Fuhon (cpp-filecoin)
