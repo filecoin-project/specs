@@ -10,7 +10,7 @@ dashboardTests: 0
 
 # Message Pool
 ---
-The Message Pool, or `mpool` or `mempool` is a Memory Pool of _Transaction_ Messages in the Filecoin blockchain system. It acts as the interface between Filecoin nodes (of any type) and the peer-to-peer network of other nodes used for off-chain message propagation. The message pool is used by nodes to maintain a set of messages to transmit to the Filecoin VM (for "on-chain" execution).
+The Message Pool, or `mpool` or `mempool` is a Pool of _Transaction_ Messages in the Filecoin protocol. It acts as the interface between Filecoin nodes and the peer-to-peer network of other nodes used for off-chain message propagation. The message pool is used by nodes to maintain a set of messages to transmit to the Filecoin VM (for "on-chain" execution).
 
 In order for a transaction message to end up in the blockchain it first has to be in the message pool. In reality, at least in the Lotus implementation of Filecoin, there is no central pool of messages stored somewhere. Instead, the message pool is an abstraction and is realised as a list of messages kept by every node in the network. Therefore, when a node puts a new message in the message pool, this message is propagated to the rest of the network using libp2p's pubsub protocol, GossipSub. Nodes need to subscribe to the corresponding pubsub topic in order to receive messages.
 
@@ -20,6 +20,5 @@ Message propagation using GossipSub does not happen immediately and therefore, t
 {{< embed src="message_pool_subsystem.id" lang="go" >}}
 
 The message pool should have a maximum size defined to avoid DoS attacks, where nodes are spammed and run out of memory. The recommended size for the message pool is 5000 Transaction messages.
-
 
 
