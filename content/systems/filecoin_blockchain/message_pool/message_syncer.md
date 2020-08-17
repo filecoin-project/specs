@@ -12,7 +12,7 @@ dashboardTests: 0
 
 The message pool has to interface with the libp2p pubsub [GossipSub](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub) protocol. This is because transaction messages are propagated over [GossipSub](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub) _topics_. Every serialised `SignedMessage` is announced (see [Message](message)) in the corresponding topic by any node participating in the network.
 
-There are two main pubsub topics related to transaction and block messages: i) the `/fil/msgs/` topic that carries transaction messages and, ii) the `/fil/blocks/` topic that carries block messages. The `/fil/msgs/` topic is linked to the `mpool`. The process is as follows:
+There are two main pubsub topics related to transactions and blocks: i) the `/fil/msgs/` topic that carries transactions and, ii) the `/fil/blocks/` topic that carries blocks. The `/fil/msgs/` topic is linked to the `mpool`. The process is as follows:
 1. When a client wants to carry out a transaction in the Filecoin network, they publish a transaction message in the `/fil/msgs/` topic.
 2. The message propagates to all other nodes in the network using GossipSub and eventually ends up in the `mpool` of all miners.
 3. Depending on cryptoeconomic rules, some miner will eventually pick the transaction message from the `mpool` (together with other transaction messages) and include it in a block.
