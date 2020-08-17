@@ -73,7 +73,7 @@ type Message struct {
 
 	// Optional method to invoke on receiver, zero for a plain value transfer.
 	Method abi.MethodNum
-	//Serialized parameters to the method (if method is non-zero).
+	//Serialized parameters to the method.
 	Params []byte
 }
 ```
