@@ -39,16 +39,16 @@ enableGitInfo = true
 
 [menu]
 # [[menu.before]]
-[[menu.after]]
-  name = "Github"
-  url = "https://github.com/filecoin-project/specs"
-  weight = 10
+# [[menu.after]]
+#   name = "Github"
+#   url = "https://github.com/filecoin-project/specs"
+#   weight = 10
 
 [params]
   # (Optional, default true) Controls table of contents visibility on right side of pages.
   # Start and end levels can be controlled with markup.tableOfContents setting.
   # You can also specify this parameter per page in front matter.
-  BookToC = true
+  BookToC = false
 
   # (Optional, default none) Set the path to a logo for the book. If the logo is
   # /static/logo.png then the path would be logo.png
@@ -80,7 +80,7 @@ enableGitInfo = true
   # (Optional, default true) Enables search function with flexsearch,
   # Index is built on fly, therefore it might slowdown your website.
   # Configuration for indexing can be adjusted in i18n folder per language.
-  BookSearch = true
+  BookSearch = false
 
   # (Optional, default true) Enables comments template on pages
   # By default partals/docs/comments.html includes Disqus template

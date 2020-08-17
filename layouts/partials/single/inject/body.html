@@ -1,0 +1,7 @@
+{{ $js := resources.Get "main.js" | js.Build "main.js"}}
+<script defer src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
+
+{{ $js := resources.Get "katex.js" | js.Build "katex.js"}}
+<script defer src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
+
+<pwa-update swpath="{{ "/sw.js" | relURL }}"></pwa-update>
