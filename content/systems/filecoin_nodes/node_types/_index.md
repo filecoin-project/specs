@@ -10,10 +10,6 @@ dashboardTests: 0
 
 # Node Types
 
-Two types of nodes: full node and miner node. Full (validation) node is a repository, interacts with miner. Full nodes read the chain. Full node needs to reach consensus and do chain sync.
-
-Miner creates nodes. A different repository. Does full validation, extends the chain.
-
 Fundamentally, there are only two major node types in the Filecoin network and this is how the Lotus implementation is realising _node types_ in the strict sense of the word. These are:
 
 The **Full Node:** this is the chain validation or chain verifier node. In essense, this type of node is a repository that interacts with one or more miner node(s). A Full Node must synchronise the chain (ChainSync) when it first joins the network. From then on, the node must read the chain and reach consensus state.
