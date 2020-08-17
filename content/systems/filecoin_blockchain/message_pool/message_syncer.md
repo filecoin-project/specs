@@ -2,7 +2,7 @@
 title: Message Propagation
 weight: 1
 dashboardWeight: 2
-dashboardState: incomplete
+dashboardState: stable
 dashboardAudit: 0
 dashboardTests: 0
 ---
@@ -10,7 +10,7 @@ dashboardTests: 0
 # Message Propagation
 ---
 
-The message pool has to interface with the libp2p pubsub [GossipSub](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub) protocol. This is because transaction messages are propagated over [GossipSub](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub) _topics_. Every serialised `SignedMessage` is announced (see [Message](message)) in the corresponding topic by any node participating in the network.
+The message pool has to interface with the libp2p pubsub [GossipSub](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub) protocol. This is because transaction messages are propagated over [GossipSub](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub) the corresponding `/fil/msgs/` _topic_. Every [Message](message) is announced in the corresponding `/fil/msgs/` topic by any node participating in the network.
 
 There are two main pubsub topics related to transactions and blocks: i) the `/fil/msgs/` topic that carries transactions and, ii) the `/fil/blocks/` topic that carries blocks. The `/fil/msgs/` topic is linked to the `mpool`. The process is as follows:
 1. When a client wants to carry out a transaction in the Filecoin network, they publish a transaction message in the `/fil/msgs/` topic.
@@ -24,7 +24,7 @@ The updated, hardened version of the GossipSub protocol includes a number of att
 
 NOTES:
 - _Fund Checking:_ It is important to note that the `mpool` logic is not checking whether there are enough funds in the account of the transaction message issuer. This is checked by the miner before including a transaction message in a block.
-- _Message Syncing:_ Transaction messages are sorted in the `mpool` of miners as they arrive according to cryptoeconomic rules followed by the miner and in order for the miner to compose the next block.
+- _Message Sorting:_ Transaction messages are sorted in the `mpool` of miners as they arrive according to cryptoeconomic rules followed by the miner and in order for the miner to compose the next block.
 
 
 {{<hint warning>}}
