@@ -27,10 +27,10 @@ rewarded according to each message's gas price and consumption, forming a market
 ## Message syntax validation
 
 A syntactically invalid message must not be transmitted, retained in a message pool, or
-included in a block. Even if an invalid message ends up being sent (e.g., by a malicious player), the libp2p GossipSub propagation protocol will reject the message on the receiving end.
+included in a block. If an invalid message is received, it should be dropped and not propagated further.
 
 When transmitted individually (before inclusion in a block), a message is packaged as
-`SignedMessage`, regardless of signature scheme used.
+`SignedMessage`, regardless of signature scheme used. A valid signed message has a total serialized size no greater than `message.MessageMaxSize`.
 
 ```go
 type SignedMessage struct {
@@ -44,7 +44,7 @@ A syntactically valid `UnsignedMessage`:
 - has a well-formed, non-empty `To` address,
 - has a well-formed, non-empty `From` address, 
 - has `Value` no less than zero and no greater than the total token supply (`2e9 * 1e18`), and
-- has a non-negative `MethodNum`, or zero if the message is for a plain transfer of funds between two actors,
+- has a non-negative `MethodNum`,
 - has non-empty `Params` only if `MethodNum` is zero,
 - has non-negative `GasPrice`,
 - has `GasLimit` that is at least equal to the gas consumption associated with the message's serialized bytes,
@@ -78,70 +78,9 @@ type Message struct {
 }
 ```
 
-There should be several functions able to extract information from the `Message struct`, such as the sender and recipient addresses, the value to be transferred, the required funds to execute the message and others as appropriate.
+There should be several functions able to extract information from the `Message struct`, such as the sender and recipient addresses, the value to be transferred, the required funds to execute the message and the CID of the message.
 
-```go
-func (m *Message) Caller() address.Address {
-	return m.From
-}
-
-func (m *Message) Receiver() address.Address {
-	return m.To
-}
-
-func (m *Message) ValueReceived() abi.TokenAmount {
-	return m.Value
-}
-
-func (m *Message) RequiredFunds() BigInt {
-	return BigAdd(
-		m.Value,
-		BigMul(m.GasPrice, NewInt(uint64(m.GasLimit))),
-	)
-}
-```
-
-Given that Transaction Messages should eventually be included in a Block and added to the blockchain, the validity of the message should be checked.
-
-
-```go
-func (m *Message) ValidForBlockInclusion(minGas int64) error {
-	if m.Version != 0 {
-		return xerrors.New("'Version' unsupported")
-	}
-
-	if m.To == address.Undef {
-		return xerrors.New("'To' address cannot be empty")
-	}
-
-	if m.From == address.Undef {
-		return xerrors.New("'From' address cannot be empty")
-	}
-
-	if m.Value.LessThan(big.Zero()) {
-		return xerrors.New("'Value' field cannot be negative")
-	}
-
-	if m.Value.GreaterThan(TotalFilecoinInt) {
-		return xerrors.New("'Value' field cannot be greater than total filecoin supply")
-	}
-
-	if m.GasPrice.LessThan(big.Zero()) {
-		return xerrors.New("'GasPrice' field cannot be negative")
-	}
-
-	if m.GasLimit > build.BlockGasLimit {
-		return xerrors.New("'GasLimit' field cannot be greater than a block's gas limit")
-	}
-
-	// since prices might vary with time, this is technically semantic validation
-	if m.GasLimit < minGas {
-		return xerrors.New("'GasLimit' field cannot be less than the cost of storing a message on chain")
-	}
-
-	return nil
-}
-```
+Given that Transaction Messages should eventually be included in a Block and added to the blockchain, the validity of the message should be checked with regard to the sender and the receiver of the message, the value (which should be non-negative and always smaller than the circulating supply), the gas price (which again should be non-negative) and the `BlockGasLimit` which should not be greater than the block's gas limit.
 
 
 ## Message semantic validation
