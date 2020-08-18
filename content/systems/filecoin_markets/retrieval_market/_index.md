@@ -14,15 +14,15 @@ The `retrieval market` refers to the process of negotiating deals for a provider
 The main components are as follows:
 
 - A payment channel actor (see {{<link payment_channel_actor>}} for details)
+- A protocol for making queries
 - A Data Transfer subsystem and protocol used to query retrieval miners and initiate retrieval deals
 - A chain-based content routing interface
+- A client module to query retrieval miners and initiate deals for retrieval
 - A provider module to respond to queries and deal proposals
 
 The retrieval market operate by piggybacking on the Data Transfer system and Graphsync to handle transfer and verification, to support arbitrary selectors, and to reduce round trips. The retrieval market can support sending arbitrary payload CIDs & selectors within a piece. 
 
 The Data Transfer System is augmented accordingly to support pausing/resuming and sending intermediate vouchers to facilitate this.
-
-Additional features, which are yet to be specified include mechanisms for timeouts and cancellations.
 
 
 ## Deal Flow in the Retrieval Market
@@ -50,7 +50,7 @@ The Filecoin Retrieval Market protocol for proposing and accepting a deal works 
 Some extra notes worth making with regard to the above process are as follows:
 
 - The payment channel is created by the client.
-- The payment channel is not created until the provider accepts the deal.
+- The payment channel is created when the provider accepts the deal, unless an open payment channel already exists between the given client and provider.
 - The vouchers are also created by the client and (a reference/identifier to these vouchers is) sent to the provider.
 - The payment indicated in the voucher is not taken out of the payment channel funds upon creation and exchange of vouchers between the client and the provider.
 - In order for money to be transferred to the provider's payment channel side, the provider has to *redeem* the voucher
