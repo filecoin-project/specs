@@ -2,9 +2,10 @@
 title: Storage Mining
 bookCollapseSection: true
 weight: 6
-dashboardAudit: 1
-dashboardState: permanent
-dashboardInterface: stable
+dashboardWeight: 2
+dashboardState: wip
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Storage Mining System - proving storage for producing blocks
@@ -25,6 +26,3 @@ important that the **protocol constraints** are satisfied. The **protocol constr
 spelled out in clear detail (an unclear, unmentioned constraint is a "spec error").  It is up
 to implementers who deviate from the algorithms presented here to ensure their modifications
 satisfy those constraints, especially those relating to protocol security.
-
-## Status Overview
-{{< dashboard-level open="true">}}

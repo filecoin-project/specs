@@ -1,6 +1,10 @@
 ---
 title: Network Interface
 weight: 3
+dashboardWeight: 1
+dashboardState: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Interface

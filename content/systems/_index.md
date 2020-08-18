@@ -1,8 +1,12 @@
 ---
 title: Systems
 description: Filecoin Systems
-bookCollapseSection: true
 weight: 2
+
+dashboardWeight: 1
+dashboardState: wip
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Systems

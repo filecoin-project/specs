@@ -1,6 +1,10 @@
 ---
 title: "Retrieval Provider (Miner)"
 weight: 4
+dashboardWeight: 2
+dashboardState: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Retrieval Provider (Miner)

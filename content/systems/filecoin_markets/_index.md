@@ -3,9 +3,10 @@ title: "Market"
 description: "Markets in Filecoin"
 bookCollapseSection: true
 weight: 7
-dashboardAudit: 1
-dashboardState: wip
-dashboardInterface: stable
+dashboardWeight: 2
+dashboardState: incomplete
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Markets
@@ -15,7 +16,3 @@ The Filecoin project is a protocol, a platform, and a marketplace. There are two
 
 Even though most of the market actions happen off the blockchain, there are on-chain invariants that create economic structure for network success and allow for positive emergent behavior. You can read more about the
 relationship between on chain deals and storage power in [Storage Power Consensus](storage_power_consensus).
-
-## Status Overview
-
-{{< dashboard-level name="Market" open="true">}}

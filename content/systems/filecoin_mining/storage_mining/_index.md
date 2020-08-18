@@ -2,6 +2,10 @@
 title: Storage Miner
 bookCollapseSection: true
 weight: 1
+dashboardWeight: 2
+dashboardState: incorrect
+dashboardAudit: 0
+dashboardTests: 0
 ---
 
 # Storage Miner
@@ -11,13 +15,13 @@ weight: 1
 
 The Filecoin Storage Mining Subsystem ensures a storage miner can effectively commit storage to the Filecoin protocol in order to both:
 
-- Participate in the Filecoin {{<link storage_market>}} by taking on client data and participating in storage deals.
-- Participate in Filecoin {{<link storage_power_consensus>}}, verifying and generating blocks to grow the Filecoin blockchain and earning block rewards and fees for doing so.
+- Participate in the Filecoin [Storage Market](storage_market) by taking on client data and participating in storage deals.
+- Participate in Filecoin [Storage Power Consensus](storage_power_consensus), verifying and generating blocks to grow the Filecoin blockchain and earning block rewards and fees for doing so.
 
 The above involves a number of steps to putting on and maintaining online storage, such as:
 
 - Committing new storage (see Sealing and PoRep)
-- Continuously proving storage (see {{<link "election_post">}})
+- Continuously proving storage (see [Election PoSt](election_post))
 - Declaring storage faults and recovering from them.
 
 ### Sector Types
@@ -26,7 +30,7 @@ There are two types of sectors, Regular Sectors with storage deals in them and C
 
 ### Sector States
 
-When managing their storage {{<link "sector">}} as part of Filecoin mining, storage providers will account for where in the {{<link "mining_cycle">}} their sectors are. For instance, has a sector been committed? Does it need a new PoSt? Most of these operations happen as part of cycles of chain epochs called `Proving Period`s each of which yield high confidence that every miner in the chain has proven their power (see {{<link "election_post">}}).
+When managing their storage [Sector](sector) as part of Filecoin mining, storage providers will account for where in the [Mining Cycle](mining_cycle) their sectors are. For instance, has a sector been committed? Does it need a new PoSt? Most of these operations happen as part of cycles of chain epochs called `Proving Period`s each of which yield high confidence that every miner in the chain has proven their power (see [Election PoSt](election_post)).
 
 There are three states that an individual sector can be in:
 

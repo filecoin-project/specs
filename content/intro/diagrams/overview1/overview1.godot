@@ -1,0 +1,145 @@
+
+type SubsysGroup Graph {
+  color=lightcyan1
+}
+
+type Subsystem Subgraph {
+  color=lightgrey
+}
+
+type Component Node {
+  shape=box
+}
+
+type Libp2pProto Node {
+  shape=Msquare
+}
+
+type Actor Node {
+  shape=doubleoctagon
+}
+
+MarketsGroup SubsysGroup {
+  StorageMarket
+  RetrievalMarket
+}
+
+MiningGroup SubsysGroup {
+  StorageMining
+  SectorStorage
+}
+
+BlockchainGroup SubsysGroup {
+  Blockchain
+  MessagePool
+  StoragePowerConsensus
+  FilecoinVM
+}
+
+NetGroup SubsysGroup {
+  NetInterface
+  Libp2p
+}
+
+Payments Subsystem {
+  PaymentChannelActor Actor
+  Wallet Component
+}
+
+Repository Subsystem {
+  IPLDDagStore Component [label="IPLD DagStore"]
+  KeyStore
+  Config
+  Disk1 [label="Disk1 (S)\nChain Storage"]
+
+  IPLDDagStore -> Disk1
+  KeyStore -> Disk1
+  Config -> Disk1
+}
+
+Clock Subsystem {
+  CronActor Actor
+  RoundClock Component
+  WallClock Component
+  NTP Component
+
+  WallClock -> NTP
+}
+
+Libp2pCore Subsystem {
+  Identify Libp2pProto
+  Libp2pNode Component [label="p2p.Node"]
+  Switch Component
+  Conn Component
+  yamux Component
+  mplex Component
+  QUIC Component
+  TLS Component [label="TLS 1.3"]
+
+  Identify -> Libp2pNode
+  Libp2pNode -> Switch
+  Switch -> Conn
+  Conn -> yamux
+  Conn -> mplex
+  Conn -> QUIC
+  yamux -> TLS
+  mplex -> TLS
+}
+
+Libp2pMore Subsystem {
+  Bitswap Libp2pProto
+  Graphsync Libp2pProto
+  Gossipsub Libp2pProto
+}
+
+DataTransfers Subsystem {
+  TransferScheduler Component [label="Transfer\nScheduler"]
+  DataTransferProto Libp2pProto [label="data\ntransfer\protocol\n(unnamed)"]
+  Disk3 Component [label="Disk3 (M)\nClient-Miner Transfers"]
+}
+
+Blockchain Subsystem {
+  StateForest Component
+  ChainManager Component
+  BlockProducer Component
+  BlockReceiver Component
+  BlockPropagator Component
+
+  StateForest -> ChainManager
+  ChainManager -> BlockProducer
+  ChainManager -> BlockReceiver
+  ChainManager -> BlockPropagator
+}
+
+StoragePowerConsensus Subsystem {
+  StoragePowerActor Actor
+  ExpectedConsensus Component
+}
+
+MessagePool Subsystem {
+  MessagePropagator Component
+  MessageStorage Component
+  MessageReceiver Component
+}
+
+FilecoinVM Subsystem {
+  Messages Component
+  VMInterpreter Component
+  InitActor Actor
+  CronActor Actor
+  AccountActor Actor
+}
+
+StorageMining Subsystem {
+  StorageMinerActor Actor
+  PostGenerator Component
+  PledgeProver Component
+  SealProver Component
+}
+
+SectorStorage Subsystem {
+  SectorSealer Component
+  SectorStore Component
+  SectorBuilder Component
+  Disk2 Component [label="Disk2 (L)\nSector Storag"]
+}

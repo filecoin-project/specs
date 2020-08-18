@@ -1,9 +1,10 @@
 ---
 title: Message
 weight: 4
+dashboardWeight: 1.5
+dashboardState: incomplete
 dashboardAudit: 0
-dashboardState: stable
-dashboardInterface: stable
+dashboardTests: 0
 ---
 
 # VM Message - Actor Method Invocation
