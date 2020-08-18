@@ -2,7 +2,7 @@
 title: "Retrieval Peer Resolver"
 weight: 1
 dashboardWeight: 2
-dashboardState: incomplete
+dashboardState: stable
 dashboardAudit: 0
 dashboardTests: 0
 ---

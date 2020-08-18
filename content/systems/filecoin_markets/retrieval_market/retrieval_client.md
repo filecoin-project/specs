@@ -2,7 +2,7 @@
 title: "Retrieval Client"
 weight: 3
 dashboardWeight: 2
-dashboardState: incomplete
+dashboardState: stable
 dashboardAudit: 0
 dashboardTests: 0
 ---

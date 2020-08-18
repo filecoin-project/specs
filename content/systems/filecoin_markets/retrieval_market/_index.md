@@ -3,7 +3,7 @@ title: Retrieval Market
 bookCollapseSection: true
 weight: 2
 dashboardWeight: 2
-dashboardState: incomplete
+dashboardState: stable
 dashboardAudit: 0
 dashboardTests: 0
 ---
