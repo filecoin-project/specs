@@ -21,4 +21,4 @@ The Retrieval Client Depends On The Following Dependencies
 
 ## API
 
-{{<embed src="retrieval_client.id" lang="go" >}}
+{{<embed src="/modules/go-fil-markets/retrievalmarket/client.go"  lang="go">}}

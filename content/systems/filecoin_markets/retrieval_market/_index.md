@@ -17,7 +17,7 @@ The `retrieval market` refers to the process of negotiating deals for a provider
 
 The main components are as follows:
 
-- A payment channel actor (see {{<link payment_channel_actor>}} for details)
+- A [payment channel actor](payment_channel_actor)
 - A protocol for making queries
 - A Data Transfer subsystem and protocol used to query retrieval miners and initiate retrieval deals
 - A chain-based content routing interface
@@ -84,4 +84,4 @@ The retrieval market works based on the Payload CID. The PayloadCID is the hash 
 
 ## Common Data Types
 
-{{<embed src="types.id" lang="go" >}}
+{{<embed src="/modules/go-fil-markets/retrievalmarket/types.go"  lang="go">}}
