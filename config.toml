@@ -106,12 +106,13 @@ enableGitInfo = true
     [[module.imports.mounts]]
     source = "actors"
     target = "content/modules/actors"
-    
-[module]
   [[module.imports]]
-    path = "github.com/alex-shpak/hugo-book"
-  [[module.imports]]
-    path = "github.com/filecoin-project/"
+    path = "github.com/filecoin-project/go-fil-markets"
     [[module.imports.mounts]]
-    source = "go-fil-markets"
+    source = "."
     target = "content/modules/go-fil-markets"    
+  [[module.imports]]
+    path = "github.com/filecoin-project/lotus"
+    [[module.imports.mounts]]
+    source = "."
+    target = "content/modules/lotus"    
