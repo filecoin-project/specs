@@ -2,7 +2,7 @@
 title: Message
 weight: 4
 dashboardWeight: 1.5
-dashboardState: incomplete
+dashboardState: stable
 dashboardAudit: 0
 dashboardTests: 0
 ---
@@ -10,7 +10,7 @@ dashboardTests: 0
 # VM Message - Actor Method Invocation
 
 A message is the unit of communication between two actors, and thus the primitive cause of changes
-in state. When referring to a Message in the context of Filecoin and unless otherwise defined, we refer to a _Transaction Message_. A message combines:
+in state. A message combines:
 
 - a token amount to be transferred from the sender to the receiver, and
 - a method with parameters to be invoked on the receiver (optional/where applicable).
@@ -44,7 +44,6 @@ A syntactically valid `UnsignedMessage`:
 - has a well-formed, non-empty `To` address,
 - has a well-formed, non-empty `From` address, 
 - has `Value` no less than zero and no greater than the total token supply (`2e9 * 1e18`), and
-- has a non-negative `MethodNum`,
 - has non-empty `Params` only if `MethodNum` is zero,
 - has non-negative `GasPrice`,
 - has `GasLimit` that is at least equal to the gas consumption associated with the message's serialized bytes,
@@ -61,7 +60,7 @@ type Message struct {
 	// Address of the sending actor.
 	From address.Address
 
-	Nonce uint64
+	CallSeqNum uint64
 
 	// Value to transfer from sender's to receiver's balance.
 	Value BigInt
