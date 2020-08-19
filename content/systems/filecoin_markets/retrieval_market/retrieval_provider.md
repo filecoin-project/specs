@@ -2,7 +2,7 @@
 title: "Retrieval Provider (Miner)"
 weight: 4
 dashboardWeight: 2
-dashboardState: incomplete
+dashboardState: stable
 dashboardAudit: 0
 dashboardTests: 0
 ---
