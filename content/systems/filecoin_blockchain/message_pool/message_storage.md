@@ -2,7 +2,7 @@
 title: Message Storage
 weight: 2
 dashboardWeight: 2
-dashboardState: incorrect
+dashboardState: stable
 dashboardAudit: 0
 dashboardTests: 0
 ---
@@ -10,9 +10,4 @@ dashboardTests: 0
 # Message Storage
 ---
 
-{{< hint warning >}}
-TODO:
-
-- give sample algorithm for miner message selection in block production (to avoid dups)
-- give sample algorithm for message storage caching/purging policies.
-{{< /hint >}}
+As mentioned earlier, there is no central pool where messages are included. Instead, every node must have allocated memory for incoming transaction messages.
