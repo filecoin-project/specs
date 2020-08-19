@@ -116,3 +116,6 @@ The reason for this "no message semantic validation" policy is that the state th
 be applied to cannot be known before the message is executed _as part of a tipset_. A block producer
 does not know whether another block will precede it in the tipset, thus altering the state to
 which the block's messages will apply from the declared parent state.
+
+
+{{<embed src="/modules/lotus/chain/types/message.go"  lang="go">}}
