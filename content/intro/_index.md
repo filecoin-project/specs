@@ -41,7 +41,7 @@ Each section of the spec must be stable and audited before it is considered done
 
 ### Spec Status Legend
 
-<table class="Dashboard"">
+<table class="Dashboard">
   <thead>
     <tr>
       <th>Spec state</th>
@@ -69,8 +69,7 @@ Each section of the spec must be stable and audited before it is considered done
 </table>
 
 ### Spec Status Overview
-
-{{<dashboard-spec>}}
+<div id="test-dash"></div>
 
 ### Spec Stabilization Progess
 

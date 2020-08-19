@@ -15,6 +15,7 @@
   $level is the corrected heading number given the depth of the file in the tree.
 */}}
 {{- $level := add $pathSize (sub .Level 1) -}}
+{{- $originalLevel := default 1 .Level -}}
 {{- $anchor := "" -}}
 
 {{/* 
@@ -34,7 +35,7 @@
   - headings get numbered by css; changing the nesting requires updating numbered.scss.
   - heading text is grabbed by toc.js as the ToC link text
 */}}
-<h{{ $level }} id="{{ $anchor | safeURL }}" class="level-{{ $level }}">
+<h{{ $level }} id="{{ $anchor | safeURL }}" class="level-{{ $level }}" data-page="{{if eq $originalLevel 1 }}true{{end}}" data-dashboard-weight="{{.Page.Params.dashboardWeight}}" data-dashboard-state="{{.Page.Params.dashboardState}}" data-dashboard-audit="{{.Page.Params.dashboardAudit}}">
   <a href="#{{ $anchor | safeURL }}">{{ .Text | safeHTML }}</a>
 </h{{ $level }}>
 <div class="section-badges">
