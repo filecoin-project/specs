@@ -2,8 +2,8 @@
 title: Storage Client
 weight: 4
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 1
+dashboardState: stable
+dashboardAudit: 0
 dashboardTests: 0
 ---
 
@@ -14,6 +14,6 @@ The `StorageClient` is a module that discovers miners, determines their asks, an
 
 Recall that a single participant can be a `StorageClient`, `StorageProvider`, or both at the same time.
 
-{{< embed src="storage_client.id" lang="go" >}}
+{{<embed src="/modules/go-fil-markets/storagemarket/client.go"  lang="go">}}
 
-<!-- # Storage Client State Machine -->
+<!-- # Storage Provider State Machine -->

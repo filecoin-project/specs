@@ -2,8 +2,8 @@
 title: Deal States
 weight: 2
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 1
+dashboardState: incompleete
+dashboardAudit: 0
 dashboardTests: 0
 ---
 
@@ -38,3 +38,5 @@ Given deal states and their transitions, the following are the relationships bet
 - `Deal Collateral`: no storage deal collateral will be slashed for `NewDeclaredFaults` and `NewDetectedFaults` but instead some pledge collateral will be slashed given these faults' impact on consensus power. In the event of `NewTerminatedFaults`, all storage deal collateral and some pledge collateral will be slashed. Provider and client storage deal collaterals will be returned when a deal or a sector has expired. If a sector recovers from `Failing` within the `MAX_CONSECUTIVE_FAULTS` threshold, deals in that sector are still considered active. However, miners may need to top up pledge collateral when they try to `RecoverFaults` given the earlier slashing.
 
 {{<svg src="diagrams/deal-payment.mmd.svg" title="Deal States Sequence Diagram" >}}
+
+{{<embed src="/modules/go-fil-markets/storagemarket/dealstatus.go"  lang="go">}}

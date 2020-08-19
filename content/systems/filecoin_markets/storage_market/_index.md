@@ -3,8 +3,8 @@ title: Storage Market
 weight: 1
 bookCollapseSection: true
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 1
+dashboardState: stable
+dashboardAudit: 0
 dashboardTests: 0
 ---
 
@@ -14,11 +14,6 @@ dashboardTests: 0
 Storage Market subsystem is the data entry point into the network. Storage miners only earn power from data stored in a storage deal and all deals live on the Filecoin network. Specific deal negotiation process happens off chain, clients and miners enter a storage deal after an agreement has been reached and post storage deals on the Filecoin network to earn block rewards and get paid for storing the data in the storage deal. A deal is only valid when it is posted on chain with signatures from both parties and at the time of posting, there are sufficient balances for both parties locked up to honor the deal in terms of deal price and deal collateral.
 
 ## Terminology
-
-<!-- info|warning|danger -->
-{{< hint info >}}
-Some terminology is off
-{{< /hint >}}
 
 - **StorageClient** - The party that wants to make a deal to store data
 - **StorageProvider** - The party that will store the data in exchange for payment. A storage miner.
@@ -115,10 +110,10 @@ Data submitted to the Filecoin network go through several transformations before
 
 ## Data Types
 
-The following data types unique to the Storage Market:
+The following data types are unique to the Storage Market:
 
-{{<embed src="storage_market.id" lang="go" >}}
-{{<embed src="storage_market.go" lang="go" >}}
+{{<embed src="/modules/go-fil-markets/storagemarket/types.go"  lang="go">}}
+
 
 Details about `StorageDealProposal` and `StorageDeal` (which are used in the Storage Market and elsewhere) specifically can be found in [Storage Deal](storage_deal).
 

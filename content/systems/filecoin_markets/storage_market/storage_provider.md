@@ -2,8 +2,8 @@
 title: "Storage Provider"
 weight: 3
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 1
+dashboardState: stable
+dashboardAudit: 0
 dashboardTests: 0
 ---
 
@@ -16,6 +16,7 @@ It is worth highlighting that a single participant can be a `StorageClient`, `St
 
 Because most of what a Storage Provider does is respond to actions initiated by a `StorageClient`, most of its public facing methods relate to getting current status on deals, as opposed to initiating new actions. However, a user of the `StorageProvider` module can update the current Ask for the provider.
 
-{{< embed src="storage_provider.id" lang="go" >}}
+{{<embed src="/modules/go-fil-markets/storagemarket/provider.go"  lang="go">}}
+
 
 <!-- # Storage Provider State Machine -->
