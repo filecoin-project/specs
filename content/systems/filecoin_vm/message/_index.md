@@ -44,7 +44,6 @@ A syntactically valid `UnsignedMessage`:
 - has a well-formed, non-empty `To` address,
 - has a well-formed, non-empty `From` address, 
 - has `Value` no less than zero and no greater than the total token supply (`2e9 * 1e18`), and
-- has non-empty `Params` only if `MethodNum` is zero,
 - has non-negative `GasPrice`,
 - has `GasLimit` that is at least equal to the gas consumption associated with the message's serialized bytes,
 - has `GasLimit` that is no greater than the block gas limit network parameter.
@@ -52,8 +51,8 @@ A syntactically valid `UnsignedMessage`:
 
 ```go
 type Message struct {
-	// Version of this message
-	Version int64
+	// Version of this message (has to be non-negative)
+	Version uint64
 
 	// Address of the receiving actor.
 	To   address.Address
