@@ -130,6 +130,7 @@ The "Block Quality" is an integer that is used for weight and block reward calcu
 
 #### High level algorithm
 
+- Verify that the eligibility requirements (defined below) are met.
 - Get the percentage of power at block `ElectionPowerTableLookback`
   - Get the power of the miner at block `ElectionPowerTableLookback`
   - Get the total network power at block `ElectionPowerTableLookback`
@@ -142,6 +143,15 @@ The "Block Quality" is an integer that is used for weight and block reward calcu
   - The probability of winning one block is `1-P[X=0]`, thus if `h_n` is less than `1-P[X=0]`, the miner wins at least one block.
   - Similarly if `h_n` is less than `1-P[X=0]-P[X=1]` we have at least two blocks and so on.
   - While it is not permitted for a single miner to publish two distinct blocks, in this case, the miner produces a single block which earns two block rewards
+
+#### Eligibility requirements
+A miner needs to meet three requirements in order to be eligible to create a block.
+These three requirements are specific to the consensus protocol (that we present in the next section) and are defined as follows:
+
+- The miner is not marked as consensus faulty (we will define what this means in the next section, see [consensus fault](#consensusfaults)).
+- Their initial pledge is above the minimal threshold.
+- They are not in debt.
+
   
 #### Explanations - Poisson Sortition
 
@@ -297,6 +307,7 @@ GetWinCount(proofDigest, minerID,epoch) {
 
 In order to verify that the leader election proof in a block is correct, miners perform the following checks:
 
+- Verify that the miner meets the eligibility requirements criteria defined above.
 - Verify that the randomness is correct by checking `GetRandomness(epoch)`
 - Use this randomness to verify the VRF correctness `Verify_VRF(vrfout,beacon,public_key)`
 - Verify ElectionProof.WinCount > 0 by checking `GetWinCount(vrfout, miner,epoch)`
@@ -373,7 +384,7 @@ The probability that two Tipsets with different blocks would have all the same V
 
 EC enforces a version of soft finality whereby all miners at round N will reject all blocks that fork off prior to round N-F. For illustrative purposes, we can take F to be 900. While strictly speaking EC is a probabilistically final protocol, choosing such an F simplifies miner implementations and enforces a macroeconomically-enforced finality at no cost to liveness in the chain.
 
-## Consensus Faults
+<a name="consensusfaults"></a>## Consensus Faults
 
 Due to the existence of potential forks in EC, a miner can try to unduly influence protocol fairness. This means they may choose to disregard the protocol in order to gain an advantage over the power they should normally get from their storage on the network. A miner should be slashed if they are provably deviating from the honest protocol.
 
@@ -382,6 +393,7 @@ This is detectable when a given miner submits two blocks that satisfy any of the
 - both blocks were mined by the same miner
 - both blocks have valid signatures
 - first block's epoch is smaller or equal than second block
+
 
 ### Types of faults
 
@@ -408,3 +420,5 @@ A single consensus fault results into:
 A node that detects and report a consensus fault is called "slasher", any user in Filecoin can be a slasher. They can report consensus faults by calling the `ReportConsensusFault` on the `StorageMinerActor` of the faulty miner. The slasher is rewarded with a portion of the offending miner's [Pledge Collateral](storage_power_actor#pledge-collateral) for notifying the network of the consensu fault.
 
 The reward give to the slasher is a function of some initial share (`SLASHER_INITIAL_SHARE`) and growth rate (`SLASHER_SHARE_GROWTH_RATE`) and it has a maximum `maxReporterShare`. Slasher's share increases exponentially as epoch elapses since the block when the fault is committed (see `RewardForConsensusSlashReport`). Only the first slasher gets their share of the pledge collateral and the remaining pledge collateral is burned. The longer a slasher waits, the higher the likelihood that the slashed collateral will be claimed by another slasher.
+
+Whenever a consensus fault is detected, the miner that committed the fault is marked as consensus faulty and is not eligible to create a block anymore (as specified in our leader election section).
