@@ -2,8 +2,8 @@
 title: PieceStore
 
 dashboardWeight: 1.5
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: reliable
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 
