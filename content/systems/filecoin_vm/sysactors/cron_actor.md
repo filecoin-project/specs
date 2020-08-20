@@ -10,8 +10,8 @@ dashboardTests: 0
 # CronActor
 ---
 
-The `CronActor` is responsible for scheduling jobs for several operations that need to take place between actors. The `CronActor` provides services to other actors related to task scheduling, such as `OnEpochTickEnd` call the `InitActor` to create a new actor, contact a miner, or call the `RewardActor` to update parameters. This is primarily realised in the form of sending messages to other registered actors at the end of every epoch. The `CronActor` interfaces with the Storage Power Actor on `OnEpochTickEnd` to check:
-- `CronEventPreCommitExpiry`: if the miner has submitted their `ProveCommit` proofs (given enough time for the miner to complete the proofs of replication and finalize the commit phase). If the miner has completed their commit phase on time, they can claim the `PreCommiDeposit` back. If not, the `PreCommitDeposit` is lost and no power is added for this miner to the power table.
+The `CronActor` is responsible for scheduling jobs for several operations that need to take place between actors. The `CronActor` can provide services to other actors related to task scheduling, such as `OnEpochTickEnd` call the `InitActor` to create a new actor, contact the `StoragePowerActor` to check if proofs have been submitted, or call the `RewardActor` to update parameters. This is primarily realised in the form of sending messages to other registered actors at the end of every epoch. The `CronActor` interfaces with the Storage Power Actor on `OnEpochTickEnd` to check:
+- `CronEventPreCommitExpiry`: if the miner has submitted their `ProveCommit` proofs.
 - `CronEventProvingPeriod`: the proving period identified,
 - `CronEventWorkerKeyChange`: if a miner has submitted a worker key address change.
 
