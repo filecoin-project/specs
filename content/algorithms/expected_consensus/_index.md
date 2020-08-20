@@ -149,7 +149,7 @@ A miner needs to meet three requirements in order to be eligible to create a blo
 These three requirements are specific to the consensus protocol (that we present in the next section) and are defined as follows:
 
 - The miner is not marked as consensus faulty (we will define what this means in the next section, see [consensus fault](#consensusfaults)).
-- Their initial pledge is above the minimal threshold.
+- Their initial pledge is above the minimal threshold (see [pledge collateral](storage_power_actor#pledge-collateral)).
 - They are not in debt.
 
   
@@ -412,8 +412,8 @@ Specifically, this can be proven with a "witness" block, that is by submitting b
 
 ### Penalization for faults
 A single consensus fault results into:
-- miner termination and removal of power from the power table,
-- loss of all pledge collateral (which includes the initial pledge and blocks rewards yet to be vested)
+- miner suspension for 24 hours (the miner is not allowed to create block during that time)
+- loss of consensus fault fee
 
 ### Detection and Reporting
 
