@@ -412,7 +412,7 @@ Specifically, this can be proven with a "witness" block, that is by submitting b
 
 ### Penalization for faults
 A single consensus fault results into:
-- miner suspension for 24 hours (the miner is not allowed to create block during that time)
+- miner suspension for finality blocks (the miner is not allowed to create block during that time)
 - loss of consensus fault fee
 
 ### Detection and Reporting
