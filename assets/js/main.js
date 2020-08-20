@@ -3,13 +3,14 @@ import { initToc } from './toc.js'
 import panzoom from 'panzoom'
 import tablesort from 'tablesort'
 import Gumshoe from 'gumshoejs'
-
+import { buildTocModel } from './content-model'
+import { buildDashboard } from './dashboard-spec'
+import { renderKatex } from "./katex";
 // Note: the tablesort lib is not ESM friendly, and the sorts expect `Tablesort` to be available on the global
 window.Tablesort = tablesort
 require('tablesort/dist/sorts/tablesort.number.min.js')
 
 function initPanZoom () {
-  console.log('init panzoom')
   var elements = document.querySelectorAll(".zoomable")
   elements.forEach(function (el) {
     panzoom(el.querySelector('*:first-child'), {
@@ -20,7 +21,6 @@ function initPanZoom () {
 }
 
 function initTableSort () {
-  console.log('init tablesort')
   var elements = document.querySelectorAll(".tablesort")
   elements.forEach(function (el) {
     tablesort(el);
@@ -36,7 +36,6 @@ function initTocDepthSlider () {
   })
 
   function handleSliderChange (depth) {
-    console.log('handleSliderChange', depth)
     for (let i = 0; i < 6; i++) {
       toc.querySelectorAll(`.depth-${i}`).forEach(el => {
         if (i < depth) {
@@ -52,7 +51,6 @@ function initTocDepthSlider () {
 }
 
 function initTocScrollSpy () {
-  console.log('initTocScrollSpy')
   var spy = new Gumshoe('.toc a', {
     nested: true,
     nestedClass: 'active-parent'
@@ -60,9 +58,23 @@ function initTocScrollSpy () {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  initToc({tocSelector:'.toc', contentSelector: '.markdown'})
+  const model = buildTocModel('.markdown')
+  initToc({tocSelector:'.toc', model })
+  buildDashboard('#test-dash', model)
   initTocDepthSlider()
   initTocScrollSpy()
   initPanZoom()
   initTableSort()
+
+  // load katex when math-mode page intersect with the viewport
+  let observer = new IntersectionObserver((entries, observer) => { 
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          renderKatex(entry.target)
+          observer.unobserve(entry.target);
+        }
+      });
+  });
+  document.querySelectorAll('.math-mode').forEach(img => { observer.observe(img) });
+
 });
