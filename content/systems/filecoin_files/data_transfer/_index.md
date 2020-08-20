@@ -45,7 +45,7 @@ There are two basic phases to any data transfer:
 2. Transfer: once the negotiation phase is complete, the data is actually transferred. The default protocol used to do the transfer is Graphsync.
 
 Note that the Negotiation and Transfer stages can occur in separate round trips,
-or potentially the same round trip, where the requesting party implicitly agrees by sending the request, and the responding party can agree and immediately send or receive data. Whether the process is taking place in a single or multiple round-trips depends in part on whether the request is a push request (storage deal) or a pull request (retrieval deal).
+or potentially the same round trip, where the requesting party implicitly agrees by sending the request, and the responding party can agree and immediately send or receive data. Whether the process is taking place in a single or multiple round-trips depends in part on whether the request is a push request (storage deal) or a pull request (retrieval deal), and on whether the data transfer negotiation process is able to piggy back on the underlying transport mechanism. 
 
 In particular, the data transfer module does the decoding of the message i.e., gets the deal out of the voucher and delivers it to the request validators to check if the deal included is one that the recipient has agreed to before. This is primarily the case for push requests (storage deals). In the case of pull requests (retrieval deals) the request includes the proposal for the retrieval deal itself. In this case, everything is done at once as a single round-trip.
 
