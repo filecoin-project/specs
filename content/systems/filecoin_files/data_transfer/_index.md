@@ -66,7 +66,7 @@ It is worth noting that in the case of retrieval the provider can accept the dea
 7. The responder completes receiving data, and notifies any listeners.
 
 The push flow is ideal for storage deals, where the client initiates the data transfer straightaway
-once it verifies the deal is signed and on chain.
+once the provider indicates their intent to accept and publish the client's deal proposal.
 
 
 ## Pull Flow - Single Round Trip
