@@ -116,3 +116,9 @@ enableGitInfo = true
     [[module.imports.mounts]]
     source = "."
     target = "content/modules/lotus"    
+  [[module.imports]]
+    path = "https://github.com/filecoin-project/go-data-transfer"
+    [[module.imports.mounts]]
+    source = "."
+    target = "content/modules/go-data-transfer"    
+  
