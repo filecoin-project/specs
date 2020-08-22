@@ -2,8 +2,8 @@
 title: Wallet
 weight: 1
 dashboardWeight: 1
-dashboardState: incorrect
-dashboardAudit: 0
+dashboardState: missing
+dashboardAudit: missing
 dashboardTests: 0
 ---
 

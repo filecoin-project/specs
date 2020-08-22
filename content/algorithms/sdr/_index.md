@@ -8,7 +8,7 @@ math-mode: true
 
 dashboardWeight: 2
 dashboardState: stable
-dashboardAudit: 1
+dashboardAudit: stable
 dashboardTests: 0
 ---
 

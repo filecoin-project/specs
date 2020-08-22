@@ -2,8 +2,8 @@
 title: Clock
 weight: 4
 dashboardWeight: 1
-dashboardState: stable
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: missing
 dashboardTests: 0
 ---
 

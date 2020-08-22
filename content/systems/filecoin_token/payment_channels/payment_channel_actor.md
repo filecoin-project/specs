@@ -2,7 +2,7 @@
 title: Payment Channel Actor
 dashboardWeight: 1
 dashboardState: incorrect
-dashboardAudit: 0
+dashboardAudit: missing
 dashboardTests: 0
 ---
 

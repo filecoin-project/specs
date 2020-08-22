@@ -3,7 +3,7 @@ title: Chain Manager
 weight: 4
 dashboardWeight: 1.5
 dashboardState: incorrect
-dashboardAudit: 0
+dashboardAudit: missing
 dashboardTests: 0
 ---
 

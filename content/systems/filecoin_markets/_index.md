@@ -4,8 +4,8 @@ description: "Markets in Filecoin"
 bookCollapseSection: true
 weight: 7
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: missing
 dashboardTests: 0
 ---
 

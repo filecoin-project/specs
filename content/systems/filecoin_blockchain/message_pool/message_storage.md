@@ -3,7 +3,7 @@ title: Message Storage
 weight: 2
 dashboardWeight: 2
 dashboardState: stable
-dashboardAudit: 0
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 
