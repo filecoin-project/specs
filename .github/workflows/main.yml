@@ -21,7 +21,7 @@ jobs:
 
       # Pin the built site to ipfs-cluster, output the cid as `steps.ipfs.outputs.cid`
       # see: https://github.com/ipfs-shipyard/ipfs-github-action
-      - uses: ipfs-shipyard/ipfs-github-action@v2.0.0
+      - uses: hugomrdias/ipfs-github-action@debug-pin
         id: ipfs
         with:
           path_to_add: public
