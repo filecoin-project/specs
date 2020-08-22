@@ -5,7 +5,7 @@ dashboardWeight: 1.5
 dashboardState: wip
 dashboardAudit: complete
 dashboardTests: 0
-addURL: https://gateway.ipfs.io/ipfs/QmWR376YyuyLewZDzaTHXGZr7quL5LB13HRFnNdSJ3CyXu/Least%20Authority%20-%20Gossipsub%20v1.1%20Final%20Audit%20Report%20%28v2%29.pdf
+dashboardAuditURL: https://gateway.ipfs.io/ipfs/QmWR376YyuyLewZDzaTHXGZr7quL5LB13HRFnNdSJ3CyXu/Least%20Authority%20-%20Gossipsub%20v1.1%20Final%20Audit%20Report%20%28v2%29.pdf
 ---
 
 # GossipSub
