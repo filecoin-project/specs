@@ -5,7 +5,7 @@ dashboardWeight: 1.5
 dashboardState: incorrect
 dashboardAudit: complete
 dashboardTests: 0
-auditURL: https://github.com/filecoin-project/rust-fil-proofs/blob/master/audits/Sigma-Prime-Protocol-Labs-Filecoin-Proofs-Security-Review-v2.1.pdf
+dashboardAuditURL: https://github.com/filecoin-project/rust-fil-proofs/blob/master/audits/Sigma-Prime-Protocol-Labs-Filecoin-Proofs-Security-Review-v2.1.pdf
 
 ---
 # Filecoin Storage Proofs
