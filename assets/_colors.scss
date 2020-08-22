@@ -1,15 +1,17 @@
 // Colors
-.text-incorrect {color: #ff0010;}
-.text-wip {color: #ff6f00;}
-.text-incomplete {color: #ffef00;}
+.text-missing {color: #ff0010;}
+.text-incorrect {color: #ff6f00;}
+.text-wip {color: #ffef00;}
+.text-reliable {color: #0090ff;}
 .text-stable {color: #90ff00;}
 .text-transparent { color: transparent;}
 .text-black { color: black !important;}
 
 .bg-na { background-color: #6c8293;}
-.bg-incorrect {background-color: #ff0010;}
-.bg-wip {background-color: #ff6f00;}
-.bg-incomplete {background-color: #ffef00;}
+.bg-missing { background-color: #ff0010; }
+.bg-incorrect {background-color: #ff6f00;}
+.bg-wip {background-color: #ffef00;}
+.bg-reliable {background-color: #0090ff; }
 .bg-stable {background-color: #90ff00;}
 .bg-transparent { background-color: transparent;}
 .bg-black { background-color: black;}

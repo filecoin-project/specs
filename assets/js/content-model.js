@@ -14,6 +14,7 @@ function buildTocModel (contentSelector) {
     let parents = [{tagName: 'H0', children: model}]
     let prevSibling = null
     for (let el of headingList) {
+      console.log("buildTocModel -> el.dataset", el.dataset)
       let node = {
         id: el.id,
         tagName: el.tagName,
@@ -21,6 +22,7 @@ function buildTocModel (contentSelector) {
         page: Boolean(el.dataset.page),
         dashboardWeight: el.dataset.dashboardWeight,
         dashboardAudit: el.dataset.dashboardAudit,
+        dashboardAuditURL: el.dataset.dashboardAuditUrl,
         dashboardState: el.dataset.dashboardState,
         children: []
       }
