@@ -1,6 +1,8 @@
+<header>
+  {{ partial "docs/brand" . }}
+  {{ partial "docs/search" . }}
+</header>
 <nav>
-    {{ partial "docs/brand" . }}
-    
     {{ partial "docs/inject/menu-before" . }}
     {{ partial "docs/menu-hugo" .Site.Menus.before }}
     

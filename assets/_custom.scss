@@ -35,6 +35,10 @@
         }
     }
 }
+.section-intro h1 {
+    // make the search box line up with the first heading.
+    margin-top:37px;
+}
 .section-badges {
     float: right;
     margin-top:-2.5rem;
@@ -111,6 +115,9 @@
     height: auto;
 }
 // search
+.book-search {
+    margin-bottom:0;
+}
 #book-search-results {
     width: 100%;
     padding: 1px .5rem;
@@ -126,6 +133,18 @@
 
 #book-search-input {
     outline: none;
+}
+
+// Aloglia doc search tweaks
+.book-menu > header {
+    position:fixed;
+    z-index: 10;
+    padding: 20px 0 0 14px;
+}
+#book-search-input {
+    width: 244px;
+    border-radius: 0;
+    border-bottom: solid 1px #eee;
 }
 
 // Tweaks
@@ -153,18 +172,17 @@ blockquote {
 }
 .book-menu nav {
     width: 20rem;
-    padding: 1rem 0.2rem 4rem 1rem;
+    padding: 0rem 0.2rem 0rem 1rem;
     position: fixed;
-    top: 0;
+    top: 111px;
     bottom: 0;
-    overflow-x: initial;
-    overflow-y: hidden;
 }
 
 .book-menu nav .toc {
     overflow-x: hidden;
     overflow-y: auto;
     height: 100%;
+    padding-top:8px;
 }
 
 .markdown>h1:first-of-type {
@@ -179,6 +197,7 @@ blockquote {
     line-height: 16px;
     box-decoration-break: clone;
 }
+
 .book-brand img {
     height: 40px;
     width: auto;
