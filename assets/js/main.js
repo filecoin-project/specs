@@ -60,7 +60,7 @@ function initTocScrollSpy () {
 window.addEventListener('DOMContentLoaded', () => {
   const model = buildTocModel('.markdown')
   initToc({tocSelector:'.toc', model })
-  buildDashboard('#test-dash', model)
+  buildDashboard('#dashboard-container', model)
   initTocDepthSlider()
   initTocScrollSpy()
   initPanZoom()
