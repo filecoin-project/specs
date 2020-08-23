@@ -84,4 +84,4 @@ The retrieval market works based on the Payload CID. The PayloadCID is the hash 
 
 ## Common Data Types
 
-{{<embed src="/modules/go-fil-markets/retrievalmarket/types.go"  lang="go">}}
+{{<embed src="/modules/retrievalmarket/types.go"  lang="go">}}

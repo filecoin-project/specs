@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "serve": "hugo server --bind=0.0.0.0 --disableFastRender",
-    "build": "hugo --gc --minify"
+    "build": "hugo --gc --minify",
+    "clean-modules": "hugo mod clean && hugo mod tidy"
   },
   "author": "",
   "license": "MIT",
