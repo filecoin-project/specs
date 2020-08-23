@@ -1,7 +1,8 @@
 .toc {
   overflow-y: auto;
   > ol {
-    overflow: hidden;
+    height: 90%;
+    overflow: auto;
     position: relative;
     > li {
       font-weight: 500;
