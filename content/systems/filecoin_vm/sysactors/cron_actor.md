@@ -10,4 +10,4 @@ dashboardTests: 0
 # CronActor
 ---
 
-{{<embed src="/modules/actors/builtin/cron/cron_actor.go"  lang="go">}}
+{{<embed src="/externals/specs-actors/actors/builtin/cron/cron_actor.go"  lang="go">}}

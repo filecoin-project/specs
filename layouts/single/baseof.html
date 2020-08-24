@@ -63,8 +63,12 @@
 {{ define "main" }}
   <div class="markdown">
     {{- $pages := where .Pages "Params.bookhidden" "ne" true -}}
-    {{ range sort $pages "Weight" "asc" }}
+    {{- $pages2 := where $pages "Type" "ne" "externals" -}}
+    {{ range sort $pages2 "Weight" "asc" }}
       {{- $pathParts := split .Page.File.Path "/" -}}
+      <script>
+        console.log('{{- .Page -}}', '{{ .Page.Type }}')
+      </script>
       <section class="section-{{ index $pathParts 0}}">
       {{ .Content }}
       {{- template "mainChildren" (dict "Section" . ) -}}

@@ -22,4 +22,4 @@ The Retrieval Provider depends on the following dependencies
 
 ## API
 
-{{<embed src="/modules/go-fil-markets/retrievalmarket/provider.go"  lang="go">}}
+{{<embed src="/externals/go-fil-markets/retrievalmarket/provider.go"  lang="go">}}

@@ -42,9 +42,11 @@ You can find examples in the `config.toml`
   [[module.imports]]
     path = "github.com/filecoin-project/specs-actors"
     [[module.imports.mounts]]
-    source = "actors"
-    target = "content/modules/actors"
+    source = "."
+    target = "content/externals/specs-actors"
 ```
+> `target` should **ALWAYS** use the folder `content/externals`
+
 This makes files from external repos available for Hugo rendering and allows for linking to up-to-date files that are directly pulled from other repositories.
 
 The configuration above gives the following information:
@@ -56,33 +58,9 @@ The configuration above gives the following information:
 Example: if you want to link/embed to the file `xyz.go` that lives in `https://github.com/filecoin-project/specs-actors/actors/xyz-folder/xyz.go`, from within a markdown file then with the above configuration the `src` for shortcodes or markdown image syntax would be:
 
 ```
-{{<embed src="/modules/actors/xyz-folder/xyz.go"  lang="go">}}
+{{<embed src="/externals/specs-actors/actors/xyz-folder/xyz.go"  lang="go">}}
 ```
 > The first foward slash is important it means the path is relative to the content folder.
-
-#### Do not include everything from a repo !
-When using Hugo modules its easy to just include everything from an external module. Like this:
-```toml
-[module]
-  [[module.imports]]
-    path = "github.com/filecoin-project/specs-actors"
-    [[module.imports.mounts]]
-    source = "." # this mounts the full file structure
-    target = "content/modules/actors"
-```
-The problem is that all these files will be included in the final Hugo build and markdown, html, etc files will be processed by Hugo build system and this is NOT good.
-So the solution is to be a bit more specific and only mount what you really need using globs like `*.go`. There's no problem making multiple mounts in fact its **recommended**.
-```toml
-[module]
-  [[module.imports]]
-    path = "github.com/filecoin-project/specs-actors"
-    [[module.imports.mounts]]
-    source = "actors/*.go"
-    target = "content/modules/actors-actor"
-    [[module.imports.mounts]]
-    source = "support/vm/*.jpg"
-    target = "content/modules/actors-support-vm"
-```
 
 These modules can be updated with 
 

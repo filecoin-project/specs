@@ -117,4 +117,4 @@ does not know whether another block will precede it in the tipset, thus altering
 which the block's messages will apply from the declared parent state.
 
 
-{{<embed src="/modules/lotus/chain/types/message.go"  lang="go">}}
+{{<embed src="/externals/lotus/chain/types/message.go"  lang="go">}}

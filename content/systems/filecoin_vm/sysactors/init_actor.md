@@ -10,4 +10,4 @@ dashboardTests: 0
 # InitActor
 ---
 
-{{<embed src="/modules/actors/builtin/init/init_actor.go" lang="go">}}
+{{<embed src="/externals/specs-actors/actors/builtin/init/init_actor.go" lang="go">}}
