@@ -16,6 +16,9 @@ jobs:
         with:
           node-version: '12'
       
+      # get lotus deps...
+      - run: apt install bzr
+
       - run: npm install
       - run: npm run build
 
