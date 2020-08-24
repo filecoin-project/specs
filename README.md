@@ -183,6 +183,8 @@ dashboardWeight: 2
 dashboardState: stable
 <!-- This is used in the dashboard to describe if the theory of the page has been audited, options are "missing", "wip", "stable" or "n/a" -->
 dashboardAudit: wip
+<!-- When dashboardAudit is stable we should have a report url -->
+dashboardAuditURL: https://url.to.the.report
 <!-- This is used in the dashboard to describe if the page content has compliance tests, options are 0 or numbers of tests -->
 dashboardTests: 0
 ```
