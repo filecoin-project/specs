@@ -1,8 +1,6 @@
 ---
 title: Fuhon
 weight: 4
-implAudit: 0
-implSpecCompliance: 0
 implRepos: 
   - { lang: c++, repo: https://github.com/filecoin-project/cpp-filecoin }
 ---
