@@ -26,6 +26,7 @@ const humanize = (input) => {
 
 const stateToNumber = (s) => {
   switch (s) {
+    case 'done':
     case 'stable':
       return 1
     case 'reliable':
@@ -59,7 +60,11 @@ function buildDashboard(selector, model) {
       <td class="Dashboard-section">${i.number} <a href="#${i.id}">${i.text}</a></td>
       <td>${i.dashboardWeight}</td>
       <td data-sort="${stateToNumber(i.dashboardState)}" class="text-black bg-na bg-${i.dashboardState}">${humanize(i.dashboardState)}</td>
-      <td data-sort="${stateToNumber(i.dashboardAudit)}" class="text- bg-na bg-${i.dashboardAudit}">${humanize(i.dashboardAudit)} ${i.dashboardAuditURL ? html`<a href="${i.dashboardAuditURL}" title="Audit Report" target="_blank" rel="noopener noreferrer"><i class="gg-external gg-s-half"></i></a>`: ''} </td>
+      <td data-sort="${stateToNumber(i.dashboardAudit)}" class="text-black bg-na bg-${i.dashboardAudit}">
+        ${i.dashboardAuditURL
+          ? html`<a href="${i.dashboardAuditURL}" title="Read the audit report" target="_blank" rel="noopener noreferrer" class="text-black">${i.dashboardAuditDate}<i class="gg-external gg-s-half"></i></a>`
+          : humanize(i.dashboardAudit) } 
+      </td>
     </tr>
     `: '')}
   </tbody>

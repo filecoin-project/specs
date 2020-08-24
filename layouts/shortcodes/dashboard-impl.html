@@ -39,12 +39,12 @@
                 {{ $color = "bg-incomplete"}}
             {{ end }}
             {{ if gt $cov 70 }}
-                {{ $color = "bg-stable"}}
+                {{ $color = "bg-reliable"}}
             {{ end }}
             <tr>
                 <td style="text-align:left"><a title="{{ $repoName }}" href="{{ $repoUrl }}">{{ $repoName }}</a></td>
                 <td>{{ $repoLang }}</td>
-                <td class="text-black {{ if eq $data.commit.ci_passed  true }}bg-stable{{ else if eq $data.commit.ci_passed false }}bg-incorrect {{ else }}bg-na{{end}}">
+                <td class="text-black {{ if eq $data.commit.ci_passed  true }}bg-reliable{{ else if eq $data.commit.ci_passed false }}bg-incorrect {{ else }}bg-na{{end}}">
                     {{ if eq $data.commit.ci_passed  true }}Passed{{ else if eq $data.commit.ci_passed false }}Failed{{ else }}Unknown{{ end }}
                 </td>
                 <td class="text-black {{ $color }}">
