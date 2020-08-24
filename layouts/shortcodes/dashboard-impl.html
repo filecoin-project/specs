@@ -35,9 +35,6 @@
             {{ if gt $cov 20 }}
                 {{ $color = "bg-wip"}}
             {{ end }}
-            {{ if gt $cov 45 }}
-                {{ $color = "bg-incomplete"}}
-            {{ end }}
             {{ if gt $cov 70 }}
                 {{ $color = "bg-reliable"}}
             {{ end }}
