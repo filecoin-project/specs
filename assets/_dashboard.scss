@@ -1,8 +1,13 @@
+#dashboard-container {
+    height: 90vh; 
+    overflow: auto
+}
 table.Dashboard {
     display: table;
     table-layout: fixed;
     width: 100%;
     font-size: 12px;
+    margin: 0;
 }
 
 table.Dashboard {
@@ -21,7 +26,6 @@ table.Dashboard {
 }
 
 .Dashboard-section {
-    // max-width:250px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

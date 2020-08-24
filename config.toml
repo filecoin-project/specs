@@ -1,5 +1,6 @@
 # baseURL = '/'
 title = 'Filecoin Spec'
+ignoreFiles= ["externals"]
 # theme = 'book'
 canonifyurls = false
 relativeURLs = true
@@ -104,21 +105,15 @@ enableGitInfo = true
   [[module.imports]]
     path = "github.com/filecoin-project/specs-actors"
     [[module.imports.mounts]]
-    source = "actors"
-    target = "content/modules/actors"
+    source = "."
+    target = "content/externals/specs-actors"
   [[module.imports]]
     path = "github.com/filecoin-project/go-fil-markets"
     [[module.imports.mounts]]
     source = "."
-    target = "content/modules/go-fil-markets"    
+    target = "content/externals/go-fil-markets"  
   [[module.imports]]
     path = "github.com/filecoin-project/lotus"
     [[module.imports.mounts]]
     source = "."
-    target = "content/modules/lotus"    
-  [[module.imports]]
-    path = "github.com/filecoin-project/go-data-transfer"
-    [[module.imports.mounts]]
-    source = "."
-    target = "content/modules/go-data-transfer"    
-  
+    target = "content/externals/lotus" 

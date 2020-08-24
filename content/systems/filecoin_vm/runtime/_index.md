@@ -23,7 +23,7 @@ A syntactically valid receipt has:
 
 ## `vm/runtime` interface
 
-{{<embed src="/modules/actors/runtime/runtime.go" lang="go" >}}
+{{<embed src="/externals/specs-actors/actors/runtime/runtime.go" lang="go" >}}
 
 ## `vm/runtime` implementation
 
@@ -35,4 +35,4 @@ A syntactically valid receipt has:
 
 ## Exit codes
 
-{{<embed src="/modules/actors/runtime/exitcode/common.go" lang="go" >}}
+{{<embed src="/externals/specs-actors/actors/runtime/exitcode/common.go" lang="go" >}}
