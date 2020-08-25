@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Expected Consensus
----
 
 TODO: remove stale .id/.go files
 

@@ -362,7 +362,6 @@ $$
 {{</plain>}}
 
 # Math mode
----
 
 ## SDR Spec
 

@@ -7,7 +7,6 @@ dashboardTests: 0
 ---
 
 # Sector Sealing
----
 
 {{<embed src="sealing.id" lang="go" >}}
 

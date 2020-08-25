@@ -9,7 +9,6 @@ dashboardTests: 0
 ---
 
 # Storage Deals
----
 
 There are two types of deals in Filecoin markets, storage deals and retrieval deals. Storage deals are recorded on the blockchain and enforced by the protocol. Retrieval deals are off chain and enabled by micropayment channel by transacting parties (see [Retrieval Market](retrieval_market) for more information). 
 

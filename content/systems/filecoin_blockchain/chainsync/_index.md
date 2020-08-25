@@ -9,7 +9,6 @@ dashboardTests: 0
 ---
 
 # ChainSync - synchronizing the Blockchain
----
 
 ## What is blockchain synchronization?
 

@@ -7,7 +7,6 @@ dashboardTests: 0
 ---
 
 # Storage Miner Actor
----
 
 ## `StorageMinerActorState` implementation
 

@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Faults
----
 
 There are two main categories of faults in the Filecoin network. 
 

@@ -9,7 +9,6 @@ implRepos:
 ---
 
 # Lotus
----
 
 Lotus is an implementation of the Filecoin Distributed Storage Network. Lotus is written in Go and it is designed to be modular and interoperable with other implementations of Filecoin.
 

@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Examples
----
 
 There are many kinds of Filecoin Nodes ...
 

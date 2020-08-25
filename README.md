@@ -85,7 +85,7 @@ hugo mod get github.com/filecoin-project/specs-actors@v0.7.2
 ```
 
 ## Page Header
-The first heading should be `# Page Title` with `---` like below and should refer to the overall title of the document.
+The first heading should be an atx style heading `# Head` and should refer to the overall title of the document.
 
 ```md
 ---
@@ -93,7 +93,6 @@ title: Storage Power Actor
 ---
 
 # Storage Power Actor
----
 
 ## Header for a section in this document
 Some text

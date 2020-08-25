@@ -7,7 +7,6 @@ dashboardAudit: n/a
 ---
 
 # Implementing Systems
----
 
 ## System Requirements
 

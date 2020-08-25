@@ -8,6 +8,5 @@ dashboardTests: 0
 ---
 
 # InitActor
----
 
 {{<embed src="/externals/specs-actors/actors/builtin/init/init_actor.go" lang="go">}}

@@ -7,7 +7,6 @@ dashboardTests: 0
 ---
 
 # Storage Mining Cycle
----
 
 Block miners should constantly be performing Proofs of SpaceTime using [Election PoSt](election_post), and checking the outputted partial tickets to run [Leader Election](expected_consensus#secret-leader-election) and determine whether they can propose a block at each epoch. Epochs are currently set to take around X seconds, in order to account for election PoSt and network propagation around the world. The details of the mining cycle are defined here.
 

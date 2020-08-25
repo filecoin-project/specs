@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # BlockSync
----
 
 {{< hint info >}}
 **Name**: Block Sync  

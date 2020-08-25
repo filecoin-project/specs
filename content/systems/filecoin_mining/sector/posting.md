@@ -7,6 +7,5 @@ dashboardTests: 0
 ---
 
 # Sector PoSting
----
 
 {{<embed src="posting.id" lang="go">}}

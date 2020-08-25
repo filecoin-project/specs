@@ -7,7 +7,6 @@ dashboardTests: 0
 ---
 
 # Election PoSt
----
 
 
 This document describes Election-PoSt, the Proof-of-Spacetime used in Filecoin.

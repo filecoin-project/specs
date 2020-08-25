@@ -10,7 +10,6 @@ dashboardAuditDate: '2020-08-09'
 ---
 
 # DRAND
----
 
 DRand (Distributed Randomness) is a publicly verifiable random beacon protocol Filecoin relies on as a source of unbiasable entropy for leader election (see [leader election](election_post)).
 

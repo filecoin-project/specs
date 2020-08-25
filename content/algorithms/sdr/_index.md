@@ -378,7 +378,6 @@ $$
 <!--lint enable -->
 
 # Stacked DRG Proof of Replication
----
 
 ## Merkle Proofs
 

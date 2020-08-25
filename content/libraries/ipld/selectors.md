@@ -8,6 +8,5 @@ dashboardTests: 0
 ---
 
 # Selectors - IPLD Query Language
----
 
 {{< embed src="selectors.id" lang="go" >}}

@@ -7,7 +7,6 @@ dashboardTests: 0
 ---
 
 # RewardActor
----
 
 RewardActor is where unminted Filecoin tokens are kept. RewardActor contains a `RewardMap` which is a mapping from owner addresses to `Reward` structs. 
 

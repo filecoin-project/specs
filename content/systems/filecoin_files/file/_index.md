@@ -10,6 +10,5 @@ dashboardTests: 0
 ---
 
 # File
----
  
 {{< embed src="file.id" lang="go" >}}

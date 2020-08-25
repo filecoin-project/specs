@@ -374,7 +374,6 @@ $$
 <!--lint enable -->
 
 # SDR Notation, Constants, and Types
----
 
 ## General Notation
 

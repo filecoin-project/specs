@@ -9,7 +9,6 @@ dashboardTests: 0
 ---
 
 # Filecoin Nodes
----
 
 This section is providing all the details needed in order to implement any of the different Filecoin Nodes. Although node types in the Filecoin blockchain are less strictly defined than in other blockchains, there are still a few different types of nodes each with its own features and characteristics.
 

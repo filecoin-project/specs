@@ -7,7 +7,6 @@ dashboardAudit: n/a
 ---
 
 # Data Structures
----
 
 ## RLE+ Bitset Encoding
 

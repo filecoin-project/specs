@@ -7,7 +7,6 @@ dashboardAudit: n/a
 ---
 
 # What are Systems? How do they work?
----
 
 Filecoin decouples and modularizes functionality into loosely-joined `systems`.
 Each system adds significant functionality, usually to achieve a set of important and tightly related goals.

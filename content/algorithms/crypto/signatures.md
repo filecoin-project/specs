@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Signatures
----
 
 Signatures are cryptographic functions that attest to the origin of a particular
 message. In the context of Filecoin, signatures are used to send and receive

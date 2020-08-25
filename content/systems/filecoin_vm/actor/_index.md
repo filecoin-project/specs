@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # VM Actor Interface
----
 
 
 {{<embed src="actor.id" lang="go" >}}

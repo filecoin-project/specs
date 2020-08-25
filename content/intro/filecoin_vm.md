@@ -7,7 +7,6 @@ dashboardAudit: missing
 ---
 
 # Filecoin VM
----
 
 The majority of Filecoin's user facing functionality (payments, storage market, power table, etc) is managed through the Filecoin Virtual Machine (Filecoin VM). The network generates a series of blocks, and agrees which 'chain' of blocks is the correct one. Each block contains a series of state transitions called `messages`, and a checkpoint of the current `global state` after the application of those `messages`.
 

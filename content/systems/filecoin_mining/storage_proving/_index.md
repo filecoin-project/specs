@@ -9,7 +9,6 @@ dashboardTests: 0
 ---
 
 # Storage Proving
----
 
 ## Filecoin Proving Subsystem
 

@@ -6,8 +6,7 @@ dashboardState: wip
 dashboardAudit: n/a
 ---
 
-# Glossary
---- 
+# Glossary 
 
 **Notes**
 

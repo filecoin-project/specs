@@ -9,7 +9,6 @@ dashboardTests: 0
 ---
 
 # Multiformats
----
 
 Self-describing protocol values
 

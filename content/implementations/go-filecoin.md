@@ -6,7 +6,6 @@ implRepos:
 ---
 
 # Filecoin (go-filecoin)
----
 
 `go-filecoin` is a [community-driven](https://filecoin.io/blog/roadmap-update-june-2020/#what-s-next) implementation of Filecoin in Go. The `go-filecoin` implementation is nearly feature-complete (as of June 2020) with `go-filecoin` nodes interoperating with Lotus nodes.
 

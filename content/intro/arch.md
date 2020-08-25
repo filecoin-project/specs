@@ -7,7 +7,6 @@ dashboardAudit: n/a
 ---
 
 # Architecture Diagrams
----
 
 ## Overview Diagram
 {{< details title="TODO" >}}

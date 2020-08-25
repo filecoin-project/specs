@@ -7,6 +7,7 @@ plugins:
   remark-lint-heading-increment:
   remark-lint-fenced-code-flag:
   remark-lint-first-heading-level:
+  remark-lint-no-hr-after-heading:
   # disable some of the sensible defaults given where we are today.
   remark-lint-list-item-indent: false
   remark-lint-final-newline: false

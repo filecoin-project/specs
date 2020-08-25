@@ -4,7 +4,6 @@ weight: 1
 ---
 
 # Stacked DRG PoRep
----
 
 
 This section describes *Stacked DRG PoRep* (SDR), the specific Proof-of-Replication (PoRep) used in Filecoin. In this construction, the prover encodes the original data into a replica and commits to it. An offline PoRep proves that the commitment to the replica is a valid commitment of the encoded original data.

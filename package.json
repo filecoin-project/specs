@@ -26,6 +26,8 @@
     "remark-lint-fenced-code-flag": "^2.0.1",
     "remark-lint-first-heading-level": "^2.0.1",
     "remark-lint-heading-increment": "^2.0.1",
+    "remark-lint-no-hr-after-heading": "^1.0.0",
+    "remark-lint-no-multiple-toplevel-headings": "^2.0.1",
     "remark-preset-lint-recommended": "^4.0.1",
     "tablesort": "^5.2.1"
   },

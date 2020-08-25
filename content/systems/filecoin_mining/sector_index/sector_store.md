@@ -7,7 +7,6 @@ dashboardTests: 0
 ---
 
 # Sector Store
----
 
 {{<embed src="sector_store.id"  lang="go" >}}
 

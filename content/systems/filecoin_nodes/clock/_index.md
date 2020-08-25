@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Clock
----
 
 {{<embed src="clock_subsystem.id" lang="go" >}}
 {{<embed src="clock_subsystem.go" lang="go" >}}

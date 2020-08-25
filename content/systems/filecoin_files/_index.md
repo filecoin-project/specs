@@ -10,7 +10,6 @@ dashboardTests: 0
 ---
 
 # Files & Data
----
 
 Filecoin's primary aim is to store client's Files and Data.
 This section details data structures and tooling related to working with files,

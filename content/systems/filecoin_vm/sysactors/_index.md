@@ -9,7 +9,6 @@ dashboardTests: 0
 ---
 
 # System Actors
----
 
 - There are two system actors required for VM processing:
   - [InitActor](init_actor.md) - initializes new actors, records the network name

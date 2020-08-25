@@ -6,7 +6,6 @@ dashboardhidden: true
 ---
 
 # Filecoin Implementations
----
 
 Filecoin is targeting [multiple implementations](https://filecoin.io/blog/announcing-filecoin-implementations-in-rust-and-c++/) of the protocol in order to guarantee security but also resilience of the Filecoin network. There are currently four active implementation efforts:
 

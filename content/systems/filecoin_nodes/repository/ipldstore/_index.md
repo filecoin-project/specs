@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # IPLD Store - Local Storage for hash-linked data
----
 
 {{<embed src="../../../../libraries/ipld/ipld.id" lang="go" >}}
 

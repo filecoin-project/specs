@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Retrieval Miner Node
----
 
 ```go
 type RetrievalMinerNode interface {

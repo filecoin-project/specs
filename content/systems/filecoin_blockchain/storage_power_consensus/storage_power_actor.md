@@ -7,7 +7,6 @@ dashboardTests: 0
 ---
 
 # Storage Power Actor
----
 
 ## `StoragePowerActorState` implementation
 

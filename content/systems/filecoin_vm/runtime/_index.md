@@ -9,7 +9,6 @@ dashboardTests: 0
 ---
 
 # VM Runtime Environment (Inside the VM)
----
 
 ## Receipts
 

@@ -9,7 +9,6 @@ dashboardTests: 0
 ---
 
 # Storage Power Consensus
----
 
 TODO: remove all stale .id, .go files referenced
 

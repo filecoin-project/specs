@@ -9,7 +9,6 @@ dashboardTests: 0
 ---
 
 # Cryptographic Primitives
----
 
 - Merkle tree/DAG
 - Vector commitment scheme
