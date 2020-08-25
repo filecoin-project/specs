@@ -1,0 +1,106 @@
+digraph G {
+    rankdir=TR;
+    graph [
+      newrank=true,
+      bgcolor="transparent",
+	  ];
+    edge [ fontname=Helvetica, fontcolor=gray, fontsize=10 ];
+
+// 	subgraph clusterPower {
+//         label="In Sector list";
+//         node [color=blue];
+//         Committed;
+//         Faulty;
+//         Recovering;
+//         Terminated;
+//           subgraph clusterCounts {
+//           label="Counts for Power";
+//           Active;
+//           }
+//  }
+    
+    
+//     subgraph clusterPowerNot {
+//         label="Not in Sector list";
+//         node [color=blue];
+//         Precommitted;
+//         Deleted;
+//     }
+
+    //// Null
+    // Null -> Null
+    Null -> Precommitted[label="PreCommitSectors"]
+    // Null -> Committed
+    // Null -> Active
+    // Null -> Faulty
+    // Null -> Recovering
+    // Null -> Terminated
+    // Null -> Deleted
+    
+    //// Precommitted
+    // Precommitted ->Null
+    // Precommitted ->Precommitted
+    Precommitted -> Committed[label="CommitSectors"]
+    // Precommitted ->Active
+    // Precommitted ->Faulty
+    // Precommitted ->Recovering
+    // Precommitted ->Terminated
+    Precommitted -> Deleted[label="CronPreCommitExpiry (PCD)"]
+
+    //// Committed
+    // Committed -> Null
+    // Committed -> Precommitted
+    // Committed -> Committed
+    Committed -> Active[label="SubmittedWindowPoSt"]
+    Committed -> Faulty[label="DeclareFault\nSubmitWindowPoSt (SP)\nProvingDeadline (SP)"]
+    // Committed -> Recovering
+    Committed -> Terminated[label="TerminateSectors\n(TF)"]
+    // Committed -> Deleted
+
+    //// Faulty
+    // Faulty -> Null
+    // Faulty -> Precommitted
+    // Faulty -> Committed
+    Faulty -> Active[label="SubmittedWindowPoSt (FF)"]
+    Faulty -> Faulty[label="ProvingDeadline (FF)"]
+    Faulty -> Recovering[label="DeclareFaultRecovered"]
+    // Faulty -> Terminated[label="Cron\nEarly Expiration\n(TF)"] merged in line below
+    Faulty -> Terminated[label="EarlyExpiration (TF)\nTerminateSectors\n(TF)"]
+    // Faulty -> Deleted
+    
+    //// Recovering
+    // Recovering -> Null
+    // Recovering -> Precommitted
+    // Recovering -> Committed
+    Recovering -> Active[label="SubmittedWindowPoSt (FF)"]
+    Recovering -> Faulty[label="DeclareFault\nProvingDeadline (SP)"]
+    // Recovering -> Recovering
+    Recovering -> Terminated[label="TerminateSectors (TF)"]
+    // Recovering -> Deleted
+    
+
+    //// Active
+    // Active -> Null
+    // Active -> Precommitted
+    // Active -> Committed
+    Active -> Active[label="SubmittedWindowPoSt"]
+    Active -> Faulty[label="DeclareFault\nSubmitWindowPoSt (SP)\nProvingDeadline (SP)"]
+    // Active -> Faulty[label="SubmittedWindowPoSt\nSkipped Fault\n(SP)"]
+    // Active -> Faulty[label="ProvingDeadline\nDetected Fault\n(SP)"] merged in line below
+    // Active -> Recovering
+    Active -> Terminated[label="CronExpiration\nTerminateSectors (TF)"]
+    // Active -> Deleted
+
+    //// Terminated
+    // Terminated -> Null
+    // Terminated -> Precommitted
+    // Terminated -> Committed
+    // Terminated -> Active
+    // Terminated -> Faulty
+    // Terminated -> Recovering
+    // Terminated -> Terminated
+    Terminated -> Deleted[label="CompactSectors"]
+    
+    // TerminatedTF -> Terminated
+    
+}
