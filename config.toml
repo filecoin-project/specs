@@ -1,6 +1,6 @@
 # baseURL = '/'
 title = 'Filecoin Spec'
-ignoreFiles= ["externals"]
+ignoreFiles= ["externals", "\\.dot$", "\\.mmd$"]
 # theme = 'book'
 canonifyurls = false
 # relativeURLs = true
