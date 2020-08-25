@@ -1,8 +1,8 @@
 ---
 title: Sector Builder
 dashboardWeight: 1
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: incorrect
+dashboardAudit: missing
 dashboardTests: 0
 ---
 

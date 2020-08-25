@@ -2,8 +2,8 @@
 title: Deal States
 weight: 2
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 1
+dashboardState: wip
+dashboardAudit: missing
 dashboardTests: 0
 ---
 

@@ -3,8 +3,8 @@ title: Piece
 weight: 2
 bookCollapseSection: true
 dashboardWeight: 1.5
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 

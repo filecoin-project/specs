@@ -3,7 +3,7 @@
 #+HUGO_BASE_DIR: ../../
 #+dashboardWeight: 2
 #+dashboardState: incorrect
-#+dashboardAudit: 0
+#+dashboardAudit: n/a
 #+dashboardTests: 0
 
 * Proof of Spacetime Paramerters

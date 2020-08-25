@@ -3,8 +3,8 @@ title: Introduction
 weight: 1
 
 dashboardWeight: 0.2
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: reliable
+dashboardAudit: n/a
 ---
 
 # Introduction
@@ -41,7 +41,7 @@ Each section of the spec must be stable and audited before it is considered done
 
 ### Spec Status Legend
 
-<table class="Dashboard"">
+<table class="Dashboard">
   <thead>
     <tr>
       <th>Spec state</th>
@@ -50,27 +50,30 @@ Each section of the spec must be stable and audited before it is considered done
   <thead>
   <tbody>
     <tr>
-      <td>Final, will not change before mainnet launch</td>
+      <td>Final, will not change before mainnet launch.</td>
       <td class="text-black bg-stable">Stable</td>
     </tr>
     <tr>
-      <td>Correct, but some details are missing</td>
-      <td class="text-black bg-incomplete">Incomplete</td>
+      <td>Reliable and likely to not change.</td>
+      <td class="text-black bg-reliable">Reliable</td>
     </tr>
     <tr>
-      <td>Likely to change. Details still being finalised</td>
-      <td class="text-black bg-wip">WIP</td>
+      <td>Work has started but not yet finished.</td>
+      <td class="text-black bg-wip">Draft/WIP</td>
     </tr>
     <tr>
-      <td>Do not follow. Important things have changed</td>
+      <td>Do not follow. Important things have changed.</td>
       <td class="text-black bg-incorrect">Incorrect</td>
+    </tr>
+    <tr>
+      <td>No work has been done yet.</td>
+      <td class="text-black bg-missing">Missing</td>
     </tr>
   </tbody>
 </table>
 
 ### Spec Status Overview
-
-{{<dashboard-spec>}}
+<div id="dashboard-container"></div>
 
 ### Spec Stabilization Progess
 

@@ -2,8 +2,8 @@
 title: "Signatures"
 weight: 1
 dashboardWeight: 2
-dashboardState: incorrect
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: done
 dashboardTests: 0
 ---
 
@@ -144,4 +144,3 @@ unique thereby the aggregation is done on distinct messages.  Obviously, the
 the other miners will **check all transactions** to make sure they are valid.
 The validity of a transaction in Filecoin's context implies that the signature
 is correctly formed over the message with the correct nonce.
-

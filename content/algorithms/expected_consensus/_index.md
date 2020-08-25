@@ -2,8 +2,8 @@
 title: "Expected Consensus"
 weight: 1
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 1
+dashboardState: reliable
+dashboardAudit: wip
 dashboardTests: 0
 ---
 

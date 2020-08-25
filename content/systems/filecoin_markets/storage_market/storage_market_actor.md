@@ -2,8 +2,8 @@
 title: Storage Market Actor
 weight: 2
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 1
+dashboardState: wip
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
@@ -14,11 +14,11 @@ dashboardTests: 0
 
 ## `StorageMarketActorState` implementation
 
-{{<embed src="/modules/actors/builtin/market/market_state.go" lang="go" >}}
+{{<embed src="/externals/specs-actors/actors/builtin/market/market_state.go" lang="go" >}}
 
 ## `StorageMarketActor` implementation
 
-{{<embed src="/modules/actors/builtin/market/market_actor.go" lang="go" >}}
+{{<embed src="/externals/specs-actors/actors/builtin/market/market_actor.go" lang="go" >}}
 
 
 ## Storage Deal Collateral

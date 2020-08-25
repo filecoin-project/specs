@@ -2,8 +2,8 @@
 title: "Retrieval Peer Resolver"
 weight: 1
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: stable
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 
@@ -14,4 +14,9 @@ The `peer resolver` is a content routing interface to discover retrieval miners 
 
 It can be backed by both a local store of previous storage deals or by querying the chain.
 
-{{<embed src="retrieval_peer_resolver.id"  lang="go" >}}
+```go
+// PeerResolver is an interface for looking up providers that may have a piece
+type PeerResolver interface {
+	GetPeers(payloadCID cid.Cid) ([]RetrievalPeer, error) // TODO: channel
+}
+```

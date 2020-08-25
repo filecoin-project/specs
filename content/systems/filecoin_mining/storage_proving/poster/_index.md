@@ -1,8 +1,8 @@
 ---
 title: Sector Poster
 dashboardWeight: 1
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: wip
 dashboardTests: 0
 ---
 

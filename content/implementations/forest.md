@@ -1,8 +1,6 @@
 ---
 title: Forest 
 weight: 3
-implAudit: 0
-implSpecCompliance: 0
 implRepos:
  - { lang: rust, repo: https://github.com/ChainSafe/forest }
 ---
