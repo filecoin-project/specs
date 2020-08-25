@@ -3,7 +3,7 @@ title = 'Filecoin Spec'
 ignoreFiles= ["externals"]
 # theme = 'book'
 canonifyurls = false
-relativeURLs = true
+# relativeURLs = true
 
 # Book configuration
 disablePathToLower = true

@@ -84,56 +84,8 @@ or to a specific version with
 hugo mod get github.com/filecoin-project/specs-actors@v0.7.2
 ```
 
-## Shortcodes
-### `Mermaid` 
-Inline mermaid syntax rendering
-```html
-{{< mermaid >}}
-graph TD
-  A[Christmas] -->|Get money| B(Go shopping)
-  B --> C{Let me think}
-  C -->|One| D[Laptop]
-  C -->|Two| E[iPhone]
-  C -->|Three| F[fa:fa-car Car]
-		
-{{</ mermaid >}}
-```
-
-### `svg`
-This shortcode includes zoom and pad features.
-```html
-<!-- Relative path -->
-{{< svg src="pull-flow.mmd.svg" title="Data Transfer - Pull Flow" >}}
-
-<!-- From hugo content folder -->
-{{< svg src="/systems/pull-flow.mmd.svg" title="Data Transfer - Pull Flow" >}}
-```
-
-### `hint`
-```md
-<!-- info|warning|danger -->
-{{< hint info >}}
-**Markdown content**  
-Lorem markdownum insigne. Olympo signis Delphis! Retexi Nereius nova develat
-stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa
-{{< /hint >}}
-```
-### `figure`
-```md
-{{< figure src="diagrams/pieces.png" title="Pieces, Proving Trees, and Piece Data Structures" zoom="true">}}
-```
-
-### `embed`
-```md
-# src relative to the page
-{{<embed src="piece_store.id" lang="go">}}
-
-# src relative to content folder
-{{<embed src="/systems/piece_store.id" lang="go">}}
-```
-
 ## Page Header
-The first heading should be # Head with `---` like below and should refer to the overall title of the document.
+The first heading should be `# Page Title` with `---` like below and should refer to the overall title of the document.
 
 ```md
 ---
@@ -192,6 +144,21 @@ Random plain text context ...
 
 ```
 
+## Images, diagrams - Markdown images
+To add an image or diagram you just need to use normal markdown syntax. 
+For diagrams you can use the source files and the pipelines will handle converting that to `svg`, we support mermaid and dot source files.
+
+```md
+# relative to the markdown file
+![Alt text](picture.jpg)
+
+# relative to the content folder
+![Alt text](/content/intro/diagram1.mmd)
+
+![Alt text](graph.dot "Graph title")
+```
+> When there's no title we use the alt text as title   
+
 
 ## References - Markdown links
 These links use "portable links" just like `relref` so you can just give it the name of the file and it will fetch the correct relative link and title for the `<a href="/relative/path" title="page title">` automatically.
@@ -199,8 +166,8 @@ You can override the `<a>` title by passing a second `string` in the link defini
 
 > **Note**: When using anchors the title can't be fetched automatically.
 ```md
-[Storage Power](storage_power_consensus)
-# <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Storage Power Consensus">Storage Power</a>
+[](storage_power_consensus)
+# <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Storage Power Consensus">Storage Power Consensus</a>
 
 [Storage Power](storage_power_consensus "Title to override the page original title")
 # <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Title to override the page original title">Storage Power</a>
@@ -208,6 +175,40 @@ You can override the `<a>` title by passing a second `string` in the link defini
 [Tickets](storage_power_consensus#the-ticket-chain-and-drawing-randomness "The Ticket chain and drawing randomness")
 # <a href="/systems/filecoin_blockchain/storage_power_consensus#the-ticket-chain-and-drawing-randomness" title="The Ticket chain and drawing randomness">Tickets</a>
 
+```
+
+
+## Shortcodes
+### `Mermaid` 
+Inline mermaid syntax rendering
+```html
+{{< mermaid >}}
+graph TD
+  A[Christmas] -->|Get money| B(Go shopping)
+  B --> C{Let me think}
+  C -->|One| D[Laptop]
+  C -->|Two| E[iPhone]
+  C -->|Three| F[fa:fa-car Car]
+		
+{{</ mermaid >}}
+```
+
+### `hint`
+```md
+<!-- info|warning|danger -->
+{{< hint info >}}
+**Markdown content**  
+Lorem markdownum insigne. Olympo signis Delphis! Retexi Nereius nova develat
+stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa
+{{< /hint >}}
+```
+### `embed`
+```md
+# src relative to the page
+{{<embed src="piece_store.id" lang="go">}}
+
+# src relative to content folder
+{{<embed src="/systems/piece_store.id" lang="go">}}
 ```
 
 ## Math mode

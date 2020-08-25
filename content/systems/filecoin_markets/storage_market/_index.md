@@ -36,7 +36,7 @@ The remaining parts of the deal lifecycle are handled by the Storage Mining Subs
 
 The following diagram outlines the phases of deal flow within the storage market in detail:
 
-{{<svg src="storage_market_flow.mmd.svg" title="Storage Market Deal Flow" >}}
+![Storage Market Deal Flow](storage_market_flow.mmd)
 
 ## Discovery
 

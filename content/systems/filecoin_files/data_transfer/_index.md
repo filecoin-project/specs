@@ -22,8 +22,7 @@ This diagram shows how Data Transfer and its modules fit into the picture with t
 In particular, note how the Data Transfer Request Validators from the markets are plugged into the Data Transfer module,
 but their code belongs in the Markets system.
 
-{{<figure src="data-transfer-modules.png" title="Data Transfer - Push Flow" zoom="true">}}
-
+![Data Transfer](data-transfer-modules.png)
 
 ## Terminology
 
@@ -55,7 +54,7 @@ It is worth noting that in the case of retrieval the provider can accept the dea
 
 ### Push Flow
 
-{{<svg src="push-flow.mmd.svg" title="Data Transfer - Push Flow">}}
+![Data Transfer - Push Flow](push-flow.mmd)
 
 1. A requestor initiates a Push transfer when it wants to send data to another party.
 2. The requestors' data transfer module will send a push request to the responder along with the data transfer voucher.
@@ -71,7 +70,7 @@ once the provider indicates their intent to accept and publish the client's deal
 
 ## Pull Flow - Single Round Trip
 
-{{< svg src="alternate-pull-flow.mmd.svg" title="Data Transfer - Single Round Trip Pull Flow" >}}
+![Data Transfer - Single Round Trip Pull Flow](alternate-pull-flow.mmd)
 
 1. A requestor initiates a Pull transfer when it wants to receive data from another party.
 2. The requestor’s data transfer module initiates the transfer by making a pull request embedded in the GraphSync request to the responder. The request includes the data transfer voucher.

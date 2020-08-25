@@ -10,7 +10,7 @@ dashboardTests: 0
 # Storage Deal Flow
 ---
 
-{{<svg src="diagrams/deal-flow.mmd.svg" title="Deal Flow Sequence Diagram">}}
+![Deal Flow Sequence Diagram](diagrams/deal-flow.mmd)
 
 ## Add Storage Deal and Power
 

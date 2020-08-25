@@ -1,0 +1,44 @@
+{{- $isRemote := or (in .Destination ":") (strings.HasPrefix .Destination "//") }}
+{{ $src := .Destination }}
+{{ $path := "" }}
+{{ $genPath := "" }}
+{{ $title := default .Text .Title }}
+{{ $ext := path.Ext .Destination }}
+{{ $supported := in ".mmd,.dot" $ext }}
+
+<figure class="diagrams-container">
+    <div title="{{ .Title }}" class="diagrams zoomable">
+
+{{- if $isRemote -}}
+    {{ $genPath = .Destination }}
+    <img loading="lazy" src="{{ .Destination | safeURL }}" alt="{{ .Text }}" {{ with .Title}} title="{{ . }}"{{ end }} />
+{{- else if eq $supported false -}}
+    {{ $src := .Page.Resources.GetMatch .Destination }}
+    {{ with $src }} 
+        {{ $genPath = .RelPermalink }}
+        <img loading="lazy"  src="{{ .RelPermalink }}" loading="lazy" alt="{{ $title }}"/>
+    {{ end }}
+{{- else -}}
+    {{ if eq ( $src | printf "%.1s") "/" }}
+        {{ $path = $src}}
+        {{ $genPath = (printf "/_gen/diagrams%s" (replace $path $ext ".svg"))}}
+    {{ else }}
+        {{ $path = printf "%s%s" .Page.File.Dir $src }}
+        {{ $genPath = (printf "/_gen/diagrams/%s" (replace $path $ext ".svg"))}}
+    {{- end -}}
+    {{ if fileExists $path }}
+        <img src="{{ $genPath | safeURL }}" loading="lazy" height="100%" alt="{{ .Text }}" title="{{ $title }}"/>
+    {{ else }}
+      <blockquote class="book-hint danger">
+        {{- printf "File '%s' not found from Page '%s'" $src .Page.File }}
+      </blockquote>
+      {{- warnf "File '%s' not found from Page '%s'" $src .Page.File }}
+    {{ end }}
+{{- end -}}
+
+    </div>
+    <figcaption title="{{ $title }}" class="diagrams-caption">
+        Figure: {{ $title }}
+        <a class="diagrams-link" title="Open diagram in new tab" href="{{ $genPath }}" target="_blank">Open in tab</a>
+    </figcaption>
+</figure>

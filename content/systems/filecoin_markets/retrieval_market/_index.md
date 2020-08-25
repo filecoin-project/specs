@@ -31,7 +31,7 @@ The Data Transfer System is augmented accordingly to support pausing/resuming an
 
 ## Deal Flow in the Retrieval Market
 
-{{<svg src="retrieval_flow_v1.mmd.svg" title="Retrieval Flow" >}}
+![Retrieval Flow](retrieval_flow_v1.mmd)
 
 The Filecoin Retrieval Market protocol for proposing and accepting a deal works as follows:
 
