@@ -33,6 +33,17 @@ yarn serve
 # open http://localhost:1313/ in the browser
 ```
 
+### Solving Common problems
+
+**Problem** - Site fails to build with an error that states it faled to download modules on macos
+
+```
+Error: failed to download modules: go command failed ...
+```
+
+**Solution** - run `npm run clean-modules` - the cache dir hugo uses can get corrupted, and this resets it. See [#1048](https://github.com/filecoin-project/specs/issues/1048)
+
+
 ### External modules
 External modules should be added as [Hugo Modules](https://gohugo.io/hugo-modules/)
 You can find examples in the `config.toml`
