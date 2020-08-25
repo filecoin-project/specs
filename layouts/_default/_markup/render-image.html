@@ -21,10 +21,10 @@
 {{- else -}}
     {{ if eq ( $src | printf "%.1s") "/" }}
         {{ $path = $src}}
-        {{ $genPath = (printf "/_gen/diagrams%s" (replace $path $ext ".svg"))}}
+        {{ $genPath = (printf "/_gen/diagrams%s?%d" (replace $path $ext ".svg") now.Unix)}}
     {{ else }}
         {{ $path = printf "%s%s" .Page.File.Dir $src }}
-        {{ $genPath = (printf "/_gen/diagrams/%s" (replace $path $ext ".svg"))}}
+        {{ $genPath = (printf "/_gen/diagrams/%s?%d" (replace $path $ext ".svg") now.Unix)}}
     {{- end -}}
     {{ if fileExists $path }}
         <img src="{{ $genPath | safeURL }}" loading="lazy" height="100%" alt="{{ .Text }}" title="{{ $title }}"/>
