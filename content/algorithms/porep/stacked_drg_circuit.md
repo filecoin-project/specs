@@ -6,9 +6,6 @@ weight: 3
 # Stacked DRG - Offline PoRep Circuit Spec
 ---
 
-
-### Stacked DRG Overview
-
 Stacked DRG PoRep is based on layering DRG graphs `LAYERS` times. The data represented in each DRG layer is a labeling based on previously labeled nodes. The final labeled layer is the SDR key, and the 'final layer' of replication the replica, an encoding of the original data using the generated key.
 
 - `ReplicaId` is a unique replica identifier (see the Filecoin Proofs spec for details).
@@ -21,7 +18,7 @@ The (offline) proof size in SDR is too large for blockchain usage (~3MB). We use
 
 This circuit proves that given a Merkle root `CommD`, `CommRLast`, and `commRStar`, that the prover knew the correct replicated data at each layer.
 
-### Spec notation
+## Spec notation
 
 - **Fr**: Field element of BLS12-381
 - **UInt**: Unsigned integer
@@ -30,8 +27,6 @@ This circuit proves that given a Merkle root `CommD`, `CommRLast`, and `commRSta
   - If there is an equality, create a constraint
   - otherwise, execute the function
 - **Inclusion path**: Binary representation of the Merkle tree path that must be proven packed into a single `Fr` element.
-
-# Offline PoRep circuit
 
 ## Public Parameters
 
@@ -158,11 +153,9 @@ for l in range LAYERS {
 ```
 
 
-
 ## Verification of offline porep proof
 
 - SNARK proof check: **Check** that given the SNARK proof and the public inputs, the SNARK verification outputs true
 - Parent checks: For each `leaf = InclusionPath[l][c]`:
   - **Check** that all `ParentsInclusionPaths_[l][c][0..PARENT_COUNT}` are the correct parent leaves of `leaf` in the DRG graph, if a leaf has less than `PARENT_COUNT`, repeat the leaf with the highest label in the graph.
   - **Check** that the parent leaves are in ascending numerical order.
-
