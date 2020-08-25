@@ -57,7 +57,7 @@ Traditionally, in order to transact through a Payment Channel, the payment chann
 
 Throughout the interaction between the two parties, the channel sender (`From` address) is sending vouchers to the recipient (`To` address). The `Value` included in the voucher indicates the value available for the receiving party to _redeem_. The `Value` is based on the service that the _payment channel recipient_ has provided to the _payment channel sender_. Either the _payment channel recipient_ or the _payment channel sender_ can `Update` the balance of the channel and the balance `ToSend` to the _payment channel recipient_ (using a voucher), but the `Update` (i.e., the voucher) has to be accepted by the other party before funds can be collected. Furthermore, the voucher has to be redeemed by the opposite party from the one that issued the voucher. The _payment channel recipient_ can choose to `Collect` this balance at any time incurring the corresponding gas cost.
 
-Redeeming a voucher is not transferring funds from the payment channel to the recipient's account. Instead, redeeming a voucher denotes the fact that some service worth of `Value` has been provided by the payment channel recipient to the payment channel sender. It is not until the voucher is _collected_ that the funds are dispatched to the provider's account.
+Redeeming a voucher is not transferring funds from the payment channel to the recipient's account. Instead, redeeming a voucher denotes the fact that some service worth of `Value` has been provided by the payment channel recipient to the payment channel sender. It is not until the whole payment channel is _collected_ that the funds are dispatched to the provider's account.
 
 This is the structure of the voucher:
 
