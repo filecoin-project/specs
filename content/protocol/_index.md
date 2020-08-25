@@ -12,36 +12,41 @@ math-mode: true
 
 ## Key Concepts
 
-
-
 ### Sectors
-
 A *sector* is a storage container in which miners store deals from the market.
 
-- `Precommitted`: miner seals sector and submits `miner.PreCommitSector`
-- `Committed`: miner generates a Seal proof and submits `miner.ProveCommitSector`
-- `Active`: miner generate valid PoSt proofs and timely submits `miner.SubmitWindowedPoSt``Committed`
-- `Faulty`: miner fails to generate a proof (see Fault section)
-- `Recovering`: miner declared a faulty sector via `miner.DeclareFaultRecovered`
+A sector can be in one of the following states.
+
+| State          | Description                                                                                                                                           |
+|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Precommitted` | miner seals sector and submits `miner.PreCommitSector`                                                                                                |
+| `Committed`    | miner generates a Seal proof and submits `miner.ProveCommitSector`                                                                                    |
+| `Active`       | miner generate valid PoSt proofs and timely submits `miner.SubmitWindowedPoSt`                                                                        |
+| `Faulty`       | miner fails to generate a proof (see Fault section)                                                                                                   |
+| `Recovering`   | miner declared a faulty sector via `miner.DeclareFaultRecovered`                                                                                      |
+| `Terminated`   | either sector is expired, or early terminated by a miner via `miner.TerminateSectors`, or was failed to be proven for 14 consecutive proving periods. |
+
+See `Miner` actor for a more detailed explanation.
 
 ### Power
+A miner wins blocks proportionally to their *Quality Adjusted Power*.
 
-A miner wins blocks proportionally to their Quality Adjusted Power.
+*Sector Quality Adjusted Power* is a weighted average of the quality of its space and it is based on the size, duration and quality of its deals.
 
-Sector quality is based on the size, duration and quality of its deals and it's calculated with the following formula:
+Formula for calculating Sector Quality Adjusted Power (or QAp, often referred to as power):
+- Calculate the `dealSpaceTime`: sum of the `duration*size` of each deal
+- Calculate the `verifiedSpaceTime`: sum of the `duration*size` of each verified deal
+- Calculate the spacetime without deals `baseSpaceTime`: `sectorSize*sectorDuration - dealSpaceTime - verifiedSpaceTime`
+- Calculate the weighted average quality `avgQuality`: `(baseSpaceTime * QualityBaseMultiplier +  dealSpaceTime * DealWeightMultiplier + verifiedSpaceTime * VerifiedDealWeightMultiplier)/ (sectorSize * sectorDuration * QualityBaseMultiplier)`
+- Calculate `sectorQuality`: `avgQuality * size`
 
+During `miner.PreCommitSector`, the sector quality is calculated and stored in the sector information.
 
+### Deals
 
-`$a$`
-
-`$\frac{\mathsf{VerifiedDeadMultiplied} 2^\mathsf{SectorQualityPrecision}}{QualityBaseMultiplier}$`
-
-#### Committed Capacity
-A `Committed Capacity sector` is a sector with no deals. It can be early terminated via the upgrade protocol (see Sector Upgrading).
-
-The power of this sector is its raw bytes multiplied by `QualityBaseMultiplier`.
-
-#### Sector with Deals
+#### Ask
+#### Bids
+#### Verified Deals
 
 ## Mining cycle
 
@@ -89,6 +94,8 @@ Partitions are a by-product of our current proof mechanism. There is a limit of 
 Sectors are assigned to a partition at `miner.ProveCommitSector` and they can be re-arranged via `CompactPartitions`.
 
 #### Deadline assignment
+
+## Market cycle
 
 ## Faults and Penalties
 

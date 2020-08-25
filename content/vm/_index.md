@@ -17,14 +17,44 @@ The are two primitives in the VM runtime: *Actors* and *Messages*.
 
 An *Actor* is an entity that can receive and send *messages*, it has a private state and can alter another actor's state through messaging.
 It has a set of callable methods that can lead to state updates or new messages sent to other actors.
-The VM has singleton actors (e.g. Cron, Power, Market) and multiple instances of the same actor class (e.g. Account, Miner).
+The VM has singleton actors (e.g. Cron, Power, Market) and multiple instances of the same actor class (e.g. Account, Miner, MultiSig, PaymentChannel).
 An actor is either existing at genesis, or it is create via another actor.
 The code that implements actors' methods is built-in in the VM and currently custom actor code is not supported.
 
 ### Addresses
 
-Each actor has an address.
-Address from `t00` to `t099` are reserved for Genesis Actors, the first user created actor starts from `t0100`.
+An *address* is an identified that refers to an actor in Filecoin.
+See the Filecoin Address spec.
+
+| Address prefix | Address type       |
+|----------------|--------------------|
+| `t0`           | Incremental ID     |
+| `t1`           | SECP256K1 key pair |
+| `t2`           | Actor Unique ID    |
+| `t3`           | BLS key pair       |
+
+#### `t0` addresses
+
+Every actor has a `t0` address.
+
+When new actors are created via the `Init` actor, they are assigned a sequential ID.
+The incremental IDs start from `t0100`, since addresses from `t00` to `t099` are reserved.
+Some of these reserved addresses are currently used for Genesis actors.
+
+Since the network may have forks, on each fork the `Init` actor may assign a `t0` to a different address.
+`t0` addresses should only be used after a large number of epochs has passed.
+
+#### `t1` addresses
+These addresses are valid for `Account` actors only.
+
+#### `t2` addresses
+
+Every user-created actor has a `t2` address (e.g. `Account`, `Miner`, `MultiSig`)
+
+When new actors are created via the `Init` actor, they are assigned a unique Identifier
+
+#### `t3` addresses
+These addresses are valid for `Account` actors only
 
 ### Actor Methods
 
@@ -39,7 +69,7 @@ All actors implement two methods
 
 ### Actor Types
 
-There are two actor types (excluding classes used for singletons): `Account` and `Miner`.
+There are four actor types (excluding classes used for singletons): `Account`, `Miner`, `MultiSig` and `PaymentChannel`.
 
 ### Genesis Actors
 
