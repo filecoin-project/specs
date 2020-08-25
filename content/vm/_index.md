@@ -24,7 +24,7 @@ The code that implements actors' methods is built-in in the VM and currently cus
 ### Addresses
 
 Each actor has an address.
-Address from `t00` to `t099` are reserved to built-in singleton actors, the first non-singleton actor starts from `t0100`.
+Address from `t00` to `t099` are reserved for Genesis Actors, the first user created actor starts from `t0100`.
 
 ### Actor Methods
 
@@ -43,7 +43,7 @@ There are two actor types (excluding classes used for singletons): `Account` and
 
 ### Genesis Actors
 
-A set of actor is created at genesis.
+A set of actor is created at the Filecoin Genesis epoch.
 All actors are singleton except for `BurntFunds` that is an `Account` actor.
 
 | Actor name         |    Actor address |

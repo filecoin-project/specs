@@ -4,42 +4,63 @@ weight: 2
 dashboardWeight: 0.2
 dashboardState: incomplete
 dashboardAudit: 0
+math-mode: true
 ---
 
 # Protocol
 ---
 
-## Key concepts
+## Key Concepts
 
-A miner has power based on the storage capacity they provide to the network.
 
-The "`Power` actor" actor is a singleton actor that exists on the Filecoin VM. It manages power allocation and rewards.
 
-The "quality adjusted power" or QAp of a sector is the amount of power assigned to a sector. A miner wins block reward proportionally to the total QAp of their sectors across their Miner actors.
+### Sectors
 
-The "power table" is what we informally refer to the table stored in the Power actor which reflects how much QA power each miner has.
+A *sector* is a storage container in which miners store deals from the market.
 
-## Mining Protocols
+- `Precommitted`: miner seals sector and submits `miner.PreCommitSector`
+- `Committed`: miner generates a Seal proof and submits `miner.ProveCommitSector`
+- `Active`: miner generate valid PoSt proofs and timely submits `miner.SubmitWindowedPoSt``Committed`
+- `Faulty`: miner fails to generate a proof (see Fault section)
+- `Recovering`: miner declared a faulty sector via `miner.DeclareFaultRecovered`
 
-### Miner cycle
-#### Register a miner
+### Power
+
+A miner wins blocks proportionally to their Quality Adjusted Power.
+
+Sector quality is based on the size, duration and quality of its deals and it's calculated with the following formula:
+
+
+
+`$a$`
+
+`$\frac{\mathsf{VerifiedDeadMultiplied} 2^\mathsf{SectorQualityPrecision}}{QualityBaseMultiplier}$`
+
+#### Committed Capacity
+A `Committed Capacity sector` is a sector with no deals. It can be early terminated via the upgrade protocol (see Sector Upgrading).
+
+The power of this sector is its raw bytes multiplied by `QualityBaseMultiplier`.
+
+#### Sector with Deals
+
+## Mining cycle
+
+### Register a miner
 A user registers a new `Miner` actor via `Power.CreateMiner`.
 
-#### Add storage capacity
+### Add storage capacity
 A miner adds storage capacity to the network by adding sectors to a `Miner` actor.
 
 - The miner collects storage deals and publish them via `Market.PublishStorageDeals`.
 - The miner groups deals in a sector, runs the sealing process and submits the sealed sector information via `miner.PreCommitSector`. The sector state is now *precommitted*.
 - The miner waits `PreCommitChallengeDelay` since the on-chain precommit epoch, gets the `InteractiveRandomness`, generates a Seal Proof and submits it via `miner.ProveCommitSector`. The sector state is now *committed*.
 
-#### Mantain storage power
+### Mantain storage capacity
 
 A miner mantains sectors *active* by timely submitting Proofs-of-Spacetime (PoSt).
 A PoSt proves sectors are persistently stored through time.
 
 A miner must timely submit `miner.SubmitWindowedPoSt` for their sectors according to their assigned deadlines (see deadline section).
-
-### Deadlines
 
 #### Proving Period
 A *proving period* is a period of `WPoStProvingPeriod` epochs in which a `Miner` actor is scheduled to prove its storage.
@@ -68,34 +89,6 @@ Partitions are a by-product of our current proof mechanism. There is a limit of 
 Sectors are assigned to a partition at `miner.ProveCommitSector` and they can be re-arranged via `CompactPartitions`.
 
 #### Deadline assignment
-
-### Sectors
-
-A *sector* is a storage container in which miners store deals from the market.
-
-- `Precommitted`: miner seals sector and submits `miner.PreCommitSector`
-- `Committed`: miner generates a Seal proof and submits `miner.ProveCommitSector`
-- `Active`: miner generate valid PoSt proofs and timely submits `miner.SubmitWindowedPoSt``Committed`
-- `Faulty`: miner fails to generate a proof (see Fault section)
-- `Recovering`: miner declared a faulty sector via `miner.DeclareFaultRecovered`
-
-### Storage Power
-
-A miner wins blocks proportionally to their Quality Adjusted Power.
-
-Sector quality is based on the size of deals in a sectors and the quality of these deals.
-
-`$a$`
-
-`$\frac{\mathsf{VerifiedDeadMultiplied} 2^\mathsf{SectorQualityPrecision}}{QualityBaseMultiplier}$`
-
-#### Committed Capacity
-A `Committed Capacity sector` is a sector with no deals. It can be early terminated via the upgrade protocol (see Sector Upgrading).
-
-The power of this sector is its raw bytes multiplied by `QualityBaseMultiplier`.
-
-#### Sector with Deals
-
 
 ## Faults and Penalties
 
@@ -176,3 +169,6 @@ There two three of Skipped Faults:
 
 ## Rewards
 
+### Block Rewards
+
+### Storage Rewards

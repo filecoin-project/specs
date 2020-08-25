@@ -144,7 +144,6 @@ sequenceDiagram
 
 A sealed sector is specific to its data, to its `Miner` actor and to a point in the chain (a chain reference called `SealRandomness`).
 
-
 #### Internal Messages
 {{< mermaid >}}
 sequenceDiagram
