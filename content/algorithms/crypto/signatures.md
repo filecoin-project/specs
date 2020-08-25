@@ -82,7 +82,7 @@ SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
 
 ### BLS Signatures
 
-Filecoin uses the [BLS signature scheme](https://datatracker.ietf.org/doc/draft-boneh-bls-signature/) over the [BLS12-381](BLS12-381](https://electriccoin.co/blog/new-snark-curve/) group of elliptic curves. You can find the default Rust implementation in [Filecoin's repo](https://github.com/filecoin-project/bls-signatures/).
+Filecoin uses the [BLS signature scheme](https://datatracker.ietf.org/doc/draft-boneh-bls-signature/) over the [BLS12-381](https://electriccoin.co/blog/new-snark-curve/) group of elliptic curves. You can find the default Rust implementation in [Filecoin's repo](https://github.com/filecoin-project/bls-signatures/).
 
 {{<embed src="bls.id" lang="go">}}
 {{<embed src="bls.go" lang="go">}}

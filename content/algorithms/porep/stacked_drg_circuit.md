@@ -57,7 +57,7 @@ This circuit proves that given a Merkle root `CommD`, `CommRLast`, and `commRSta
 Design notes:
 
 - `CommRLast` is a private input used during during Proof-of-Spacetime.
-   To enable this, the prover must store `CommC` and use it to prove that `CommRLast` is included in `CommR` [TODO: define 'included' language.]
+   To enable this, the prover must store `CommC` and use it to prove that `CommRLast` is included in `CommR` (TODO: define 'included' language.)
 - `InclusionPath` and `ParentInclusionPath`: Each layer `l` has `LAYER_CHALLENGES[l]` inclusion paths.
 
 ## Private Inputs

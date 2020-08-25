@@ -67,7 +67,7 @@ The sequence of executions for a tipset is thus summarised:
 - pay reward for second block
 - process election post for second block
 - messages for second block (BLS before SECP, skipping any already encountered)
-- [... subsequent blocks ...]
+- `[... subsequent blocks ...]`
 - cron tick 
 
 ## Message validity and failure

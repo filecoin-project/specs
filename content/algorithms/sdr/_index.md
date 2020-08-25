@@ -12,6 +12,7 @@ dashboardAudit: done
 dashboardTests: 0
 ---
 
+<!--lint disable -->
 
 {{< plain hidden >}}
 $$
@@ -373,6 +374,8 @@ $$
 \gdef\encode{\textsf{encode}}
 $$
 {{< /plain >}}
+
+<!--lint enable -->
 
 # Stacked DRG Proof of Replication
 ---

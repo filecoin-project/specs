@@ -137,7 +137,7 @@ We have describe three hash functions:
 
 `RepHash` is a vector commitment used to generate commitments to sealed sectors, unsealed sectors, piece commitments and intermediate stepds of the Proof-of-Replication. Filecoin uses a balanced binary Merkle tree for `RepHash`. The leaves of the Merkle tree are pairs of adjacent nodes.
 
-`RepHash` inputs MUST respect a valid Storage Format. [TODO: What does this mean?]
+`RepHash` inputs MUST respect a valid Storage Format. (TODO: What does this mean?)
 
 ## Stacked DRG Graph
 

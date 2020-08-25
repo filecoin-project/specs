@@ -106,12 +106,12 @@ w[r+1] = w[r] + (wPowerFactor[r+1] + wBlocksFactor[r+1]) * 2^8
 For a given tipset `ts` in round `r+1`, we define:
 
 - `wPowerFactor[r+1]  = wFunction(totalPowerAtTipset(ts))`
-- wBlocksFactor[r+1] =  `wPowerFactor[r+1] * wRatio * t / e`
+- `wBlocksFactor[r+1] =  wPowerFactor[r+1] * wRatio * t / e`
   - with `t = |ticketsInTipset(ts)|`
   - `e = expected number of tickets per round in the protocol`
   - and `wRatio in ]0, 1[`
 Thus, for stability of weight across implementations, we take:
-- wBlocksFactor[r+1] =  `(wPowerFactor[r+1] * b * wRatio_num) / (e * wRatio_den)`
+- `wBlocksFactor[r+1] =  (wPowerFactor[r+1] * b * wRatio_num) / (e * wRatio_den)`
 
 We get:
 
@@ -146,7 +146,7 @@ In the case where two Tipsets of equal weight have the same min ticket, the mine
 
 The above case may happen in situations under certain block propagation conditions. Assume three blocks B, C, and D have been mined (by miners 1, 2, and 3 respectively) off of block A, with minTicket(B) < minTicket(C) < minTicket(D).
 
-Miner 1 outputs their block B and shuts down. Miners 2 and 3 both receive B but not each others' blocks. We have miner 2 mining a Tipset made of B and C and miner 3 mining a Tipset made of B and D. If both succesfully mine blocks now, other miners in the network will receive new blocks built off of Tipsets with equal weight and the same smallest ticket (that of block B). They should select the block mined atop [B, C] since minTicket(C) < minTicket(D).
+Miner 1 outputs their block B and shuts down. Miners 2 and 3 both receive B but not each others' blocks. We have miner 2 mining a Tipset made of B and C and miner 3 mining a Tipset made of B and D. If both succesfully mine blocks now, other miners in the network will receive new blocks built off of Tipsets with equal weight and the same smallest ticket (that of block B). They should select the block mined atop `[B, C]` since `minTicket(C) < minTicket(D)`.
 
 The probability that two Tipsets with different blocks would have all the same tickets can be considered negligible: this would amount to finding a collision between two 256-bit (or more) collision-resistant hashes.
 

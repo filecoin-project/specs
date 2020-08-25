@@ -10,6 +10,8 @@ dashboardAudit: done
 dashboardTests: 0
 ---
 
+<!--lint disable -->
+
 {{< plain hidden >}}
 $$
 \gdef\createporepbatch{\textsf{create\_porep\_batch}}
@@ -368,6 +370,8 @@ $$
 \gdef\sector{\textsf{sector}}
 $$
 {{< /plain >}}
+
+<!--lint enable -->
 
 # SDR Notation, Constants, and Types
 ---
