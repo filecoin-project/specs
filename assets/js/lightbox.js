@@ -6,14 +6,14 @@ function lightbox () {
     // template
     const fragment = new DocumentFragment()
     const container = document.createElement('div')
-    container.classList.add('lumos-container')
+    container.classList.add('lightbox-container')
   
     const zoom = document.createElement('div')
-    zoom.classList.add('lumos-zoom')
+    zoom.classList.add('lightbox-zoom')
     
     const img = document.createElement('img')
     img.src = ''
-    img.classList.add('lumos-image')
+    img.classList.add('lightbox-image')
     
     container.appendChild(zoom)
     zoom.appendChild(img)
@@ -31,37 +31,37 @@ function lightbox () {
           handleElementClick(element);
       });
     });
-    container.addEventListener('click', hideLumos);
+    container.addEventListener('click', hideLightbox);
     window.addEventListener('keyup', (event) => {
         if (event.key === 'Escape') {
-            hideLumos();
+            hideLightbox();
         }
     });
     
     function handleElementClick(htmlElement) {
       img.attributes['src'].value = htmlElement.attributes['src'].value;
-      if (!lumosContainerIsVisible()) {
+      if (!isVisible()) {
         container.classList.remove('hidden');
         container.classList.add('visible');
-        document.body.classList.add('lumos-body-scroll-stop')
+        document.body.classList.add('lightbox-body-scroll-stop')
       }
     }
   
-    function hideLumos() {
-      if (lumosContainerIsVisible()) {
+    function hideLightbox() {
+      if (isVisible()) {
           container.classList.add('hidden');
   
           setTimeout(() => {
               container.classList.remove('visible');
               container.classList.remove('hidden');
-              document.body.classList.remove('lumos-body-scroll-stop')
+              document.body.classList.remove('lightbox-body-scroll-stop')
               img.attributes['src'].value = '';
               myZoom.zoomReset()
           }, transitionSpeedInMilliseconds);
       }
     }
   
-    function lumosContainerIsVisible() {
+    function isVisible() {
       return container.classList.contains('visible');
     }
   }

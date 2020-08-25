@@ -1,4 +1,4 @@
-.lumos-container {
+.lightbox-container {
     transition: all 250ms ease-in-out;
     position: fixed;
     top: 0;
@@ -17,24 +17,24 @@
     will-change: transform;
 }
 
-.lumos-body-scroll-stop {
+.lightbox-body-scroll-stop {
     overflow: hidden;
     // position:fixed;
     width: 100%;
 }
 
-.lumos-container.visible {
+.lightbox-container.visible {
     animation-name: animate-in;
     animation-duration: 250ms;
     animation-fill-mode: forwards; 
 }
-.lumos-container.hidden {
+.lightbox-container.hidden {
     animation: animate-out;
     animation-duration: 250ms;
     animation-fill-mode: forwards; 
 }
 
-.lumos-zoom {
+.lightbox-zoom {
     transform-origin: top left;
     width: 100%;
     height: 100%;
@@ -43,7 +43,7 @@
     align-items: center;
 }
 
-.lumos-image {
+.lightbox-image {
     max-width: 100%;
     max-height: 100%;
     width: auto;
@@ -51,7 +51,7 @@
     object-fit: contain; 
 }
 @media (min-width: 768px) {
-    .lumos-image {
+    .lightbox-image {
         max-width: 95%;
         max-height: 95%;
     } 
