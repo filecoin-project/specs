@@ -4,7 +4,7 @@ bookhidden: true
 math-mode: true
 ---
 
-
+<!--lint disable -->
 {{<plain hidden>}}
 $$
 \gdef\createporepbatch{\textsf{create_porep_batch}}
@@ -360,6 +360,7 @@ $$
 \gdef\encode{\textsf{encode}}
 $$
 {{</plain>}}
+<!--lint enable -->
 
 # Math mode
 
