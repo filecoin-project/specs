@@ -1,6 +1,6 @@
 import '@pwabuilder/pwaupdate'
 import { initToc } from './toc.js'
-import panzoom from 'panzoom'
+import zoomable from 'd3-zoomable';
 import tablesort from 'tablesort'
 import Gumshoe from 'gumshoejs'
 import { buildTocModel } from './content-model'
@@ -13,10 +13,9 @@ require('tablesort/dist/sorts/tablesort.number.min.js')
 function initPanZoom () {
   var elements = document.querySelectorAll(".zoomable")
   elements.forEach(function (el) {
-    panzoom(el.querySelector('*:first-child'), {
-      maxZoom: 10,
-      minZoom: 0.5
-    })
+    zoomable()
+      (el)
+      .htmlEl(el.querySelector('img'))
   })
 }
 

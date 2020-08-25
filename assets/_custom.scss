@@ -48,15 +48,23 @@
     border-radius: $border-radius;
 }
 .diagrams {
-    width: auto;
-    overflow: hidden;
-    cursor: grab;
+    will-change: transform;
+    // width: 100%;
     height: 400px;
+    overflow: hidden;
+    outline: none;
+    cursor: grab;
     display: flex;
     justify-content: center;
     align-items: center;
-    will-change: transform;
-    outline: none;
+}
+.diagrams img {
+    transform-origin: top left;
+    max-height: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .diagrams:active {
     cursor: grabbing;
@@ -74,43 +82,6 @@
     }
 }
 
-.diagrams svg {
-    transform-origin: top left;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.diagrams.svg svg {
-    background-color: white;
-}
-
-// Figure zoom 
-.figure {
-    width: auto;
-    overflow: hidden;
-    cursor: grab;
-    justify-content: center;
-    align-items: center;
-    will-change: transform;
-    outline: none;
-}
-.figure:active {
-    cursor: grabbing;
-}
-.figure + figcaption {
-    text-align: center;
-}
-
-.figure img {
-    transform-origin: top left;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: auto;
-}
 // search
 #book-search-results {
     width: 100%;

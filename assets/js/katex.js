@@ -1,7 +1,6 @@
 import renderMathInElement from 'katex/dist/contrib/auto-render.mjs'
 
 function renderKatex (target) {
-  console.log('init katex for ', target)
   renderMathInElement(target, {
     ignoredTags: ["script", "noscript", "style", "textarea"],
     throwOnError: false,
