@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "concurrently -n diagrams,hugo \"npm-watch\" \"hugo server --bind=0.0.0.0 --disableFastRender\"",
+    "serve": "concurrently -n diagrams,hugo \"npm-watch\" \"npm run diagrams && hugo server --bind=0.0.0.0 --disableFastRender\"",
     "build": "hugo --gc --minify",
     "clean-modules": "hugo mod clean --all && hugo mod tidy",
     "diagrams": "node tools/diagrams.js"
@@ -14,7 +14,8 @@
     "diagrams": {
       "patterns" : "content",
       "extensions": "mmd,dot",
-      "quiet": true
+      "quiet": true,
+      "runOnChangeOnly": false
     }
   },
   "author": "",
