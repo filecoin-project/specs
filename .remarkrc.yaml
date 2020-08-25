@@ -3,6 +3,7 @@ plugins:
   remark-preset-lint-recommended:
   # add extra rules
   remark-lint-heading-increment:
+  remark-lint-fenced-code-flag: 
   # disable some of the sensible defaults given where we are today.
   remark-lint-list-item-indent: false
   remark-lint-final-newline: false

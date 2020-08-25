@@ -61,7 +61,7 @@ key locally from the signature rather than specifying an ID of the public key.
 as described below. For more details on how the Filecoin `Signature` type is
 serialized, see [Signature](signatures).
 
-```
+```text
 SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
 ```
 

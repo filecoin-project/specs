@@ -252,12 +252,12 @@ The Replication Algorithm  proceeds as follows:
 - `RandomSeed` is a 32-byte array of randomness extracted from the chain.
 - `CommD` is the Merkle root obtained by performing `RepHash` on the original data represented in `paddedfr32v1`.
 
-```
+```text
 ReplicaID := Hash(ProverID || SectorNumber || RandomSeed || CommD)
 ```
 
 - Perform `RepHash` on `Data` to yield `CommD` and `TreeD`:
-```
+```text
 CommD, TreeD = RepHash(data)
 ```
 

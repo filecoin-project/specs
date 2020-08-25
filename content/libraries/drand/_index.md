@@ -27,7 +27,7 @@ In the following sections we look in turn at how the Filecoin protocol makes use
 
 By polling the appropriate endpoint (see below for specifics on the drand network Filecoin uses), a Filecoin node will get back a drand value formatted as follows (e.g.):
 
-```
+```json
 {
   "round": 367,
   "signature": "b62dd642e939191af1f9e15bef0f0b0e9562a5f570a12a231864afe468377e2a6424a92ccfc34ef1471cbd58c37c6b020cf75ce9446d2aa1252a090250b2b1441f8a2a0d22208dcc09332eaa0143c4a508be13de63978dbed273e3b9813130d5",
