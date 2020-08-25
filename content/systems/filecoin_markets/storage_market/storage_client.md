@@ -2,7 +2,7 @@
 title: Storage Client
 weight: 4
 dashboardWeight: 2
-dashboardState: incomplete
+dashboardState: wip
 dashboardAudit: n/a
 dashboardTests: 0
 ---

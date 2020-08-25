@@ -22,6 +22,7 @@ function buildTocModel (contentSelector) {
         dashboardWeight: el.dataset.dashboardWeight,
         dashboardAudit: el.dataset.dashboardAudit,
         dashboardAuditURL: el.dataset.dashboardAuditUrl,
+        dashboardAuditDate: el.dataset.dashboardAuditDate,
         dashboardState: el.dataset.dashboardState,
         children: []
       }

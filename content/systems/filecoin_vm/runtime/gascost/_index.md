@@ -1,7 +1,7 @@
 ---
 title: Gas Costs
 dashboardWeight: 1
-dashboardState: incomplete
+dashboardState: wip
 dashboardAudit: missing
 dashboardTests: 0
 ---

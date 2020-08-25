@@ -3,7 +3,7 @@ title: Storage Market
 weight: 1
 bookCollapseSection: true
 dashboardWeight: 2
-dashboardState: incomplete
+dashboardState: wip
 dashboardAudit: missing
 dashboardTests: 0
 ---

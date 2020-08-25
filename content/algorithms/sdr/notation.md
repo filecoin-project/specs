@@ -6,7 +6,7 @@ description: "Notation, Constants, and Types for Stacked DRG PoRep"
 
 dashboardWeight: 2
 dashboardState: stable
-dashboardAudit: stable
+dashboardAudit: done
 dashboardTests: 0
 ---
 

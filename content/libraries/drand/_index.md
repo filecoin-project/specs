@@ -3,9 +3,10 @@ title: drand - Distributed Randomness
 weight: 1
 dashboardWeight: 2
 dashboardState: stable
-dashboardAudit: stable
 dashboardTests: 0
+dashboardAudit: done
 dashboardAuditURL: https://drive.google.com/file/d/1fCy1ynO78gJLCNbqBruzHx7bh72Tu-q2/view
+dashboardAuditDate: '2020-08-09'
 ---
 
 # DRAND

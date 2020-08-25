@@ -35,7 +35,7 @@
   - headings get numbered by css; changing the nesting requires updating numbered.scss.
   - heading text is grabbed by toc.js as the ToC link text
 */}}
-<h{{ $level }} id="{{ $anchor | safeURL }}" class="level-{{ $level }}" data-page="{{if eq $originalLevel 1 }}true{{end}}" data-dashboard-weight="{{.Page.Params.dashboardWeight}}" data-dashboard-state="{{.Page.Params.dashboardState}}" data-dashboard-audit="{{.Page.Params.dashboardAudit}}" data-dashboard-audit-url="{{.Page.Params.dashboardAuditURL}}">
+<h{{ $level }} id="{{ $anchor | safeURL }}" class="level-{{ $level }}" data-page="{{if eq $originalLevel 1 }}true{{end}}" data-dashboard-weight="{{.Page.Params.dashboardWeight}}" data-dashboard-state="{{.Page.Params.dashboardState}}" data-dashboard-audit="{{.Page.Params.dashboardAudit}}" data-dashboard-audit-url="{{.Page.Params.dashboardAuditURL}}" data-dashboard-audit-date="{{.Page.Params.dashboardAuditDate}}">
   <a href="#{{ $anchor | safeURL }}">{{ .Text | safeHTML }}</a>
 </h{{ $level }}>
 <div class="section-badges">
