@@ -3,8 +3,8 @@ title: Sector Index
 weight: 3
 bookCollapseSection: true
 dashboardWeight: 1
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: incorrect
+dashboardAudit: missing
 dashboardTests: 0
 ---
 

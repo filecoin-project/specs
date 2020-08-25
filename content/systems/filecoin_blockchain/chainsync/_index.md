@@ -3,8 +3,8 @@ title: ChainSync
 weight: 3
 description: ChainSync - synchronizing the Blockchain
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: reliable
+dashboardAudit: missing
 dashboardTests: 0
 ---
 

@@ -3,8 +3,8 @@ title: Multiformats
 description: Multiformats - self describing protocol values
 weight: 6
 dashboardWeight: 1
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: missing
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 

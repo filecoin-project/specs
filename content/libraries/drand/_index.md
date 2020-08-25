@@ -1,9 +1,15 @@
 ---
-menuTitle: drand
 title: drand - Distributed Randomness
+weight: 1
+dashboardWeight: 2
+dashboardState: stable
+dashboardAudit: stable
+dashboardTests: 0
+dashboardAuditURL: https://drive.google.com/file/d/1fCy1ynO78gJLCNbqBruzHx7bh72Tu-q2/view
 ---
 
-# Drand
+# DRAND
+---
 
 DRand (Distributed Randomness) is a publicly verifiable random beacon protocol Filecoin relies on as a source of unbiasable entropy for leader election (see [leader election](election_post)).
 

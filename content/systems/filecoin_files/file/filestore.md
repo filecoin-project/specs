@@ -1,8 +1,8 @@
 ---
 title: FileStore
 dashboardWeight: 1
-dashboardState: stable
-dashboardAudit: 0
+dashboardState: reliable
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 
