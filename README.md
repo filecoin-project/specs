@@ -29,7 +29,7 @@ brew install go bzr
 
 ### Serve with Live Reload
 ```sh
-yarn serve
+yarn start
 # open http://localhost:1313/ in the browser
 ```
 
