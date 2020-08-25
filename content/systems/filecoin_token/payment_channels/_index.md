@@ -116,7 +116,7 @@ One example of such accounting is *merging of lanes*. When a pair of channel sen
 Summarising, we have the following sequence:
 
 0. Two parties agree to a series of transactions (for instance as part of file retrieval) with one party paying the other party up to some _total_ sum of Filecoin over time. This is part of the deal-phase, it takes place off-chain and does not (at this stage) involve payment channels.
-1. The [Payment Channel Actor](payment_channel_actor.md) is used, called the payment channel sender (who is the recipient of some service, e.g., file in case of file retrieval) to create the payment channel and deposit funds.
+1. The Payment Channel Actor is used, called the payment channel sender (who is the recipient of some service, e.g., file in case of file retrieval) to create the payment channel and deposit funds.
 2. Any of the two parties can create vouchers to send to the other party.
 3. The voucher recipient saves the voucher locally. Each voucher has to be submitted by the opposite party from the one that created the voucher.
 4. Either immediately or later, the voucher recipient "redeems" the voucher by submitting it to the chain, calling `UpdateChannelState`
