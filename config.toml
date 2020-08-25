@@ -1,5 +1,5 @@
 # baseURL = '/'
-title = 'Filecoin Spec'
+title = 'Filecoin Actors'
 # theme = 'book'
 canonifyurls = false
 relativeURLs = true

@@ -10,26 +10,19 @@ dashboardAudit: 0
 # Introduction
 ---
 
-Filecoin is a distributed storage network based on a blockchain mechanism.
-Filecoin *miners* can elect to provide storage capacity for the network, and thereby
-earn units of the Filecoin cryptocurrency (FIL) by periodically producing
-cryptographic proofs that certify that they are providing the capacity specified.
-In addition, Filecoin enables parties to exchange FIL currency
-through transactions recorded in a shared ledger on the Filecoin blockchain.
-Rather than using Nakamoto-style proof of work to maintain consensus on the chain, however,
-Filecoin uses proof of storage itself: a miner's power in the consensus protocol
-is proportional to the amount of storage it provides.
+## What is Filecoin?
 
-The Filecoin blockchain not only maintains the ledger for FIL transactions and
-accounts, but also implements the Filecoin VM, a replicated state machine which executes
-a variety of cryptographic contracts and market mechanisms among participants
-on the network.
-These contracts include *storage deals*, in which clients pay FIL currency to miners
-in exchange for storing the specific file data that the clients request.
-Via the distributed implementation of the Filecoin VM, storage deals
-and other contract mechanisms recorded on the chain continue to be processed
-over time, without requiring further interaction from the original parties
-(such as the clients who requested the data storage).
+Filecoin is a *decentralized storage network*, a network of independent storage providers offering storage and retrieval services in a market operated on a blockchain with a native protocol token called FIL.
+
+The *Filecoin Market* is an algorithmic market for storage and retrieval services.
+Miners offer their storage capacity in the market and make *storage deals* with clients.
+The market is verifiable: storage providers must provide cryptographic proofs that guarantee persistent storage to their clients.
+
+The *Filecoin Blockchain* is a distributed ledger that orders FIL transactions and executes the *Filecoin Virtual Machine*, a state machine that implements core functionalities to operate the Filecoin markets and token transactions.
+Miners mantain the blockchain by creating blocks and verifying transactions and earn block rewards.
+Differently from other protocols based on computational resources, miners' influence in the network and block reward earnings are proportional to the amount of storage they prove.
+
+This spec documents the logic implemented in the Filecoin Virtual Machine.
 
 ## Spec Status
 
