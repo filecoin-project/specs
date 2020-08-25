@@ -21,10 +21,10 @@ yarn install
 ```
 
 ## Develop
-You need to have Go installed https://golang.org/doc/install
+You need to have [Go](https://golang.org/doc/install) and `bzr` installed (required to build lotus)
 
 ```bash
-brew install go
+brew install go bzr
 ```
 
 ### Serve with Live Reload
