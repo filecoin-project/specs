@@ -3,23 +3,96 @@ title: Node Types
 weight: 1
 bookCollapseSection: true
 dashboardWeight: 1
-dashboardState: wip
+dashboardState: stable
 dashboardAudit: n/a
 dashboardTests: 0
 ---
 
-# Node Types
+Nodes in the Filecoin network are primarily identified in terms of the services they provide. The type of node, therefore, depends on which services a node provides. A basic set of services in the Filecoin network include:
+- chain verification
+- storage market client
+- storage market provider
+- retrieval market client
+- retrieval market provider
+- storage mining
 
-Fundamentally, there are only two major node types in the Filecoin network and this is how the Lotus implementation is realising _node types_ in the strict sense of the word. Nodes are identified with a repository (directory) in the host in a one-to-one relationship - that is one repo belongs to a single node. That said one host might realise multiple Filecoin nodes by having the corresponding repositories. The two major node types are:
+Any node participating in the Filecoin network should provide the _chain verification_ service as a minimum. Depending on which extra services a node provides on top of chain verification, it gets the corresponding functionality and Node Type "label".
 
-The **Full Node:** this is the chain validation or chain verifier node. A Full Node must synchronise the chain (ChainSync) when it first joins the network to reach current consensus. From then on, the node must constantly be fetching any addition to the chain (i.e., receive the latest blocks) and validate them to reach consensus state.
-The **Miner Node:** Miner nodes are the backbone of the Filecoin blockchain network. They have all the functionality of the Full Node, but also extend this functionality to create blocks, submit blocks to the blockchain and ultimately extend the blockchain.
-
-In order to realise the full potential of the Filecoin network, there is more functionality that needs to be added on top of the _base_ node types described above. This extra functionality can be thought of as a service or subsystem that run on top of the two node types above. We refer to a node that realises extra functionality as _node_ too, for clarity. However, note that different node types are not mutually exclusive to each other, meaning that one physical node might have to implement more than one type of node functionality.
+Nodes can be realized with a repository (directory) in the host in a one-to-one relationship - that is, one repo belongs to a single node. That said, one host can implement multiple Filecoin nodes by having the corresponding repositories.
 
 A Filecoin implementation should support the following subsystems, or types of nodes:
 
-- **Chain Verifier Node:** this is the **Full Node** described above. This type of node cannot play an active role in the network, unless it implements **Client Node** functionality, described below.
-- **Client Node:** this type of node builds on top of the **Full or Chain Verifier Node** and must be implemented by any application that is building on the Filecoin network. This can be thought of as the main infrastructure node (at least as far as interaction with the blockchain is concerned) of applications such as exchanges or decentralised storage applications building on Filecoin. The node should implement and interact (as a client) with the Storage and Retrieval Markets, keep the Market Order Book and be able to do Data Transfers through the Data Transfer Module.
-- **Retrieval Miner Node:** this node type is extending the **Full or Chain Verifier Node** to add _retrieval miner_ functionality, that is, participate in the retrieval market. As such, this node type needs to implement the retrieval market provider subsystem, keep the Market Order Book and be able to do Data Transfers through the Data Transfer Module.
-- **Storage Miner Node:** this type of node is building on top of the Miner Node described above and must implement all of its functionality for validating, creating and adding blocks to the blockchain. It should implement the storage mining subsystem, the storage market provider subsystem, keep the Market Order Book and be able to do Data Transfers through the Data Transfer Module.
+- **Chain Verifier Node:** this is the minimum functionality that a node needs to have in order to participate in the Filecoin network. This type of node cannot play an active role in the network, unless it implements **Client Node** functionality, described below. A Chain Verifier Node must synchronise the chain (ChainSync) when it first joins the network to reach current consensus. From then on, the node must constantly be fetching any addition to the chain (i.e., receive the latest blocks) and validate them to reach consensus state.
+- **Client Node:** this type of node builds on top of the **Chain Verifier Node** and must be implemented by any application that is building on the Filecoin network. This can be thought of as the main infrastructure node (at least as far as interaction with the blockchain is concerned) of applications such as exchanges or decentralised storage applications building on Filecoin. The node should implement the _storage market and retrieval market client_ services. The client node should interact with the Storage and Retrieval Markets, keep the Market Order Book and be able to do Data Transfers through the Data Transfer Module.
+- **Retrieval Miner Node:** this node type is extending the **Chain Verifier Node** to add _retrieval miner_ functionality, that is, participate in the retrieval market. As such, this node type needs to implement the _retrieval market provider_ service, keep the Market Order Book and be able to do Data Transfers through the Data Transfer Module.
+- **Storage Miner Node:** this type of node must implement all of the required functionality for validating, creating and adding blocks to extend the blockchain. It should implement the chain verification, storage mining and storage market provider services, keep the Market Order Book and be able to do Data Transfers through the Data Transfer Module.
+
+# Node Interface
+
+{{<embed src="content/externals/lotus/node/repo/interface.go" lang="go" >}}
+
+# Chain Verifier Node
+
+```go
+type ChainVerifierNode interface {
+  FilecoinNode
+
+  systems.Blockchain
+}
+```
+{{<embed src="content/externals/lotus/node/impl/full.go" lang="go" >}}
+
+# Client Node
+
+```go
+type ClientNode struct {
+  FilecoinNode
+
+  systems.Blockchain
+  markets.StorageMarketClient
+  markets.RetrievalMarketClient
+  markets.MarketOrderBook
+  markets.DataTransfers
+}
+```
+{{<embed src="content/externals/lotus/node/impl/client/client.go" lang="go" >}}
+
+# Storage Miner Node
+
+```go
+type StorageMinerNode interface {
+  FilecoinNode
+
+  systems.Blockchain
+  systems.Mining
+  markets.StorageMarketProvider
+  markets.MarketOrderBook
+  markets.DataTransfers
+}
+```
+{{<embed src="content/externals/lotus/node/impl/storminer.go" lang="go" >}}
+
+# Retrieval Miner Node
+
+```go
+type RetrievalMinerNode interface {
+  FilecoinNode
+
+  blockchain.Blockchain
+  markets.RetrievalMarketProvider
+  markets.MarketOrderBook
+  markets.DataTransfers
+}
+```
+
+# Relayer Node
+
+```go
+type RelayerNode interface {
+  FilecoinNode
+
+  blockchain.MessagePool
+  markets.MarketOrderBook
+}
+```
+
