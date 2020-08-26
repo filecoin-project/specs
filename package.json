@@ -4,12 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "concurrently -n diagrams,hugo \"tools/diagrams.js --watch\" \"npm run serve\"",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "tools/diagrams.js --all && hugo server --bind=0.0.0.0 --disableFastRender",
-    "build": "hugo --gc --minify",
-    "clean-modules": "hugo mod clean --all && hugo mod tidy",
-    "diagrams": "node tools/diagrams.js"
+    "start": "concurrently npm:build-diagrams npm:watch-*",
+    "serve": "npm start",
+    "build": "concurrently npm:build-*",
+    "clean": "concurrently npm:clean-*",
+    "watch-hugo": "hugo server --bind=0.0.0.0 --disableFastRender",
+    "watch-diagrams": "tools/diagrams.js --watch",
+    "build-hugo": "hugo --gc --minify",
+    "build-diagrams": "tools/diagrams.js --all",
+    "clean-hugo": "rm -rf ./public",
+    "clean-hugo-modules": "hugo mod clean --all",
+    "clean-diagrams": "rm -rf ./_gen"
   },
   "author": "",
   "license": "MIT",
