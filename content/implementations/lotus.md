@@ -2,10 +2,23 @@
 title: Lotus
 weight: 1
 implRepos: 
-  - { lang: go,   repo: https://github.com/filecoin-project/lotus, auditState: done, auditDate: '2020-07-31' }
-  - { lang: go,   repo: https://github.com/filecoin-project/go-fil-markets, auditState: done, auditDate: '2020-07-31' }
-  - { lang: go,   repo: https://github.com/filecoin-project/specs-actors, auditState: done, auditDate: '2020-07-31' }
-  - { lang: rust, repo: https://github.com/filecoin-project/rust-fil-proofs }
+  - repo: https://github.com/filecoin-project/lotus
+    lang: go
+    auditState: wip
+  - repo: https://github.com/filecoin-project/go-fil-markets
+    lang: go
+    auditState: wip
+  - repo: https://github.com/filecoin-project/specs-actors
+    lang: go
+    auditState: wip
+  - repo: https://github.com/filecoin-project/rust-fil-proofs
+    lang: rust
+    auditState: done
+    audits:
+    - auditDate: '2020-07-28'
+      auditURL: https://github.com/filecoin-project/rust-fil-proofs/blob/master/audits/protocolai-audit-20200728.pdf
+    - auditDate: '2020-07-28'
+      auditURL: https://github.com/filecoin-project/rust-fil-proofs/blob/4a07a868d077f5926b23c3f913f99d8b46b8cebc/audits/Sigma-Prime-Protocol-Labs-Filecoin-Proofs-Security-Review-v2.1.pdf
 ---
 
 # Lotus
