@@ -38,6 +38,7 @@
     "execa": "^4.0.3",
     "globby": "^11.0.1",
     "graphviz-cli": "^1.0.0",
-    "hugo-extended": "^0.74.3"
+    "hugo-extended": "^0.74.3",
+    "premove": "^3.0.1"
   }
 }
