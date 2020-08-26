@@ -13,9 +13,7 @@
     "watch-diagrams": "tools/diagrams.js --watch",
     "build-hugo": "hugo --gc --minify",
     "build-diagrams": "tools/diagrams.js --all",
-    "clean-hugo": "rm -rf ./public",
-    "clean-hugo-modules": "hugo mod clean --all",
-    "clean-diagrams": "rm -rf ./_gen"
+    "clean": "premove public resources static/_gen && hugo mod clean --all && hugo mod tidy"
   },
   "author": "",
   "license": "MIT",
