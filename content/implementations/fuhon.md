@@ -8,6 +8,8 @@ implRepos:
 # Fuhon (cpp-filecoin)
 ---
 
-C++17 implementation of blockchain based digital storage
+Fuhon is the C++ implementation of Filecoin. The implementation uses Rust libraries for BLS, so Rust is needed in order to build successfully.
 
-https://github.com/filecoin-project/cpp-filecoin
+You can find the Fuhon codebase [here](https://github.com/filecoin-project/cpp-filecoin).
+
+The Fuhon implementation of Filecoin is supported by [Soramitsu](https://soramitsu.co.jp/).

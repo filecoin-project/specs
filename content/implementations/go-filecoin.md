@@ -8,6 +8,8 @@ implRepos:
 # Filecoin (go-filecoin)
 ---
 
-The original Filecoin node implementation in Go.
+`go-filecoin` is a [community-driven](https://filecoin.io/blog/roadmap-update-june-2020/#what-s-next) implementation of Filecoin in Go. The `go-filecoin` implementation is nearly feature-complete (as of June 2020) with `go-filecoin` nodes interoperating with Lotus nodes.
 
-https://github.com/filecoin-project/go-filecoin
+Protocol Labs is offering [DevGrants](https://github.com/filecoin-project/devgrants/issues/140) to support the development of `go-filecoin`.
+
+You can find the `go-filecoin` codebase [here](https://github.com/filecoin-project/go-filecoin) and its extensive documentation website [here](https://go.filecoin.io/).
