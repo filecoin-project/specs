@@ -1,6 +1,7 @@
 ---
 title: Lotus
 weight: 1
+dashboardWeight: 1
 dashboardState: reliable
 dashboardAudit: n/a
 implRepos: 

@@ -1,6 +1,7 @@
 ---
 title: Fuhon
 weight: 4
+dashboardWeight: 1
 dashboardState: reliable
 dashboardAudit: n/a
 implRepos: 

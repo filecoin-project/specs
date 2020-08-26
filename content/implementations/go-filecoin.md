@@ -1,6 +1,7 @@
 ---
 title: go-filecoin
 weight: 2
+dashboardWeight: 1
 dashboardState: reliable
 dashboardAudit: n/a
 implRepos: 
