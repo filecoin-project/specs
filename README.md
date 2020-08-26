@@ -33,6 +33,19 @@ yarn start
 # open http://localhost:1313/ in the browser
 ```
 
+### Check your markdown
+
+We have a markdown linter set up to check for common errors like incorrectly nested headers. It runs in CI and you can run it locally with:
+
+```bash
+npm test
+content/algorithms/crypto/randomness.md
+  15:39-15:46  warning  Found reference to undefined definition  no-undefined-references  remark-lint
+  54:24-54:31  warning  Found reference to undefined definition  no-undefined-references  remark-lint
+
+⚠ 2 warnings
+```
+
 ### Solving Common problems
 
 **Problem** - Site fails to build with an error that states it faled to download modules on macos
