@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Retrieval Protocols
----
 
 The `retrieval market` is implemented using the following `libp2p` service.
 

@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Key Store
----
 
 The `Key Store` is a fundamental abstraction in any full Filecoin node used to store the keypairs associated with a given miner's address and distinct workers (should the miner choose to run multiple workers).
 

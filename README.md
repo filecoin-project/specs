@@ -33,6 +33,19 @@ yarn start
 # open http://localhost:1313/ in the browser
 ```
 
+### Check your markdown
+
+We have a markdown linter set up to check for common errors like incorrectly nested headers. It runs in CI and you can run it locally with:
+
+```bash
+npm test
+content/algorithms/crypto/randomness.md
+  15:39-15:46  warning  Found reference to undefined definition  no-undefined-references  remark-lint
+  54:24-54:31  warning  Found reference to undefined definition  no-undefined-references  remark-lint
+
+⚠ 2 warnings
+```
+
 ### Solving Common problems
 
 **Problem** - Site fails to build with an error that states it faled to download modules on macos
@@ -85,7 +98,7 @@ hugo mod get github.com/filecoin-project/specs-actors@v0.7.2
 ```
 
 ## Page Header
-The first heading should be `# Page Title` with `---` like below and should refer to the overall title of the document.
+The first heading should be an atx style heading `# Head` and should refer to the overall title of the document.
 
 ```md
 ---
@@ -93,7 +106,6 @@ title: Storage Power Actor
 ---
 
 # Storage Power Actor
----
 
 ## Header for a section in this document
 Some text

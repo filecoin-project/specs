@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Client Node
----
 
 ```go
 type ClientNode struct {

@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Storage Deal Flow
----
 
 ![Deal Flow Sequence Diagram](diagrams/deal-flow.mmd)
 

@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Retrieval Client
----
 
 ## Client Dependencies
 

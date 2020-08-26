@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Relayer Node
----
 
 ```go
 type RelayerNode interface {

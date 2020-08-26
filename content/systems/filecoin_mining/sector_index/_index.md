@@ -9,6 +9,5 @@ dashboardTests: 0
 ---
 
 # Sector Index
----
 
 {{<embed src="sector_index_subsystem.id"  lang="go" >}}

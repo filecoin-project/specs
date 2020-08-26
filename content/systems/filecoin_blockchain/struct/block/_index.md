@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Block
----
 
 A block header contains information relevant to a particular point in time over which the network may achieve consensus.
 

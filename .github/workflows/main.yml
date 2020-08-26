@@ -20,6 +20,7 @@ jobs:
       - run: sudo apt install bzr
 
       - run: npm install
+      - run: npm test
       - run: npm run build
 
       # Pin the built site to ipfs-cluster, output the cid as `steps.ipfs.outputs.cid`

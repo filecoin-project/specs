@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Verifiable Random Function
----
 
 Filecoin uses the notion of a [Verifiable Random
 Function](https://people.csail.mit.edu/silvio/Selected%20Scientific%20Papers/Pseudo%20Randomness/Verifiable_Random_Functions.pdf)

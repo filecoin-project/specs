@@ -9,7 +9,6 @@ dashboardTests: 0
 ---
 
 # Storage Mining System - proving storage for producing blocks
----
 
 The Storage Mining System is the part of the Filecoin Protocol that deals with storing Client's
 data, producing proof artifacts that demonstrate correct storage behavior, and managing the work

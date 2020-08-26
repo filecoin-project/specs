@@ -12,6 +12,7 @@ dashboardAudit: done
 dashboardTests: 0
 ---
 
+<!--lint disable -->
 
 {{< plain hidden >}}
 $$
@@ -374,8 +375,9 @@ $$
 $$
 {{< /plain >}}
 
+<!--lint enable -->
+
 # Stacked DRG Proof of Replication
----
 
 ## Merkle Proofs
 

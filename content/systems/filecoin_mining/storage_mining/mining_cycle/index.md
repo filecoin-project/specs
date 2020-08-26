@@ -7,7 +7,6 @@ dashboardTests: 0
 ---
 
 # Storage Mining Cycle
----
 
 Block miners should constantly be performing Proofs of SpaceTime using [Election PoSt](election_post), and checking the outputted partial tickets to run [Leader Election](expected_consensus#secret-leader-election) and determine whether they can propose a block at each epoch. Epochs are currently set to take around X seconds, in order to account for election PoSt and network propagation around the world. The details of the mining cycle are defined here.
 
@@ -72,17 +71,17 @@ In a fully synchronized network most of period `Rx` does not see any network tra
 
 Let's look at an example, both use a block-time of 30s, and a cutoff at 15s.
 
-- T = 0: start of epoch n
-- T in [0, 15]: miner A receives, validates and propagates incoming blocks. Valid blocks should have timestamp 0.
-- T = 15: epoch cutoff for n-1, A assembles the heaviest tipset and starts mining atop it.
-- T = 25: A successfully generates a block, sets its timestamp to 30, and waits until the epoch boundary (at 30) to release it.
-- T = 30: start of epoch n + 1, A releases its block for epoch n.
-- T in [30, 45]: A receives and validates incoming blocks, their timestamp is 30.
-- T = 45: epoch cutoff for n, A forms tipsets and starts mining atop the heaviest.
-- T = 60: start of epoch n + 2.
-- T in [60, 75]: A receives and validates incoming blocks
-- T = 67: A successfully generates a block, sets it timestamp to 60 and releases it.
-- T = 75: epoch cutoff for n+1...
+- `T = 0`: start of epoch n
+- `T in [0, 15]`: miner A receives, validates and propagates incoming blocks. Valid blocks should have timestamp 0.
+- `T = 15`: epoch cutoff for n-1, A assembles the heaviest tipset and starts mining atop it.
+- `T = 25`: A successfully generates a block, sets its timestamp to 30, and waits until the epoch boundary (at 30) to release it.
+- `T = 30`: start of epoch n + 1, A releases its block for epoch n.
+- `T in [30, 45]`: A receives and validates incoming blocks, their timestamp is 30.
+- `T = 45`: epoch cutoff for n, A forms tipsets and starts mining atop the heaviest.
+- `T = 60`: start of epoch n + 2.
+- `T in [60, 75]`: A receives and validates incoming blocks
+- `T = 67`: A successfully generates a block, sets it timestamp to 60 and releases it.
+- `T = 75`: epoch cutoff for n+1...
 
 Above, in epoch n, A mines fast, in epoch n+1 A mines slow. So long as the miner's block is between the epoch boundary and the cutoff, it will be accepted by other miners.
 

@@ -7,7 +7,6 @@ dashboardAudit: n/a
 ---
 
 # Filecoin VM Actors
----
 {{< hint warning >}}
 TODO: Needs content
 {{< /hint >}}

@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Config - Local Storage for Configuration Values
----
 
 Filecoin Node configuration
 

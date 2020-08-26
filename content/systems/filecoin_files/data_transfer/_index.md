@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Data Transfer in Filecoin
----
 
 The _Data Transfer Protocol_ is a protocol for transferring all or part of a `Piece` across the network when a deal is made. The overall goal for the data transfer module is for it to be an abstraction of the underlying transport medium over which data is transferred between different parties in the Filecoin network. Currently, the underlying medium or protocol used to actually do the data transfer is GraphSync. As such, the Data Transfer Protocol can be thought of as a negotiation protocol.
 

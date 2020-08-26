@@ -9,7 +9,6 @@ dashboardTests: 0
 ---
 
 # Storage Miner
----
 
 ## Filecoin Storage Mining Subsystem
 

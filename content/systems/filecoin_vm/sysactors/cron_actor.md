@@ -8,6 +8,5 @@ dashboardTests: 0
 ---
 
 # CronActor
----
 
 {{<embed src="/externals/specs-actors/actors/builtin/cron/cron_actor.go"  lang="go">}}

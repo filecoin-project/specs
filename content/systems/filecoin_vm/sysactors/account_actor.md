@@ -8,6 +8,5 @@ dashboardTests: 0
 ---
 
 # AccountActor
----
 
 {{<embed src="/externals/specs-actors/actors/builtin/account/account_actor.go" lang="go" >}}

@@ -10,7 +10,6 @@ dashboardAuditURL: https://github.com/filecoin-project/rust-fil-proofs/blob/mast
 
 ---
 # Filecoin Storage Proofs
----
 
 {{< embed src="filecoin_proofs_subsystem.id" lang="go" >}}
 

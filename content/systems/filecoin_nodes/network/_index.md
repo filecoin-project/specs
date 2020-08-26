@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Interface
----
 
 {{<embed src="network.id" lang="go" >}}
 

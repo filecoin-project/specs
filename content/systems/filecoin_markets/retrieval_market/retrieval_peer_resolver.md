@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Retrieval Peer Resolver
----
 
 The `peer resolver` is a content routing interface to discover retrieval miners that have a given Piece.
 

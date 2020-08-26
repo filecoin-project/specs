@@ -9,7 +9,6 @@ dashboardTests: 0
 ---
 
 # Retrieval Market in Filecoin
----
 
 ## Components
 

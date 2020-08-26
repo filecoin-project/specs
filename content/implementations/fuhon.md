@@ -6,7 +6,6 @@ implRepos:
 ---
 
 # Fuhon (cpp-filecoin)
----
 
 Fuhon is the C++ implementation of Filecoin. The implementation uses Rust libraries for BLS, so Rust is needed in order to build successfully.
 

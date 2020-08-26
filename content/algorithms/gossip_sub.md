@@ -10,7 +10,6 @@ dashboardAuditURL: https://gateway.ipfs.io/ipfs/QmWR376YyuyLewZDzaTHXGZr7quL5LB1
 ---
 
 # GossipSub
----
 
 Transaction messages and block headers alongside the message references are propagated using the [libp2p GossipSub router](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub). **In order to guarantee interoperability between different implementations, all filecoin full nodes must implement and use this protocol.** All pubsub messages are authenticated and must be [syntactically validated](message#message-syntax-validation) before being propagated further.
 

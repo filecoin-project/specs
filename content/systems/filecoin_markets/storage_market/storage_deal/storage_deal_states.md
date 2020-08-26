@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Storage Deal States
----
 
 All on-chain economic activities in Filecoin start with the deal. This section aims to explain different states of a deal and their relationship with other concepts in the protocol such as Power, Payment, and Collaterals.
 

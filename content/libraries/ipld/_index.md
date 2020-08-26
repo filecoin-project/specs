@@ -10,6 +10,5 @@ dashboardTests: 0
 ---
 
 # IPLD - InterPlanetary Linked Data
----
 
 {{< embed src="ipld.id" lang="go" >}}

@@ -10,7 +10,6 @@ dashboardAuditDate: '2020-08-09'
 ---
 
 # DRAND
----
 
 DRand (Distributed Randomness) is a publicly verifiable random beacon protocol Filecoin relies on as a source of unbiasable entropy for leader election (see [leader election](election_post)).
 
@@ -23,11 +22,11 @@ You can learn more about how drand works, by visiting its [repository](https://g
 
 In the following sections we look in turn at how the Filecoin protocol makes use of drand randomness, and at some of the characteristics of the specific drand network Filecoin uses.
 
-### Drand randomness outputs
+## Drand randomness outputs
 
 By polling the appropriate endpoint (see below for specifics on the drand network Filecoin uses), a Filecoin node will get back a drand value formatted as follows (e.g.):
 
-```
+```json
 {
   "round": 367,
   "signature": "b62dd642e939191af1f9e15bef0f0b0e9562a5f570a12a231864afe468377e2a6424a92ccfc34ef1471cbd58c37c6b020cf75ce9446d2aa1252a090250b2b1441f8a2a0d22208dcc09332eaa0143c4a508be13de63978dbed273e3b9813130d5",
@@ -43,7 +42,7 @@ Specifically, we have:
 
 Specifically, the message signed is the concatenation of the round number treated as a uint64 and the previous signature. At the moment, drand uses BLS signatures on the BLS12-381 curve with the latest v7 RFC of hash-to-curve and the signature is made over G1 (for more see the [drand spec](https://github.com/drand/drand/blob/master/docs/SPECS.md#cryptographic-specification)).
 
-### Polling the drand network
+## Polling the drand network
 
 Filecoin nodes fetches the drand entry from the distribution network of the
 selected drand network. TODO: define network's name/entrypoints when drand
@@ -72,7 +71,7 @@ Thereafter, the Filecoin client can call drand's endpoints:
 - `/public/latest` to get the latest randomness value produced by the beacon
 - `/public/<round>` to get the randoomness value produced by the beacon at a given round
 
-### Using drand in Filecoin
+## Using drand in Filecoin
 
 Drand is used as a randomness beacon for leader election in Filecoin. You can
 read more about that in [leader election](election_post). See drand used in the
@@ -84,7 +83,7 @@ Filecoin blocks need only store a subset of these in order to track a full drand
 chain. This information can then be mixed with on-chain data for use in
 Filecoin. See [randomness](randomness) for more.
 
-#### Verifying an incoming drand value
+### Verifying an incoming drand value
 
 Upon receiving a new drand randomness value from a beacon, a Filecoin node should immediately verify its validity. That is, it should verify:
 
@@ -93,7 +92,7 @@ Upon receiving a new drand randomness value from a beacon, a Filecoin node shoul
 
 See [drand](https://github.com/drand/drand/blob/master/beacon/beacon.go#L63) for an example.
 
-#### Fetching the appropriate drand value while mining
+### Fetching the appropriate drand value while mining
 
 There is a deterministic mapping between a needed drand round number and a Filecoin epoch number.
 
@@ -123,7 +122,7 @@ MaxBeaconRoundForEpoch(filEpoch) {
 }
 ```
 
-### Edge cases and dealing with a drand outage
+## Edge cases and dealing with a drand outage
 
 It is important to note that any drand beacon outage will effectively halt
 Filecoin block production. Given that new randomness is not produced, Filecoin
@@ -156,7 +155,7 @@ of these blocks.
 In any event, a heavier chain will emerge after the catch up period and mining
 can resume as normal.
 
-### drand network specification
+## drand network specification
 
 TODO once ready: @nikkolasg
 - Filecoin node access to randomness (how to connect, poll, etc)

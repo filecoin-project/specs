@@ -7,7 +7,6 @@ dashboardAudit: n/a
 ---
 
 # Filecoin Parameters
----
 
 Some of these parameters are used around the code in the Filecoin subsystems and ABI. Others are used as part of the proofs libraries.
 

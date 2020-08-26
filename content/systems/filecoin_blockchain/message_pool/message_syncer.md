@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Message Propagation
----
 
 The message pool has to interface with the libp2p pubsub [GossipSub](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub) protocol. This is because transaction messages are propagated over [GossipSub](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub) the corresponding `/fil/msgs/` _topic_. Every [Message](message) is announced in the corresponding `/fil/msgs/` topic by any node participating in the network.
 

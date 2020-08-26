@@ -10,6 +10,5 @@ dashboardTests: 0
 ---
 
 # VM - Virtual Machine
----
 
 {{<embed src="vm.id" lang="go" >}}

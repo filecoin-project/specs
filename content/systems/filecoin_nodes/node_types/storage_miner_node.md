@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Storage Miner Node
----
 
 ```go
 type StorageMinerNode interface {

@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Chain Verifier Node
----
 
 ```go
 type ChainVerifierNode interface {

@@ -7,6 +7,5 @@ dashboardTests: 0
 ---
 
 # Sector Set
----
 
 {{<embed src="sectorset.id" lang="go" >}}

@@ -8,7 +8,6 @@ dashboardTests: 0
 ---
 
 # Block Producer
----
 
 ## Mining Blocks
 

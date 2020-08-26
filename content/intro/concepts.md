@@ -7,7 +7,6 @@ dashboardAudit: n/a
 ---
 
 # Key Concepts
----
 
 For clarity, we refer the following types of entities to describe implementations of the Filecoin protocol:
 
