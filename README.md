@@ -54,7 +54,7 @@ content/algorithms/crypto/randomness.md
 Error: failed to download modules: go command failed ...
 ```
 
-**Solution** - run `npm run clean-modules` - the cache dir hugo uses can get corrupted, and this resets it. See [#1048](https://github.com/filecoin-project/specs/issues/1048)
+**Solution** - run `npm run clean` - the cache dir hugo uses can get corrupted, and this resets it. See [#1048](https://github.com/filecoin-project/specs/issues/1048)
 
 
 ### External modules
