@@ -20,7 +20,7 @@ Once a sector is full, the unsealed sector is combined by a proving tree into a 
 
 This diagram shows the composition of an unsealed sector and a sealed sector.
 
-{{<figure src="sectors.png" title="Unsealed Sectors and Sealed Sectors" >}}
+![Unsealed Sectors and Sealed Sectors](sectors.png)
 
 {{<embed src="sector.id" lang="go" >}}
 

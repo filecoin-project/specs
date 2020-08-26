@@ -5,3 +5,4 @@ public/
 yarn.lock
 node_modules
 resources
+static/_gen

@@ -1,5 +1,6 @@
 {{ $opts := dict "targetPath" "main.js" "minify" "true" }}
 {{ $js := resources.Get "js/main.js" | js.Build $opts}}
 <script defer src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
-
-<pwa-update swpath="{{ "/sw.js" | relURL }}"></pwa-update>
+{{ if ne .Site.IsServer true }}
+<pwa-update swpath="{{ "/sw.js" | relURL }}" ></pwa-update>
+{{end}}

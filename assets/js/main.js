@@ -1,24 +1,14 @@
 import '@pwabuilder/pwaupdate'
 import { initToc } from './toc.js'
-import panzoom from 'panzoom'
 import tablesort from 'tablesort'
 import Gumshoe from 'gumshoejs'
 import { buildTocModel } from './content-model'
 import { buildDashboard } from './dashboard-spec'
-import { renderKatex } from "./katex";
+import { renderKatex } from './katex';
+import { lightbox } from './lightbox'
 // Note: the tablesort lib is not ESM friendly, and the sorts expect `Tablesort` to be available on the global
 window.Tablesort = tablesort
 require('tablesort/dist/sorts/tablesort.number.min.js')
-
-function initPanZoom () {
-  var elements = document.querySelectorAll(".zoomable")
-  elements.forEach(function (el) {
-    panzoom(el.querySelector('*:first-child'), {
-      maxZoom: 10,
-      minZoom: 0.5
-    })
-  })
-}
 
 function initTableSort () {
   var elements = document.querySelectorAll(".tablesort")
@@ -63,9 +53,8 @@ window.addEventListener('DOMContentLoaded', () => {
   buildDashboard('#dashboard-container', model)
   initTocDepthSlider()
   initTocScrollSpy()
-  initPanZoom()
   initTableSort()
-
+  lightbox()
   // load katex when math-mode page intersect with the viewport
   let observer = new IntersectionObserver((entries, observer) => { 
       entries.forEach(entry => {

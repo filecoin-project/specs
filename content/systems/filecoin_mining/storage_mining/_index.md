@@ -42,9 +42,9 @@ Sectors enter `Active` from `PreCommit` through a ProveCommit message that serve
 
 A particular sector enters `TemporaryFault` from `Active` through `DeclareTemporaryFault` with a specified period. Power associated with the sector will be lost immediately and miner needs to pay a `TemporaryFaultFee` determined by the power suspended and the duration of suspension. At the end of the declared duration, faulted sectors automatically regain power and enter `Active`. Miners are expected to prove over this recovered sector. Failure to do so may result in failing ElectionPoSt or `DetectedFault` from failing SurprisePoSt. 
 
-{{<svg src="diagrams/sector_state_machine.dot.svg" title="Sector State Machine" >}}
+![Sector State Machine](diagrams/sector_state_machine.dot)
 
-{{<svg src="diagrams/sector_state_machine_legend.dot.svg" title="Sector State Machine Legend" >}}
+![Sector State Machine Legend](diagrams/sector_state_machine_legend.dot)
 
 #### Miner PoSt State
 
@@ -60,7 +60,7 @@ A particular sector enters `TemporaryFault` from `Active` through `DeclareTempor
 
 Miners can call ProveCommit to commit a sector and add to their Claimed Power. However, a miner's Nominal Power and Consensus Power will be zero when it is in either Challenged or DetectedFault state. Note also that miners can call DeclareTemporaryFault when they are in Challenged or DetectedFault state. This does not change the list of  sectors that are currently challenged which is a snapshot of all active sectors (ProvingSet) at the time of challenge.
 
-{{<svg src="diagrams/miner_post_state_machine.dot.svg" title="Miner PoSt State Machine" >}}
+![Miner PoSt State Machine](diagrams/miner_post_state_machine.dot)
 
-{{<svg src="diagrams/miner_post_state_machine_legend.dot.svg" title="Miner PoSt State Machine Legend" >}}
+![Miner PoSt State Machine Legend](diagrams/miner_post_state_machine_legend.dot)
 

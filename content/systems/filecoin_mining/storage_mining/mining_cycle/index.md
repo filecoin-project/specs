@@ -45,7 +45,7 @@ Anytime a miner receives new valid blocks, it should evaluate what is the heavie
 
 ### Epoch Timing
 
-{{<figure src="timing.png" title="Mining Cycle Timing">}}
+![Mining Cycle Timing](timing.png)
 
 The timing diagram above describes the sequence of block creation "mining", propagation and reception.
 
