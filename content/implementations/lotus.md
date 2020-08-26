@@ -1,6 +1,8 @@
 ---
 title: Lotus
 weight: 1
+dashboardState: reliable
+dashboardAudit: n/a
 implRepos: 
   - repo: https://github.com/filecoin-project/lotus
     lang: go

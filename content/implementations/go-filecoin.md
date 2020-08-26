@@ -1,6 +1,8 @@
 ---
 title: go-filecoin
 weight: 2
+dashboardState: reliable
+dashboardAudit: n/a
 implRepos: 
   - { lang: go, repo: https://github.com/filecoin-project/go-filecoin }
 ---

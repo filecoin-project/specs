@@ -18,7 +18,7 @@ const humanize = (input) => {
   }
 
   if(input === 'n/a') {
-    return 'N/A'
+    return ''
   }
   
   return input.charAt(0).toUpperCase() + input.substr(1);
@@ -49,7 +49,6 @@ function buildDashboard(selector, model) {
   <thead>
     <tr>
         <th>Section</th>
-        <th>Weight</th>
         <th>State</th>
         <th>Theory Audit</th>
     </tr>
@@ -58,7 +57,6 @@ function buildDashboard(selector, model) {
     ${data.map((i)=> i.page ? html`
     <tr>
       <td class="Dashboard-section">${i.number} <a href="#${i.id}">${i.text}</a></td>
-      <td>${i.dashboardWeight}</td>
       <td data-sort="${stateToNumber(i.dashboardState)}" class="text-black bg-na bg-${i.dashboardState}">${humanize(i.dashboardState)}</td>
       <td data-sort="${stateToNumber(i.dashboardAudit)}" class="text-black bg-${i.dashboardAudit}">
         ${i.dashboardAuditURL
