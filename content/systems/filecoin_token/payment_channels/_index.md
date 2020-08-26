@@ -116,7 +116,7 @@ One example of such accounting is *merging of lanes*. When a pair of channel sen
 Summarising, we have the following sequence:
 
 0. Two parties agree to a series of transactions (for instance as part of file retrieval) with one party paying the other party up to some _total_ sum of Filecoin over time. This is part of the deal-phase, it takes place off-chain and does not (at this stage) involve payment channels.
-1. The [Payment Channel Actor](payment_channel_actor.md) is used, called the payment channel sender (who is the recipient of some service, e.g., file in case of file retrieval) to create the payment channel and deposit funds.
+1. The Payment Channel Actor is used, called the payment channel sender (who is the recipient of some service, e.g., file in case of file retrieval) to create the payment channel and deposit funds.
 2. Any of the two parties can create vouchers to send to the other party.
 3. The voucher recipient saves the voucher locally. Each voucher has to be submitted by the opposite party from the one that created the voucher.
 4. Either immediately or later, the voucher recipient "redeems" the voucher by submitting it to the chain, calling `UpdateChannelState`
@@ -135,6 +135,15 @@ Payment Channels are used in the Filecoin [Retrieval Market](retrieval_market) t
 In particular, given that there is no proving method provided for the act of sending data from a provider (miner) to a client, there is no trust anchor between the two. Therefore, in order to avoid mis-behaviour, Filecoin is making use of payment channels in order to realise a step-wise "data transfer <-> payment" relationship between the data provider and the client (data receiver). Clients issue requests for data that miners are responding to. The miner is entitled to ask for interim payments, the volume-oriented interval for which is agreed in the Deal phase. In order to facilitate this process, the Filecoin client is creating a payment channel once the provider has agreed on the proposed deal. The client should also lock monetary value in the payment channel equal to the one needed for retrieval of the entire block of data requested. Every time a provider is completing transfer of the pre-specified amount of data, they can request a payment. The client is responding to this payment with a voucher which the provider can redeem (immediately or later), as per the process described earlier.
 
 
-The lotus implementation of [vouchers](https://github.com/filecoin-project/lotus/blob/master/chain/types/voucher.go) and [payment channels](https://github.com/filecoin-project/lotus/blob/master/paychmgr/paych.go) are also good references.
+## Payment Channel Implementation
 
-You can also read more about the [Filecoin payment channel actor interface](payment_channel_actor).
+{{<embed src="/externals/lotus/paychmgr/paych.go" lang="go" >}}
+
+## Payment Channel Voucher
+
+{{<embed src="/externals/lotus/chain/types/voucher.go" lang="go" >}}
+
+## Payment Channel Actor
+
+{{<embed src="/externals/specs-actors/actors/builtin/paych/paych_actor.go" lang="go" >}}
+
