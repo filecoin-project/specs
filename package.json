@@ -6,10 +6,10 @@
   "scripts": {
     "start": "concurrently -n diagrams,hugo \"tools/diagrams.js --watch\" \"npm run serve\"",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "tools/diagrams.js --all && hugo server --bind=0.0.0.0 --disableFastRender",
-    "build": "tools/diagrams.js --all && hugo --gc --minify",
+    "serve": "npm run diagrams && hugo server --bind=0.0.0.0 --disableFastRender",
+    "build": "npm run diagrams && hugo --gc --minify",
     "clean-modules": "hugo mod clean --all && hugo mod tidy",
-    "diagrams": "node tools/diagrams.js"
+    "diagrams": "tools/diagrams.js --all"
   },
   "author": "",
   "license": "MIT",
