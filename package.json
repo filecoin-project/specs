@@ -7,7 +7,7 @@
     "start": "concurrently -n diagrams,hugo \"tools/diagrams.js --watch\" \"npm run serve\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "serve": "tools/diagrams.js --all && hugo server --bind=0.0.0.0 --disableFastRender",
-    "build": "hugo --gc --minify",
+    "build": "tools/diagrams.js && hugo --gc --minify",
     "clean-modules": "hugo mod clean --all && hugo mod tidy",
     "diagrams": "node tools/diagrams.js"
   },
