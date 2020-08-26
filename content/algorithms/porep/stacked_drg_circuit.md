@@ -27,7 +27,9 @@ This circuit proves that given a Merkle root `CommD`, `CommRLast`, and `commRSta
   - otherwise, execute the function
 - **Inclusion path**: Binary representation of the Merkle tree path that must be proven packed into a single `Fr` element.
 
-## Public Parameters
+## Offline PoRep circuit
+
+### Public Parameters
 
 *Parameters that are embeded in the circuits or used to generate the circuit*
 
@@ -38,7 +40,7 @@ This circuit proves that given a Merkle root `CommD`, `CommRLast`, and `commRSta
 - `TREE_DEPTH: UInt`: Depth of the Merkle tree. Note, this is (log_2(Size of original data in bytes/32 bytes per leaf)).
 - `PARENT_COUNT : UInt`: Defined as `EXPANSION_DEGREE+BASE_DEGREE`.
 
-## Public Inputs
+### Public Inputs
 
 *Inputs that the prover uses to generate a SNARK proof and that the verifier uses to verify it*
 
@@ -54,7 +56,7 @@ Design notes:
    To enable this, the prover must store `CommC` and use it to prove that `CommRLast` is included in `CommR` (TODO: define 'included' language.)
 - `InclusionPath` and `ParentInclusionPath`: Each layer `l` has `LAYER_CHALLENGES[l]` inclusion paths.
 
-## Private Inputs
+### Private Inputs
 
 *Inputs that the prover uses to generate a SNARK proof, these are not needed by the verifier to verify the proof*
 
@@ -74,7 +76,7 @@ Design notes:
 
 - `ParentValue : [LAYERS][][PARENT_COUNT]Fr`: Value of the parent leaves for each challenged leaf at layer `l`.
 
-## Circuit
+### Circuit
 
 In high level, we do 4 checks:
 
@@ -152,7 +154,7 @@ for l in range LAYERS {
 ```
 
 
-## Verification of offline porep proof
+## Verification of Offline PoRep Proof
 
 - SNARK proof check: **Check** that given the SNARK proof and the public inputs, the SNARK verification outputs true
 - Parent checks: For each `leaf = InclusionPath[l][c]`:
