@@ -1,15 +1,17 @@
 {
-  "name": "specs-new",
+  "name": "specs",
   "version": "1.0.0",
-  "description": "",
+  "description": "The Filecoin protocol specification",
   "main": "index.js",
   "scripts": {
-    "start": "concurrently -n diagrams,hugo \"tools/diagrams.js --watch\" \"npm run serve\"",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "npm run diagrams && hugo server --bind=0.0.0.0 --disableFastRender",
-    "build": "npm run diagrams && hugo --gc --minify",
-    "clean-modules": "hugo mod clean --all && hugo mod tidy",
-    "diagrams": "tools/diagrams.js --all"
+    "start": "concurrently npm:watch-*",
+    "serve": "npm start",
+    "watch-hugo": "npm run build-diagrams && hugo server --bind=0.0.0.0 --disableFastRender",
+    "watch-diagrams": "tools/diagrams.js --watch",
+    "build": "npm run build-diagrams && hugo --gc --minify",
+    "build-diagrams": "tools/diagrams.js --all",
+    "clean": "premove public resources static/_gen && hugo mod clean --all && hugo mod tidy"
   },
   "author": "",
   "license": "MIT",
