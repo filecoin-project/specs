@@ -90,12 +90,12 @@ transport mechanism (including offline mechanisms) is acceptable.
 
 **Data Transfer Types**
 
-{{<embed src="/modules/go-data-transfer/types.go"  lang="go">}}
+{{<embed src="/externals/go-data-transfer/types.go"  lang="go">}}
 
 **Data Transfer Statuses**
 
-{{<embed src="/modules/go-data-transfer/statuses.go"  lang="go">}}
+{{<embed src="/externals/go-data-transfer/statuses.go"  lang="go">}}
 
 **Data Transfer Manager**
 
-{{<embed src="/modules/go-data-transfer/manager.go"  lang="go">}}
+{{<embed src="/externals/go-data-transfer/manager.go"  lang="go">}}

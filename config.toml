@@ -116,4 +116,9 @@ enableGitInfo = true
     path = "github.com/filecoin-project/lotus"
     [[module.imports.mounts]]
     source = "."
-    target = "content/externals/lotus" 
+    target = "content/externals/lotus"
+  [[module.imports]]
+    path = "github.com/filecoin-project/go-data-transfer"
+    [[module.imports.mounts]]
+    source = "."
+    target = "content/externals/go-data-transfer"
