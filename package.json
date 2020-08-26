@@ -4,7 +4,7 @@
   "description": "The Filecoin protocol specification",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "remark content --quiet",
     "start": "concurrently npm:watch-*",
     "serve": "npm start",
     "watch-hugo": "npm run build-diagrams && hugo server --bind=0.0.0.0 --disableFastRender",
