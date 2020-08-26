@@ -25,16 +25,16 @@ For clarity, we refer the following types of entities to describe implementation
   as a process or thread running a single specified main loop, which waits for network messages
   and responds accordingly by recording and/or forwarding block data.
 
-- **_APIs_** are messages that can be sent to components.
+- **_APIs_** are the interfaces for delivering messages to components.
   A client's view of a given sub-protocol, such as a request to a miner node's
   [Storage Provider](storage_provider) component to store files in the storage market,
-  may require the execution of a series of APIs.
+  may require the execution of a series of API requests.
 
 - **_Nodes_** are complete software and hardware systems that interact with the protocol.
   A node might be constantly running several of the above _components_, participating in several _subsystems_,
   and exposing _APIs_ locally and/or over the network,
   depending on the node configuration.
-  The term _full node_ refers to a system that runs all of the above components, and supports all of the APIs detailed in the spec.
+  The term _full node_ refers to a system that runs all of the above components and supports all of the APIs detailed in the spec.
 
 - **_Subsystems_** are conceptual divisions of the entire Filecoin protocol, either in terms of complete protocols
   (such as the [Storage Market](storage_market) or [Retrieval Market](retrieval_market)), or in terms of functionality
