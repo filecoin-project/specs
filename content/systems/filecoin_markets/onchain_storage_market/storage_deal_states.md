@@ -20,7 +20,7 @@ A deal has the following states:
 
 Note that `Unpublished` and `Deleted` states are not tracked on chain. To reduce on-chain footprint, an `OnChainDeal` struct is created when a deal is published and it keeps track of a `LastPaymentEpoch` which defaults to -1 when a deal is in the `Published` state. A deal transitions into the `Active` state when `LastPaymentEpoch` is positive.
 
-The following describes how a deal transitions between its different states.
+The following describes how a deal transitions between its different states. These states in the list below are **on-chain states** understood by the actor/VM logic.
 
 - `Unpublished -> Published`: this is triggered by `StorageMarketActor.PublishStorageDeals` which validates new storage deals, locks necessary funds, generates deal IDs, and registers the storage deals in `StorageMarketActor`.
 - `Published -> Deleted`: this is triggered by `StorageMinerActor.ProveCommitSector` during InteractivePoRep when the elapsed number of epochs between PreCommit and ProveCommit messages exceeds `MAX_PROVE_COMMIT_SECTOR_EPOCH`. ProveCommitSector will also trigger garbage collection on the list of published storage deals.
@@ -30,12 +30,14 @@ The following describes how a deal transitions between its different states.
   - The sector containing the deal has expired. This is triggered by `StorageMinerActorCode._submitPowerReport` which is called whenver a PoSt is submitted. Power associated with the deals in the sector will be lost, collaterals returned, and all remaining storage fees unlocked.
   - The sector containing the active deal has been terminated. This is triggered by `StorageMinerActor._submitFaultReport` for `TerminatedFaults`. No storage deal collateral will be slashed on fault declaration or detection, only on termination. A terminated fault is triggered when a sector is in the `Failing` state for `MAX_CONSECUTIVE_FAULTS` consecutive proving periods.
 
-Given deal states and their transitions, the following are the relationships between deal states and other economic states and activities in the protocol.
+Given the **onchain deal states and their transitions** discussed above, below is a description of the relationships between **off-chain deal states** and other economic states and activities in the protocol. Note that these states below are **off-chain states tracked internally by the markets module**.
 
 - `Power`: only payload data in an Active storage deal counts towards power.
 - `Deal Payment`: happens on `_onSuccessfulPoSt` and at deal/sector expiration through `_submitPowerReport`, paying out `StoragePricePerEpoch` for each epoch since the last PoSt.
 - `Deal Collateral`: no storage deal collateral will be slashed for `NewDeclaredFaults` and `NewDetectedFaults` but instead some pledge collateral will be slashed given these faults' impact on consensus power. In the event of `NewTerminatedFaults`, all storage deal collateral and some pledge collateral will be slashed. Provider and client storage deal collaterals will be returned when a deal or a sector has expired. If a sector recovers from `Failing` within the `MAX_CONSECUTIVE_FAULTS` threshold, deals in that sector are still considered active. However, miners may need to top up pledge collateral when they try to `RecoverFaults` given the earlier slashing.
 
-{{<embed src="/modules/go-fil-markets/storagemarket/dealstatus.go"  lang="go">}}
+**NOTE: the states in the following code block are off-chain deal states of the Storage Market module.**
+
+{{<embed src="/externals/go-fil-markets/storagemarket/dealstatus.go"  lang="go">}}
 
 ![Deal States Sequence Diagram](diagrams/deal-payment.mmd)
