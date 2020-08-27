@@ -1,6 +1,9 @@
 ---
 title: Forest 
 weight: 3
+dashboardWeight: 1
+dashboardState: reliable
+dashboardAudit: n/a
 implRepos:
  - { lang: rust, repo: https://github.com/ChainSafe/forest }
 ---

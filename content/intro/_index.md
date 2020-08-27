@@ -49,15 +49,15 @@ Each section of the spec must be stable and audited before it is considered done
   <thead>
   <tbody>
     <tr>
-      <td>Final, will not change before mainnet launch.</td>
+      <td>Unlikely to change in the foreseeable future.</td>
       <td class="text-black bg-stable">Stable</td>
     </tr>
     <tr>
-      <td>Reliable and likely to not change.</td>
+      <td>All content is correct. Important details are covered.</td>
       <td class="text-black bg-reliable">Reliable</td>
     </tr>
     <tr>
-      <td>Work has started but not yet finished.</td>
+      <td>All content is correct. Details are being worked on.</td>
       <td class="text-black bg-wip">Draft/WIP</td>
     </tr>
     <tr>
