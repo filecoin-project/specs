@@ -111,7 +111,7 @@ Data submitted to the Filecoin network go through several transformations before
 
 The following data types are unique to the Storage Market:
 
-{{<embed src="/modules/go-fil-markets/storagemarket/types.go"  lang="go">}}
+{{<embed src="/externals/go-fil-markets/storagemarket/types.go"  lang="go">}}
 
 
 Details about `StorageDealProposal` and `StorageDeal` (which are used in the Storage Market and elsewhere) specifically can be found in [Storage Deal](storage_deal).
