@@ -1,6 +1,6 @@
 ---
 title: "Faults"
-weight: 3
+weight: 4
 dashboardWeight: 2
 dashboardState: wip
 dashboardAudit: missing

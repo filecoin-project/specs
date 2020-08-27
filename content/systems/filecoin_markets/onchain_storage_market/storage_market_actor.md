@@ -1,8 +1,8 @@
 ---
 title: Storage Market Actor
-weight: 2
+weight: 1
 dashboardWeight: 2
-dashboardState: stable
+dashboardState: wip
 dashboardAudit: missing
 dashboardTests: 0
 ---

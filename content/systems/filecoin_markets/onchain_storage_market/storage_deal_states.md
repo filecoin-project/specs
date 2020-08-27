@@ -1,6 +1,6 @@
 ---
 title: Deal States
-weight: 2
+weight: 3
 dashboardWeight: 2
 dashboardState: wip
 dashboardAudit: missing
