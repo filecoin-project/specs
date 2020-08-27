@@ -48,7 +48,7 @@ During `miner.PreCommitSector`, the sector quality is calculated and stored in t
 #### Bids
 #### Verified Deals
 
-## Mining cycle
+## Mining Cycle
 
 ### Register a miner
 A user registers a new `Miner` actor via `Power.CreateMiner`.
@@ -73,40 +73,49 @@ A *proving period* is evenly divided in `WPoStPeriodDeadlines` *deadlines*.
 
 Each miner has a different start of proving period `ProvingPeriodStart` that is assigned at `Power.CreateMiner`.
 
-#### Deadline
+#### Deadlines
 A *deadline* is a period of `WPoStChallengeWindow` epochs that divides a proving period.
 Sectors are assigned to a deadline on `miner.ProveCommitSector` and will remain assigned to it throughout their lifetime.
-Sectors are also assigned to partitions.
-
-There are four relevant epochs associated to a deadline.
-- Open Epoch: Epoch from which a PoSt Proof for this deadline can be submitted.
-- Close Epoch: Epoch after which a PoSt Proof for this deadline will be rejected.
-- Fault Cutoff Epoch: Epoch after which a `DeclareFault` for sectors in the upcoming deadline are rejected.
-- Challenge Epoch: Epoch at which the randomness for the challenges is available.
+Sectors are also assigned to a partition (see Partitions section).
 
 A miner must submit a `miner.SubmitWindowedPoSt` for each deadline.
 
+There are four relevant epochs associated to a deadline:
+
+| Name          | Distance from `Open`      | Description                                                                                                                   |
+|---------------|---------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| `Open`        | `0`                       | Epoch from which a PoSt Proof for this deadline can be submitted.                                                             |
+| `Close`       | `WPoStChallengeWindow`    | Epoch after which a PoSt Proof for this deadline will be rejected.                                                            |
+| `FaultCutoff` | `-FaultDeclarationCutoff` | Epoch after which a `miner.DeclareFault` and `miner.DeclareFaultRecovered` for sectors in the upcoming deadline are rejected. |
+| `Challenge`   | `-WPoStChallengeLookback` | Epoch at which the randomness for the challenges is available.                                                                |
+
+
 #### Partitions
-A partition is a set of sectors that is not larger than the Seal Proof `sp.WindowPoStPartitionSectors`.
+A partition is a set of sectors that is not larger than the Seal Proof allowed number of sectors `sp.WindowPoStPartitionSectors`.
 
 Partitions are a by-product of our current proof mechanism. There is a limit of sectors (`sp.WindowPoStPartitionSectors`) that can be proven in a single SNARK proof. If more than this amount is required to be proven, more than one SNARK proof is required. Each SNARK proof is a partition.
 
 Sectors are assigned to a partition at `miner.ProveCommitSector` and they can be re-arranged via `CompactPartitions`.
-
-#### Deadline assignment
 
 ## Market cycle
 
 ## Faults and Penalties
 
 ### Collaterals
+
+| Name             | Type       | Deposited at              | Penalizations                                    | Withdrawable after        |
+|------------------|------------|---------------------------|--------------------------------------------------|---------------------------|
+| PreCommitDeposit | per sector | `miner.PreCommitDeposit`  | PreCommit Faults                                 | `miner.ProveCommitSector` |
+| InitialPledge    | per sector | `miner.ProveCommitSector` | Declared Faults, Skipped Faults, Detected Faults | On sector expiration      |
+|                  |            |                           |                                                  |                           |
+
 #### PreCommitDeposit
 
-`PreCommitDeposit` is the collateral deposited on `miner.PreCommitSector` and it is returned on `miner.ProveCommit`. If the `miner.ProveCommit` is not executed before `MaxProveCommitDuration` epochs since precommit.
-
-The `PreCommitDeposit` is locked separately from Initial Pledge and cannot be used as collateral for other faults.
+`PreCommitDeposit` is the collateral that secures that a *precommitted* sectors becomes *committed* before `MaxProveCommitDuration` since the precommit on-chain inclusion.
+It is deposited during `miner.PreCommitSector`, it is released on `miner.ProveCommitSector` and it is penalized on PreCommit faults.
 
 #### InitialPledge
+
 #### LockedFunds
 
 ### Fees
@@ -179,3 +188,62 @@ There two three of Skipped Faults:
 ### Block Rewards
 
 ### Storage Rewards
+
+## Security
+
+### Attacks
+
+#### PreCommit Attack
+
+Aim: Store a compressible sector.
+
+Context:
+- Attacker has a `Miner` actor.
+
+Execution:
+- Attacker crafts a sealed sector that correctly encodes less than `$(1 - spacegap)$` of its size and incorrectly encodes the remaining space with zeroes.
+- Attacker successfully submits `miner.PreCommitSector`.
+- Attacker waits `PreCommitChallengeDelay` for `InteractiveRandomness`
+- Attacker submits `miner.ProveCommitSector` if the proof succeeds, otherwise, abort.
+
+Outcome: Attack will succeed with probability `$<2^-{\lambda}$`
+
+Rationality mitigation:
+- Require a deposit on `PreCommitDeposit` 
+- Require the `PreCommitDeposit` fee to be equivalent to block rewards earned by the QApower of the sector in 5 years.
+
+#### Fork-and-PreCommit Attack
+
+Aim: Store a compressible sector.
+
+Context:
+- Attacker has a `Miner` actor.
+
+Execution:
+- Attacker sees the `InteractiveRandomness` of current block.
+- Attacker crafts a compressible sealed sector that correctly encodes less than `$(1 - spacegap)$` of its size and incorrectly encodes the remaning space with zeroes.
+- Attacker tries to do a fork longer of size `PreCommitChallengeDelay`.
+- If successful, miner includes `miner.PreCommitSector` for the compressible sector.
+
+Outcome: Attack will succeed with the probability of a successful fork of size `PreCommitChallengeDelay`.
+
+Mitigation:
+- Require `PreCommitChallengeDelay` to be large such that the probability of a successful fork is small for the largest miner.
+
+#### PreCommit-and-Fork Attack
+
+Note: This attack is a weaker version of Fork-and-PreCommit Attack
+
+Aim: Store a compressible sector.
+
+Context:
+- Attacker has a `Miner` actor.
+
+Execution:
+- Attacker crafts a compressible sealed sector that correctly encodes less than `$(1 - spacegap)$` of its size and incorrectly encodes the remaning space with zeroes.
+- Attacker waits `PreCommitChallengeDelay` for `InteractiveRandomness`
+- If the proof succeeds, attacker submits `miner.ProveCommitSector`
+- Otherwise, attacker forks the chain for `PreCommitChallengeDelay`
+
+Mitigation:
+- Require `PreCommitChallengeDelay` to be large such that the probability of a successful fork is small for the largest miner.

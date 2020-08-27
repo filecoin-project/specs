@@ -42,6 +42,7 @@ A *miner* is an user that participates in the consensus protocol and provides st
 A `Miner` actor is an entity in the Filecoin VM that can make deal, seal sectors, mine blocks and earn block rewards. A miner can control one or more `Miner` actors.
 
 > Why having one miner instead of many?
+
 A `Miner` actor can only be associated with a Seal proof. If a miner wants to have 32GiB and 64GiB SDR sectors, they must have two different `Miner` actors.
 
 ### Keys
