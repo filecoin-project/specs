@@ -2,8 +2,8 @@
 title: "Randomness"
 weight: 3
 dashboardWeight: 2
-dashboardState: incorrect
-dashboardAudit: 0
+dashboardState: reliable
+dashboardAudit: wip
 dashboardTests: 0
 ---
 
@@ -12,7 +12,7 @@ dashboardTests: 0
 TODO: clean up stale .id/.go files
 
 Randomness is used throughout the protocol in order to generate values and extend the blockchain.
-Random values are drawn from a (drand)[drand] beacon and appropriately formatted for usage.
+Random values are drawn from a [drand](drand) beacon and appropriately formatted for usage.
 We describe this formatting below.
 
 ## Encoding Random Beacon randomness for on-chain use
@@ -51,7 +51,7 @@ The beacon entry is combined with a few elements for use as part of the protocol
 
 While all elements are not needed for every use of entropy (e.g. the inclusion of the round number is not necessary prior to genesis or outside of leader election, other entropy is only used sometimes, etc), we draw randomness as follows for the sake of uniformity/simplicity in the overall protocol.
 
-In all cases, a (drand)[drand] signature is used as the base of randomness: it is hashed using blake2b in order to obtain a usable randomness seed. In order to make randomness seed creation uniform, the protocol derives all such seeds in the same way, using blake2b as a hash function to generate a 256-bit output as follows:
+In all cases, a [drand](drand) signature is used as the base of randomness: it is hashed using blake2b in order to obtain a usable randomness seed. In order to make randomness seed creation uniform, the protocol derives all such seeds in the same way, using blake2b as a hash function to generate a 256-bit output as follows:
 
 In round `n`, for a given randomness lookback `l`, and serialized entropy `s`:
 
@@ -68,7 +68,7 @@ GetRandomness(dst, l, s):
     return H(buffer)
 ```
 
-{{<embed src="/modules/actors/crypto/randomness.go"  lang="go">}}
+{{<embed src="/externals/specs-actors/actors/crypto/randomness.go"  lang="go">}}
 {{<embed src="/systems/filecoin_blockchain/struct/chain/chain.go" lang="go">}}
 
 ## Drawing tickets from the VRF-chain for proof inclusion

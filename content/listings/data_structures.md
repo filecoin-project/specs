@@ -2,12 +2,11 @@
 title: "Data Structures"
 weight: 3
 dashboardWeight: 0.2
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: n/a
 ---
 
 # Data Structures
----
 
 ## RLE+ Bitset Encoding
 

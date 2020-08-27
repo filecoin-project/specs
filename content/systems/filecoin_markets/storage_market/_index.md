@@ -4,12 +4,11 @@ weight: 1
 bookCollapseSection: true
 dashboardWeight: 2
 dashboardState: stable
-dashboardAudit: 0
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # Storage Market in Filecoin
----
 
 Storage Market subsystem is the data entry point into the network. Storage miners only earn power from data stored in a storage deal and all deals live on the Filecoin network. Specific deal negotiation process happens off chain, clients and miners enter a storage deal after an agreement has been reached and post storage deals on the Filecoin network to earn block rewards and get paid for storing the data in the storage deal. A deal is only valid when it is posted on chain with signatures from both parties and at the time of posting, there are sufficient balances for both parties locked up to honor the deal in terms of deal price and deal collateral.
 
@@ -36,7 +35,7 @@ From that point on, the deal is handled by the Storage Mining Subsystem, which c
 
 The following diagram outlines the phases of deal flow within the storage market in detail:
 
-{{<svg src="storage_market_flow.mmd.svg" title="Storage Market Deal Flow" >}}
+![Storage Market Deal Flow](storage_market_flow.mmd)
 
 ## Discovery
 

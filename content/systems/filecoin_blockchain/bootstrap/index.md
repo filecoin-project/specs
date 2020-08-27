@@ -6,7 +6,6 @@ draft: true
 ---
 
 # Genesis - starting the Blockchain
----
 {{< hint warning >}}
 **WARNING:** This section is not yet complete.
 {{< /hint >}}

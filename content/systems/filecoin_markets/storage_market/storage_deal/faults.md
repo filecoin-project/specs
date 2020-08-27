@@ -2,13 +2,12 @@
 title: "Faults"
 weight: 3
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 1
+dashboardState: wip
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # Faults
----
 
 There are two main categories of faults in the Filecoin network. 
 

@@ -3,13 +3,12 @@ title: ChainSync
 weight: 3
 description: ChainSync - synchronizing the Blockchain
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: reliable
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # ChainSync - synchronizing the Blockchain
----
 
 ## What is blockchain synchronization?
 
@@ -176,8 +175,7 @@ implementations MAY deviate from implementing precisely these states, or dividin
 Implementations MAY blur the lines between the states. If so, implementations MUST ensure security
 of the altered protocol.
 
-{{< svg src="chainsync_fsm.dot.svg" title="ChainSync State Machine" >}}
-
+![ChainSync State Machine](chainsync_fsm.dot)
 
 
 ### ChainSync FSM: `INIT`

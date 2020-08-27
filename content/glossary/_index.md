@@ -2,12 +2,11 @@
 title: "Glossary"
 weight: 6
 dashboardWeight: 0.2
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: n/a
 ---
 
-# Glossary
---- 
+# Glossary 
 
 **Notes**
 
@@ -73,7 +72,7 @@ Collateral is Filecoin tokens pledged by an actor as a commitment to a promise. 
 
 ### Deal
 
-*** *A deal in a Filecoin market is made when a bid and ask are matched, corresponding to an agreement on a service and price between a miner and client.
+**** A deal in a Filecoin market is made when a bid and ask are matched, corresponding to an agreement on a service and price between a miner and client.
 
 ### Erasure coding
 

@@ -3,12 +3,11 @@ title: Block
 weight: 1
 dashboardWeight: 1.5
 dashboardState: incorrect
-dashboardAudit: 0
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # Block
----
 
 A block header contains information relevant to a particular point in time over which the network may achieve consensus.
 

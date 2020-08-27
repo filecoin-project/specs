@@ -51,7 +51,6 @@
   <div id="{{ $id }}" class="diagrams{{ with .Get "class" }} {{ . }}{{ end }}">
   </div>
   <script>
-    console.log("{{ $uuid }}")
     var element = document.querySelector("#{{ $id }}");
     var insertSvg = function(svgCode){
         element.innerHTML = svgCode;

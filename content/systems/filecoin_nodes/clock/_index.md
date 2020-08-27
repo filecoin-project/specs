@@ -2,13 +2,12 @@
 title: Clock
 weight: 4
 dashboardWeight: 1
-dashboardState: stable
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # Clock
----
 
 {{<embed src="clock_subsystem.id" lang="go" >}}
 {{<embed src="clock_subsystem.go" lang="go" >}}

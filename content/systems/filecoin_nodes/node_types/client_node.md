@@ -2,13 +2,12 @@
 title: Client Node
 weight: 4
 dashboardWeight: 1
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 
 # Client Node
----
 
 ```go
 type ClientNode struct {

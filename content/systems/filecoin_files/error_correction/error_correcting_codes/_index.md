@@ -4,6 +4,5 @@ title: Error Correcting Codes
 ---
 
 # Error Correcting Codes
----
 
 TODO

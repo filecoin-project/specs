@@ -1,13 +1,12 @@
 ---
 title: Sector Sealing
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: wip
 dashboardTests: 0
 ---
 
 # Sector Sealing
----
 
 {{<embed src="sealing.id" lang="go" >}}
 
@@ -38,7 +37,7 @@ When starting to prepare a SEAL in round X, the miner should draw a ticket from 
 
 ## Verifying a Seal's ticket
 
-When verifying a SEAL in round Z, a verifier should ensure that the ticket used to generate the SEAL is found in the range of rounds [Z-T-F-G, Z-T-F+G].
+When verifying a SEAL in round Z, a verifier should ensure that the ticket used to generate the SEAL is found in the range of rounds `[Z-T-F-G, Z-T-F+G]`.
 
 ### In Detail
 

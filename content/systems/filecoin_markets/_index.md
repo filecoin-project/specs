@@ -4,13 +4,12 @@ description: "Markets in Filecoin"
 bookCollapseSection: true
 weight: 7
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # Markets
----
 
 Filecoin is a consensus protocol, a data-storage platform, and a marketplace for storing and retrieving data. There are two major components to Filecoin markets, the storage market and the retrieval market. While storage and retrieval negotiations for both the storage and the retrieval markets are taking place primarily *off the blockchain* (at least in the current version of Filecoin), storage deals made in the storage market will be published on-chain and will be enforced by the protocol. Storage deal negotiation and order matching are expected to happen off-chain in the first version of Filecoin. Retrieval deals are also negotiated off-chain and executed with micropayments between transacting parties in payment channels.
 

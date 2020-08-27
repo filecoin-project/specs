@@ -2,13 +2,12 @@
 title: Retrieval Miner Node
 weight: 6
 dashboardWeight: 1
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 
 # Retrieval Miner Node
----
 
 ```go
 type RetrievalMinerNode interface {

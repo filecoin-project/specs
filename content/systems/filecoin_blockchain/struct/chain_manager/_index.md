@@ -3,12 +3,11 @@ title: Chain Manager
 weight: 4
 dashboardWeight: 1.5
 dashboardState: incorrect
-dashboardAudit: 0
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # Chain Manager
----
 
 The _Chain Manager_ is a central component in the blockchain system. It tracks and updates competing subchains received by a given node in order to select the appropriate blockchain head: the latest block of the heaviest subchain it is aware of in the system.
 

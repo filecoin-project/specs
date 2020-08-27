@@ -2,13 +2,12 @@
 title: Interpreter
 weight: 7
 dashboardWeight: 1
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # VM Interpreter - Message Invocation (Outside VM)
----
 
 The VM interpreter orchestrates the execution of messages from a tipset on that tipset's parent state,
 producing a new state and a sequence of message receipts. The CIDs of this new state and of the receipt
@@ -67,7 +66,7 @@ The sequence of executions for a tipset is thus summarised:
 - pay reward for second block
 - process election post for second block
 - messages for second block (BLS before SECP, skipping any already encountered)
-- [... subsequent blocks ...]
+- `[... subsequent blocks ...]`
 - cron tick 
 
 ## Message validity and failure
