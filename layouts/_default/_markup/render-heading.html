@@ -37,6 +37,9 @@
 */}}
 <h{{ $level }} id="{{ $anchor | safeURL }}" class="level-{{ $level }}" data-page="{{if eq $originalLevel 1 }}true{{end}}" data-dashboard-weight="{{.Page.Params.dashboardWeight}}" data-dashboard-state="{{.Page.Params.dashboardState}}" data-dashboard-audit="{{.Page.Params.dashboardAudit}}" data-dashboard-audit-url="{{.Page.Params.dashboardAuditURL}}" data-dashboard-audit-date="{{.Page.Params.dashboardAuditDate}}">
   <a href="#{{ $anchor | safeURL }}">{{ .Text | safeHTML }}</a>
+  {{ if .Page.Site.IsServer }}
+    <a style="color: blue" href="#{{ .Page.RelPermalink }}" title="open in single page view"><i class="gg-file"></i></a>
+  {{ end }}
 </h{{ $level }}>
 <div class="section-badges">
 {{- if or (eq $level 2) (eq $level 3) -}}
