@@ -8,9 +8,9 @@
 //   { text: "Baz", id: "baz", tag: 'h1', children: [] }
 // ]
 
-function buildTocModel (contentSelector) {
+function buildTocModel (root) {
     const model = []
-    const headingList = document.querySelector(contentSelector).querySelectorAll('h1,h2,h3,h4,h5,h6')
+    const headingList = root.querySelectorAll('h1,h2,h3,h4,h5,h6')
     let parents = [{tagName: 'H0', children: model}]
     let prevSibling = null
     for (let el of headingList) {
@@ -46,17 +46,17 @@ function buildTocModel (contentSelector) {
         prevSibling = node
       }
     }
-    return model
-  }
+  return model
+}
 
-  function cleanHeadingText (el) {
-    return el.textContent.trim()
-  }
-  
-  function headingNum (el) {
-    return Number(el.tagName[1])
-  }
+function cleanHeadingText (el) {
+  return el.textContent.trim()
+}
 
-  export {
-    buildTocModel
-  }
+function headingNum (el) {
+  return Number(el.tagName[1])
+}
+
+module.exports = {
+  buildTocModel
+}

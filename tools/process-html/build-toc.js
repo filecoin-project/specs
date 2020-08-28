@@ -1,9 +1,4 @@
-function initToc ({tocSelector, model}) {
-  const toc = buildTocDom(model)
-  document.querySelector(tocSelector).appendChild(toc)
-}
-
-function buildTocDom (model) {
+function buildToc ({model}) {
   const parent = document.createDocumentFragment()
   buildList(parent, model, 0)
   return parent
@@ -31,6 +26,6 @@ function createList(depth) {
   return ol
 }
 
-export {
-  initToc
+module.exports = {
+  buildToc
 }
