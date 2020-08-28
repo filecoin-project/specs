@@ -1,6 +1,6 @@
 ---
 title: libp2p
-weight: 4
+weight: 6
 bookCollapseSection: true
 dashboardWeight: 1
 dashboardState: stable
