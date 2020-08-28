@@ -53,12 +53,16 @@ During `miner.PreCommitSector`, the sector quality is calculated and stored in t
 ### Register a miner
 A user registers a new `Miner` actor via `Power.CreateMiner`.
 
+The user can now add storage capacity to the miner and engage in the market.
+
 ### Add storage capacity
 A miner adds storage capacity to the network by adding sectors to a `Miner` actor.
 
-- The miner collects storage deals and publish them via `Market.PublishStorageDeals`.
-- The miner groups deals in a sector, runs the sealing process and submits the sealed sector information via `miner.PreCommitSector`. The sector state is now *precommitted*.
-- The miner waits `PreCommitChallengeDelay` since the on-chain precommit epoch, gets the `InteractiveRandomness`, generates a Seal Proof and submits it via `miner.ProveCommitSector`. The sector state is now *committed*.
+1. The miner collects storage deals and publish them via `Market.PublishStorageDeals`.
+2. The miner groups deals in a sector, runs the sealing process and submits the sealed sector information via `miner.PreCommitSector`. The sector state is now *precommitted*.
+3. The miner waits `PreCommitChallengeDelay` since the on-chain precommit epoch, gets the `InteractiveRandomness`, generates a Seal Proof and submits it via `miner.ProveCommitSector`. The sector state is now *committed*.
+
+See section on collateral requirements to understand what deposits are required.
 
 ### Mantain storage capacity
 
@@ -96,6 +100,34 @@ A partition is a set of sectors that is not larger than the Seal Proof allowed n
 Partitions are a by-product of our current proof mechanism. There is a limit of sectors (`sp.WindowPoStPartitionSectors`) that can be proven in a single SNARK proof. If more than this amount is required to be proven, more than one SNARK proof is required. Each SNARK proof is a partition.
 
 Sectors are assigned to a partition at `miner.ProveCommitSector` and they can be re-arranged via `CompactPartitions`.
+
+#### Declaring and recovering faults
+
+### Mining Blocks
+Filecoin miners attempt to mine block at every epoch by running the leader election process (see Consensus).
+
+Miners win proportionally to their *active* power as reported in the power table,n only create blocks if they are *eligible*.
+
+See the section on the block mining process.
+
+#### Power accounting
+The active QA power of a `Miner` actor is stored in `Power.Claims` and it is the sum of the QA power of all the active sectors of a miner.
+
+The active QA power of the network is stored in `Power.TotalQualityAdjPower` and does not include power of miner below minimum miner size.
+
+The QA power values used in the election are taken from `WinningPoStSectorSetLookback` epochs back.
+
+#### Minimum miner size
+A `Miner` actor must have a minimum miner size of `ConsensusMinerMinPower` in order for their power to count in the power table.
+
+#### Eligibility requirement
+A `Miner` actor is eligible to mine blocks if `miner.MinerEligibleForElection()` returns true.
+
+The eligibility requirements are:
+1. Initial Pledge requirement is met at the election epoch.
+2. No active consensus faults at the election epoch.
+3. Initial Pledge is sufficient to cover for consensus faults at the election epoch.
+4. Miner had minimum miner size at the `WinningPoStSectorSetLookback`
 
 ## Market cycle
 

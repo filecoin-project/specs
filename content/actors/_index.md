@@ -90,11 +90,13 @@ stateDiagram
 |--------------|------------------|---------------------|
 | Precommitted | -                | -                   |
 | Committed    | -                | Yes                 |
-| Faulty       | -                | -                |
+| Faulty       | -                | -                   |
 | Recovering   | -                | Yes                 |
 | Active       | Yes              | Yes                 |
 | Terminated   | -                | -                   |
 | Deleted      | -                | -                   |
+
+Note: see section on power accounting for a more detailed explanation of when a sector counts for power.
 
 ### State
 
