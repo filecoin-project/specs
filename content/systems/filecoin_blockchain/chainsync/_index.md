@@ -91,7 +91,7 @@ no external dependencies for the protocol implementation. Nonetheless, the Gossi
 
 This process is supported through either bootstrap nodes or other normal peers. Bootstrap nodes must be maintained by system operators. They have to be stable and operate independently of protocol constructions, such as the GossipSub mesh construction, that is, bootstrap nodes do not maintain connections to the mesh.
 
-For more details on Peer Exchange please refer to the GossipSub specification.
+For more details on Peer Exchange please refer to the [GossipSub specification](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub).
 
 ### Explicit Peering Agreements
 
