@@ -2,12 +2,46 @@
 
 // Addons
 
-// @import "plugins/numbered";
+@import "plugins/numbered";
 @import "plugins/scrollbars";
 @import "plugins/toggles";
 @import "table-sort";
 @import "colors";
 @import "dashboard";
+@import "plugins/toc";
+@import "katex";
+@import "icons";
+@import "code";
+@import "plugins/lightbox";
+
+
+.markdown {
+    overflow-x: hidden;
+    h1, h2, h3, h4, h5, h6 {
+        padding-top: 1.5rem;
+        margin-bottom: 1rem;
+        a {
+            color: inherit;
+            text-decoration: none;
+            &:visited {
+                color:inherit;
+            }
+            &:hover {
+                text-decoration: none;
+                &::after {
+                    font-size: 70%;
+                    padding-left:0.3em;
+                    color: $color-link;
+                    content: " #"
+                }
+            }
+        }
+    }
+}
+.section-badges {
+    float: right;
+    margin-top:-2.5rem;
+}
 
 // SVG Diagrams
 .diagrams-container {
@@ -16,21 +50,25 @@
     border-radius: $border-radius;
 }
 .diagrams {
-    width: auto;
-    overflow: hidden;
-    cursor: grab;
     height: 400px;
+    overflow: hidden;
+    outline: none;
+    cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    will-change: transform;
-    outline: none;
+}
+.diagrams img {
+    max-height: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .diagrams:active {
     cursor: grabbing;
 }
 .diagrams-caption {
-    // background-color: #e9ecef;
     border-top: 1px solid #e9ecef;
     padding: 0.5rem;
     font-size: 12px;
@@ -42,43 +80,6 @@
     }
 }
 
-.diagrams svg {
-    transform-origin: top left;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.diagrams.svg svg {
-    background-color: white;
-}
-
-// Figure zoom 
-.figure {
-    width: auto;
-    overflow: hidden;
-    cursor: grab;
-    justify-content: center;
-    align-items: center;
-    will-change: transform;
-    outline: none;
-}
-.figure:active {
-    cursor: grabbing;
-}
-.figure + figcaption {
-    text-align: center;
-}
-
-.figure img {
-    transform-origin: top left;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: auto;
-}
 // search
 #book-search-results {
     width: 100%;
@@ -98,11 +99,40 @@
 }
 
 // Tweaks
+html {
+    scroll-behavior: auto;
+    touch-action: auto;
+}
+.container {
+    max-width: 89rem;
+}
+.book-menu {
+    flex: 0 0 20rem;
+}
+.book-page {
+    padding-top: 0rem;
+    padding-left: 2rem;
+    max-width: 52rem;
+}
+
 summary {
     outline: none;
 }
 blockquote {
     overflow: auto;
+}
+.book-menu nav {
+    width: 20rem;
+    height: 100%;
+    padding: 1rem 0.2rem 1rem 1rem;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
+}
+.book-menu .toc {
+    height: 100%;
+    overflow: hidden;
 }
 
 .markdown>h1:first-of-type {
@@ -138,27 +168,33 @@ blockquote {
     padding: 0;
     height: 90vh;
 }
-.book-menu > nav::-webkit-scrollbar,
+.book-menu > nav .toc::-webkit-scrollbar,
 .book-toc > div nav::-webkit-scrollbar{
     width: 8px;
 }
 
-.book-menu > nav::-webkit-scrollbar-thumb,
+.book-menu > nav .toc::-webkit-scrollbar-thumb,
 .book-toc > div nav::-webkit-scrollbar-thumb{
     background: transparent;
 }
 
-.book-menu > nav:hover::-webkit-scrollbar-thumb,
-.book-toc > div nav:hover::-webkit-scrollbar-thumb{
+.book-menu > nav:hover .toc::-webkit-scrollbar-thumb,
+.book-toc > div nav:hover .toc::-webkit-scrollbar-thumb{
     background: rgba(255,255,255,.1);
 }
 
 @media screen and (max-width: 56rem) {
-    .toc {
-        text-align: right;
+    .book-page {
+        padding-left:1rem;
+    }
+    .book-menu {
+        visibility: hidden;
+        margin-inline-start: -20rem;
+    }
+    #menu-control:checked~main .book-menu nav {
+        transform: translateX(20rem);
     }
     .toc-label {
-        margin: 0 0 2rem;
         font-weight:700;
         font-size:10px;
         .gg-menu-motion {
@@ -167,6 +203,15 @@ blockquote {
     }
     .book-header {
         margin-bottom: 2rem;
+        position: fixed;
+        width: 100%;
+        background: white;
+        z-index: 1;
+        padding: 5px 0.6rem;
+        box-shadow: 1px 0 2px 0px rgba(0,0,0,0.2);
+    }
+    #toc-depth-slider {
+        display:none;
     }
 }
 
@@ -182,19 +227,21 @@ blockquote {
     .toc {
         top:78px;
     }
-    .toc-label, .dark-mode-toggle-label {
-        font-size: 10px;
-        font-weight: 700;
-        display: block;
-    }
-    .gg-menu-motion, .gg-dark-mode {
-        display: inline-block;
-        margin-left: 0;
-        margin-right: 0;
-        vertical-align: middle;
-        font-size: 10px;
-        transform: scale(0.7);
-    }
+}
+
+.toc-label, .dark-mode-toggle-label {
+    font-size: 10px;
+    font-weight: 700;
+    display: block;
+    color:$gray-600;
+}
+.gg-menu-motion, .gg-dark-mode {
+    display: inline-block;
+    margin-left: 0;
+    margin-right: 0;
+    vertical-align: middle;
+    font-size: 10px;
+    transform: scale(0.7);
 }
 
 // Colors
@@ -411,7 +458,7 @@ i[class^="gg-"] {
     box-shadow: 4px -6px 0,8px -12px 0;
     border-radius: 4px;
     background: currentColor
-} 
+}
 
 .gg-dark-mode {
     box-sizing: border-box;
@@ -452,4 +499,25 @@ i[class^="gg-"] {
     height:8px;
     right:4px;
     top:4px
+}
+
+.state-badge {
+    font-size: 10px;
+    font-weight: 500;   
+}
+.state-badge-link {
+    text-decoration: none !important;
+    color: white !important;
+    &:hover {
+        text-decoration: none;
+    }
+}
+.state-badge-key, .state-badge-value {
+    padding: 2px 5px;
+}
+.state-badge-key {
+    background-color: #555;
+}
+.section-intro .state-badge {
+    display: none;
 }

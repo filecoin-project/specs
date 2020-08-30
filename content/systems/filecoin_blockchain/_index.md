@@ -4,12 +4,11 @@ bookCollapseSection: true
 weight: 4
 dashboardWeight: 2
 dashboardState: wip
-dashboardAudit: 0
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # Blockchain
----
 
 The Filecoin Blockchain is a distributed virtual machine that achieves consensus, processes messages, accounts for storage, and maintains security in the Filecoin Protocol. It is the main interface linking various actors in the Filecoin system.
 

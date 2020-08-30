@@ -21,17 +21,41 @@ yarn install
 ```
 
 ## Develop
-You need to have Go installed https://golang.org/doc/install
+You need to have [Go](https://golang.org/doc/install) and `bzr` installed (required to build lotus)
 
 ```bash
-brew install go
+brew install go bzr
 ```
 
 ### Serve with Live Reload
 ```sh
-yarn serve
+yarn start
 # open http://localhost:1313/ in the browser
 ```
+
+### Check your markdown
+
+We have a markdown linter set up to check for common errors like incorrectly nested headers. It runs in CI and you can run it locally with:
+
+```bash
+npm test
+content/algorithms/crypto/randomness.md
+  15:39-15:46  warning  Found reference to undefined definition  no-undefined-references  remark-lint
+  54:24-54:31  warning  Found reference to undefined definition  no-undefined-references  remark-lint
+
+⚠ 2 warnings
+```
+
+### Solving Common problems
+
+**Problem** - Site fails to build with an error that states it faled to download modules on macos
+
+```
+Error: failed to download modules: go command failed ...
+```
+
+**Solution** - run `npm run clean` - the cache dir hugo uses can get corrupted, and this resets it. See [#1048](https://github.com/filecoin-project/specs/issues/1048)
+
 
 ### External modules
 External modules should be added as [Hugo Modules](https://gohugo.io/hugo-modules/)
@@ -42,84 +66,39 @@ You can find examples in the `config.toml`
   [[module.imports]]
     path = "github.com/filecoin-project/specs-actors"
     [[module.imports.mounts]]
-    source = "actors"
-    target = "content/modules/actors"
+    source = "."
+    target = "content/externals/specs-actors"
 ```
+> `target` should **ALWAYS** use the folder `content/externals`
+
 This makes files from external repos available for Hugo rendering and allows for linking to up-to-date files that are directly pulled from other repositories.
 
 The configuration above gives the following information:
 
-- `path`: gives the repository you want to mount content from.
-- `source`: the folder from the repository referenced in the `path` that we want to mount into  our local Hugo filesystem. This is the "root" seen from your Hugo site where you pull content from. In the above case, this means that the source that will be mounted is `https://github.com/filecoin-project/specs-actors/actors/`.
-- `target`: the folder in your local Hugo site where the mounted content appears. In our case folder `content` is where we include all Hugo content.
+- `path`: Repository's URL without protocol.
+- `source`: Folder from the repository referenced in the `path` to be mounted into the local Hugo filesystem.
+- `target`: Folder where `source` will be mounted locally, this should follow this structure `content/modules/<target value>`.
 
-Putting everything together in an example: if you want to link to the file `xyz.go` from `https://github.com/filecoin-project/specs-actors/actors/xyz-folder/xyz.go`, from any file within the local folder `content` (or any of its subfolders), then with the above configuration you have to include:
+Example: if you want to link/embed to the file `xyz.go` that lives in `https://github.com/filecoin-project/specs-actors/actors/xyz-folder/xyz.go`, from within a markdown file then with the above configuration the `src` for shortcodes or markdown image syntax would be:
 
 ```
-{{<embed src="/modules/actors/xyz-folder/xyz.go"  lang="go">}}
+{{<embed src="/externals/specs-actors/actors/xyz-folder/xyz.go"  lang="go">}}
 ```
+> The first foward slash is important it means the path is relative to the content folder.
 
 These modules can be updated with 
 
 ```sh
 hugo mod get -u
 ```
-or use specific version with
+or to a specific version with
 
 ```sh
 hugo mod get github.com/filecoin-project/specs-actors@v0.7.2
 ```
 
-## Shortcodes
-### `Mermaid` 
-Inline mermaid syntax rendering
-```html
-{{< mermaid >}}
-graph TD
-  A[Christmas] -->|Get money| B(Go shopping)
-  B --> C{Let me think}
-  C -->|One| D[Laptop]
-  C -->|Two| E[iPhone]
-  C -->|Three| F[fa:fa-car Car]
-		
-{{</ mermaid >}}
-```
-
-### `svg`
-This shortcode includes zoom and pad features.
-```html
-<!-- Relative path -->
-{{< svg src="pull-flow.mmd.svg" title="Data Transfer - Pull Flow" >}}
-
-<!-- From hugo content folder -->
-{{< svg src="/systems/pull-flow.mmd.svg" title="Data Transfer - Pull Flow" >}}
-```
-
-### `hint`
-```md
-<!-- info|warning|danger -->
-{{< hint info >}}
-**Markdown content**  
-Lorem markdownum insigne. Olympo signis Delphis! Retexi Nereius nova develat
-stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa
-{{< /hint >}}
-```
-### `figure`
-```md
-{{< figure src="diagrams/pieces.png" title="Pieces, Proving Trees, and Piece Data Structures" zoom="true">}}
-```
-
-### `embed`
-```md
-# src relative to the page
-{{<embed src="piece_store.id" lang="go">}}
-
-# src relative to content folder
-{{<embed src="/systems/piece_store.id" lang="go">}}
-```
-
 ## Page Header
-The first heading should be # Head with `---` like below and should refer to the overall title of the document. The right nav **only** starts on the second level of headings. 
+The first heading should be an atx style heading `# Head` and should refer to the overall title of the document.
 
 ```md
 ---
@@ -127,7 +106,6 @@ title: Storage Power Actor
 ---
 
 # Storage Power Actor
----
 
 ## Header for a section in this document
 Some text
@@ -146,7 +124,7 @@ Description for all the available frontmatter properties
 title: Libraries 
 <!-- Small description for html metadata, if not present the first couple of paragraphs will be used instead -->
 description: Libraries used from Filecoin
-<!-- This will be used to order the navigation and any other listing of pages -->
+<!-- This will be used to order the ToC, navigation and any other listings of pages -->
 weight: 3
 <!-- This will make a page section collapse in the navigation -->
 bookCollapseSection: true
@@ -154,10 +132,14 @@ bookCollapseSection: true
 bookhidden: true
 <!-- This is used in the dashboard to describe the importance of the page content -->
 dashboardWeight: 2
-<!-- This is used in the dashboard to describe the state of the page content options are "incorrect", "wip", "incomplete" and "stable" -->
+<!-- This is used in the dashboard to describe the state of the page content options are "missing", "incorrect", "wip", "reliable", "stable" or "n/a" -->
 dashboardState: stable
-<!-- This is used in the dashboard to describe if the theory of the page has been audited, options are 1 or 0 -->
-dashboardAudit: 1
+<!-- This is used in the dashboard to describe if the theory of the page has been audited, options are "missing", "wip", "done" or "n/a" -->
+dashboardAudit: wip
+<!-- When dashboardAudit is stable we should have a report url -->
+dashboardAuditURL: https://url.to.the.report
+<!-- The date that the report at dashboardAuditURL was completed -->
+dashboardAuditDate: "2020-08-01"
 <!-- This is used in the dashboard to describe if the page content has compliance tests, options are 0 or numbers of tests -->
 dashboardTests: 0
 ```
@@ -174,16 +156,30 @@ Random plain text context ...
 
 ```
 
+## Images, diagrams - Markdown images
+To add an image or diagram you just need to use normal markdown syntax. 
+For diagrams you can use the source files and the pipelines will handle converting that to `svg`, we support mermaid and dot source files.
 
-## References
-### Markdown links **(Recommended)**
+```md
+# relative to the markdown file
+![Alt text](picture.jpg)
+
+# relative to the content folder
+![Alt text](/content/intro/diagram1.mmd)
+
+![Alt text](graph.dot "Graph title")
+```
+> When there's no title we use the alt text as title   
+
+
+## References - Markdown links
 These links use "portable links" just like `relref` so you can just give it the name of the file and it will fetch the correct relative link and title for the `<a href="/relative/path" title="page title">` automatically.
 You can override the `<a>` title by passing a second `string` in the link definition.
 
 > **Note**: When using anchors the title can't be fetched automatically.
 ```md
-[Storage Power](storage_power_consensus)
-# <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Storage Power Consensus">Storage Power</a>
+[](storage_power_consensus)
+# <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Storage Power Consensus">Storage Power Consensus</a>
 
 [Storage Power](storage_power_consensus "Title to override the page original title")
 # <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Title to override the page original title">Storage Power</a>
@@ -193,17 +189,38 @@ You can override the `<a>` title by passing a second `string` in the link defini
 
 ```
 
-### Hugo Cross Refs
-Check Hugo's documentation [here](https://gohugo.io/content-management/shortcodes/#ref-and-relref)
-```md
-[Random]({{<relref "randomness">}})
-[Pledge Collateral]({{<relref "storage_power_actor#pledge-collateral">}})
+
+## Shortcodes
+### `Mermaid` 
+Inline mermaid syntax rendering
+```html
+{{< mermaid >}}
+graph TD
+  A[Christmas] -->|Get money| B(Go shopping)
+  B --> C{Let me think}
+  C -->|One| D[Laptop]
+  C -->|Two| E[iPhone]
+  C -->|Three| F[fa:fa-car Car]
+		
+{{</ mermaid >}}
 ```
-### Link shortcode
-Theres also `link` shortcode which will fetch the title of the page automatically and use it for the `<a>` text and title, but **DOES NOT** work with anchors (`#anchor-id`)
+
+### `hint`
 ```md
-{{<link storage_power_consensus>}}
-# <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Storage Power Consensus">Storage Power Consensus</a>
+<!-- info|warning|danger -->
+{{< hint info >}}
+**Markdown content**  
+Lorem markdownum insigne. Olympo signis Delphis! Retexi Nereius nova develat
+stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa
+{{< /hint >}}
+```
+### `embed`
+```md
+# src relative to the page
+{{<embed src="piece_store.id" lang="go">}}
+
+# src relative to content folder
+{{<embed src="/systems/piece_store.id" lang="go">}}
 ```
 
 ## Math mode

@@ -2,21 +2,33 @@
 title: "Randomness"
 weight: 3
 dashboardWeight: 2
-dashboardState: incorrect
-dashboardAudit: 0
+dashboardState: reliable
+dashboardAudit: wip
 dashboardTests: 0
 ---
 
 # Randomness
----
+
+TODO: clean up stale .id/.go files
 
 Randomness is used throughout the protocol in order to generate values and extend the blockchain.
-Random values are drawn from the [Ticket Chain](storage_power_consensus#the-ticket-chain-and-drawing-randomness) and appropriately formatted for usage.
+Random values are drawn from a [drand](drand) beacon and appropriately formatted for usage.
 We describe this formatting below.
 
-## Encoding On-chain data for randomness
+## Encoding Random Beacon randomness for on-chain use
 
-Entropy from the ticket-chain can be combined with other values to generate necessary randomness that can be
+Entropy from the drand beacon can be harvested into a more general data structure: a `BeaconEntry`, defined as follows:
+
+```go
+type BeaconEntry struct {
+    // Drand Round for the given randomness
+    Round       uint64
+    // Drand Signature for the given Randomness, named Data as a more general name for random beacon output
+    Data   []byte
+}
+```
+
+The BeaconEntry is then combined with other values to generate necessary randomness that can be
 specific to (eg) a given miner address or epoch. To be used as part of entropy, these values are combined in 
 objects that can then be CBOR-serialized according to their algebraic datatypes.
 
@@ -27,13 +39,46 @@ Further, we define Domain Separation Tags with which we prepend random inputs wh
 All randomness used in the protocol must be generated in conjunction with a unique DST, as well as 
 certain [Signatures](signatures) and [Verifiable Random Function](vrf) usage.
 
-## Drawing tickets for randomness from the chain
+## Forming Randomness Seeds
 
-Tickets are used as a source of on-chain randomness, generated with each new block created (see [Tickets](storage_power_consensus#tickets)).
+The beacon entry is combined with a few elements for use as part of the protocol as follows:
+
+- a DST (domain separation tag)
+    - Different uses of randomness are distinguished by this type of personalization which ensures that randomness used for different purposes will not conflict with randomness used elsewhere in the protocol
+- the epoch number, ensuring
+    - liveness for leader election -- in the case no one is elected in a round and no new beacon entry has appeared (i.e. if the beacon frequency is slower than that of block production in Filecoin), the new epoch number will output new randomness for LE (note that Filecoin uses liveness during a beacon outage).
+    - other entropy, ensuring that randomness is modified as needed by other context-dependent entropy (e.g. a miner address if we want the randomness to be different for each miner).
+
+While all elements are not needed for every use of entropy (e.g. the inclusion of the round number is not necessary prior to genesis or outside of leader election, other entropy is only used sometimes, etc), we draw randomness as follows for the sake of uniformity/simplicity in the overall protocol.
+
+In all cases, a [drand](drand) signature is used as the base of randomness: it is hashed using blake2b in order to obtain a usable randomness seed. In order to make randomness seed creation uniform, the protocol derives all such seeds in the same way, using blake2b as a hash function to generate a 256-bit output as follows:
+
+In round `n`, for a given randomness lookback `l`, and serialized entropy `s`:
+
+```text
+GetRandomness(dst, l, s):
+    ticketDigest = beacon.GetRandomnessFromBeacon(n-l)
+
+    buffer = Bytes{}
+    buffer.append(IntToBigEndianBytes(dst))
+    buffer.append(randSeed)
+    buffer.append(n-l) // the sought epoch
+    buffer.append(s)
+
+    return H(buffer)
+```
+
+{{<embed src="/externals/specs-actors/actors/crypto/randomness.go"  lang="go">}}
+{{<embed src="/systems/filecoin_blockchain/struct/chain/chain.go" lang="go">}}
+
+## Drawing tickets from the VRF-chain for proof inclusion
+
+In some places, the protocol needs randomness drawn from the Filecoin blockchain's VRF-chain (which generates [tickets](storage_power_consensus#tickets) with each new block) rather than from the random beacon, in order to tie certain proofs to a particular set of Filecoin blocks (i.e. a given chain or fork).
+In particular, `SealRandomness` must be taken from the VRF chain, in order to ensure that no other fork can replay the Seal (see [sealing](sealing) for more).
 
 A ticket is drawn from the chain for randomness as follows, for a given epoch `n`, and ticket sought at epoch `e`:
 ```text
-RandomnessSeedAtEpoch(e):
+GetRandomnessFromVRFChain(e):
     While ticket is not set:
         Set wantedTipsetHeight = e
         if wantedTipsetHeight <= genesis:
@@ -54,42 +99,7 @@ In plain language, this means:
 
 This ticket is then combined with a Domain Separation Tag, the round number sought and appropriate entropy to form randomness for various uses in the protocol.
 
-See the `RandomnessSeedAtEpoch` method below:
-{{<embed src="/systems/filecoin_blockchain/struct/chain/chain.go" lang="go">}}
-
-## Forming Randomness Seeds
-
-The drawn ticket digest is combined with a few elements to make up randomness for use as part of the protocol.
-
-- a DST (domain separation tag)
-    - Different uses of randomness are distinguished by this type of personalization which ensures that randomness used for different purposes will not conflict with randomness used elsewhere in the protocol
-- the epoch number, ensuring
-    - liveness for leader election -- in the case of null rounds, the new epoch number will output new randomness for LE
-    - distinct values for randomness sought before genesis -- where the genesis ticket will be returned
-    - For instance, if in epoch `curr`, a miner wants randomness from `lookback` epochs back where `curr - lookback <= genesis`, the ticket randomness drawn would be based on `genesisTicket.digest` where the `genesisTicket` is the randomness included in the genesis block. Using the epoch as part of randomness composition ensures that randomness drawn at various epochs prior to genesis has different values.
-- other entropy,
-    - ensuring that randomness is modified as needed by other context-dependent entropy (e.g. a miner address if we want the randomness to be different for each miner).
-
-While all elements are not needed for every use of entropy (e.g. the inclusion of the round number is not necessary prior to genesis or outside of leader election, other entropy is only used sometimes, etc), we draw randomness as follows for the sake of uniformity/simplicity in the overall protocol.
-
-In all cases, a ticket is used as the base of randomness (see [Tickets](storage_power_consensus#tickets)). In order to make randomness seed creation uniform, the protocol derives all such seeds in the same way, using blake2b as a hash function to generate a 256-bit output as follows:
-
-In round `n`, for a given randomness lookback `l`, and serialized entropy `s`:
-
-```text
-GetRandomness(dst, l, s):
-    ticketDigest = RandomnessSeedAtEpoch(n-l)
-
-    buffer = Bytes{}
-    buffer.append(IntToBigEndianBytes(dst))
-    buffer.append(randSeed)
-    buffer.append(n-l) // the sought epoch
-    buffer.append(s)
-
-    return H(buffer)
-```
-
-{{<embed src="/modules/actors/crypto/randomness.go"  lang="go">}}
+See the `GetRandomnessFromVRFChain` method below:
 {{<embed src="/systems/filecoin_blockchain/struct/chain/chain.go" lang="go">}}
 
 ## Entropy to be used with randomness
@@ -108,8 +118,10 @@ type baz struct {
 Currently, we distinguish the following entropy needs in the Filecoin protocol (this list is not exhaustive):
 
 - TicketProduction: requires MinerIDAddress
-- ElectionPoStChallengeSeed: requires current epoch and MinerIDAddress -- epoch is already mixed in from ticket drawing so in practice is the same as just adding MinerIDAddress as entropy
+- ElectionProofProduction: requires current epoch and MinerIDAddress -- epoch is already mixed in from ticket drawing so in practice is the same as just adding MinerIDAddress as entropy
+- WinningPoStChallengeSeed: requires MinerIDAddress
 - WindowedPoStChallengeSeed: requires MinerIDAddress
+- WindowedPoStDeadlineAssignment: TODO @jake
 - SealRandomness: requires MinerIDAddress
 - InteractiveSealChallengeSeed: requires MinerIDAddress
 

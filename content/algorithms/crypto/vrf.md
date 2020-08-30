@@ -3,12 +3,11 @@ title: "Verifiable Random Function"
 weight: 2
 dashboardWeight: 2
 dashboardState: incorrect
-dashboardAudit: 0
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # Verifiable Random Function
----
 
 Filecoin uses the notion of a [Verifiable Random
 Function](https://people.csail.mit.edu/silvio/Selected%20Scientific%20Papers/Pseudo%20Randomness/Verifiable_Random_Functions.pdf)

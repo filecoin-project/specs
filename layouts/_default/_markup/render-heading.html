@@ -1,0 +1,45 @@
+{{/* 
+  render-heading.html is a hugo hook called for each heading in each markdown doc, 
+  allowing us to control the HTML generated and fix the id generation to work for
+  a single page site, and add anchors and state badges.
+*/}}
+
+{{/* get rid of unwanted filename noise */}}
+{{- $path := strings.TrimSuffix "/_index.md" .Page.File.Path }}
+{{- $path = strings.TrimSuffix ".md" $path }}
+{{- $pathParts := split $path "/" -}}
+{{- $pathSize := len $pathParts -}}
+
+{{/* 
+  .Level is the heading number from the original markdown, e.g 1 for an h1.
+  $level is the corrected heading number given the depth of the file in the tree.
+*/}}
+{{- $level := add $pathSize (sub .Level 1) -}}
+{{- $originalLevel := default 1 .Level -}}
+{{- $anchor := "" -}}
+
+{{/* 
+  each markdown doc must have exactly 1 h1 element.
+  e.g. in intro/_index.md, the h1 gets the id #intro... 
+  
+  ...while the subsequent headings have the .Anchor appended which is a hugo provided id derived from the heading text.
+  e.g  in intro/_index.md <h2>Spec Status</h2> gets the id #intro__spec-status
+*/}}
+{{- if eq .Level 1 -}}
+  {{- $anchor = (delimit $pathParts "__") -}}
+{{- else -}}
+  {{- $anchor = printf "%s__%s" (delimit $pathParts "__") .Anchor -}}
+{{- end -}}
+
+{{/* 
+  - headings get numbered by css; changing the nesting requires updating numbered.scss.
+  - heading text is grabbed by toc.js as the ToC link text
+*/}}
+<h{{ $level }} id="{{ $anchor | safeURL }}" class="level-{{ $level }}" data-page="{{if eq $originalLevel 1 }}true{{end}}" data-dashboard-weight="{{.Page.Params.dashboardWeight}}" data-dashboard-state="{{.Page.Params.dashboardState}}" data-dashboard-audit="{{.Page.Params.dashboardAudit}}" data-dashboard-audit-url="{{.Page.Params.dashboardAuditURL}}" data-dashboard-audit-date="{{.Page.Params.dashboardAuditDate}}">
+  <a href="#{{ $anchor | safeURL }}">{{ .Text | safeHTML }}</a>
+</h{{ $level }}>
+<div class="section-badges">
+{{- if or (eq $level 2) (eq $level 3) -}}
+  {{- partial "state-badge.html" .Page.Params -}}
+{{- end -}}
+</div>
