@@ -3,7 +3,7 @@ title: System Actors
 weight: 6
 bookCollapseSection: true
 dashboardWeight: 2
-dashboardState: wip
+dashboardState: reliable
 dashboardAudit: wip
 dashboardTests: 0
 ---
@@ -29,3 +29,29 @@ The remaining seven (7) builtin System Actors that do not interact directly with
 -  `StoragePowerActor`: responsible for keeping track of the storage power allocated at each storage miner [[Storage Power Actor](https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/power/power_actor.go)]
 - `VerifiedRegistryActor`: responsible for managing verified clients [[Verifreg Actor Repo](https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/verifreg/verified_registry_actor.go)]
 - `SystemActor`: general system actor [[System Actor Repo](https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/system/system_actor.go)]
+
+## CronActor
+
+Built in to the genesis state, the `CronActor`'s dispatch table invokes the `StoragePowerActor` and `StorageMarketActor` for them to maintain internal state and process deferred events. It could in principle invoke other actors after a network upgrade.
+
+{{<embed src="/externals/specs-actors/actors/builtin/cron/cron_actor.go"  lang="go">}}
+
+## InitActor
+
+The `InitActor` has the power to create new actors, e.g., those that enter the system. It maintains a table resolving a public key and temporary actor addresses to their canonical ID-addresses. Invalid CIDs should not get committed to the state tree.
+
+Note that the canonical ID address does not persist in case of chain re-organization. The actor address or public key survives chain re-organization.
+
+{{<embed src="/externals/specs-actors/actors/builtin/init/init_actor.go" lang="go">}}
+
+## RewardActor
+
+The `RewardActor` is where unminted Filecoin tokens are kept. The actor distributes rewards directly to miner actors, where they are locked for vesting. The reward value used for the current epoch is updated at the end of an epoch through a cron tick.
+
+{{<embed src="/externals/specs-actors/actors/builtin/reward/reward_actor.go"  lang="go">}}
+
+## AccountActor
+
+The `AccountActor` is responsible for user accounts. Account actors are not created by the `InitActor`, but their constructor is called by the system. Account actors are created by sending a message to a public-key style address. The address must be `BLS` or `SECP`, or otherwise there should be an exit error. The account actor is updating the state tree with the new actor address.
+
+{{<embed src="/externals/specs-actors/actors/builtin/account/account_actor.go" lang="go" >}}
