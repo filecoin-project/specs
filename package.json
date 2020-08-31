@@ -9,9 +9,10 @@
     "serve": "npm start",
     "watch-hugo": "npm run build-diagrams && hugo server --bind=0.0.0.0 --disableFastRender --renderToDisk",
     "watch-diagrams": "tools/diagrams.js --watch",
-    "build": "npm run build-diagrams && hugo --gc --minify",
+    "watch-toc": "tools/toc.js --watch",
+    "build": "npm run build-diagrams && hugo --quiet && npm run build-toc && hugo --gc --minify",
     "build-diagrams": "tools/diagrams.js --all",
-    "build-toc": "tools/process-html",
+    "build-toc": "tools/toc.js",
     "clean": "premove public resources static/_gen && hugo mod clean --all && hugo mod tidy"
   },
   "author": "",

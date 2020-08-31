@@ -12,4 +12,6 @@
   </ol>
 {{ end }}
 
-{{ template "toc-list" (dict "children" .Site.Data.toc "depth" 0 )}}
+{{ if isset .Site.Data "toc" }}
+  {{ template "toc-list" (dict "children" .Site.Data.toc "depth" 0 )}}
+{{ end }}
