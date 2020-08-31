@@ -46,16 +46,15 @@ A `Miner` actor is an entity in the Filecoin VM that can make deal, seal sectors
 A `Miner` actor can only be associated with a Seal proof. If a miner wants to have 32GiB and 64GiB SDR sectors, they must have two different `Miner` actors.
 
 ### Keys
-A `Miner` actor can be controlled with two keys: *worker key* and *owner key*.
+A `Miner` actor can be controlled by different key types: one *worker key*, one *owner key* and up to ten *control keys*.
 
 The *owner key* is the key used at `Power.CreateMiner` and it cannot change, but it can be used to change the *worker key*.
 
 The *worker key* is used for the leader election step in consensus and it can be changed via `miner.WorkerKeyChange` using the *owner key*.
 
-Both keys can be used to interact with the `Miner` actor. We reccomend to avoid using the *owner key* and use the *worker key* for daily operation.
+All the keys can be used to interact with the `Miner` actor. We reccomend to avoid using the *owner key* and use the *control keys* for daily operation.
 
-If the miner calls `miner.WorkerKeyChange`, the *worker key* cannot be used until the key is updated (this requires `WorkerKeyChangeDelay` epochs).
-This implies that the miner won't be able to participate in leader election with the previous key.
+If the miner calls `miner.WorkerKeyChange`, the *worker key* cannot be used until the key is updated (this requires `WorkerKeyChangeDelay` epochs). This implies that the miner won't be able to participate in leader election with the previous key.*Control keys* are updated immediatedly.
 
 ### Miner Duties
 - Timely follow up `miner.PreCommitSectors` with valid `miner.ProveCommitSector` (see PreCommit Faults)
