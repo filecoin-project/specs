@@ -3,13 +3,12 @@ title: System Actors
 weight: 6
 bookCollapseSection: true
 dashboardWeight: 2
-dashboardState: stable
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: wip
 dashboardTests: 0
 ---
 
 # System Actors
----
 
 There are eleven (11) builtin System Actors in total, but not all of them interact with the VM. Each actor is identified by a _Code ID_ (or CID).
 

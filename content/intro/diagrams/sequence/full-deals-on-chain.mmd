@@ -72,9 +72,9 @@ sequenceDiagram
 
     opt ClientQuery
         StorageMarketParticipant1 ->>+ StorageMarketParticipant2: QueryStorageDealProposalStatus(StorageDealProposalQuery)
-        StorageMarketParticipant1 -->>- StorageMarketParticipant2: StorageDealProposalQueryResponse
+        StorageMarketParticipant2 -->>- StorageMarketParticipant1: StorageDealProposalQueryResponse
         StorageMarketParticipant1 ->>+ StorageMarketParticipant2: QueryStorageDealStatus(StorageDealQuery)
-        StorageMarketParticipant1 -->>- StorageMarketParticipant2: StorageDealQueryResponse
+        StorageMarketParticipant2 -->>- StorageMarketParticipant1: StorageDealQueryResponse
     end
 
     opt SealingSector

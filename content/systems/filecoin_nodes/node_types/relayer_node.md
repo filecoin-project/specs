@@ -2,13 +2,12 @@
 title: Relayer Node
 weight: 7
 dashboardWeight: 1
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 
 # Relayer Node
----
 
 ```go
 type RelayerNode interface {

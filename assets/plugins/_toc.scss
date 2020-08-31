@@ -1,7 +1,8 @@
 .toc {
   overflow-y: auto;
   > ol {
-    overflow: hidden;
+    height: 90%;
+    overflow: auto;
     position: relative;
     > li {
       font-weight: 500;
@@ -39,15 +40,15 @@
   li.active-parent > .maybe-hide > li {
     height: auto;
   }
-}
-ol li {
-  padding: 0 0;
-  line-height: 2;
-  font-size: 14px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  a.toc-link {
-    height: 100%;
+  ol li {
+    padding: 0 0;
+    line-height: 2;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    a.toc-link {
+      height: 100%;
+    }
   }
 }

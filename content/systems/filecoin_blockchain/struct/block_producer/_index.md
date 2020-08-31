@@ -3,12 +3,11 @@ title: Block Producer
 weight: 5
 dashboardWeight: 1.5
 dashboardState: incorrect
-dashboardAudit: 0
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # Block Producer
----
 
 ## Mining Blocks
 

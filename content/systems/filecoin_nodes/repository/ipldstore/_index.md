@@ -2,13 +2,12 @@
 title: IPLD Store
 weight: 3
 dashboardWeight: 1
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: wip
 dashboardTests: 0
 ---
 
 # IPLD Store - Local Storage for hash-linked data
----
 
 {{<embed src="../../../../libraries/ipld/ipld.id" lang="go" >}}
 

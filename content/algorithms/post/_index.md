@@ -3,13 +3,12 @@ title: Proof-of-Spacetime
 bookCollapseSection: true
 weight: 3
 dashboardWeight: 2
-dashboardState: incorrect
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: wip
 dashboardTests: 0
 ---
 
 # Proof-of-Spacetime
----
 _Proof-of-Storage_ schemes allow a user to check if a storage provider is storing the outsourced data at the time
 of the challenge. How can we use **PoS** schemes to prove that some data was being stored throughout a period
 of time? A natural answer to this question is to require the user to repeatedly (e.g. every minute) send

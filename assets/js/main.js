@@ -1,26 +1,16 @@
 import '@pwabuilder/pwaupdate'
 import { initToc } from './toc.js'
-import panzoom from 'panzoom'
 import tablesort from 'tablesort'
 import Gumshoe from 'gumshoejs'
-
+import { buildTocModel } from './content-model'
+import { buildDashboard } from './dashboard-spec'
+import { renderKatex } from './katex';
+import { lightbox } from './lightbox'
 // Note: the tablesort lib is not ESM friendly, and the sorts expect `Tablesort` to be available on the global
 window.Tablesort = tablesort
 require('tablesort/dist/sorts/tablesort.number.min.js')
 
-function initPanZoom () {
-  console.log('init panzoom')
-  var elements = document.querySelectorAll(".zoomable")
-  elements.forEach(function (el) {
-    panzoom(el.querySelector('*:first-child'), {
-      maxZoom: 10,
-      minZoom: 0.5
-    })
-  })
-}
-
 function initTableSort () {
-  console.log('init tablesort')
   var elements = document.querySelectorAll(".tablesort")
   elements.forEach(function (el) {
     tablesort(el);
@@ -36,7 +26,6 @@ function initTocDepthSlider () {
   })
 
   function handleSliderChange (depth) {
-    console.log('handleSliderChange', depth)
     for (let i = 0; i < 6; i++) {
       toc.querySelectorAll(`.depth-${i}`).forEach(el => {
         if (i < depth) {
@@ -52,7 +41,6 @@ function initTocDepthSlider () {
 }
 
 function initTocScrollSpy () {
-  console.log('initTocScrollSpy')
   var spy = new Gumshoe('.toc a', {
     nested: true,
     nestedClass: 'active-parent'
@@ -60,9 +48,22 @@ function initTocScrollSpy () {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  initToc({tocSelector:'.toc', contentSelector: '.markdown'})
+  const model = buildTocModel('.markdown')
+  initToc({tocSelector:'.toc', model })
+  buildDashboard('#dashboard-container', model)
   initTocDepthSlider()
   initTocScrollSpy()
-  initPanZoom()
   initTableSort()
+  lightbox()
+  // load katex when math-mode page intersect with the viewport
+  let observer = new IntersectionObserver((entries, observer) => { 
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          renderKatex(entry.target)
+          observer.unobserve(entry.target);
+        }
+      });
+  });
+  document.querySelectorAll('.math-mode').forEach(img => { observer.observe(img) });
+
 });

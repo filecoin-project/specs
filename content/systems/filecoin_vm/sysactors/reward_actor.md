@@ -2,13 +2,12 @@
 title: RewardActor
 weight: 4
 dashboardWeight: 2
-dashboardState: stable
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: wip
 dashboardTests: 0
 ---
 
 # RewardActor
----
 
 The `RewardActor` is where unminted Filecoin tokens are kept. The `RewardActor` contains a `RewardMap` which is a mapping from owner addresses to `Reward` structs. 
 
@@ -16,5 +15,4 @@ A `Reward struct` is created to preserve the flexibility of introducing block re
 
 The award value used for the current epoch is updated at the end of an epoch through a cron tick. In the case previous epochs were null blocks this is the reward value as calculated at the last non-null epoch.
 
-
-{{<embed src="/modules/actors/builtin/reward/reward_actor.go" lang="go">}}
+{{<embed src="/externals/specs-actors/actors/builtin/reward/reward_actor.go"  lang="go">}}
