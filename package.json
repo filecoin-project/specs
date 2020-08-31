@@ -11,7 +11,8 @@
     "watch-diagrams": "tools/diagrams.js --watch",
     "build": "npm run build-diagrams && hugo --gc --minify",
     "build-diagrams": "tools/diagrams.js --all",
-    "clean": "premove public resources static/_gen && hugo mod clean --all && hugo mod tidy"
+    "clean": "premove public resources static/_gen && hugo mod clean --all && hugo mod tidy",
+    "release": "np --no-publish && conventional-github-releaser -p angular"
   },
   "author": "",
   "license": "MIT",
@@ -35,10 +36,12 @@
     "@mermaid-js/mermaid-cli": "^8.7.0",
     "chokidar": "^3.4.2",
     "concurrently": "^5.3.0",
+    "conventional-github-releaser": "^3.1.5",
     "execa": "^4.0.3",
     "globby": "^11.0.1",
     "graphviz-cli": "^1.0.0",
     "hugo-extended": "^0.74.3",
+    "np": "^6.5.0",
     "premove": "^3.0.1"
   }
 }
