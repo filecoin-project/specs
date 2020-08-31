@@ -72,7 +72,8 @@ Each section of the spec must be stable and audited before it is considered done
 </table>
 
 ### Spec Status Overview
-<div id="dashboard-container"></div>
+
+{{<dashboard-spec>}}
 
 ### Spec Stabilization Progess
 
