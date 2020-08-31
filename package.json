@@ -1,6 +1,6 @@
 {
   "name": "specs",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "The Filecoin protocol specification",
   "main": "index.js",
   "scripts": {
