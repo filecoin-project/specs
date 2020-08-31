@@ -1,0 +1,52 @@
+{{/* Get the filepath */}}
+{{/* Relative to content folder */}}
+{{ if eq (.Get "src" | printf "%.1s") "/" }}
+    {{ $.Scratch.Set "filepath" ( strings.TrimLeft "/" ( .Get "src" ))}}
+{{ else }}
+{{/* Relative to page */}}
+    {{ $.Scratch.Set "filepath" $.Page.File.Dir }}
+    {{ $.Scratch.Add "filepath" ( .Get "src" ) }}
+{{ end }}
+{{ $path := ($.Scratch.Get "filepath")}}
+{{ $lang := .Get "lang" }}
+{{ $symbolName := .Get "symbol" }}
+
+{{ if fileExists ($.Scratch.Get "filepath") }}
+        {{ $content := readFile $path }}
+        {{ $body := "" }}
+        {{ $comment := "" }}
+
+        <!-- search for func -->
+        <!-- func https://regex101.com/r/hEcbY2/6 -->
+        {{ $pattern2 := printf "(?m)(^\\n^((//.*\\n)*)(func(\\s\\([^\\)]+\\))?\\s%s\\([\\s\\S]+?\\n}))" $symbolName}}
+        {{ $block :=  index (findRE $pattern2 $content ) 0}}
+        {{ $comment = replaceRE $pattern2 "$2" $block }}
+        {{ $body = replaceRE $pattern2 "$4" $block }}
+
+        <!-- search for type struct -->
+        {{- if eq $body "" -}}
+            {{ $patternStruct := printf "(?m)(^\n^((//.*\n)*)(type %s struct \\{[\\s\\S]+?\\n}))" $symbolName}}
+            {{ $block :=  index (findRE $patternStruct $content ) 0}}
+            {{ $comment = replaceRE $patternStruct "$2" $block }}
+            {{ $body = replaceRE $patternStruct "$4" $block }}
+        {{- end -}}
+
+        {{- if $body }}
+            <p id="symbol-comment-{{- $symbolName -}}">
+                {{ (replace $comment "//" "") | .Page.RenderString }}
+            </p>
+            <div id="symbol-body-{{- $symbolName -}}">
+                {{ highlight $body $lang "" }}
+            </div>
+        {{- else -}}
+            <blockquote class="book-hint danger">
+                {{- printf "Symbol '%s' not found in file '%s' from Page '%s'" $symbolName $path .Page.File }}
+            </blockquote>
+            {{- errorf "Symbol '%s' not found in file '%s' from Page '%s'" $symbolName $path .Page.File }}
+        {{- end -}}
+{{ else }}
+    <blockquote class="book-hint danger">
+      {{- printf "File '%s' not found from Page '%s'" $path .Page.File }}
+    </blockquote>
+    {{- errorf "File '%s' not found from Page '%s'" $path .Page.File }}
+{{ end }}
