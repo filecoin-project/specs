@@ -1,0 +1,54 @@
+.toc {
+  overflow-y: auto;
+  > ol {
+    height: 90%;
+    overflow: auto;
+    position: relative;
+    > li {
+      font-weight: 500;
+    } 
+  }
+  > ol li {
+    list-style: none;
+  }
+  > ol > li > ol {
+    padding-bottom: 1rem;
+    font-weight: 400;
+  }
+  ol {
+    margin: 0;
+    padding-left: 10px;
+  }
+  a {
+    color: currentColor;
+    height: 100%;
+  }
+  li::before {
+    content: " ";
+    display: inline-block;
+    height: inherit;
+    left: 0;
+    margin-top: -1px;
+    position: absolute;
+  }
+  li:not(.active-parent) > .maybe-hide > li:not(.active) {
+    height:0;
+  }
+  li.active,
+  li.active-parent,
+  .maybe-hide li.active-parent,
+  li.active-parent > .maybe-hide > li {
+    height: auto;
+  }
+  ol li {
+    padding: 0 0;
+    line-height: 2;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    a.toc-link {
+      height: 100%;
+    }
+  }
+}

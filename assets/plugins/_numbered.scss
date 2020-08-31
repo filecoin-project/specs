@@ -1,0 +1,49 @@
+$startLevel: 1;
+$endLevel: 6;
+
+.book-page .markdown {
+  counter-reset: h1 h2 h3 h4 h5 h6;
+}
+
+.book-page .markdown {
+  @for $currentLevel from $startLevel through $endLevel {
+    h#{$currentLevel} {
+      counter-reset: h#{$currentLevel + 1} 0;
+      counter-increment: h#{$currentLevel};
+    }
+    $content: "";
+    @for $n from $startLevel through $currentLevel {
+      $content: $content + 'counter(h#{$n})"."';
+    }
+
+    h#{$currentLevel}::before {
+      content: unquote($content) " ";
+    }
+  }
+}
+
+.book-menu nav ol {
+  li {
+    counter-increment: item;
+
+    &:first-child {
+      counter-reset: item;
+    }
+
+    a:before {
+      content: counters(item, ".") " ";
+      float: left;
+      margin-inline-end: $padding-4;
+      color: $gray-600;
+    }
+    &.active {
+      &::before {
+        content: "⨎";
+        color: $blue;
+      }
+      > a::before {
+        color: $blue;
+      }
+    }
+  }
+}

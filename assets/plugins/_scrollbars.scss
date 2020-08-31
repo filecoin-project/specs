@@ -1,0 +1,56 @@
+@import "defaults";
+@import "variables";
+
+::-webkit-scrollbar {
+  width: 8.5px;
+  height: 8.5px;
+}
+
+* {
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+  scrollbar-width: thin;
+  scrollbar-color: transparent rgba(0, 0, 0, 0.3) ;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-track-piece,
+::-webkit-scrollbar-corner,
+::-webkit-resizer { display: none; }
+
+// code blocks
+.markdown pre::-webkit-scrollbar {
+  display: none;
+}
+.markdown pre:hover::-webkit-scrollbar {
+  display: initial;
+}
+
+.markdown pre {
+  scrollbar-color: transparent rgba(255, 255, 255, 0.1) ;
+}
+
+.markdown pre::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.markdown pre::-webkit-scrollbar-thumb:active {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+// toc
+.toc > ol::-webkit-scrollbar {
+  display: none;
+}
+.toc > ol:hover::-webkit-scrollbar {
+  display: initial;
+}
+
+
+// Future
+.book-menu nav {
+  scrollbar-color: transparent $gray-500;
+}

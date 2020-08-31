@@ -1,0 +1,80 @@
+.lightbox-container {
+    transition: all 250ms ease-in-out;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    transform: scale(0);
+    opacity: 1;
+    cursor: zoom-out;
+    overflow: hidden;
+    will-change: transform;
+}
+
+.lightbox-body-scroll-stop {
+    overflow: hidden;
+    // position:fixed;
+    width: 100%;
+}
+
+.lightbox-container.visible {
+    animation-name: animate-in;
+    animation-duration: 250ms;
+    animation-fill-mode: forwards; 
+}
+.lightbox-container.hidden {
+    animation: animate-out;
+    animation-duration: 250ms;
+    animation-fill-mode: forwards; 
+}
+
+.lightbox-zoom {
+    transform-origin: top left;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.lightbox-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: 100%;
+    object-fit: contain; 
+}
+@media (min-width: 768px) {
+    .lightbox-image {
+        max-width: 95%;
+        max-height: 95%;
+    } 
+}
+
+@keyframes animate-in {
+    0% {
+      transform: scale(0);
+      opacity: 0; }
+    1% {
+      transform: scale(0.9);
+      opacity: 0; }
+    100% {
+      transform: scale(1);
+      opacity: 1; } }
+  
+  @keyframes animate-out {
+    0% {
+      transform: scale(1);
+      opacity: 1; }
+    99% {
+      transform: scale(0.9);
+      opacity: 0; }
+    100% {
+      transform: scale(0);
+      opacity: 0; } }

@@ -1,2 +1,0 @@
-{{- $ret := . | lower | replaceRE " " "_" | replaceRE "(\\(|\\))" "" | replaceRE "\\+" "" }}
-{{- return $ret -}}

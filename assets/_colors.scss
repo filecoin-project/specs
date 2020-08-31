@@ -1,0 +1,24 @@
+// Colors
+
+
+.text-missing {color: $red;}
+.text-incorrect {color: $orange;}
+.text-wip {color: $yellow;}
+.text-reliable {color: $green;}
+.text-stable {color: $blue;}
+.text-transparent { color: transparent;}
+.text-black { color: black !important;}
+
+.bg-na { background-color: #6c8293;}
+.bg-missing { background-color: $red; }
+.bg-incorrect {background-color: $orange;}
+.bg-wip {background-color: $yellow;}
+.bg-done {background-color: $green; }
+.bg-reliable {background-color: $green; }
+.bg-stable { background-color: $blue;
+  a {
+    color: black;
+  }
+}
+.bg-transparent { background-color: transparent;}
+.bg-black { background-color: black;}
