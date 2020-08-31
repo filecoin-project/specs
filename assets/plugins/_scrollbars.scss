@@ -24,17 +24,20 @@
 
 // code blocks
 .markdown pre::-webkit-scrollbar {
-  display: none;
-}
-.markdown pre:hover::-webkit-scrollbar {
-  display: initial;
+  background-color: transparent;
 }
 
 .markdown pre {
+  scrollbar-color: transparent transparent ;
+}
+.markdown pre:hover {
   scrollbar-color: transparent rgba(255, 255, 255, 0.1) ;
 }
 
 .markdown pre::-webkit-scrollbar-thumb {
+  background-color: transparent;
+}
+.markdown pre:hover::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.1);
 }
 .markdown pre::-webkit-scrollbar-thumb:active {
