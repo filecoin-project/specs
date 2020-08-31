@@ -13,11 +13,11 @@ dashboardTests: 0
 There are eleven (11) builtin System Actors in total, but not all of them interact with the VM. Each actor is identified by a _Code ID_ (or CID).
 
 There are two system actors required for VM processing:
-  - the [InitActor](init_actor.md), which initializes new actors and records the network name, and
-  - the [CronActor](cron_actor.md), a scheduler actor that runs critical functions at every epoch.
+  - the [InitActor](sysactors#initactor), which initializes new actors and records the network name, and
+  - the [CronActor](sysactors#cronactor), a scheduler actor that runs critical functions at every epoch.
 There are another two actors that interact with the VM:
-  - the [AccountActor](account_actor.md) responsible for user accounts (non-singleton), and
-  - the [RewardActor](reward_actor.md) for block reward and token vesting (singleton).
+  - the [AccountActor](sysactors#accountactor) responsible for user accounts (non-singleton), and
+  - the [RewardActor](sysactors#rewardactor) for block reward and token vesting (singleton).
 
 
 The remaining seven (7) builtin System Actors that do not interact directly with the VM are the following:
