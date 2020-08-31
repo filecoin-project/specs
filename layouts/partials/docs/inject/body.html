@@ -1,5 +1,8 @@
 <script type="module" src="https://cdn.jsdelivr.net/npm/@pwabuilder/pwaupdate"></script>
-<pwa-update swpath="{{ "/sw.js" | relURL }}"></pwa-update>
+
+{{ if ne .Site.IsServer true }}
+<pwa-update swpath="{{ "/sw.js" | relURL }}" ></pwa-update>
+{{end}}
 
 {{- if default true .Site.Params.BookSearch }}
   {{- $searchJSFile := printf "%s.search.js" .Language.Lang }}
