@@ -2,23 +2,21 @@
 <html lang="{{ .Site.Language.Lang }}" dir={{ .Site.Language.LanguageDirection }}>
 
 <head>
-  {{ partial "docs/html-head" . }}
+  {{ partial "single/html-head" . }}
   {{ partial "docs/inject/head" . }}
 </head>
 
 <body dir={{ .Site.Language.LanguageDirection }}>
   <input type="checkbox" class="hidden toggle" id="menu-control" />
-  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <header class="book-header">
+    {{ template "header" . }} <!-- Mobile layout header -->
+  </header>
   <main class="container flex">
     <aside class="book-menu">
-      {{ template "menu" . }} <!-- Left menu Content -->
+      
     </aside>
 
     <div class="book-page">
-      <header class="book-header">
-        {{ template "header" . }} <!-- Mobile layout header -->
-      </header>
-
       {{ partial "docs/inject/content-before" . }}
       {{ template "main" . }} <!-- Page Content -->
       {{ partial "docs/inject/content-after" . }}
@@ -28,53 +26,26 @@
         {{ partial "docs/inject/footer" . }}
       </footer>
 
-      {{ template "comments" . }} <!-- Comments block -->
-
       <label for="menu-control" class="hidden book-menu-overlay"></label>
     </div>
-
-    {{ if default true (default .Site.Params.BookToC .Params.BookToC) }}
-    <aside class="book-toc">
-      <div class="book-toc-toggles">
-        <label class="dark-mode-toggle-label" for="dark-mode-toggle">
-          <i class="gg-dark-mode"></i> DARK MODE
-        </label>
-        <button id="dark-mode-toggle" class="dark-mode-toggle toggle" type="button" aria-pressed="false"></button>
-      </div>
-      {{ template "toc" . }} <!-- Table of Contents -->
-    </aside>
-    {{ end }}
   </main>
 
-  {{ partial "docs/inject/body" . }}
+  {{ partial "single/inject/body" . }}
+</script>
 </body>
 
 </html>
 
 {{ define "menu" }}
-  {{ partial "docs/menu" . }}
+  {{ partial "single/menu" . }}
 {{ end }}
 
 {{ define "header" }}
   {{ partial "docs/header" . }}
-
-  {{ if default true (default .Site.Params.BookToC .Params.BookToC) }}
-    <aside class="hidden clearfix">
-      {{ template "toc" . }}
-    </aside>
-  {{ end }}
 {{ end }}
 
 {{ define "footer" }}
   {{ partial "docs/footer" . }}
-{{ end }}
-
-{{ define "comments" }}
-  {{ if and .Content (default true (default .Site.Params.BookComments .Params.BookComments)) }}
-  <div class="book-comments">
-    {{- partial "docs/comments" . -}}
-  </div>
-  {{ end }}
 {{ end }}
 
 {{ define "main" }}
@@ -82,11 +53,10 @@
     {{- if eq .Title "Home" -}}
       {{ with .GetPage "/intro" }}{{ .Content }}{{end}}
     {{- else -}}
-      {{- .Content -}}
+      <div class="{{ if default false (index .Params "math-mode") }}math-mode{{end}}">
+        {{- .Content -}}
+      </div>
     {{- end -}}
   </article>
 {{ end }}
 
-{{ define "toc" }}
-  {{ partial "docs/toc" . }}
-{{ end }}
