@@ -12,8 +12,9 @@ dashboardTests: 0
 Blockchain synchronization ("sync") is a key part of a blockchain system.
 It handles retrieval and propagation of blocks and transactions (messages), and
 thus is in charge of distributed state replication.
-As such, this process is security critical -- problems with state replication can have severe consequences to the
-operation of a blockchain.
+As such, this process is security critical -- problems with state replication can have severe consequences to the operation of a blockchain.
+
+When a node first joins the network it discovers peers (through the peer discovery discussed above) and joins the `/fil/blocks` and `/fil/msgs` GossipSub topics. It listens to new blocks being propagated by other nodes. It picks one block as the `BestTargetHead` and starts syncing the blockchain up to this height from the  `TrustedCheckpoint`, which by default is the `GenesisBlock` or `GenesisCheckpoint`. In order to pick the `BestTargetHead` the peer is comparing a combination of height and weight - the higher these values the higher the chances of the block being on the main chain. If there are two blocks on the same height, the peer should choose the one with the higher weight. Once the peer chooses the `BestTargetHead` it uses the BlockSync protocol to fetch the blocks and get to the current height. From that point on it is in `CHAIN_FOLLOW` mode, where it uses GossipSub to receive new blocks, or Bitswap if it hears about a block that it has not received through GossipSub.
 
 ## ChainSync Overview
 
@@ -116,6 +117,3 @@ With explicit peering agreements, the operators must specify a list of peers whi
   - **BV7 - Message Signatures**:
   - **BV8 - State tree**: Parent tipset message execution produces the claimed state tree root and receipts.
 
-## Summary
-
-When a node first joins the network it discovers peers (through the peer discovery discussed above) and joins the `/fil/blocks` and `/fil/msgs` GossipSub topics. It listens to new blocks being propagated by other nodes. It picks one block as the `BestTargetHead` and starts syncing the blockchain up to this height from the  `TrustedCheckpoint`, which by default is the `GenesisBlock` or `GenesisCheckpoint`. In order to pick the `BestTargetHead` the peer is comparing a combination of height and weight - the higher these values the higher the chances of the block being on the main chain. If there are two blocks on the same height, the peer should choose the one with the higher weight. Once the peer chooses the `BestTargetHead` it uses the BlockSync protocol to fetch the blocks and get to the current height. From that point on it is in `CHAIN_FOLLOW` mode, where it uses GossipSub to receive new blocks, or Bitswap if it hears about a block that it has not received through GossipSub.
