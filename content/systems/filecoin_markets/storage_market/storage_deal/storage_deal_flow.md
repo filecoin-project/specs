@@ -2,15 +2,14 @@
 title: Deal Flow
 weight: 1
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 1
+dashboardState: wip
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # Storage Deal Flow
----
 
-{{<svg src="diagrams/deal-flow.mmd.svg" title="Deal Flow Sequence Diagram">}}
+![Deal Flow Sequence Diagram](diagrams/deal-flow.mmd)
 
 ## Add Storage Deal and Power
 

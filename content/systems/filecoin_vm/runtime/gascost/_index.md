@@ -1,13 +1,12 @@
 ---
 title: Gas Costs
 dashboardWeight: 1
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # VM Gas Cost Constants
----
 
 Every operation that triggers computation or storage on the Filecoin VM incurs payment in terms of `GasCharge` (`VirtualCompute`, `VirtualStorage`). Charges can also be incurred by actors (`ComputeGas`, `StorageGas`). The `GasCharge struct` includes the `Name` of the cost to be incurred, which is taken by the `Pricelist`.
 

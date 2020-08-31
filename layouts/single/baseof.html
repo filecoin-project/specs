@@ -63,11 +63,18 @@
 {{ define "main" }}
   <div class="markdown">
     {{- $pages := where .Pages "Params.bookhidden" "ne" true -}}
-    {{ range sort $pages "Weight" "asc" }}
+    {{- $pages2 := where $pages "Type" "ne" "externals" -}}
+    {{ range sort $pages2 "Weight" "asc" }}
       {{- $pathParts := split .Page.File.Path "/" -}}
       <section class="section-{{ index $pathParts 0}}">
-      {{ .Content }}
-      {{- template "mainChildren" (dict "Section" . ) -}}
+        {{ if default false (index .Params "math-mode") }}
+          <div class="math-mode">
+          {{ .Content }}
+          </div>
+        {{ else }}
+          {{ .Content }}
+        {{ end }}
+        {{- template "mainChildren" (dict "Section" . ) -}}
       </section>
     {{ end }}
   </div>

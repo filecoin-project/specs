@@ -1,8 +1,10 @@
 module spec
 
-go 1.14
+go 1.15
 
 require (
-	github.com/alex-shpak/hugo-book v0.0.0-20200729113755-796468766fa2 // indirect
-	github.com/filecoin-project/specs-actors v0.8.4 // indirect
+	github.com/alex-shpak/hugo-book v0.0.0-20200819182225-6beca7928c20 // indirect
+	github.com/filecoin-project/go-fil-markets v0.5.7 // indirect
+	github.com/filecoin-project/lotus v0.5.3 // indirect
+	github.com/filecoin-project/specs-actors v0.9.3 // indirect
 )

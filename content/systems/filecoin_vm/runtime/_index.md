@@ -3,13 +3,12 @@ title: Runtime
 weight: 5
 bookCollapseSection: true
 dashboardWeight: 1
-dashboardState: stable
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # VM Runtime Environment (Inside the VM)
----
 
 ## Receipts
 
@@ -270,6 +269,7 @@ Apart from the actor-specific common error codes above, there are some system er
 	SysErrorReserved5 = ExitCode(14)
 	SysErrorReserved6 = ExitCode(15)
 )
+{{<embed src="/externals/specs-actors/actors/runtime/runtime.go" lang="go" >}}
 
 // The initial range of exit codes is reserved for system errors.
 // Actors may define codes starting with this one.
@@ -278,5 +278,4 @@ const FirstActorErrorCode = ExitCode(16)
 ```
 
 
-
-
+{{<embed src="/externals/specs-actors/actors/runtime/exitcode/common.go" lang="go" >}}

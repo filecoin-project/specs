@@ -3,12 +3,11 @@ title: Cryptoecon
 weight: 8
 dashboardWeight: 2
 dashboardState: incorrect
-dashboardAudit: 0
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # Cryptoecon
----
 
 The Filecoin network is a complex multi-agent economic system. This section aims to explain some mechanisms and parameters in the system that can help achieve network-level goals. For now, just lists some key mechanisms and parameters that are still subject to changes during testnet but that must be resolved before mainnet launch. Note that this is a list of economic levers that are in consideration and not all of them will be used in mainnet. Some may be added or changed after mainnet launch, through the FIP process, requiring a **network upgrade**.
 

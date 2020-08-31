@@ -10,6 +10,10 @@
 @import "dashboard";
 @import "plugins/toc";
 @import "katex";
+@import "icons";
+@import "code";
+@import "plugins/lightbox";
+
 
 .markdown {
     overflow-x: hidden;
@@ -46,21 +50,25 @@
     border-radius: $border-radius;
 }
 .diagrams {
-    width: auto;
-    overflow: hidden;
-    cursor: grab;
     height: 400px;
+    overflow: hidden;
+    outline: none;
+    cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    will-change: transform;
-    outline: none;
+}
+.diagrams img {
+    max-height: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .diagrams:active {
     cursor: grabbing;
 }
 .diagrams-caption {
-    // background-color: #e9ecef;
     border-top: 1px solid #e9ecef;
     padding: 0.5rem;
     font-size: 12px;
@@ -72,43 +80,6 @@
     }
 }
 
-.diagrams svg {
-    transform-origin: top left;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.diagrams.svg svg {
-    background-color: white;
-}
-
-// Figure zoom 
-.figure {
-    width: auto;
-    overflow: hidden;
-    cursor: grab;
-    justify-content: center;
-    align-items: center;
-    will-change: transform;
-    outline: none;
-}
-.figure:active {
-    cursor: grabbing;
-}
-.figure + figcaption {
-    text-align: center;
-}
-
-.figure img {
-    transform-origin: top left;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: auto;
-}
 // search
 #book-search-results {
     width: 100%;
@@ -152,18 +123,16 @@ blockquote {
 }
 .book-menu nav {
     width: 20rem;
-    padding: 1rem 0.2rem 4rem 1rem;
+    height: 100%;
+    padding: 1rem 0.2rem 1rem 1rem;
     position: fixed;
     top: 0;
     bottom: 0;
-    overflow-x: initial;
-    overflow-y: hidden;
+    overflow: hidden;
 }
-
-.book-menu nav .toc {
-    overflow-x: hidden;
-    overflow-y: auto;
+.book-menu .toc {
     height: 100%;
+    overflow: hidden;
 }
 
 .markdown>h1:first-of-type {

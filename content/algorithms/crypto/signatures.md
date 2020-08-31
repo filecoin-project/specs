@@ -2,13 +2,12 @@
 title: "Signatures"
 weight: 1
 dashboardWeight: 2
-dashboardState: incorrect
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: done
 dashboardTests: 0
 ---
 
 # Signatures
----
 
 Signatures are cryptographic functions that attest to the origin of a particular
 message. In the context of Filecoin, signatures are used to send and receive
@@ -61,7 +60,7 @@ key locally from the signature rather than specifying an ID of the public key.
 as described below. For more details on how the Filecoin `Signature` type is
 serialized, see [Signature](signatures).
 
-```
+```text
 SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
 ```
 
@@ -82,7 +81,7 @@ SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
 
 ### BLS Signatures
 
-Filecoin uses the [BLS signature scheme](https://datatracker.ietf.org/doc/draft-boneh-bls-signature/) over the [BLS12-381](BLS12-381](https://electriccoin.co/blog/new-snark-curve/) group of elliptic curves. You can find the default Rust implementation in [Filecoin's repo](https://github.com/filecoin-project/bls-signatures/).
+Filecoin uses the [BLS signature scheme](https://datatracker.ietf.org/doc/draft-boneh-bls-signature/) over the [BLS12-381](https://electriccoin.co/blog/new-snark-curve/) group of elliptic curves. You can find the default Rust implementation in [Filecoin's repo](https://github.com/filecoin-project/bls-signatures/).
 
 {{<embed src="bls.id" lang="go">}}
 {{<embed src="bls.go" lang="go">}}
@@ -144,4 +143,3 @@ unique thereby the aggregation is done on distinct messages.  Obviously, the
 the other miners will **check all transactions** to make sure they are valid.
 The validity of a transaction in Filecoin's context implies that the signature
 is correctly formed over the message with the correct nonce.
-

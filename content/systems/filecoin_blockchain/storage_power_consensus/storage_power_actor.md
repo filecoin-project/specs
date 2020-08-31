@@ -1,21 +1,20 @@
 ---
 title: Storage Power Actor
 dashboardWeight: 2
-dashboardState: incorrect
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: wip
 dashboardTests: 0
 ---
 
 # Storage Power Actor
----
 
 ## `StoragePowerActorState` implementation
 
-{{<embed src="/modules/actors/builtin/power/power_state.go" lang="go" >}}
+{{<embed src="/externals/specs-actors/actors/builtin/power/power_state.go" lang="go" >}}
 
 ## `StoragePowerActor` implementation
 
-{{<embed src="/modules/actors/builtin/power/power_actor.go" lang="go" >}}
+{{<embed src="/externals/specs-actors/actors/builtin/power/power_actor.go" lang="go" >}}
 
 ## The Power Table
 
