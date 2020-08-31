@@ -3,12 +3,11 @@ title: Block
 weight: 1
 dashboardWeight: 1.5
 dashboardState: incorrect
-dashboardAudit: 0
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # Block
----
 
 A block header contains information relevant to a particular point in time over which the network may achieve consensus.
 
@@ -72,6 +71,7 @@ A semantically valid block must have:
     - not farther in the past than the soft finality as defined by SPC [Finality](expected_consensus#finality-in-ec),
         - this rule only applied when receiving new gossip blocks (i.e. from the current chain head), not when syncing to the chain for the first time (e.g.)
 - `Miner` that is active in the storage power table in the parent tipset state,  
+- A valid `BeaconEntry` array (can be empty)
 - a `Ticket` derived from the minimum ticket from the parent tipset's block headers, 
     - `Ticket.VRFResult` validly signed by the `Miner` actor's worker account public key,
 - `ElectionPoStOutput` yielding winning partial tickets that were generated validly, 
@@ -90,6 +90,5 @@ There is no semantic validation of the messages included in a block beyond valid
 If all messages included in a block are syntactically valid then they may be executed and produce a receipt. 
 
 A chain sync system may perform syntactic and semantic validation in stages in order to minimize unnecessary resource expenditure.
-
 
 

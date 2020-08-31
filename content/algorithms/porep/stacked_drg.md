@@ -4,7 +4,6 @@ weight: 1
 ---
 
 # Stacked DRG PoRep
----
 
 
 This section describes *Stacked DRG PoRep* (SDR), the specific Proof-of-Replication (PoRep) used in Filecoin. In this construction, the prover encodes the original data into a replica and commits to it. An offline PoRep proves that the commitment to the replica is a valid commitment of the encoded original data.
@@ -137,7 +136,7 @@ We have describe three hash functions:
 
 `RepHash` is a vector commitment used to generate commitments to sealed sectors, unsealed sectors, piece commitments and intermediate stepds of the Proof-of-Replication. Filecoin uses a balanced binary Merkle tree for `RepHash`. The leaves of the Merkle tree are pairs of adjacent nodes.
 
-`RepHash` inputs MUST respect a valid Storage Format. [TODO: What does this mean?]
+`RepHash` inputs MUST respect a valid Storage Format. (TODO: What does this mean?)
 
 ## Stacked DRG Graph
 
@@ -252,12 +251,12 @@ The Replication Algorithm  proceeds as follows:
 - `RandomSeed` is a 32-byte array of randomness extracted from the chain.
 - `CommD` is the Merkle root obtained by performing `RepHash` on the original data represented in `paddedfr32v1`.
 
-```
+```text
 ReplicaID := Hash(ProverID || SectorNumber || RandomSeed || CommD)
 ```
 
 - Perform `RepHash` on `Data` to yield `CommD` and `TreeD`:
-```
+```text
 CommD, TreeD = RepHash(data)
 ```
 

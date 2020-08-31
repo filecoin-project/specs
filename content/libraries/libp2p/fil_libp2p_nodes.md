@@ -2,11 +2,9 @@
 title: FIL Libp2p Nodes
 description: Filecoin libp2p Nodes
 dashboardWeight: 1
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: missing
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 
-{{< hint danger >}}
-Needs content
-{{< /hint >}}
+# FIL libp2p nodes

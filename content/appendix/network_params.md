@@ -2,12 +2,11 @@
 title: Filecoin Parameters
 weight: 3
 dashboardWeight: 0.2
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: n/a
 ---
 
 # Filecoin Parameters
----
 
 Some of these parameters are used around the code in the Filecoin subsystems and ABI. Others are used as part of the proofs libraries.
 

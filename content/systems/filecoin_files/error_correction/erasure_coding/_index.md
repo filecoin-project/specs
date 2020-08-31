@@ -4,6 +4,5 @@ title: Erasure Coding
 ---
 
 # Erasure Coding
----
 
 TODO

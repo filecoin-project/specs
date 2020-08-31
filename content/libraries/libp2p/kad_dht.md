@@ -2,11 +2,9 @@
 title: DHT
 description: Kademlia DHT for Peer Routing
 dashboardWeight: 1
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: missing
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 
-{{< hint danger >}}
-Needs content
-{{< /hint >}}
+# DHT

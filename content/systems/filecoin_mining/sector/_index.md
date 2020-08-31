@@ -3,13 +3,12 @@ title: Sector
 weight: 2
 bookCollapseSection: true
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: reliable
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 
 # Sector
----
 
 The `Sector` is a fundamental "storage container" abstraction used in Filecoin Storage Mining. It is the basic unit of storage,
 and serves to make storage conform to a set of expectations.
@@ -20,7 +19,7 @@ Once a sector is full, the unsealed sector is combined by a proving tree into a 
 
 This diagram shows the composition of an unsealed sector and a sealed sector.
 
-{{<figure src="sectors.png" title="Unsealed Sectors and Sealed Sectors" >}}
+![Unsealed Sectors and Sealed Sectors](sectors.png)
 
 {{<embed src="sector.id" lang="go" >}}
 

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.Language.Lang }}" dir={{ .Site.Language.LanguageDirection }}>
+
+<head>
+  {{ partial "single/html-head" . }}
+  {{ partial "docs/inject/head" . }}
+</head>
+
+<body dir={{ .Site.Language.LanguageDirection }}>
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <header class="book-header">
+    {{ template "header" . }} <!-- Mobile layout header -->
+  </header>
+  <main class="container flex">
+    <aside class="book-menu">
+      {{ template "menu" . }} <!-- Left menu Content -->
+    </aside>
+
+    <div class="book-page">
+      {{ partial "docs/inject/content-before" . }}
+      {{ template "main" . }} <!-- Page Content -->
+      {{ partial "docs/inject/content-after" . }}
+
+      <footer class="book-footer">
+        {{ template "footer" . }} <!-- Footer under page content -->
+        {{ partial "docs/inject/footer" . }}
+      </footer>
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+
+    {{ if default true (default .Site.Params.BookToC .Params.BookToC) }}
+    <aside class="book-toc">
+      <div class="book-toc-toggles">
+        <label class="dark-mode-toggle-label" for="dark-mode-toggle">
+          <i class="gg-dark-mode"></i> DARK MODE
+        </label>
+        <button id="dark-mode-toggle" class="dark-mode-toggle toggle" type="button" aria-pressed="false"></button>
+      </div>
+    </aside>
+    {{ end }}
+  </main>
+
+  {{ partial "single/inject/body" . }}
+</script>
+</body>
+
+</html>
+
+{{ define "menu" }}
+  {{ partial "single/menu" . }}
+{{ end }}
+
+{{ define "header" }}
+  {{ partial "docs/header" . }}
+{{ end }}
+
+{{ define "footer" }}
+  {{ partial "docs/footer" . }}
+{{ end }}
+
+{{ define "main" }}
+  <div class="markdown">
+    {{- $pages := where .Pages "Params.bookhidden" "ne" true -}}
+    {{- $pages2 := where $pages "Type" "ne" "externals" -}}
+    {{ range sort $pages2 "Weight" "asc" }}
+      {{- $pathParts := split .Page.File.Path "/" -}}
+      <section class="section-{{ index $pathParts 0}}">
+        {{ if default false (index .Params "math-mode") }}
+          <div class="math-mode">
+          {{ .Content }}
+          </div>
+        {{ else }}
+          {{ .Content }}
+        {{ end }}
+        {{- template "mainChildren" (dict "Section" . ) -}}
+      </section>
+    {{ end }}
+  </div>
+{{ end }}
+
+{{ define "mainChildren" }}
+    {{- $pages := where .Section.Pages "Params.bookhidden" "ne" true -}}
+    {{ range sort $pages "Weight" "asc" }}
+      {{ if default false (index .Params "math-mode") }}
+        <div class="math-mode">
+        {{ .Content }}
+        </div>
+      {{ else }}
+        {{ .Content }}
+      {{ end }}
+        {{- template "mainChildren" (dict "Section" . ) -}}
+    {{ end }}
+{{ end }}

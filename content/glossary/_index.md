@@ -2,22 +2,23 @@
 title: "Glossary"
 weight: 6
 dashboardWeight: 0.2
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: n/a
 ---
 
-# Glossary
---- 
+# Glossary 
+
+**Notes**
+
+- Want to split all repair stuff to separate doc
+- Let's refer to Filecoin system rather than network. In a sense, the network is an instantiation of the system (this protocol). We can however refer to the Filecoin VM separately which means the system by which we apply changes to the state of the system at a point in time.
+- Asterisks indicate that the definition requires updating by any affected party.
+
 
 ## Updates to definitions
 
 To make any updates to these definitions please submit a pull request with the changes, or open an issue and one of the maintainers will do it for you.
 
-## Notes
-
-- Want to split all repair stuff to separate doc
-- Let's refer to Filecoin system rather than network. In a sense, the network is an instantiation of the system (this protocol). We can however refer to the Filecoin VM separately which means the system by which we apply changes to the state of the system at a point in time.
-- Asterisks indicate that the definition requires updating by any affected party.
 
 ## Definitions
 
@@ -38,7 +39,7 @@ An ask contains the terms on which a miner is willing to provide services. Stora
 
 A block in the Filecoin blockchain is a chunk of data appended to the shared history of the network including transactions, messages, etc. and representing the state of the storage network at a given point in time.
 
-## Bootstrapping
+### Bootstrapping
 
 ### Chain weight
 
@@ -65,13 +66,13 @@ Collateral is Filecoin tokens pledged by an actor as a commitment to a promise. 
 
 ### Commitment
 
-## Confirmation
+### Confirmation
 
 ### Consensus
 
 ### Deal
 
-*** *A deal in a Filecoin market is made when a bid and ask are matched, corresponding to an agreement on a service and price between a miner and client.
+**** A deal in a Filecoin market is made when a bid and ask are matched, corresponding to an agreement on a service and price between a miner and client.
 
 ### Erasure coding
 
@@ -91,7 +92,7 @@ Files are what clients bring to the filecoin system to store. A file is split up
 
 ### Finality
 
-## Gas, Fees, Prices
+### Gas, Fees, Prices
 
 ### Generation Attack Threshold
 
@@ -165,7 +166,7 @@ See `Power Fraction`.
 
 A miner's `Power Fraction` or `Power` is the ratio of their committed storage as of their last PoSt submission over Filecoin's total committed storage as of the current block. It is used in leader election.
 
-##  Power Table
+### Power Table
 
 The Power Table is an abstraction provided by the Filecoin storage market that lists the `power` of every miner in the system.
 
@@ -243,8 +244,6 @@ Storage Fault Slashing is a term that is used to encompass a broader set of pena
 Consensus Fault Slashing is the penalty that a miner incurs for committing consensus faults. This penalty is applied to miners that have acted maliciously against the network's consensus functionality.
 
 
-
-
 ### Smart contracts
 
 ### Storage
@@ -306,7 +305,7 @@ A verifiable random function that receives {Secret Key (SK), seed} and outputs {
 
 ### Weight
 
-Every mined block has a computed `weight`. Together, the `weights` of all the blocks in a branch of the chain determines the cumulative `weight` of that branch. Filecoin's Expected Consensus is a GHOSTy or heaviest-chain protocol, where chain selection is done on the basis of an explicit weighting function. Filecoin’s `weight` function currently seeks to incentivize collaboration amongst miners as well as the addition of storage to the network. The specific weighting function is defined in [Chain Weighting](expected-consensus#chain-weighting).
+Every mined block has a computed `weight`. Together, the `weights` of all the blocks in a branch of the chain determines the cumulative `weight` of that branch. Filecoin's Expected Consensus is a GHOSTy or heaviest-chain protocol, where chain selection is done on the basis of an explicit weighting function. Filecoin’s `weight` function currently seeks to incentivize collaboration amongst miners as well as the addition of storage to the network. The specific weighting function is defined in [Chain Weighting](expected_consensus#chain-weighting).
 
 ### zkSNARK
 

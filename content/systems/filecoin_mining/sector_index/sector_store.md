@@ -1,13 +1,12 @@
 ---
 title: Sector Store
 dashboardWeight: 1
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 
 # Sector Store
----
 
 {{<embed src="sector_store.id"  lang="go" >}}
 

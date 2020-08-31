@@ -2,13 +2,12 @@
 title: Actor
 weight: 1
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: wip
 dashboardTests: 0
 ---
 
 # VM Actor Interface
----
 
 As mentioned above, Actors are the Filecoin equivalent of smart contracts in the Ethereum Virtual Machine. As such, Actors are very central components of the system. Any change to the current state of the Filecoin blockchain has to be triggered through an actor method invocation.
 

@@ -3,13 +3,12 @@ title: Repository
 weight: 2
 bookCollapseSection: true
 dashboardWeight: 1
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 
 # Repository - Local Storage for Chain Data and Systems
----
 
 The Filecoin node repository is simply an abstraction denoting that data which any functional Filecoin node needs to store locally in order to run correctly.
 

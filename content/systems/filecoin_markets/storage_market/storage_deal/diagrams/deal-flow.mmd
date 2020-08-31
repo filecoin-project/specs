@@ -12,7 +12,7 @@ StorageClient -->+ DataTransfer: OpenPushTransferRequest(provider, voucher, payl
 DataTransfer -->+ StorageProvider: ValidatePush(client, voucher, payload, selector)
 StorageProvider -->- DataTransfer: accept
 DataTransfer -->- StorageProvider: OnDataTransferEvent(DataTransferComplete, state)
-activeate StorageProvider
+activate StorageProvider
 StorageProvider -->> StorageProvider: verifyStorageDealProposal(proposal)
 StorageProvider -->> StorageProvider: verifyPieceCID(proposal, payloadCID)
 StorageProvider -->> StorageProvider: signStorageDealProposal(proposal)

@@ -6,9 +6,11 @@ description: "Notation, Constants, and Types for Stacked DRG PoRep"
 
 dashboardWeight: 2
 dashboardState: stable
-dashboardAudit: 1
+dashboardAudit: done
 dashboardTests: 0
 ---
+
+<!--lint disable -->
 
 {{< plain hidden >}}
 $$
@@ -369,8 +371,9 @@ $$
 $$
 {{< /plain >}}
 
+<!--lint enable -->
+
 # SDR Notation, Constants, and Types
----
 
 ## General Notation
 

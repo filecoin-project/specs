@@ -4,24 +4,23 @@ bookCollapseSection: true
 weight: 1
 dashboardWeight: 2
 dashboardState: incorrect
-dashboardAudit: 0
+dashboardAudit: wip
 dashboardTests: 0
 ---
 
 # Storage Miner
----
 
 ## Filecoin Storage Mining Subsystem
 
 The Filecoin Storage Mining Subsystem ensures a storage miner can effectively commit storage to the Filecoin protocol in order to both:
 
-- Participate in the Filecoin {{<link storage_market>}} by taking on client data and participating in storage deals.
-- Participate in Filecoin {{<link storage_power_consensus>}}, verifying and generating blocks to grow the Filecoin blockchain and earning block rewards and fees for doing so.
+- Participate in the Filecoin [Storage Market](storage_market) by taking on client data and participating in storage deals.
+- Participate in Filecoin [Storage Power Consensus](storage_power_consensus), verifying and generating blocks to grow the Filecoin blockchain and earning block rewards and fees for doing so.
 
 The above involves a number of steps to putting on and maintaining online storage, such as:
 
 - Committing new storage (see Sealing and PoRep)
-- Continuously proving storage (see {{<link "election_post">}})
+- Continuously proving storage (see [Election PoSt](election_post))
 - Declaring storage faults and recovering from them.
 
 ### Sector Types
@@ -30,7 +29,7 @@ There are two types of sectors, Regular Sectors with storage deals in them and C
 
 ### Sector States
 
-When managing their storage {{<link "sector">}} as part of Filecoin mining, storage providers will account for where in the {{<link "mining_cycle">}} their sectors are. For instance, has a sector been committed? Does it need a new PoSt? Most of these operations happen as part of cycles of chain epochs called `Proving Period`s each of which yield high confidence that every miner in the chain has proven their power (see {{<link "election_post">}}).
+When managing their storage [Sector](sector) as part of Filecoin mining, storage providers will account for where in the [Mining Cycle](mining_cycle) their sectors are. For instance, has a sector been committed? Does it need a new PoSt? Most of these operations happen as part of cycles of chain epochs called `Proving Period`s each of which yield high confidence that every miner in the chain has proven their power (see [Election PoSt](election_post)).
 
 There are three states that an individual sector can be in:
 
@@ -42,9 +41,9 @@ Sectors enter `Active` from `PreCommit` through a ProveCommit message that serve
 
 A particular sector enters `TemporaryFault` from `Active` through `DeclareTemporaryFault` with a specified period. Power associated with the sector will be lost immediately and miner needs to pay a `TemporaryFaultFee` determined by the power suspended and the duration of suspension. At the end of the declared duration, faulted sectors automatically regain power and enter `Active`. Miners are expected to prove over this recovered sector. Failure to do so may result in failing ElectionPoSt or `DetectedFault` from failing SurprisePoSt. 
 
-{{<svg src="diagrams/sector_state_machine.dot.svg" title="Sector State Machine" >}}
+![Sector State Machine](diagrams/sector_state_machine.dot)
 
-{{<svg src="diagrams/sector_state_machine_legend.dot.svg" title="Sector State Machine Legend" >}}
+![Sector State Machine Legend](diagrams/sector_state_machine_legend.dot)
 
 #### Miner PoSt State
 
@@ -60,7 +59,7 @@ A particular sector enters `TemporaryFault` from `Active` through `DeclareTempor
 
 Miners can call ProveCommit to commit a sector and add to their Claimed Power. However, a miner's Nominal Power and Consensus Power will be zero when it is in either Challenged or DetectedFault state. Note also that miners can call DeclareTemporaryFault when they are in Challenged or DetectedFault state. This does not change the list of  sectors that are currently challenged which is a snapshot of all active sectors (ProvingSet) at the time of challenge.
 
-{{<svg src="diagrams/miner_post_state_machine.dot.svg" title="Miner PoSt State Machine" >}}
+![Miner PoSt State Machine](diagrams/miner_post_state_machine.dot)
 
-{{<svg src="diagrams/miner_post_state_machine_legend.dot.svg" title="Miner PoSt State Machine Legend" >}}
+![Miner PoSt State Machine Legend](diagrams/miner_post_state_machine_legend.dot)
 
