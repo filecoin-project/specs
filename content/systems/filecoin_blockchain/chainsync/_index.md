@@ -23,16 +23,17 @@ specific to Filecoin's choices in state representation and consensus rules,
 but is general enough that it can serve other blockchains. `ChainSync` is a
 group of smaller protocols, which handle different parts of the sync process.
 
-Chain synchronisation generally applies to three main processes:
-1. Chain synchronization when a node first joins the network and needs to get to the current state before validating or extending the chain.
-2. Chain synchronisation when a node has fell out of sync, e.g., due to a brief disconnection.
-3. Continuous chain synchronisation to keep up with the latest messages and blocks.
+Chain synchronisation is generally needed in the following cases:
+1. when a node first joins the network and needs to get to the current state before validating or extending the chain.
+2. when a node has fell out of sync, e.g., due to a brief disconnection.
+3. during normal operation in order to keep up with the latest messages and blocks.
 
-There are three main protocols used to achieve synchronisation for these three processes.
+There are three main protocols used to achieve synchronisation for these three cases.
 - `GossipSub` is the libp2p pubsub protocol used to propagate messages and blocks. It is mainly used in the third process above when a node needs to stay in sync with new blocks being produced and propagated.
 - `BlockSync` is used to synchronise specific parts of the chain, that is from and to a specific height.
-- `Bitswap` is used to request and receive blocks, when a node is synchonized but GossipSub has failed to deliver some blocks to a node.
-- `GraphSync` can be used to fetch parts of the blockchain as a more efficient version of `Bitswap`.
+- `hello` protocol, which is used when two peers first "meet" (i.e., first time they connect to each other). According to the protocol, they exchange their chain heads.
+
+In addition, `Bitswap` is used to request and receive blocks, when a node is synchonized ("caught up"), but GossipSub has failed to deliver some blocks to a node. Finally, `GraphSync` can be used to fetch parts of the blockchain as a more efficient version of `Bitswap`.
 
 Filecoin nodes are libp2p nodes, and therefore may run a variety of other protocols. As with anything else in Filecoin, nodes MAY opt to use additional protocols to achieve the results. That said, nodes MUST implement the version of `ChainSync` as described in this spec in order to be considered implementations of Filecoin. 
 
