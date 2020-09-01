@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const chokidar = require ('chokidar')
+const chokidar = require('chokidar')
 const jsdom = require('jsdom')
 const path = require('path')
 const fs = require('fs')
@@ -16,20 +16,19 @@ async function run (src, dest) {
   if (args[0] === '--watch') {
     chokidar.watch(src, {
       awaitWriteFinish: {
-          stabilityThreshold: 1000,
-          pollInterval: 100
+        stabilityThreshold: 1000,
+        pollInterval: 100
       },
       ignoreInitial: true
-  })
-  .on('all', async (event, p) => {
-      console.log(event, p);
-      await processHtml(src, dest)
-  })
-  .on('ready', () => {
-      console.log(`Watching ${src}`);
-  })
-  .on('error', err => console.error('error watching: ', err));
-  
+    })
+      .on('all', async (event, p) => {
+        console.log(event, p)
+        await processHtml(src, dest)
+      })
+      .on('ready', () => {
+        console.log(`Watching ${src}`)
+      })
+      .on('error', err => console.error('error watching: ', err))
   } else {
     console.time('Building toc.json')
     await processHtml(src, dest)
