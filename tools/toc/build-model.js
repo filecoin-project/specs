@@ -14,6 +14,22 @@ function buildTocModel (root) {
   let parents = [{tagName: 'H0', children: model}]
   let prevSibling = null
   let sectionNumber = [0]
+
+  function addSibling(node) {
+    sectionNumber[sectionNumber.length - 1] = sectionNumber[sectionNumber.length - 1] + 1
+    node.number = sectionNumber.join('.')
+    parents[parents.length - 1].children.push(node)
+    prevSibling = node
+  }
+
+  function addChild(node) {
+    sectionNumber.push(1)
+    node.number = sectionNumber.join('.')
+    parents.push(prevSibling)
+    prevSibling.children.push(node)
+    prevSibling = node
+  }
+
   for (let el of headingList) {
     let node = {
       id: el.id,
@@ -28,33 +44,26 @@ function buildTocModel (root) {
       dashboardState: el.dataset.dashboardState,
       children: []
     }
+    
     if (!prevSibling || headingNum(node) === headingNum(prevSibling))  {
-      sectionNumber[sectionNumber.length - 1] = sectionNumber[sectionNumber.length - 1] + 1
-      node.number = sectionNumber.join('.')
-      parents[parents.length - 1].children.push(node)
-      prevSibling = node
+      // sibling: h2 == h2
+      addSibling(node)
       
-      // is h3 > h2 ?
     } else if (headingNum(node) > headingNum(prevSibling)) {
-      sectionNumber.push(1)
-      node.number = sectionNumber.join('.')
-      parents.push(prevSibling)
-      prevSibling.children.push(node)
-      prevSibling = node
+      // child: h3 > h2
+      addChild(node)
+
     } else {
-      // h2 or h1 after an h3... gotta find out how far to unwind, parents may not be contiguous in a bad doc, so we walk.
-      let prevParent = parents.pop()
-      let prevSection = sectionNumber.pop()
-      while (headingNum(node) <= headingNum(prevParent)) {
-        prevParent = parents.pop()
-        prevSection = sectionNumber.pop()
+      // h2 or h1 after an h3... gotta find out how far to unwind. Parents may not be contiguous, so walk till we find a parent
+      let target = headingNum(node)
+      let rmCount = 0
+      while (target <= headingNum(parents[parents.length - (rmCount + 1)])) {
+        rmCount++
       }
-      sectionNumber.push(prevSection)
-      sectionNumber[sectionNumber.length - 1] = sectionNumber[sectionNumber.length - 1] + 1
-      node.number = sectionNumber.join('.')
-      prevParent.children.push(node)
-      parents.push(prevParent)
-      prevSibling = node
+      parents = parents.slice(0, parents.length - rmCount)
+      sectionNumber = sectionNumber.slice(0, sectionNumber.length - rmCount)
+
+      addSibling(node)
     }
   }
 
