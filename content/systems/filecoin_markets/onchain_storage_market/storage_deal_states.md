@@ -30,7 +30,7 @@ The following describes how a deal transitions between its different states. The
   - The sector containing the deal has expired. This is triggered by `StorageMinerActorCode._submitPowerReport` which is called whenver a PoSt is submitted. Power associated with the deals in the sector will be lost, collaterals returned, and all remaining storage fees unlocked.
   - The sector containing the active deal has been terminated. This is triggered by `StorageMinerActor._submitFaultReport` for `TerminatedFaults`. No storage deal collateral will be slashed on fault declaration or detection, only on termination. A terminated fault is triggered when a sector is in the `Failing` state for `MAX_CONSECUTIVE_FAULTS` consecutive proving periods.
 
-Given the **onchain deal states and their transitions** discussed above, below is a description of the relationships between **off-chain deal states** and other economic states and activities in the protocol. Note that these states below are **off-chain states tracked internally by the markets module**.
+Given the **onchain deal states and their transitions** discussed above, below is a description of the relationships between **onchain deal states** and other economic states and activities in the protocol. 
 
 - `Power`: only payload data in an Active storage deal counts towards power.
 - `Deal Payment`: happens on `_onSuccessfulPoSt` and at deal/sector expiration through `_submitPowerReport`, paying out `StoragePricePerEpoch` for each epoch since the last PoSt.
