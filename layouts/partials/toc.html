@@ -1,6 +1,6 @@
 {{ define "toc-list" }}
   {{ $depth := .depth }}
-  <ol class="depth-{{.depth}}">
+  <ol class="depth-{{ .depth }}{{ if ge .depth 2 }} maybe-hide{{ end }}">
     {{ range .children }}
       <li>
         <a href="#{{ .id }}">{{.text}}</a>
