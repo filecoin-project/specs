@@ -154,12 +154,18 @@ Properties:
 - Randomness cannot be biased.
 - Randomness of an epoch is the same across forks.
 
-**Mapping between filecoin epoch and drand epoch**: the beacon outputs
-randomness periodically at predetermined timestamps, as Filecoin. Hence there is
-a mapping between Filecoin timestamps/rounds and the beacon timestamps/rounds. 
-To be able to create a block, a miner takes the beacon randomness that
-corresponds to the timestamp _before_ the timestamp of block since the miner
-must broadcast the block at the timestamp indicated in its header.  
+###### Mapping between filecoin epoch and drand epoch
+
+The beacon outputs randomness periodically at predetermined timestamps, as
+Filecoin. Hence there is a mapping between Filecoin timestamps/rounds and the
+beacon timestamps/rounds.  To be able to create a block, a miner takes the
+beacon randomness that corresponds to the timestamp _before_ the timestamp of
+block since the miner must broadcast the block at the timestamp indicated in its
+header.  
+
+That means in practice, a miner mine as soon as they have the drand value even
+before the previous round finished, but blocks with timestamp in the future are
+rejected so the malicious miner can not broadcast this block.
 
 ###### Randomn Beacon Outages
 
@@ -188,6 +194,12 @@ and include the drand value in their block if they are eligible. Note a miner
 can decide to skip a block and inject two drand values in one block for example,
 however, that is a fork and it is highly likely that its chain has a lower
 weight than the main chain.
+
+During catchup, a malicious miner can mine one block in advance with respect to
+the honest miners. Since the timestamp is already in the past, he could
+broadcast it already. Therefore, the attacker can have a 1 block advantage but
+given the rate of the catchup allows for transactions and block propagation to
+happen, the attacker risks to have a lower chain as well.
 
 ##### Ticket Randomness
 
