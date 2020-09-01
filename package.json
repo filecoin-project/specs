@@ -42,7 +42,6 @@
     "graphviz-cli": "^1.0.0",
     "hugo-extended": "^0.74.3",
     "jsdom": "^16.4.0",
-    "premove": "^3.0.1",
-    "standard": "^14.3.4"
+    "premove": "^3.0.1"
   }
 }
