@@ -61,10 +61,10 @@
                             {{- $pattern := printf "(?m)(^\\t([\\S]*)\\s*([\\S]*)(\\s//\\s(.*))?)" -}}
                             {{- $name := replaceRE $pattern "$2" . -}}
                             {{- $type := replaceRE $pattern "$3" . -}}
-                            {{- $desc := replaceRE $pattern "$4" . -}}
+                            {{- $desc := replaceRE $pattern "$5" . -}}
                             <tr>
-                                <td>{{ $name }}</td>
-                                <td>{{ $type }}</td>
+                                <td><code>{{ $name }}</code></td>
+                                <td><code>{{ $type }}</code></td>
                                 <td>{{ $desc }}</td>
                             </tr>
                         {{- end -}}
