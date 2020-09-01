@@ -20,6 +20,4 @@ function watch () {
 
   toc.configureWatcher(watcher)
   diagrams.configureWatcher(watcher)
-
-  console.log('Watching', watcher.getWatched())
 }
