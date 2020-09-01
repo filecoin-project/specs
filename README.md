@@ -186,6 +186,36 @@ You can override the `<a>` title by passing a second `string` in the link defini
 
 
 ## Shortcodes
+
+### `embed`
+```md
+# src relative to the page
+{{<embed src="piece_store.id" lang="go">}}
+
+# src relative to content folder
+{{<embed src="/systems/piece_store.id" lang="go">}}
+
+# can just embed a markdown file
+{{<embed src="section.md" markdown="true">}}
+
+# can embed symbols from Go files
+# extracts comments and symbol body
+{{<embed src="/externals/go-data-transfer/types.go"  lang="go" symbol="Channel">}}
+```
+
+### `listing`
+The listing shortcode creates tables from externals sources, supports Go `struct`.
+```md
+# src relative to the page
+{{<listing src="piece_store.go" symbol="Channel">}}
+
+# src relative to content folder
+{{<listing src="/systems/piece_store.go" symbol="Channel">}}
+
+# src can also be from the externals repos
+{{<listing src="/externals/go-data-transfer/types.go"  symbol="Channel">}}
+```
+
 ### `Mermaid` 
 Inline mermaid syntax rendering
 ```html
@@ -209,14 +239,8 @@ Lorem markdownum insigne. Olympo signis Delphis! Retexi Nereius nova develat
 stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa
 {{< /hint >}}
 ```
-### `embed`
-```md
-# src relative to the page
-{{<embed src="piece_store.id" lang="go">}}
 
-# src relative to content folder
-{{<embed src="/systems/piece_store.id" lang="go">}}
-```
+
 
 ## Math mode
 For short snippets of math text you can just use the `{{<katex>}}` shortcode, but if you need to write lots of math in a page you can just use `math-mode` and avoid writting the katex shortcode everywhere.

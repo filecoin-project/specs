@@ -11,7 +11,7 @@
 {{ $lang := .Get "lang" }}
 {{ $symbolName := .Get "symbol" }}
 
-{{ if fileExists ($.Scratch.Get "filepath") }}
+{{ if fileExists $path }}
         {{ $content := readFile $path }}
         {{ $body := "" }}
         {{ $comment := "" }}
@@ -24,8 +24,17 @@
         {{ $body = replaceRE $pattern2 "$4" $block }}
 
         <!-- search for type struct -->
+        <!-- https://regex101.com/r/GxAnFP/1 -->
         {{- if eq $body "" -}}
-            {{ $patternStruct := printf "(?m)(^\n^((//.*\n)*)(type %s struct \\{[\\s\\S]+?\\n}))" $symbolName}}
+            {{ $patternStruct := printf "(?m)(^\\n^((//.*\\n)*)(type %s struct \\{[\\s\\S]+?\\n}))" $symbolName}}
+            {{ $block :=  index (findRE $patternStruct $content ) 0}}
+            {{ $comment = replaceRE $patternStruct "$2" $block }}
+            {{ $body = replaceRE $patternStruct "$4" $block }}
+        {{- end -}}
+
+        <!-- search for type interface -->
+        {{- if eq $body "" -}}
+            {{ $patternStruct := printf "(?m)(^\\n^((//.*\\n)*)(type %s interface \\{[\\s\\S]+?\\n}))" $symbolName}}
             {{ $block :=  index (findRE $patternStruct $content ) 0}}
             {{ $comment = replaceRE $patternStruct "$2" $block }}
             {{ $body = replaceRE $patternStruct "$4" $block }}
@@ -36,7 +45,32 @@
                 {{ (replace $comment "//" "") | .Page.RenderString }}
             </p>
             <div id="symbol-body-{{- $symbolName -}}">
-                {{ highlight $body $lang "" }}
+                {{ $parts := split $body "\n" }}
+                {{ $partsFirst := first (sub (len $parts) 1) $parts }}
+                {{ $partsLast := last (sub (len $partsFirst) 1) $partsFirst }}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{- range $partsLast -}}
+                            {{- $pattern := printf "(?m)(^\\t([\\S]*)\\s*([\\S]*)(\\s//\\s(.*))?)" -}}
+                            {{- $name := replaceRE $pattern "$2" . -}}
+                            {{- $type := replaceRE $pattern "$3" . -}}
+                            {{- $desc := replaceRE $pattern "$4" . -}}
+                            <tr>
+                                <td>{{ $name }}</td>
+                                <td>{{ $type }}</td>
+                                <td>{{ $desc }}</td>
+                            </tr>
+                        {{- end -}}
+                    </tbody>
+                </table>
+                {{ highlight ($body | safeHTML) $lang "" }}
             </div>
         {{- else -}}
             <blockquote class="book-hint danger">
