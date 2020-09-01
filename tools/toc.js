@@ -1,42 +1,25 @@
 #!/usr/bin/env node
 
-const chokidar = require('chokidar')
 const jsdom = require('jsdom')
 const path = require('path')
 const fs = require('fs')
 const { buildTocModel } = require('./toc/build-model')
 
-const src = path.join(__dirname, '../public/index.html')
-const dest = path.join(__dirname, '../data/toc.json')
+const src = 'public/index.html'
+const dest = 'data/toc.json'
 
-run(src, dest)
-
-async function run (src, dest) {
-  const args = process.argv.slice(2)
-  if (args[0] === '--watch') {
-    chokidar.watch(src, {
-      awaitWriteFinish: {
-        stabilityThreshold: 1000,
-        pollInterval: 100
-      },
-      ignoreInitial: true
-    })
-      .on('all', async (event, p) => {
-        console.log(event, p)
-        await processHtml(src, dest)
-      })
-      .on('ready', () => {
-        console.log(`Watching ${src}`)
-      })
-      .on('error', err => console.error('error watching: ', err))
-  } else {
-    console.time('Building toc.json')
-    await processHtml(src, dest)
-    console.timeEnd('Building toc.json')
-  }
+// run as script, so do the thing
+if (require.main === module) {
+  run(src, dest)
 }
 
-async function processHtml (src, dest) {
+async function run (src, dest) {
+  console.time('Building toc.json')
+  await buildToc(src, dest)
+  console.timeEnd('Building toc.json')
+}
+
+async function buildToc (src, dest) {
   if (!fs.existsSync(path.dirname(dest))) {
     fs.mkdirSync(path.dirname(dest))
   }
@@ -55,6 +38,16 @@ async function processHtml (src, dest) {
     } catch (err) {
       return console.error(err)
     }
-    console.log('Updated toc.json')
+    console.log('updated ${dest}')
   }
+}
+
+module.exports.configureWatcher = (watcher) => {
+  watcher.on('all', async (_, p) => {
+    if (p === src) {
+      await buildToc(src, dest)
+    }
+  })
+
+  watcher.add(src)
 }
