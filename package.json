@@ -8,10 +8,9 @@
     "start": "concurrently npm:watch-*",
     "serve": "npm start",
     "watch-hugo": "npm run build-diagrams && hugo server --bind=0.0.0.0 --disableFastRender --renderToDisk",
-    "watch-diagrams": "tools/diagrams.js --watch",
-    "watch-toc": "tools/toc.js --watch",
+    "watch-assets": "tools/watch.js --watch",
     "build": "npm run build-diagrams && hugo --quiet && npm run build-toc && hugo --gc --minify",
-    "build-diagrams": "tools/diagrams.js --all",
+    "build-diagrams": "tools/diagrams.js",
     "build-toc": "tools/toc.js",
     "clean": "premove public resources static/_gen && hugo mod clean --all && hugo mod tidy",
     "release": "np --no-publish && conventional-github-releaser -p angular"
