@@ -84,14 +84,14 @@ of the altered protocol.
 
 ## Peer Discovery
 
-Peer discovery is a critical part of the overall architecture. Taking this wrong can have severe consequences for the operation of the protocol. This is especially important for security because network "Bootstrap" is a difficult problem in peer-to-peer networks. The set of peers a new node initially connects to may completely dominate the node's awareness of other peers, and therefore the view of the state of the network that the node has.
+Peer discovery is a critical part of the overall architecture. Taking this wrong can have severe consequences for the operation of the protocol. The set of peers a new node initially connects to when joining the network may completely dominate the node's awareness of other peers, and therefore the view of the state of the network that the node has.
 
 Peer discovery can be driven by arbitrary external means and is pushed outside the core functionality of the protocols involved in ChainSync (i.e., GossipSub, Bitswap, BlockSync). This allows for orthogonal, application-driven development and
-no external dependencies for the protocol implementation. Nonetheless, the GossipSub protocol supports: i) Peer Exchange, which allows applications to bootstrap from a known set of bootstrap peers without an external peer discovery mechanism, and ii) Explicit Peering Agreements, where the application can specify a list of peers to which nodes should connect when joining.
+no external dependencies for the protocol implementation. Nonetheless, the GossipSub protocol supports: i) Peer Exchange, and ii) Explicit Peering Agreements.
 
 ### Peer Exchange
 
-This process is supported through either bootstrap nodes or other normal peers. Bootstrap nodes must be maintained by system operators. They have to be stable and operate independently of protocol constructions, such as the GossipSub mesh construction, that is, bootstrap nodes do not maintain connections to the mesh.
+Peer Exchange allows applications to bootstrap from a known set of peers without an external peer discovery mechanism. This process can be realized either through bootstrap nodes or other normal peers. **Bootstrap nodes must be maintained by system operators and must be configured correctly.** They have to be stable and operate independently of protocol constructions, such as the GossipSub mesh construction, that is, bootstrap nodes do not maintain connections to the mesh.
 
 For more details on Peer Exchange please refer to the [GossipSub specification](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub).
 
