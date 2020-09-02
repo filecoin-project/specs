@@ -96,6 +96,13 @@
     outline: none;
 }
 
+.label {
+    font-size: 10px;
+    font-weight: 700;
+    display: block;
+    color:$gray-600;
+}
+
 // Tweaks
 html {
     scroll-behavior: auto;
