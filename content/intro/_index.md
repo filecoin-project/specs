@@ -36,7 +36,6 @@ Each section of the spec must be stable and audited before it is considered done
 
 - The **State** column indicates the stability as defined in the legend. 
 - The **Theory Audit** column shows the date of the last theory audit with a link to the report.
-- The **Weight** column is used to highlight the relative criticality of a section against the others.
 
 ### Spec Status Legend
 
@@ -74,7 +73,7 @@ Each section of the spec must be stable and audited before it is considered done
 ### Spec Status Overview
 <div id="dashboard-container"></div>
 
-### Spec Stabilization Progess
+### Spec Stabilization Progress
 
 This progress bar shows what percentage of the spec sections are considered stable.
 
