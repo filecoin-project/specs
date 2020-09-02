@@ -32,7 +32,7 @@
 
 {{ define "humanizeState" }}
     {{- if eq . "wip" -}}
-    WIP
+    Draft/WIP
     {{- else if eq . "n/a" -}}
     {{ else }}
         {{ humanize . }}
