@@ -14,9 +14,10 @@ if (require.main === module) {
 }
 
 async function run (src, dest) {
-  console.time('Building toc.json')
+  console.log('Building toc.json')
+  console.time('Built toc.json')
   await buildToc(src, dest)
-  console.timeEnd('Building toc.json')
+  console.timeEnd('Built toc.json')
 }
 
 async function buildToc (src, dest) {
@@ -35,10 +36,10 @@ async function buildToc (src, dest) {
   if (!Buffer.from(json).equals(prev)) {
     try {
       fs.writeFileSync(dest, json)
+      console.log(`Updated toc.json`)
     } catch (err) {
       return console.error(err)
     }
-    console.log('updated ${dest}')
   }
 }
 
