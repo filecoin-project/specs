@@ -216,7 +216,7 @@ The listing shortcode creates tables from externals sources, supports Go `struct
 {{<listing src="/externals/go-data-transfer/types.go"  symbol="Channel">}}
 ```
 
-### `Mermaid` 
+### `mermaid` 
 Inline mermaid syntax rendering
 ```html
 {{< mermaid >}}
