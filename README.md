@@ -166,7 +166,7 @@ hugo shortcodes you can add to your markdown.
 
 ```md
 # src relative to the page
-{{<embed src="piece_store.id" lang="go">}}
+{{<embed src="piece_store.go" lang="go">}}
 
 # src relative to content folder
 {{<embed src="/systems/piece_store.id" lang="go">}}
