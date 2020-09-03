@@ -1,59 +1,69 @@
-{{- with .Site.GetPage "/" -}}
+{{ if isset .Site.Data "toc" }}
+  {{ template "dashboard-spec" (dict "children" .Site.Data.toc "number" 0 )}}
+{{ end }}
+
+{{ define "dashboard-spec" }}
 <table id="dashboard" class="sort Dashboard tablesort">
     <thead>
         <tr>
             <th>Section</th>
-            <th>Weight</th>
             <th>State</th>
             <th>Theory Audit</th>
         </tr>
     </thead>
     <tbody>
-        {{- template "dashboard-section-children" (dict "Section" . "level" 0) -}}
+        {{ range .children }}
+            {{- template "dashboard-spec-tr" . -}}
+        {{ end }}
     </tbody>
 </table>
-{{- end -}}
+{{ end }}
 
-<!-- Children Template -->
-{{ define "dashboard-section-children" }}
-    {{- $level := .level -}}
-    {{- $level = mul $level 10 -}}
-    {{- $pages := where .Section.Pages "Params.bookhidden" "ne" true -}}
-    {{- $pages2 := where $pages "Params.dashboardhidden" "ne" true -}}
-    {{- range sort $pages2 "Weight" "asc" -}}
-        {{- $level = add $level 1 -}}
-        {{- if (or (lt $level 200) (gt $level 10000)) -}}
-            {{ template "dashboard-section-children" (dict "Section" . "level" $level) }}
-        {{- else if .IsSection -}}
-            {{ template "dashboard-tr" (dict "Page" . "Level" $level) }}
-            {{ template "dashboard-section-children" (dict "Section" . "level" $level) }}
-        {{ else if and .IsPage .Content }}
-            {{ template "dashboard-tr" (dict "Page" . "Level" $level) }}
-        {{ end }}
+{{ define "stateToNumber" }}
+    {{- $num := 6 -}}
+    {{- if eq . "done" -}}{{$num = 1}}{{end}}
+    {{- if eq . "stable" -}}{{$num = 1}}{{end}}
+    {{- if eq . "reliable" -}}{{$num = 2}}{{end}}
+    {{- if eq . "wip" -}}{{$num = 3}}{{end}}
+    {{- if eq . "incorrect" -}}{{$num = 4}}{{end}}
+    {{- if eq . "missing" -}}{{$num = 5}}{{end}}
+    {{- $num -}}
+{{end}}
+
+{{ define "humanizeState" }}
+    {{- if eq . "wip" -}}
+    Draft/WIP
+    {{- else if eq . "n/a" -}}
+    {{ else }}
+        {{ humanize . }}
     {{ end }}
 {{ end }}
 
 <!-- Children TR template -->
-{{- define "dashboard-tr" -}}
+{{- define "dashboard-spec-tr" -}}
 <tr>
     <!-- Section -->
-    <td class="Dashboard-section">{{- delimit (split .Level "") "." }} 
-        {{ template "portable-link" (dict "Destination" .Page.File.Path "Text" .Page.Title "Page" .Page) }}
+    <td class="Dashboard-section">
+        {{.number}} <a href="#{{.id}}">{{.text}}</a>
     </td>
-
-    <!-- Weight -->
-    <td>{{- (default 0 .Page.Params.dashboardWeight) -}}</td>
     
     <!-- State -->
-    <td class="text-black bg-na bg-{{- .Page.Params.dashboardState }} ">
-        {{- if eq .Page.Params.dashboardState "wip" -}}
-            WIP
-        {{- else -}}
-            {{- (default "N/A" (humanize .Page.Params.dashboardState)) -}}
-        {{- end -}}
+    <td data-sort="{{template "stateToNumber" .dashboardState}}" class="text-black bg-na bg-{{.dashboardState}}">
+        {{ template "humanizeState" .dashboardState }}
     </td>
     
     <!-- Audit -->
-    <td class="text-transparent {{ if gt .Page.Params.dashboardaudit 0 }}bg-stable{{ else }}bg-incorrect{{end}}">{{ .Page.Params.dashboardaudit }}</td>
+    <td data-sort="{{template "stateToNumber" .dashboardAudit}}" class="text-black bg-{{.dashboardAudit}}">
+        {{- if eq .dashboardAuditURL "" -}}
+        {{ template "humanizeState" .dashboardAudit }} 
+        {{ else }}
+            <a href="{{ .dashboardAuditURL }}" title="Read the audit report" target="_blank" rel="noopener noreferrer" class="text-black">{{.dashboardAuditDate}}<i class="gg-external gg-s-half"></i></a>
+        {{ end }}
+    </td>
 </tr>
+{{ range .children }}
+    {{ if .page }}
+        {{- template "dashboard-spec-tr" . -}}
+    {{ end }}
+{{ end }}
 {{- end -}}
