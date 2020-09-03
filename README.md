@@ -60,7 +60,7 @@ Then open http&#x3A;//localhost:1313/ in the browser
 
 ## Writing the spec
 
-The spec is written in markdown. Each section is markdown document in the `content` directory. The first level of the directory structure denotes the top level sections of the spec; (Intrduction, Systems, etc.) The `_index.html` file in each folder is used as the starting point for each section. For example the introduction starts in `content/intro/_index.md`. 
+The spec is written in markdown. Each section is markdown document in the `content` directory. The first level of the directory structure denotes the top level sections of the spec; (Introduction, Systems, etc.) The `_index.md` file in each folder is used as the starting point for each section. For example the **Introduction** starts in `content/intro/_index.md`. 
 
 Sections can be split out into multiple markdown documents. The build process combines them into a single html page. The sections are ordered by the `weight` front-matter property. The introduction appears at the start of the html page because `content/intro/_index.md` has `weight: 1`, while `content/systems/_index.html` has `weight: 2` so it appears as the second section. 
 
