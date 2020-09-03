@@ -60,4 +60,14 @@ window.addEventListener('DOMContentLoaded', () => {
   });
   document.querySelectorAll('.math-mode').forEach(img => { observer.observe(img) });
 
+  const toggle = document.querySelector('#menu-control')
+
+  toggle.addEventListener('click', (e) => {
+    if(e.target.checked) {
+      document.body.classList.add('lightbox-body-scroll-stop')
+    } else {
+      document.body.classList.remove('lightbox-body-scroll-stop')
+    }
+  })
+
 });

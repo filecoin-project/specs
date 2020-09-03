@@ -1,15 +1,5 @@
 <nav>
-    {{ partial "docs/brand" . }}
+    {{ partial "single/brand" . }}
     
-    {{ partial "docs/inject/menu-before" . }}
-    {{ partial "docs/menu-hugo" .Site.Menus.before }}
-    
-    {{ if .Site.Params.BookMenuBundle }}
-      {{ partial "docs/menu-bundle" . }}
-    {{ else }}
-      {{ partial "single/menu-single" . }}
-    {{ end }}
-    
-    {{ partial "docs/menu-hugo" .Site.Menus.after }}
-    {{ partial "docs/inject/menu-after" . }}
+    {{ partial "single/menu-single" . }}
 </nav>

@@ -3,45 +3,32 @@
 
 <head>
   {{ partial "single/html-head" . }}
-  {{ partial "docs/inject/head" . }}
 </head>
 
 <body dir={{ .Site.Language.LanguageDirection }}>
   <input type="checkbox" class="hidden toggle" id="menu-control" />
+
   <header class="book-header">
     {{ template "header" . }} <!-- Mobile layout header -->
   </header>
+  
+  <aside class="book-menu">
+    {{ template "menu" . }} <!-- Left menu Content -->
+  </aside>
+
   <main class="container flex">
-    <aside class="book-menu">
-      {{ template "menu" . }} <!-- Left menu Content -->
-    </aside>
 
     <div class="book-page">
-      {{ partial "docs/inject/content-before" . }}
       {{ template "main" . }} <!-- Page Content -->
-      {{ partial "docs/inject/content-after" . }}
 
-      <footer class="book-footer">
+      {{/*  <footer class="book-footer">
         {{ template "footer" . }} <!-- Footer under page content -->
-        {{ partial "docs/inject/footer" . }}
-      </footer>
+      </footer>  */}}
 
-      <label for="menu-control" class="hidden book-menu-overlay"></label>
     </div>
-
-
-    {{ if default true (default .Site.Params.BookToC .Params.BookToC) }}
-    <aside class="book-toc">
-      <div class="book-toc-toggles">
-        <label class="dark-mode-toggle-label" for="dark-mode-toggle">
-          <i class="gg-dark-mode"></i> DARK MODE
-        </label>
-        <button id="dark-mode-toggle" class="dark-mode-toggle toggle" type="button" aria-pressed="false"></button>
-      </div>
-    </aside>
-    {{ end }}
   </main>
-
+  
+  <label for="menu-control" class="hidden book-menu-overlay"></label>
   {{ partial "single/inject/body" . }}
 </script>
 </body>
@@ -53,7 +40,7 @@
 {{ end }}
 
 {{ define "header" }}
-  {{ partial "docs/header" . }}
+  {{ partial "single/header" . }}
 {{ end }}
 
 {{ define "footer" }}
