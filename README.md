@@ -98,7 +98,7 @@ dashboardAudit: missing
 
 ## Code
 
-Wrap code blocks in _code fences_. Code fences should **always** have a lang. It is used to provide syntax heighlighting. Use `text` as the language flag for pseudocode for no highlighting.
+Wrap code blocks in _code fences_. Code fences should **always** have a lang. It is used to provide syntax highlighting. Use `text` as the language flag for pseudocode for no highlighting.
 
 ````text
 ```text
