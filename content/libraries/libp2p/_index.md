@@ -28,4 +28,4 @@ The Kademlia DHT implementation of libp2p in go can be found in its [GitHub repo
 
 GossipSub is libp2p's pubsub protocol. Filecoin uses GossipSub for message and block propagation among Filecoin nodes. The recent hardening extensions of GossipSub include a number of techniques to make it robust against a variety of attacks.
 
-Please refer to [GossipSub's Spec section](gossip_sub), or the protocol’s own and more complete [specification](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/gossipsub-v1.1.md) for details on the protocol’s design, implementation and parameter settings. A [technical report](https://arxiv.org/abs/2007.02754) is also available, which discusses the design rationale of the protocol.
+Please refer to [GossipSub's Spec section](gossip_sub), or the protocol’s more complete [specification](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/gossipsub-v1.1.md) for details on its design, implementation and parameter settings. A [technical report](https://arxiv.org/abs/2007.02754) is also available, which discusses the design rationale of the protocol.
