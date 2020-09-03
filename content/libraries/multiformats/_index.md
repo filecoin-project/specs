@@ -17,7 +17,7 @@ Please refer to the [Multiformats repository](https://github.com/multiformats) f
 
 Filecoin references data using IPLD's Content Identifier (CID).
 
-A CID is a hash digest prefixed with identifiers for its hash function and codec. This means you can validate and decode data by with only this identifier.
+A CID is a hash digest prefixed with identifiers for its hash function and codec. This means you can validate and decode data with only this identifier.
 
 When CIDs are printed as strings they also use multibase to identify the base encoding being used.
 
