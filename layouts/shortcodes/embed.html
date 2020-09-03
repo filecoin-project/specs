@@ -69,5 +69,5 @@
     <blockquote class="book-hint danger">
       {{- printf "File '%s' not found from Page '%s'" ($path) .Page.File }}
     </blockquote>
-    {{- warnf "File '%s' not found from Page '%s'" ($path) .Page.File }}
+    {{- errorf "File '%s' not found from Page '%s'" ($path) .Page.File }}
 {{ end }}

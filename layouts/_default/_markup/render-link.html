@@ -36,7 +36,7 @@
         {{- else -}}
             {{- $anchor = printf "#%s" (delimit $pathParts "__") -}}
         {{- end -}}
-      {{- $destination = $anchor }}
+        {{- $destination = $anchor }}
       {{- if .Title -}}
         {{- $title = .Title -}}
       {{- else -}}
@@ -45,7 +45,7 @@
     {{- else if fileExists (print .Page.File.Dir .Destination) }}
       <!-- Nothing -->
     {{- else -}}
-      {{- warnf "Page '%s' not found in '%s' for lang '%s'" .Destination .Page.File .Page.File.Lang }}
+      {{- errorf "Page '%s' not found in '%s' for lang '%s'" .Destination .Page.File .Page.File.Lang }}
     {{- end }}
   {{- end }}
   <a href="{{ $destination | safeURL }}"{{ with $title}} title="{{ . }}"{{ end }} {{ if $isRemote }} target="_blank" rel="noopener"{{ end }}>{{ (default $title .Text) | safeHTML }}</a>
