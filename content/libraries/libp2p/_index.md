@@ -12,7 +12,7 @@ dashboardAuditURL: https://github.com/protocol/libp2p-vulnerabilities/blob/maste
 
 # Libp2p
 
-[Libp2p](https://libp2p.io) is a modular network protocol stack for peer-to-peer networks. Libp2p enables your network to run applications free from runtime and address services, independently of their location. It includes several protocols and algorithms to enable efficient peer-to-peer communication. Some of these include peer discovery, peer routing and NAT Traversal. Libp2p is being used by IPFS and several of its components are also used by Filecoin. However libp2p is a standalone stack that can be used independently of these systems.
+[Libp2p](https://libp2p.io) is a modular network protocol stack for peer-to-peer networks. It consists of a catalogue of modules from which p2p network developers can select and reuse just the protocols they need, while making it easy to upgrade and interoperate between applications. This includes several protocols and algorithms to enable efficient peer-to-peer communication like peer discovery, peer routing and NAT Traversal. While libp2p is used by both IPFS and Filecoin, it is a standalone stack that can be used independently of these systems as well.
 
 There are several implementations of libp2p, which can be found at the [libp2p GitHub repositoriy](https://github.com/libp2p). The specification of libp2p can be found in its [specs repo](https://github.com/libp2p/specs) and its documentation at [https://docs.libp2p.io](https://docs.libp2p.io).
 
