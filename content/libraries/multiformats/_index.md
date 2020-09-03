@@ -26,7 +26,7 @@ For a more detailed specification, please see the
 
 ## Multihash
 
-A Multihash is a set of self-describing hash values. Multihash is used for differentiating outputs from various well-established cryptographic hash functions, addressing sizes and encoding considerations.
+A Multihash is a set of self-describing hash values. Multihash is used for differentiating outputs from various well-established cryptographic hash functions, while addressing size and encoding considerations.
 
 Please refer to the [Multihash specification](https://github.com/multiformats/multihash) for more information.
 
