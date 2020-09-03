@@ -50,7 +50,7 @@ git clone https://github.com/filecoin-project/specs.git
 npm install
 ```
 
-To run it locally with live-reload in the browser when you change a file run
+To run the development server with live-reload locally, run:
 
 ```sh
 npm start
