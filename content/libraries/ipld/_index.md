@@ -20,7 +20,7 @@ Please refer to the [IPLD specifications repository](https://github.com/ipld/spe
 
 All Filecoin system data structures are stored using DAG-CBOR (which is an IPLD codec). DAG-CBOR is a more strict subset of CBOR with a predefined tagging scheme, designed for storage, retrieval and traversal of hash-linked data DAGs.
 
-Files and data stored on the Filecoin network are also stored using various IPLD codecs (not necessarily DAG-CBOR). IPLD provides a consistent and coherent abstraction above data that allows Filecoin to build and interact with complex, multi-block data structures, such as HAMT and AMT. Filecoin uses the DAG-CBOR codec for the serialization and deserialization of its data structures and interacts with that data using the IPLD Data Model, upon which various tools are built. IPLD Selectors can also used to address specific nodes within a linked data structure (see GraphSync below).
+Files and data stored on the Filecoin network are also stored using various IPLD codecs (not necessarily DAG-CBOR). IPLD provides a consistent and coherent abstraction above data that allows Filecoin to build and interact with complex, multi-block data structures, such as HAMT and AMT. Filecoin uses the DAG-CBOR codec for the serialization and deserialization of its data structures and interacts with that data using the IPLD Data Model, upon which various tools are built. IPLD Selectors are also used to address specific nodes within a linked data structure (see GraphSync below).
 
 Please refer to the [DAG-CBOR specification](https://github.com/ipld/specs/blob/master/block-layer/codecs/dag-cbor.md) for more information.
 
