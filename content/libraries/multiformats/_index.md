@@ -21,7 +21,7 @@ A CID is a hash digest prefixed with identifiers for its hash function and codec
 
 When CIDs are printed as strings they also use multibase to identify the base encoding being used.
 
-For a more detailed specification, we refer the reader to the
+For a more detailed specification, please see the
 [CID specification](https://github.com/multiformats/cid).
 
 ## Multihash
