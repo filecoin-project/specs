@@ -1,6 +1,6 @@
 ---
 title: libp2p
-weight: 6
+weight: 5
 bookCollapseSection: true
 dashboardWeight: 1
 dashboardState: stable
@@ -10,7 +10,7 @@ dashboardAuditDate: '2019-10-10'
 dashboardAuditURL: https://github.com/protocol/libp2p-vulnerabilities/blob/master/DRAFT_NCC_Group_ProtocolLabs_1903ProtocolLabsLibp2p_Report_2019-10-10_v1.1.pdf 
 ---
 
-# Libp2p - A modular network stack
+# Libp2p
 
 [Libp2p](https://libp2p.io) is a modular network protocol stack for peer-to-peer networks. Libp2p enables your network to run applications free from runtime and address services, independently of their location. It includes several protocols and algorithms to enable efficient peer-to-peer communication. Some of these include peer discovery, peer routing and NAT Traversal. Libp2p is being used by IPFS and several of its components are also used by Filecoin. However libp2p is a standalone stack that can be used independently of these systems.
 
