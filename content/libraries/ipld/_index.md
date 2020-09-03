@@ -28,7 +28,7 @@ Please refer to the [DAG-CBOR specification](https://github.com/ipld/specs/blob/
 
 The Content Addressable aRchives (CAR) format is used to store content addressable objects in the form of IPLD block data as a sequence of bytes; typically in a file with a `.car` filename extension.
 
-The CAR format is used to produce a _Filecoin Piece_ (the main representation of files in Filecoin) by serialising its IPLD DAG. The `.car` file is then going through further transformations to produce the _Piece CID_.
+The CAR format is used to produce a _Filecoin Piece_ (the main representation of files in Filecoin) by serialising its IPLD DAG. The `.car` file then goes through further transformations to produce the _Piece CID_.
 
 Please refer to the [CAR specification](https://github.com/ipld/specs/blob/master/block-layer/content-addressable-archives.md) for further information.
 
