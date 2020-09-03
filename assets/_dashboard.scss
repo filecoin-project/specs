@@ -16,6 +16,11 @@ table.Dashboard {
     th:first-child {
         width: 50%;
     }
+    .gg-external {
+        display: inline-block;
+        margin-left: 3px;
+        vertical-align: text-top;
+    }
 }
 
 .Dashboard tr th,

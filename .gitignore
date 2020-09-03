@@ -6,3 +6,4 @@ yarn.lock
 node_modules
 resources
 static/_gen
+data/toc.json

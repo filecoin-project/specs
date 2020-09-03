@@ -4,14 +4,9 @@
 
 This is the [Filecoin Specification](https://github.com/filecoin-project/specs), a repository that contains documents, code, models, and diagrams that constitute the specification of the [Filecoin Protocol](https://filecoin.io). This repository is the singular source of truth for the Filecoin Protocol. All implementations of the Filecoin Protocol should match and comply with the descriptions, interfaces, code, and models defined in this specification.
 
-Note that the `beta` branch of the specs moves quickly. We work to merge PRs as fast as possible into master, which means changes or reversals are possible here. Accordingly, we periodically compile swaths of spec along with a high-level difflog into the `release` branch. As the spec stabilizes, this practice will change.
-
 ## Website
 
-https://beta.spec.filecoin.io is the user-friendly website rendering, which we recommend for reading this repository. The website is updated automatically with every merge to `beta`.
-
-## Previous version
-You can find the previous version of the Filecoin Spec in the master branch [here](https://github.com/filecoin-project/specs/tree/master).
+https://spec.filecoin.io is the user-friendly website rendering, which we recommend for reading this repository. The website is updated automatically with every merge to `master`.
 
 ## Install
 
@@ -191,6 +186,36 @@ You can override the `<a>` title by passing a second `string` in the link defini
 
 
 ## Shortcodes
+
+### `embed`
+```md
+# src relative to the page
+{{<embed src="piece_store.id" lang="go">}}
+
+# src relative to content folder
+{{<embed src="/systems/piece_store.id" lang="go">}}
+
+# can just embed a markdown file
+{{<embed src="section.md" markdown="true">}}
+
+# can embed symbols from Go files
+# extracts comments and symbol body
+{{<embed src="/externals/go-data-transfer/types.go"  lang="go" symbol="Channel">}}
+```
+
+### `listing`
+The listing shortcode creates tables from externals sources, supports Go `struct`.
+```md
+# src relative to the page
+{{<listing src="piece_store.go" symbol="Channel">}}
+
+# src relative to content folder
+{{<listing src="/systems/piece_store.go" symbol="Channel">}}
+
+# src can also be from the externals repos
+{{<listing src="/externals/go-data-transfer/types.go"  symbol="Channel">}}
+```
+
 ### `Mermaid` 
 Inline mermaid syntax rendering
 ```html
@@ -214,14 +239,8 @@ Lorem markdownum insigne. Olympo signis Delphis! Retexi Nereius nova develat
 stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa
 {{< /hint >}}
 ```
-### `embed`
-```md
-# src relative to the page
-{{<embed src="piece_store.id" lang="go">}}
 
-# src relative to content folder
-{{<embed src="/systems/piece_store.id" lang="go">}}
-```
+
 
 ## Math mode
 For short snippets of math text you can just use the `{{<katex>}}` shortcode, but if you need to write lots of math in a page you can just use `math-mode` and avoid writting the katex shortcode everywhere.
