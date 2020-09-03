@@ -56,7 +56,7 @@ To run the development server with live-reload locally, run:
 npm start
 ```
 
-Then open http&#x3A;//localhost:1313/ in the browser
+Then open <http://localhost:1313> in the browser
 
 ## Writing the spec
 
@@ -290,25 +290,25 @@ Description for all the available frontmatter properties
 ```yaml
 # Page Title to be used in the navigation
 title: Libraries 
-# Small description for html metadata, if not present the first couple of paragraphs will be used instead -->
+# Small description for html metadata, if not present the first couple of paragraphs will be used instead
 description: Libraries used from Filecoin
-# This will be used to order the ToC, navigation and any other listings of pages -->
+# This will be used to order the ToC, navigation and any other listings of pages
 weight: 3
-# This will make a page section collapse in the navigation -->
+# This will make a page section collapse in the navigation
 bookCollapseSection: true
-# This will hidden the page from the navigation -->
+# This will hidden the page from the navigation
 bookhidden: true
-# This is used in the dashboard to describe the importance of the page content -->
+# This is used in the dashboard to describe the importance of the page content
 dashboardWeight: 2
-# This is used in the dashboard to describe the state of the page content options are "missing", "incorrect", "wip", "reliable", "stable" or "n/a" -->
+# This is used in the dashboard to describe the state of the page content options are "missing", "incorrect", "wip", "reliable", "stable" or "n/a"
 dashboardState: stable
-# This is used in the dashboard to describe if the theory of the page has been audited, options are "missing", "wip", "done" or "n/a" -->
+# This is used in the dashboard to describe if the theory of the page has been audited, options are "missing", "wip", "done" or "n/a"
 dashboardAudit: wip
-# When dashboardAudit is stable we should have a report url -->
+# When dashboardAudit is stable we should have a report url
 dashboardAuditURL: https://url.to.the.report
-# The date that the report at dashboardAuditURL was completed -->
+# The date that the report at dashboardAuditURL was completed
 dashboardAuditDate: "2020-08-01"
-# This is used in the dashboard to describe if the page content has compliance tests, options are 0 or numbers of tests -->
+# This is used in the dashboard to describe if the page content has compliance tests, options are 0 or numbers of tests
 dashboardTests: 0
 ```
 
