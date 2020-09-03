@@ -12,7 +12,7 @@ dashboardTests: 0
 
 The InterPlanetary Linked Data or [IPLD](https://ipld.io/) is the data model of the content-addressable web. It provides standards and formats to build Merkle-DAG data-structures, like those that represent a filesystem. IPLD allows us to treat all hash-linked data structures as subsets of a unified information space, unifying all data models that link data via hashes as instances of IPLD. This means that data can be linked and referenced from totally different data structures in a global namespace. This is a very useful feature that is used extensively in Filecoin.
 
-IPLD introduces several concepts and protocols, such as the concept of content addressing itself, codecs, such as DAG-CBOR, file formats, such as Content Addressable aRchives (CARs) and protocols, such as GraphSync.
+IPLD introduces several concepts and protocols, such as the concept of content addressing itself, codecs such as DAG-CBOR, file formats such as Content Addressable aRchives (CARs), and protocols such as GraphSync.
 
 Please refer to the [IPLD specifications repository](https://github.com/ipld/specs) for more information.
 
