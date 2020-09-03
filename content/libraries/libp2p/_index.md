@@ -20,7 +20,7 @@ Below we discuss how some of libp2p's components are used in Filecoin.
 
 ## DHT
 
-The Kademlia DHT implementation of libp2p is used by Filecoin for peer discovery and peer exchange. Libp2p's [PeerID](https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md) is used as the ID scheme for Filecoin storage miners and more generally Filecoin nodes. In order for a client to find miner information, such as its address, it is using the DHT to resolve the PeerID to the miner's _Multiaddress_.
+The Kademlia DHT implementation of libp2p is used by Filecoin for peer discovery and peer exchange. Libp2p's [PeerID](https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md) is used as the ID scheme for Filecoin storage miners and more generally Filecoin nodes. One way that clients find miner information, such as a miner's address, is by using the DHT to resolve the associated PeerID to the miner's _Multiaddress_.
 
 The Kademlia DHT implementation of libp2p in go can be found in its [GitHub repository](https://github.com/libp2p/go-libp2p-kad-dht).
 
