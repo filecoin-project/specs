@@ -234,7 +234,7 @@ TODO: link to filproofs/feistel
 
 > The Replication phase turns an *unsealed sector* into a *sealed sector* by first *generating a key*, then using the key to *encode the orignal data*.
 
-Before running the `Replicate` algorithm, the prover must ensure that the sector is correctly formatted with a valid "Storage Format" described in Filecoin Client Data Processing (currently `paddedfr32v1` is the required default).
+Before running the `Replicate` algorithm, the prover must ensure that the sector is correctly formatted with a valid "Storage Format" (currently `paddedfr32v1` is the required default).
 
 {{< hint warning >}}
 TODO: inputs are missing
