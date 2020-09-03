@@ -1,9 +1,6 @@
 import '@pwabuilder/pwaupdate'
-import { initToc } from './toc.js'
 import tablesort from 'tablesort'
 import Gumshoe from 'gumshoejs'
-import { buildTocModel } from './content-model'
-import { buildDashboard } from './dashboard-spec'
 import { renderKatex } from './katex';
 import { lightbox } from './lightbox'
 // Note: the tablesort lib is not ESM friendly, and the sorts expect `Tablesort` to be available on the global
@@ -48,9 +45,6 @@ function initTocScrollSpy () {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  const model = buildTocModel('.markdown')
-  initToc({tocSelector:'.toc', model })
-  buildDashboard('#dashboard-container', model)
   initTocDepthSlider()
   initTocScrollSpy()
   initTableSort()

@@ -43,7 +43,7 @@
       <blockquote class="book-hint danger">
         {{- printf "File '%s' not found from Page '%s'" ($.Scratch.Get "filepath") .Page.File }}
       </blockquote>
-      {{- warnf "File '%s' not found from Page '%s'" ($.Scratch.Get "filepath") .Page.File }}
+      {{- errorf "File '%s' not found from Page '%s'" ($.Scratch.Get "filepath") .Page.File }}
     {{ end }}
 {{ else }}
   {{ $uuid := delimit (shuffle (seq 1 9)) "" }}

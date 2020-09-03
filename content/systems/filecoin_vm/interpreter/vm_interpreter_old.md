@@ -20,7 +20,7 @@ The `global state` is modeled as a map of actor `ID`s to actor structs. This map
 
 There are two mechanisms by which an actor can be created. By explicitly invoking `exec` on the `Init` actor, and by sending a message to a `Public Key` typed `Address`.
 
-Calling `exec` to create an actor should generate an Actor address, and register it in the state tree (see [Init Actor](init_actor) for more details).
+Calling `exec` to create an actor should generate an Actor address, and register it in the state tree (see [Init Actor](sysactors#initactor) for more details).
 
 Sending a message to a non-existant account via a public key address causes the creation of an account actor for that address. The `To` address should be placed into the actor storage for later use in validating messages sent from this actor.
 
