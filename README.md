@@ -9,38 +9,24 @@ This is the [Filecoin Specification](https://github.com/filecoin-project/specs),
 ## Table of Contents
 
 -   [Install](#install)
-
 -   [Writing the spec](#writing-the-spec)
-
 -   [Check your markdown](#check-your-markdown)
-
 -   [Page Template](#page-template)
-
 -   [Code](#code)
-
 -   [Images](#images)
-
 -   [Links](#links)
-
 -   [Shortcodes](#shortcodes)
-
     -   [`embed`](#embed)
     -   [`listing`](#listing)
-    -   [`Mermaid`](#mermaid)
+    -   [`mermaid`](#mermaid)
     -   [`hint`](#hint)
-
 -   [Math mode](#math-mode)
-
     -   [Wrap `def`, `gdef`, etc.](#wrap-def-gdef-etc)
     -   [Wrap inline math text with code blocks](#wrap-inline-math-text-with-code-blocks)
     -   [Wrap math blocks with code fences](#wrap-math-blocks-with-code-fences)
-
 -   [Front-matter](#front-matter)
-
 -   [External modules](#external-modules)
-
 -   [Solving Common problems](#solving-common-problems)
-
 -   [References](#references)
 
 ## Install
@@ -122,7 +108,7 @@ Your algorithm here
 
 You can embed source code from other repos. Mount the repo as a hugo modules as descibed in [External Modules](#external-modules) then use the [`embed shorcode`](#embed) to link to a specific symbol.
 
-```
+```go
 {{<embed src="/externals/go-data-transfer/types.go"  lang="go" symbol="Channel">}}
 ```
 
@@ -146,28 +132,35 @@ For `dot` and `mermaid` diagrams you link to the source file and the pipelines w
 
 ## Links
 
-These links use "portable links" just like `relref` so you can just give it the name of the file and it will fetch the correct relative link and title for the `<a href="/relative/path" title="page title">` automatically.
-You can override the `<a>` title by passing a second `string` in the link definition.
+Use markdown syntax `[text](markdown-document-name)`. 
 
-````
+These links use "portable links" just like `relref`. Just give it the name of the file and it will fetch the correct relative path and title automatically. You can override the title by passing a second `string` in the link definition.
+
 > **Note**: When using anchors the title can't be fetched automatically.
->
-> ```md
-> [](storage_power_consensus)
-> # <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Storage Power Consensus">Storage Power Consensus</a>
-> ```
+
+```md
+[](storage_power_consensus)
+
+# Renders to
+<a href="/systems/filecoin_blockchain/storage_power_consensus" title="Storage Power Consensus">Storage Power Consensus</a>
+
 
 [Storage Power](storage_power_consensus "Title to override the page original title")
 
-# <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Title to override the page original title">Storage Power</a>
+# Renders to
+<a href="/systems/filecoin_blockchain/storage_power_consensus" title="Title to override the page original title">Storage Power</a>
+
 
 [Tickets](storage_power_consensus#the-ticket-chain-and-drawing-randomness "The Ticket chain and drawing randomness")
 
-# <a href="/systems/filecoin_blockchain/storage_power_consensus#the-ticket-chain-and-drawing-randomness" title="The Ticket chain and drawing randomness">Tickets</a>
+# Renders to
+<a href="/systems/filecoin_blockchain/storage_power_consensus#the-ticket-chain-and-drawing-randomness" title="The Ticket chain and drawing randomness">Tickets</a>
 
-````
+```
 
 ## Shortcodes
+
+hugo shortcodes you can add to your markdown.
 
 ### `embed`
 
@@ -201,7 +194,7 @@ The listing shortcode creates tables from externals sources, supports Go `struct
 {{<listing src="/externals/go-data-transfer/types.go"  symbol="Channel">}}
 ```
 
-### `Mermaid`
+### `mermaid`
 
 Inline mermaid syntax rendering
 
