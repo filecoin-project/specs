@@ -220,7 +220,7 @@ See `Height` for definition. They are synonymous.
 
 ### SEAL/UNSEAL
 
-See [Filecoin Proofs](filproofs)
+TODO
 
 ### Sector
 

@@ -9,7 +9,6 @@ dashboardTests: 0
 
 # IPLD Store - Local Storage for hash-linked data
 
-{{<embed src="../../../../libraries/ipld/ipld.id" lang="go" >}}
 
 IPLD is a set of libraries which allow for the interoperability of content-addressed data structures across different distributed systems. It provides a fundamental 'common language' to primitive cryptographic hashing, enabling data to be verifiably referenced and retrieved between two independent protocols. For example, a user can reference a git commit in a blockchain transaction to create an immutable copy and timestamp, or a data from a DHT can be referenced and linked to in a smart contract. 
 
