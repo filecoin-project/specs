@@ -17,7 +17,6 @@ dashboardAudit: n/a
   - move data_transfers into Token
 {{< /details >}}
 
-
 ![Protocol Overview Diagram](diagrams/overview1/overview.dot)
 
 ## Protocol Flow Diagram
