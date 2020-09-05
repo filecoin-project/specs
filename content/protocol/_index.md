@@ -189,7 +189,7 @@ The QA power values used in the election are taken from `WinningPoStSectorSetLoo
 |--------------------|-------------------------------------------------|
 | Miner Validity     | Election epoch                                  |
 | Minimum Miner Size | Election epoch - `WinningPoStSectorSetLookback` |
-| Miner Eligibility  | Election epoch - `WinningPoStSectorSetLookback` |
+| Miner Eligibility  | Election epoch                                  |
 
 ##### Miner validity requirement
 `Miner` actor exists  and has non zero power at the election epoch
