@@ -85,13 +85,13 @@ A PoSt proves sectors are persistently stored through time.
 
 Each miner proves all of its sector once per over a period of time called *proving period*; each sector must be proven by a particular time called deadline.
 
-##### Proving Period
+#### Proving Period
 A *proving period* is a period of `WPoStProvingPeriod` epochs in which a `Miner` actor is scheduled to prove its storage.
 A *proving period* is evenly divided in `WPoStPeriodDeadlines` *deadlines*.
 
 Each miner has a different start of proving period `ProvingPeriodStart` that is assigned at `Power.CreateMiner`.
 
-##### Deadlines
+#### Deadlines
 A *deadline* is a period of `WPoStChallengeWindow` epochs that divides a proving period.
 Sectors are assigned to a deadline on `miner.ProveCommitSector` and will remain assigned to it throughout their lifetime.
 Sectors are also assigned to a partition (see Partitions section).
@@ -107,7 +107,7 @@ There are four relevant epochs associated to a deadline:
 | `FaultCutoff` | `-FaultDeclarationCutoff` | Epoch after which a `miner.DeclareFault` and `miner.DeclareFaultRecovered` for sectors in the upcoming deadline are rejected. |
 | `Challenge`   | `-WPoStChallengeLookback` | Epoch at which the randomness for the challenges is available.                                                                |
 
-##### Partitions
+#### Partitions
 A partition is a set of sectors that is not larger than the Seal Proof allowed number of sectors `sp.WindowPoStPartitionSectors`.
 
 Partitions are a by-product of our current proof mechanism. There is a limit of sectors (`sp.WindowPoStPartitionSectors`) that can be proven in a single SNARK proof. If more than this amount is required to be proven, more than one SNARK proof is required. Each SNARK proof is a partition.
@@ -120,19 +120,27 @@ Sectors are assigned to a partition at `miner.ProveCommitSector` and they can be
 A sector is marked as *faulty* when the miner is not able to submit a `miner.SubmittedWindowPoSt**
 A sector can become faulty for different reasons, for example: power outage, hardware failure, internet connection loss.
 
-##### User declaration
+Faults can either be declared by the user or detected by the network
+
+##### User-declare faults
 A miner can declare a sector as faulty ahead of time via `miner.DeclareFaults` (before the sector's deadline fault cutoff epoch) or at proof submission via `miner.SubmitWindowedPoSt`. If the miner does not declare a sector as faulty, they will not be able to generate a valid proof and submit a `miner.SubmitWindowedPoSt`.
 
-##### Network detection
+##### Network-detected faults
 At deadline close, the `Miner` actor will mark the sectors that have not been proven as faulty.
 
-##### Penalization
+##### Penalizations
+Power is removed from the `Power` actor when a sector is marked as *faulty*.
+
+Fees are charged 
 When a sector is marked as faulty its power is removed, a fee is charged (see the faults section for more details).
-4. Counter for termination: If the sector is faulty for 14 proving periods, the sector is terminated and a termination fee is charged.
+
+Counter for termination: If the sector is faulty for 14 proving periods, the sector is terminated and a termination fee is charged.
 
 #### Recover faulty sectors
-A faulty sector is marked as *recovering* via `miner.DeclareFaultRecovered` and it must be proved at its deadline via `miner.SubmittedWindowPoSt` to marked as *active*.
-A sec
+A faulty sector is marked as *recovering* via `miner.DeclareFaultRecovered` and it is marked as *active* at its next `miner.SubmittedWindowPoSt`.
+
+Failure to submit a proof will result in a fault (Skipped fault if marked as skipped, Detected fault if no `miner.SubmittedWindowPoSt` appeared on chain).
+
 
 ### Sector Management
 
@@ -161,13 +169,13 @@ Failures during upgrade:
 ### Mining Blocks
 Filecoin miners attempt to mine block at every epoch by running the leader election process (see Consensus).
 
-Miners win proportionally to their *active Quality Adjusted power* as reported in the power table `WinningPoStSectorSetLookback` epochs before the election.
+Miners win blocks with a probability proportionally to their *active Quality Adjusted power* as reported in the power table `WinningPoStSectorSetLookback` epochs before the election.
 
 Miners can mine blocks if they meet the mining requirements.
 
 See the section on the block mining process.
 
-#### Power
+#### Power accounting
 
 The active QA power of a `Miner` actor is stored in `Power.Claims` and it is the sum of the QA power of all the active sectors of a miner.
 
@@ -184,24 +192,43 @@ The QA power values used in the election are taken from `WinningPoStSectorSetLoo
 | Miner Eligibility  | Election epoch - `WinningPoStSectorSetLookback` |
 
 ##### Miner validity requirement
-Miner exists and has non zero power at the election epoch
+`Miner` actor exists  and has non zero power at the election epoch
 
 ##### Minimum miner size requirement
-A `Miner` actor must have had a minimum miner size of `ConsensusMinerMinPower` `WinningPoStSectorSetLookback` epochs before the election. 
+A `Miner` actor must have had a minimum miner size of `ConsensusMinerMinPower` exactly `WinningPoStSectorSetLookback` epochs before the election. 
 
 ##### Miner Eligibility requirement
 A `Miner` actor is eligible to mine blocks if `miner.MinerEligibleForElection()` returns true for the election epoch.
 
 The eligibility requirements are:
-1. Initial Pledge requirement is met.
-2. No active consensus faults.
-3. Initial Pledge is sufficient to cover for consensus faults.
+1. `Miner` actor is not in debt.
+2. `Miner` actor has not active consensus faults.
+3. `Miner`'s initial pledge is sufficient to cover for consensus fault (TODO).
+
+### Earning rewards
+Miner earn two types of rewards:
+1. Mining rewards (block rewards and gas fees)
+2. Storage rewards (deal payments)
+
+#### Block Rewards
+When a `Miner` actor creates a block, they earn a block reward via ``
 
 ## Market cycle
 
 ## Faults and Penalties
 
-### Collaterals
+### Balances
+
+#### Miner balance
+
+A `Miner` actor has a balance
+
+#### PreCommitDeposit
+
+#### UnlockedFunds
+
+#### LockedFunds
+
 
 | Name             | Type       | Deposited at              | Penalizations                                                      | Withdrawable after        |
 |------------------|------------|---------------------------|--------------------------------------------------------------------|---------------------------|
@@ -281,8 +308,22 @@ There two three of Skipped Faults:
 ## Rewards
 
 ### Block Rewards
+Block rewards are assigned to a `Miner` actor at each block via `Reward.AwardBlockReward`.
+
+Block rewards are vested over a period 
+
+#### Block Reward
+
+##### Win count
+
+
+#### Gas fees
+
+#### Vesting schedule
 
 ### Storage Rewards
+#### Vesting schedule
+
 
 ## Security
 
