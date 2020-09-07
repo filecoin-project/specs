@@ -16,12 +16,18 @@
 @import "icons";
 @import "code";
 
+input.toggle {
+    height: 20px;
+    width: 20px;
+    overflow: hidden;
+    opacity: 1;
+    position: fixed;
+    visibility: hidden;
+}
+
 
 .markdown {
-    overflow-x: hidden;
     h1, h2, h3, h4, h5, h6 {
-        padding-top: 1.5rem;
-        margin-bottom: 1rem;
         a {
             color: inherit;
             text-decoration: none;
@@ -110,15 +116,8 @@ html {
     touch-action: auto;
 }
 .container {
-    max-width: 89rem;
-}
-.book-menu {
-    flex: 0 0 20rem;
-}
-.book-page {
-    padding-top: 0rem;
-    padding-left: 2rem;
-    max-width: 52rem;
+    margin-left: 20rem;
+    overflow-x: hidden;
 }
 
 summary {
@@ -129,32 +128,20 @@ blockquote {
     overflow: auto;
 }
 
+.book-page {
+    max-width: 52rem;
+    margin: 0 auto;
+}
 .book-menu nav {
     width: 20rem;
-    height: 100%;
-    padding: 1rem 0.2rem 1rem 1rem;
-    position: fixed;
-    top: 0;
-    bottom: 0;
     overflow: hidden;
 }
+
 .book-menu > nav > ul {
     height: 90vh;
     overflow: auto;
 }
 
-.markdown>h1:first-of-type {
-    margin-top: 0;
-}
-
-.markdown code, code {
-    margin: 0 1px;
-    padding: 3px 6px;
-    font-size: 85%;
-    border-radius: 3px;
-    line-height: 16px;
-    box-decoration-break: clone;
-}
 .book-brand img {
     height: 40px;
     width: auto;
@@ -162,18 +149,55 @@ blockquote {
     margin-inline-end: .5rem;
 }
 
+.book-header label {
+    height: 43px;
+    width: 43px;
+    display: flex;
+    align-items: center;
+}
+
+
+.book-menu {
+    position: fixed;
+    z-index: 3;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 20rem;
+    visibility: initial;
+    margin-inline-start: initial;
+    transition: 0.2s ease-in-out;
+    transition-property: transform;
+    will-change: transform;
+}
 
 @media screen and (max-width: 56rem) {
-    .book-page {
-        padding-left:1rem;
+    .container {
+        margin-left: 0;
     }
     .book-menu {
-        visibility: hidden;
-        margin-inline-start: -20rem;
+        transform: translateX(-20rem);
     }
-    #menu-control:checked~main .book-menu nav {
-        transform: translateX(20rem);
+    #menu-control:checked~main .book-page {
+        opacity: initial;
     }
+
+    #menu-control:checked~.book-menu {
+        transform: translateX(0);
+        box-shadow: 0 0 $padding-8 rgba(0, 0, 0, 0.1);
+    }
+
+    #menu-control:checked~.book-menu-overlay {
+        display: block;
+        position: fixed;
+        z-index: 2;
+        background-color: rgba(0, 0, 0, 0.4);
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+
     .toc-label {
         font-weight:700;
         font-size:10px;
