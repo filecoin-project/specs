@@ -1,6 +1,6 @@
 ---
 title: Deal Flow
-weight: 1
+weight: 2
 dashboardWeight: 2
 dashboardState: wip
 dashboardAudit: missing

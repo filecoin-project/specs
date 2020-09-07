@@ -102,17 +102,3 @@ maximum gas cost, `GasLimit * GasPrice` (miner penalized),
 
 Note that if the `To` actor does not exist in state and the address is a valid `H(pubkey)` address, 
 it will be created as an account actor.
-
-(You can see the _old_ VM interpreter [here](vm_interpreter_old) )
-
-## `vm/interpreter` interface
-
-{{<embed src="vm_interpreter.id"  lang="go" >}}
-
-## `vm/interpreter` implementation
-
-{{<embed src="vm_interpreter.go"  lang="go" >}}
-
-## `vm/interpreter/registry`
-
-{{<embed src="vm_registry.go"  lang="go" >}}
