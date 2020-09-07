@@ -2,7 +2,7 @@
 title: Data Transfer
 weight: 3
 dashboardWeight: 1
-dashboardState: wip
+dashboardState: stable
 dashboardAudit: missing
 dashboardTests: 0
 ---

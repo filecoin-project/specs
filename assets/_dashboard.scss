@@ -1,5 +1,7 @@
 #dashboard-container {
-    height: 90vh; 
+    // the dashboard is generated on the client, so it throws out in page anchor scrolling, so we set the heigt manually here.
+    // TODO: Fix properly. perhaps generating the table earlier in the page render could fix it... otherwise writing it into the dom as a post process.
+    height: 2850px; 
     overflow: auto
 }
 table.Dashboard {
@@ -13,6 +15,11 @@ table.Dashboard {
 table.Dashboard {
     th:first-child {
         width: 50%;
+    }
+    .gg-external {
+        display: inline-block;
+        margin-left: 3px;
+        vertical-align: text-top;
     }
 }
 

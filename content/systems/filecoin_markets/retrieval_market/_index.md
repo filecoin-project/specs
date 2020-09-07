@@ -16,7 +16,7 @@ The `retrieval market` refers to the process of negotiating deals for a provider
 
 The main components are as follows:
 
-- A [payment channel actor](payment_channel_actor)
+- A [payment channel actor](payment_channels#payment-channel-actor)
 - A protocol for making queries
 - A Data Transfer subsystem and protocol used to query retrieval miners and initiate retrieval deals
 - A chain-based content routing interface

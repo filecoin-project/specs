@@ -6,9 +6,9 @@
 <!-- Children Template -->
 {{ define "dashboard-progress" }}
     {{- $count := .level -}}
-    {{- $countWeight:= 0 -}}
     {{- $stable := 0 -}}
-    {{- $stableWeight := 0 -}}
+    {{- $reliable := 0 -}}
+    {{- $wip := 0 -}}
     {{- $pages := where .Site.AllPages "Params.bookhidden" "ne" true -}}
     {{- $pages2 := where $pages "Params.dashboardhidden" "ne" true -}}
     {{- $pages3 := where $pages2 "Kind" "in" (slice "section" "page") -}}
@@ -16,35 +16,29 @@
     {{- range sort $pages4 "Weight" "asc" -}}
         {{- if .Params.dashboardState -}}
             {{- $count = add $count 1 -}}
-            {{- $countWeight = add $countWeight (mul 1 (float .Params.dashboardWeight)) -}}
             {{- if eq .Params.dashboardState "stable" -}}
                 {{- $stable = add $stable 1 -}}
-                {{- $stableWeight = add $stableWeight (mul 1 (float .Params.dashboardWeight)) -}}
+            {{- end -}}
+            {{- if eq .Params.dashboardState "reliable" -}}
+                {{- $reliable = add $reliable 1 -}}
+            {{- end -}}
+            {{- if eq .Params.dashboardState "wip" -}}
+                {{- $wip = add $wip 1 -}}
             {{- end -}}
         {{- end -}}
     {{- end -}}
-    {{- $perc := lang.NumFmt 0 (div (float (mul $stable 100))  (float $count)) -}}
-    {{- $perc2 := lang.NumFmt 0 (div (mul $stableWeight 100) $countWeight) -}}
-
+    {{- $total := (add $stable (add $reliable $wip)) }}
+    {{- $usable := add $stable $reliable }}
+    {{- $stablePercent := lang.NumFmt 0 (div (float (mul $stable 100))  (float $count)) -}}
+    {{- $reliablePercent := lang.NumFmt 0 (div (float (mul $reliable 100))  (float $count)) -}}
+    {{- $wipPercent := lang.NumFmt 0 (div (float (mul $wip 100))  (float $count)) -}}
+    {{- $totalPercent := lang.NumFmt 0 (div (float (mul $total 100))  (float $count)) -}}
+    {{- $usablePercent := lang.NumFmt 0 (div (float (mul $usable 100))  (float $count)) -}}
     <div class="meter">
-        <span style="width: {{$perc}}%">{{$perc}}%</span>
+        <span class="bar bg-wip" style="width: {{ $wipPercent }}%">WIP <strong>{{$wipPercent}}%</strong>
+        </span><span class="bar bg-reliable" style="width: {{ $reliablePercent }}%">Reliable <strong>{{$reliablePercent}}%</strong>
+        </span><span class="bar bg-stable" style="width: {{ $stablePercent }}%">Stable <strong>{{$stablePercent}}%</strong>
+        </span>
+        {{/*  <span> total {{$totalPercent}}%</span>  */}}
     </div>
-    <style>
-        .meter { 
-            height: 20px;  /* Can be anything */
-            position: relative;
-            background: #555;
-            border-radius: 4px;
-            color: white;
-        }
-        .meter > span {
-            display: block;
-            height: 100%;
-            line-height: 20px;
-            text-align: right;
-            border-radius: 4px;
-            background-color: #0090ff;
-            overflow: hidden;
-          }
-    </style>
 {{ end }}

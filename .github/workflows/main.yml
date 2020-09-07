@@ -39,10 +39,10 @@ jobs:
 
       - run: echo ${{ github.ref }}
 
-      # This branch updates a dnslink for a domain if the current branch should be deployed to prod.
+      # Update the dnslink if changes to the current branch should go live
       # see https://github.com/ipfs-shipyard/js-dnslink-dnsimple
-      - run: npx dnslink-dnsimple --domain beta.spec.filecoin.io --link /ipfs/${{ steps.ipfs.outputs.cid }}
+      - run: npx dnslink-dnsimple --domain spec.filecoin.io --link /ipfs/${{ steps.ipfs.outputs.cid }}
         env:
           DNSIMPLE_TOKEN: ${{ secrets.DNSIMPLE_TOKEN }}
         # TODO: change to master once merged.
-        if: github.ref == 'refs/heads/beta'
+        if: github.ref == 'refs/heads/master'

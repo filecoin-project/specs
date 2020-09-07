@@ -49,16 +49,20 @@
                         {{ if $data.commit.totals.c }}{{ math.Round $data.commit.totals.c }}%{{ else }}Unknown{{end}}
                     </a>
                 </td>
-                <td class="text-black bg-{{ $repoItem.auditState | default "na" }}">
-                    {{if eq $repoItem.auditState "wip"}}
+                <td class="text-black bg-{{ $repoItem.auditState | default "missing" }}">
+                    {{ if eq $repoItem.auditState "wip" }}
                         WIP
-                    {{else if $repoItem.auditURL}} 
-                        <a href="{{ $repoItem.auditURL }}" title="Read the audit report" target="_blank" rel="noopener noreferrer" class="text-black">
-                            {{ $repoItem.auditDate }}<i class="gg-external gg-s-half"></i>
-                        </a>
-                    {{else}}
-                        {{ humanize $repoItem.auditState | default "None" }}
-                    {{end}}
+                    {{ else if and (eq $repoItem.auditState "done") (isset $repoItem "audits") }}
+                    {{ else }}
+                        {{ humanize $repoItem.auditState | default "Missing" }}
+                    {{ end }}
+                    {{ if isset $repoItem "audits" }} 
+                        {{ range $auditIndex, $audit := $repoItem.audits }}
+                            <a href="{{ $audit.auditURL }}" title="Read the audit report - {{ $audit.auditDate }}" target="_blank" rel="noopener noreferrer" class="text-black">
+                                [{{ add $auditIndex 1 }}]
+                            </a>
+                        {{ end }}
+                    {{ end }}
                 </td>
             </tr>
         {{ end }}

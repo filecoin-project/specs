@@ -56,8 +56,8 @@ github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuy
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
 github.com/alecthomas/units v0.0.0-20190717042225-c3de453c63f4/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
 github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d/go.mod h1:rBZYJk541a8SKzHPHnH3zbiI+7dagKZ0cgpgrD7Fyho=
-github.com/alex-shpak/hugo-book v0.0.0-20200819182225-6beca7928c20 h1:xkWkiissWW+nxjH4wKsL5Fx0jFemcoIRGof2PuDta70=
-github.com/alex-shpak/hugo-book v0.0.0-20200819182225-6beca7928c20/go.mod h1:DvU1VD1ikK0ufuSgldRCwm4kVaEF0cQGdHUp16XjSVI=
+github.com/alex-shpak/hugo-book v0.0.0-20200707210728-615400b3b747 h1:XuqsYYXFCvHQsSpB08qeDRapdznYZujyfeFAqnDm8kg=
+github.com/alex-shpak/hugo-book v0.0.0-20200707210728-615400b3b747/go.mod h1:DvU1VD1ikK0ufuSgldRCwm4kVaEF0cQGdHUp16XjSVI=
 github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239/go.mod h1:2FmKhYUyUczH0OGQWaF5ceTx0UBShxjsH6f8oGKYe2c=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/apache/thrift v0.12.0/go.mod h1:cp2SuWMxlEZw2r+iP2GNCdIi4C1qmUzdZFSVb+bacwQ=
@@ -185,6 +185,7 @@ github.com/filecoin-project/go-bitfield v0.1.2/go.mod h1:CNl9WG8hgR5mttCnUErjcQj
 github.com/filecoin-project/go-bitfield v0.2.0/go.mod h1:CNl9WG8hgR5mttCnUErjcQjGvuiZjRqK9rHVBsQF4oM=
 github.com/filecoin-project/go-cbor-util v0.0.0-20191219014500-08c40a1e63a2/go.mod h1:pqTiPHobNkOVM5thSRsHYjyQfq7O5QSCMhvuu9JoDlg=
 github.com/filecoin-project/go-crypto v0.0.0-20191218222705-effae4ea9f03/go.mod h1:+viYnvGtUTgJRdy6oaeF4MTFKAfatX071MPDPBL11EQ=
+github.com/filecoin-project/go-data-transfer v0.6.2 h1:IgbkwcHoyWGglzfsY7P9L1GapzoiLNKuzfZY2bxER8E=
 github.com/filecoin-project/go-data-transfer v0.6.2/go.mod h1:uRYBRKVBVM12CSusBtVrzDHkVw/3DKZpkxKJVP1Ydas=
 github.com/filecoin-project/go-fil-commcid v0.0.0-20200716160307-8f644712406f/go.mod h1:Eaox7Hvus1JgPrL5+M3+h7aSPHc0cVqpSxA+TxIEpZQ=
 github.com/filecoin-project/go-fil-markets v0.5.7 h1:kzyMHqez8ssxchj5s9M1hkC3CTwRGh2MeglJGfUksQU=
