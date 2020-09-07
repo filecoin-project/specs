@@ -55,7 +55,7 @@ Negotiation is the out-of-band process during which a storage client and a stora
 
 Negotiation begins once a client has discovered a miner whose `StorageAsk` meets their desired criteria. The *recommended* order of operations for negotiating and publishing a deal is as follows:
 
-1. In order to propose a storage deal, the `StorageClient` calculates the piece commitment (`CommP`) for the data it intends to store. This is neccesary so that the `StorageProvider` can verify that the data the `StorageClient` sends to be stored matches the `CommP` in the `StorageDealProposal`. For more detail about the relationship between payloads, pieces, and `CommP` see [Piece](piece) and [Filproofs](filproofs).
+1. In order to propose a storage deal, the `StorageClient` calculates the piece commitment (`CommP`) for the data it intends to store. This is neccesary so that the `StorageProvider` can verify that the data the `StorageClient` sends to be stored matches the `CommP` in the `StorageDealProposal`. For more detail about the relationship between payloads, pieces, and `CommP` see [Piece](piece).
 2. Before sending a proposal to the provider, the `StorageClient` adds funds for a deal, as necessary, to the `StorageMarketActor` (by calling `AddBalance`).
 3. The `StorageClient` now creates a `StorageDealProposal` and sends the proposal and the CID for the root of the data payload to be stored to the `StorageProvider` using the `Storage Deal Protocol`.
 
@@ -89,10 +89,10 @@ Finally, the `StorageClient` verifies the deal.
 
 ## Handoff
 
-Now that a deal is published, it needs to be stored, sealed, and proven in order for the provider to be paid. See [Storage Deal](storage_deal) for more information about how deal payments are made. These later stages of a deal are handled by the [Storage Mining Subsystem](storage_mining). So the final task for the Storage Market is to handoff to the Storage Mining Subsystem.
+Now that a deal is published, it needs to be stored, sealed, and proven in order for the provider to be paid. See Storage Deal for more information about how deal payments are made. These later stages of a deal are handled by the [Storage Mining Subsystem](storage_mining). So the final task for the Storage Market is to handoff to the Storage Mining Subsystem.
 
-17.  The `StorageProvider` writes the serialized, padded piece to a shared [Filestore](filestore). 
-18.  The `StorageProvider` calls `HandleStorageDeal` on the `StorageMiner` with the published `StorageDeal` and filestore path (in Go this is the `io.Reader`).
+1.   The `StorageProvider` writes the serialized, padded piece to a shared [Filestore](filestore). 
+2.   The `StorageProvider` calls `HandleStorageDeal` on the `StorageMiner` with the published `StorageDeal` and filestore path (in Go this is the `io.Reader`).
 
 A note regarding the order of operations: the only requirement to publish a storage deal with the `StorageMarketActor` is that the `StorageDealProposal` is signed by the `StorageClient`, the publish message is signed by the `StorageProvider`, and both parties have deposited adequate funds/collateral in the `StorageMarketActor`. As such, it's not required that the steps listed above happen in this exact order. However, the above order is _recommended_ because it generally minimizes the ability of either party to act maliciously.
 
@@ -114,7 +114,7 @@ The following data types are unique to the Storage Market:
 {{<embed src="/externals/go-fil-markets/storagemarket/types.go"  lang="go">}}
 
 
-Details about `StorageDealProposal` and `StorageDeal` (which are used in the Storage Market and elsewhere) specifically can be found in [Storage Deal](storage_deal).
+Details about `StorageDealProposal` and `StorageDeal` (which are used in the Storage Market and elsewhere) specifically can be found in Storage Deal.
 
 ## Protocols
 {{<hint info >}}
