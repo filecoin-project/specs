@@ -71,7 +71,7 @@ enableGitInfo = true
   # Enable "Edit this page" links for 'doc' page type.
   # Disabled by default. Uncomment to enable. Requires 'BookRepo' param.
   # Edit path must point to root directory of repo.
-  BookEditPath = 'edit/beta'
+  BookEditPath = 'edit/master'
 
   # Configure the date format used on the pages
   # - In git information
