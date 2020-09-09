@@ -2,7 +2,7 @@
 title: Key Store
 weight: 2
 dashboardWeight: 1
-dashboardState: wip
+dashboardState: reliable
 dashboardAudit: missing
 dashboardTests: 0
 ---
@@ -11,11 +11,8 @@ dashboardTests: 0
 
 The `Key Store` is a fundamental abstraction in any full Filecoin node used to store the keypairs associated with a given miner's address (see actual definition further down) and distinct workers (should the miner choose to run multiple workers).
 
-Node security depends in large part on keeping these keys secure. To that end we strongly recommend: 1) keeping keys separate from all subsystem, ii) using a separate key store to sign requests as required by other subsystems, and iii) keeping those keys that are not used as part of mining in cold storage.
+Node security depends in large part on keeping these keys secure. To that end we strongly recommend: 1) keeping keys separate from all subsystems, 2) using a separate key store to sign requests as required by other subsystems, and 3) keeping those keys that are not used as part of mining in cold storage.
 
-<!--
-{{<embed src="key_store.id" lang="go" >}}
--->
 
 Filecoin storage miners rely on three main components:
 

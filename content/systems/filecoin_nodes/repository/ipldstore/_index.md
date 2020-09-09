@@ -7,9 +7,11 @@ dashboardAudit: wip
 dashboardTests: 0
 ---
 
-# IPLD Store - Local Storage for hash-linked data
+# IPLD Store
 
 InterPlanetary Linked Data (IPLD) is a set of libraries which allow for the interoperability of content-addressed data structures across different distributed systems and protocols. It provides a fundamental 'common language' to primitive cryptographic hashing, enabling data structures to be verifiably referenced and retrieved between two independent protocols. For example, a user can reference an IPFS directory in an Ethereum transaction or smart contract.
+
+The IPLD Store of a Filecoin Node is local storage for hash-linked data.
 
 IPLD is fundamentally comprised of three layers:
 

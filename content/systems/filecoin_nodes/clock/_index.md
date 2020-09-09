@@ -2,16 +2,12 @@
 title: Clock
 weight: 4
 dashboardWeight: 1
-dashboardState: wip
+dashboardState: reliable
 dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # Clock
-
-{{<embed src="clock_subsystem.id" lang="go" >}}
-{{<embed src="clock_subsystem.go" lang="go" >}}
-
 
 Filecoin assumes weak clock synchrony amongst participants in the system. That is, the system relies on participants having access to a globally synchronized clock (tolerating some bounded drift).
 
@@ -19,6 +15,7 @@ Filecoin relies on this system clock in order to secure consensus.  Specifically
 
 
 ## Clock uses
+
 The Filecoin system clock is used:
 
 - by syncing nodes to validate that incoming blocks were mined in the appropriate epoch given their timestamp (see [Block Validation](block#block-syntax-validation)).  This is possible because the system clock maps all times to a unique epoch number totally determined by the start time in the genesis block.
@@ -44,16 +41,8 @@ Computer-grade clock crystals can be expected to have drift rates on the order o
     - `time.cloudflare.com:1234` (more on [Cloudflare time services](https://www.cloudflare.com/time/))
     - `time.google.com` (more on [Google Public NTP](https://developers.google.com/time))
     - `ntp-b.nist.gov` ([NIST](https://tf.nist.gov/tf-cgi/servers.cgi) servers require registration)
-  - We further recommend making 3 measurements in order to drop by using the network to drop outliers
+  - We further recommend making three (3) measurements in order to drop outliers
 - clients MAY consider using cesium clocks instead for accurate synchrony within larger mining operations
 
 Mining operations have a strong incentive to prevent their clock from drifting ahead more than one epoch to keep their block submissions from being rejected.  Likewise they have an incentive to prevent their clocks from drifting behind more than one epoch to avoid partitioning themselves off from the synchronized nodes in the network.
-
-## Future work
-
-If either of the above metrics show significant network skew over time, future versions of Filecoin may include potential timestamp/epoch correction periods at regular intervals.
-
-When recoverying from exceptional chain halting outages (for example all implementations panic on a given block) the network can potentially opt for per-outage "dead zone" rules banning the authoring of blocks during the outage epochs to prevent attack vectors related to unmined epochs during chain restart.
-
-Future versions of the Filecoin protocol may use Verifiable Delay Functions (VDFs) to strongly enforce block time and fulfill this leader election requirement; we choose to explicitly assume clock synchrony until hardware VDF security has been proven more extensively.
 
