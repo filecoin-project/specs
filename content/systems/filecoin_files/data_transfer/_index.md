@@ -81,7 +81,7 @@ once the provider indicates their intent to accept and publish the client's deal
 
 ## Protocol
 
-A data transfer CAN be negotiated over the network via the [Data Transfer Protocol](data_transfer_protocol), a libp2p protocol type.
+A data transfer CAN be negotiated over the network via the Data Transfer Protocol, a libp2p protocol type.
 
 Using the Data Transfer Protocol as an independent libp2p communciation mechanism is not a hard requirement -- as long as both parties have an implementation of the Data Transfer Subsystem that can talk to the other, any
 transport mechanism (including offline mechanisms) is acceptable.
