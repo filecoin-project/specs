@@ -1,22 +1,37 @@
 ---
 title: Multiformats
-description: Multiformats - self describing protocol values
-weight: 6
+weight: 3
 dashboardWeight: 1
-dashboardState: missing
-dashboardAudit: n/a
+dashboardState: stable
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
 # Multiformats
 
-Self-describing protocol values
+[Multiformats](https://multiformats.io/) is a set of self-describing protocol values. These values are useful both to the data layer (IPLD) and to the network layer (libp2p). Multiformats includes specifications for the Content Identifier (CID) used by IPLD and IPFS, the multicodec, multibase and multiaddress (used by libp2p).
 
-## Multihash - self describing hash values
+Please refer to the [Multiformats repository](https://github.com/multiformats) for more information.
 
-{{< embed src="multihash.id" lang="go" >}}
+## CIDs
 
-## Multiaddr - self describing network addresses
+Filecoin references data using IPLD's Content Identifier (CID).
 
-{{< embed src="multiaddr.id" lang="go" >}}
+A CID is a hash digest prefixed with identifiers for its hash function and codec. This means you can validate and decode data with only this identifier.
 
+When CIDs are printed as strings they also use multibase to identify the base encoding being used.
+
+For a more detailed specification, please see the
+[CID specification](https://github.com/multiformats/cid).
+
+## Multihash
+
+A Multihash is a set of self-describing hash values. Multihash is used for differentiating outputs from various well-established cryptographic hash functions, while addressing size and encoding considerations.
+
+Please refer to the [Multihash specification](https://github.com/multiformats/multihash) for more information.
+
+## Multiaddr
+
+A Multiadddress is a self-describing network address. Multiaddresses are composable and future-proof network addresses used by libp2p.
+
+Please refer to the [Multiaddr specification](https://github.com/multiformats/multiaddr) for more information.

@@ -1,5 +1,13 @@
 .markdown pre {
-    // max-height: 450px;
-    // overflow: auto;
-    
+    max-height: 450px;
+    overflow: auto;
+}
+
+.markdown code, code {
+    margin: 0 1px;
+    padding: 3px 6px;
+    font-size: 85%;
+    border-radius: 3px;
+    line-height: 16px;
+    box-decoration-break: clone;
 }

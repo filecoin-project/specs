@@ -1,6 +1,6 @@
 ---
-title: Storage Deal
-weight: 1
+title: Storage Market On-Chain Components
+weight: 2
 bookCollapseSection: true
 dashboardWeight: 2
 dashboardState: wip
@@ -8,7 +8,9 @@ dashboardAudit: missing
 dashboardTests: 0
 ---
 
-# Storage Deals
+# Storage Market On-Chain Components
+
+## Storage Deals
 
 There are two types of deals in Filecoin markets, storage deals and retrieval deals. Storage deals are recorded on the blockchain and enforced by the protocol. Retrieval deals are off chain and enabled by micropayment channel by transacting parties (see [Retrieval Market](retrieval_market) for more information). 
 
@@ -19,4 +21,3 @@ This section describes the storage deal data type and a technical outline for de
 ## Data Types
 
 {{< embed src="/externals/specs-actors/actors/builtin/market/deal.go" lang="go" >}}
-
