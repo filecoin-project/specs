@@ -3,17 +3,17 @@ title: Repository
 weight: 2
 bookCollapseSection: true
 dashboardWeight: 1
-dashboardState: wip
+dashboardState: stable
 dashboardAudit: n/a
 dashboardTests: 0
 ---
 
-# Repository - Local Storage for Chain Data and Systems
+# Node Repository
 
-The Filecoin node repository is simply an abstraction denoting that data which any functional Filecoin node needs to store locally in order to run correctly.
+The Filecoin node repository is simply local storage for system and chain data. It is an abstraction of the data which any functional Filecoin node needs to store locally in order to run correctly.
 
-The repo is accessible to the node's systems and subsystems and acts as local storage compartementalized from the node's `FileStore` (for instance).
+The repository is accessible to the node's systems and subsystems and can be compartmentalized from the node's `FileStore`.
 
-It stores the node's keys, the IPLD datastructures of stateful objects and node configs.
+The repository stores the node's keys, the IPLD data structures of stateful objects as well as the node configuration settings.
 
-{{<embed src="repository_subsystem.id" lang="go" >}}
+The Lotus implementation of the FileStore Repository can be found [here](https://github.com/filecoin-project/lotus/blob/master/node/repo/fsrepo.go).
