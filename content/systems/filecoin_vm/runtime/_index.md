@@ -30,18 +30,16 @@ type MessageReceipt struct {
 
 ## `vm/runtime` Actors Interface
 
-{{<embed src="/externals/specs-actors/actors/runtime/runtime.go" lang="go" >}}
+The Actors Interface implementation can be found [here](https://github.com/filecoin-project/specs-actors/blob/master/actors/runtime/runtime.go)
 
 ## `vm/runtime` VM Implementation
 
-{{<embed src="/externals/lotus/chain/vm/runtime.go" lang="go" >}}
+The Lotus implementation of the Filecoin Virtual Machine runtime can be found [here](https://github.com/filecoin-project/lotus/blob/master/chain/vm/runtime.go)
 
 ## Exit Codes
 
-There are some common runtime exit codes that are shared by different actors.
-
-{{<embed src="/externals/specs-actors/actors/runtime/exitcode/common.go" lang="go" >}}
+There are some common runtime exit codes that are shared by different actors. Their definition can be found [here](https://github.com/filecoin-project/go-state-types/blob/master/exitcode/common.go).
 
 ## VM Gas Cost Constants
 
-{{<embed src="/externals/lotus/chain/vm/gas.go" lang="go" >}}
+The Gas Cost Constants as implemented in Lotus can be found [here](https://github.com/filecoin-project/lotus/blob/master/chain/vm/gas.go)
