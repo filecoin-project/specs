@@ -38,6 +38,10 @@ In a blockchain, a _block_ is the fundamental unit of record. Each block is cryp
 
 The _height_ of a block corresponds to the number of epochs elapsed from genesis before the block was added to the blockchain. That said, `height` and `epoch` are synonymous. The height of the Filecoin blockchain is defined to be the maximum height of any block in the blockchain.
 
+## Block Reward
+
+The reward in [FIL](glossary#fil) given to [storage miners](glossary#storage-miner-actor) for contributing to the network with storage and proving that they have stored the files they have committed to store. The _Block Reward_ is allocated to the storage miners that mine blocks and extend the blockchain.
+
 ## Blockchain
 
 A _blockchain_ is a system of record in which new records, or blocks are cryptographically linked to preceding records. This construction is a foundational component of secure, verifiable, and distributed transaction ledgers.
