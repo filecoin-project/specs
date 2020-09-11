@@ -7,7 +7,7 @@ dashboardAudit: n/a
 dashboardTests: 0
 ---
 
-## Adding Storage
+# Adding Storage
 
 A Miner adds more storage in the form of Sectors. Adding more storage is a two-step process:
 1. **PreCommitting a Sector**: A Miner publishes a Sector's SealedCID and makes a deposit. The Sector is now registered to the Miner, and the Miner must ProveCommit the Sector or lose their deposit.
@@ -19,7 +19,7 @@ This two-step process provides assurance that the Miner's PoRep _actually proves
 
 For each Sector successfully ProveCommitted, the Miner becomes responsible for continuously proving the existence of their Sectors' data. In return, the Miner is awarded storage power!
 
-## Upgrading Sectors
+# Upgrading Sectors
 
 Miners are granted storage power in exchange for the storage space they dedicate to Filecoin. Ideally, this storage space is used to store data on behalf of Clients, but there may not always be enough Clients to utilize all the space a Miner has to offer.
 

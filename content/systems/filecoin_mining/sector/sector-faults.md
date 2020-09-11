@@ -7,7 +7,7 @@ dashboardAudit: wip
 dashboardTests: 0
 ---
 
-## Sector Faults
+# Sector Faults
 
 It is very important for storage providers to have a strong incentive to both report the failure to the chain and attempt recovery from the fault in order to uphold the storage guarantee for the networkʼs clients. Without this incentive, it is impossible to distinguish an honest minerʼs hardware failure from malicious behavior, which is necessary to treat miners fairly. The size of the fault fees depend on the severity of the failure and the rewards that the miner is expected to earn from the sector to make sure incentives are aligned. The three types of sector storage fault fees are:
 

@@ -7,7 +7,7 @@ dashboardAudit: n/a
 dashboardTests: 0
 ---
 
-## Sector Quality
+# Sector Quality
 
 Given different sector contents, not all sectors have the same usefulness to the network. The notion of Sector Quality distinguishes between sectors with heuristics indicating the presence of valuable data. That distinction is used to allocate more subsidies to higher-quality sectors. To quantify the contribution of a sector to the consensus power of the network, some relevant parameters are described here.
 

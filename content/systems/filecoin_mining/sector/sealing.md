@@ -7,7 +7,7 @@ dashboardAudit: wip
 dashboardTests: 0
 ---
 
-## Sector Sealing
+# Sector Sealing
 
 Before a Sector can be used, the Miner must _seal_ the Sector: encode the data in the Sector to prepare it for the proving process.
 
@@ -20,7 +20,7 @@ Sealing a sector through Proof-of-Replication (PoRep) is a computation-intensive
 
 The Lotus-specific set of functions applied to the sealing of a sector can be found [here](https://github.com/filecoin-project/lotus/blob/master/storage/sealing.go).
 
-### Randomness
+## Randomness
 
 Randomness is an important attribute that helps the network verify the integrity of Miners' stored data. Filecoin's block creation process includes two types of randomness:
 * [DRAND](#drand): Values pulled from a distributed random beacon
@@ -35,7 +35,7 @@ There are two proof types. Each uses one of the two sources of randomness:
 * Proof of Replication (PoRep): Uses VRF values
 
 
-### Drawing randomness for sector commitments
+## Drawing randomness for sector commitments
 
 Tickets are used as input to calculation of the ReplicaID in order to tie Proofs-of-Replication to a given chain, thereby preventing long-range attacks (from another miner in the future trying to reuse SEALs).
 
