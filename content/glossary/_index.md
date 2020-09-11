@@ -8,6 +8,10 @@ dashboardAudit: n/a
 
 # Glossary 
 
+## Account Actor
+
+The _Account Actor_ is responsible for user accounts.
+
 ## Actor
 
 The Actor is the Filecoin equivalent of the smart contract in Ethereum.
@@ -42,13 +46,13 @@ A _blockchain_ is a system of record in which new records, or blocks are cryptog
 
 Bootstrapping traditionally refers to the process of starting a network. In the context of the Filecoin network _bootstrapping_ refers to the process of onboarding a new Filecoin node in the Filecoin network and relates to connecting the new node to other peers, synchronizing the blockchain and "catching up" with the current state.
 
-## Capacity commitment - Committed Capacity (CC)
+## Capacity commitment
 
-If a storage miner doesn't find any available deal proposals appealing, they can alternatively make a _capacity commitment_, filling a sector with arbitrary data, rather than with client data. Maintaining this sector allows the storage miner to provably demonstrate that they are reserving space on behalf of the network.
+If a storage miner doesn't find any available deal proposals appealing, they can alternatively make a _capacity commitment_, filling a sector with arbitrary data, rather than with client data. Maintaining this sector allows the storage miner to provably demonstrate that they are reserving space on behalf of the network. Also referred to as Committed Capacity (CC).
 
 ## Challenge Sampling
 
-An algorithm for challenge derivation used in [Proof of Replication](glossary#proof-of-replication) or [Proof of SpaceTime](glossary#proof-of-spacetime).
+An algorithm for challenge derivation used in [Proof of Replication](glossary#proof-of-replication-porep) or [Proof of SpaceTime](glossary#proof-of-spacetime-post).
 
 ## CID
 
@@ -62,15 +66,19 @@ A client is any user with an account who wishes to store data with a storage min
 
 Collateral is Filecoin tokens pledged by an actor as a commitment to a promise. If the promise is respected, the collateral is returned. If the promise is broken, the collateral is not returned in full.
 
-In order to enter into a [storage deal](glossary#deal), a [storage miner](glossary#storage-miner) is required to provide [FIL](glossary#fil) as _collateral_, to be paid out as compensation to a client in the event that the miner fails to uphold their storage commitment.
+In order to enter into a [storage deal](glossary#deal), a [storage miner](glossary#storage-miner-actor) is required to provide [FIL](glossary#fil) as _collateral_, to be paid out as compensation to a client in the event that the miner fails to uphold their storage commitment.
 
 ## Consensus
 
 The algorithm(s) and logic needed so that the state of the blockchain is agreed across all nodes in the network.
 
-### Consensus fault slashing
+## Consensus fault slashing
 
 Consensus Fault Slashing is the penalty that a miner incurs for committing consensus faults. This penalty is applied to miners that have acted maliciously against the network's consensus functionality.
+
+## Cron Actor
+
+The _Cron Actor_ is a scheduler actor that runs critical functions at every epoch.
 
 ## Deal
 
@@ -90,7 +98,7 @@ DRAND, short for Distributed Randomness, is a publicly verifiable random beacon 
 
 ## Election
 
-On every [epoch](glossary#epoch), a small subset of Filecoin [storage miners](glossary#storage-miner) are _elected_ to mine a new, or a few new [block(s)](glossary#block) for the Filecoin blockchain. A miner's probability of being elected is roughly proportional to the share of the Filecoin network's total storage capacity they contribute.
+On every [epoch](glossary#epoch), a small subset of Filecoin [storage miners](glossary#storage-miner-actor) are _elected_ to mine a new, or a few new [block(s)](glossary#block) for the Filecoin blockchain. A miner's probability of being elected is roughly proportional to the share of the Filecoin network's total storage capacity they contribute.
 
 ## Epoch
 
@@ -108,11 +116,11 @@ _FIL_ is the name of the Filecoin unit of currency; it is alternatively denoted 
 
 A fault occurs when a proof is not posted in the Filecoin system within the proving period, denoting another malfunction such as loss of network connectivity, storage malfunction, or malicious behaviour.
 
-When a [storage miner](glossary#storage-miner) fails to complete [Window Proof-of-Spacetime](glossary#window-proof-of-spacetime-windowpost) for a given sector, the Filecoin network registers a _fault_ for that sector, and the miner is [_slashed_](glossary#slash). If a storage miner does not resolve the fault quickly, the network assumes they have abandoned their commitment.
+When a [storage miner](glossary#storage-miner-actor) fails to complete [Window Proof-of-Spacetime](glossary#window-proof-of-spacetime-windowpost) for a given sector, the Filecoin network registers a _fault_ for that sector, and the miner is [_slashed_](glossary#slashing). If a storage miner does not resolve the fault quickly, the network assumes they have abandoned their commitment.
 
 ## File
 
-Files are what clients bring to the filecoin system to store. A file is split up into [pieces](#piece). A piece is the basic unit of account in the storage network and is what is actually stored by the Filecoin network.
+Files are what clients bring to the filecoin system to store. A file is split up into [pieces](glossary#piece). A piece is the basic unit of account in the storage network and is what is actually stored by the Filecoin network.
 
 ## Filecoin
 
@@ -128,7 +136,7 @@ _Gas_ is a property of a [message](glossary#message), corresponding to the resou
 
 ## Generation Attack Threshold
 
-Security parameter. Number of rounds within which a new Proof-of-Storage must be submitted in order for a miner to retain power in the network (and avoid getting slashed). This number must be be smaller than the minimum time it takes for an adversarial miner to generate a replica of the data (thereby not storing it undetectably for some period of time).
+Security parameter. Number of rounds within which a new Proof-of-Spacetime must be submitted in order for a miner to retain power in the network (and avoid getting slashed). This number must be smaller than the minimum time it takes for an adversarial miner to generate a replica of the data (thereby not storing it undetectably for some period of time).
 
 The Generation Attack Threshold is equal to the Polling Time + some Grace Period after which miners get slashed.
 
@@ -143,6 +151,10 @@ The _genesis block_ is the first block of the Filecoin blockchain. As is the cas
 ## Height
 
 Same as Block Height.
+
+## Init Actor
+
+The _Init Actor_ initializes new actors and records the network name.
 
 ## Lane
 
@@ -166,9 +178,13 @@ A miner is an actor in the Filecoin system performing a service in the network f
 
 There are three types of miners in Filecoin:
 
-- Storage miners, who store files on behalf of clients.
-- Retrieval miners, who deliver stored files to clients. 
+- [Storage miners](glossary#storage-miner-actor), who store files on behalf of clients.
+- [Retrieval miners](glossary#retrieval-miner), who deliver stored files to clients. 
 - Repair miners, who replicate files to keep them available in the network, when a storage miner presents a fault.
+
+## Multisig Actor
+
+The _Multisig Actor_ (or Multi-Signature Wallet Actor) is responsible for dealing with operations involving the Filecoin wallet.
 
 ## Node
 
@@ -180,7 +196,7 @@ On-chain actions are those that change the state of the tree and the blockchain 
 
 ## Payment Channel
 
-A payment channel is set up between actors in the Filecoin system to enable off-chain payments with on-chain guarantees, making settlement more efficient.
+A payment channel is set up between actors in the Filecoin system to enable off-chain payments with on-chain guarantees, making settlement more efficient. Payment channels are managed by the Payment Channel Actor, who is responsible for setting up and settling funds related to payment channels.
 
 ## Piece
 
@@ -204,7 +220,7 @@ A storage miner's `Power Fraction` or `Power` is the ratio of their committed st
 
 ## Power Table
 
-The Power Table is an abstraction provided by the Filecoin storage market that lists the `power` of every [storage miner](glossary#storage-miner) in the system.
+The Power Table is an abstraction provided by the Filecoin storage market that lists the `power` of every [storage miner](glossary#storage-miner-actor) in the system.
 
 ## Protocol
 
@@ -220,11 +236,11 @@ The elements used as input by a proof of Spacetime to enable a proof to be gener
 
 ## Proof of Replication (PoRep)
 
-_Proof-of-Replication_ is a procedure by which a [storage miner](glossary#storage-miner) can prove to the Filecoin network that they have created a unique copy of some piece of data on the network's behalf. PoRep is used in the Filecoin system to generate sealed sectors through which storage miners prove they hold client data.
+_Proof-of-Replication_ is a procedure by which a [storage miner](glossary#storage-miner-actor) can prove to the Filecoin network that they have created a unique copy of some piece of data on the network's behalf. PoRep is used in the Filecoin system to generate sealed sectors through which storage miners prove they hold client data.
 
 ## Proof of Spacetime (PoSt)
 
-_Proof-of-Spacetime_ is a procedure by which a [storage-miner](glossary#storage-miner) can prove to the Filecoin network they have stored and continue to store a unique copy of some data on behalf of the network for a period of time. Proof-of-Spacetime manifests in two distinct varieties in the present Filecoin specification: [Window Proof-of-Spacetime](glossary#window-proof-of-spacetime-windowpost) and [Winning Proof-of-Spacetime](glossary#winning-proof-of-spacetime-winningpost).
+_Proof-of-Spacetime_ is a procedure by which a [storage-miner](glossary#storage-miner-actor) can prove to the Filecoin network they have stored and continue to store a unique copy of some data on behalf of the network for a period of time. Proof-of-Spacetime manifests in two distinct varieties in the present Filecoin specification: [Window Proof-of-Spacetime](glossary#window-proof-of-spacetime-windowpost) and [Winning Proof-of-Spacetime](glossary#winning-proof-of-spacetime-winningpost).
 
 ## Quality-Adjusted Power
 
@@ -244,11 +260,15 @@ This measurement is the size of a sector in bytes.
 
 ## Retrieval miner
 
-A _retrieval miner_ is a Filecoin participant that enters in retrieval [deals](glossary#deal) with clients, agreeing to supply a client with a particular file in exchange for [FIL](glossary#fil).  Note that unlike [storage miners](glossary#storage-miner), retrieval miners are not additionally rewarded with the ability to add blocks to (i.e., extend) the Filecoin blockchain; their only reward is the fee they extract from the client.
+A _retrieval miner_ is a Filecoin participant that enters in retrieval [deals](glossary#deal) with clients, agreeing to supply a client with a particular file in exchange for [FIL](glossary#fil).  Note that unlike [storage miners](glossary#storage-miner-actor), retrieval miners are not additionally rewarded with the ability to add blocks to (i.e., extend) the Filecoin blockchain; their only reward is the fee they extract from the client.
 
 ## Repair
 
 Repair refers to the processes and protocols by which the Filecoin network ensures that data that is partially lost (by, for example, a miner disappearing) can be re-constructed and re-added to the network. Repairing is done by [Repair Miners](glossary#miner).
+
+## Reward Actor
+
+The _Reward Actor_ is responsible for distributing block rewards to [storage miners](glossary#storage-miner-actor) and token vesting.
 
 ## Round
 
@@ -262,7 +282,7 @@ _Sealing_ is one of the fundamental building blocks of the Filecoin protocol. It
 
 ## Sector
 
-The default unit of storage that miners put in the network (currently 32GBs or 64GBs). A sector is a contiguous array of bytes that a [storage miner](glossary#storage-miner) puts together, seals, and performs Proofs of Spacetime on. Storage miners store data on behalf of the Filecoin network in fixed-size sectors.
+The default unit of storage that miners put in the network (currently 32GBs or 64GBs). A sector is a contiguous array of bytes that a [storage miner](glossary#storage-miner-actor) puts together, seals, and performs Proofs of Spacetime on. Storage miners store data on behalf of the Filecoin network in fixed-size sectors.
 
 Sectors can contain data from multiple deals and multiple clients. Sectors are also split in “Regular Sectors”, i.e., those that contain deals and “Committed Capacity” (CC), i.e., the sectors/storage that have been made available to the system, but for which a deal has not been agreed yet.
 
@@ -282,7 +302,23 @@ Filecoin implements two kinds of slashing: **Storage Fault Slashing** and **Cons
 
 In the Filecoin blockchain smart contracts are referred to as [actors](glossary#actor).
 
-### Storage fault slashing
+## State
+
+The _State_ or _State Tree_ refers to the shared history of the Filecoin system which contains actors and their storage power. The _State_ is deterministically generated from the initial state and the set of messages generated by the system.
+
+## Storage Market Actor
+
+The _Storage Market Actor_ is responsible for managing storage and retrieval deals.
+
+## Storage Miner Actor
+
+The _Storage Miner Actor_ commits storage to the network, stores data on behalf of the network and is rewarded in [FIL](glossary#fil) for the storage service. The storage miner actor is responsible for collecting proofs and reaching consensus on the latest state of the storage network. When they create a block, storage miners are rewarded with newly minted FIL, as well as the transaction fees they can levy on other participants seeking to include messages in the block.
+
+## Storage Power Actor
+
+The _Storage Power Actor_ is responsible for keeping track of the storage power allocated at each storage miner.
+
+## Storage fault slashing
 
 Storage Fault Slashing is a term that is used to encompass a broader set of penalties, including (but not limited to) Fault Fees, Sector Penalties, and Termination Fees. These penalties are to be paid by miners if they fail to provide sector reliability or decide to voluntarily exit the network. 
 
@@ -290,10 +326,6 @@ Storage Fault Slashing is a term that is used to encompass a broader set of pena
 * **Sector Penalty (SP):**  A penalty that a miner incurs for a faulted sector that was not declared faulted before a WindowPoSt check occurs. 
     * The sector will pay FF after incurring an SP when the fault is detected.
 * **Termination Penalty (TP):** A penalty that a miner incurs when a sector is voluntarily or involuntarily terminated and is removed from the network.
-
-## State
-
-The _State_ or _State Tree_ refers to the shared history of the Filecoin system which contains actors and their storage power. The _State_ is deterministically generated from the initial state and the set of messages generated by the system.
 
 ## Ticket
 
@@ -309,15 +341,15 @@ A [tipset](https://filecoin.io/blog/tipsets-family-based-approach-to-consensus/)
 
 Each tipset is assigned a weight corresponding to the amount of storage the network is provided per the commitments encoded in the tipset's blocks. The consensus protocol of the network directs nodes to build on top of the heaviest chain.
 
-By basing its blockchain on tipsets, Filecoin can allow multiple [storage miners](#storage-miner) to create blocks in the same [epoch](glossary#epoch), increasing network throughput. By construction, this also provides network security: a node that attempts to intentionally prevent the valid blocks of a second node from making it onto the canonical chain runs up against the consensus preference for heavier chains.
+By basing its blockchain on tipsets, Filecoin can allow multiple [storage miners](glossary#storage-miner-actor) to create blocks in the same [epoch](glossary#epoch), increasing network throughput. By construction, this also provides network security: a node that attempts to intentionally prevent the valid blocks of a second node from making it onto the canonical chain runs up against the consensus preference for heavier chains.
 
 ## Verified client
 
-To further incentivize the storage of "useful" data over simple [capacity commitments](glossary#capacity-commitment), [storage miners](glossary#storage-miner) have the additional opportunity to compete for special [deals](glossary#deal) offered by [verified clients](glossary#verified-client). Such clients are certified with respect to their intent to offer deals involving the storage of meaningful data, and the power a storage miner earns for these deals is augmented by a multiplier.
+To further incentivize the storage of "useful" data over simple [capacity commitments](glossary#capacity-commitment), [storage miners](glossary#storage-miner-actor) have the additional opportunity to compete for special [deals](glossary#deal) offered by verified clients. Such clients are certified with respect to their intent to offer deals involving the storage of meaningful data, and the power a storage miner earns for these deals is augmented by a multiplier.
 
-## Verifiable
+## Verified Registry Actor
 
-Something that is verifiable can be checked for correctness by a third party.
+The _Verified Registry Actor_ is responsible for managing [verified clients](glossary#verified-client).
 
 ## VDF
 
@@ -349,16 +381,28 @@ Every mined block has a computed `weight`. Together, the `weights` of all the bl
 
 ## Window Proof-of-Spacetime (WindowPoSt)
 
-_Window Proof-of-Spacetime_ (WindowPoSt) is the mechanism by which the commitments made by [storage miners](glossary#storage-miner) are audited. It sees each 24-hour period broken down into a series of windows. Correspondingly, each storage miner's set of pledged [sectors](glossary#sector) is partitioned into subsets, one subset for each window. Within a given window, each storage miner must submit a [Proof-of-Spacetime](glossary#proof-of-spacetime-post) for each sector in their respective subset. This requires ready access to each of the challenged sectors, and will result in a [zk-SNARK-compressed](glossary#zero-knowledge-succinct-non-interactive-argument-of-knowledge-zk-snark) proof published to the Filecoin [blockchain](glossary#blockchain) as a [message](glossary#message) in a [block](#block). In this way, every sector of [pledged storage](glossary#pledged-storage) is audited at least once in any 24-hour period, and a permanent, verifiable, and public record attesting to each storage miner's continued commitment is kept.
+_Window Proof-of-Spacetime_ (WindowPoSt) is the mechanism by which the commitments made by [storage miners](glossary#storage-miner-actor) are audited. It sees each 24-hour period broken down into a series of windows. Correspondingly, each storage miner's set of pledged [sectors](glossary#sector) is partitioned into subsets, one subset for each window. Within a given window, each storage miner must submit a [Proof-of-Spacetime](glossary#proof-of-spacetime-post) for each sector in their respective subset. This requires ready access to each of the challenged sectors, and will result in a [zk-SNARK-compressed](glossary#zksnark) proof published to the Filecoin [blockchain](glossary#blockchain) as a [message](glossary#message) in a [block](#block). In this way, every sector of [pledged storage](glossary#pledged-storage) is audited at least once in any 24-hour period, and a permanent, verifiable, and public record attesting to each storage miner's continued commitment is kept.
 
 The Filecoin network expects constant availability of stored data. Failing to submit WindowPoSt for a sector will result in a [fault](glossary#fault), and the storage miner supplying the sector will be [slashed](glossary#slash).
 
 ## Winning Proof-of-Spacetime (WinningPoSt)
 
-_Winning Proof-of-Spacetime_ (WinningPoSt) is the mechanism by which [storage miners](glossary#storage-miner) are rewarded for their contributions to the Filecoin network. At the beginning of each [epoch](glossary#epoch), a small number of storage miners are [elected](glossary#election) to each mine a new [block](glossary#block). As a requirement for doing so, each miner is tasked with submitting a compressed [Proof-of-Storage](glossary#proof-of-storage-post) for a specified [sector](glossary#sector). Each elected miner who successfully creates a block is granted [FIL](glossary#fil), as well as the opportunity to charge other Filecoin participants fees to include [messages](glossary#message) in the block.
+_Winning Proof-of-Spacetime_ (WinningPoSt) is the mechanism by which [storage miners](glossary#storage-miner-actor) are rewarded for their contributions to the Filecoin network. At the beginning of each [epoch](glossary#epoch), a small number of storage miners are [elected](glossary#election) to each mine a new [block](glossary#block). As a requirement for doing so, each miner is tasked with submitting a compressed [Proof-of-Spacetime](glossary#proof-of-spacetime-post) for a specified [sector](glossary#sector). Each elected miner who successfully creates a block is granted [FIL](glossary#fil), as well as the opportunity to charge other Filecoin participants fees to include [messages](glossary#message) in the block.
 
 Storage miners who fail to do this in the necessary window will forfeit their opportunity to mine a block, but will not otherwise incur penalties for their failure to do so.
 
 ## zkSNARK
 
-Zero Knowledge Succinct ARguments of Knowledge. A way of producing a small 'proof' that convinces a 'verifier' that some computation was done correctly.
+zkSNARK stands for Zero-knowledge succinct non-interactive argument of knowledge.
+
+An _argument of knowledge_ is a construction by which one party, called the _prover_, can convince another, the _verifier_, that the prover has access to some piece of information. There are several possible constraints on such constructions:
+
+- A _non-interactive_ argument of knowledge has the requirement that just a single message, sent from the prover to the verifier, should serve as a sufficient argument.
+
+A _zero-knowledge_ argument of knowledge has the requirement that the verifier should not need access to the knowledge the prover has access to in order to verify the prover's claim.
+
+A _succinct_ argument of knowledge is one that can be "quickly" verified, and which is "small", for appropriate definitions of both of those terms.
+
+A zero-knowledge, succinct non-interactive argument of knowledge (zk-SNARK) embodies all of these properties. Filecoin utilizes these constructions to enable its distributed network to efficiently verify that [storage miners](glossary#storage-miner-actor) are storing files they pledged to store, without requiring the verifiers to maintain copies of these files themselves.
+
+In summary, a zkSNARK is a way of producing a small 'proof' that convinces a 'verifier' that some computation on a stored file was done correctly, without the verifier needing to have access to the stored file itself.
