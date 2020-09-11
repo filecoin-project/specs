@@ -1,9 +1,9 @@
 ---
-title: "Token"
+title: Token
 bookCollapseSection: true
 weight: 5
 dashboardWeight: 1
-dashboardState: incorrect
+dashboardState: reliable
 dashboardAudit: missing
 dashboardTests: 0
 ---

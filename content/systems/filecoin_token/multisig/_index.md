@@ -1,7 +1,7 @@
 ---
 title: Multisig Wallet
 description: Multisig - Wallet requiring multiple signatures
-weight: 3
+weight: 4
 bookCollapseSection: true
 dashboardWeight: 1
 dashboardState: incorrect
