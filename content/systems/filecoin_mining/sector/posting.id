@@ -1,5 +1,0 @@
-//import abi "github.com/filecoin-project/specs-actors/actors/abi"
-
-// type PoStWitness struct {
-//     Candidates [abi.PoStCandidate]
-// }
