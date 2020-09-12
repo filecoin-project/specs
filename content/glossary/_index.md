@@ -395,9 +395,9 @@ _Winning Proof-of-Spacetime_ (WinningPoSt) is the mechanism by which [storage mi
 
 Storage miners who fail to do this in the necessary window will forfeit their opportunity to mine a block, but will not otherwise incur penalties for their failure to do so.
 
-## zkSNARK
+## zk-SNARK
 
-zkSNARK stands for Zero-knowledge succinct non-interactive argument of knowledge.
+zk-SNARK stands for Zero-Knowledge Succinct Non-Interactive Argument of Knowledge.
 
 An _argument of knowledge_ is a construction by which one party, called the _prover_, can convince another, the _verifier_, that the prover has access to some piece of information. There are several possible constraints on such constructions:
 
@@ -407,6 +407,6 @@ A _zero-knowledge_ argument of knowledge has the requirement that the verifier s
 
 A _succinct_ argument of knowledge is one that can be "quickly" verified, and which is "small", for appropriate definitions of both of those terms.
 
-A zero-knowledge, succinct non-interactive argument of knowledge (zk-SNARK) embodies all of these properties. Filecoin utilizes these constructions to enable its distributed network to efficiently verify that [storage miners](glossary#storage-miner-actor) are storing files they pledged to store, without requiring the verifiers to maintain copies of these files themselves.
+A Zero-Knowledge Succinct Non-Interactive Argument of Knowledge (zk-SNARK) embodies all of these properties. Filecoin utilizes these constructions to enable its distributed network to efficiently verify that [storage miners](glossary#storage-miner-actor) are storing files they pledged to store, without requiring the verifiers to maintain copies of these files themselves.
 
-In summary, a zkSNARK is a way of producing a small 'proof' that convinces a 'verifier' that some computation on a stored file was done correctly, without the verifier needing to have access to the stored file itself.
+In summary, Filecoin uses zk-SNARKs to produce a small 'proof' that convinces a 'verifier' that some computation on a stored file was done correctly, without the verifier needing to have access to the stored file itself.
