@@ -9,9 +9,9 @@ dashboardTests: 0
 
 # Clock
 
-Filecoin assumes weak clock synchrony amongst participants in the system. That is, the system relies on participants having access to a globally synchronized clock (tolerating some bounded drift).
+Filecoin assumes weak clock synchrony amongst participants in the system. That is, the system relies on participants having access to a globally synchronized clock (tolerating some bounded offset).
 
-Filecoin relies on this system clock in order to secure consensus.  Specifically the clock is necessary to support validation rules that prevent block producers from mining blocks with a future timstamp, and running leader elections more frequently than the protocol allows.
+Filecoin relies on this system clock in order to secure consensus.  Specifically, the clock is necessary to support validation rules that prevent block producers from mining blocks with a future timestamp and running leader elections more frequently than the protocol allows.
 
 
 ## Clock uses
@@ -24,25 +24,24 @@ The Filecoin system clock is used:
 
 In order to allow miners to do the above, the system clock must:
 
-1. Have low enough clock drift (sub 1s) relative to other nodes so that blocks are not mined in epochs considered future epochs from the persective of other nodes (those blocks should not be validated until the proper epoch/time as per [validation rules](block#block-semantic-validation)).
+1. Have low enough offset relative to other nodes so that blocks are not mined in epochs considered future epochs from the perspective of other nodes (those blocks should not be validated until the proper epoch/time as per [validation rules](block#block-semantic-validation)).
 2. Set epoch number on node initialization equal to `epoch = Floor[(current_time - genesis_time) / epoch_time]`
 
 It is expected that other subsystems will register to a `NewRound()` event from the clock subsystem.
 
+
 ## Clock Requirements
 
-Clocks used as part of the Filecoin protocol should be kept in sync, with drift less than 1 second so as to enable appropriate validation.
+Clocks used as part of the Filecoin protocol should be kept in sync, with offset less than 1 second so as to enable appropriate validation.
 
-Computer-grade clock crystals can be expected to have drift rates on the order of [1ppm](https://www.hindawi.com/journals/jcnc/2008/583162/) (i.e. 1 microsecond every second or .6 seconds a week), therefore, in order to respect the above-requirement,
+Computer-grade crystals can be expected to deviate by [1ppm](https://www.hindawi.com/journals/jcnc/2008/583162/) (i.e. 1 microsecond every second, or 0.6 seconds per week). Therefore, in order to respect the requirement above:
 
-- clients SHOULD query an NTP server (`pool.ntp.org` is recommended) on an hourly basis to adjust clock skew.
-  - We recommend one of the following:
-    - `pool.ntp.org` (can be catered to a [specific zone](https://www.ntppool.org/zone))
-    - `time.cloudflare.com:1234` (more on [Cloudflare time services](https://www.cloudflare.com/time/))
-    - `time.google.com` (more on [Google Public NTP](https://developers.google.com/time))
-    - `ntp-b.nist.gov` ([NIST](https://tf.nist.gov/tf-cgi/servers.cgi) servers require registration)
-  - We further recommend making three (3) measurements in order to drop outliers
-- clients MAY consider using cesium clocks instead for accurate synchrony within larger mining operations
+- Nodes SHOULD run an NTP daemon (e.g. timesyncd, ntpd, chronyd) to keep their clocks synchronized to one or more reliable external references.
+  - We recommend the following sources:
+    - **`pool.ntp.org`** ([details](https://www.ntppool.org/en/use.html))
+    - `time.cloudflare.com:1234` ([details](https://www.cloudflare.com/time/))
+    - `time.google.com` ([details](https://developers.google.com/time))
+    - `time.nist.gov` ([details](https://tf.nist.gov/tf-cgi/servers.cgi))
+- Larger mining operations MAY consider using local NTP/PTP servers with GPS references and/or frequency-stable external clocks for improved timekeeping.
 
-Mining operations have a strong incentive to prevent their clock from drifting ahead more than one epoch to keep their block submissions from being rejected.  Likewise they have an incentive to prevent their clocks from drifting behind more than one epoch to avoid partitioning themselves off from the synchronized nodes in the network.
-
+Mining operations have a strong incentive to prevent their clock skewing ahead more than one epoch to keep their block submissions from being rejected.  Likewise they have an incentive to prevent their clocks skewing behind more than one epoch to avoid partitioning themselves off from the synchronized nodes in the network.
