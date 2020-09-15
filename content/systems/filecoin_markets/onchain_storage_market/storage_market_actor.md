@@ -5,7 +5,6 @@ dashboardWeight: 2
 dashboardState: wip
 dashboardAudit: missing
 dashboardTests: 0
-math-mode: true
 ---
 
 # Storage Market Actor

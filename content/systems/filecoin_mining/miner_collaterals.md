@@ -6,7 +6,6 @@ dashboardWeight: 2
 dashboardState: reliable
 dashboardAudit: n/a
 dashboardTests: 0
-math-mode: true
 ---
 
 # Miner Collaterals
