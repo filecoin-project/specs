@@ -1,5 +1,5 @@
 ---
-title: Decay Model
+title: Minting Model
 bookCollapseSection: true
 weight: 1
 dashboardWeight: 1
