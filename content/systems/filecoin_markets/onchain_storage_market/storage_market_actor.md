@@ -2,7 +2,7 @@
 title: Storage Market Actor
 weight: 1
 dashboardWeight: 2
-dashboardState: wip
+dashboardState: reliable
 dashboardAudit: missing
 dashboardTests: 0
 ---
@@ -11,14 +11,15 @@ dashboardTests: 0
 
 `StorageMarketActor` is responsible for processing and managing on-chain deals. This is also the entry point of all storage deals and data into the system. It maintains a mapping of `StorageDealID` to `StorageDeal` and keeps track of locked balances of `StorageClient` and `StorageProvider`. When a deal is posted on chain through the `StorageMarketActor`, it will first check if both transacting parties have sufficient balances locked up and include the deal on chain. 
 
-## `StorageMarketActorState` implementation
-
-{{<embed src="/externals/specs-actors/actors/builtin/market/market_state.go" lang="go" >}}
-
 ## `StorageMarketActor` implementation
 
-{{<embed src="/externals/specs-actors/actors/builtin/market/market_actor.go" lang="go" >}}
+The implementation of the Storage Market Actor can be found [here](https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_actor.go).
 
+## `StorageMarketActorState` implementation
+
+The Storage Market Actor Statuses can be found [here](https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_state.go).
+
+The Storage Market Actor Balance states and mutations can be found [here](https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_balances.go).
 
 ## Storage Deal Collateral
 
@@ -32,5 +33,5 @@ This collateral is returned to the storage provider when all deals in the sector
 
 
 {{<katex>}}
-MinimumProviderDealCollateral = \\[0.2cm] 5\% \times FILCirculatingSupply \times \frac{DealRawByte}{max(NetworkBaseline, NetworkRawBytePower)}
+MinimumProviderDealCollateral = \\[0.2cm] \ \ \ \ \ \ \ \ 5\% \times FILCirculatingSupply \times \frac{DealRawByte}{max(NetworkBaseline, NetworkRawBytePower)}
 {{</katex>}}
