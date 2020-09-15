@@ -8,7 +8,7 @@ dashboardAudit: missing
 dashboardTests: 0
 ---
 
-# Decay Model
+# Minting Model
 
 Many blockchains mint tokens based on a simple exponential decay model. Under this model, block rewards are highest in the beginning, and miner participation is often the lowest, so mining generates many tokens per unit of work early in the networkʼs life, then rapidly decreases.
 
