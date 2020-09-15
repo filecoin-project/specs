@@ -6,6 +6,7 @@ dashboardWeight: 2
 dashboardState: reliable
 dashboardAudit: n/a
 dashboardTests: 0
+math-mode: true
 ---
 
 # Miner Collaterals
@@ -20,9 +21,30 @@ To satisfy the multiple needs for collateral in a way that is minimally burdenso
 
 Filecoin Miners must commit resources in order to participate in the economy; the protocol can use the minersʼ stake in the network to ensure that rational behavior benefits the network, rewarding the creation of value and penalizing malicious behavior via slashing. The pledge size is meant to adequately incentivize the fulfillment of a sectorʼs promised lifetime and provide sufficient consensus security.
 
-Hence, the initial pledge function consists of two components: a storage pledge and a consensus pledge. The storage pledge protects the networkʼs quality-of-service for clients by providing starting collateral for the sector in the event of slashing. The storage pledge must be small enough to be feasible for miners joining the network, and large enough to collateralize storage against early faults, penalties, and fees. The vesting of block rewards and the use of unvested rewards as additional collateral reduces initial storage pledge without compromising the incentive alignment of the network. This is discussed in more depth in the following subsection. A balance is achieved by using an initial storage pledge amount approximately sufficient to cover 7 days worth of Sector fault fee and 1 Sector fault detection fee. This is denominated in the number of days of future rewards that a sector is expected to earn.
+Hence, the initial pledge function consists of two components: a _storage pledge_ and a _consensus pledge_.
+
+{{<katex>}}
+
+SectorInitialPledge = SectorInitialStoragePledge + SectorInitialConsensusPledge \\[0.3cm]
+
+{{</katex>}}
+
+The storage pledge protects the networkʼs quality-of-service for clients by providing starting collateral for the sector in the event of slashing. The storage pledge must be small enough to be feasible for miners joining the network, and large enough to collateralize storage against early faults, penalties, and fees. The vesting of block rewards and the use of unvested rewards as additional collateral reduces initial storage pledge without compromising the incentive alignment of the network. This is discussed in more depth in the following subsection. A balance is achieved by using an initial storage pledge amount approximately sufficient to cover 7 days worth of Sector fault fee and 1 Sector fault detection fee. This is denominated in the number of days of future rewards that a sector is expected to earn.
+
+{{<katex>}}
+
+SectorInitialStoragePledge = Estimated20DaysSectorBlockReward \\[0.3cm]
+
+{{</katex>}}
 
 Since the storage pledge per sector is based on the expected block reward that sector will win, the storage pledge is independent of the networkʼs total storage. As a result, the total network storage pledge depends solely on future block reward. Thus, while the storage pledge provides a clean way to reason about the rationality of adding a sector, it does not provide sufficient long-term security guarantees to the network, making consensus takeovers less costly as the block reward decreases. As such, the second half of the initial pledge function, the consensus pledge, depends on both the amount of quality-adjusted power (QAP) added by the sector and the network circulating supply. The network targets approximately 30% of the network's circulating supply locked up in initial consensus pledge when it is at or above the baseline. This is achieved with a small pledge share allocated to sectors based on their share of the networkʼs quality-adjusted power. Given an exponentially growing baseline, initial pledge per unit QAP should decrease over time, as should other mining costs.
+
+{{<katex>}}
+
+SectorInitialConsensusPledge = \\[0.2cm] 30\% \times FILCirculatingSupply \times \frac{SectorQAP}{max(NetworkBaseline, NetworkQAP)}
+
+{{</katex>}}
+
 
 ## Block Reward Collateral
 
