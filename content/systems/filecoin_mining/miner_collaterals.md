@@ -1,7 +1,7 @@
 ---
 title: Miner Collaterals
 weight: 3
-bookCollapseSection: true
+bookCollapseSection: false
 dashboardWeight: 2
 dashboardState: reliable
 dashboardAudit: n/a
