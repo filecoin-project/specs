@@ -1,6 +1,6 @@
 ---
 title: Adding Storage
-weight: 6
+weight: 7
 dashboardWeight: 2
 dashboardState: stable
 dashboardAudit: n/a
