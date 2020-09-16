@@ -64,7 +64,7 @@ CID is short for Content Identifier, a self describing content address used thro
 
 ## Client
 
-A client is any user with an account who wishes to store data with a storage miner. A client's account is used to pay for the storage, and helps to prove the client's ability to pay.
+There are two types of clients in Filecoin, the storage client and the retrieval client, both of which can be implemented as part of the same physical host. All clients have an account, which is used to pay for the storage or retrieval of data.
 
 ## Collateral
 
@@ -112,19 +112,19 @@ Time in the Filecoin blockchain is discretized into _epochs_ that are currently 
 
 Erasure coding is a strategy through which messages can be lengthened so as to be made recoverable in spite of errors. See [Wikipedia](https://en.wikipedia.org/wiki/Erasure_code) description.
 
-## FIL
-
-_FIL_ is the name of the Filecoin unit of currency; it is alternatively denoted by the Unicode symbol for an integral with a double stroke (⨎).
-
 ## Fault
 
 A fault occurs when a proof is not posted in the Filecoin system within the proving period, denoting another malfunction such as loss of network connectivity, storage malfunction, or malicious behaviour.
 
 When a [storage miner](glossary#storage-miner-actor) fails to complete [Window Proof-of-Spacetime](glossary#window-proof-of-spacetime-windowpost) for a given sector, the Filecoin network registers a _fault_ for that sector, and the miner is [_slashed_](glossary#slashing). If a storage miner does not resolve the fault quickly, the network assumes they have abandoned their commitment.
 
+## FIL
+
+_FIL_ is the name of the Filecoin unit of currency; it is alternatively denoted by the Unicode symbol for an integral with a double stroke (⨎).
+
 ## File
 
-Files are what clients bring to the filecoin system to store. A file is split up into [pieces](glossary#piece). A piece is the basic unit of account in the storage network and is what is actually stored by the Filecoin network.
+Files are what clients bring to the filecoin system to store. A file is converted to a UnixFS DAG and is placed in a [piece](glossary#piece). A piece is the basic unit of account in the storage network and is what is actually stored by the Filecoin network.
 
 ## Filecoin
 
@@ -204,7 +204,7 @@ A payment channel is set up between actors in the Filecoin system to enable off-
 
 ## Piece
 
-The main unit of account and negotiation for the data that a user wants to store on filecoin. A piece is a [CAR file](https://github.com/ipld/specs/blob/master/block-layer/content-addressable-archives.md#summary) produced by an IPLD DAG with its own *payload CID* and *piece CID*. A piece is not a unit of storage, that is, it can be of any size up to the size of a [sector](glossary#sector). If a piece is larger than a sector, then it has to be split in two (or more) pieces.
+The main unit of account and negotiation for the data that a user wants to store on Filecoin. In the Lotus implementation, a piece is a [CAR file](https://github.com/ipld/specs/blob/master/block-layer/content-addressable-archives.md#summary) produced by an IPLD DAG with its own *payload CID* and *piece CID*. However, a piece can be produced in different ways as long as the outcome matches the _piece CID_. A piece is not a unit of storage and therefore, it can be of any size up to the size of a [sector](glossary#sector). If a piece is larger than a sector (currently set to 32GB or 64GB and chosen by the miner), then it has to be split in two (or more) pieces. For more details on the exact sizing of a pieces as well as how it can be produced, see the [Piece section](piece).
 
 ## Pledged Storage
 
