@@ -1,6 +1,6 @@
 ---
 title: Sector Sealing
-weight: 3
+weight: 4
 dashboardWeight: 2
 dashboardState: stable
 dashboardAudit: wip
