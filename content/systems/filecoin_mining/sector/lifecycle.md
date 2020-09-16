@@ -7,7 +7,7 @@ dashboardAudit: n/a
 dashboardTests: 0
 ---
 
-# Sector Lifecycle Summary
+# Sector Lifecycle
 
 Once the sector has been generated and the deal has been incorporated into the Filecoin blockchain, the storage miner begins generating Proofs-of-Spacetime (PoSt) on the sector, starting to potentially win block rewards and also earn storage fees. Parameters are set so that miners generate and capture more value if they guarantee that their sectors will be around for the duration of the original contract. However, some bounds are placed on a sectorʼs lifetime to improve the network performance.
 
@@ -22,3 +22,14 @@ As with every system it is expected that sectors will present faults. Although t
 An adjacent concept to the sector _fault_ is sector _recovery_, that is, how quickly and if the miner attempts to recover the sector and bring it back to normal operation. Therefore, in case of a faulty sector, a small penalty fee approximately equal to the block reward that the sector would win per day is applied. The fee is calculated per day of the sector being unavailable to the network.
 
 Miners can extend the lifetime of a sector at any time, though the sector will be expected to remain live until it has reached the end of the new sector lifetime. This can be done by submitting a `ExtendedSectorExpiration` message to the chain.
+
+A sector can be in one of the following states.
+
+| State          | Description                                                                                                                                           |
+|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Precommitted` | Miner seals sector and submits `miner.PreCommitSector`                                                                                                |
+| `Committed`    | Miner generates a Seal proof and submits `miner.ProveCommitSector`                                                                                    |
+| `Active`       | Miner generate valid PoSt proofs and timely submits `miner.SubmitWindowedPoSt`                                                                        |
+| `Faulty`       | Miner fails to generate a proof (see Fault section)                                                                                                   |
+| `Recovering`   | Miner declared a faulty sector via `miner.DeclareFaultRecovered`                                                                                      |
+| `Terminated`   | Either sector is expired, or early terminated by a miner via `miner.TerminateSectors`, or was failed to be proven for 14 consecutive proving periods. |
