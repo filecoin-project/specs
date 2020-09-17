@@ -1,7 +1,6 @@
 # baseURL = '/'
 title = 'Filecoin Spec'
 ignoreFiles= ["externals", "\\.dot$", "\\.mmd$"]
-# theme = 'book'
 canonifyurls = false
 # relativeURLs = true
 
@@ -33,11 +32,6 @@ enableGitInfo = true
   contentDir = 'content-pt'
   weight = 2
 
-# [languages.zh]
-#   languageName = 'Chinese'
-#   contentDir = 'content.zh'
-#   weight = 3
-
 [menu]
 # [[menu.before]]
 # [[menu.after]]
@@ -46,6 +40,7 @@ enableGitInfo = true
 #   weight = 10
 
 [params]
+  API = 'http://127.0.0.1:8787' #'https://specs-api.hugomrdias.workers.dev'
   # (Optional, default true) Controls table of contents visibility on right side of pages.
   # Start and end levels can be controlled with markup.tableOfContents setting.
   # You can also specify this parameter per page in front matter.

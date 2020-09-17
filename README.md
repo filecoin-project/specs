@@ -110,10 +110,12 @@ Your algorithm here
 ```
 ````
 
-You can embed source code from other repos. Mount the repo as a hugo modules as descibed in [External Modules](#external-modules) then use the [`embed shorcode`](#embed) to link to a specific symbol.
+You can embed source code from other repos. Mount the repo as a hugo modules as described in [External Modules](#external-modules) then use the [`embed shorcode`](#embed) to link to a specific symbol.
 
-```go
+```text
 {{<embed src="/externals/go-data-transfer/types.go"  lang="go" symbol="Channel">}}
+
+{{<embed src="github:filecoin-project/specs-actors/actors/builtin/paych/paych_actor.go" lang="go">}}
 ```
 
 ## Images
@@ -181,6 +183,10 @@ hugo shortcodes you can add to your markdown.
 # can embed symbols from Go files
 # extracts comments and symbol body
 {{<embed src="/externals/go-data-transfer/types.go"  lang="go" symbol="Channel">}}
+
+
+# embed from github
+{{<embed src="github:filecoin-project/specs-actors/actors/builtin/paych/paych_actor.go" lang="go">}}
 ```
 
 ### `listing`

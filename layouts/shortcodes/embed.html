@@ -1,25 +1,47 @@
+{{ $src := .Get "src" }}
+
 {{/* Get the filepath */}}
 {{/* Relative to content folder */}}
-{{ if eq (.Get "src" | printf "%.1s") "/" }}
-    {{ $.Scratch.Set "filepath" ( strings.TrimLeft "/" ( .Get "src" ))}}
+{{ if eq ($src | printf "%.1s") "/" }}
+    {{ $.Scratch.Set "filepath" ( strings.TrimLeft "/" ( $src ))}}
 {{ else }}
 {{/* Relative to page */}}
     {{ $.Scratch.Set "filepath" $.Page.File.Dir }}
-    {{ $.Scratch.Add "filepath" ( .Get "src" ) }}
+    {{ $.Scratch.Add "filepath" ( $src ) }}
 {{ end }}
+
 
 {{ $path := ($.Scratch.Get "filepath")}}
 {{ $lang := .Get "lang" }}
 {{ $markdown := .Get "markdown" }}
 {{ $symbolName := .Get "symbol" }}
+{{ $remote := .Get "remote"}}
+{{ $external := false }}
+{{ $content := "" }}
+{{ $url := "" }}
+{{ $title := default $symbolName (.Get "title")}}
 
+{{ if hasPrefix $src "github:" }}
+    {{ $external = "github" }}
+{{ end }}
 
-{{ if fileExists $path }}
+{{ if $external }}
+    {{- $HOST := $.Site.Params.API -}}
+    {{- $ref := default "master" (.Get "ref" ) -}}
+    {{- $resp := getJSON (printf "%s/github?file=%s&ref=%s" $HOST $src $ref )  -}}
+    {{- $content = ($resp.content | base64Decode ) -}}
+    {{- $url = $resp.url -}}
+{{ else if fileExists $path }}
+    {{ $content = readFile $path }}
+{{ else }}
+    {{- errorf "File '%s' not found from Page '%s'" $path .Page.File }}
+{{ end }}
+
+{{ if $content }}
     {{ if eq $markdown "true" }}
-        {{ $path | readFile | markdownify }}
+        {{ $content | markdownify }}
     {{ else if $symbolName }}
         <!-- Symbols -->
-        {{ $content := readFile $path }}
         {{ $body := "" }}
         {{ $comment := "" }}
 
@@ -53,21 +75,34 @@
             </p>
             <div id="symbol-body-{{- $symbolName -}}">
                 {{ highlight ($body | safeHTML) $lang "" }}
+                {{- template "embed-legend" (dict "Title" $title "URL" $url) -}}
             </div>
         {{- else -}}
-            <blockquote class="book-hint danger">
-                {{- printf "Symbol '%s' not found in file '%s' from Page '%s'" $symbolName $path .Page.File }}
-            </blockquote>
             {{- errorf "Symbol '%s' not found in file '%s' from Page '%s'" $symbolName $path .Page.File }}
         {{- end -}}
     {{ else if $lang }}
-        {{ highlight ($path | readFile | safeHTML ) (.Get "lang") "" }}
+        <div id="{{anchorize $title}}">
+            {{ highlight ($content | safeHTML ) (.Get "lang") "" }}
+            {{- template "embed-legend" (dict "Title" $title "URL" $url) -}}
+        </div>
     {{ else }}
-        {{ $path | readFile | safeHTML }}
+        {{ $content | safeHTML }}
     {{ end }}
-{{ else }}
-    <blockquote class="book-hint danger">
-      {{- printf "File '%s' not found from Page '%s'" ($path) .Page.File }}
-    </blockquote>
-    {{- errorf "File '%s' not found from Page '%s'" ($path) .Page.File }}
+{{ end }}
+
+{{ define "embed-legend" }}
+<div style="display: flex; margin-top: -1rem">
+    {{- if .Title -}}
+        <a style="width: 50%" class="permalink" href="#{{anchorize (printf "example %s" .Title) }}">Example: {{.Title}}</a>
+    {{- end -}}
+    {{- if .URL -}}
+        {{- if eq .Title "" -}}
+            <div style="width: 50%"></div>
+        {{- end -}}
+        <a style="width: 50%; text-align: right" href="{{.URL}}" title="Github Source" target="_blank" rel="noopener noreferrer" >
+            Github <i class="gg-external gg-inline gg-s-half"></i>
+        </a>
+    {{- end -}}
+</div>
+
 {{ end }}
