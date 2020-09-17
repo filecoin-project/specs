@@ -286,7 +286,7 @@ This measurement is the sector size multiplied by its promised duration in byte-
 
 ## Slashing
 
-Filecoin implements two kinds of slashing: [**Storage Fault Slashing**](glossary#storage-fault-slashing) and [**Consensus Fault Slashing**](consensus-fault-slashing).
+Filecoin implements two kinds of slashing: [**Storage Fault Slashing**](glossary#storage-fault-slashing) and [**Consensus Fault Slashing**](glossary#consensus-fault-slashing).
 
 ## Smart contracts
 
