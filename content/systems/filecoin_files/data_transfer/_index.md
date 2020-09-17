@@ -88,14 +88,11 @@ transport mechanism (including offline mechanisms) is acceptable.
 
 ## Data Structures
 
-**Data Transfer Types**
 
-{{<embed src="/externals/go-data-transfer/types.go"  lang="go">}}
+{{<embed src="github:filecoin-project/go-data-transfer/types.go"  lang="go" title="Data Transfer Types">}}
 
-**Data Transfer Statuses**
 
-{{<embed src="/externals/go-data-transfer/statuses.go"  lang="go">}}
+{{<embed src="github:filecoin-project/go-data-transfer/statuses.go"  lang="go" title="Data Transfer Statuses">}}
 
-**Data Transfer Manager**
 
-{{<embed src="/externals/go-data-transfer/manager.go"  lang="go">}}
+{{<embed src="github:filecoin-project/go-data-transfer/manager.go"  lang="go" symbol="Manager" title="Data Transfer Manager">}}

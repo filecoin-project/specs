@@ -19,6 +19,4 @@ The Retrieval Provider depends on the following dependencies
 - **BlockStore**: Same as one used by data transfer module
 - **Data Transfer**: Module used for transferring payload. Reads from the blockstore.
 
-## API
-
-{{<embed src="/externals/go-fil-markets/retrievalmarket/provider.go"  lang="go">}}
+{{<embed src="github:filecoin-project/go-fil-markets/retrievalmarket/provider.go"  lang="go" title="Retrieval Provider API">}}

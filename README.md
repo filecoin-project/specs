@@ -37,12 +37,11 @@ To build the spec website you need
 
 -   [`node` & `npm`](https://nodejs.org/en/download)
 -   [`go`](https://golang.org/doc/install)
--   `bzr` (required to build lotus)
 
-On macOS you can get go and bzr from Homebrew
+On macOS you can get go from Homebrew
 
 ```bash
-brew install go bzr
+brew install go
 ```
 
 Clone the repo, and use `npm install` to fetch the dependencies
@@ -110,10 +109,10 @@ Your algorithm here
 ```
 ````
 
-You can embed source code from other repos. Mount the repo as a hugo modules as described in [External Modules](#external-modules) then use the [`embed shorcode`](#embed) to link to a specific symbol.
+You can embed source code from local files or external other repos using the `embed` [shortcode](#embed).
 
 ```text
-{{<embed src="/externals/go-data-transfer/types.go"  lang="go" symbol="Channel">}}
+{{<embed src="/path/to/local/file/types.go"  lang="go" symbol="Channel">}}
 
 {{<embed src="github:filecoin-project/specs-actors/actors/builtin/paych/paych_actor.go" lang="go">}}
 ```
@@ -175,19 +174,20 @@ hugo shortcodes you can add to your markdown.
 {{<embed src="piece_store.go" lang="go">}}
 
 # src relative to content folder
-{{<embed src="/systems/piece_store.id" lang="go">}}
+{{<embed src="/systems/piece_store.go" lang="go">}}
 
 # can just embed a markdown file
 {{<embed src="section.md" markdown="true">}}
 
 # can embed symbols from Go files
 # extracts comments and symbol body
-{{<embed src="/externals/go-data-transfer/types.go"  lang="go" symbol="Channel">}}
+{{<embed src="types.go"  lang="go" symbol="Channel">}}
 
-
-# embed from github
+# can embed from external sources like github
 {{<embed src="github:filecoin-project/specs-actors/actors/builtin/paych/paych_actor.go" lang="go">}}
 ```
+This shortcode also supports the property `title` to add a permalink below the embed.
+
 
 ### `listing`
 

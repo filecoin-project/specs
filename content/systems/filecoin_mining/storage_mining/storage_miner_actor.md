@@ -8,10 +8,7 @@ dashboardTests: 0
 
 # Storage Miner Actor
 
-## `StorageMinerActorState` implementation
 
-{{<embed src="/externals/specs-actors/actors/builtin/miner/miner_state.go"  lang="go" >}}
+{{<embed src="github:filecoin-project/specs-actors/actors/builtin/miner/miner_state.go"  lang="go" symbol="State" title="Storage Miner Actor State">}}
 
-## `StorageMinerActorCode` implementation
-
-{{<embed src="/externals/specs-actors/actors/builtin/miner/miner_actor.go"  lang="go" >}}
+{{<embed src="github:filecoin-project/specs-actors/actors/builtin/miner/miner_actor.go"  lang="go" title="Storage Miner Actor">}}

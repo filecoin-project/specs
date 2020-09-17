@@ -8,13 +8,10 @@ dashboardTests: 0
 
 # Storage Power Actor
 
-## `StoragePowerActorState` implementation
+{{<embed src="github:filecoin-project/specs-actors/actors/builtin/power/power_state.go" lang="go" title="StoragePowerActorState implementation" symbol="State">}}
 
-{{<embed src="/externals/specs-actors/actors/builtin/power/power_state.go" lang="go" >}}
 
-## `StoragePowerActor` implementation
-
-{{<embed src="/externals/specs-actors/actors/builtin/power/power_actor.go" lang="go" >}}
+{{<embed src="github:filecoin-project/specs-actors/actors/builtin/power/power_actor.go" lang="go" title="StoragePowerActor implementation" >}}
 
 ## The Power Table
 

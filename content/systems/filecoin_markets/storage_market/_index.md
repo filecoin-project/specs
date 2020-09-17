@@ -107,11 +107,9 @@ Data submitted to the Filecoin network go through several transformations before
 5. At this point, the Piece is included in a Sector together with data from other deals. The `StorageProvider` then calculates Merkle root for all the Pieces inside the sector. The root of this tree is _CommD_. This is the _unsealed sector CID_.
 6. The `StorageProvider` is then sealing the sector and the root of the resulting Merkle root is the _CommR_.
 
-## Data Types
-
 The following data types are unique to the Storage Market:
 
-{{<embed src="/externals/go-fil-markets/storagemarket/types.go"  lang="go">}}
+{{<embed src="github:filecoin-project/go-fil-markets/storagemarket/types.go"  lang="go" title="Storage Market Data Types">}}
 
 
 Details about `StorageDealProposal` and `StorageDeal` (which are used in the Storage Market and elsewhere) specifically can be found in Storage Deal.
@@ -141,7 +139,7 @@ It is worth highlighting that a single participant can be a `StorageClient`, `St
 
 Because most of what a Storage Provider does is respond to actions initiated by a `StorageClient`, most of its public facing methods relate to getting current status on deals, as opposed to initiating new actions. However, a user of the `StorageProvider` module can update the current Ask for the provider.
 
-{{<embed src="/externals/go-fil-markets/storagemarket/provider.go"  lang="go">}}
+{{<embed src="github:filecoin-project/go-fil-markets/storagemarket/provider.go"  lang="go" title="Storage Market Provider">}}
 
 ## Storage Client
 
@@ -149,4 +147,4 @@ The `StorageClient` is a module that discovers miners, determines their asks, an
 
 Recall that a single participant can be a `StorageClient`, `StorageProvider`, or both at the same time.
 
-{{<embed src="/externals/go-fil-markets/storagemarket/client.go"  lang="go">}}
+{{<embed src="github:filecoin-project/go-fil-markets/storagemarket/client.go"  lang="go" title="Storage Market Client">}}

@@ -18,6 +18,4 @@ The Retrieval Client Depends On The Following Dependencies
 - **BlockStore**: Same as one used by data transfer module
 - **Data Transfer**: Module used for transferring payload. Writes to the blockstore.
 
-## API
-
-{{<embed src="/externals/go-fil-markets/retrievalmarket/client.go"  lang="go">}}
+{{<embed src="github:filecoin-project/go-fil-markets/retrievalmarket/client.go"  lang="go" title="Retrieval Client API">}}

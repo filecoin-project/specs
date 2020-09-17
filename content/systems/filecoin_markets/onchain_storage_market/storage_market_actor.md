@@ -11,13 +11,9 @@ dashboardTests: 0
 
 `StorageMarketActor` is responsible for processing and managing on-chain deals. This is also the entry point of all storage deals and data into the system. It maintains a mapping of `StorageDealID` to `StorageDeal` and keeps track of locked balances of `StorageClient` and `StorageProvider`. When a deal is posted on chain through the `StorageMarketActor`, it will first check if both transacting parties have sufficient balances locked up and include the deal on chain. 
 
-## `StorageMarketActor` implementation
+{{<embed src="github:filecoin-project/specs-actors/actors/builtin/market/market_state.go" lang="go" symbol="State" title="Storage Market Actor State">}}
 
-The implementation of the Storage Market Actor can be found [here](https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_actor.go).
-
-## `StorageMarketActorState` implementation
-
-The Storage Market Actor Statuses can be found [here](https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_state.go).
+{{<embed src="github:filecoin-project/specs-actors/actors/builtin/market/market_actor.go" lang="go" title="Storage Market Actor" >}}
 
 The Storage Market Actor Balance states and mutations can be found [here](https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_balances.go).
 

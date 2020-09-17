@@ -134,15 +134,9 @@ Payment Channels are used in the Filecoin [Retrieval Market](retrieval_market) t
 In particular, given that there is no proving method provided for the act of sending data from a provider (miner) to a client, there is no trust anchor between the two. Therefore, in order to avoid mis-behaviour, Filecoin is making use of payment channels in order to realise a step-wise "data transfer <-> payment" relationship between the data provider and the client (data receiver). Clients issue requests for data that miners are responding to. The miner is entitled to ask for interim payments, the volume-oriented interval for which is agreed in the Deal phase. In order to facilitate this process, the Filecoin client is creating a payment channel once the provider has agreed on the proposed deal. The client should also lock monetary value in the payment channel equal to the one needed for retrieval of the entire block of data requested. Every time a provider is completing transfer of the pre-specified amount of data, they can request a payment. The client is responding to this payment with a voucher which the provider can redeem (immediately or later), as per the process described earlier.
 
 
-## Payment Channel Implementation
+{{<embed src="github:filecoin-project/lotus/paychmgr/paych.go" lang="go" title="Payment Channel Implementation">}}
 
-{{<embed src="/externals/lotus/paychmgr/paych.go" lang="go" >}}
+{{<embed src="github:filecoin-project/lotus/chain/types/voucher.go" lang="go" title="Payment Channel Voucher">}}
 
-## Payment Channel Voucher
-
-{{<embed src="/externals/lotus/chain/types/voucher.go" lang="go" >}}
-
-## Payment Channel Actor
-
-{{<embed src="/externals/specs-actors/actors/builtin/paych/paych_actor.go" lang="go" >}}
+{{<embed src="github:filecoin-project/specs-actors/actors/builtin/paych/paych_actor.go" lang="go" title="Payment Channel Actor">}}
 

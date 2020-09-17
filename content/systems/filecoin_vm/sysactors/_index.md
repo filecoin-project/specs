@@ -34,7 +34,7 @@ The remaining seven (7) builtin System Actors that do not interact directly with
 
 Built in to the genesis state, the `CronActor`'s dispatch table invokes the `StoragePowerActor` and `StorageMarketActor` for them to maintain internal state and process deferred events. It could in principle invoke other actors after a network upgrade.
 
-{{<embed src="/externals/specs-actors/actors/builtin/cron/cron_actor.go"  lang="go">}}
+{{<embed src="github:filecoin-project/specs-actors/actors/builtin/cron/cron_actor.go"  lang="go">}}
 
 ## InitActor
 
@@ -42,16 +42,16 @@ The `InitActor` has the power to create new actors, e.g., those that enter the s
 
 Note that the canonical ID address does not persist in case of chain re-organization. The actor address or public key survives chain re-organization.
 
-{{<embed src="/externals/specs-actors/actors/builtin/init/init_actor.go" lang="go">}}
+{{<embed src="github:filecoin-project/specs-actors/actors/builtin/init/init_actor.go" lang="go">}}
 
 ## RewardActor
 
 The `RewardActor` is where unminted Filecoin tokens are kept. The actor distributes rewards directly to miner actors, where they are locked for vesting. The reward value used for the current epoch is updated at the end of an epoch through a cron tick.
 
-{{<embed src="/externals/specs-actors/actors/builtin/reward/reward_actor.go"  lang="go">}}
+{{<embed src="github:filecoin-project/specs-actors/actors/builtin/reward/reward_actor.go"  lang="go">}}
 
 ## AccountActor
 
 The `AccountActor` is responsible for user accounts. Account actors are not created by the `InitActor`, but their constructor is called by the system. Account actors are created by sending a message to a public-key style address. The address must be `BLS` or `SECP`, or otherwise there should be an exit error. The account actor is updating the state tree with the new actor address.
 
-{{<embed src="/externals/specs-actors/actors/builtin/account/account_actor.go" lang="go" >}}
+{{<embed src="github:filecoin-project/specs-actors/actors/builtin/account/account_actor.go" lang="go" >}}

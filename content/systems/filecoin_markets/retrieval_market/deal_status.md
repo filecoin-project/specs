@@ -9,4 +9,4 @@ dashboardTests: 0
 
 # Retrieval Deal Status
 
-{{<embed src="/externals/go-fil-markets/retrievalmarket/dealstatus.go"  lang="go">}}
+{{<embed src="github:filecoin-project/go-fil-markets/retrievalmarket/dealstatus.go"  lang="go">}}
