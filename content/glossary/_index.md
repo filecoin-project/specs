@@ -138,12 +138,6 @@ Finality is a well known concept in blockchain environments and refers to the am
 
 _Gas_ is a property of a [message](glossary#message), corresponding to the resources involved in including that message in a given [block](glossary#block). For each message included in a block, the block's creator (i.e., miner) charges a fee to the message's sender.
 
-## Generation Attack Threshold
-
-Security parameter. Number of rounds within which a new Proof-of-Spacetime must be submitted in order for a miner to retain power in the network (and avoid getting slashed). This number must be smaller than the minimum time it takes for an adversarial miner to generate a replica of the data (thereby not storing it undetectably for some period of time).
-
-The Generation Attack Threshold is equal to the Polling Time + some Grace Period after which miners get slashed.
-
 ## Genesis Block
 
 The _genesis block_ is the first block of the Filecoin blockchain. As is the case with every blockchain, the genesis block is the foundation of the blockchain. The tree of any block mined in the future should link back to the genesis block.
@@ -209,10 +203,6 @@ The main unit of account and negotiation for the data that a user wants to store
 ## Pledged Storage
 
 Storage capacity (in terms of [sectors](glossary#sector))that a miner has promised to reserve for the Filecoin network via [Proof-of-Replication](glossary#proof-of-replication-porep) is termed _pledged storage_.
-
-## Polling Time
-
-Security Parameter. Polling time is the time between two online PoReps in a PoSt proof.
 
 ## Power
 
