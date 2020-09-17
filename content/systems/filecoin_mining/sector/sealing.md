@@ -23,7 +23,7 @@ The Lotus-specific set of functions applied to the sealing of a sector can be fo
 ## Randomness
 
 Randomness is an important attribute that helps the network verify the integrity of Miners' stored data. Filecoin's block creation process includes two types of randomness:
-* [DRAND](#drand): Values pulled from a distributed random beacon
+* [DRAND](drand): Values pulled from a distributed random beacon
 * VRF: The output of a _Verifiable Random Function_ (VRF), which takes the previous block's VRF value and produces the current block's VRF value.
 
 Each block produced in Filecoin includes values pulled from these two sources of randomness.
