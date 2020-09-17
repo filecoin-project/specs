@@ -10,7 +10,7 @@ dashboardAudit: n/a
 
 ## Account Actor
 
-The _Account Actor_ is responsible for user accounts.
+The [_Account Actor_](sysactors) is responsible for user accounts.
 
 ## Actor
 
@@ -18,7 +18,7 @@ The Actor is the Filecoin equivalent of the smart contract in Ethereum.
 
 An actor is an on-chain object with its own state and set of methods. An actor's state is persisted in the on-chain state tree, keyed by its address. All actors (miner actors, the storage market actor, account actors) have an address. Actor's methods are invoked by crafting messages and getting miners to include them in blocks.
 
-There eleven (11) builtin System Actors in total in the Filecoin System.
+There eleven (11) builtin [System Actors](sysactors) in total in the Filecoin System.
 
 ## Address
 
@@ -32,7 +32,7 @@ An _ask_ contains the terms on which a miner is willing to provide services. Sto
 
 ## Block
 
-In a blockchain, a _block_ is the fundamental unit of record. Each block is cryptographically linked to one or more previous blocks. Blocks typically contain messages that apply changes to the previous state (for example, financial records) tracked by the blockchain. A block represents the state of the network at a given point in time.
+In a blockchain, a [_block_](block) is the fundamental unit of record. Each block is cryptographically linked to one or more previous blocks. Blocks typically contain messages that apply changes to the previous state (for example, financial records) tracked by the blockchain. A block represents the state of the network at a given point in time.
 
 ## Block Height
 
@@ -44,7 +44,7 @@ The reward in [FIL](glossary#fil) given to [storage miners](glossary#storage-min
 
 ## Blockchain
 
-A _blockchain_ is a system of record in which new records, or blocks are cryptographically linked to preceding records. This construction is a foundational component of secure, verifiable, and distributed transaction ledgers.
+A [_blockchain_](filecoin_blockchain) is a system of record in which new records, or blocks are cryptographically linked to preceding records. This construction is a foundational component of secure, verifiable, and distributed transaction ledgers.
 
 ## Bootstrapping
 
@@ -60,15 +60,15 @@ An algorithm for challenge derivation used in [Proof of Replication](glossary#pr
 
 ## CID
 
-CID is short for Content Identifier, a self describing content address used throughout the IPFS ecosystem. CIDs are used in Filecoin to identify files submitted to the decentralized storage network. For more detailed information, see [the github documentation for it](https://github.com/ipld/cid).
+[CID](multiformats#cids) is short for Content Identifier, a self describing content address used throughout the IPFS ecosystem. CIDs are used in Filecoin to identify files submitted to the decentralized storage network. For more detailed information, see [the github documentation for it](https://github.com/ipld/cid).
 
 ## Client
 
-There are two types of clients in Filecoin, the storage client and the retrieval client, both of which can be implemented as part of the same physical host. All clients have an account, which is used to pay for the storage or retrieval of data.
+There are two types of [clients](filecoin_nodes#node_types) in Filecoin, the storage client and the retrieval client, both of which can be implemented as part of the same physical host. All clients have an account, which is used to pay for the storage or retrieval of data.
 
 ## Collateral
 
-Collateral is Filecoin tokens pledged by an actor as a commitment to a promise. If the promise is respected, the collateral is returned. If the promise is broken, the collateral is not returned in full.
+[Collateral](filecoin_mining#miner_collaterals) is Filecoin tokens pledged by an actor as a commitment to a promise. If the promise is respected, the collateral is returned. If the promise is broken, the collateral is not returned in full.
 
 In order to enter into a [storage deal](glossary#deal), a [storage miner](glossary#storage-miner-actor) is required to provide [FIL](glossary#fil) as _collateral_, to be paid out as compensation to a client in the event that the miner fails to uphold their storage commitment.
 
@@ -76,17 +76,17 @@ In order to enter into a [storage deal](glossary#deal), a [storage miner](glossa
 
 The algorithm(s) and logic needed so that the state of the blockchain is agreed across all nodes in the network.
 
-## Consensus fault slashing
+## Consensus Fault Slashing
 
 Consensus Fault Slashing is the penalty that a miner incurs for committing consensus faults. This penalty is applied to miners that have acted maliciously against the network's consensus functionality.
 
 ## Cron Actor
 
-The _Cron Actor_ is a scheduler actor that runs critical functions at every epoch.
+The [_Cron Actor_](sysactors) is a scheduler actor that runs critical functions at every epoch.
 
 ## Deal
 
-Two participants in the Filecoin network can enter into a _deal_ in which one party contracts the services of the other for a given price agreed between the two. The Filecoin specification currently details _storage deals_ (in which one party agrees to store data for the other for a specified length of time) and _retrieval deals_ (in which one party agrees to transmit specified data to the other).
+Two participants in the Filecoin network can enter into a [_deal_](storage_market#deal-flow) in which one party contracts the services of the other for a given price agreed between the two. The Filecoin specification currently details _storage deals_ (in which one party agrees to store data for the other for a specified length of time) and _retrieval deals_ (in which one party agrees to transmit specified data to the other).
 
 ## Deal Quality Multiplier
 
@@ -98,19 +98,15 @@ This weight converts spacetime occupied by deals into consensus power. Deal weig
 
 ## DRAND
 
-DRAND, short for Distributed Randomness, is a publicly verifiable random beacon protocol that Filecoin uses as a source of unbiasable entropy for [leader election](glossary#leader-election). See the [DRAND website](https://drand.love/) for more details.
+[DRAND](drand), short for Distributed Randomness, is a publicly verifiable random beacon protocol that Filecoin uses as a source of unbiasable entropy for [leader election](glossary#leader-election). See the [DRAND website](https://drand.love/) for more details.
 
 ## Election
 
-On every [epoch](glossary#epoch), a small subset of Filecoin [storage miners](glossary#storage-miner-actor) are _elected_ to mine a new, or a few new [block(s)](glossary#block) for the Filecoin blockchain. A miner's probability of being elected is roughly proportional to the share of the Filecoin network's total storage capacity they contribute.
+On every [epoch](glossary#epoch), a small subset of Filecoin [storage miners](glossary#storage-miner-actor) are _elected_ to mine a new, or a few new [block(s)](glossary#block) for the Filecoin blockchain. A miner's probability of being elected is roughly proportional to the share of the Filecoin network's total storage capacity they contribute. Election in Filecoin is realized through [Expected Consensus](expected_consensus).
 
 ## Epoch
 
 Time in the Filecoin blockchain is discretized into _epochs_ that are currently set to thirty (30) seconds in duration. On every epoch, a subset of storage miners are elected to each add a new block to the Filecoin blockchain via [Winning Proof-of-Spacetime](glossary#winning-proof-of-spacetime-winningpost). Also referred to as [Round](glossary#round).
-
-## Erasure coding
-
-Erasure coding is a strategy through which messages can be lengthened so as to be made recoverable in spite of errors. See [Wikipedia](https://en.wikipedia.org/wiki/Erasure_code) description.
 
 ## Fault
 
@@ -124,7 +120,7 @@ _FIL_ is the name of the Filecoin unit of currency; it is alternatively denoted 
 
 ## File
 
-Files are what clients bring to the filecoin system to store. A file is converted to a UnixFS DAG and is placed in a [piece](glossary#piece). A piece is the basic unit of account in the storage network and is what is actually stored by the Filecoin network.
+[Files](file) are what clients bring to the filecoin system to store. A file is converted to a UnixFS DAG and is placed in a [piece](glossary#piece). A piece is the basic unit of account in the storage network and is what is actually stored by the Filecoin network.
 
 ## Filecoin
 
@@ -132,7 +128,7 @@ The term _Filecoin_ is used generically to refer to the Filecoin project, protoc
 
 ## Finality
 
-Finality is a well known concept in blockchain environments and refers to the amount of time needed until having a reasonable guarantee that a transaction cannot be reversed or cancelled. It is measured in terms of delay, normally in epochs or rounds from the point when a transaction has been included in a block published onchain.
+[Finality](expected_consensus#finality-in-ec) is a well known concept in blockchain environments and refers to the amount of time needed until having a reasonable guarantee that a transaction cannot be reversed or cancelled. It is measured in terms of delay, normally in epochs or rounds from the point when a transaction has been included in a block published onchain.
 
 ## Gas, Gas Fees
 
@@ -152,11 +148,11 @@ Same as Block Height.
 
 ## Init Actor
 
-The _Init Actor_ initializes new actors and records the network name.
+The [_Init Actor_](sysactors) initializes new actors and records the network name.
 
 ## Lane
 
-_Lanes_ are used to split Filecoin Payment Channels as a way to update the channel state (e.g., for different services exchanged between the same end-points/users). The channel state is updated using [vouchers](glossary#voucher) with every lane marked with an associated `nonce` and amount of tokens it can be redeemed for.
+[_Lanes_](payment_channels#lanes) are used to split Filecoin Payment Channels as a way to update the channel state (e.g., for different services exchanged between the same end-points/users). The channel state is updated using [vouchers](glossary#voucher) with every lane marked with an associated `nonce` and amount of tokens it can be redeemed for.
 
 ## Leader
 
@@ -182,11 +178,11 @@ There are three types of miners in Filecoin:
 
 ## Multisig Actor
 
-The _Multisig Actor_ (or Multi-Signature Wallet Actor) is responsible for dealing with operations involving the Filecoin wallet.
+The [_Multisig Actor_](sysactors) (or Multi-Signature Wallet Actor) is responsible for dealing with operations involving the Filecoin wallet.
 
 ## Node
 
-A node is a communication endpoint that implements the Filecoin protocol.
+A [node](filecoin_nodes) is a communication endpoint that implements the Filecoin protocol.
 
 ## On-chain/off-chain
 
@@ -194,11 +190,11 @@ On-chain actions are those that change the state of the tree and the blockchain 
 
 ## Payment Channel
 
-A payment channel is set up between actors in the Filecoin system to enable off-chain payments with on-chain guarantees, making settlement more efficient. Payment channels are managed by the Payment Channel Actor, who is responsible for setting up and settling funds related to payment channels.
+A [_payment channel_](filecoin_token#payment_channels) is set up between actors in the Filecoin system to enable off-chain payments with on-chain guarantees, making settlement more efficient. Payment channels are managed by the Payment Channel Actor, who is responsible for setting up and settling funds related to payment channels.
 
 ## Piece
 
-The main unit of account and negotiation for the data that a user wants to store on Filecoin. In the Lotus implementation, a piece is a [CAR file](https://github.com/ipld/specs/blob/master/block-layer/content-addressable-archives.md#summary) produced by an IPLD DAG with its own *payload CID* and *piece CID*. However, a piece can be produced in different ways as long as the outcome matches the _piece CID_. A piece is not a unit of storage and therefore, it can be of any size up to the size of a [sector](glossary#sector). If a piece is larger than a sector (currently set to 32GB or 64GB and chosen by the miner), then it has to be split in two (or more) pieces. For more details on the exact sizing of a pieces as well as how it can be produced, see the [Piece section](piece).
+The [Piece](piece) main unit of account and negotiation for the data that a user wants to store on Filecoin. In the Lotus implementation, a piece is a [CAR file](https://github.com/ipld/specs/blob/master/block-layer/content-addressable-archives.md#summary) produced by an IPLD DAG with its own *payload CID* and *piece CID*. However, a piece can be produced in different ways as long as the outcome matches the _piece CID_. A piece is not a unit of storage and therefore, it can be of any size up to the size of a [sector](glossary#sector). If a piece is larger than a sector (currently set to 32GB or 64GB and chosen by the miner), then it has to be split in two (or more) pieces. For more details on the exact sizing of a pieces as well as how it can be produced, see the [Piece section](piece).
 
 ## Pledged Storage
 
@@ -230,11 +226,11 @@ The elements used as input by a proof of Spacetime to enable a proof to be gener
 
 ## Proof of Replication (PoRep)
 
-_Proof-of-Replication_ is a procedure by which a [storage miner](glossary#storage-miner-actor) can prove to the Filecoin network that they have created a unique copy of some piece of data on the network's behalf. PoRep is used in the Filecoin system to generate sealed sectors through which storage miners prove they hold client data.
+[_Proof-of-Replication_](sdr) is a procedure by which a [storage miner](glossary#storage-miner-actor) can prove to the Filecoin network that they have created a unique copy of some piece of data on the network's behalf. PoRep is used in the Filecoin system to generate sealed sectors through which storage miners prove they hold client data.
 
 ## Proof of Spacetime (PoSt)
 
-_Proof-of-Spacetime_ is a procedure by which a [storage-miner](glossary#storage-miner-actor) can prove to the Filecoin network they have stored and continue to store a unique copy of some data on behalf of the network for a period of time. Proof-of-Spacetime manifests in two distinct varieties in the present Filecoin specification: [Window Proof-of-Spacetime](glossary#window-proof-of-spacetime-windowpost) and [Winning Proof-of-Spacetime](glossary#winning-proof-of-spacetime-winningpost).
+[_Proof-of-Spacetime_](post) is a procedure by which a [storage-miner](glossary#storage-miner-actor) can prove to the Filecoin network they have stored and continue to store a unique copy of some data on behalf of the network for a period of time. Proof-of-Spacetime manifests in two distinct varieties in the present Filecoin specification: [Window Proof-of-Spacetime](glossary#window-proof-of-spacetime-windowpost) and [Winning Proof-of-Spacetime](glossary#winning-proof-of-spacetime-winningpost).
 
 ## Quality-Adjusted Power
 
@@ -254,7 +250,7 @@ This measurement is the size of a sector in bytes.
 
 ## Retrieval miner
 
-A _retrieval miner_ is a Filecoin participant that enters in retrieval [deals](glossary#deal) with clients, agreeing to supply a client with a particular file in exchange for [FIL](glossary#fil).  Note that unlike [storage miners](glossary#storage-miner-actor), retrieval miners are not additionally rewarded with the ability to add blocks to (i.e., extend) the Filecoin blockchain; their only reward is the fee they extract from the client.
+A [_retrieval miner_](retrieval_market#retrieval_provider) is a Filecoin participant that enters in retrieval [deals](glossary#deal) with clients, agreeing to supply a client with a particular file in exchange for [FIL](glossary#fil).  Note that unlike [storage miners](glossary#storage-miner-actor), retrieval miners are not additionally rewarded with the ability to add blocks to (i.e., extend) the Filecoin blockchain; their only reward is the fee they extract from the client.
 
 ## Repair
 
@@ -262,7 +258,7 @@ Repair refers to the processes and protocols by which the Filecoin network ensur
 
 ## Reward Actor
 
-The _Reward Actor_ is responsible for distributing block rewards to [storage miners](glossary#storage-miner-actor) and token vesting.
+The [_Reward Actor_](sysactors) is responsible for distributing block rewards to [storage miners](glossary#storage-miner-actor) and token vesting.
 
 ## Round
 
@@ -276,7 +272,7 @@ _Sealing_ is one of the fundamental building blocks of the Filecoin protocol. It
 
 ## Sector
 
-The default unit of storage that miners put in the network (currently 32GBs or 64GBs). A sector is a contiguous array of bytes that a [storage miner](glossary#storage-miner-actor) puts together, seals, and performs Proofs of Spacetime on. Storage miners store data on behalf of the Filecoin network in fixed-size sectors.
+The [sector](sector) is the default unit of storage that miners put in the network (currently 32GBs or 64GBs). A sector is a contiguous array of bytes that a [storage miner](glossary#storage-miner-actor) puts together, seals, and performs Proofs of Spacetime on. Storage miners store data on behalf of the Filecoin network in fixed-size sectors.
 
 Sectors can contain data from multiple deals and multiple clients. Sectors are also split in “Regular Sectors”, i.e., those that contain deals and “Committed Capacity” (CC), i.e., the sectors/storage that have been made available to the system, but for which a deal has not been agreed yet.
 
@@ -290,7 +286,7 @@ This measurement is the sector size multiplied by its promised duration in byte-
 
 ## Slashing
 
-Filecoin implements two kinds of slashing: **Storage Fault Slashing** and **Consensus Fault Slashing**. Below are definitions of both types.
+Filecoin implements two kinds of slashing: [**Storage Fault Slashing**](glossary#storage-fault-slashing) and [**Consensus Fault Slashing**](consensus-fault-slashing).
 
 ## Smart contracts
 
@@ -298,21 +294,21 @@ In the Filecoin blockchain smart contracts are referred to as [actors](glossary#
 
 ## State
 
-The _State_ or _State Tree_ refers to the shared history of the Filecoin system which contains actors and their storage power. The _State_ is deterministically generated from the initial state and the set of messages generated by the system.
+The _State_ or [_State Tree_](state_tree) refers to the shared history of the Filecoin system which contains actors and their storage power. The _State_ is deterministically generated from the initial state and the set of messages generated by the system.
 
 ## Storage Market Actor
 
-The _Storage Market Actor_ is responsible for managing storage and retrieval deals.
+The [_Storage Market Actor_](sysactors) is responsible for managing storage and retrieval deals.
 
 ## Storage Miner Actor
 
-The _Storage Miner Actor_ commits storage to the network, stores data on behalf of the network and is rewarded in [FIL](glossary#fil) for the storage service. The storage miner actor is responsible for collecting proofs and reaching consensus on the latest state of the storage network. When they create a block, storage miners are rewarded with newly minted FIL, as well as the transaction fees they can levy on other participants seeking to include messages in the block.
+The [_Storage Miner Actor_](sysactors) commits storage to the network, stores data on behalf of the network and is rewarded in [FIL](glossary#fil) for the storage service. The storage miner actor is responsible for collecting proofs and reaching consensus on the latest state of the storage network. When they create a block, storage miners are rewarded with newly minted FIL, as well as the transaction fees they can levy on other participants seeking to include messages in the block.
 
 ## Storage Power Actor
 
-The _Storage Power Actor_ is responsible for keeping track of the storage power allocated at each storage miner.
+The [_Storage Power Actor_](sysactors) is responsible for keeping track of the storage power allocated at each storage miner.
 
-## Storage fault slashing
+## Storage Fault Slashing
 
 Storage Fault Slashing is a term that is used to encompass a broader set of penalties, including (but not limited to) Fault Fees, Sector Penalties, and Termination Fees. These penalties are to be paid by miners if they fail to provide sector reliability or decide to voluntarily exit the network. 
 
@@ -343,11 +339,11 @@ To further incentivize the storage of "useful" data over simple [capacity commit
 
 ## Verified Registry Actor
 
-The _Verified Registry Actor_ is responsible for managing [verified clients](glossary#verified-client).
+The [_Verified Registry Actor_](sysactors) is responsible for managing [verified clients](glossary#verified-client).
 
 ## VDF
 
-A verifiable function that guarantees a random delay given some hardware assumptions and a small set of requirements. These requirements are efficient proof verification, random output, and strong sequentiality. Verifiable delay functions are formally defined by [BBBF](https://eprint.iacr.org/2018/601).
+A Verifiable Delay Function that guarantees a random delay given some hardware assumptions and a small set of requirements. These requirements are efficient proof verification, random output, and strong sequentiality. Verifiable delay functions are formally defined by [BBBF](https://eprint.iacr.org/2018/601).
 
 ```text
 {proof, value} <-- VDF(public parameters, seed)
@@ -355,15 +351,15 @@ A verifiable function that guarantees a random delay given some hardware assumpt
 
 ## (Filecoin) Virtual Machine (VM)
 
-The Filecoin VM refers to the system by which changes are applied to the Filecoin system's state. The VM takes messages as input, and outputs updated state. The four main Actors interact with the Filecoin VM to update the state. These are: the `InitActor`, the `CronActor`, the `AccountActor` and the `RewardActor`.
+The [Filecoin VM](actor) refers to the system by which changes are applied to the Filecoin system's state. The VM takes messages as input, and outputs updated state. The four main Actors interact with the Filecoin VM to update the state. These are: the `InitActor`, the `CronActor`, the `AccountActor` and the `RewardActor`.
 
 ## Voucher
 
-Vouchers are used as part of the Payment Channel Actor. Vouchers are signed messages exchanged between the channel creator and the channel recipient to acknowledge that a part of the service has been completed. Vouchers are the realisation of micropayments or checkpoints ini a payment channel. Vouchers are submitted to the blockchain and when `Collected`, funds are moved from the channel creator's account to the channel recipient's account.
+[Vouchers](payment_channels#vouchers) are used as part of the Payment Channel Actor. Vouchers are signed messages exchanged between the channel creator and the channel recipient to acknowledge that a part of the service has been completed. Vouchers are the realisation of micropayments or checkpoints ini a payment channel. Vouchers are submitted to the blockchain and when `Collected`, funds are moved from the channel creator's account to the channel recipient's account.
 
 ## VRF
 
-A verifiable random function that receives {Secret Key (SK), seed} and outputs {proof of correctness, output value}. VRFs must yield a proof of correctness and a unique & efficiently verifiable output.
+A Verifiable Random Function (VRF) that receives {Secret Key (SK), seed} and outputs {proof of correctness, output value}. VRFs must yield a proof of correctness and a unique & efficiently verifiable output.
 
 ```text
 {proof, value} <-- VRF(SK, seed)
@@ -371,7 +367,7 @@ A verifiable random function that receives {Secret Key (SK), seed} and outputs {
 
 ## Weight
 
-Every mined block has a computed `weight`. Together, the `weights` of all the blocks in a branch of the chain determines the cumulative `weight` of that branch. Filecoin's Expected Consensus is a GHOSTy or heaviest-chain protocol, where chain selection is done on the basis of an explicit weighting function. Filecoin’s `weight` function currently seeks to incentivize collaboration amongst miners as well as the addition of storage to the network. The specific weighting function is defined in [Chain Weighting](expected_consensus#chain-weighting).
+Every mined block has a computed `weight`, also called its `WinCount`. Together, the `weights` of all the blocks in a branch of the chain determines the cumulative `weight` of that branch. Filecoin's Expected Consensus is a GHOSTy or heaviest-chain protocol, where chain selection is done on the basis of an explicit weighting function. Filecoin’s `weight` function currently seeks to incentivize collaboration amongst miners as well as the addition of storage to the network. The specific weighting function is defined in [Chain Weighting](expected_consensus#chain-weighting).
 
 ## Window Proof-of-Spacetime (WindowPoSt)
 
