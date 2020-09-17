@@ -8,7 +8,7 @@ dashboardAudit: 0
 dashboardTests: 0
 ---
 
-# The Filecoin Piece & Data Representation in Filecoin
+# The Filecoin Piece
 ---
 
 The _Filecoin Piece_ is the main _unit of negotiation_ for data that users store on the Filecoin network. The Filecoin Piece is _not a unit of storage_, it is not of a specific size, but is upper-bounded by the size of the _Sector_. A Filecoin Piece can be of any size, but if a Piece is larger than the size of a Sector that the miner supports it has to be split into more Pieces so that each Piece fits into a Sector.
@@ -23,7 +23,7 @@ Piece data structures.
 
 ![Pieces, Proving Trees, and Piece Data Structures](pieces.png)
 
-## Data Representation in the Filecoin Network
+## Data Representation
 
 It is important to highlight that data submitted to the Filecoin network go through several transformations before they come to the format at which the `StorageProvider` stores it.
 
@@ -56,3 +56,9 @@ The following steps take place on the `StorageProvider` side (apart from step 4 
 8. Finally, _CommR_ (or _Commitment of Replication_) is the hash of CommC || CommRLast.
 
 Finally, it is important to add a note related to the _Payload CID_ (discussed in the first two steps above) and the data retrieval process. The retrieval deal is negotiated on the basis of the _Payload CID_. When the retrieval deal is agreed, the retrieval miner starts sending the unsealed and "un-CAR'ed" file to the client. The transfer starts from the root node of the IPLD Merkle Tree and in this way the client can validate the _Payload CID_ from the beginning of the transfer and verify that the file they are receiving is the file they negotiated in the deal and not random bits.
+
+## PieceStore
+
+The `PieceStore` module allows for storage and retrieval of Pieces from some local storage. The piecestore's main goal is to help the [storage](https://github.com/filecoin-project/go-fil-markets/blob/master/storagemarket) and [retrieval market](https://github.com/filecoin-project/go-fil-markets/blob/master/retrievalmarket) modules to find where sealed data lives inside of sectors. The storage market writes the data, and retrieval market reads it in order to send out to retrieval clients.
+
+The implementation of the PieceStore module can be found [here](https://github.com/filecoin-project/go-fil-markets/tree/master/piecestore).
