@@ -70,7 +70,7 @@ You can split out sub-sections by adding additional pages to a section directory
 
 The markdown documents should all be well formed, with a single h1, and headings should increment by a single level.
 
-> Note: Regular pages like `content/intro/concepts.md` can't use resources like images, etc to work around it you need to create a new folder like `content/intro/concepts/_index.md` and add the resources to the new `concepts` folder then you can use them inside _index.md. Everything else works the same way. 
+> Note: Regular markdown files like `content/intro/concepts.md` can't reference resources such as images, or other files. Such resources can be referenced only from `_index.md` files. Given that a folder will have an `_index.md` file already, there is the following work around to reference resources from any file: create a new sub-folder in the same folder where the initial .md file was, e.g., `content/intro/concepts/_index.md`, include the content from `concepts.md` in the `_index.md` file, add the resource files (for example, images) in the new folder and reference the resource file from the new `_index.md` file inside the `concepts` folder. The referencing syntax and everything else works the same way.
 
 ## Check your markdown
 
