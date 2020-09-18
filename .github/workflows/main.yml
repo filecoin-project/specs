@@ -26,6 +26,7 @@ jobs:
       # Pin the built site to ipfs-cluster, output the cid as `steps.ipfs.outputs.cid`
       # see: https://github.com/ipfs-shipyard/ipfs-github-action
       - uses: ipfs-shipyard/ipfs-github-action@v2.0.0
+        if: github.event.pull_request.head.repo.full_name == github.repository
         id: ipfs
         with:
           path_to_add: public
@@ -43,4 +44,4 @@ jobs:
         env:
           DNSIMPLE_TOKEN: ${{ secrets.DNSIMPLE_TOKEN }}
         # TODO: change to master once merged.
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master' && github.event.pull_request.head.repo.full_name == github.repository
