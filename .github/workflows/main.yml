@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: '12'
-      
+      - run: echo ${{ github.event }}
       # get lotus deps...
       - run: sudo apt install bzr
 
