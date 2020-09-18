@@ -18,11 +18,11 @@ jobs:
       
       # get lotus deps...
       - run: sudo apt install bzr
-
+      - run: echo ${{github.repository_owner}}
       - run: npm install
       - run: npm test
       - run: npm run build
-      - run: echo ${{github.repository_owner}}
+      
       # Pin the built site to ipfs-cluster, output the cid as `steps.ipfs.outputs.cid`
       # see: https://github.com/ipfs-shipyard/ipfs-github-action
       - uses: ipfs-shipyard/ipfs-github-action@v2.0.0
