@@ -31,7 +31,7 @@ Below is the process followed from the point a user starts preparing a file to s
 
 The first three steps take place on the client side.
 
-1. When a client wants to store a file in the Filecoin network, they start by producing the IPLD DAG of the file. The hash that represents root node of the DAG is an IPFS-style CID, called _Payload CID_.
+1. When a client wants to store a file in the Filecoin network, they start by producing the IPLD DAG of the file. The hash that represents the root node of the DAG is an IPFS-style CID, called _Payload CID_.
 
 2. In order to make a _Filecoin Piece_, the IPLD DAG is serialised into a ["Content-Addressable aRchive" (.car)](https://github.com/ipld/specs/blob/master/block-layer/content-addressable-archives.md#summary) file, which is in raw bytes format. A CAR file is an opaque blob of data that packs together and transfers IPLD nodes. The _Payload CID_ is common between the CAR'ed and un-CAR'ed constructions. This helps later during data retrieval, when data is transferred between the storage  client and the storage provider as we discuss later.
 
@@ -51,7 +51,10 @@ The following steps take place on the `StorageProvider` side (apart from step 4 
 
 8. Finally, _CommR_ (or _Commitment of Replication_) is the hash of CommC || CommRLast.
 
-Finally, it is important to add a note related to the _Payload CID_ (discussed in the first two steps above) and the data retrieval process. The retrieval deal is negotiated on the basis of the _Payload CID_. When the retrieval deal is agreed, the retrieval miner starts sending the unsealed and "un-CAR'ed" file to the client. The transfer starts from the root node of the IPLD Merkle Tree and in this way the client can validate the _Payload CID_ from the beginning of the transfer and verify that the file they are receiving is the file they negotiated in the deal and not random bits.
+
+**IMPORTANT NOTES:**
+- Steps 2 and 3 above are specific to the Lotus implementation. The same outcome can be achieved in different ways. However, any implementation has to make sure that the initial IPLD DAG is serialised and padded so that calculating the Merkle root out of the resulting blob of data gives the same **Piece CID**. As long as this is the case, implementations can deviate from the first three steps above.
+- Finally, it is important to add a note related to the _Payload CID_ (discussed in the first two steps above) and the data retrieval process. The retrieval deal is negotiated on the basis of the _Payload CID_. When the retrieval deal is agreed, the retrieval miner starts sending the unsealed and "un-CAR'ed" file to the client. The transfer starts from the root node of the IPLD Merkle Tree and in this way the client can validate the _Payload CID_ from the beginning of the transfer and verify that the file they are receiving is the file they negotiated in the deal and not random bits.
 
 ## PieceStore
 
