@@ -1,6 +1,6 @@
 name: CI 
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   deploy:
@@ -36,8 +36,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - run: echo /ipfs/${{ steps.ipfs.outputs.cid }}
-
-      - run: echo ${{ github.ref }}
 
       # Update the dnslink if changes to the current branch should go live
       # see https://github.com/ipfs-shipyard/js-dnslink-dnsimple
