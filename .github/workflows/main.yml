@@ -26,8 +26,8 @@ jobs:
       # Pin the built site to ipfs-cluster, output the cid as `steps.ipfs.outputs.cid`
       # see: https://github.com/ipfs-shipyard/ipfs-github-action
       - uses: ipfs-shipyard/ipfs-github-action@v2.0.0
+        if: github.event.pull_request.head.repo.full_name == github.repository
         id: ipfs
-        if: secrets != 0
         with:
           path_to_add: public
           cluster_host: /dnsaddr/cluster.ipfs.io
@@ -41,7 +41,6 @@ jobs:
       # Update the dnslink if changes to the current branch should go live
       # see https://github.com/ipfs-shipyard/js-dnslink-dnsimple
       - run: npx dnslink-dnsimple --domain spec.filecoin.io --link /ipfs/${{ steps.ipfs.outputs.cid }}
+        if: github.ref == 'refs/heads/master' && github.event.pull_request.head.repo.full_name == github.repository
         env:
           DNSIMPLE_TOKEN: ${{ secrets.DNSIMPLE_TOKEN }}
-        # TODO: change to master once merged.
-        if: github.ref == 'refs/heads/master' && secrets != 0
