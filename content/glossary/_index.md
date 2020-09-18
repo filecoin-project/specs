@@ -134,6 +134,11 @@ The term _Filecoin_ is used generically to refer to the Filecoin project, protoc
 
 [Finality](expected_consensus#finality-in-ec) is a well known concept in blockchain environments and refers to the amount of time needed until having a reasonable guarantee that a transaction cannot be reversed or cancelled. It is measured in terms of delay, normally in epochs or rounds from the point when a transaction has been included in a block published onchain.
 
+## `fr32`
+
+The term `fr32` is derived from the name of a struct that Filecoin uses to represent the elements of the arithmetic field of a pairing-friendly curve, specifically Bls12-381—which justifies use of 32 bytes. `F` stands for "Field", while `r` is simply a mathematic letter-as-variable substitution used to denote the modulus of this particular field.
+
+
 ## Gas, Gas Fees
 
 _Gas_ is a property of a [message](glossary#message), corresponding to the resources involved in including that message in a given [block](glossary#block). For each message included in a block, the block's creator (i.e., miner) charges a fee to the message's sender.
