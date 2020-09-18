@@ -18,7 +18,7 @@ jobs:
       
       # get lotus deps...
       - run: sudo apt install bzr
-      - run: echo ${{github.ref}}
+      - run: echo ${{github.event.pull_request.head.repo.full_name}}
       - run: npm install
       - run: npm test
       - run: npm run build
