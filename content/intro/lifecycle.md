@@ -1,6 +1,6 @@
 ---
 title: Lifecycle of Data
-weight: 5
+weight: 4
 dashboardWeight: 0.2
 dashboardState: reliable
 dashboardAudit: n/a

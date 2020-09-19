@@ -1,6 +1,6 @@
 ---
 title: "Filecoin VM"
-weight: 3
+weight: 5
 dashboardWeight: 0.2
 dashboardState: reliable
 dashboardAudit: n/a
