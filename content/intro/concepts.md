@@ -12,7 +12,7 @@ The Filecoin Protocol is a complex system that includes many different and novel
 
 ## FIL Network & Protocol
 
-- **Node Types:** Nodes in the Filecoin network are defined in an abstract manner and are primarily identified in terms of the services they provide. The type of node, therefore, depends on which services the node provides. A basic set of services in the Filecoin network include: chain verification, storage market client, storage market provider, retrieval market client, retrieval market provider and storage mining. Nodes that extend the blockchain need to implement the chain verification and storage mining services. See [Node Types section](filecoin-nodes) for more details.
+- **Node Types:** Nodes in the Filecoin network are defined in an abstract manner and are primarily identified in terms of the services they provide. The type of node, therefore, depends on which services the node provides. A basic set of services in the Filecoin network include: chain verification, storage market client, storage market provider, retrieval market client, retrieval market provider and storage mining. Nodes that extend the blockchain need to implement the chain verification and storage mining services. See [Node Types section](filecoin_nodes) for more details.
 
 - **Files, Messages and Data:**
 	- _File:_ a file represents the data that a user wants to store on the Filecoin network. Each node runs a `FileStore` which is simply an abstraction for any system or device where a user stores the data it has submitted to Filecoin. See the [File section](file) for more details.
@@ -27,15 +27,15 @@ The Filecoin Protocol is a complex system that includes many different and novel
 
     - _Tipset:_ A set of up to 5 blocks. The _Tipset_ is the unit of increment of the Filecoin blockchain. This means that in every round or epoch the Filecoin blockchain is extended by one Tipset (as opposed to one block as is common in other blockchains). A Tipset is a set of blocks that have the same parent set and have been mined in the same epoch.
 
-    - _Message Pool:_ The message pool, `mpool` or `mempool` is a collection of messages that miners have submitted to be included in the blockchain. Every miner node maintains a collection of messages out of which it picks the ones it wants to include in the next block it intends to mine. See the [Message Pool section](message-pool) for more details.
+    - _Message Pool:_ The message pool, `mpool` or `mempool` is a collection of messages that miners have submitted to be included in the blockchain. Every miner node maintains a collection of messages out of which it picks the ones it wants to include in the next block it intends to mine. See the [Message Pool section](message_pool) for more details.
 
-- _Deal:_ The agreement between the client and a miner for the storage of data. A deal has its own *deal CID* that includes the identifiers of the client, the miner and details about the deal itself. See the [Storage Market section](storage-market) for more details on storage deals.
+- _Deal:_ The agreement between the client and a miner for the storage of data. A deal has its own *deal CID* that includes the identifiers of the client, the miner and details about the deal itself. See the [Storage Market section](storage_market) for more details on storage deals.
 
-- _Sealing:_ the process that takes as input the data that a user submits to the Filecoin network and produces an encoded output that links the data with the specific node. This binding of a sealed sector to a node and the recording of this on the blockchain is what keeps the system secure, i.e., avoids colluding nodes from sharing storage space and reporting to the system more storage than they actually commit to the system. The sealing process enables much of the operation of the Proof of Replication and Proof of SpaceTime and is effectively what keeps the system safe. See the [Sector Sealing section](sector-sealing) for more details.
+- _Sealing:_ the process that takes as input the data that a user submits to the Filecoin network and produces an encoded output that links the data with the specific node. This binding of a sealed sector to a node and the recording of this on the blockchain is what keeps the system secure, i.e., avoids colluding nodes from sharing storage space and reporting to the system more storage than they actually commit to the system. The sealing process enables much of the operation of the Proof of Replication and Proof of SpaceTime and is effectively what keeps the system safe. See the [Sector Sealing section](sealing) for more details.
 
 - **Actors:** Actors are the Ethereum equivalent of smart contracts in the Filecoin blockchain. Actors carry the logic needed in order to submit transactions, proofs and blocks, among other things, to the Filecoin blockchain. Every actor is identified by a unique address. See the [System Actors section](sysactors) for more details.
 
-- **Virtual Machine:** The Filecoin Virtual Machine executes actors code and maintains the _state tree_, which is the latest source of truth in the Filecoin blockchain. See the [Virtual Machine section](filecoin_vm) for more details.
+- **Virtual Machine:** The Filecoin Virtual Machine executes actors code and maintains the _state tree_, which is the latest source of truth in the Filecoin blockchain. See the [Virtual Machine section](systems/filecoin_vm) for more details.
 
 - **Power Table:** The table where the power (in terms of storage capacity) of each miner is kept.
 
