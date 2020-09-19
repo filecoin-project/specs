@@ -203,7 +203,7 @@ A [_payment channel_](filecoin_token#payment_channels) is set up between actors 
 
 ## Piece
 
-The [Piece](piece) main unit of account and negotiation for the data that a user wants to store on Filecoin. In the Lotus implementation, a piece is a [CAR file](https://github.com/ipld/specs/blob/master/block-layer/content-addressable-archives.md#summary) produced by an IPLD DAG with its own *payload CID* and *piece CID*. However, a piece can be produced in different ways as long as the outcome matches the _piece CID_. A piece is not a unit of storage and therefore, it can be of any size up to the size of a [sector](glossary#sector). If a piece is larger than a sector (currently set to 32GB or 64GB and chosen by the miner), then it has to be split in two (or more) pieces. For more details on the exact sizing of a pieces as well as how it can be produced, see the [Piece section](piece).
+The [Piece](piece) is the main unit of account and negotiation for the data that a user wants to store on Filecoin. In the Lotus implementation, a piece is a [CAR file](https://github.com/ipld/specs/blob/master/block-layer/content-addressable-archives.md#summary) produced by an IPLD DAG with its own *payload CID* and *piece CID*. However, a piece can be produced in different ways as long as the outcome matches the _piece CID_. A piece is not a unit of storage and therefore, it can be of any size up to the size of a [sector](glossary#sector). If a piece is larger than a sector (currently set to 32GB or 64GB and chosen by the miner), then it has to be split in two (or more) pieces. For more details on the exact sizing of a Filecoin Piece as well as how it can be produced, see the [Piece section](piece).
 
 ## Pledged Storage
 
