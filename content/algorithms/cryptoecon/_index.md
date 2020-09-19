@@ -14,8 +14,8 @@ The Filecoin network is a complex multi-agent economic system. The CryptoEconomi
 Next, we provide the parameters of the cryptoeconomic model. It is advised that the reader refers to the following sections that are closely related to the Filecoin CryptoEconomic model.
 
 - [Miner Collaterals](miner_collaterals)
-- The Minting Model
-- Token Allocation
+- [The Minting Model](minting_model)
+- [Token Allocation](token_allocation)
 
 ## Verified Clients
 
