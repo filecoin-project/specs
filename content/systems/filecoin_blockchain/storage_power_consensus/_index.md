@@ -3,13 +3,12 @@ title: Storage Power Consensus
 weight: 4
 bookCollapseSection: true
 dashboardWeight: 2
-dashboardState: incorrect
-dashboardAudit: 0
+dashboardState: wip
+dashboardAudit: wip
 dashboardTests: 0
 ---
 
 # Storage Power Consensus
----
 
 TODO: remove all stale .id, .go files referenced
 

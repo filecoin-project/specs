@@ -1,12 +1,11 @@
 ---
 title: Introduction
 weight: 1
-dashboardState: incomplete
+dashboardState: wip
 bookCollapseSection: true
 ---
 
 # Introdução
----
 
 Filecoin is a distributed storage network based on a blockchain mechanism.
 Filecoin *miners* can elect to provide storage capacity for the network, and thereby

@@ -35,16 +35,13 @@
             {{ if gt $cov 20 }}
                 {{ $color = "bg-wip"}}
             {{ end }}
-            {{ if gt $cov 45 }}
-                {{ $color = "bg-incomplete"}}
-            {{ end }}
             {{ if gt $cov 70 }}
-                {{ $color = "bg-stable"}}
+                {{ $color = "bg-reliable"}}
             {{ end }}
             <tr>
                 <td style="text-align:left"><a title="{{ $repoName }}" href="{{ $repoUrl }}">{{ $repoName }}</a></td>
                 <td>{{ $repoLang }}</td>
-                <td class="text-black {{ if eq $data.commit.ci_passed  true }}bg-stable{{ else if eq $data.commit.ci_passed false }}bg-incorrect {{ else }}bg-na{{end}}">
+                <td class="text-black {{ if eq $data.commit.ci_passed  true }}bg-reliable{{ else if eq $data.commit.ci_passed false }}bg-incorrect {{ else }}bg-na{{end}}">
                     {{ if eq $data.commit.ci_passed  true }}Passed{{ else if eq $data.commit.ci_passed false }}Failed{{ else }}Unknown{{ end }}
                 </td>
                 <td class="text-black {{ $color }}">
@@ -52,8 +49,20 @@
                         {{ if $data.commit.totals.c }}{{ math.Round $data.commit.totals.c }}%{{ else }}Unknown{{end}}
                     </a>
                 </td>
-                <td class="text-transparent {{ if gt $impl.Params.implAudit 0 }}bg-stable{{ else }}bg-incorrect{{end}}">
-                    {{ $impl.Params.implAudit }}
+                <td class="text-black bg-{{ $repoItem.auditState | default "missing" }}">
+                    {{ if eq $repoItem.auditState "wip" }}
+                        WIP
+                    {{ else if and (eq $repoItem.auditState "done") (isset $repoItem "audits") }}
+                    {{ else }}
+                        {{ humanize $repoItem.auditState | default "Missing" }}
+                    {{ end }}
+                    {{ if isset $repoItem "audits" }} 
+                        {{ range $auditIndex, $audit := $repoItem.audits }}
+                            <a href="{{ $audit.auditURL }}" title="Read the audit report - {{ $audit.auditDate }}" target="_blank" rel="noopener noreferrer" class="text-black">
+                                [{{ add $auditIndex 1 }}]
+                            </a>
+                        {{ end }}
+                    {{ end }}
                 </td>
             </tr>
         {{ end }}

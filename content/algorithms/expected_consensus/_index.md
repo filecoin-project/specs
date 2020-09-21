@@ -2,13 +2,12 @@
 title: "Expected Consensus"
 weight: 1
 dashboardWeight: 2
-dashboardState: incomplete
-dashboardAudit: 1
+dashboardState: reliable
+dashboardAudit: wip
 dashboardTests: 0
 ---
 
 # Expected Consensus
----
 
 TODO: remove stale .id/.go files
 
@@ -325,12 +324,12 @@ w[r+1] = w[r] + (wPowerFactor[r+1] + wBlocksFactor[r+1]) * 2^8
 For a given tipset `ts` in round `r+1`, we define:
 
 - `wPowerFactor[r+1]  = wFunction(totalPowerAtTipset(ts))`
-- wBlocksFactor[r+1] =  `wPowerFactor[r+1] * wRatio * t / e`
+- `wBlocksFactor[r+1] =  wPowerFactor[r+1] * wRatio * t / e`
   - with `t = |ticketsInTipset(ts)|`
   - `e = expected number of tickets per round in the protocol`
   - and `wRatio in ]0, 1[`
 Thus, for stability of weight across implementations, we take:
-- wBlocksFactor[r+1] =  `(wPowerFactor[r+1] * b * wRatio_num) / (e * wRatio_den)`
+- `wBlocksFactor[r+1] =  (wPowerFactor[r+1] * b * wRatio_num) / (e * wRatio_den)`
 
 We get:
 
@@ -387,16 +386,17 @@ This is detectable when a given miner submits two blocks that satisfy any of the
 
 1. **Double-Fork Mining Fault**: two blocks mined at the same epoch (even if they have the same tipset).
    - `B4.Epoch == B5.Epoch` 
-{{< svg src="diagrams/double_fork.dot.svg" title="Double-Fork Mining Fault" >}}
+![Double-Fork Mining Fault](diagrams/double_fork.dot)
+
 
 2. **Time-Offset Mining Fault**: two blocks mined off of the same Tipset at different epochs.
    - `B3.Parents == B4.Parents && B3.Epoch != B4.Epoch`
-{{< svg src="diagrams/time_offset.dot.svg" title="Time-Offset Mining Fault" >}}
+![Time-Offset Mining Fault](diagrams/time_offset.dot)
 
 3. **Parent-Grinding Fault**: one block's parent is a Tipset that provably should have included a given block but does not. While it cannot be proven that a missing block was willfully omitted in general (i.e. network latency could simply mean the miner did not receive a particular block), it can when a miner has successfully mined a block two epochs in a row and omitted one. That is, this condition should be evoked when a miner omits their own prior block.
 Specifically, this can be proven with a "witness" block, that is by submitting blocks B2, B3, B4 where B2 is B4's parent and B3's sibling but B3 is not B4's parent.
     - `!B4.Parents.Include(B3) && B4.Parents.Include(B2) && B3.Parents == B2.Parents && B3.Epoch == B2.Epoch`
-{{< svg src="diagrams/parent_grinding.dot.svg" title="Parent-Grinding fault" >}}
+![Parent-Grinding fault](diagrams/parent_grinding.dot)
 
 ### Penalization for faults
 A single consensus fault results into:

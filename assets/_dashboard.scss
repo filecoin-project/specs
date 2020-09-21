@@ -1,8 +1,15 @@
+#dashboard-container {
+    // the dashboard is generated on the client, so it throws out in page anchor scrolling, so we set the heigt manually here.
+    // TODO: Fix properly. perhaps generating the table earlier in the page render could fix it... otherwise writing it into the dom as a post process.
+    height: 2850px; 
+    overflow: auto
+}
 table.Dashboard {
     display: table;
     table-layout: fixed;
     width: 100%;
     font-size: 12px;
+    margin: 0;
 }
 
 table.Dashboard {
@@ -21,7 +28,6 @@ table.Dashboard {
 }
 
 .Dashboard-section {
-    // max-width:250px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

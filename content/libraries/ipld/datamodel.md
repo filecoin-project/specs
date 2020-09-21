@@ -1,8 +1,8 @@
 ---
 title: Data Model
 dashboardWeight: 1
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: missing
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 

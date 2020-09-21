@@ -48,5 +48,5 @@
       {{- warnf "Page '%s' not found in '%s' for lang '%s'" .Destination .Page.File .Page.File.Lang }}
     {{- end }}
   {{- end }}
-  <a href="{{ $destination | safeURL }}"{{ with $title}} title="{{ . }}"{{ end }} {{ if $isRemote }} target="_blank" rel="noopener"{{ end }}>{{ .Text | safeHTML }}</a>
+  <a href="{{ $destination | safeURL }}"{{ with $title}} title="{{ . }}"{{ end }} {{ if $isRemote }} target="_blank" rel="noopener"{{ end }}>{{ (default $title .Text) | safeHTML }}</a>
 {{- end -}}

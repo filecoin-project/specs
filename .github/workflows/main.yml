@@ -16,7 +16,11 @@ jobs:
         with:
           node-version: '12'
       
+      # get lotus deps...
+      - run: sudo apt install bzr
+
       - run: npm install
+      - run: npm test
       - run: npm run build
 
       # Pin the built site to ipfs-cluster, output the cid as `steps.ipfs.outputs.cid`

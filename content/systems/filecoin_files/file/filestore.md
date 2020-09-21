@@ -1,13 +1,12 @@
 ---
 title: FileStore
 dashboardWeight: 1
-dashboardState: stable
-dashboardAudit: 0
+dashboardState: reliable
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 
 # FileStore - Local Storage for Files
----
 
 The `FileStore` is an abstraction used to refer to any underlying system or device
 that Filecoin will store its data to. It is based on Unix filesystem semantics, and

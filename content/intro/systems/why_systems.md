@@ -2,12 +2,11 @@
 title: What are Systems?
 weight: 1
 dashboardWeight: 0.2
-dashboardState: incomplete
-dashboardAudit: 0
+dashboardState: reliable
+dashboardAudit: n/a
 ---
 
 # What are Systems? How do they work?
----
 
 Filecoin decouples and modularizes functionality into loosely-joined `systems`.
 Each system adds significant functionality, usually to achieve a set of important and tightly related goals.
