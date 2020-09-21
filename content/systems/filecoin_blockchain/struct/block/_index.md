@@ -25,7 +25,7 @@ type FullBlock struct {
 
 > **Note:** A block is functionally the same as a block header in the Filecoin protocol. While a block header contains Merkle links to the full system state, messages, and message receipts, a block can be thought of as the full set of this information (not just the Merkle roots, but rather the full data of the state tree, message tree, receipts tree, etc.). Because a full block is large in size, the Filecoin blockchain consists of block headers rather than full blocks. We often use the terms `block` and `block header` interchangeably.
 
-A `BlockHeader` is a canonical representation of a block. BlockHeaders are propagated between miner nodes. From the blockcheader message, a miner has all the required information to apply the associated `FullBlock`'s state and update the chain. In order to be able to do this, the minimum set of information items that need to be included in the `BlockHeader` are shown below and include among others: the miner's address, the [Ticket](\missing-link), the [Proof of SpaceTime](\missing-link), the CID of the parents where this block evolved from in the IPLD DAG, as well as the messages' own CID.
+A `BlockHeader` is a canonical representation of a block. BlockHeaders are propagated between miner nodes. From the blockcheader message, a miner has all the required information to apply the associated `FullBlock`'s state and update the chain. In order to be able to do this, the minimum set of information items that need to be included in the `BlockHeader` are shown below and include among others: the miner's address, the Ticket, the [Proof of SpaceTime](post), the CID of the parents where this block evolved from in the IPLD DAG, as well as the messages' own CID.
 
 The Lotus implementation of the block header can be found [here](https://github.com/filecoin-project/lotus/blob/master/chain/types/blockheader.go). It has the following `struct`s:
 
@@ -66,7 +66,7 @@ type BeaconEntry struct {
 }
 ```
 
-The `BlockHeader` structure has to refer to the TicketWinner of the current round ++ which eensures the correct winner is passed to [ChainSync](\missing-link).
+The `BlockHeader` structure has to refer to the TicketWinner of the current round ++ which eensures the correct winner is passed to [ChainSync](chainsync).
 
 ```go
 func IsTicketWinner(vrfTicket []byte, mypow BigInt, totpow BigInt) bool
