@@ -26,21 +26,26 @@ The following table summarizes initial parameter recommendations for Filecoin. M
 
 | **Parameter**  | **Value**   |
 | :------------- | :---------- |
-| Baseline Initial Value | 1 EiB | 
-| Baseline Annual Growth Rate  | 200% |
+| Baseline Storage Amount Initial Value | 2.5 EiB | 
+| Baseline Storage Amount Function  | 100% |
 | Percent simple minting vs baseline minting | 30% / 70% |
-| Reward delay and linear vesting period | 20 days |
+| Percent of block reward locked as collateral " | 100% |
+| Reward delay and linear vesting period | 0 days |
 | Linear vesting period | 180 days |
 | Sector quality multipliers | Committed Capacity: 1x <br> Regular Deals: 1x <br> Verified Client Deals: 10x |
 | Initial pledge function | 20 days worth of block reward + <br> share of 30% FIL circulating supply target | 
+| Initial Pledge Cap | 1FIL/32GiB QA Power |
 | Minimum sector lifetime | 180 days |
 | Maximum sector lifetime | 540 days |
 | Minimum deal duration | 180 days |
 | Maximum deal duration | 540 days |
-| Sector Fault Fee | 2.14 days |
-| Sector Fault Detection Fee | 5 days worth of estimated block reward |
+| Sector Fault Fee | 2.14 days worth of block reward|
+| Sector Fault Detection Fee | 3.5 days worth of estimated block reward |
 | Sector Termination Fee | Estimated number of days of block reward that a sector has earned; capped at 90 days |
+| Minimum Client Deal Collateral | 0 |
+| Minimum Provider Deal Collateral | 1% of raw byte-normalised circulating supply |
 | Network Transaction Fee | Dynamic fee structure based on network congestion |
+
 
 ## Design Principles Justification
 
