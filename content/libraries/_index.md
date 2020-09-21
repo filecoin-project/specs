@@ -2,7 +2,7 @@
 title: Libraries
 weight: 3 
 dashboardWeight: 1.5
-dashboardState: wip
+dashboardState: reliable
 dashboardAudit: n/a
 dashboardTests: 0
 ---

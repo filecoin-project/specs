@@ -224,8 +224,6 @@ ValidateBeaconEntries(blockHeader, priorBlockHeader) error {
 
 Filecoin block headers also contain a single "ticket" generated from its epoch's beacon entry. Tickets are used to break ties in the Fork Choice Rule, for forks of equal weight.
 
-You can find the Ticket data structure [here](data_structures)
-
 Whenever comparing tickets in Filecoin, the comparison is that of the ticket's VRFDigest's bytes.
 
 ### Randomness Ticket generation

@@ -34,11 +34,7 @@ All Systems, as defined in this document, require the following:
   Systems expect to be initialized with a Clock from which to tell network time. Some systems (like Blockchain)
   require very little clock drift, and require _secure_ time.
 
-For this purpose, we use the `FilecoinNode` data structure, which is passed into all systems at initialization:
-
-{{<embed src="../../systems/filecoin_nodes/node_base/filecoin_node.id" lang="go">}}
-
-{{<embed src="../../systems/filecoin_nodes/repository/repository_subsystem.id" lang="go" >}}
+For this purpose, we use the `FilecoinNode` data structure, which is passed into all systems at initialization.
 
 ## System Limitations
 
