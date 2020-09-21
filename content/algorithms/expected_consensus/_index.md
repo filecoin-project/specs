@@ -1,23 +1,21 @@
 ---
-title: "Expected Consensus"
+title: Expected Consensus
 weight: 1
 dashboardWeight: 2
-dashboardState: incorrect
+dashboardState: reliable
 dashboardAudit: wip
 dashboardTests: 0
 ---
 
 # Expected Consensus
 
-TODO: remove stale .id/.go files
-
 ## Algorithm
 
-Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high level, it operates by running a leader election every epoch in which, on expectation, a set number of participants may be eligible to submit a block. EC guarantees that these winners will be anonymous until they reveal themselves by submitting a proof of their election, the `ElectionProof`. Each winning miner can submit one such proof per round and will be rewarded proportionally to its power. **Each miner will submit a proof for election (Leader Election - Step 1) and a proof of storage (Winning PoSt - Step 2).**
+Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high level, it operates by running a leader election every epoch in which, on expectation, a set number of participants may be eligible to submit a block. EC guarantees that these winners will be anonymous until they reveal themselves by submitting a proof that they have been elected, the `ElectionProof`. Each winning miner can submit one such proof per round and will be rewarded proportionally to its power. From this point on, each wining miner also creates a proof of storage (aka Winning PoSt). Each proof can be derived from a [properly formatted beacon entry](randomness), as described below.
 
-All valid blocks submitted in a given round form a `Tipset`. Every block in a Tipset adds weight to its chain. The 'best' chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on how to select the heaviest chain, see [Chain Selection](expected_consensus#chain-selection).
+All valid blocks submitted in a given round form a `Tipset`. Every block in a Tipset adds weight to its chain. The 'best' chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on how to select the heaviest chain, see [Chain Selection](expected_consensus#chain-selection). While on expectation at least one block will be generated at every round, in cases where no one finds a block in a given round, a miner can simply run leader election again for the next epoch with the appropriate random seed, thereby ensuring liveness in the protocol.
 
-Every block is associated with a randomness value. This randomness value is generated from [DRAND](https://drand.love), an unbiasable randomness generator, through a beacon. When the miner wants to publish a new block, they invoke the `getRandomness` function providing the chain height (i.e., epoch) as input. The randomness value is returned through the DRAND beacon and included in the block. For the details of DRAND and its implementation, please consult the project's [documentation](https://drand.love/docs/overview/) and [specification](https://drand.love/docs/specification/).
+The randomness used in the proofs is generated from [DRAND](https://drand.love), an unbiasable randomness generator, through a beacon. When the miner wants to publish a new block, they invoke the `getRandomness` function providing the chain height (i.e., epoch) as input. The randomness value is returned through the DRAND beacon and included in the block. For the details of DRAND and its implementation, please consult the project's [documentation](https://drand.love/docs/overview/) and [specification](https://drand.love/docs/specification/).
 
 The [Storage Power Consensus](storage_power_consensus) subsystem uses access to EC to use the following facilities:
 
@@ -26,20 +24,18 @@ The [Storage Power Consensus](storage_power_consensus) subsystem uses access to 
 - Access to a weighting function enabling [Chain Selection](expected_consensus#chain-selection) by the chain manager.
 - Access to the most recently [finalized tipset](expected_consensus#finality-in-ec) available to all protocol participants.
 
-{{<embed src="../../systems/filecoin_blockchain/storage_power_consensus/expected_consensus.id"  lang="go" >}} 
-{{<embed src="../../systems/filecoin_blockchain/storage_power_consensus/expected_consensus.go"  lang="go" >}}
 
 ## Tickets in EC
 
 There are two kinds of tickets:
-1. election proof/ticket: which is the VRF that runs based on DRAND input. In particular, the miner gets the DRAND randomness beacon and gives it as input to the VRF together with the miner's worker's key.
-2. VRF Chain: the ticket is the same as above, but includes the concatenation of the previous ticket. This means that the new ticket becomes the old ticket concatenated with the new DRAND value.
+1. ElectionProof ticket: which is the VRF that runs based on DRAND input. In particular, the miner gets the DRAND randomness beacon and gives it as input to the VRF together with the miner's worker's key.
+2. the ticket is generated using the VRF as above, but the input includes the concatenation of the previous ticket. This means that the new ticket is generated running the VRF on the old ticket concatenated with the new DRAND value (and the key as before).
 
 ```text
 ## Get Randomness value from  DRAND beacon, by giving the current epoch as input.
 Drand_value = GetRandmness(current epoch)
 
-## Create election proof (also called election ticket) by calling VRF and  giving the secret key of the miner's worker and the DRAND value obtained in the previous step
+## Create ElectionProof ticket by calling VRF and  giving the secret key of the miner's worker and the DRAND value obtained in the previous step
 Election_Proof = VRF(sk, drand_value)
 
 ## Extend the VRF ticket chain by concatenating the previous proof/ticket with the current one by following the same process as above (i.e., call VRF function with the secret key of the miner's worker and the DRAND value of the current epoch).
@@ -57,7 +53,7 @@ Through the use of VRFs and thanks to the unbiasable design of DRAND, we achieve
 
 Expected Consensus is a consensus protocol that works by electing a miner from a weighted set in proportion to their power. In the case of Filecoin, participants and powers are drawn from the [The Power Table](storage_power_actor#the-power-table), where power is equivalent to storage provided over time.
 
-Leader Election in Expected Consensus must be _Secret, Fair and Verifiable_. This is achieved through the use of randomness used to run the election. In the case of Filecoin's EC, the blockchain uses [Beacon Entries](storage_power_consensus#beacon-entries) provided by a [drand](drand) beacon. These seeds are used as unbiasable randomness for Leader Election. Every block header contains an `ElectionProof` derived by the miner using the appropriate seed. As noted earlier, there are two ways through which randomness can be used in the Filecoin EC: i) through the election proof (or ticket), and ii) through the VRF ticket chain.
+Leader Election in Expected Consensus must be _Secret, Fair and Verifiable_. This is achieved through the use of randomness used to run the election. In the case of Filecoin's EC, the blockchain uses [Beacon Entries](storage_power_consensus#beacon-entries) provided by a [drand](drand) beacon. These seeds are used as unbiasable randomness for Leader Election. Every block header contains an `ElectionProof` derived by the miner using the appropriate seed. As noted earlier, there are two ways through which randomness can be used in the Filecoin EC: i) through the ElectionProof ticket, and ii) through the VRF ticket chain.
 
 ### Running a leader election
 
@@ -68,7 +64,7 @@ Design goals here include:
 - Miners should be rewarded proportional to their power in the system
 - The system should be able to tune how many blocks are put out per epoch _on expectation_ (hence "expected consensus").
 
-A miner will use the election proof/ticket to uniformly draw a value from 0 to 1 when crafting a block.
+A miner will use the ElectionProof ticket to uniformly draw a value from 0 to 1 when crafting a block.
 
 #### Winning a block
 
@@ -125,7 +121,7 @@ If the above is successful, miners build a block and propagate it.
 
 `GenerateElectionProof` outputs the result of whether a miner won the block or not as well as the quality of the block mined.
 
-The "Block Quality" is an integer that is used for weight and block reward calculations. For example a block with quality "2" is equivalent as two blocks of quality "1".
+The "WinCount" is an integer that is used for weight and block reward calculations. For example a WinCount equal to "2" is equivalent as two blocks of quality "1".
 
 #### High level algorithm
 
@@ -135,10 +131,10 @@ The "Block Quality" is an integer that is used for weight and block reward calcu
 - Get randomness for the current epoch using `GetRandomness`.
 - Generate a VRF and compute its hash
   - The storage miner's `workerKey` is given as input in the VRF process
-- Compute block quality: The smaller the hash is, the higher the block quality will be
+- Compute WinCount: The smaller the hash is, the higher the WinCount will be
   - Compute the probability distribution of winning `k` blocks (i.e. Poisson distribution see below for details)
-  - Let `h_n` be the normalised VRF, i.e. `h_n = vrfout/2^256`
-  - The probability of winning one block is `1-P[X=0]`, thus if `h_n` is less than `1-P[X=0]`, the miner wins at least one block.
+  - Let `h_n` be the normalised VRF, i.e. `h_n = vrf.Proof/2^256`, where `vrf.Proof` is the ElectionProof ticket.
+  - The probability of winning one block is `1-P[X=0]`, where `X` is a Poisson random variable following Poisson distribution with parameter `lambda = MinerPowerShare*ExpectedLeadersPerEpoch`. Thus, if `h_n` is less than `1-P[X=0]`, the miner wins at least one block.
   - Similarly if `h_n` is less than `1-P[X=0]-P[X=1]` we have at least two blocks and so on.
   - While it is not permitted for a single miner to publish two distinct blocks, in this case, the miner produces a single block which earns two block rewards
   
@@ -146,7 +142,7 @@ The "Block Quality" is an integer that is used for weight and block reward calcu
 
 Filecoin is building on the principle that a miner possessing _X%_ of network power should win as many times as X miners with 1% of network power in the election algorithm.
 
-A straightforward solution to model the situation is using a Binomial distribution with parameter`p=MinerPower/TotalPower` and `n=ExpectedLeadersPerRound`. However, given that we effectively want every miner to roll an uncorrelated/independent dice and want to be invariant to miner pooling, it turns out that Poisson is the ideal distribution for our case.
+A straightforward solution to model the situation is using a Binomial distribution with parameter`p=MinerPower/TotalPower` and `n=ExpectedLeadersPerEpoch`. However, given that we effectively want every miner to roll an uncorrelated/independent dice and want to be invariant to miner pooling, it turns out that Poisson is the ideal distribution for our case.
 
 Despite this finding, we wanted to assess the difference between the two distributions in terms of the probability mass function.
 
@@ -167,14 +163,14 @@ k | Binomial | Poisson
 9 | 0.00005 | 0.00005
 
 
-**Justification for the need of _Block Quality_**
+**Justification for the need of _WinCount_**
 
 It should not be possible for a miner to split their power into multiple identities and have more chances of winning more blocks than keeping their power under one identity. In particular, Strategy 2 below should not be possible to achieve.
 
 - Strategy 1: A miner with X% can run a single election and win a single block.
 - Strategy 2: The miner splits its power in multiple sybil miners (with the sum still equal to X%), running multiple elections to win more blocks.
 
-Block quality guarantees that a lucky single block will earn the same reward as the reward that the miner would earn had they split their power into multiple sybils.
+WinCount guarantees that a lucky single block will earn the same reward as the reward that the miner would earn had they split their power into multiple sybils.
 
 **Alternative Options for the Distribution/Sortition**
 
@@ -253,8 +249,8 @@ We have used the Horner rule with 128-bit fixed-point coefficients in decimal, i
 
 #### Implementation Guidelines
 
-- The `ElectionProof` struct in block header has two fields:
-  - `vrf.Proof` the output of the VRF
+- The `ElectionProof` ticket struct in the block header has two fields:
+  - `vrf.Proof`, the output of the VRF, or `ElectionProof` ticket.
   - `WinCount` that corresponds to the result of the Poisson Sortition.
 - `WinCount` needs to be `> 0` for winning blocks.
 - `WinCount` is included in the tipset weight function. The sum of `WinCount`s of a tipset replaces the size of tipset factor in the weight function.
@@ -294,11 +290,11 @@ GetWinCount(proofDigest, minerID,epoch) {
 
 ### Leader Election Verification
 
-In order to verify that the leader election proof in a block is correct, miners perform the following checks:
+In order to verify that the leader ElectionProof ticket in a block is correct, miners perform the following checks:
 
 - Verify that the randomness is correct by checking `GetRandomness(epoch)`
-- Use this randomness to verify the VRF correctness `Verify_VRF(vrfout,beacon,public_key)`
-- Verify ElectionProof.WinCount > 0 by checking `GetWinCount(vrfout, miner,epoch)`
+- Use this randomness to verify the VRF correctness `Verify_VRF(vrf.Proof,beacon,public_key)`, where vrf.Proof is the ElectionProof ticket.
+- Verify ElectionProof.WinCount > 0 by checking `GetWinCount(vrf.Proof, miner,epoch)`, where `vrf.Proof` is the ElectionProof ticket.
 
 ## Chain Selection
 
@@ -358,7 +354,7 @@ potentially long chain scans would be required to compute a given block's weight
 
 ### Selecting between Tipsets with equal weight
 
-When selecting between Tipsets of equal weight, a miner chooses the one with the smallest final VRF output.
+When selecting between Tipsets of equal weight, a miner chooses the one with the smallest final ElectionProof ticket.
 
 In the case where two Tipsets of equal weight have the same minimum VRF output, the miner will compare the next smallest ticket in the Tipset (and select the Tipset with the next smaller ticket). This continues until one Tipset is selected.
 
@@ -405,6 +401,6 @@ A single consensus fault results into:
 
 ### Detection and Reporting
 
-A node that detects and report a consensus fault is called "slasher", any user in Filecoin can be a slasher. They can report consensus faults by calling the `ReportConsensusFault` on the `StorageMinerActor` of the faulty miner. The slasher is rewarded with a portion of the offending miner's [Pledge Collateral](storage_power_actor#pledge-collateral) for notifying the network of the consensu fault.
+A node that detects and report a consensus fault is called "slasher", any user in Filecoin can be a slasher. They can report consensus faults by calling the `ReportConsensusFault` on the `StorageMinerActor` of the faulty miner. The slasher is rewarded with a portion of the offending miner's [Pledge Collateral](miner_collaterals) for notifying the network of the consensu fault.
 
 The reward give to the slasher is a function of some initial share (`SLASHER_INITIAL_SHARE`) and growth rate (`SLASHER_SHARE_GROWTH_RATE`) and it has a maximum `maxReporterShare`. Slasher's share increases exponentially as epoch elapses since the block when the fault is committed (see `RewardForConsensusSlashReport`). Only the first slasher gets their share of the pledge collateral and the remaining pledge collateral is burned. The longer a slasher waits, the higher the likelihood that the slashed collateral will be claimed by another slasher.
