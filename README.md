@@ -8,26 +8,28 @@ This is the [Filecoin Specification](https://github.com/filecoin-project/specs),
 
 ## Table of Contents
 
--   [Install](#install)
--   [Writing the spec](#writing-the-spec)
--   [Check your markdown](#check-your-markdown)
--   [Page Template](#page-template)
--   [Code](#code)
--   [Images](#images)
--   [Links](#links)
--   [Shortcodes](#shortcodes)
-    -   [`embed`](#embed)
-    -   [`listing`](#listing)
-    -   [`mermaid`](#mermaid)
-    -   [`hint`](#hint)
--   [Math mode](#math-mode)
-    -   [Wrap `def`, `gdef`, etc.](#wrap-def-gdef-etc)
-    -   [Wrap inline math text with code blocks](#wrap-inline-math-text-with-code-blocks)
-    -   [Wrap math blocks with code fences](#wrap-math-blocks-with-code-fences)
--   [Front-matter](#front-matter)
--   [External modules](#external-modules)
--   [Solving Common problems](#solving-common-problems)
--   [References](#references)
+- [Filecoin Specification](#filecoin-specification)
+  - [Table of Contents](#table-of-contents)
+  - [Install](#install)
+  - [Writing the spec](#writing-the-spec)
+  - [Check your markdown](#check-your-markdown)
+  - [Page Template](#page-template)
+  - [Code](#code)
+  - [Images](#images)
+  - [Links](#links)
+  - [Shortcodes](#shortcodes)
+    - [`embed`](#embed)
+    - [`listing`](#listing)
+    - [`mermaid`](#mermaid)
+    - [`hint`](#hint)
+  - [Math mode](#math-mode)
+    - [Wrap `def`, `gdef`, etc.](#wrap-def-gdef-etc)
+    - [Wrap inline math text with code blocks](#wrap-inline-math-text-with-code-blocks)
+    - [Wrap math blocks with code fences](#wrap-math-blocks-with-code-fences)
+  - [Front-matter](#front-matter)
+  - [External modules](#external-modules)
+  - [Solving Common problems](#solving-common-problems)
+  - [References](#references)
 
 ## Install
 
@@ -67,6 +69,8 @@ Sections can be split out into multiple markdown documents. The build process co
 You can split out sub-sections by adding additional pages to a section directory. The `content/intro/concepts.md` defines the Key Concepts sub-section of the the Introduction. The order of sub-sections within a section is again controlled by setting the `weight` property. This pattern repeats for sub sub folders which represent sub sub sections.
 
 The markdown documents should all be well formed, with a single h1, and headings should increment by a single level.
+
+> Note: Regular markdown files like `content/intro/concepts.md` can't reference resources such as images, or other files. Such resources can be referenced only from `_index.md` files. Given that a folder will have an `_index.md` file already, there is the following work around to reference resources from any file: create a new sub-folder in the same folder where the initial .md file was, e.g., `content/intro/concepts/_index.md`, include the content from `concepts.md` in the `_index.md` file, add the resource files (for example, images) in the new folder and reference the resource file from the new `_index.md` file inside the `concepts` folder. The referencing syntax and everything else works the same way.
 
 ## Check your markdown
 

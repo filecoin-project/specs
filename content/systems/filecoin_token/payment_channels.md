@@ -1,6 +1,6 @@
 ---
 title: Payment Channels
-weight: 2
+weight: 3
 bookCollapseSection: true
 dashboardWeight: 1
 dashboardState: stable
