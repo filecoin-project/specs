@@ -3,7 +3,7 @@ title: Runtime
 weight: 5
 bookCollapseSection: true
 dashboardWeight: 1
-dashboardState: wip
+dashboardState: reliable
 dashboardAudit: missing
 dashboardTests: 0
 ---
@@ -12,26 +12,34 @@ dashboardTests: 0
 
 ## Receipts
 
-A `MessageReceipt` contains the result of a top-level message execution.
+A `MessageReceipt` contains the result of a top-level message execution. Every syntactically valid and correctly signed message can be included in a block and will produce a receipt from execution. 
 
 A syntactically valid receipt has:
 
 - a non-negative `ExitCode`,
-- a non empty `ReturnValue` only if the exit code is zero,
+- a non empty `Return` value only if the exit code is zero, and
 - a non-negative `GasUsed`.
 
-## `vm/runtime` interface
+```go
+type MessageReceipt struct {
+	ExitCode exitcode.ExitCode
+	Return   []byte
+	GasUsed  int64
+}
+```
 
-{{<embed src="/externals/specs-actors/actors/runtime/runtime.go" lang="go" >}}
+## `vm/runtime` Actors Interface
 
-## `vm/runtime` implementation
+The Actors Interface implementation can be found [here](https://github.com/filecoin-project/specs-actors/blob/master/actors/runtime/runtime.go)
 
-{{<embed src="impl/runtime.go" lang="go" >}}
+## `vm/runtime` VM Implementation
 
-## Code Loading
+The Lotus implementation of the Filecoin Virtual Machine runtime can be found [here](https://github.com/filecoin-project/lotus/blob/master/chain/vm/runtime.go)
 
-{{<embed src="impl/codeload.go" lang="go" >}}
+## Exit Codes
 
-## Exit codes
+There are some common runtime exit codes that are shared by different actors. Their definition can be found [here](https://github.com/filecoin-project/go-state-types/blob/master/exitcode/common.go).
 
-{{<embed src="/externals/specs-actors/actors/runtime/exitcode/common.go" lang="go" >}}
+## VM Gas Cost Constants
+
+The Gas Cost Constants as implemented in Lotus can be found [here](https://github.com/filecoin-project/lotus/blob/master/chain/vm/gas.go)

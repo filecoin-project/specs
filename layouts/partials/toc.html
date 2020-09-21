@@ -1,0 +1,17 @@
+{{ define "toc-list" }}
+  {{ $depth := .depth }}
+  <ol class="depth-{{ .depth }}{{ if ge .depth 2 }} maybe-hide{{ end }}">
+    {{ range .children }}
+      <li>
+        <a href="#{{ .id }}">{{.text}}</a>
+        {{ if gt (len .children) 0 }}
+          {{ template "toc-list" (dict "children" .children "depth" (add 1 $depth) ) }}
+        {{ end }}
+      </li>
+    {{ end }}
+  </ol>
+{{ end }}
+
+{{ if isset .Site.Data "toc" }}
+  {{ template "toc-list" (dict "children" .Site.Data.toc "depth" 0 )}}
+{{ end }}

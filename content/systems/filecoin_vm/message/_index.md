@@ -2,7 +2,7 @@
 title: Message
 weight: 4
 dashboardWeight: 1.5
-dashboardState: stable
+dashboardState: reliable
 dashboardAudit: n/a
 dashboardTests: 0
 ---

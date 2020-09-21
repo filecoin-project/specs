@@ -26,7 +26,7 @@ For clarity, we refer the following types of entities to describe implementation
 
 - **_APIs_** are the interfaces for delivering messages to components.
   A client's view of a given sub-protocol, such as a request to a miner node's
-  [Storage Provider](storage_provider) component to store files in the storage market,
+  Storage Provider component to store files in the storage market,
   may require the execution of a series of API requests.
 
 - **_Nodes_** are complete software and hardware systems that interact with the protocol.

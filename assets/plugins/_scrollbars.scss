@@ -2,14 +2,14 @@
 @import "variables";
 
 ::-webkit-scrollbar {
-  width: 8.5px;
-  height: 8.5px;
+  width: 6.5px;
+  height: 6.5px;
 }
 
 * {
   -ms-overflow-style: -ms-autohiding-scrollbar;
   scrollbar-width: thin;
-  scrollbar-color: transparent rgba(0, 0, 0, 0.3) ;
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -24,33 +24,41 @@
 
 // code blocks
 .markdown pre::-webkit-scrollbar {
-  display: none;
-}
-.markdown pre:hover::-webkit-scrollbar {
-  display: initial;
+  background-color: transparent;
 }
 
 .markdown pre {
-  scrollbar-color: transparent rgba(255, 255, 255, 0.1) ;
+  scrollbar-color: transparent transparent ;
+}
+.markdown pre:hover {
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+.markdown pre:active {
+  scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
 }
 
+
 .markdown pre::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: transparent;
+}
+.markdown pre:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
 }
 .markdown pre::-webkit-scrollbar-thumb:active {
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.4);
 }
 
 // toc
+.toc > ol {
+  scrollbar-color: transparent transparent;
+}
+.toc > ol:hover {
+  scrollbar-color: inherit;
+}
+
 .toc > ol::-webkit-scrollbar {
   display: none;
 }
 .toc > ol:hover::-webkit-scrollbar {
   display: initial;
-}
-
-
-// Future
-.book-menu nav {
-  scrollbar-color: transparent $gray-500;
 }

@@ -16,9 +16,6 @@ Most are generated/finalized using the [orient framework](https://github.com/fil
 ⚠️ **WARNING:** Filecoin is not yet launched, and we are finishing protocol spec and implementations. Parameters are set here as placeholders and highly likely to change to fit product and security requirements.
 {{</hint>}}
 
-## Code parameters
-
-{{<embed src="../systems/filecoin_nodes/node_base/network_params.go" lang="go" >}}
 
 ## Orient parameters
 
