@@ -29,6 +29,9 @@ Block producers are expected to coordinate how they select messages for inclusio
 
 The main Tipset structure in the Lotus implementation includes the following:
 
+{{<embed src="/externals/lotus/chain/types/tipset.go"  lang="go" symbol="TipSet">}}
+
+
 - chain/types/tipset.go
 ```go
 type TipSet struct {
