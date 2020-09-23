@@ -21,14 +21,14 @@
 {{ $url := "" }}
 {{ $title := default $symbolName (.Get "title")}}
 
-{{ if hasPrefix $src "github:" }}
+{{ if hasPrefix $src "https://github.com" }}
     {{ $external = "github" }}
 {{ end }}
 
 {{ if $external }}
     {{- $HOST := $.Site.Params.API -}}
     {{- $ref := default "master" (.Get "ref" ) -}}
-    {{- $resp := getJSON (printf "%s/github?file=%s&ref=%s" $HOST $src $ref )  -}}
+    {{- $resp := getJSON (printf "%s/github?file=%s" $HOST $src )  -}}
     {{- $content = ($resp.content | base64Decode ) -}}
     {{- $url = $resp.url -}}
 {{ else if fileExists $path }}

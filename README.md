@@ -114,7 +114,7 @@ You can embed source code from local files or external other repos using the `em
 ```text
 {{<embed src="/path/to/local/file/types.go"  lang="go" symbol="Channel">}}
 
-{{<embed src="github:filecoin-project/specs-actors/actors/builtin/paych/paych_actor.go" lang="go">}}
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/build/bootstrap.go" lang="go">}}
 ```
 
 ## Images
@@ -184,7 +184,7 @@ hugo shortcodes you can add to your markdown.
 {{<embed src="types.go"  lang="go" symbol="Channel">}}
 
 # can embed from external sources like github
-{{<embed src="github:filecoin-project/specs-actors/actors/builtin/paych/paych_actor.go" lang="go">}}
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/build/bootstrap.go" lang="go">}}
 ```
 This shortcode also supports the property `title` to add a permalink below the embed.
 
@@ -237,7 +237,7 @@ For short snippets of math text you can just use the `{{<katex>}}` shortcode, bu
 
 Parses math typesetting with [KaTeX](https://katex.org/docs/api.html)   
 
-Check this example [example](https://deploy-preview-969--fil-spec-staging.netlify.app/math-mode/)
+Check this example [example](https://spec.filecoin.io/math-mode/)
 
 > Some syntax like `\_` can't go through HUGO markdown parser and for that reason we need to wrap math text with code blocks, code fendes or the shortcode `{{<plain>}}`. See examples below.
 >

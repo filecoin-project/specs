@@ -109,7 +109,7 @@ Data submitted to the Filecoin network go through several transformations before
 
 The following data types are unique to the Storage Market:
 
-{{<embed src="github:filecoin-project/go-fil-markets/storagemarket/types.go"  lang="go" title="Storage Market Data Types">}}
+{{<embed src="https://github.com/filecoin-project/go-fil-markets/blob/master/storagemarket/types.go"  lang="go" title="Storage Market Data Types">}}
 
 
 Details about `StorageDealProposal` and `StorageDeal` (which are used in the Storage Market and elsewhere) specifically can be found in Storage Deal.
@@ -139,7 +139,7 @@ It is worth highlighting that a single participant can be a `StorageClient`, `St
 
 Because most of what a Storage Provider does is respond to actions initiated by a `StorageClient`, most of its public facing methods relate to getting current status on deals, as opposed to initiating new actions. However, a user of the `StorageProvider` module can update the current Ask for the provider.
 
-{{<embed src="github:filecoin-project/go-fil-markets/storagemarket/provider.go"  lang="go" title="Storage Market Provider">}}
+{{<embed src="https://github.com/filecoin-project/go-fil-markets/blob/master/storagemarket/provider.go"  lang="go" title="Storage Market Provider">}}
 
 ## Storage Client
 
@@ -147,4 +147,4 @@ The `StorageClient` is a module that discovers miners, determines their asks, an
 
 Recall that a single participant can be a `StorageClient`, `StorageProvider`, or both at the same time.
 
-{{<embed src="github:filecoin-project/go-fil-markets/storagemarket/client.go"  lang="go" title="Storage Market Client">}}
+{{<embed src="https://github.com/filecoin-project/go-fil-markets/blob/master/storagemarket/client.go"  lang="go" title="Storage Market Client">}}
