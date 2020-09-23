@@ -32,19 +32,15 @@ The main Tipset structure in the Lotus implementation includes the following:
 {{<embed src="/externals/lotus/chain/types/tipset.go"  lang="go" symbol="TipSet">}}
 
 
-- chain/types/tipset.go
-```go
-type TipSet struct {
-	cids   []cid.Cid
-	blks   []*BlockHeader
-	height abi.ChainEpoch
-}
-```
-
 Semantic validation of a Tipset is performed in:
 
 ```go
 func NewTipSet(blks []*BlockHeader) (*TipSet, error)
 ```
+
+Semantic validation includes the following checks:
+- The tipset should be composed of at least one block
+- All blocks within a tipset should have the same height
+- All blocks within a tipset have the same parents, both in terms of number of parents and in terms of CIDs.
 
 The Lotus implementation of the `Tipset` can be found [here](https://github.com/filecoin-project/lotus/blob/master/chain/types/tipset.go).
