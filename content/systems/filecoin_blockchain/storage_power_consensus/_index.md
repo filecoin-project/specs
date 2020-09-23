@@ -33,21 +33,25 @@ Much of the Storage Power Consensus' subsystem functionality is detailed in the 
 There are two ways to earn Filecoin tokens in the Filecoin network:
 
 - By participating in the [Storage Market](storage_market) as a storage provider and being paid by clients for file storage deals.
-- By mining new blocks on the network, helping modify system state and secure the Filecoin consensus mechanism.
+- By mining new blocks, extend the blockchain, helping modify system state and securing the Filecoin consensus mechanism.
 
 We must distinguish between both types of "miners" (storage and block miners). [Leader Election](expected_consensus#secret-leader-election) in Filecoin is predicated on a miner's storage power. Thus, while all block miners will be storage miners, the reverse is not necessarily true.
 
-However, given Filecoin's "useful Proof-of-Work" is achieved through file storage (PoRep and PoSt), there is little overhead cost for storage miners to participate in leader election. Such a [Storage Miner Actor](storage_miner_actor) need only register with the [Storage Power Actor](storage_power_actor) in order to participate in Expected Consensus and mine blocks.
+However, given Filecoin's "useful Proof-of-Work" is achieved through file storage ([PoRep](porep) and [PoSt](post)), there is little overhead cost for storage miners to participate in leader election. Such a [Storage Miner Actor](storage_miner_actor) need only register with the [Storage Power Actor](storage_power_actor) in order to participate in Expected Consensus and mine blocks.
 
 ## On Power
 
-Claimed power is assigned to every sector as a static function of its `SectorStorageWeightDesc` which includes `SectorSize`, `Duration`, and `DealWeight`. DealWeight is a measure that maps size and duration of active deals in a sector during its lifetime to its impact on power and reward distribution. A CommittedCapacity Sector (see Sector Types in [Storage Mining Subsystem](storage_mining)) will have a DealWeight of zero but all sectors have an explicit Duration which is defined from the ChainEpoch that the sector comes online in a ProveCommit message to the Expiration ChainEpoch of the sector. In principle, power is the number of votes a miner has in leader election and it is a point in time concept of storage. However, the exact function that maps `SectorStorageWeightDesc` to claimed `StoragePower` and `BlockReward` will be announced soon.
+Claimed power is assigned to every sector as a static function of its _Sector Quality_ which includes `SectorSize`, `Duration`, and `DealWeight`. DealWeight is a measure that maps size and duration of active deals in a sector during its lifetime to its impact on power and reward distribution. A CommittedCapacity Sector (see Sector Types in [Storage Mining Subsystem](storage_mining)) will have a DealWeight of zero but all sectors have an explicit Duration which is defined from the ChainEpoch that the sector comes online in a ProveCommit message to the Expiration ChainEpoch of the sector. 
+
+In principle, power is the number of votes a miner has in leader election and has been defined to increase linearly with the storage that a miner has committed to the network. 
+
+The weight or quality of a sector depends on the deal made over the data inside the sector. There are generally three types of deals: the Committed Capacity (CC), where there is effectively no deal and the miner is storing arbitrary data inside the sector, the Regular Deals, where a miner and a client agree on a price in the market and the Verified Client deals, which give more power to the sector. We refer the reader to the [Sector](sector) and [Sector Quality](sector#sector_quality) section for details on Sector Types and Sector Quality, the [Verified Clients](verified_clients) section for more details on what a verified client is, and the [CryptoEconomics](cryptoecon) section for specific parameter values on the Deal Weights and Quality Multipliers.
 
 More precisely,
 
-- Claimed power = power from ProveCommit sectors minus sectors in TemporaryFault effective duration.
-- Nominal power = claimed power, unless the miner is in DetectedFault or Challenged state. Nominal power is used to determine total network storage power for purposes of consensus minimum.
-- Consensus power = nominal power, unless the miner fails to meet consensus minimum, or is undercollateralized.
+- Claimed power: power from `ProveCommit` sectors minus sectors in `TemporaryFault` effective duration.
+- Nominal power: claimed power, unless the miner is in `DetectedFault` or `Challenged` state. Nominal power is used to determine total network storage power for purposes of consensus minimum.
+- Consensus power: nominal power, unless the miner fails to meet consensus minimum, or is undercollateralized.
 
 ## Beacon Entries
 
@@ -84,7 +88,7 @@ For operations such as PoRep creation, proof validations, or anything that
 requires randomness for the Filecoin VM, the following method shows how to
 extract the drand entry from the chain.
 Note that the round may span multiple filecoin epochs if drand is slower; the
-lowest epoch number block will contain the requested beacon entry. As well, if
+lowest epoch number block will contain the requested beacon entry. Similarly, if
 there has been null rounds where the beacon should have been inserted, we need
 to iterate on the chain to find where the entry is inserted.
 
@@ -261,13 +265,6 @@ Miners smaller than this cannot mine blocks and earn block rewards in the networ
 Accordingly, to bootstrap the network, the genesis block must include miners, potentially just CommittedCapacity sectors, to initiate the network.
 
 The `MIN_MINER_SIZE_TARG` condition will not be used in a network in which any miner has more than `MIN_MINER_SIZE_STOR` power. It is nonetheless defined to ensure liveness in small networks (e.g. close to genesis or after large power drops).
-
-NOTE: The below values are currently placeholders.
-
-We currently set:
-
-- `MIN_MINER_SIZE_STOR = 100 * (1 << 40) Bytes` (100 TiB)
-- `MIN_MINER_SIZE_TARG = 3`
 
 ## Network recovery after halting
 
