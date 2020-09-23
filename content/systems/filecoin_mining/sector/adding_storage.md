@@ -35,7 +35,7 @@ To incentivize Miners to hoard storage space and dedicate it to Filecoin, CC Sec
 
 Miners upgrade their ProveCommitted CC Sectors by PreCommitting a Regular Sector, and specifying that it should replace an existing CC Sector. Once the Regular Sector is successfully ProveCommitted, it will replace the existing CC Sector. If the newly ProveCommitted Regular sector contains a Verified Client deal, i.e., a deal with higher Sector Quality, then the miner's storage power will increase accordingly.
 
-Upgrading capacity currently involves currently resealing, that is, creating a unique representation of the new data included in the Sector through a computationally intensive process. Looking ahead, committed capacity upgrades should eventually be possible without a reseal. A succinct and publicly verifiable proof that the committed capacity has been correctly replaced with replicated data should achieve this goal. However, this mechanism must be fully specified to preserve the security and incentives of the network before it can be implemented and is, therefore, left as a future improvement.
+Upgrading capacity currently involves resealing, that is, creating a unique representation of the new data included in the Sector through a computationally intensive process. Looking ahead, committed capacity upgrades should eventually be possible without a reseal. A succinct and publicly verifiable proof that the committed capacity has been correctly replaced with replicated data should achieve this goal. However, this mechanism must be fully specified to preserve the security and incentives of the network before it can be implemented and is, therefore, left as a future improvement.
 
 
 
