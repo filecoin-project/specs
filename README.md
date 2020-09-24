@@ -381,4 +381,3 @@ hugo mod get github.com/filecoin-project/specs-actors@v0.7.2
     -   [editor](https://mermaid-js.github.io/mermaid-live-editor)
 -   [Pan/Zoom for SVG](https://github.com/anvaka/panzoom)
 -   [Icons](https://css.gg/)
--   [Working with submodules](https://github.blog/2016-02-01-working-with-submodules/)
