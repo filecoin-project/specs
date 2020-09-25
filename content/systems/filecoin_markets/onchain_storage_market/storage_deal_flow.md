@@ -16,7 +16,11 @@ dashboardTests: 0
 1. `StorageClient` and `StorageProvider` call `StorageMarketActor.AddBalance` to deposit funds into Storage Market.
    - `StorageClient` and `StorageProvider` can call `WithdrawBalance` before any deal is made.
 2. `StorageClient` and `StorageProvider` negotiate a deal off chain. `StorageClient` sends a `StorageDealProposal` to a `StorageProvider`.
-   - `StorageProvider` verifies the `StorageDeal` by checking address and signature of `StorageClient`, checking the proposal's `StartEpoch` is after the current Epoch, checking `StorageClient` did not call withdraw in the last X Epoch (`WithdrawBalance` should take at least X Epoch), checking both `StorageProvider` and `StorageClient` have sufficient available balances in `StorageMarketActor`.
+   - `StorageProvider` verifies the `StorageDeal` by checking:
+   		- the address and signature of the `StorageClient`,
+   		- the proposal's `StartEpoch` is after the current Epoch,
+   		- the `StorageClient` did not call withdraw in the last **X** Epochs (`WithdrawBalance` should take at least **X** Epochs), 
+   		- both `StorageProvider` and `StorageClient` have sufficient available balances in `StorageMarketActor`.
 3. `StorageProvider` signs the `StorageDealProposal`  by constructing an on-chain message.
    - `StorageProvider` calls `PublishStorageDeals` in `StorageMarketActor` to publish this on-chain message which will generate a `DealID` for each `StorageDeal` and store a mapping from `DealID` to `StorageDeal`. However, the deals are not active at this point.
      - As a backup, `StorageClient` may call `PublishStorageDeals` with the `StorageDeal`, to activate the deal if they can obtain the signed on-chain message from `StorageProvider`.
@@ -25,12 +29,12 @@ dashboardTests: 0
 
 ## Sealing sectors
 
-4. Once the miner finishes packing a `Sector`, it generates a SectorPreCommitInfo and calls PreCommitSector with a PreCommitDeposit. It must call ProveCommitSector with SectorProveCommitInfo within some bound to recover the deposit. An expired PreCommit message will result in PreCommitDeposit being burned. There are two types of sectors, Regular Sector and Committed Capacity Sector but all sectors have an explicit expiration epoch declared during PreCommit. For a Regular Sector with storage deals in it, all deals must expire before sector expiration. Miner gains power for this particular sector upon successful ProveCommit.
+4. Once the miner finishes packing a `Sector`, it generates a `SectorPreCommitInfo` and calls `PreCommitSector` with a `PreCommitDeposit`. It must call `ProveCommitSector` with `SectorProveCommitInfo` within some bound to recover the deposit. An expired `PreCommit` message will result in `PreCommitDeposit` being burned. All sectors have an explicit expiration epoch declared during `PreCommit`. For Sectors with Regular Deals, all deals must expire before sector expiration. The Miner gains power for this particular sector upon successful `ProveCommit`. For more details on the Sectors and the different types of deals that can be included in a Sector refer to the [Sector section](filecoin_mining#sector).
 
-## Receive Challenge
+## Prove Storage
 
-5. Miners enter the `Challenged` status when receiving a SurprisePoSt challenge from the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before the chain checks for SurprisePoSt expiry. Miners can only get out the challenge with `SubmitSurprisePoStResponse`.
-6. Miners are allowed to DeclareTemporaryFault when they are in the `Challenged` state but this will not change the list of sectors challenged as `Challenged` state specifies a list of sectors to be challenged which is a snapshot of all Active sectors at the time of challenge. Miners are also allowed to call ProveCommit which will add to their ClaimedPower but their Nominal and Consensus Power are still zero whe  they are in either Challenged or DetectedFault state.
+5. Miners have to prove that they hold unique copies of Sectors by submitting proofs according to the [Proof of SpaceTime](post) algorithm. Miners have to prove all their Sectors in regular time intervals in order for the system to guarantee that they indeed store the data they committed to store in the deal phase.
+6. Miners are allowed to `DeclareTemporaryFault`. Miners are also allowed to call `ProveCommit` which will add to their ClaimedPower but their Nominal and Consensus Power are still zero for the Sectors for which they have in `DeclareTemporaryFault` state.
 
 ## Declare and Recover Faults
 

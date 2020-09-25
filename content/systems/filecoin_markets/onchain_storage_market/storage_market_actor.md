@@ -9,17 +9,21 @@ dashboardTests: 0
 
 # Storage Market Actor
 
-`StorageMarketActor` is responsible for processing and managing on-chain deals. This is also the entry point of all storage deals and data into the system. It maintains a mapping of `StorageDealID` to `StorageDeal` and keeps track of locked balances of `StorageClient` and `StorageProvider`. When a deal is posted on chain through the `StorageMarketActor`, it will first check if both transacting parties have sufficient balances locked up and include the deal on chain. 
+The `StorageMarketActor` is responsible for processing and managing on-chain deals. This is also the entry point of all storage deals and data into the system. It maintains a mapping of `StorageDealID` to `StorageDeal` and keeps track of locked balances of `StorageClient` and `StorageProvider`. When a deal is posted on chain through the `StorageMarketActor`, it will first check if both transacting parties have sufficient balances locked up and include the deal on chain. 
 
 ## `StorageMarketActor` implementation
 
-The implementation of the Storage Market Actor can be found [here](https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_actor.go).
+{{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_actor.go" lang="go">}}
 
 ## `StorageMarketActorState` implementation
 
-The Storage Market Actor Statuses can be found [here](https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_state.go).
+**Storage Market Actor Statuses**
+{{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_state.go" lang="go">}}
 
-The Storage Market Actor Balance states and mutations can be found [here](https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_balances.go).
+**Storage Market Actor Balance states and mutations**
+ 
+{{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_balances.go" lang="go">}}
+
 
 ## Storage Deal Collateral
 
@@ -33,5 +37,5 @@ This collateral is returned to the storage provider when all deals in the sector
 
 
 {{<katex>}}
-MinimumProviderDealCollateral = \\[0.2cm] \ \ \ \ \ \ \ \ 5\% \times FILCirculatingSupply \times \frac{DealRawByte}{max(NetworkBaseline, NetworkRawBytePower)}
+MinimumProviderDealCollateral = \\[0.2cm] \ \ \ \ \ \ \ \ 1\% \times FILCirculatingSupply \times \frac{DealRawByte}{max(NetworkBaseline, NetworkRawBytePower)}
 {{</katex>}}
