@@ -34,9 +34,7 @@ The main Tipset structure in the Lotus implementation includes the following:
 
 Semantic validation of a Tipset is performed in:
 
-```go
-func NewTipSet(blks []*BlockHeader) (*TipSet, error)
-```
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/types/tipset.go"  lang="go" symbol="NewTipSet">}}
 
 Semantic validation includes the following checks:
 - The tipset should be composed of at least one block

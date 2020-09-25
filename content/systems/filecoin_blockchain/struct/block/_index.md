@@ -13,7 +13,7 @@ The Block is the main unit of the Filecoin blockchain.
 
 The Block structure in the Filecoin blockchain is composed of: i) the Block Header, ii) the list of messages inside the block, and iii) the signed messages. This is represented inside the `FullBlock` abstraction. The messages indicate the required set of changes to apply in order to arrive at a deterministic state of the chain.
 
-The Lotus implementation of the block can be found [here](https://github.com/filecoin-project/lotus/blob/master/chain/types/fullblock.go). It has the following `struct`:
+The Lotus implementation of the block has the following `struct`:
 
 {{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/types/fullblock.go"  lang="go" symbol="FullBlock">}}
 
@@ -21,7 +21,7 @@ The Lotus implementation of the block can be found [here](https://github.com/fil
 
 A `BlockHeader` is a canonical representation of a block. BlockHeaders are propagated between miner nodes. From the blockcheader message, a miner has all the required information to apply the associated `FullBlock`'s state and update the chain. In order to be able to do this, the minimum set of information items that need to be included in the `BlockHeader` are shown below and include among others: the miner's address, the Ticket, the [Proof of SpaceTime](post), the CID of the parents where this block evolved from in the IPLD DAG, as well as the messages' own CIDs.
 
-The Lotus implementation of the block header can be found [here](https://github.com/filecoin-project/lotus/blob/master/chain/types/blockheader.go). It has the following `struct`s:
+The Lotus implementation of the block header has the following `struct`s:
 
 {{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/types/blockheader.go"  lang="go" symbol="BlockHeader">}}
 
@@ -39,14 +39,14 @@ func IsTicketWinner(vrfTicket []byte, mypow BigInt, totpow BigInt) bool
 
 The `Message` structure has to include the source (`From`) and destination (`To`) addresses, a `Nonce` and the `GasPrice`.
 
-The Lotus implementation of the message can be found [here](https://github.com/filecoin-project/lotus/blob/master/chain/types/message.go). It has the following structure:
+The Lotus implementation of the message has the following structure:
 
 {{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/types/message.go"  lang="go" symbol="Message">}}
 
 
 The message is also validated before it is passed to the [chain synchronization logic](chainsync):
 
-{{<embed src="/externals/lotus/chain/types/message.go"  lang="go" symbol="ValidForBlockInclusion">}}
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/types/message.go"  lang="go" symbol="ValidForBlockInclusion">}}
 
 
 ## Block syntax validation
@@ -87,11 +87,10 @@ Semantic validation refers to validation that requires reference to information 
 
 In order to proceed to semantic validation the `FullBlock` must be assembled from the received block header retrieving its Filecoin messages. Block message CIDs can be retrieved from the network and be decoded into valid CBOR `Message`/`SignedMessage`.
 
-In the Lotus implementation the semantic validation of a block is carried out by the `Syncer` module, which can be found [here](https://github.com/filecoin-project/lotus/blob/master/chain/sync.go).
+In the Lotus implementation the semantic validation of a block is carried out by the `Syncer` module:
 
-```go
-func (syncer *Syncer) ValidateBlock(ctx context.Context, b *types.FullBlock) error
-```
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/sync.go"  lang="go" symbol="ValidateBlock">}}
+
 
 Messages are retrieved through the `Syncer`. There are the following two steps followed by the `Syncer`:
 1) Assemble a `FullTipSet` populated with the single block received earlier. The Block's `ParentWeight` is greater than the one from the (first block of the) heaviest tipset.
