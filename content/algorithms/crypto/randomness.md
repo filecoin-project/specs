@@ -68,7 +68,7 @@ GetRandomness(dst, l, s):
     return H(buffer)
 ```
 
-{{<embed src="/externals/specs-actors/actors/crypto/randomness.go"  lang="go">}}
+
 {{<embed src="/systems/filecoin_blockchain/struct/chain/chain.go" lang="go">}}
 
 ## Drawing tickets from the VRF-chain for proof inclusion
