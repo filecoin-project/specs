@@ -29,7 +29,7 @@ Block producers are expected to coordinate how they select messages for inclusio
 
 The main Tipset structure in the Lotus implementation includes the following:
 
-{{<embed src="/externals/lotus/chain/types/tipset.go"  lang="go" symbol="TipSet">}}
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/types/tipset.go"  lang="go" symbol="TipSet">}}
 
 
 Semantic validation of a Tipset is performed in:

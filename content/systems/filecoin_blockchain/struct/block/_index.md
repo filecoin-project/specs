@@ -15,7 +15,7 @@ The Block structure in the Filecoin blockchain is composed of: i) the Block Head
 
 The Lotus implementation of the block can be found [here](https://github.com/filecoin-project/lotus/blob/master/chain/types/fullblock.go). It has the following `struct`:
 
-{{<embed src="/externals/lotus/chain/types/fullblock.go"  lang="go" symbol="FullBlock">}}
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/types/fullblock.go"  lang="go" symbol="FullBlock">}}
 
 > **Note:** A block is functionally the same as a block header in the Filecoin protocol. While a block header contains Merkle links to the full system state, messages, and message receipts, a block can be thought of as the full set of this information (not just the Merkle roots, but rather the full data of the state tree, message tree, receipts tree, etc.). Because a full block is large in size, the Filecoin blockchain consists of block headers rather than full blocks. We often use the terms `block` and `block header` interchangeably.
 
@@ -23,13 +23,13 @@ A `BlockHeader` is a canonical representation of a block. BlockHeaders are propa
 
 The Lotus implementation of the block header can be found [here](https://github.com/filecoin-project/lotus/blob/master/chain/types/blockheader.go). It has the following `struct`s:
 
-{{<embed src="/externals/lotus/chain/types/blockheader.go"  lang="go" symbol="BlockHeader">}}
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/types/blockheader.go"  lang="go" symbol="BlockHeader">}}
 
-{{<embed src="/externals/lotus/chain/types/blockheader.go"  lang="go" symbol="Ticket">}}
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/types/blockheader.go"  lang="go" symbol="Ticket">}}
 
-{{<embed src="/externals/lotus/chain/types/electionproof.go"  lang="go" symbol="ElectionProof">}}
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/types/electionproof.go"  lang="go" symbol="ElectionProof">}}
 
-{{<embed src="/externals/lotus/chain/types/blockheader.go"  lang="go" symbol="BeaconEntry">}}
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/types/blockheader.go"  lang="go" symbol="BeaconEntry">}}
 
 The `BlockHeader` structure has to refer to the TicketWinner of the current round which ensures the correct winner is passed to [ChainSync](chainsync).
 
@@ -41,7 +41,7 @@ The `Message` structure has to include the source (`From`) and destination (`To`
 
 The Lotus implementation of the message can be found [here](https://github.com/filecoin-project/lotus/blob/master/chain/types/message.go). It has the following structure:
 
-{{<embed src="/externals/lotus/chain/types/message.go"  lang="go" symbol="Message">}}
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/types/message.go"  lang="go" symbol="Message">}}
 
 
 The message is also validated before it is passed to the [chain synchronization logic](chainsync):
