@@ -15,9 +15,6 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: '12'
-      
-      # get lotus deps...
-      - run: sudo apt install bzr
 
       - run: npm install
       - run: npm test
@@ -37,12 +34,9 @@ jobs:
       
       - run: echo /ipfs/${{ steps.ipfs.outputs.cid }}
 
-      - run: echo ${{ github.ref }}
-
       # Update the dnslink if changes to the current branch should go live
       # see https://github.com/ipfs-shipyard/js-dnslink-dnsimple
       - run: npx dnslink-dnsimple --domain spec.filecoin.io --link /ipfs/${{ steps.ipfs.outputs.cid }}
+        if: github.ref == 'refs/heads/master'
         env:
           DNSIMPLE_TOKEN: ${{ secrets.DNSIMPLE_TOKEN }}
-        # TODO: change to master once merged.
-        if: github.ref == 'refs/heads/master'
