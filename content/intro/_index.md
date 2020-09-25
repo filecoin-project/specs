@@ -30,6 +30,7 @@ and other contract mechanisms recorded on the chain continue to be processed
 over time, without requiring further interaction from the original parties
 (such as the clients who requested the data storage).
 
+
 ## Spec Status
 
 Each section of the spec must be stable and audited before it is considered done. The state of each section is tracked below. 
