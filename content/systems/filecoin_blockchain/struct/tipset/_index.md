@@ -40,5 +40,3 @@ Semantic validation includes the following checks:
 - The tipset should be composed of at least one block
 - All blocks within a tipset should have the same height
 - All blocks within a tipset have the same parents, both in terms of number of parents and in terms of CIDs.
-
-The Lotus implementation of the `Tipset` can be found [here](https://github.com/filecoin-project/lotus/blob/master/chain/types/tipset.go).
