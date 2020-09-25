@@ -20,4 +20,4 @@ This section describes the storage deal data type and a technical outline for de
 
 ## Data Types
 
-{{< embed src="/externals/specs-actors/actors/builtin/market/deal.go" lang="go" >}}
+{{< embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/deal.go" lang="go" >}}
