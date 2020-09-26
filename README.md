@@ -231,6 +231,22 @@ stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa
 {{< /hint >}}
 ```
 
+### `katex`
+
+```md
+
+<!-- Use $$ math $$ for display mode-->
+{{<katex>}}
+$$SectorInitialConsensusPledge = \\[0.2cm] 30\% \times FILCirculatingSupply \times \frac{SectorQAP}{max(NetworkBaseline, NetworkQAP)}$$
+{{</katex >}}
+
+
+<!-- Use $ math $ for inline mode-->
+{{<katex>}}
+$SectorInitialConsensusPledge = \\[0.2cm] 30\% \times FILCirculatingSupply \times \frac{SectorQAP}{max(NetworkBaseline, NetworkQAP)}$
+{{</katex >}}
+```
+
 ## Math mode
 
 For short snippets of math text you can just use the `{{<katex>}}` shortcode, but if you need to write lots of math in a page you can just use `math-mode` and avoid writting the katex shortcode everywhere.

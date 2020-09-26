@@ -182,7 +182,7 @@ Bernouli, Binomial and Poisson distributions have been considered for the _WinCo
 - Option 4: WinCount(p,N) ~ Binomial(p/M, ME/N)
 - Option 5: WinCount(p,N) ~ Poisson(pE/N)
 
-Note that in Options 2-5 the expectation of the win-count grows linearly with the miner's power `p`. That is,  𝔼[WinCount(p,N)] = pE/N. For Option 1 this property does not hold when p/N > 1/E.
+Note that in Options 2-5 the expectation of the win-count grows linearly with the miner's power `p`. That is,  `𝔼[WinCount(p,N)] = pE/N`. For Option 1 this property does not hold when p/N > 1/E.
 
 Furthermore, in Options 1, 3 and 5 the _WinCount distribution is invariant to the number of Sybils in the system. In particular WinCount(p,N)=2WinCount(p/2,N), which is a desirable property.
 
@@ -200,7 +200,7 @@ In Option 5 (the one used in Filecoin Leader Election), the ticket targets for e
 
 We have used the Horner rule with 128-bit fixed-point coefficients in decimal, in order to approximate the co-efficients of `exp(-x)`. The coefficients are given below:
 
-```
+```text
 (x * (x * (x * (x * (x * (x * (x * (
 -648770010757830093818553637600
 *2^(-128)) +
@@ -360,7 +360,7 @@ In the case where two Tipsets of equal weight have the same minimum VRF output, 
 
 The above case may happen in situations under certain block propagation conditions. Assume three blocks B, C, and D have been mined (by miners 1, 2, and 3 respectively) off of block A, with minTicket(B) < minTicket(C) < minTicket(D).
 
-Miner 1 outputs their block B and shuts down. Miners 2 and 3 both receive B but not each others' blocks. We have miner 2 mining a Tipset made of B and C and miner 3 mining a Tipset made of B and D. If both succesfully mine blocks now, other miners in the network will receive new blocks built off of Tipsets with equal weight and the same smallest VRF output (that of block B). They should select the block mined atop [B, C] since minVRF(C) < minVRF(D).
+Miner 1 outputs their block B and shuts down. Miners 2 and 3 both receive B but not each others' blocks. We have miner 2 mining a Tipset made of B and C and miner 3 mining a Tipset made of B and D. If both succesfully mine blocks now, other miners in the network will receive new blocks built off of Tipsets with equal weight and the same smallest VRF output (that of block B). They should select the block mined atop `[B, C]` since minVRF(C) < minVRF(D).
 
 The probability that two Tipsets with different blocks would have all the same VRF output can be considered negligible: this would amount to finding a collision between two 256-bit (or more) collision-resistant hashes.
 
