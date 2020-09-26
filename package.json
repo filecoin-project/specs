@@ -4,7 +4,7 @@
   "description": "The Filecoin protocol specification",
   "main": "index.js",
   "scripts": {
-    "test": "remark content --quiet",
+    "test": "remark content --frail --quiet",
     "start": "concurrently npm:watch-*",
     "serve": "npm start",
     "watch-hugo": "npm run build-diagrams && hugo server --bind=0.0.0.0 --disableFastRender --renderToDisk",
@@ -44,6 +44,7 @@
     "remark-lint-heading-increment": "^2.0.1",
     "remark-lint-no-hr-after-heading": "^1.0.0",
     "remark-lint-no-multiple-toplevel-headings": "^2.0.1",
+    "remark-math": "^3.0.1",
     "remark-preset-lint-recommended": "^4.0.1",
     "remark-toc": "^7.0.0",
     "to-vfile": "^6.1.0"

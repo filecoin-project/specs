@@ -1,6 +1,7 @@
 plugins:
   # make remark aware of fontmatter.
   remark-frontmatter:
+  remark-math:
   # sensible linter defaults see: https://github.com/remarkjs/remark-lint/tree/main/packages/remark-preset-lint-recommended#rules
   remark-preset-lint-recommended:
   # add extra rules
