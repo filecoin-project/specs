@@ -38,16 +38,16 @@ dashboardTests: 0
 
 ## Declare and Recover Faults
 
-7. Declared faults are penalized to a smaller degree than DetectedFault. Miners declare failing sectors by invoking `DeclareTemporaryFaults` with a specified fault duration and associated `TemporaryFaultFee`. Miner will lose power associated with the sector when the TemporaryFault period begins.
-8. The loss of power associated with TemporaryFault will be restored when the TemporaryFault period has ended and the miner is now expected to prove over that sector. Failure to do so will result in unsuccessful ElectionPoSt or unsuccessful SurprisePoSt that leads to detected faults.
+7. Declared faults are penalized to a smaller degree than DetectedFault. Miners declare failing sectors by invoking `DeclareTemporaryFaults` with a specified fault duration and associated `TemporaryFaultFee`. The Miner loses power associated with the sector when the `TemporaryFault` period begins.
+8. The loss of power associated with `TemporaryFault` will be restored when the `TemporaryFault` period has ended and the miner is now expected to prove over that sector. Failure to do so will result in unsuccessful `ElectionPoSt`.
 
 
 ## Detect Faults
 
-9. `CronActor` triggers `StorageMinerActor._rtCheckSurprisePoStExpiry` through `StoragePowerActor` and checks if SurprisePoSt challenge has expired for a particular miner.
-   - If no PoSt is submitted by the end of the `ProvingPeriod`, miner enters `DetectedFault` state, some `PledgeCollateral` is slashed, and all power is lost.
-   - Miners will now have to wait for the next SurprisePoSt challenge.
-   - If the faults persist for `MAX_CONSECUTIVE_FAULTS` then sectors are terminated and provider deal collateral is slashed. 
+9. `CronActor` triggers `StorageMinerActor._rtCheckPoStExpiry` through `StoragePowerActor` and checks if the Proof of Spacetime challenge has been submitted for a particular miner.
+   - If no PoSt is submitted by the end of the `ProvingPeriod`, the miner enters `DetectedFault` state, some `PledgeCollateral` is slashed, and all power is lost.
+   - Miners will now have to wait for the next PoSt period.
+   - If the faults persist for `MAX_CONSECUTIVE_FAULTS` then sectors are terminated and provider deal collateral is slashed.
 
 ## Sector Expiration
 
