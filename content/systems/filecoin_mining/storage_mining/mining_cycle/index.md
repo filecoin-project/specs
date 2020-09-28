@@ -8,7 +8,9 @@ dashboardTests: 0
 
 # Storage Mining Cycle
 
-Block miners should constantly be performing Proofs of SpaceTime using [Election PoSt](election_post), and checking the outputted partial tickets to run [Leader Election](expected_consensus#secret-leader-election) and determine whether they can propose a block at each epoch. Epochs are currently set to take around X seconds, in order to account for election PoSt and network propagation around the world. The details of the mining cycle are defined here.
+Block miners should constantly be performing Proofs of SpaceTime using [Election PoSt](election_post), and checking the outputted partial tickets to run [Leader Election](expected_consensus#secret-leader-election) and determine whether they can propose a block at each epoch. Epochs are currently set to take 30 seconds, in order to account for election PoSt and network propagation around the world.
+
+Here we provide a detailed description of the mining cycle.
 
 ## Active Miner Mining Cycle
 
@@ -16,14 +18,14 @@ In order to mine blocks on the Filecoin blockchain a miner must be running [Bloc
 
 With every new tipset, the miner can use their committed power to attempt to craft a new block.
 
-For additional details around how consensus works in Filecoin, see [Expected Consensus](expected_consensus). For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner is eligible to mine a block itself, and other rules pertaining to the production of some artifacts required of valid blocks (e.g. Tickets, ElectionPoSt).
+For additional details around how consensus works in Filecoin, see [Expected Consensus](expected_consensus). For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner is eligible to mine a block, and other rules pertaining to the production of some artifacts required of valid blocks (e.g. Tickets, ElectionPoSt).
 
 ### Mining Cycle
 
-After the chain has caught up to the current head using [ChainSync](chainsync). At a high-level, the mining process is as follows, (we go into more detail on epoch timing below):
+After the chain has caught up to the current head using [ChainSync](chainsync), the mining process is as follows, (we go into more detail on epoch timing below):
 
 - The node receives and transmits messages using the [Message Syncer](message_syncer)
-- At the same time it [receives blocks](block_sync)
+- At the same time the node receives blocks through [BlockSync](block_sync).
     - Each block has an associated timestamp and epoch (quantized time window in which it was crafted)
     - Blocks are validated as they come in [block validation](block)
 - After an epoch's "cutoff", the miner should take all the valid blocks received for this epoch and assemble them into tipsets according to [Tipset validation rules](tipset) 
@@ -131,7 +133,7 @@ In this period, the miner can still:
 
 If a miner detects [Storage Faults](faults#storage-faults) among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the `DeclareTemporaryFaults()` method of the Storage Miner Actor. 
 
-The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of winning Election and SurprisePoSts. By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can specify how long the duration of their TemporaryFault and pay a TemporaryFaultFee.
+The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of being elected to mine a block (i.e., winning ElectionPoSt). By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can specify how long the duration of their TemporaryFault and pay a TemporaryFaultFee.
 
 A miner will no longer be able to declare faults after being challenged for a SurprisePoSt.
 
