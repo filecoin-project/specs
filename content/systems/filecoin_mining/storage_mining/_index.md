@@ -42,12 +42,12 @@ When Miners commit to storing data, they must first produce a valid Proof of Rep
 
 #### Proof of Spacetime
 
-A [Proof of Spacetime (aka PoSt)](post) is a long-term assurance of a Miner's continuous storage of their Sectors' data. _This is not a single proof,_ but a collection of proofs the Miner has submitted over time. Periodically, a Miner must add to these proofs by submitting a **Windowed PoSt**:
-* Fundamentally, a Windowed PoSt is a collection of merkle proofs over the underlying data in a Miner's Sectors.
-* Windowed PoSts bundle proofs of various leaves across groups of Sectors (called **Partitions**).
+A [Proof of Spacetime (aka PoSt)](post) is a long-term assurance of a Miner's continuous storage of their Sectors' data. _This is not a single proof,_ but a collection of proofs the Miner has submitted over time. Periodically, a Miner must add to these proofs by submitting a **WindowPoSt**:
+* Fundamentally, a WindowPoSt is a collection of merkle proofs over the underlying data in a Miner's Sectors.
+* WindowPoSts bundle proofs of various leaves across groups of Sectors (called **Partitions**).
 * These proofs are submitted as a single SNARK.
 
-The historical and ongoing submission of Windowed PoSts creates assurance that the Miner has been storing, and continues to store the Sectors they agreed to store in the storage deal.
+The historical and ongoing submission of WindowPoSts creates assurance that the Miner has been storing, and continues to store the Sectors they agreed to store in the storage deal.
 
 Once a Miner successfully adds and ProveCommits a Sector, the Sector is assigned to a Deadline: a specific window of time during which PoSts must be submitted. The day is broken up into 48 individual Deadlines of 30 minutes each, and ProveCommitted Sectors are assigned to one of these 48 Deadlines.
 * PoSts may only be submitted for the currently-active Deadline. Deadlines are open for 30 minutes, starting from the Deadline's "Open" epoch and ending at its "Close" epoch.
@@ -65,8 +65,8 @@ A Miner's financial gain or loss is affected by the following three actions:
 
 A Miner's token balance MUST cover ALL of the following:
 * **PreCommit Deposits**: When a Miner PreCommits a Sector, they must supply a "precommit deposit" for the Sector, which acts as collateral. If the Sector is not ProveCommitted on time, this deposit is removed and burned.
-* **Initial Pledge**: When a Miner ProveCommits a Sector, they must supply an "initial pledge" for the Sector, which acts as collateral. If the Sector is terminated, this deposit is removed and burned.
-* **Locked Funds**: When a Miner receives tokens from block rewards, the tokens are locked and added to the Miner's vesting table to be unlocked at a future epoch.
+* **Initial Pledge**: When a Miner ProveCommits a Sector, they must supply an "initial pledge" for the Sector, which acts as collateral. If the Sector is terminated, this deposit is removed and burned along with rewards earned by this sector up to a limit.
+* **Locked Funds**: When a Miner receives tokens from block rewards, the tokens are locked and added to the Miner's vesting table to be unlocked linearly over some future epochs.
 
 ### Faults, Penalties and Fee Debt
 
