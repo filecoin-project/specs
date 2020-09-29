@@ -88,21 +88,3 @@ When a Miner accrues penalties, the amount penalized is tracked as "Fee Debt." I
 * Withdraw balance
 
 Faults are implied to be "temporary" - that is, a Miner that temporarily loses internet connection may choose to declare some Sectors for their upcoming Deadline as faulty, because the Miner knows they will regain the ability to submit proofs for those Sectors eventually. This declaration allows the Miner to still submit a valid proof for their Deadline (minus the faulty Sectors). This is very important for Miners, as missing a Deadline's PoSt entirely incurs a high penalty.
-
-## Miner PoSt State
-
-The `MinerPoStState` keeps track of a miner's state in responding to PoSt challenges. There are three states in `MinerPoStState`:
-
-- `OK` miner has passed an ElectionPoSt challenge sufficiently recently.
-- `DetectedFault` miner has failed at least one PoSt, indicating that not all claimed storage has been proven. The Miner has lost power on its sector and recovery can only proceed by a successful response to a subsequent PoSt challenge, up until the limit of number of consecutive failures.
-
-`DetectedFault` is a miner-wide PoSt state when all sectors are considered inactive. All power is lost immediately and pledge collateral is slashed. If a miner remains in `DetectedFault` for more than `MaxConsecutiveFailures`, all sectors will be terminated, both power and market actors will be notified for slashing and return of client deal collateral.
-
-`ProvingSet` consists of sectors that miners are required to generate proofs against and is what counts towards miners' power. In other words, `ProvingSet` is a set of all `Active` sectors for a particular miner. `ProvingSet` is only relevant when the miner is in OK stage of its `MinerPoStState`. When a miner is in the `Challenged` state, `ChallengedSectors` specify the list of sectors to be challenged which is the `ProvingSet` before the challenge is issued thus allowing more sectors to be added while it is in the `Challenged` state.
-
-Miners can call `ProveCommit` to commit a sector and add to their Claimed Power. However, a miner's Nominal Power and Consensus Power will be zero when it is in either `Challenged` or `DetectedFault` state. Note also that miners can call `DeclareTemporaryFault` when they are in `Challenged` or `DetectedFault` state. This does not change the list of  sectors that are currently challenged which is a snapshot of all active sectors (`ProvingSet`) at the time of challenge.
-
-![Miner PoSt State Machine](diagrams/miner_post_state_machine.dot)
-
-![Miner PoSt State Machine Legend](diagrams/miner_post_state_machine_legend.dot)
-
