@@ -20,7 +20,7 @@ The Filecoin Storage Mining Subsystem ensures a storage miner can effectively co
 The above involves a number of steps to putting on and maintaining online storage, such as:
 
 - Committing new storage (see [Sector](sector), [Sector Sealing](sector#sealing) and [PoRep](sdr))
-- Continuously proving storage (see [Election PoSt](election_post))
+- Continuously proving storage (see [WinningPoSt](expected_consensus#winning-a-block) and Window PoSt)
 - Declaring [storage faults](sector#sector-faults) and recovering from them.
 
 

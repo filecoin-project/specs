@@ -8,7 +8,7 @@ dashboardTests: 0
 
 # Storage Mining Cycle
 
-Block miners should constantly be performing Proofs of SpaceTime using [Election PoSt](election_post), and checking the outputted partial tickets to run [Leader Election](expected_consensus#secret-leader-election) and determine whether they can propose a block at each epoch. Epochs are currently set to take 30 seconds, in order to account for election PoSt and network propagation around the world.
+Block miners should constantly, on every epoch, be checking if they win the Secret Leader Election and in case they are elected, determine whether they can propose a block by running the Winning PoSt. Epochs are currently set to take 30 seconds, in order to account for Winning PoSt and network propagation around the world. The detailed steps for the above process can be found in the [Secret Leader Election](expected_consensus#secret-leader-election) section.
 
 Here we provide a detailed description of the mining cycle.
 
@@ -134,8 +134,6 @@ In this period, the miner can still:
 If a miner detects [Storage Faults](faults#storage-faults) among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the `DeclareTemporaryFaults()` method of the Storage Miner Actor. 
 
 The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of being able to create a valid block (i.e., adding a Winning PoSt). By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can specify how long the duration of their TemporaryFault and pay a TemporaryFaultFee.
-
-A miner will no longer be able to declare faults after being challenged for a SurprisePoSt.
 
 ### Step 3: Deal/Sector Expiration
 
