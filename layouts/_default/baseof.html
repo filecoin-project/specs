@@ -2,8 +2,7 @@
 <html lang="{{ .Site.Language.Lang }}" dir={{ .Site.Language.LanguageDirection }}>
 
 <head>
-  {{ partial "docs/html-head" . }}
-  {{ partial "docs/inject/head" . }}
+  {{ partial "html-head" . }}
 </head>
 
 <body dir={{ .Site.Language.LanguageDirection }}>
@@ -28,8 +27,6 @@
         {{ partial "docs/inject/footer" . }}
       </footer>
 
-      {{ template "comments" . }} <!-- Comments block -->
-
       <label for="menu-control" class="hidden book-menu-overlay"></label>
     </div>
 
@@ -46,7 +43,7 @@
     {{ end }}
   </main>
 
-  {{ partial "docs/inject/body" . }}
+  {{ partial "body" . }}
 </body>
 
 </html>
@@ -78,9 +75,11 @@
 {{ end }}
 
 {{ define "main" }}
-  <article class="markdown">
+  <article class="markdown {{ if default false (index .Params "math-mode") }}math-mode{{ end }}">
     {{- if eq .Title "Home" -}}
-      {{ with .GetPage "/intro" }}{{ .Content }}{{end}}
+        {{ with .GetPage "/intro" }}
+            {{ .Content }}
+        {{end}}
     {{- else -}}
       {{- .Content -}}
     {{- end -}}
