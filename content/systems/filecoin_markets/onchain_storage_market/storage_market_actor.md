@@ -37,5 +37,5 @@ This collateral is returned to the storage provider when all deals in the sector
 
 
 {{<katex>}}
-MinimumProviderDealCollateral = \\[0.2cm] \ \ \ \ \ \ \ \ 1\% \times FILCirculatingSupply \times \frac{DealRawByte}{max(NetworkBaseline, NetworkRawBytePower)}
+$MinimumProviderDealCollateral = \\[0.2cm] \ \ \ \ \ \ \ \ 1\% \times FILCirculatingSupply \times \frac{DealRawByte}{max(NetworkBaseline, NetworkRawBytePower)}$
 {{</katex>}}
