@@ -1,9 +1,9 @@
 ---
-title: "Blocks"
+title: Blocks
 bookCollapseSection: true
 weight: 1
 dashboardWeight: 1.5
-dashboardState: incorrect
+dashboardState: wip
 dashboardAudit: missing
 dashboardTests: 0
 ---
