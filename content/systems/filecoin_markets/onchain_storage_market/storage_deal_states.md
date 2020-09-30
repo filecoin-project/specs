@@ -2,7 +2,7 @@
 title: Deal States
 weight: 3
 dashboardWeight: 2
-dashboardState: wip
+dashboardState: reliable
 dashboardAudit: missing
 dashboardTests: 0
 ---

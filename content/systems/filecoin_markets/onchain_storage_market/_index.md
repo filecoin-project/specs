@@ -3,7 +3,7 @@ title: Storage Market On-Chain Components
 weight: 2
 bookCollapseSection: true
 dashboardWeight: 2
-dashboardState: wip
+dashboardState: reliable
 dashboardAudit: missing
 dashboardTests: 0
 ---

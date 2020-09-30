@@ -2,7 +2,7 @@
 title: Deal Flow
 weight: 2
 dashboardWeight: 2
-dashboardState: wip
+dashboardState: reliable
 dashboardAudit: missing
 dashboardTests: 0
 ---
@@ -29,7 +29,7 @@ dashboardTests: 0
 
 ## Sealing sectors
 
-4. Once a miner finishes packing a `Sector`, it generates a `SectorPreCommitInfo` and calls `PreCommitSector` with a `PreCommitDeposit`. It must call `ProveCommitSector` with `SectorProveCommitInfo` within some bound to recover the deposit. Initial pledge will then be required at ProveCommit. Initial Pledge is usually higher than PreCommitDeposit. Recovered PreCommitDeposit will count towards Initial Pledge and miners only need to top up additional funds at ProveCommit. Excess PreCommitDeposit, when it is greater than Initial Pledge, will be returned to the miner. An expired `PreCommit` message will result in `PreCommitDeposit` being burned. All Sectors have an explicit expiration epoch declared during `PreCommit`. For sectors with deals, all deals must expire before sector expiration. The Miner gains power for this particular sector upon successful `ProveCommit`. For more details on the Sectors and the different types of deals that can be included in a Sector refer to the [Sector section](filecoin_mining#sector).
+4. Once a miner finishes packing a `Sector`, it generates a `SectorPreCommitInfo` and calls `PreCommitSector` with a `PreCommitDeposit`. It must call `ProveCommitSector` with `SectorProveCommitInfo` within some bound to recover the deposit. Initial pledge will then be required at `ProveCommit`. Initial Pledge is usually higher than `PreCommitDeposit`. Recovered `PreCommitDeposit` will count towards Initial Pledge and miners only need to top up additional funds at `ProveCommit`. Excess `PreCommitDeposit`, when it is greater than Initial Pledge, will be returned to the miner. An expired `PreCommit` message will result in `PreCommitDeposit` being burned. All Sectors have an explicit expiration epoch declared during `PreCommit`. For sectors with deals, all deals must expire before sector expiration. The Miner gains power for this particular sector upon successful `ProveCommit`. For more details on the Sectors and the different types of deals that can be included in a Sector refer to the [Sector section](filecoin_mining#sector).
 
 ## Prove Storage
 
