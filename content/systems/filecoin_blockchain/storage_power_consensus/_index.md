@@ -33,25 +33,23 @@ Much of the Storage Power Consensus' subsystem functionality is detailed in the 
 There are two ways to earn Filecoin tokens in the Filecoin network:
 
 - By participating in the [Storage Market](storage_market) as a storage provider and being paid by clients for file storage deals.
-- By mining new blocks, extend the blockchain, helping modify system state and securing the Filecoin consensus mechanism.
+- By mining new blocks, extending the blockchain, securing the Filecoin consensus mechanism, and running smart contracts to perform state updates.
 
-We must distinguish between both types of "miners" (storage and block miners). [Leader Election](expected_consensus#secret-leader-election) in Filecoin is predicated on a miner's storage power. Thus, while all block miners will be storage miners, the reverse is not necessarily true.
+There are two types of "miners" (storage and block miners) to be distinguished. [Leader Election](expected_consensus#secret-leader-election) in Filecoin is predicated on a miner's storage power. Thus, while all block miners will be storage miners, the reverse is not necessarily true.
 
 However, given Filecoin's "useful Proof-of-Work" is achieved through file storage ([PoRep](porep) and [PoSt](post)), there is little overhead cost for storage miners to participate in leader election. Such a [Storage Miner Actor](storage_miner_actor) need only register with the [Storage Power Actor](storage_power_actor) in order to participate in Expected Consensus and mine blocks.
 
 ## On Power
+Quality-adjusted power is assigned to every sector as a static function of its _Sector Quality_ which includes `SectorSize`, `Duration`, and `DealWeight`. DealWeight is a measure that maps size and duration of active deals in a sector during its lifetime to its impact on power and reward distribution. Concretely, deal weight is defined as spacetime occupied by a deal type in a sector. A CommittedCapacity Sector (see Sector Types in [Storage Mining Subsystem](storage_mining)) will have a DealWeight of zero but all sectors have an explicit Duration which is defined from the ChainEpoch that the sector comes online in a ProveCommit message to the Expiration ChainEpoch of the sector. 
 
-Claimed power is assigned to every sector as a static function of its _Sector Quality_ which includes `SectorSize`, `Duration`, and `DealWeight`. DealWeight is a measure that maps size and duration of active deals in a sector during its lifetime to its impact on power and reward distribution. A CommittedCapacity Sector (see Sector Types in [Storage Mining Subsystem](storage_mining)) will have a DealWeight of zero but all sectors have an explicit Duration which is defined from the ChainEpoch that the sector comes online in a ProveCommit message to the Expiration ChainEpoch of the sector. 
+Quality-adjusted power is the number of votes a miner has in leader election and has been defined to increase linearly with the useful storage that a miner has committed to the network. 
 
-In principle, power is the number of votes a miner has in leader election and has been defined to increase linearly with the storage that a miner has committed to the network. 
-
-The weight or quality of a sector depends on the deal made over the data inside the sector. There are generally three types of deals: the Committed Capacity (CC), where there is effectively no deal and the miner is storing arbitrary data inside the sector, the Regular Deals, where a miner and a client agree on a price in the market and the Verified Client deals, which give more power to the sector. We refer the reader to the [Sector](sector) and [Sector Quality](sector#sector_quality) section for details on Sector Types and Sector Quality, the [Verified Clients](algorithms#verified_clients) section for more details on what a verified client is, and the [CryptoEconomics](cryptoecon) section for specific parameter values on the Deal Weights and Quality Multipliers.
+The weight or quality of a sector depends on the deal made over the data inside the sector. There are generally three types of deals: the Committed Capacity (CC), where there is effectively no deal and the miner is storing arbitrary data inside the sector, the Regular Deals, where a miner and a client agree on a price in the market and the Verified Client deals, which give more power to the sector. We refer the reader to the [Sector](sector) and [Sector Quality](sector#sector_quality) section for details on Sector Types and Sector Quality, the [Verified Clients](verified_clients) section for more details on what a verified client is, and the [CryptoEconomics](cryptoecon) section for specific parameter values on the Deal Weights and Quality Multipliers. Sector quality multiplier of a sector is an average of deal quality multipliers weighted by the amount of spacetime each type of deal occupies in the sector.
 
 More precisely,
 
-- Claimed power: power from `ProveCommit` sectors minus sectors in `TemporaryFault` effective duration.
-- Nominal power: claimed power, unless the miner is in `DetectedFault` or `Challenged` state. Nominal power is used to determine total network storage power for purposes of consensus minimum.
-- Consensus power: nominal power, unless the miner fails to meet consensus minimum, or is undercollateralized.
+- Raw-byte power: size of a sector in bytes.
+- Quality-adjusted power: consensus power of stored data on the network, equal to Raw-byte power multiplied by Sector Quality Multiplier.
 
 ## Beacon Entries
 
