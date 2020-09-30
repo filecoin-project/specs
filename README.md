@@ -249,9 +249,9 @@ $SectorInitialConsensusPledge = \\[0.2cm] 30\% \times FILCirculatingSupply \time
 
 ## Math mode
 
-For short snippets of math text you can just use the `{{<katex>}}` shortcode, but if you need to write lots of math in a page you can just use `math-mode` and avoid writting the katex shortcode everywhere.
+For short snippets of math text (e.g., inline reference to parameters, or single formulas) it is easier to use the `{{<katex>}}`/`{{/katex}}` shortcode (as described just [above](specs#katex)). Check how KaTeX parses math typesetting [here]((https://katex.org/docs/api.html)).
 
-Parses math typesetting with [KaTeX](https://katex.org/docs/api.html)   
+For extensive blocks of math content it is more convenient to use `math-mode` to avoid having to repeat the katex shortcode for every math formula.
 
 Check this example [example](https://spec.filecoin.io/math-mode/)
 
