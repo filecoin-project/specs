@@ -19,7 +19,7 @@ dashboardTests: 0
    - `StorageProvider` verifies the `StorageDeal` by checking:
    		- the address and signature of the `StorageClient`,
    		- the proposal's `StartEpoch` is after the current Epoch,
-   		- the `StorageClient` did not call withdraw in the last **X** Epochs (`WithdrawBalance` should take at least **X** Epochs), 
+   		- (tentative) the `StorageClient` did not call withdraw in the last *X* epochs (`WithdrawBalance` should take at least *X* epochs) - *X* is currently set to 0, but the setting will be re-considered in the near future.
    		- both `StorageProvider` and `StorageClient` have sufficient available balances in `StorageMarketActor`.
 3. `StorageProvider` signs the `StorageDealProposal`  by constructing an on-chain message.
    - `StorageProvider` calls `PublishStorageDeals` in `StorageMarketActor` to publish this on-chain message which will generate a `DealID` for each `StorageDeal` and store a mapping from `DealID` to `StorageDeal`. However, the deals are not active at this point.
