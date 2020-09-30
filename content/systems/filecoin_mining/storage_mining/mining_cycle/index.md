@@ -18,7 +18,7 @@ In order to mine blocks on the Filecoin blockchain a miner must be running [Bloc
 
 With every new tipset, the miner can use their committed power to attempt to craft a new block.
 
-For additional details around how consensus works in Filecoin, see [Expected Consensus](expected_consensus). For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner is eligible to mine a block, and other rules pertaining to the production of some artifacts required of valid blocks (e.g. Tickets, ElectionPoSt).
+For additional details around how consensus works in Filecoin, see [Expected Consensus](expected_consensus). For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner is eligible to mine a block, and other rules pertaining to the production of some artifacts required of valid blocks (e.g. Tickets, WinningPoSt).
 
 ### Mining Cycle
 
@@ -133,7 +133,7 @@ In this period, the miner can still:
 
 If a miner detects [Storage Faults](faults#storage-faults) among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the `DeclareTemporaryFaults()` method of the Storage Miner Actor. 
 
-The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of being elected to mine a block (i.e., winning ElectionPoSt). By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can specify how long the duration of their TemporaryFault and pay a TemporaryFaultFee.
+The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of being able to create a valid block (i.e., adding a Winning PoSt). By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can specify how long the duration of their TemporaryFault and pay a TemporaryFaultFee.
 
 A miner will no longer be able to declare faults after being challenged for a SurprisePoSt.
 
