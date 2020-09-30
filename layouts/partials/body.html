@@ -1,4 +1,4 @@
-{{ $opts := dict "targetPath" "main.js" "minify" "true" }}
+{{ $opts := dict "targetPath" "main.js" "minify" "false" }}
 {{ $js := resources.Get "js/main.js" | js.Build $opts}}
 <script defer src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
 

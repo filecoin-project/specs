@@ -17,10 +17,14 @@ function initTableSort () {
 function initTocDepthSlider () {
   var slider = document.getElementById('toc-depth-slider')
   var toc = document.querySelector('.toc')
-  
-  slider.addEventListener('change', (event) => {
-    handleSliderChange(Number(event.target.value))
-  })
+
+  if(slider) {
+      slider.addEventListener('change', (event) => {
+        handleSliderChange(Number(event.target.value))
+      })
+      // init to the current value
+      handleSliderChange(slider.value)
+  }
 
   function handleSliderChange (depth) {
     for (let i = 0; i < 6; i++) {
@@ -33,15 +37,16 @@ function initTocDepthSlider () {
       })
     }
   }
-  // init to the current value
-  handleSliderChange(slider.value)
 }
 
 function initTocScrollSpy () {
-  var spy = new Gumshoe('.toc a', {
-    nested: true,
-    nestedClass: 'active-parent'
-  })
+    const toc = document.querySelector('.toc a')
+    if(toc) {
+        new Gumshoe('.toc a', {
+          nested: true,
+          nestedClass: 'active-parent'
+        })
+    }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -50,7 +55,7 @@ window.addEventListener('DOMContentLoaded', () => {
   initTableSort()
   lightbox()
   // load katex when math-mode page intersect with the viewport
-  let observer = new IntersectionObserver((entries, observer) => { 
+  let observer = new IntersectionObserver((entries, observer) => {
       entries.forEach(entry => {
         if(entry.isIntersecting){
           renderKatex(entry.target)
