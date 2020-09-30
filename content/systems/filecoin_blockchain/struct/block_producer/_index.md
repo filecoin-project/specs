@@ -1,6 +1,6 @@
 ---
 title: Block Producer
-weight: 5
+weight: 4
 dashboardWeight: 1.5
 dashboardState: reliable
 dashboardAudit: missing
@@ -17,13 +17,9 @@ In order to do so, the miner must be running chain validation, and be keeping tr
 
 ### Block Creation
 
-Producing a block for epoch `H` requires computing a tipset for epoch `H-1` (or possibly a prior epoch,
-if no blocks were received for that epoch). Using the state produced by this tipset, a miner can
-scratch winning ElectionPoSt ticket(s). 
-Armed with the requisite `ElectionPoStOutput`, as well as a new randomness ticket generated in this epoch, a miner can produce a new block.
+Producing a block for epoch `H` requires waiting for the beacon entry for that epoch and using it to run `GenerateElectionProof`. If `WinCount` ≥ 1 (i.e., when the miner is elected), the same beacon entry is used to run `WinningPoSt`. Armed by the `ElectionProof` ticket (output of `GenerateElectionProof`) and the `WinningPoSt` proof, the miner can produce an new block.
 
-See [VM Interpreter](interpreter) for details of parent tipset evaluation, and [Block](block) for constraints 
-on valid block header values. 
+See [VM Interpreter](interpreter) for details of parent tipset evaluation, and [Block](block) for constraints on valid block header values. 
 
 To create a block, the eligible miner must compute a few fields:
 

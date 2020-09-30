@@ -1,6 +1,6 @@
 ---
 title: Chain Manager
-weight: 4
+weight: 3
 dashboardWeight: 1.5
 dashboardState: reliable
 dashboardAudit: missing

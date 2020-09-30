@@ -32,7 +32,7 @@ The main Tipset structure in the Lotus implementation includes the following:
 {{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/types/tipset.go"  lang="go" symbol="TipSet">}}
 
 
-Semantic validation of a Tipset is performed in:
+Semantic validation of a Tipset includes the following checks.
 
 {{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/types/tipset.go"  lang="go" symbol="NewTipSet">}}
 
