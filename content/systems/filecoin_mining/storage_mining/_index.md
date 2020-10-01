@@ -70,14 +70,14 @@ A Miner's token balance MUST cover ALL of the following:
 
 ### Faults, Penalties and Fee Debt
 
-A Sector's PoSts must be submitted on time, or that Sector is marked "faulty." There are two types of faults:
-* **Declared Fault**: When the Miner explicitly declares a Sector "faulty" _before_ its Deadline's FaultCutoff. Recall that `WindowPoSt` proofs are submitted per partition for a specific `ChallengeWindow`. A miner has to declare the sector as faulty before the `ChallengeWindow` for the particular partition opens. Until the sectors are recovered the sectors will be masked from proofs in subsequent proving periods. 
-* **Skipped Undeclared Fault (optional)**: When the Miner does not explicitly declare a Sector "faulty," but their submitted PoSt does not contain a proof for that Sector, or they do not submit a proof at all. In particular, a PoSt submission may carry a list of sector numbers representing not-previously-declared faults for each partition. When reading sector information for these faulty sectors, information for the first non-faulty sector in the partition is substituted instead. This enables sector-wise fault penalties, as compared to partition-wise fault sectors. This type of undeclared fault is optional.
-* **Undeclared Detected Fault**: This type of fault is similar to the one above, but applies to entire partitions as compared to individual sectors. At the end of the proving period, the cron invocation inspects the proof verification records. Partitions without a PoSt (i.e. detected faults) are penalised for all of their sectors, and all sectors are marked faulty until they are recovered.
+A Sector's PoSts must be submitted on time, or that Sector is marked "faulty." There are three types of faults:
+* **Declared Fault**: When the Miner explicitly declares a Sector "faulty" _before_ its Deadline's FaultCutoff. Recall that `WindowPoSt` proofs are submitted per partition for a specific `ChallengeWindow`. A miner has to declare the sector as faulty before the `ChallengeWindow` for the particular partition opens. Until the sectors are recovered they will be masked from proofs in subsequent proving periods.
+* **Detected Fault**: Partitions of sectors without PoSt proof verification records, which have not been declared faulty before the deadline's fault cutoff epoch are marked as detected faults.
+* **Skipped Fault**: If a sector is currently in active or recovering state and has not been declared faulty before, but the PoSt submission does not include a proof for this sector, then this is a "skipped fault" state. In other words, when a miner submits PoSt proofs for a partition but does not include proofs for some sectors in the partition, then these sectors are in "skipped fault" state.
 
-**Fault Recovery**
+Note that the "skipped fault" allows for sector-wise fault penalties, as compared to partition-wide faults and penalties, as is the case with "detected faults".
 
-Regardless of how a fault first becomes known (declared, skipped, detected), the sector stays faulty and is excluded from future proofs until the miner explicitly declares it recovered. The declaration of recovery restores the sector to the proving set at the start of the subsequent proving period. When a PoSt for a just-recovered sector is received, power for that sector is restored.
+Fault Recovery: Regardless of how a fault first becomes known (declared, skipped, detected), the sector stays faulty and is excluded from future proofs until the miner explicitly declares it recovered. The declaration of recovery restores the sector to the proving set at the start of the subsequent proving period. When a PoSt for a just-recovered sector is received, power for that sector is restored.
 
 A Miner may accrue penalties for many reasons:
 * **PreCommit Expiry Penalty**: Occurs if a Miner fails to `ProveCommit` a PreCommitted Sector in time. This happens the first time that a miner declares that it proves a sector and falls into the PoRep consensus.
