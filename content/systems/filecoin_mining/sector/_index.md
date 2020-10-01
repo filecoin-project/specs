@@ -9,7 +9,6 @@ dashboardTests: 0
 ---
 
 # Sector
----
 
 Sectors are the basic units of storage on Filecoin. They have standard sizes, as well as well-defined time-increments for commitments. The size of a sector balances security concerns against usability. A sectorʼs lifetime is determined in the storage market, and sets the promised duration of the sector.
 

@@ -9,7 +9,7 @@
         </tr>
     </thead>
     <tbody>
-        {{- template "dashboard-impls-children" (dict "Section" ($.Site.GetPage "implementations") ) -}}
+        {{- template "dashboard-impls-children" (dict "Section" ($.Site.GetPage "implementations") "Host" $.Site.Params.API ) -}}
     </tbody>
 </table>
 
@@ -20,33 +20,30 @@
         {{- range $repoUrlIndex, $repoItem := .Params.implRepos -}}
             {{ $repoUrl := $repoItem.repo }}
             {{ $repoLang := $repoItem.lang }}
-            {{ $parts := split $repoUrl "/" }}
-            {{ $size := len $parts }}
-            {{ $repoName := (index $parts (sub $size 1)) }}
-            {{ $repoOrg := (index $parts (sub $size 2)) }}
-            {{ $path := delimit (slice $repoOrg $repoName) "/" }}
-            {{ $url := printf "https://codecov.io/api/gh/%s" $path }}
+            {{ $url := printf "%s/cov?repo=%s" $.Host $repoUrl }}
             {{ $data := getJSON $url }}
-            {{ $cov := $data.commit.totals.c }}
+            {{ $path := delimit (slice $data.org $data.repo) "/" }}
+
             {{ $color := "bg-na"}}
-            {{ if gt $cov 0 }}
+            {{ if gt $data.cov 0 }}
                 {{ $color = "bg-incorrect"}}
             {{ end }}
-            {{ if gt $cov 20 }}
+            {{ if gt $data.cov 20 }}
                 {{ $color = "bg-wip"}}
             {{ end }}
-            {{ if gt $cov 70 }}
+            {{ if gt $data.cov 70 }}
                 {{ $color = "bg-reliable"}}
             {{ end }}
+            
             <tr>
-                <td style="text-align:left"><a title="{{ $repoName }}" href="{{ $repoUrl }}">{{ $repoName }}</a></td>
-                <td>{{ $repoLang }}</td>
-                <td class="text-black {{ if eq $data.commit.ci_passed  true }}bg-reliable{{ else if eq $data.commit.ci_passed false }}bg-incorrect {{ else }}bg-na{{end}}">
-                    {{ if eq $data.commit.ci_passed  true }}Passed{{ else if eq $data.commit.ci_passed false }}Failed{{ else }}Unknown{{ end }}
+                <td style="text-align:left"><a title="{{ $data.repo }}" href="{{ $repoUrl }}">{{ $data.repo }}</a></td>
+                <td>{{ $repoLang }}  </td>
+                <td class="text-black {{ if eq $data.ci  true }}bg-reliable{{ else if eq $data.ci false }}bg-incorrect {{ else }}bg-na{{end}}">
+                    {{ if eq $data.ci  true }}Passed{{ else if eq $data.ci false }}Failed{{ else }}Unknown{{ end }}
                 </td>
                 <td class="text-black {{ $color }}">
                     <a class="text-black" href="https://codecov.io/gh/{{ $path }}" title="Open on codecov.io">
-                        {{ if $data.commit.totals.c }}{{ math.Round $data.commit.totals.c }}%{{ else }}Unknown{{end}}
+                        {{ if $data.cov }}{{ math.Round $data.cov }}%{{ else }}Unknown{{end}}
                     </a>
                 </td>
                 <td class="text-black bg-{{ $repoItem.auditState | default "missing" }}">

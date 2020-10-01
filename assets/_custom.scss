@@ -47,6 +47,23 @@ input.toggle {
     }
 }
 
+.markdown .permalink {
+    color: inherit;
+    text-decoration: none;
+    &:visited {
+        color:inherit;
+    }
+    &:hover {
+        text-decoration: none;
+        &::after {
+            font-size: 90%;
+            padding-left:0.3em;
+            color: $color-link;
+            content: " #"
+        }
+    }
+}
+
 
 // SVG Diagrams
 .diagrams-container {

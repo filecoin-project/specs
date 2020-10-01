@@ -1,12 +1,6 @@
 name: CI 
 
-on:
-  push:
-    branches:
-      - "master"
-  pull_request:
-    branches:
-      - "*"
+on: [push]
 
 jobs:
   deploy:
@@ -21,8 +15,6 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: '12'
-      # get lotus deps...
-      - run: sudo apt install bzr
 
       - run: npm install
       - run: npm test
@@ -31,7 +23,6 @@ jobs:
       # Pin the built site to ipfs-cluster, output the cid as `steps.ipfs.outputs.cid`
       # see: https://github.com/ipfs-shipyard/ipfs-github-action
       - uses: ipfs-shipyard/ipfs-github-action@v2.0.0
-        if: github.event.pull_request == 0 || github.event.pull_request.head.repo.full_name == github.repository
         id: ipfs
         with:
           path_to_add: public

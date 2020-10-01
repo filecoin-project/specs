@@ -1,9 +1,3 @@
-// Modifiers
-.gg-s-half {
-    --ggs: 0.5
-}
-
-
 // External Icon
 .gg-external {
     box-sizing: border-box;
@@ -40,4 +34,19 @@
     border-right: 2px solid;
     border-top: 2px solid;
     top: -4px
+}
+
+
+// Modifiers
+.gg-s-half {
+    --ggs: 0.5
+}
+
+
+.gg-inline {
+    display: inline-block;
+}
+
+.gg-middle {
+    vertical-align: middle;
 }
