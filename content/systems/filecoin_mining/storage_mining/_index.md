@@ -72,8 +72,8 @@ A Miner's token balance MUST cover ALL of the following:
 
 A Sector's PoSts must be submitted on time, or that Sector is marked "faulty." There are three types of faults:
 * **Declared Fault**: When the Miner explicitly declares a Sector "faulty" _before_ its Deadline's FaultCutoff. Recall that `WindowPoSt` proofs are submitted per partition for a specific `ChallengeWindow`. A miner has to declare the sector as faulty before the `ChallengeWindow` for the particular partition opens. Until the sectors are recovered they will be masked from proofs in subsequent proving periods.
-* **Detected Fault**: Partitions of sectors without PoSt proof verification records, which have not been declared faulty before the deadline's fault cutoff epoch are marked as detected faults.
-* **Skipped Fault**: If a sector is currently in active or recovering state and has not been declared faulty before, but the PoSt submission does not include a proof for this sector, then this is a "skipped fault" state. In other words, when a miner submits PoSt proofs for a partition but does not include proofs for some sectors in the partition, then these sectors are in "skipped fault" state.
+* **Detected Fault**: Partitions of sectors without PoSt proof verification records, which have not been declared faulty before the `FaultCutoff` epoch's deadline are marked as detected faults.
+* **Skipped Fault**: If a sector is currently in active or recovering state and has not been declared faulty before, but the miner's PoSt submission does not include a proof for this sector, then this is a "skipped fault" sector. In other words, when a miner submits PoSt proofs for a partition but does not include proofs for some sectors in the partition, then these sectors are in "skipped fault" state. This is in contrast to the "detected fault" state, where the miner does not submit a PoSt proof at all. The skipped fault is helpful in case a sector becomes faulty after the `FaultCutoff` epoch.
 
 Note that the "skipped fault" allows for sector-wise fault penalties, as compared to partition-wide faults and penalties, as is the case with "detected faults".
 
