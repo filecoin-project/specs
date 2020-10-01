@@ -3,7 +3,7 @@ title: Storage Miner
 bookCollapseSection: true
 weight: 2
 dashboardWeight: 2
-dashboardState: wip
+dashboardState: reliable
 dashboardAudit: wip
 dashboardTests: 0
 ---
@@ -40,7 +40,7 @@ It is important to note that the replica should not only be unique to the miner,
 
 When Miners commit to storing data, they must first produce a valid Proof of Replication.
 
-#### Proof of Spacetime
+### Proof of Spacetime
 
 A [Proof of Spacetime (aka PoSt)](post) is a long-term assurance of a Miner's continuous storage of their Sectors' data. _This is not a single proof,_ but a collection of proofs the Miner has submitted over time. Periodically, a Miner must add to these proofs by submitting a **WindowPoSt**:
 * Fundamentally, a WindowPoSt is a collection of merkle proofs over the underlying data in a Miner's Sectors.
@@ -71,12 +71,17 @@ A Miner's token balance MUST cover ALL of the following:
 ### Faults, Penalties and Fee Debt
 
 A Sector's PoSts must be submitted on time, or that Sector is marked "faulty." There are two types of faults:
-* **Declared fault**: When the Miner explicitly declares a Sector "faulty" _before_ its Deadline's FaultCutoff.
-* **Undeclared fault**: When the Miner does not explicitly declare a Sector "faulty," but their submitted PoSt does not contain a proof for that Sector.
+* **Declared Fault**: When the Miner explicitly declares a Sector "faulty" _before_ its Deadline's FaultCutoff. Recall that `WindowPoSt` proofs are submitted per partition for a specific `ChallengeWindow`. A miner has to declare the sector as faulty before the `ChallengeWindow` for the particular partition opens. Until the sectors are recovered the sectors will be masked from proofs in subsequent proving periods. 
+* **Skipped Undeclared Fault (optional)**: When the Miner does not explicitly declare a Sector "faulty," but their submitted PoSt does not contain a proof for that Sector, or they do not submit a proof at all. In particular, a PoSt submission may carry a list of sector numbers representing not-previously-declared faults for each partition. When reading sector information for these faulty sectors, information for the first non-faulty sector in the partition is substituted instead. This enables sector-wise fault penalties, as compared to partition-wise fault sectors. This type of undeclared fault is optional.
+* **Undeclared Detected Fault**: This type of fault is similar to the one above, but applies to entire partitions as compared to individual sectors. At the end of the proving period, the cron invocation inspects the proof verification records. Partitions without a PoSt (i.e. detected faults) are penalised for all of their sectors, and all sectors are marked faulty until they are recovered.
+
+**Fault Recovery**
+
+Regardless of how a fault first becomes known (declared, skipped, detected), the sector stays faulty and is excluded from future proofs until the miner explicitly declares it recovered. The declaration of recovery restores the sector to the proving set at the start of the subsequent proving period. When a PoSt for a just-recovered sector is received, power for that sector is restored.
 
 A Miner may accrue penalties for many reasons:
 * **PreCommit Expiry Penalty**: Occurs if a Miner fails to `ProveCommit` a PreCommitted Sector in time. This happens the first time that a miner declares that it proves a sector and falls into the PoRep consensus.
-* **Undeclared Fault Penalty**: Occurs if a Miner fails to submit a PoSt for a Sector on time.
+* **Undeclared Fault Penalty**: Occurs if a Miner fails to submit a PoSt for a Sector on time. Depending on whether the "Skipped Undeclared Fault" is implemented, this penalty applies to either a sector or a whole partition.
 * **Declared Fault Penalty**: Occurs if a Miner fails to submit a PoSt for a Sector on time, but they declare the Sector faulty before the system finds out (in which case the fault falls in the "Undeclared Fault Penalty" above). **This penalty fee is lower than the undeclared fault penalty**, in order to incentivize Miners to declare faults early.
 * **Ongoing Fault Penalty**: Occurs every Proving Period a Miner fails to submit a PoSt for a Sector.
 * **Termination Penalty**: Occurs if a Sector is forcibly terminated before its expiration.
@@ -87,4 +92,4 @@ When a Miner accrues penalties, the amount penalized is tracked as "Fee Debt." I
 * Declare faulty Sectors "recovered"
 * Withdraw balance
 
-Faults are implied to be "temporary" - that is, a Miner that temporarily loses internet connection may choose to declare some Sectors for their upcoming Deadline as faulty, because the Miner knows they will regain the ability to submit proofs for those Sectors eventually. This declaration allows the Miner to still submit a valid proof for their Deadline (minus the faulty Sectors). This is very important for Miners, as missing a Deadline's PoSt entirely incurs a high penalty.
+Faults are implied to be "temporary" - that is, a Miner that temporarily loses internet connection may choose to declare some Sectors for their upcoming proving period as faulty, because the Miner knows they will eventually regain the ability to submit proofs for those Sectors. This declaration allows the Miner to still submit a valid proof for their Deadline (minus the faulty Sectors). This is very important for Miners, as missing a Deadline's PoSt entirely incurs a high penalty.
