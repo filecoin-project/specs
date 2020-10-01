@@ -2,7 +2,7 @@
 <html lang="{{ .Site.Language.Lang }}" dir={{ .Site.Language.LanguageDirection }}>
 
 <head>
-  {{ partial "single/html-head" . }}
+  {{ partial "html-head" . }}
 </head>
 
 <body dir={{ .Site.Language.LanguageDirection }}>
@@ -11,7 +11,7 @@
   <header class="book-header">
     {{ template "header" . }} <!-- Mobile layout header -->
   </header>
-  
+
   <aside class="book-menu">
     {{ template "menu" . }} <!-- Left menu Content -->
   </aside>
@@ -27,9 +27,9 @@
 
     </div>
   </main>
-  
+
   <label for="menu-control" class="hidden book-menu-overlay"></label>
-  {{ partial "single/inject/body" . }}
+  {{ partial "body" . }}
 </script>
 </body>
 

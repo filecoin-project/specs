@@ -1,8 +1,8 @@
 ---
 title: Block Producer
-weight: 5
+weight: 4
 dashboardWeight: 1.5
-dashboardState: incorrect
+dashboardState: reliable
 dashboardAudit: missing
 dashboardTests: 0
 ---
@@ -11,19 +11,15 @@ dashboardTests: 0
 
 ## Mining Blocks
 
-A miner registered with the storage power actor may begin generating and checking election tickets if it has proven storage meeting the [Minimum Miner Size](storage_power_consensus#minimum-miner-size) threshold requirement. 
+A miner registered with the storage power actor may begin generating and checking election tickets if it has proven storage that meets the [Minimum Miner Size](storage_power_consensus#minimum-miner-size) threshold requirement. 
 
 In order to do so, the miner must be running chain validation, and be keeping track of the most recent blocks received. A miner's new block will be based on parents from the previous epoch.
 
 ### Block Creation
 
-Producing a block for epoch `H` requires computing a tipset for epoch `H-1` (or possibly a prior epoch,
-if no blocks were received for that epoch). Using the state produced by this tipset, a miner can
-scratch winning ElectionPoSt ticket(s). 
-Armed with the requisite `ElectionPoStOutput`, as well as a new randomness ticket generated in this epoch, a miner can produce a new block.
+Producing a block for epoch `H` requires waiting for the beacon entry for that epoch and using it to run `GenerateElectionProof`. If `WinCount` ≥ 1 (i.e., when the miner is elected), the same beacon entry is used to run `WinningPoSt`. Armed by the `ElectionProof` ticket (output of `GenerateElectionProof`) and the `WinningPoSt` proof, the miner can produce an new block.
 
-See [VM Interpreter](interpreter) for details of parent tipset evaluation, and [Block](block) for constraints 
-on valid block header values. 
+See [VM Interpreter](interpreter) for details of parent tipset evaluation, and [Block](block) for constraints on valid block header values. 
 
 To create a block, the eligible miner must compute a few fields:
 
@@ -57,20 +53,12 @@ a winning ticket is found independently of block generation.
 
 ### Block Broadcast
 
-An eligible miner broadcasts the completed block to the network and, assuming everything was done correctly, 
-the network will accept it and other miners will mine on top of it, earning the miner a block reward!
+An eligible miner propagates the completed block to the network using the [GossipSub](gossip_sub) `/fil/blocks` topic and, assuming everything was done correctly, 
+the network will accept it and other miners will mine on top of it, earning the miner a block reward.
 
-Miners should output their valid block as soon as it is produced, otherwise they risk other miners receiving the block after the EPOCH_CUTOFF and not including them.
+Miners should output their valid block as soon as it is produced, otherwise they risk other miners receiving the block after the EPOCH_CUTOFF and not including them in the current epoch.
 
 ## Block Rewards
 
-{{< hint warning >}}
-TODO: Rework this.
-{{</ hint >}}
-Over the entire lifetime of the protocol, 1,400,000,000 FIL (`TotalIssuance`) will be given out to miners. Each of the miners who produced a block in a tipset will receive a block reward. 
-
-Note: Due to jitter in EC, and the gregorian calendar, there may be some error in the issuance schedule over time. This is expected to be small enough that it's not worth correcting for. Additionally, since the payout mechanism is transferring from the network account to the miner, there is no risk of minting *too much* FIL.
-
-{{< hint warning >}}
-TODO: Ensure that if a miner earns a block reward while undercollateralized, then `min(blockReward, requiredCollateral-availableBalance)` is garnished (transfered to the miner actor instead of the owner).
-{{</ hint >}}
+Block rewards are handled by the [Reward Actor](sysactors#rewardactor).
+Further details on the Block Reward are discussed in the [Filecoin Token](filecoin_token) section and details about the Block Reward Collateral are discussed in the [Miner Collaterals](miner_collaterals) section.
