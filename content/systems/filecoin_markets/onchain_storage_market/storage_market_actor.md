@@ -5,6 +5,7 @@ dashboardWeight: 2
 dashboardState: reliable
 dashboardAudit: missing
 dashboardTests: 0
+math-mode: true
 ---
 
 # Storage Market Actor
@@ -35,7 +36,6 @@ Provider deal collateral is only slashed when a sector is terminated before the 
 
 This collateral is returned to the storage provider when all deals in the sector successfully conclude. Upon graceful deal expiration, storage providers must wait for finality number of epochs (as defined in [Finality](expected_consensus#finality-in-ec)) before being able to withdraw their `StorageDealCollateral` from the `StorageMarketActor`.
 
-
-{{<katex>}}
-$MinimumProviderDealCollateral = \\[0.2cm] \ \ \ \ \ \ \ \ 1\% \times FILCirculatingSupply \times \frac{DealRawByte}{max(NetworkBaseline, NetworkRawBytePower)}$
-{{</katex>}}
+```text
+$MinimumProviderDealCollateral = 1\% \times FILCirculatingSupply \times \frac{DealRawByte}{max(NetworkBaseline, NetworkRawBytePower)}$
+```
