@@ -24,7 +24,7 @@ SPC provides a power table abstraction which tracks miner power (i.e. miner stor
 
 Sector ProveCommit is the first time power is proven to the network and hence power is first added upon successful sector ProveCommit. Power is also added when a sector's TemporaryFault period has ended. Miners are expected to prove over all their sectors that contribute to their power. 
 
-Power is decremented when a sector expires, when a sector becomes faulty, or when it is terminated through miner invocation. Miners can also extend the lifetime of a sector through `ExtendSectorExpiration` and thus modifying `SectorStorageWeightDesc`.
+Power is decremented when a sector expires, when a sector becomes faulty, or when it is terminated through miner invocation. Miners can also extend the lifetime of a sector through `ExtendSectorExpiration`.
 
 The Miner lifecycle in the power table should be roughly as follows:
 
