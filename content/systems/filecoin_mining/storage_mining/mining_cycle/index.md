@@ -1,7 +1,8 @@
 ---
 title: Storage Mining Cycle
+weight: 5
 dashboardWeight: 2
-dashboardState: incorrect
+dashboardState: reliable
 dashboardAudit: wip
 dashboardTests: 0
 ---
@@ -111,37 +112,24 @@ Note that any change to worker keys after registration must be appropriately del
 
 ### Step 1: Committing Sectors
 
-When the miner has completed their first seal, they should post it on-chain using the [Storage Miner Actor's](storage_miner_actor) `ProveCommitSector` function. The miner will need to put up pledge collateral in proportion to the amount of storage they commit on chain. Miner will now gain power for this particular sector upon successful `ProveCommitSector`.
+When the miner has completed their first seal, they should post it on-chain using the [Storage Miner Actor's](storage_miner_actor) `ProveCommitSector` function. The miner will need to put up [pledge collateral](filecoin_mining#miner_collaterals) in proportion to the amount of storage they commit on chain. The miner will now gain power for this particular sector upon successful `ProveCommitSector`.
 
 You can read more about sectors [here](sector) and how sector relates to power [here](storage_power_consensus#on-power).
 
-### Step 2: Running Elections
+### Step 2: Producing Blocks
 
-Once the miner has power on the network, they can begin to submit `ElectionPoSts`. To do so, the miner must run a PoSt on a subset of their sectors in every round, using the outputted partial tickets to run leader election.
+Once the miner has power on the network, they are randomly chosen by the ["Secret Leader Election"](expected_consensus#secret_leader_election) algorithm to mine and submit blocks proportionally to the power they hold, i.e., if a miner holds 3% of the overall network power they will be chosen in 3% of the cases. The winning miner is chosen by the system and the miner can prove that they were chosen by submitting an Election Proof.
 
-If the miner finds winning tickets, they are eligible to generate a new block and earn block rewards using the [Block Producer](block_producer).
+When a miner is chosen to produce a block, they must submit a `WinningPoSt` proof. This process is as follows: an elected miner gets the randomness value through the DRAND randomness generator based on the current epoch and uses it to generate WinningPoSt.
 
-Every successful PoSt submission will delay the next SurprisePoSt challenge the miner will receive.
-
-In this period, the miner can still:
-
-- commit new sectors
-- be challenged with a SurprisePoSt
-- declare faults
+WinningPoSt uses the randomness to select a sector for which the miner must generate a proof. If the miner is not able to generate this proof within some predefined amount of time, then they will not be able to create a block.
 
 ### Faults
 
-If a miner detects [Storage Faults](faults#storage-faults) among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults with the `DeclareTemporaryFaults()` method of the Storage Miner Actor. 
+If a miner detects [Storage Faults](faults#storage-faults) among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults as discussed earlier.
 
-The miner will be unable to craft valid PoSts over faulty sectors, thereby reducing their chances of being able to create a valid block (i.e., adding a Winning PoSt). By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly. The miner can specify how long the duration of their TemporaryFault and pay a TemporaryFaultFee.
+The miner will be unable to craft valid PoSt proofs over faulty sectors, thereby reducing their chances of being able to create a valid block (i.e., adding a Winning PoSt). By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly.
 
 ### Step 3: Deal/Sector Expiration
 
 In order to stop mining, a miner must complete all of its storage deals. Once all deals in a sector have expired, the sector itself will expire thereby enabling the miner to remove the associated collateral from their account.
-
-### Future Work
-
-There are many ideas for improving upon the storage miner, here are ideas that may be potentially implemented in the future.
-
-- **Sector Resealing**: Miners should be able to 're-seal' sectors, to allow them to take a set of sectors with mostly expired pieces, and combine the not-yet-expired pieces into a single (or multiple) sectors.
-- **Sector Transfer**: Miners should be able to re-delegate the responsibility of storing data to another miner. This is tricky for many reasons, and will not be implemented in the initial release of Filecoin, but could provide interesting capabilities down the road.

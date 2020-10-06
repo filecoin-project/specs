@@ -1,7 +1,7 @@
 ---
 title: Storage Miner
-bookCollapseSection: true
 weight: 2
+bookCollapseSection: true
 dashboardWeight: 2
 dashboardState: reliable
 dashboardAudit: wip
@@ -23,10 +23,6 @@ The above involves a number of steps to putting on and maintaining online storag
 - Continuously proving storage (see [WinningPoSt](expected_consensus#winning-a-block) and Window PoSt)
 - Declaring [storage faults](sector#sector-faults) and recovering from them.
 
-
-![Sector State Machine](diagrams/sector_state_machine.dot)
-
-![Sector State Machine Legend](diagrams/sector_state_machine_legend.dot)
 
 ## Filecoin Proofs
 
@@ -70,10 +66,12 @@ A Miner's token balance MUST cover ALL of the following:
 
 ### Faults, Penalties and Fee Debt
 
+**Faults**
+
 A Sector's PoSts must be submitted on time, or that Sector is marked "faulty." There are three types of faults:
 * **Declared Fault**: When the Miner explicitly declares a Sector "faulty" _before_ its Deadline's FaultCutoff. Recall that `WindowPoSt` proofs are submitted per partition for a specific `ChallengeWindow`. A miner has to declare the sector as faulty before the `ChallengeWindow` for the particular partition opens. Until the sectors are recovered they will be masked from proofs in subsequent proving periods.
 * **Detected Fault**: Partitions of sectors without PoSt proof verification records, which have not been declared faulty before the `FaultCutoff` epoch's deadline are marked as detected faults.
-* **Skipped Fault**: If a sector is currently in active or recovering state and has not been declared faulty before, but the miner's PoSt submission does not include a proof for this sector, then this is a "skipped fault" sector. In other words, when a miner submits PoSt proofs for a partition but does not include proofs for some sectors in the partition, then these sectors are in "skipped fault" state. This is in contrast to the "detected fault" state, where the miner does not submit a PoSt proof for any section in the partition at all. The skipped fault is helpful in case a sector becomes faulty after the `FaultCutoff` epoch.
+* **Skipped Fault**: If a sector is currently in active or recovering state and has not been declared faulty before, but the miner's PoSt submission does not include a proof for this sector, then this is a "skipped fault" sector (also referred to as "skipped undeclared fault"). In other words, when a miner submits PoSt proofs for a partition but does not include proofs for some sectors in the partition, then these sectors are in "skipped fault" state. This is in contrast to the "detected fault" state, where the miner does not submit a PoSt proof for any section in the partition at all. The skipped fault is helpful in case a sector becomes faulty after the `FaultCutoff` epoch.
 
 Note that the "skipped fault" allows for sector-wise fault penalties, as compared to partition-wide faults and penalties, as is the case with "detected faults".
 
@@ -98,12 +96,14 @@ There are four relevant epochs associated to a deadline:
 
 Regardless of how a fault first becomes known (declared, skipped, detected), the sector stays faulty and is excluded from future proofs until the miner explicitly declares it recovered. The declaration of recovery restores the sector to the proving set at the start of the subsequent proving period. When a PoSt for a just-recovered sector is received, power for that sector is restored.
 
+**Penalties**
+
 A Miner may accrue penalties for many reasons:
 * **PreCommit Expiry Penalty**: Occurs if a Miner fails to `ProveCommit` a PreCommitted Sector in time. This happens the first time that a miner declares that it proves a sector and falls into the PoRep consensus.
-* **Undeclared Fault Penalty**: Occurs if a Miner fails to submit a PoSt for a Sector on time. Depending on whether the "Skipped Undeclared Fault" is implemented, this penalty applies to either a sector or a whole partition.
-* **Declared Fault Penalty**: Occurs if a Miner fails to submit a PoSt for a Sector on time, but they declare the Sector faulty before the system finds out (in which case the fault falls in the "Undeclared Fault Penalty" above). **This penalty fee is lower than the undeclared fault penalty**, in order to incentivize Miners to declare faults early.
+* **Undeclared Fault Penalty**: Occurs if a Miner fails to submit a PoSt for a Sector on time. Depending on whether the "Skipped Fault" option is implemented, this penalty applies to either a sector or a whole partition.
+* **Declared Fault Penalty**: Occurs if a Miner fails to submit a PoSt for a Sector on time, but they declare the Sector faulty before the system finds out (in which case the fault falls in the "Undeclared Fault Penalty" above). **This penalty fee should be lower than the undeclared fault penalty**, in order to incentivize Miners to declare faults early.
 * **Ongoing Fault Penalty**: Occurs every Proving Period a Miner fails to submit a PoSt for a Sector.
-* **Termination Penalty**: Occurs if a Sector is forcibly terminated before its expiration.
+* **Termination Penalty**: Occurs if a Sector is terminated before its expiration.
 * **Consensus Fault Penalty**: Occurs if a Miner commits a consensus fault and is reported.
 
 When a Miner accrues penalties, the amount penalized is tracked as "Fee Debt." If a Miner has Fee Debt, they are restricted from certain actions until the amount owed is paid off. Miners with Fee Debt may not:

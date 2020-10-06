@@ -3,7 +3,7 @@ title: Storage Mining
 bookCollapseSection: true
 weight: 6
 dashboardWeight: 2
-dashboardState: wip
+dashboardState: reliable
 dashboardAudit: wip
 dashboardTests: 0
 ---
