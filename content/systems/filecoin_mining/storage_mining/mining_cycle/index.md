@@ -1,6 +1,6 @@
 ---
 title: Storage Mining Cycle
-weight: 5
+weight: 4
 dashboardWeight: 2
 dashboardState: reliable
 dashboardAudit: wip
