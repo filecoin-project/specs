@@ -3,16 +3,14 @@ title: Storage Power Consensus
 weight: 4
 bookCollapseSection: true
 dashboardWeight: 2
-dashboardState: wip
+dashboardState: reliable
 dashboardAudit: wip
 dashboardTests: 0
 ---
 
 # Storage Power Consensus
 
-TODO: remove all stale .id, .go files referenced
-
-The Storage Power Consensus subsystem is the main interface which enables Filecoin nodes to agree on the state of the system. SPC accounts for individual storage miners' effective power over consensus in given chains in its [Power Table](storage_power_actor#the-power-table). It also runs [Expected Consensus](expected_consensus) (the underlying consensus algorithm in use by Filecoin), enabling storage miners to run leader election and generate new blocks updating the state of the Filecoin system.
+The Storage Power Consensus (SPC) subsystem is the main interface which enables Filecoin nodes to agree on the state of the system. Storage Power Consensus accounts for individual storage miners' effective power over consensus in given chains in its [Power Table](storage_power_actor#the-power-table). It also runs [Expected Consensus](expected_consensus) (the underlying consensus algorithm in use by Filecoin), enabling storage miners to run leader election and generate new blocks updating the state of the Filecoin system.
 
 Succinctly, the SPC subsystem offers the following services:
 
@@ -24,16 +22,13 @@ Succinctly, the SPC subsystem offers the following services:
     - Running [Chain Selection](expected_consensus#chain-selection) across subchains using EC's weighting function.
     - Identification of [the most recently finalized tipset](expected_consensus#finality-in-ec), for use by all protocol participants.
 
-Much of the Storage Power Consensus' subsystem functionality is detailed in the code below but we touch upon some of its behaviors in more detail.
-
-{{<embed src="storage_power_consensus_subsystem.id" lang="go">}}
 
 ## Distinguishing between storage miners and block miners
 
 There are two ways to earn Filecoin tokens in the Filecoin network:
 
 - By participating in the [Storage Market](storage_market) as a storage provider and being paid by clients for file storage deals.
-- By mining new blocks, extending the blockchain, securing the Filecoin consensus mechanism, and running smart contracts to perform state updates.
+- By mining new blocks, extending the blockchain, securing the Filecoin consensus mechanism, and running smart contracts to perform state updates as a [Storage Miner](filecoin_mining#storage_mining).
 
 There are two types of "miners" (storage and block miners) to be distinguished. [Leader Election](expected_consensus#secret-leader-election) in Filecoin is predicated on a miner's storage power. Thus, while all block miners will be storage miners, the reverse is not necessarily true.
 
@@ -41,18 +36,18 @@ However, given Filecoin's "useful Proof-of-Work" is achieved through file storag
 
 ## On Power
 
-Quality-adjusted power is assigned to every sector as a static function of its _Sector Quality_ which includes: i) the "Sector Spacetime", which is the product of the sector size and the promised storage duration, ii) the "Deal Weight" that converts spacetime occupied by deals into consensus power, iii) the "Deal Quality Multiplier" that depends on the type of deal done over the sector (i.e., CC, Regular Deal or Verified Client Deal), and finally, iv) the "Sector Quality Multiplier", which is an average of deal quality multipliers weighted by the amount of spacetime each type of deal occupies in the sector.
+Quality-adjusted power is assigned to every sector as a static function of its **_Sector Quality_** which includes: i) the **Sector Spacetime**, which is the product of the sector size and the promised storage duration, ii) the **Deal Weight** that converts spacetime occupied by deals into consensus power, iii) the **Deal Quality Multiplier** that depends on the type of deal done over the sector (i.e., CC, Regular Deal or Verified Client Deal), and finally, iv) the **Sector Quality Multiplier**, which is an average of deal quality multipliers weighted by the amount of spacetime each type of deal occupies in the sector.
 
-The Sector Quality is a measure that maps size, duration and the type of active deals in a sector during its lifetime to its impact on power and reward distribution. 
+The **Sector Quality** is a measure that maps size, duration and the type of active deals in a sector during its lifetime to its impact on power and reward distribution. 
 
-The quality of a sector depends on the deals made over the data inside the sector. There are generally three types of deals: the Committed Capacity (CC), where there is effectively no deal and the miner is storing arbitrary data inside the sector, the Regular Deals, where a miner and a client agree on a price in the market and the Verified Client deals, which give more power to the sector. We refer the reader to the [Sector](sector) and [Sector Quality](sector#sector_quality) section for details on Sector Types and Sector Quality, the [Verified Clients](verified_clients) section for more details on what a verified client is, and the [CryptoEconomics](cryptoecon) section for specific parameter values on the Deal Weights and Quality Multipliers.
+The quality of a sector depends on the deals made over the data inside the sector. There are generally three types of deals: the _Committed Capacity (CC)_, where there is effectively no deal and the miner is storing arbitrary data inside the sector, the _Regular Deals_, where a miner and a client agree on a price in the market and the _Verified Client_ deals, which give more power to the sector. We refer the reader to the [Sector](sector) and [Sector Quality](sector#sector_quality) sections for details on Sector Types and Sector Quality, the [Verified Clients](verified_clients) section for more details on what a verified client is, and the [CryptoEconomics](cryptoecon) section for specific parameter values on the Deal Weights and Quality Multipliers.
 
-Quality-adjusted power is the number of votes a miner has in leader election and has been defined to increase linearly with the useful storage that a miner has committed to the network. 
+**Quality-Adjusted Power** is the number of votes a miner has in the [Secret Leader Election](expected_consensus#secret-leader-election) and has been defined to increase linearly with the useful storage that a miner has committed to the network. 
 
-More precisely,
+More precisely, we have the following definitions:
 
-- Raw-byte power: size of a sector in bytes.
-- Quality-adjusted power: consensus power of stored data on the network, equal to Raw-byte power multiplied by Sector Quality Multiplier.
+- _Raw-byte power_: the size of a sector in bytes.
+- _Quality-adjusted power_: the consensus power of stored data on the network, equal to Raw-byte power multiplied by the Sector Quality Multiplier.
 
 ## Beacon Entries
 
@@ -62,7 +57,7 @@ In turn these random seeds are used by:
 
 - The [sector_sealer](sealing) as SealSeeds to bind sector commitments to a given subchain.
 - The [post_generator](poster) as PoStChallenges to prove sectors remain committed as of a given block.
-- The Storage Power subsystem as randomness in [leader_election](election_post) to determine their eligibility to mine a block.
+- The Storage Power subsystem as randomness in [Secret Leader Election](expected_consensus#secret-leader-election) to determine how often a miner is chosen to mine a new block.
 
 This randomness may be drawn from various Filecoin chain epochs by the respective protocols that use them according to their security requirements.
 
@@ -93,147 +88,42 @@ lowest epoch number block will contain the requested beacon entry. Similarly, if
 there has been null rounds where the beacon should have been inserted, we need
 to iterate on the chain to find where the entry is inserted.
 
-```go
-func GetRandomnessFromBeacon(e ChainEpoch, head ChainEpoch) (DrandEntry,error) {
-  // get the drand round associated with the timestamp of this epoch.
-  drandRound := MaxBeaconRoundForEpoch(e)
-  // get the minimum drand timestamp associated with the drand round
-  drandTs := drandGenesisTime + (drandPeriod-1) * drandRound 
-  // get the minimum filecoin epoch associated with this timestamp
-  minEpoch := (drandTs - filGenesisTime) / filEpochDuration 
-  for minEpoch < head {
-     // if this is not a null block, then it must have the entry we want
-    if !chain.IsNullBlock(minEpoch) 
-         // the requested drand entry must be in the list of drand entries
-         // included in this block. If it is not the case, 
-         // it means the block is invalid - but this condition is caught by the 
-         // block validation logic.
-         returns getDrandEntryFromBlockHeader(chain.Block(minEpoch))
-    // otherwise, we need to continue progressing on the chain, i.e. maybe no
-    // miner were elected or filecoin / drand outage
-    minEpoch++
-  }
-}
 
-func getDrandEntryFromBlockHeader(block,round) (DrandEntry,error) {
-    for _,dr := range block.DrandEntries {
-        if dr.Round == round {
-            return dr
-        }
-    }
-    return errors.New("drand entry not found in block")
-}
-```
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/vm/runtime.go" lang="go" symbol="GetRandomnessFromBeacon">}}
+
 
 ### Fetch randomness from drand network
 
 When mining, a miner can fetch entries from the drand network to include them in
-the new block by calling the method `GetBeaconEntriesForEpoch`.
+the new block.
 
-```go
-GetBeaconEntriesForEpoch(epoch) []BeaconEntry {
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/beacon/drand/drand.go" lang="go" symbol="DrandBeacon">}}
 
-    // special case genesis: the genesis block is pre-generated and so cannot include a beacon entry 
-    // (since it will not have been generated). Hence, we only start checking beacon entries at the first block after genesis.
-    // If that block includes a wrong beacon entry, we simply assume that a majority of honest miners at network birth will
-    // simply fork.
-    entries := []
-    if epoch == 0 {
-        return entries
-    }
 
-    maxDrandRound := MaxBeaconRoundForEpoch(epoch)
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/beacon/beacon.go" lang="go" symbol="BeaconEntriesForBlock">}}
 
-    // if checking the first post-genesis block, simply fetch the latest entry.
-    if epoch == 1 {
-        rand := drand.Public(maxDrandRound)
-        return append(entries, rand)
-    }
 
-    // for the rest, fetch all drand entries generated between this epoch and last
-    prevMaxDrandRound := MaxBeaconRoundForEpoch(epoch - 1)
-    if (maxDrandRound == prevMaxDrandRound) {
-        // no new beacon randomness
-        return entries
-    }
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/beacon/drand/drand.go" lang="go" symbol="MaxBeaconRoundForEpoch">}}
 
-    entries := []
-    curr := maxDrandRound
-    for curr > prevMaxDrandRound {
-        rand := drand.Public(curr)
-        entries = append(entries, rand)
-        curr -= 1
-    }
-    // return entries in increasing order
-    reverse(entries)
-    return entries
-}
-```
 
 ### Validating Beacon Entries on block reception
 
-Per the above, a Filecoin chain will contain the entirety of the beacon's output from the Filecoin genesis to the current block.
+A Filecoin chain will contain the entirety of the beacon's output from the Filecoin genesis to the current block.
 
 Given their role in leader election and other critical protocols in Filecoin, a block's beacon entries must be validated for every block. See [drand](drand) for details. This can be done by ensuring every beacon entry is a valid signature over the prior one in the chain, using drand's [`Verify`](https://github.com/drand/drand/blob/763e9a252cf59060c675ced0562e8eba506971c1/chain/beacon.go#L76) endpoint as follows:
 
-```go
-// This need not be done for the genesis block
-// We assume that blockHeader and priorBlockHeader are two valid subsequent headers where block was mined atop priorBlock
-ValidateBeaconEntries(blockHeader, priorBlockHeader) error {
-    currEntries := blockHeader.BeaconEntries
-    prevEntries := priorBlockHeader.BeaconEntries
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/beacon/beacon.go" lang="go" symbol="ValidateBlockValues">}}
 
-    // special case for genesis block (it has no beacon entry and so the first
-    verifiable value comes at height 2, 
-    // as with GetBeaconEntriesForEpoch()
-    if priorBlockHeader.Epoch == 0 {
-        return nil
-    }
-
-    maxRoundForEntry := MaxBeaconRoundForEpoch(blockHeader.Epoch)
-    // ensure entries are not repeated in blocks
-    lastBlocksLastEntry := prevEntries[len(prevEntries)-1]
-    if lastBlocksLastEntry == maxRound && len(currEntries) != 0 {
-        return errors.New("Did not expect a new entry in this round.")
-    }
-
-    // preparing to check that entries properly follow one another
-    var entries []BeaconEntry
-    // at currIdx == 0, must fetch last Fil block's last BeaconEntry
-    entries := append(entries, lastBlocksLastEntry)
-    entries := append(entries, currEntries...)
-
-    currIdx := len(entries) - 1
-    // ensure that the last entry in the header is not in the future (i.e. that this is not a Filecoin
-    // block being mined with a future known drand entry).
-    if entries[currIdx].Round != maxRoundForEntry {
-        return fmt.Errorf("expected final beacon entry in block to be at round %d, got %d", maxRound, last.Round)
-    }
-
-    for currIdx >= 0 {
-        // walking back the entries to ensure they follow one another
-        currEntry := entries[currIdx]
-        prevEntry := entries[currIdx - 1]
-        err := drand.Verify(node.drandPubKey, prevEntry.Data, currEntry.Data, currEntry.Round)
-        if err != nil {
-            return err
-        }
-        currIdx -= 1
-    }
-
-    return nil
-}
-```
 
 ## Tickets
 
 Filecoin block headers also contain a single "ticket" generated from its epoch's beacon entry. Tickets are used to break ties in the Fork Choice Rule, for forks of equal weight.
 
-Whenever comparing tickets in Filecoin, the comparison is that of the ticket's VRFDigest's bytes.
+Whenever comparing tickets in Filecoin, the comparison is that of the ticket's VRF Digest's bytes.
 
 ### Randomness Ticket generation
 
-At a Filecoin epoch n, a new ticket is generated using the appropriate beacon entry for epoch n.
+At a Filecoin epoch `n`, a new ticket is generated using the appropriate beacon entry for epoch `n`.
 
 The miner runs the beacon entry through a Verifiable Random Function (VRF) to get a new unique ticket. The beacon entry is prepended with the ticket domain separation tag and concatenated with the miner actor address (to ensure miners using the same worker keys get different tickets).
 
@@ -243,17 +133,11 @@ randSeed = GetRandomnessFromBeacon(n)
 newTicketRandomness = VRF_miner(H(TicketProdDST || index || Serialization(randSeed, minerActorAddress)))
 ```
 
-We use the VRF from [Verifiable Random Functions](vrf) for ticket generation (see the `PrepareNewTicket` method below).
-
-{{< embed src="../../filecoin_mining/storage_mining/storage_mining_subsystem.go" lang="go" >}}
-
+[Verifiable Random Functions](vrf) are used for ticket generation.
 
 ### Ticket Validation
 
-Each Ticket should be generated from the prior one in the VRF-chain and verified accordingly as shown in `validateTicket` below.
-
-{{< embed src="storage_power_consensus_subsystem.id" lang="go" >}}
-{{< embed src="storage_power_consensus_subsystem.go" lang="go" >}}
+Each Ticket should be generated from the prior one in the VRF-chain and verified accordingly.
 
 ## Minimum Miner Size
 
@@ -266,7 +150,3 @@ Miners smaller than this cannot mine blocks and earn block rewards in the networ
 Accordingly, to bootstrap the network, the genesis block must include miners, potentially just CommittedCapacity sectors, to initiate the network.
 
 The `MIN_MINER_SIZE_TARG` condition will not be used in a network in which any miner has more than `MIN_MINER_SIZE_STOR` power. It is nonetheless defined to ensure liveness in small networks (e.g. close to genesis or after large power drops).
-
-## Network recovery after halting
-
-Placeholder where we will define a means of rebooting network liveness after it halts catastrophically (i.e. empty power table).
