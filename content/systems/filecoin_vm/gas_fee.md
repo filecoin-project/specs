@@ -21,7 +21,6 @@ In order to overcome this situation, the Filecoin blockchain defines a `BaseFee`
 
 Finally, `GasPremium` is the priority fee included by senders to incentivize miners to pick the most profitable messages. In other words, if a message sender wants its message to be included more quickly, they can set a higher `GasPremium`.
 
-
 ## Parameters
 
 - `GasUsed` is a measure of the amount of resources (or units of gas) consumed, in order to execute a message. Each unit of gas is measured in attoFIL and therefore, `GasUsed` is a number that represents the units of energy consumed. `GasUsed` is independent of whether a message was executed correctly or failed.
@@ -29,6 +28,11 @@ Finally, `GasPremium` is the priority fee included by senders to incentivize min
 - `GasLimit` is measured in units of gas and set by the message sender. It imposes a hard limit on the amount of gas (i.e., number of units of gas) that a message’s execution should be allowed to consume on chain. A message consumes gas for every fundamental operation it triggers, and a message that runs out of gas fails. When a message fails, every modification to the state that happened as a result of this message's execution is reverted back to its previous state. Independently of whether a message execution was successful or not, the miner will receive a reward for the resources they consumed to execute the message (see `GasPremium` below). 
 - `GasFeeCap` is the maximum price that the message sender is willing to pay per unit of gas (measured in attoFIL/gas unit). Together with the `GasLimit`, the `GasFeeCap` is setting the maximum amount of FIL that a sender will pay for a message: a sender is guaranteed that a message will never cost them more than `GasLimit * GasFeeCap` attoFIL (not including any Premium that the message includes for its recipient).
 - `GasPremium` is the price per unit of gas (measured in attoFIL/gas) that the message sender is willing to pay (on top of the `BaseFee`) to "tip" the miner that will include this message in a block. A message typically earns its miner `GasLimit * GasPremium` attoFIL, where effectively `GasPremium = GasFeeCap - BaseFee`. Note that `GasPremium` is applied on `GasLimit`, as opposed to `GasUsed`, in order to make message selection for miners more straightforward.
+
+
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/vm/burn.go"  lang="go" symbol="ComputeGasOverestimationBurn">}}
+
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/store/basefee.go"  lang="go" symbol="ComputeNextBaseFee">}}
 
 ## Notes & Implications 
 
