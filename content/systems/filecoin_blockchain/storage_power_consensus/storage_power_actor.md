@@ -10,11 +10,14 @@ dashboardTests: 0
 
 ## `StoragePowerActorState` implementation
 
-The implementation of the `StoragePowerActor` _state_ can be found [here](https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/power/power_state.go).
+{{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/power/power_state.go" lang="go" symbol="State">}}
 
 ## `StoragePowerActor` implementation
 
-The implementation of the `StoragePowerActor` can be found [here](https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/power/power_actor.go).
+{{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/power/power_actor.go" lang="go" symbol="Exports">}}
+
+{{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/power/power_actor.go" lang="go" symbol="MinerConstructorParams">}}
+
 
 ## The Power Table
 

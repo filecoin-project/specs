@@ -114,7 +114,6 @@ Given their role in leader election and other critical protocols in Filecoin, a 
 
 {{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/beacon/beacon.go" lang="go" symbol="ValidateBlockValues">}}
 
-
 ## Tickets
 
 Filecoin block headers also contain a single "ticket" generated from its epoch's beacon entry. Tickets are used to break ties in the Fork Choice Rule, for forks of equal weight.
