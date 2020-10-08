@@ -86,7 +86,7 @@ extracts the drand entry from the chain correctly.
 Note that the round may span multiple filecoin epochs if drand is slower; the
 lowest epoch number block will contain the requested beacon entry. Similarly, if
 there has been null rounds where the beacon should have been inserted, we need
-to iterate on the chain to find where the entry is inserted. In addition, the next non-null block must contain the drand entry requested by definition.
+to iterate on the chain to find where the entry is inserted. Specifically, the next non-null block must contain the drand entry requested by definition.
 
 
 ### Fetch randomness from drand network
