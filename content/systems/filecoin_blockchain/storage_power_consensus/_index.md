@@ -150,5 +150,4 @@ Accordingly, to bootstrap the network, the genesis block must include miners, po
 
 The `MIN_MINER_SIZE_TARG` condition will not be used in a network in which any miner has more than `MIN_MINER_SIZE_STOR` power. It is nonetheless defined to ensure liveness in small networks (e.g. close to genesis or after large power drops).
 
-{{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/power/policy.go" lang="go" symbol="ConsensusMinerMinPower">}}
 
