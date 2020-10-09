@@ -1,6 +1,6 @@
 ---
 title: Sector
-weight: 2
+weight: 1
 bookCollapseSection: true
 dashboardWeight: 2
 dashboardState: stable
