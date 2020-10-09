@@ -136,7 +136,7 @@ In particular, given that there is no proving method provided for the act of sen
 
 {{<embed src="https://github.com/filecoin-project/lotus/blob/master/paychmgr/paych.go" lang="go" title="Payment Channel Implementation">}}
 
-{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/types/voucher.go" lang="go" title="Payment Channel Voucher">}}
+{{<embed src="https://github.com/filecoin-project/specs-actors/blob/v0.9.12/actors/builtin/paych/paych_actor.go" lang="go" symbol="SignedVoucher">}}
 
 {{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/paych/paych_actor.go" lang="go" title="Payment Channel Actor">}}
 
