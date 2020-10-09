@@ -4,7 +4,7 @@ bookCollapseSection: true
 weight: 1
 dashboardWeight: 1
 dashboardState: reliable
-dashboardAudit: wip
+dashboardAudit: missing
 dashboardTests: 0
 ---
 
@@ -26,4 +26,6 @@ There are many features that will make passing the baseline more efficient and e
 - A more scalable consensus algorithm that can provide greater throughput and handle larger volume with shorter finality.
 - More deal functionalities that allow sectors to last for longer.
 
-Lastly, it is important to note that while the block reward incentivizes participation, it cannot be treated as a resource to be exploited. It is a common pool of subsidies that seeds and grows the network to benefit the economy and participants. An example of different stages of the economy and different sources of subsidies is illustrated in Figure TODO.
+Lastly, it is important to note that while the block reward incentivizes participation, it cannot be treated as a resource to be exploited. It is a common pool of subsidies that seeds and grows the network to benefit the economy and participants. An example of different stages of the economy and different sources of subsidies is illustrated in the following Figure.
+
+![Filecoin Economy Stages](final-stages-of-economy.jpg)
