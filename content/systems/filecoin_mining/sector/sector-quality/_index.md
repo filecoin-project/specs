@@ -5,6 +5,7 @@ dashboardWeight: 2
 dashboardState: stable
 dashboardAudit: n/a
 dashboardTests: 0
+math-mode: true
 ---
 
 # Sector Quality
@@ -18,7 +19,7 @@ capacity, regular deals, and verified client deals) to reward different content.
 - **Sector Quality Multiplier:** Sector quality is assigned on Activation (the epoch when the miner starts proving theyʼre storing the file). The sector quality multiplier is computed as an average of deal quality multipliers (committed capacity, regular deals, and verified client deals), weighted by the amount of spacetime each type of deal occupies in the sector.
 
 {{<katex>}}
-SectorQualityMultiplier = \frac{\sum\nolimits_{deals} DealWeight * DealQualityMultiplier}{SectorSpaceTime}
+$$SectorQualityMultiplier = \frac{\sum\nolimits_{deals} DealWeight * DealQualityMultiplier}{SectorSpaceTime}$$
 {{</katex>}}
 
 - **Raw Byte Power:** This measurement is the size of a sector in bytes.
