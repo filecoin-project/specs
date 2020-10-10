@@ -44,9 +44,8 @@ Specifically, the message signed is the concatenation of the round number treate
 
 ## Polling the drand network
 
-Filecoin nodes fetches the drand entry from the distribution network of the
-selected drand network. TODO: define network's name/entrypoints when drand
-network's live.
+Filecoin nodes fetch the drand entry from the distribution network of the
+selected drand network.
 
 drand distributes randomness via multiple distribution channels (HTTP servers,
 S3 buckets, gossiping...).  Simply put, the drand nodes themselves will not be
@@ -154,10 +153,3 @@ of these blocks.
 
 In any event, a heavier chain will emerge after the catch up period and mining
 can resume as normal.
-
-## drand network specification
-
-TODO once ready: @nikkolasg
-- Filecoin node access to randomness (how to connect, poll, etc)
-- Drand Node composition and governance
-- Network characteristics (DDoS resistance, layer description etc)
