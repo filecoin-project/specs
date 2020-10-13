@@ -3,7 +3,7 @@ title: Storage Market Actor
 weight: 1
 dashboardWeight: 2
 dashboardState: reliable
-dashboardAudit: missing
+dashboardAudit: done
 dashboardTests: 0
 math-mode: true
 ---
