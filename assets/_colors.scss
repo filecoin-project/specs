@@ -1,24 +1,54 @@
 // Colors
 
-
-.text-missing {color: $red;}
-.text-incorrect {color: $orange;}
-.text-wip {color: $yellow;}
-.text-reliable {color: $green;}
-.text-stable {color: $blue;}
-.text-transparent { color: transparent;}
-.text-black { color: black !important;}
-
-.bg-na { background-color: #6c8293;}
-.bg-missing { background-color: $red; }
-.bg-incorrect {background-color: $orange;}
-.bg-wip {background-color: $yellow;}
-.bg-done {background-color: $green; }
-.bg-reliable {background-color: $green; }
-.bg-stable { background-color: $blue;
-  a {
-    color: black;
-  }
+.text-missing {
+    color: var(--cl-red);
 }
-.bg-transparent { background-color: transparent;}
-.bg-black { background-color: black;}
+.text-incorrect {
+    color: var(--cl-orange);
+}
+.text-wip {
+    color: var(--cl-yellow);
+}
+.text-reliable {
+    color: var(--cl-green);
+}
+.text-stable {
+    color: var(--cl-blue);
+}
+.text-transparent {
+    color: transparent;
+}
+.text-black {
+    color: black !important;
+}
+
+.bg-na {
+    background-color: var(--cl-gray);
+}
+.bg-missing {
+    background-color: var(--cl-red);
+}
+.bg-incorrect {
+    background-color: var(--cl-orange);
+}
+.bg-wip {
+    background-color: var(--cl-yellow);
+}
+.bg-done {
+    background-color: var(--cl-green);
+}
+.bg-reliable {
+    background-color: var(--cl-green);
+}
+.bg-stable {
+    background-color: var(--cl-blue);
+    a {
+        color: black;
+    }
+}
+.bg-transparent {
+    background-color: transparent;
+}
+.bg-black {
+    background-color: black;
+}

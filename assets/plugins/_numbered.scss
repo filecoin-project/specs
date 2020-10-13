@@ -34,15 +34,15 @@ $endLevel: 6;
       content: counters(item, ".") " ";
       float: left;
       margin-inline-end: $padding-4;
-      color: $gray-600;
+      color: var(--gray-600);
     }
     &.active {
       &::before {
         content: "⨎";
-        color: $blue;
+        color: var(--cl-blue);
       }
       > a::before {
-        color: $blue;
+        color: var(--cl-blue);
       }
     }
   }
