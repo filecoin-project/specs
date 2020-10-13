@@ -50,13 +50,13 @@ Based on these the average quality of a sector is:
 
 
 {{<katex>}}
-avgQuality = \frac{baseSpaceTime*QBM + dealSpaceTime*DWM + verifiedSpaceTime*VDWM}{sectorSize*sectorDuration*QBM}
+$$avgQuality = \frac{baseSpaceTime*QBM + dealSpaceTime*DWM + verifiedSpaceTime*VDWM}{sectorSize*sectorDuration*QBM}$$
 {{</katex>}}
 
 The _Sector Quality Adjusted Power_ is:
 
 {{<katex>}}
-sectorQuality = avgQuality*size
+$$sectorQuality = avgQuality*size$$
 {{</katex>}}
 
 During `miner.PreCommitSector`, the sector quality is calculated and stored in the sector information.
