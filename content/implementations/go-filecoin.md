@@ -1,5 +1,5 @@
 ---
-title: go-filecoin
+title: Venus
 weight: 2
 dashboardWeight: 1
 dashboardState: reliable
@@ -8,10 +8,10 @@ implRepos:
   - { lang: go, repo: https://github.com/filecoin-project/go-filecoin }
 ---
 
-# Filecoin (go-filecoin)
+# Venus
 
-`go-filecoin` is a [community-driven](https://filecoin.io/blog/roadmap-update-june-2020/#what-s-next) implementation of Filecoin in Go. The `go-filecoin` implementation is nearly feature-complete (as of June 2020) with `go-filecoin` nodes interoperating with Lotus nodes.
+Venus, previously called `go-filecoin`, is another implementation of Filecoin in Go and is maintained by the [IPFS Force Community](https://github.com/ipfs-force-community). The `go-filecoin` implementation, before it was renamed to Venus and taken over by IPFS Force, was already nearly feature-complete (as of June 2020) with `go-filecoin` nodes interoperating with Lotus nodes.
 
-Protocol Labs is offering [DevGrants](https://github.com/filecoin-project/devgrants/issues/140) to support the development of `go-filecoin`.
+Protocol Labs is offering [DevGrants](https://github.com/filecoin-project/devgrants/issues/140) to support the development of Venus.
 
-You can find the `go-filecoin` codebase [here](https://github.com/filecoin-project/go-filecoin) and its extensive documentation website [here](https://go.filecoin.io/).
+You can find the Venus codebase [here](https://github.com/filecoin-project/venus) and its extensive documentation website [here](https://go.filecoin.io/).
