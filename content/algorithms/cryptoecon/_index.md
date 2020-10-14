@@ -3,7 +3,7 @@ title: Filecoin CryptoEconomics
 weight: 9
 dashboardWeight: 2
 dashboardState: reliable
-dashboardAudit: missing
+dashboardAudit: wip
 dashboardTests: 0
 ---
 

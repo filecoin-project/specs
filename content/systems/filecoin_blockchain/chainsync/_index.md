@@ -3,7 +3,7 @@ title: ChainSync
 weight: 3
 dashboardWeight: 2
 dashboardState: stable
-dashboardAudit: missing
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 
