@@ -3,7 +3,7 @@ title: "Verifiable Random Function"
 weight: 2
 dashboardWeight: 2
 dashboardState: incorrect
-dashboardAudit: missing
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 

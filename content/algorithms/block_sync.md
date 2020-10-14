@@ -3,7 +3,7 @@ title: "BlockSync"
 weight: 5
 dashboardWeight: 1
 dashboardState: stable
-dashboardAudit: missing
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 

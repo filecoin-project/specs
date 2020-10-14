@@ -3,7 +3,7 @@ title: Block Producer
 weight: 4
 dashboardWeight: 1.5
 dashboardState: reliable
-dashboardAudit: missing
+dashboardAudit: wip
 dashboardTests: 0
 ---
 
