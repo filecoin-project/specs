@@ -11,7 +11,7 @@ dashboardAuditDate: '2020-08-09'
 
 # DRAND
 
-DRand (Distributed Randomness) is a publicly verifiable random beacon protocol Filecoin relies on as a source of unbiasable entropy for leader election (see [leader election](election_post)).
+DRand (Distributed Randomness) is a publicly verifiable random beacon protocol Filecoin relies on as a source of unbiasable entropy for leader election (see [Secret Leader Election](expected_consensus#secret-leader-election)).
 
 At a high-level, the drand protocol runs a series of MPCs (Multi-Party Computations) in order to produce a series of deterministic, verifiable random values. Specifically, after a trusted setup, a known (to each other) group of n drand nodes sign a given message using t-of-n threshold BLS signatures in a series of successive rounds occuring at regular intervals (the drand round time).
 Any node that has gathered t of the signatures can reconstruct the full BLS signature. This signature can then be hashed in order to produce a collective random value which can be verified against the collective public key generated during the trusted setup. Note that while this can be done by the drand node, the random value (i.e. hashed value) should be checked by the consumer of the beacon. In Filecoin, we hash it using blake2b in order to obtain a 256 bit output.
@@ -73,7 +73,7 @@ Thereafter, the Filecoin client can call drand's endpoints:
 ## Using drand in Filecoin
 
 Drand is used as a randomness beacon for leader election in Filecoin. You can
-read more about that in [leader election](election_post). See drand used in the
+read more about that in the [secret leader election](expected_consensus#secret-leader-election) algorithm of [Expected Consensus](algorithms#expected_consensus). See drand used in the
 Filecoin lotus implementation
 [here](https://github.com/filecoin-project/lotus/blob/master/chain/beacon/drand/drand.go).
 
@@ -103,7 +103,7 @@ After initializing access to a drand beacon, a Filecoin node should have access 
 - `drandGenesisTime`    -- drand's genesis timestamp
 - `drandPeriod`         -- drand's epoch duration (between any two randomness creations)
 
-Using the above, a Filecoin node can determine the appropriate drand round value to be used for use in [leader election](election_post) in an epoch using both networks' reliance on real time as follows:
+Using the above, a Filecoin node can determine the appropriate drand round value to be used for use in [secret leader election](expected_consensus#secret-leader-election) in an epoch using both networks' reliance on real time as follows:
 
 ```go
 MaxBeaconRoundForEpoch(filEpoch) {
