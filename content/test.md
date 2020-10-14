@@ -42,5 +42,25 @@ over time, without requiring further interaction from the original parties
 
 {{<embed src="https://github.com/filecoin-project/lotus/blob/v0.7.1/build/bootstrap.go" lang="go" title="Payment Channel Implementation">}}
 
+### Github code comments
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/sync.go" lang="go" title="Sync" symbol="Syncer">}}
+
+### Github code small
+
+#### Lorem ipsum
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed congue eros, sit amet efficitur turpis. Ut arcu dui, tempor non ex consequat, dictum egestas est. Morbi et pulvinar magna. Nam scelerisque fermentum felis ut vehicula. Fusce malesuada tortor sed arcu pretium laoreet. Praesent ac nibh eu leo euismod condimentum. Suspendisse vitae fringilla nulla. Donec in fermentum odio. Nullam ut congue leo. Fusce urna lorem, tincidunt ac porta nec, dapibus ac ipsum. Nulla posuere vulputate nisi. Integer eget elementum diam. Aenean tincidunt lectus eu quam tincidunt aliquam. Curabitur eget lacinia diam.
+
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/sync.go" lang="go" title="Sync" symbol="InformNewHead">}}
+
+### Local file 
+{{<embed src="test-embed.js" lang="js" title="Test embed JS">}}
 
 
+## Diagrams 
+![Protocol Overview Diagram](/intro/diagrams/orient/filecoin.dot)
+
+## Blockquotes
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed congue eros, sit amet efficitur turpis. Ut arcu dui, tempor non ex consequat, dictum egestas est.
+
+> **Note**  
+Morbi et pulvinar magna. Nam scelerisque fermentum felis ut vehicula. Fusce malesuada tortor sed arcu pretium laoreet. Praesent ac nibh eu leo euismod condimentum. Suspendisse vitae fringilla nulla. Donec in fermentum odio. Nullam ut congue leo. Fusce urna lorem, tincidunt ac porta nec, dapibus ac ipsum. Nulla posuere vulputate nisi. Integer eget elementum diam. Aenean tincidunt lectus eu quam tincidunt aliquam. Curabitur eget lacinia diam.
