@@ -46,7 +46,7 @@ For each partition, the miner will have to produce a SNARK-compressed proof and 
 
 It naturally follows that the more the sectors a miner has pledged to store, the more the partitions of sectors that the miner will need to prove per deadline. This requires ready access to sealed copies of each of the challenged sectors and makes it irrational for the miner to seal data every time they need to provide a WindowPoSt proof.
 
-The Filecoin network expects constant availability of stored files. Failing to submit WindowPoSt for a sector will result in a fault, and the storage miner supplying the sector will be slashed – that is, a portion of their [pledge collateral](filecoin_mining#miner_collaterasl) will be forfeited, and their storage power will be reduced (see [Storage Power Consensus](filecoin_blockchain#storage_power_consensus).
+The Filecoin network expects constant availability of stored files. Failing to submit WindowPoSt for a sector will result in a fault, and the storage miner supplying the sector will be slashed – that is, a portion of their [pledge collateral](filecoin_mining#miner_collaterals) will be forfeited, and their storage power will be reduced (see [Storage Power Consensus](filecoin_blockchain#storage_power_consensus).
 
 ## Design
 

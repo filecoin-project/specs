@@ -235,11 +235,11 @@ The elements used as input by a proof of Spacetime to enable a proof to be gener
 
 ## Proof of Replication (PoRep)
 
-[_Proof-of-Replication_](sdr) is a procedure by which a [storage miner](glossary#storage-miner-actor) can prove to the Filecoin network that they have created a unique copy of some piece of data on the network's behalf. PoRep is used in the Filecoin system to generate sealed sectors through which storage miners prove they hold client data.
+[_Proof-of-Replication_](pos#porep) is a procedure by which a [storage miner](glossary#storage-miner-actor) can prove to the Filecoin network that they have created a unique copy of some piece of data on the network's behalf. PoRep is used in the Filecoin system to generate sealed sectors through which storage miners prove they hold client data.
 
 ## Proof of Spacetime (PoSt)
 
-[_Proof-of-Spacetime_](post) is a procedure by which a [storage-miner](glossary#storage-miner-actor) can prove to the Filecoin network they have stored and continue to store a unique copy of some data on behalf of the network for a period of time. Proof-of-Spacetime manifests in two distinct varieties in the present Filecoin specification: [Window Proof-of-Spacetime](glossary#window-proof-of-spacetime-windowpost) and [Winning Proof-of-Spacetime](glossary#winning-proof-of-spacetime-winningpost).
+[_Proof-of-Spacetime_](pos#post) is a procedure by which a [storage-miner](glossary#storage-miner-actor) can prove to the Filecoin network they have stored and continue to store a unique copy of some data on behalf of the network for a period of time. Proof-of-Spacetime manifests in two distinct varieties in the present Filecoin specification: [Window Proof-of-Spacetime](glossary#window-proof-of-spacetime-windowpost) and [Winning Proof-of-Spacetime](glossary#winning-proof-of-spacetime-winningpost).
 
 ## Quality-Adjusted Power
 
@@ -376,13 +376,13 @@ Every mined block has a computed `weight`, also called its `WinCount`. Together,
 
 ## Window Proof-of-Spacetime (WindowPoSt)
 
-_Window Proof-of-Spacetime_ (WindowPoSt) is the mechanism by which the commitments made by [storage miners](glossary#storage-miner-actor) are audited. It sees each 24-hour period broken down into a series of windows. Correspondingly, each storage miner's set of pledged [sectors](glossary#sector) is partitioned into subsets, one subset for each window. Within a given window, each storage miner must submit a [Proof-of-Spacetime](glossary#proof-of-spacetime-post) for each sector in their respective subset. This requires ready access to each of the challenged sectors, and will result in a [zk-SNARK-compressed](glossary#zksnark) proof published to the Filecoin [blockchain](glossary#blockchain) as a [message](glossary#message) in a [block](#block). In this way, every sector of [pledged storage](glossary#pledged-storage) is audited at least once in any 24-hour period, and a permanent, verifiable, and public record attesting to each storage miner's continued commitment is kept.
+[_Window Proof-of-Spacetime_ (WindowPoSt)](post#windowpost) is the mechanism by which the commitments made by [storage miners](glossary#storage-miner-actor) are audited. It sees each 24-hour period broken down into a series of windows. Correspondingly, each storage miner's set of pledged [sectors](glossary#sector) is partitioned into subsets, one subset for each window. Within a given window, each storage miner must submit a [Proof-of-Spacetime](glossary#proof-of-spacetime-post) for each sector in their respective subset. This requires ready access to each of the challenged sectors, and will result in a [zk-SNARK-compressed](glossary#zksnark) proof published to the Filecoin [blockchain](glossary#blockchain) as a [message](glossary#message) in a [block](#block). In this way, every sector of [pledged storage](glossary#pledged-storage) is audited at least once in any 24-hour period, and a permanent, verifiable, and public record attesting to each storage miner's continued commitment is kept.
 
 The Filecoin network expects constant availability of stored data. Failing to submit WindowPoSt for a sector will result in a [fault](glossary#fault), and the storage miner supplying the sector will be [slashed](glossary#slash).
 
 ## Winning Proof-of-Spacetime (WinningPoSt)
 
-_Winning Proof-of-Spacetime_ (WinningPoSt) is the mechanism by which [storage miners](glossary#storage-miner-actor) are rewarded for their contributions to the Filecoin network. At the beginning of each [epoch](glossary#epoch), a small number of storage miners are [elected](glossary#election) to each mine a new [block](glossary#block). As a requirement for doing so, each miner is tasked with submitting a compressed [Proof-of-Spacetime](glossary#proof-of-spacetime-post) for a specified [sector](glossary#sector). Each elected miner who successfully creates a block is granted [FIL](glossary#fil), as well as the opportunity to charge other Filecoin participants fees to include [messages](glossary#message) in the block.
+[_Winning Proof-of-Spacetime_ (WinningPoSt)](post#winningpost) is the mechanism by which [storage miners](glossary#storage-miner-actor) are rewarded for their contributions to the Filecoin network. At the beginning of each [epoch](glossary#epoch), a small number of storage miners are [elected](glossary#election) to each mine a new [block](glossary#block). As a requirement for doing so, each miner is tasked with submitting a compressed [Proof-of-Spacetime](glossary#proof-of-spacetime-post) for a specified [sector](glossary#sector). Each elected miner who successfully creates a block is granted [FIL](glossary#fil), as well as the opportunity to charge other Filecoin participants fees to include [messages](glossary#message) in the block.
 
 Storage miners who fail to do this in the necessary window will forfeit their opportunity to mine a block, but will not otherwise incur penalties for their failure to do so.
 
