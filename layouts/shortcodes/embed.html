@@ -81,9 +81,11 @@
         {{- end -}}
 
         {{- if $body }}
+            {{- if $comment }}
             <div class="embed-comment" id="symbol-comment-{{- $symbolName -}}">
                 {{- (replace $comment "//" "") | .Page.RenderString -}}
             </div>
+            {{- end -}}
             <div id="symbol-body-{{- $symbolName -}}">
                 {{ highlight ($body | safeHTML) $lang "" }}
             </div>
