@@ -3,19 +3,28 @@ title: Storage Market Actor
 weight: 1
 dashboardWeight: 2
 dashboardState: reliable
-dashboardAudit: missing
+dashboardAudit: done
 dashboardTests: 0
+math-mode: true
 ---
 
 # Storage Market Actor
 
-`StorageMarketActor` is responsible for processing and managing on-chain deals. This is also the entry point of all storage deals and data into the system. It maintains a mapping of `StorageDealID` to `StorageDeal` and keeps track of locked balances of `StorageClient` and `StorageProvider`. When a deal is posted on chain through the `StorageMarketActor`, it will first check if both transacting parties have sufficient balances locked up and include the deal on chain. 
+The `StorageMarketActor` is responsible for processing and managing on-chain deals. This is also the entry point of all storage deals and data into the system. It maintains a mapping of `StorageDealID` to `StorageDeal` and keeps track of locked balances of `StorageClient` and `StorageProvider`. When a deal is posted on chain through the `StorageMarketActor`, it will first check if both transacting parties have sufficient balances locked up and include the deal on chain. 
 
-{{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_state.go" lang="go" symbol="State" title="Storage Market Actor State">}}
+## `StorageMarketActor` implementation
 
-{{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_actor.go" lang="go" title="Storage Market Actor" >}}
+{{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_actor.go" lang="go">}}
 
-The Storage Market Actor Balance states and mutations can be found [here](https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_balances.go).
+## `StorageMarketActorState` implementation
+
+**Storage Market Actor Statuses**
+{{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_state.go" lang="go">}}
+
+**Storage Market Actor Balance states and mutations**
+ 
+{{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/market/market_balances.go" lang="go">}}
+
 
 ## Storage Deal Collateral
 
@@ -27,7 +36,6 @@ Provider deal collateral is only slashed when a sector is terminated before the 
 
 This collateral is returned to the storage provider when all deals in the sector successfully conclude. Upon graceful deal expiration, storage providers must wait for finality number of epochs (as defined in [Finality](expected_consensus#finality-in-ec)) before being able to withdraw their `StorageDealCollateral` from the `StorageMarketActor`.
 
-
-{{<katex>}}
-$MinimumProviderDealCollateral = \\[0.2cm] \ \ \ \ \ \ \ \ 5\% \times FILCirculatingSupply \times \frac{DealRawByte}{max(NetworkBaseline, NetworkRawBytePower)}$
-{{</katex>}}
+```text
+$$MinimumProviderDealCollateral = 1\% \times FILCirculatingSupply \times \frac{DealRawByte}{max(NetworkBaseline, NetworkRawBytePower)}$$
+```

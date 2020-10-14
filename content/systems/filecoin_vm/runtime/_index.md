@@ -4,7 +4,7 @@ weight: 5
 bookCollapseSection: true
 dashboardWeight: 1
 dashboardState: reliable
-dashboardAudit: missing
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 
@@ -39,7 +39,3 @@ The Lotus implementation of the Filecoin Virtual Machine runtime can be found [h
 ## Exit Codes
 
 There are some common runtime exit codes that are shared by different actors. Their definition can be found [here](https://github.com/filecoin-project/go-state-types/blob/master/exitcode/common.go).
-
-## VM Gas Cost Constants
-
-The Gas Cost Constants as implemented in Lotus can be found [here](https://github.com/filecoin-project/lotus/blob/master/chain/vm/gas.go)

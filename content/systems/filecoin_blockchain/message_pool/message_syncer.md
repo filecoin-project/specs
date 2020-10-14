@@ -24,8 +24,3 @@ The updated, hardened version of the GossipSub protocol includes a number of att
 NOTES:
 - _Fund Checking:_ It is important to note that the `mpool` logic is not checking whether there are enough funds in the account of the transaction message issuer. This is checked by the miner before including a transaction message in a block.
 - _Message Sorting:_ Transaction messages are sorted in the `mpool` of miners as they arrive according to cryptoeconomic rules followed by the miner and in order for the miner to compose the next block.
-
-
-{{<hint warning>}}
-**TODO:** discuss checking signatures and account balances, some tricky bits that need consideration. Does the fund check cause improper dropping? E.g. I have a message sending funds then use the newly constructed account to send funds, as long as the previous wasn't executed the second will be considered "invalid" ... though it won't be at the time of execution.
-{{</hint>}}

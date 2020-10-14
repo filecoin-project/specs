@@ -3,8 +3,8 @@ title: Blocks
 bookCollapseSection: true
 weight: 1
 dashboardWeight: 1.5
-dashboardState: wip
-dashboardAudit: missing
+dashboardState: reliable
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 

@@ -2,7 +2,7 @@
 title: "Address"
 weight: 2
 dashboardWeight: 0.2
-dashboardState: wip
+dashboardState: reliable
 dashboardAudit: n/a
 ---
 
@@ -18,7 +18,7 @@ Accounts have a public key-based address (e.g. to receive funds), and non-single
 
 An account actor's crypto-address (for signature verification) is found by looking up its actor state, keyed by the canonical ID-address. There is no map from ID-address to pubkey address.
 
-The reference implementation is https://github.com/filecoin-project/go-address
+The reference implementation of the Filecoin Address can be found in the [`go-address` Github repository](https://github.com/filecoin-project/go-address).
 
 ## Design criteria
 
@@ -64,13 +64,13 @@ When encoded to a string a filecoin address contains the following:
 
 ### Network Prefix
 
-The **network prefix** is prepended to an address when encoding to a string. The network prefix indicates which network an address belongs in. The network prefix may either be `f` for filecoin mainnet or `t` for filecoin testnet. It is worth noting that a network prefix will never appear on chain and is only used when encoding an address to a human readable format.
+The **network prefix** is prepended to an address when encoding to a string. The network prefix indicates which network an address belongs to. The network prefix may either be `f` for filecoin mainnet or `t` for filecoin testnet. It is worth noting that a network prefix will never appear on chain and is only used when encoding an address to a human readable format.
 
 ### Protocol Indicator
 
 The **protocol indicator** byte describes how a method should interpret the information in the payload field of an address. Any deviation for the algorithms and data types specified by the protocol must be assigned a new protocol number. In this way, protocols also act as versions.
 
-- `0 ` : ID
+- `0` : ID
 - `1` : SECP256K1 Public Key
 - `2` : Actor
 - `3` : BLS Public Key
@@ -91,7 +91,7 @@ const (
 
 #### Protocol 0: IDs
 
-**Protocol 0** addresses are simple IDs.  All actors have a numeric ID even if they don't have public keys. The payload of an ID address is base10 encoded. IDs are not hashed and do not have a checksum.
+**Protocol 0** addresses are simple IDs. All actors have a numeric ID even if they don't have public keys. The payload of an ID address is base10 encoded. IDs are not hashed and do not have a checksum.
 
 **Bytes**
 
@@ -206,7 +206,7 @@ type Address interface {
 ```
 #### New()
 
-New returns an Address for the specified protocol encapsulating corresponding payload. New fails for unknown protocols.
+`New()` returns an Address for the specified protocol encapsulating corresponding payload. New fails for unknown protocols.
 
 ```go
 func New(protocol byte, payload []byte) Address {
@@ -298,7 +298,7 @@ func Decode(a string) Address {
 
 #### Checksum()
 
-Checksum produces a byte array by taking the blake2b-4 hash of an address protocol and payload.
+`Checksum` produces a byte array by taking the blake2b-4 hash of an address protocol and payload.
 
 ```go
 
@@ -309,7 +309,7 @@ func Checksum(a Address) [4]byte {
 
 #### ValidateChecksum()
 
-ValidateChecksum returns true if the Checksum of data matches the expected checksum.
+`ValidateChecksum` returns true if the `Checksum` of data matches the expected checksum.
 
 ```go
 func ValidateChecksum(data, expected []byte) bool {

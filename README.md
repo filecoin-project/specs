@@ -22,13 +22,13 @@ This is the [Filecoin Specification](https://github.com/filecoin-project/specs),
     - [`listing`](#listing)
     - [`mermaid`](#mermaid)
     - [`hint`](#hint)
+    - [`katex`](#katex)
   - [Math mode](#math-mode)
     - [Wrap `def`, `gdef`, etc.](#wrap-def-gdef-etc)
     - [Wrap inline math text with code blocks](#wrap-inline-math-text-with-code-blocks)
     - [Wrap math blocks with code fences](#wrap-math-blocks-with-code-fences)
   - [Front-matter](#front-matter)
   - [External modules](#external-modules)
-  - [Solving Common problems](#solving-common-problems)
   - [References](#references)
 
 ## Install
@@ -36,12 +36,11 @@ This is the [Filecoin Specification](https://github.com/filecoin-project/specs),
 To build the spec website you need
 
 -   [`node` & `npm`](https://nodejs.org/en/download)
--   [`go`](https://golang.org/doc/install)
 
-On macOS you can get go from Homebrew
+On macOS you can get node from Homebrew
 
 ```bash
-brew install go
+brew install node
 ```
 
 Clone the repo, and use `npm install` to fetch the dependencies
@@ -249,7 +248,7 @@ $SectorInitialConsensusPledge = \\[0.2cm] 30\% \times FILCirculatingSupply \time
 
 ## Math mode
 
-For short snippets of math text (e.g., inline reference to parameters, or single formulas) it is easier to use the `{{<katex>}}`/`{{/katex}}` shortcode (as described just [above](specs#katex)). Check how KaTeX parses math typesetting [here]((https://katex.org/docs/api.html)).
+For short snippets of math text (e.g., inline reference to parameters, or single formulas) it is easier to use the `{{<katex>}}`/`{{/katex}}` shortcode (as described just [above](specs#katex)). Check how KaTeX parses math typesetting [here](https://katex.org/docs/api.html).
 
 For extensive blocks of math content it is more convenient to use `math-mode` to avoid having to repeat the katex shortcode for every math formula.
 
@@ -379,14 +378,6 @@ or to a specific version with
 ```sh
 hugo mod get github.com/filecoin-project/specs-actors@v0.7.2
 ```
-
-## Solving Common problems
-
-**Problem** - Site fails to build with an error that states it failed to download modules on macos
-
-    Error: failed to download modules: go command failed ...
-
-**Solution** - run `npm run clean` - the cache dir hugo uses can get corrupted, and this resets it. See [#1048](https://github.com/filecoin-project/specs/issues/1048)
 
 ## References
 

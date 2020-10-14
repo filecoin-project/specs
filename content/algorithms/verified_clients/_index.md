@@ -3,7 +3,7 @@ title: Verified Clients
 weight: 8
 dashboardWeight: 2
 dashboardState: wip
-dashboardAudit: missing
+dashboardAudit: wip
 dashboardTests: 0
 ---
 

@@ -32,11 +32,8 @@ The main Tipset structure in the Lotus implementation includes the following:
 {{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/types/tipset.go"  lang="go" symbol="TipSet">}}
 
 
-Semantic validation of a Tipset is performed in:
+Semantic validation of a Tipset includes the following checks.
 
 {{<embed src="https://github.com/filecoin-project/lotus/blob/master/chain/types/tipset.go"  lang="go" symbol="NewTipSet">}}
 
-Semantic validation includes the following checks:
-- The tipset should be composed of at least one block
-- All blocks within a tipset should have the same height
-- All blocks within a tipset have the same parents, both in terms of number of parents and in terms of CIDs.
+
