@@ -14,7 +14,7 @@ dashboardTests: 0
 **Protocol ID**: `/fil/chain/xchg/0.0.1`
 {{< /hint >}}
 
-ChainExchange is a simple request/response protocol that allows Filecoin nodes to request ranges of Tipsets and/or Messages from each other.
+ChainExchange is a simple request/response protocol that allows Filecoin nodes to request ranges of Tipsets and/or Messages from each other. `ChainExchange` is part of a bigger "family" of protocols that live under the umbrella of `ChainSync`. Please refer to the [ChainSync](blockchain#chainsync) section for an overview of the operational boundaries of each of the protocols in ChainSync.
 
 The `Request` message requests a chain segment of a given length by the hash of the highest Tipset in the segment (not necessarily heaviest Tipset of the current chain). For example, if the current height is at 5000, but a node is missing Tipsets between 4500-4700, then the `Request.Head` requested is 4700 and `Request.Length` is 200.
 
