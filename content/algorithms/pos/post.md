@@ -52,7 +52,7 @@ The Filecoin network expects constant availability of stored files. Failing to s
 
 Each miner actor is allocated a 24-hr proving period at random upon creation. This proving period is divided into 48 non-overlapping half-hour deadlines. Each sector is assigned to one of these deadlines when proven to the chain, i.e., when `ProveCommit` completes and never changes deadline. The sets of sectors due at each deadline is recorded in a collection of 48 bitfields.
 
-At the beginning of each period, a cron invocation removes expired sectors and allocates any newly-proven sectors sequentially to one of the 48 deadlines. Generally, sectors are first allocated to fill any deadline up to the next whole-partition multiple of (2349) sectors; next a new partition is started on the deadline with the fewest partitions. If all deadlines have the same number of sectors, a new partition is opened at deadline 0.
+Generally, sectors are first allocated to fill any deadline up to the next whole-partition multiple of (2349) sectors; next a new partition is started on the deadline with the fewest partitions. If all deadlines have the same number of sectors, a new partition is opened at deadline 0.
 
 The per-deadline sector sets are set at the beginning of each proving period as proving set bitfields and never change. The sector IDs are then (logically) divided sequentially into partitions, and the partitions across all deadlines for the miner logically numbered sequentially. Thus, a sector may move between partitions at the same deadline as other sectors fault or expire, but never changes deadline.
 
