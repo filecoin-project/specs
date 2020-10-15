@@ -12,7 +12,6 @@ const runMmd = (p) => {
     fs.mkdirSync(outDir, { recursive: true })
 
     return execa('mmdc', [
-        '-p', 'tools/pptr.config',
         '-i', p,
         '-o', path.join(outDir, outFile)
     ], { preferLocal: true, stdio: "inherit" });
