@@ -64,3 +64,31 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed congue eros, 
 
 > **Note**  
 > Morbi et pulvinar magna. Nam scelerisque fermentum felis ut vehicula. Fusce malesuada tortor sed arcu pretium laoreet. Praesent ac nibh eu leo euismod condimentum. Suspendisse vitae fringilla nulla. Donec in fermentum odio. Nullam ut congue leo. Fusce urna lorem, tincidunt ac porta nec, dapibus ac ipsum. Nulla posuere vulputate nisi. Integer eget elementum diam. Aenean tincidunt lectus eu quam tincidunt aliquam. Curabitur eget lacinia diam.
+
+
+## Katex shortcode
+
+Filecoin Miners must commit resources in order to participate in the economy; the protocol can use the minersʼ stake in the network to ensure that rational behavior benefits the network, rewarding the creation of value and penalizing malicious behavior via slashing. The pledge size is meant to adequately incentivize the fulfillment of a sectorʼs promised lifetime and provide sufficient consensus security.
+
+Hence, the {{<katex>}}$sectorQuality = avgQuality*size${{</katex>}}initial pledge function consists of two components: a _storage pledge_ and a _consensus pledge_.
+
+{{<katex>}}
+
+$SectorInitialPledge = SectorInitialStoragePledge + SectorInitialConsensusPledge$
+
+{{</katex>}}
+
+Morbi et pulvinar magna. Nam scelerisque fermentum felis ut vehicula. Fusce malesuada tortor sed arcu pretium laoreet. Praesent ac nibh eu leo euismod condimentum. Suspendisse vitae fringilla nulla. Donec in fermentum odio. Nullam ut congue leo. Fusce urna lorem, tincidunt ac porta nec, dapibus ac ipsum. Nulla posuere vulputate nisi. Integer eget elementum diam. Aenean tincidunt lectus eu quam tincidunt aliquam. Curabitur eget lacinia diam.  
+
+
+{{<katex>}}
+
+$SectorInitialConsensusPledge =  30\% \times FILCirculatingSupply \times \frac{SectorQAP}{max(NetworkBaseline, NetworkQAP)}$
+
+{{</katex>}}
+
+Morbi et pulvinar magna. Nam scelerisque fermentum felis ut vehicula. Fusce malesuada tortor sed arcu pretium laoreet. Praesent ac nibh eu leo euismod condimentum. Suspendisse vitae fringilla nulla. Donec in fermentum odio. Nullam ut congue leo. Fusce urna lorem, tincidunt ac porta nec, dapibus ac ipsum. Nulla posuere vulputate nisi. Integer eget elementum diam. Aenean tincidunt lectus eu quam tincidunt aliquam. Curabitur eget lacinia diam.  
+
+{{<katex>}}
+$SectorQualityMultiplier = \frac{\sum\nolimits_{deals} DealWeight * DealQualityMultiplier}{SectorSpaceTime}$
+{{</katex>}}

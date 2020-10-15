@@ -19,7 +19,7 @@ capacity, regular deals, and verified client deals) to reward different content.
 - **Sector Quality Multiplier:** Sector quality is assigned on Activation (the epoch when the miner starts proving theyʼre storing the file). The sector quality multiplier is computed as an average of deal quality multipliers (committed capacity, regular deals, and verified client deals), weighted by the amount of spacetime each type of deal occupies in the sector.
 
 {{<katex>}}
-$$SectorQualityMultiplier = \frac{\sum\nolimits_{deals} DealWeight * DealQualityMultiplier}{SectorSpaceTime}$$
+$SectorQualityMultiplier = \frac{\sum\nolimits_{deals} DealWeight * DealQualityMultiplier}{SectorSpaceTime}$
 {{</katex>}}
 
 - **Raw Byte Power:** This measurement is the size of a sector in bytes.
@@ -50,13 +50,13 @@ Based on these the average quality of a sector is:
 
 
 {{<katex>}}
-$$avgQuality = \frac{baseSpaceTime*QBM + dealSpaceTime*DWM + verifiedSpaceTime*VDWM}{sectorSize*sectorDuration*QBM}$$
+$avgQuality = \frac{baseSpaceTime*QBM + dealSpaceTime*DWM + verifiedSpaceTime*VDWM}{sectorSize*sectorDuration*QBM}$
 {{</katex>}}
 
 The _Sector Quality Adjusted Power_ is:
 
 {{<katex>}}
-$$sectorQuality = avgQuality*size$$
+$sectorQuality = avgQuality*size$
 {{</katex>}}
 
 During `miner.PreCommitSector`, the sector quality is calculated and stored in the sector information.

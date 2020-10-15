@@ -24,7 +24,7 @@ Hence, the initial pledge function consists of two components: a _storage pledge
 
 {{<katex>}}
 
-$$SectorInitialPledge = SectorInitialStoragePledge + SectorInitialConsensusPledge \\[0.3cm]$$
+$SectorInitialPledge = SectorInitialStoragePledge + SectorInitialConsensusPledge$
 
 {{</katex>}}
 
@@ -32,7 +32,7 @@ The storage pledge protects the networkʼs quality-of-service for clients by pro
 
 {{<katex>}}
 
-$$SectorInitialStoragePledge = Estimated20DaysSectorBlockReward \\[0.3cm]$$
+$SectorInitialStoragePledge = Estimated20DaysSectorBlockReward$
 
 {{</katex>}}
 
@@ -40,7 +40,7 @@ Since the storage pledge per sector is based on the expected block reward that s
 
 {{<katex>}}
 
-$$SectorInitialConsensusPledge = \\[0.2cm] 30\% \times FILCirculatingSupply \times \frac{SectorQAP}{max(NetworkBaseline, NetworkQAP)}$$
+$SectorInitialConsensusPledge = 30\% \times FILCirculatingSupply \times \frac{SectorQAP}{max(NetworkBaseline, NetworkQAP)}$
 
 {{</katex>}}
 
