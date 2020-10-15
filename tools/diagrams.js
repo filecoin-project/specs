@@ -8,13 +8,13 @@ const fs = require('fs')
 const runMmd = (p) => {
     const outDir = path.dirname(p).replace('content/', 'static/_gen/diagrams/')
     const outFile = path.basename(p).replace('.mmd', '.svg')
-    
+
     fs.mkdirSync(outDir, { recursive: true })
-    
+
     return execa('mmdc', [
         '-i', p,
         '-o', path.join(outDir, outFile)
-    ], { preferLocal: true });
+    ], { preferLocal: true, stdio: "inherit" });
 }
 
 const runMmdAll = async () => {
