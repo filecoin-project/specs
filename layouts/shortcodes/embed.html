@@ -38,6 +38,17 @@
 {{ end }}
 
 {{ if $content }}
+<div class="diagrams-container" id="{{anchorize (printf "example-%s" $title) }}">
+    <div title="{{ $title }}" class="diagrams-caption">
+        <a href="#{{anchorize (printf "example-%s" $title) }}" title="{{ $title }}" class="permalink">Example: {{ $title }} </a>
+        {{- if $external -}}
+        <a class="diagrams-link" title="Open example in Github" href="{{$url}}" target="_blank" rel="noopener">
+            <svg class="icon">
+                <use xlink:href="/symbol-defs.svg#icon-github"></use>
+            </svg>
+        </a>
+        {{- end -}}
+    </div>
     {{ if eq $markdown "true" }}
         {{ $content | markdownify }}
     {{ else if $symbolName }}
@@ -70,39 +81,23 @@
         {{- end -}}
 
         {{- if $body }}
-            <p id="symbol-comment-{{- $symbolName -}}">
-                {{ (replace $comment "//" "") | .Page.RenderString }}
-            </p>
+            {{- if $comment }}
+            <div class="embed-comment" id="symbol-comment-{{- $symbolName -}}">
+                {{- (replace $comment "//" "") | .Page.RenderString -}}
+            </div>
+            {{- end -}}
             <div id="symbol-body-{{- $symbolName -}}">
                 {{ highlight ($body | safeHTML) $lang "" }}
-                {{- template "embed-legend" (dict "Title" $title "URL" $url) -}}
             </div>
         {{- else -}}
             {{- errorf "Symbol '%s' not found in file '%s' from Page '%s'" $symbolName $path .Page.File }}
         {{- end -}}
     {{ else if $lang }}
-        <div id="{{anchorize $title}}">
+        <div>
             {{ highlight ($content | safeHTML ) (.Get "lang") "" }}
-            {{- template "embed-legend" (dict "Title" $title "URL" $url) -}}
         </div>
     {{ else }}
         {{ $content | safeHTML }}
     {{ end }}
-{{ end }}
-
-{{ define "embed-legend" }}
-<div style="display: flex; margin-top: -1rem">
-    {{- if .Title -}}
-        <a style="width: 50%" class="permalink" href="#{{anchorize (printf "example %s" .Title) }}">Example: {{.Title}}</a>
-    {{- end -}}
-    {{- if .URL -}}
-        {{- if eq .Title "" -}}
-            <div style="width: 50%"></div>
-        {{- end -}}
-        <a style="width: 50%; text-align: right" href="{{.URL}}" title="Github Source" target="_blank" rel="noopener noreferrer" >
-            Github <i class="gg-external gg-inline gg-s-half"></i>
-        </a>
-    {{- end -}}
 </div>
-
 {{ end }}

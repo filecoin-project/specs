@@ -1,24 +1,48 @@
 .section-badges {
-    float: right;
-    margin-top:-2.5rem;
+    text-align: right;
+    font-size: 20px;
+    position: relative;
 }
-.state-badge {
-    font-size: 10px;
-    font-weight: 500;   
+.section-badges .toggle {
+    cursor: pointer;
+    padding: 8px 0 8px 16px;
 }
-.state-badge-link {
-    text-decoration: none !important;
-    color: white !important;
-    &:hover {
-        text-decoration: none;
-    }
-}
-.state-badge-key, .state-badge-value {
-    padding: 2px 5px;
-}
-.state-badge-key {
-    background-color: #555;
-}
-.section-intro .state-badge {
+
+.section-badges .dropdown {
+    position: absolute;
+    right: 0;
+    background-color: white;
+    border: 1px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    list-style-type: none;
+    margin: 0;
+    z-index: 10;
     display: none;
+    text-align: left;
+    font-size: 14px;
+    font-weight: initial;
+    line-height: 24px;
+    max-width: 400px;
+}
+
+.section-badges .dropdown li {
+    white-space: nowrap;
+}
+
+.section-badges .dropdown code.label {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: auto;
+    display: inline-block;
+}
+.section-badges .dropdown code.label::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+}
+.section-badges .dropdown code.label::-webkit-scrollbar-thumb {
+    border-radius: 12px;
+}
+
+.section-badges input.toggle:checked ~ .dropdown {
+    display: block;
 }
