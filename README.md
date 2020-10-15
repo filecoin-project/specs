@@ -231,18 +231,17 @@ stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa
 ```
 
 ### `katex`
+We should **only** use `inline` mode for now! Display mode has a bug and is not responsive the formulas don't break in small screen. Track: https://github.com/KaTeX/KaTeX/issues/2271
 
 ```md
+<!-- Use $ math $ for inline mode-->
+{{<katex>}}
+$SectorInitialConsensusPledge = \\[0.2cm] 30\% \times FILCirculatingSupply \times \frac{SectorQAP}{max(NetworkBaseline, NetworkQAP)}$
+{{</katex >}}
 
 <!-- Use $$ math $$ for display mode-->
 {{<katex>}}
 $$SectorInitialConsensusPledge = \\[0.2cm] 30\% \times FILCirculatingSupply \times \frac{SectorQAP}{max(NetworkBaseline, NetworkQAP)}$$
-{{</katex >}}
-
-
-<!-- Use $ math $ for inline mode-->
-{{<katex>}}
-$SectorInitialConsensusPledge = \\[0.2cm] 30\% \times FILCirculatingSupply \times \frac{SectorQAP}{max(NetworkBaseline, NetworkQAP)}$
 {{</katex >}}
 ```
 
