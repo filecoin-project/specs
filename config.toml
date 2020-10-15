@@ -1,8 +1,8 @@
 # baseURL = '/'
 title = 'Filecoin Spec'
 ignoreFiles= ["externals", "\\.dot$", "\\.mmd$"]
-# theme = 'book'
 canonifyurls = false
+theme = "book"
 # relativeURLs = true
 
 # Book configuration
@@ -33,11 +33,6 @@ enableGitInfo = true
   contentDir = 'content-pt'
   weight = 2
 
-# [languages.zh]
-#   languageName = 'Chinese'
-#   contentDir = 'content.zh'
-#   weight = 3
-
 [menu]
 # [[menu.before]]
 # [[menu.after]]
@@ -46,6 +41,7 @@ enableGitInfo = true
 #   weight = 10
 
 [params]
+  API = 'https://specs-api.hugomrdias.workers.dev'
   # (Optional, default true) Controls table of contents visibility on right side of pages.
   # Start and end levels can be controlled with markup.tableOfContents setting.
   # You can also specify this parameter per page in front matter.
@@ -98,27 +94,3 @@ enableGitInfo = true
   # /!\ This is an experimental feature, might be removed or changed at any time
   # (Optional, experimental, default false) Enables service worker that caches visited pages and resources for offline use.
   BookServiceWorker = false
-
-[module]
-  [[module.imports]]
-    path = "github.com/alex-shpak/hugo-book"
-  [[module.imports]]
-    path = "github.com/filecoin-project/specs-actors"
-    [[module.imports.mounts]]
-    source = "."
-    target = "content/externals/specs-actors"
-  [[module.imports]]
-    path = "github.com/filecoin-project/go-fil-markets"
-    [[module.imports.mounts]]
-    source = "."
-    target = "content/externals/go-fil-markets"  
-  [[module.imports]]
-    path = "github.com/filecoin-project/lotus"
-    [[module.imports.mounts]]
-    source = "."
-    target = "content/externals/lotus"
-  [[module.imports]]
-    path = "github.com/filecoin-project/go-data-transfer"
-    [[module.imports.mounts]]
-    source = "."
-    target = "content/externals/go-data-transfer"

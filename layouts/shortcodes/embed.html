@@ -1,25 +1,58 @@
+{{ $src := .Get "src" }}
+
 {{/* Get the filepath */}}
 {{/* Relative to content folder */}}
-{{ if eq (.Get "src" | printf "%.1s") "/" }}
-    {{ $.Scratch.Set "filepath" ( strings.TrimLeft "/" ( .Get "src" ))}}
+{{ if eq ($src | printf "%.1s") "/" }}
+    {{ $.Scratch.Set "filepath" ( strings.TrimLeft "/" ( $src ))}}
 {{ else }}
 {{/* Relative to page */}}
     {{ $.Scratch.Set "filepath" $.Page.File.Dir }}
-    {{ $.Scratch.Add "filepath" ( .Get "src" ) }}
+    {{ $.Scratch.Add "filepath" ( $src ) }}
 {{ end }}
+
 
 {{ $path := ($.Scratch.Get "filepath")}}
 {{ $lang := .Get "lang" }}
 {{ $markdown := .Get "markdown" }}
 {{ $symbolName := .Get "symbol" }}
+{{ $remote := .Get "remote"}}
+{{ $external := false }}
+{{ $content := "" }}
+{{ $url := "" }}
+{{ $title := default $symbolName (.Get "title")}}
 
+{{ if hasPrefix $src "https://github.com" }}
+    {{ $external = "github" }}
+{{ end }}
 
-{{ if fileExists $path }}
+{{ if $external }}
+    {{- $HOST := $.Site.Params.API -}}
+    {{- $ref := default "master" (.Get "ref" ) -}}
+    {{- $resp := getJSON (printf "%s/github?file=%s" $HOST $src )  -}}
+    {{- $content = ($resp.content | base64Decode ) -}}
+    {{- $url = $resp.url -}}
+{{ else if fileExists $path }}
+    {{ $content = readFile $path }}
+{{ else }}
+    {{- errorf "File '%s' not found from Page '%s'" $path .Page.File }}
+{{ end }}
+
+{{ if $content }}
+<div class="diagrams-container" id="{{anchorize (printf "example-%s" $title) }}">
+    <div title="{{ $title }}" class="diagrams-caption">
+        <a href="#{{anchorize (printf "example-%s" $title) }}" title="{{ $title }}" class="permalink">Example: {{ $title }} </a>
+        {{- if $external -}}
+        <a class="diagrams-link" title="Open example in Github" href="{{$url}}" target="_blank" rel="noopener">
+            <svg class="icon">
+                <use xlink:href="/symbol-defs.svg#icon-github"></use>
+            </svg>
+        </a>
+        {{- end -}}
+    </div>
     {{ if eq $markdown "true" }}
-        {{ $path | readFile | markdownify }}
+        {{ $content | markdownify }}
     {{ else if $symbolName }}
         <!-- Symbols -->
-        {{ $content := readFile $path }}
         {{ $body := "" }}
         {{ $comment := "" }}
 
@@ -48,26 +81,23 @@
         {{- end -}}
 
         {{- if $body }}
-            <p id="symbol-comment-{{- $symbolName -}}">
-                {{ (replace $comment "//" "") | .Page.RenderString }}
-            </p>
+            {{- if $comment }}
+            <div class="embed-comment" id="symbol-comment-{{- $symbolName -}}">
+                {{- (replace $comment "//" "") | .Page.RenderString -}}
+            </div>
+            {{- end -}}
             <div id="symbol-body-{{- $symbolName -}}">
                 {{ highlight ($body | safeHTML) $lang "" }}
             </div>
         {{- else -}}
-            <blockquote class="book-hint danger">
-                {{- printf "Symbol '%s' not found in file '%s' from Page '%s'" $symbolName $path .Page.File }}
-            </blockquote>
             {{- errorf "Symbol '%s' not found in file '%s' from Page '%s'" $symbolName $path .Page.File }}
         {{- end -}}
     {{ else if $lang }}
-        {{ highlight ($path | readFile | safeHTML ) (.Get "lang") "" }}
+        <div>
+            {{ highlight ($content | safeHTML ) (.Get "lang") "" }}
+        </div>
     {{ else }}
-        {{ $path | readFile | safeHTML }}
+        {{ $content | safeHTML }}
     {{ end }}
-{{ else }}
-    <blockquote class="book-hint danger">
-      {{- printf "File '%s' not found from Page '%s'" ($path) .Page.File }}
-    </blockquote>
-    {{- errorf "File '%s' not found from Page '%s'" ($path) .Page.File }}
+</div>
 {{ end }}

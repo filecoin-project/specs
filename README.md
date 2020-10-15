@@ -8,39 +8,39 @@ This is the [Filecoin Specification](https://github.com/filecoin-project/specs),
 
 ## Table of Contents
 
--   [Install](#install)
--   [Writing the spec](#writing-the-spec)
--   [Check your markdown](#check-your-markdown)
--   [Page Template](#page-template)
--   [Code](#code)
--   [Images](#images)
--   [Links](#links)
--   [Shortcodes](#shortcodes)
-    -   [`embed`](#embed)
-    -   [`listing`](#listing)
-    -   [`mermaid`](#mermaid)
-    -   [`hint`](#hint)
--   [Math mode](#math-mode)
-    -   [Wrap `def`, `gdef`, etc.](#wrap-def-gdef-etc)
-    -   [Wrap inline math text with code blocks](#wrap-inline-math-text-with-code-blocks)
-    -   [Wrap math blocks with code fences](#wrap-math-blocks-with-code-fences)
--   [Front-matter](#front-matter)
--   [External modules](#external-modules)
--   [Solving Common problems](#solving-common-problems)
--   [References](#references)
+- [Filecoin Specification](#filecoin-specification)
+  - [Table of Contents](#table-of-contents)
+  - [Install](#install)
+  - [Writing the spec](#writing-the-spec)
+  - [Check your markdown](#check-your-markdown)
+  - [Page Template](#page-template)
+  - [Code](#code)
+  - [Images](#images)
+  - [Links](#links)
+  - [Shortcodes](#shortcodes)
+    - [`embed`](#embed)
+    - [`listing`](#listing)
+    - [`mermaid`](#mermaid)
+    - [`hint`](#hint)
+    - [`katex`](#katex)
+  - [Math mode](#math-mode)
+    - [Wrap `def`, `gdef`, etc.](#wrap-def-gdef-etc)
+    - [Wrap inline math text with code blocks](#wrap-inline-math-text-with-code-blocks)
+    - [Wrap math blocks with code fences](#wrap-math-blocks-with-code-fences)
+  - [Front-matter](#front-matter)
+  - [External modules](#external-modules)
+  - [References](#references)
 
 ## Install
 
 To build the spec website you need
 
 -   [`node` & `npm`](https://nodejs.org/en/download)
--   [`go`](https://golang.org/doc/install)
--   `bzr` (required to build lotus)
 
-On macOS you can get go and bzr from Homebrew
+On macOS you can get node from Homebrew
 
 ```bash
-brew install go bzr
+brew install node
 ```
 
 Clone the repo, and use `npm install` to fetch the dependencies
@@ -67,6 +67,8 @@ Sections can be split out into multiple markdown documents. The build process co
 You can split out sub-sections by adding additional pages to a section directory. The `content/intro/concepts.md` defines the Key Concepts sub-section of the the Introduction. The order of sub-sections within a section is again controlled by setting the `weight` property. This pattern repeats for sub sub folders which represent sub sub sections.
 
 The markdown documents should all be well formed, with a single h1, and headings should increment by a single level.
+
+> Note: Regular markdown files like `content/intro/concepts.md` can't reference resources such as images, or other files. Such resources can be referenced only from `_index.md` files. Given that a folder will have an `_index.md` file already, there is the following work around to reference resources from any file: create a new sub-folder in the same folder where the initial .md file was, e.g., `content/intro/concepts/_index.md`, include the content from `concepts.md` in the `_index.md` file, add the resource files (for example, images) in the new folder and reference the resource file from the new `_index.md` file inside the `concepts` folder. The referencing syntax and everything else works the same way.
 
 ## Check your markdown
 
@@ -106,10 +108,12 @@ Your algorithm here
 ```
 ````
 
-You can embed source code from other repos. Mount the repo as a hugo modules as descibed in [External Modules](#external-modules) then use the [`embed shorcode`](#embed) to link to a specific symbol.
+You can embed source code from local files or external other repos using the `embed` [shortcode](#embed).
 
-```go
-{{<embed src="/externals/go-data-transfer/types.go"  lang="go" symbol="Channel">}}
+```text
+{{<embed src="/path/to/local/file/types.go"  lang="go" symbol="Channel">}}
+
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/build/bootstrap.go" lang="go">}}
 ```
 
 ## Images
@@ -169,15 +173,20 @@ hugo shortcodes you can add to your markdown.
 {{<embed src="piece_store.go" lang="go">}}
 
 # src relative to content folder
-{{<embed src="/systems/piece_store.id" lang="go">}}
+{{<embed src="/systems/piece_store.go" lang="go">}}
 
 # can just embed a markdown file
 {{<embed src="section.md" markdown="true">}}
 
 # can embed symbols from Go files
 # extracts comments and symbol body
-{{<embed src="/externals/go-data-transfer/types.go"  lang="go" symbol="Channel">}}
+{{<embed src="types.go"  lang="go" symbol="Channel">}}
+
+# can embed from external sources like github
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/build/bootstrap.go" lang="go">}}
 ```
+This shortcode also supports the property `title` to add a permalink below the embed.
+
 
 ### `listing`
 
@@ -221,13 +230,29 @@ stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa
 {{< /hint >}}
 ```
 
+### `katex`
+
+```md
+
+<!-- Use $$ math $$ for display mode-->
+{{<katex>}}
+$$SectorInitialConsensusPledge = \\[0.2cm] 30\% \times FILCirculatingSupply \times \frac{SectorQAP}{max(NetworkBaseline, NetworkQAP)}$$
+{{</katex >}}
+
+
+<!-- Use $ math $ for inline mode-->
+{{<katex>}}
+$SectorInitialConsensusPledge = \\[0.2cm] 30\% \times FILCirculatingSupply \times \frac{SectorQAP}{max(NetworkBaseline, NetworkQAP)}$
+{{</katex >}}
+```
+
 ## Math mode
 
-For short snippets of math text you can just use the `{{<katex>}}` shortcode, but if you need to write lots of math in a page you can just use `math-mode` and avoid writting the katex shortcode everywhere.
+For short snippets of math text (e.g., inline reference to parameters, or single formulas) it is easier to use the `{{<katex>}}`/`{{/katex}}` shortcode (as described just [above](specs#katex)). Check how KaTeX parses math typesetting [here](https://katex.org/docs/api.html).
 
-Parses math typesetting with [KaTeX](https://katex.org/docs/api.html)   
+For extensive blocks of math content it is more convenient to use `math-mode` to avoid having to repeat the katex shortcode for every math formula.
 
-Check this example [example](https://deploy-preview-969--fil-spec-staging.netlify.app/math-mode/)
+Check this example [example](https://spec.filecoin.io/math-mode/)
 
 > Some syntax like `\_` can't go through HUGO markdown parser and for that reason we need to wrap math text with code blocks, code fendes or the shortcode `{{<plain>}}`. See examples below.
 >
@@ -354,14 +379,6 @@ or to a specific version with
 hugo mod get github.com/filecoin-project/specs-actors@v0.7.2
 ```
 
-## Solving Common problems
-
-**Problem** - Site fails to build with an error that states it failed to download modules on macos
-
-    Error: failed to download modules: go command failed ...
-
-**Solution** - run `npm run clean` - the cache dir hugo uses can get corrupted, and this resets it. See [#1048](https://github.com/filecoin-project/specs/issues/1048)
-
 ## References
 
 -   [hugo theme book](https://themes.gohugo.io//theme/hugo-book/docs/shortcodes/columns/)
@@ -371,4 +388,3 @@ hugo mod get github.com/filecoin-project/specs-actors@v0.7.2
     -   [editor](https://mermaid-js.github.io/mermaid-live-editor)
 -   [Pan/Zoom for SVG](https://github.com/anvaka/panzoom)
 -   [Icons](https://css.gg/)
--   [Working with submodules](https://github.blog/2016-02-01-working-with-submodules/)

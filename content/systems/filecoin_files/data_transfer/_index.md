@@ -3,7 +3,7 @@ title: Data Transfer
 weight: 3
 dashboardWeight: 1
 dashboardState: stable
-dashboardAudit: missing
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 
@@ -88,14 +88,11 @@ transport mechanism (including offline mechanisms) is acceptable.
 
 ## Data Structures
 
-**Data Transfer Types**
 
-{{<embed src="/externals/go-data-transfer/types.go"  lang="go">}}
+{{<embed src="https://github.com/filecoin-project/go-data-transfer/blob/master/types.go"  lang="go" title="Data Transfer Types">}}
 
-**Data Transfer Statuses**
 
-{{<embed src="/externals/go-data-transfer/statuses.go"  lang="go">}}
+{{<embed src="https://github.com/filecoin-project/go-data-transfer/blob/master/statuses.go"  lang="go" title="Data Transfer Statuses">}}
 
-**Data Transfer Manager**
 
-{{<embed src="/externals/go-data-transfer/manager.go"  lang="go">}}
+{{<embed src="https://github.com/filecoin-project/go-data-transfer/blob/master/manager.go"  lang="go" symbol="Manager" title="Data Transfer Manager">}}

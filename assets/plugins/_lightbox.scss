@@ -26,12 +26,12 @@
 .lightbox-container.visible {
     animation-name: animate-in;
     animation-duration: 250ms;
-    animation-fill-mode: forwards; 
+    animation-fill-mode: forwards;
 }
 .lightbox-container.hidden {
     animation: animate-out;
     animation-duration: 250ms;
-    animation-fill-mode: forwards; 
+    animation-fill-mode: forwards;
 }
 
 .lightbox-zoom {
@@ -48,33 +48,41 @@
     max-height: 100%;
     width: auto;
     height: 100%;
-    object-fit: contain; 
+    object-fit: contain;
 }
 @media (min-width: 768px) {
     .lightbox-image {
         max-width: 95%;
         max-height: 95%;
-    } 
+    }
 }
 
 @keyframes animate-in {
     0% {
-      transform: scale(0);
-      opacity: 0; }
+        transform: scale(0);
+        opacity: 0;
+    }
     1% {
-      transform: scale(0.9);
-      opacity: 0; }
+        transform: scale(0.9);
+        opacity: 0;
+    }
     100% {
-      transform: scale(1);
-      opacity: 1; } }
-  
-  @keyframes animate-out {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes animate-out {
     0% {
-      transform: scale(1);
-      opacity: 1; }
+        transform: scale(1);
+        opacity: 1;
+    }
     99% {
-      transform: scale(0.9);
-      opacity: 0; }
+        transform: scale(0.9);
+        opacity: 0;
+    }
     100% {
-      transform: scale(0);
-      opacity: 0; } }
+        transform: scale(0);
+        opacity: 0;
+    }
+}

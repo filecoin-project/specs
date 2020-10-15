@@ -1,10 +1,10 @@
 ---
-title: "Blocks"
+title: Blocks
 bookCollapseSection: true
 weight: 1
 dashboardWeight: 1.5
-dashboardState: incorrect
-dashboardAudit: missing
+dashboardState: reliable
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 

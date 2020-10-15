@@ -9,8 +9,6 @@ dashboardTests: 0
 
 # Randomness
 
-TODO: clean up stale .id/.go files
-
 Randomness is used throughout the protocol in order to generate values and extend the blockchain.
 Random values are drawn from a [drand](drand) beacon and appropriately formatted for usage.
 We describe this formatting below.
@@ -68,8 +66,6 @@ GetRandomness(dst, l, s):
     return H(buffer)
 ```
 
-{{<embed src="/externals/specs-actors/actors/crypto/randomness.go"  lang="go">}}
-{{<embed src="/systems/filecoin_blockchain/struct/chain/chain.go" lang="go">}}
 
 ## Drawing tickets from the VRF-chain for proof inclusion
 
@@ -99,8 +95,6 @@ In plain language, this means:
 
 This ticket is then combined with a Domain Separation Tag, the round number sought and appropriate entropy to form randomness for various uses in the protocol.
 
-See the `GetRandomnessFromVRFChain` method below:
-{{<embed src="/systems/filecoin_blockchain/struct/chain/chain.go" lang="go">}}
 
 ## Entropy to be used with randomness
 

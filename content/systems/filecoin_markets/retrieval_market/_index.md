@@ -4,7 +4,7 @@ bookCollapseSection: true
 weight: 3
 dashboardWeight: 2
 dashboardState: stable
-dashboardAudit: missing
+dashboardAudit: n/a
 dashboardTests: 0
 ---
 
@@ -81,6 +81,4 @@ Trust establishment proceeds as follows:
 
 The retrieval market works based on the Payload CID. The PayloadCID is the hash that represents the root of the IPLD DAG of the UnixFS version of the file. At this stage the file is a raw system file with IPFS-style representation. In order for a client to request  for some data under the retrieval market, they have to know the PayloadCID. It is important to highlight that PayloadCIDs are not stored or registered on-chain.
 
-## Common Data Types
-
-{{<embed src="/externals/go-fil-markets/retrievalmarket/types.go"  lang="go">}}
+{{<embed src="https://github.com/filecoin-project/go-fil-markets/blob/master/retrievalmarket/types.go"  lang="go" title="Retrieval Market - Common Data Types">}}

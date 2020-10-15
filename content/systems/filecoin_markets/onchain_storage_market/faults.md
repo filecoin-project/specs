@@ -2,26 +2,18 @@
 title: "Faults"
 weight: 4
 dashboardWeight: 2
-dashboardState: wip
-dashboardAudit: missing
+dashboardState: reliable
+dashboardAudit: done
 dashboardTests: 0
 ---
 
 # Faults
 
-There are two main categories of faults in the Filecoin network. 
+There are two main categories of faults in the Filecoin network:
 
-- ConsensusFaults
-- StorageDealFaults
+1. [Storage or Sector Faults](sector#sector-faults) that relate with the failure to store files agreed in a deal previously due to a hardware error or malicious behaviour, and
+2. [Consensus Faults](expected_consensus#consensus-faults) that relate to a miner trying deviate from the protocol in order to gain more power than their storage deserves.
 
-ConsensusFaults are faults that impact network consensus and StorageDealFaults are faults where data in a `StorageDeal` is not maintained by the providers pursuant to deal terms.
+Please refer to the corresponding sections for more details.
 
-[Pledge Collateral](storage_power_actor#pledge-collateral) is slashed for ConsensusFaults and Storage Deal Collateral for StorageDealFaults.
-
-Any misbehavior may result in more than one fault thus lead to slashing on both collaterals. For example, missing a `PoStProof` will incur a penalty on both `PledgeCollateral` and `StorageDealCollateral` given it impacts both a given `StorageDeal` and power derived from the sector commitments in [Storage Power Consensus](storage_power_consensus).
-
-## Storage Faults
-
-{{<hint warning>}}
-TODO: complete this.
-{{</hint>}}
+Both Storage and Consensus Faults come with penalties that slash the miner's collateral. See more details on the different types of collaterals in the [Miner Collaterals](filecoin_mining#miner_collaterals).

@@ -4,7 +4,7 @@
   "description": "The Filecoin protocol specification",
   "main": "index.js",
   "scripts": {
-    "test": "remark content --quiet",
+    "test": "remark content --frail --quiet",
     "start": "concurrently npm:watch-*",
     "serve": "npm start",
     "watch-hugo": "npm run build-diagrams && hugo server --bind=0.0.0.0 --disableFastRender --renderToDisk",
@@ -12,7 +12,7 @@
     "build": "npm run build-diagrams && hugo && npm run build-toc && hugo --gc --minify",
     "build-diagrams": "tools/diagrams.js",
     "build-toc": "tools/toc.js",
-    "clean": "premove public resources static/_gen && hugo mod clean --all && hugo mod tidy",
+    "clean": "premove public resources static/_gen",
     "release": "np --no-publish && conventional-github-releaser -p angular",
     "readme": "tools/readme.js"
   },
@@ -26,14 +26,14 @@
     "tablesort": "^5.2.1"
   },
   "devDependencies": {
-    "@mermaid-js/mermaid-cli": "^8.7.0",
-    "chokidar": "^3.4.2",
+    "@mermaid-js/mermaid-cli": "^8.8.1",
+    "chokidar": "^3.4.3",
     "concurrently": "^5.3.0",
     "conventional-github-releaser": "^3.1.5",
     "execa": "^4.0.3",
     "globby": "^11.0.1",
     "graphviz-cli": "^1.0.0",
-    "hugo-extended": "^0.74.3",
+    "hugo-extended": "^0.76.4",
     "jsdom": "^16.4.0",
     "np": "^6.5.0",
     "premove": "^3.0.1",
@@ -44,6 +44,7 @@
     "remark-lint-heading-increment": "^2.0.1",
     "remark-lint-no-hr-after-heading": "^1.0.0",
     "remark-lint-no-multiple-toplevel-headings": "^2.0.1",
+    "remark-math": "^3.0.1",
     "remark-preset-lint-recommended": "^4.0.1",
     "remark-toc": "^7.0.0",
     "to-vfile": "^6.1.0"
