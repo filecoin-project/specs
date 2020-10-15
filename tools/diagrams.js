@@ -15,7 +15,7 @@ const runMmd = (p) => {
         '-p', 'tools/pptr.config',
         '-i', p,
         '-o', path.join(outDir, outFile)
-    ], { preferLocal: true, stdio: "inherit" });
+    ], { preferLocal: true });
 }
 
 const runMmdAll = async () => {
