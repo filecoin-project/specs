@@ -6,17 +6,14 @@
 {{ $ext := path.Ext .Destination }}
 {{ $supported := in ".mmd,.dot" $ext }}
 
-<figure class="diagrams-container">
-    <div title="{{ .Title }}" class="diagrams zoomable">
+
 
 {{- if $isRemote -}}
     {{ $genPath = .Destination }}
-    <img loading="lazy" src="{{ .Destination | safeURL }}" alt="{{ .Text }}" {{ with .Title}} title="{{ . }}"{{ end }} />
 {{- else if eq $supported false -}}
     {{ $src := .Page.Resources.GetMatch .Destination }}
-    {{ with $src }} 
+    {{ with $src }}
         {{ $genPath = .RelPermalink }}
-        <img loading="lazy"  src="{{ .RelPermalink }}" loading="lazy" alt="{{ $title }}" title="{{ $title }}"/>
     {{- else -}}
         {{- errorf "Image '%s' not found from Page '%s'" .Destination .Page.File }}
     {{ end }}
@@ -30,15 +27,26 @@
     {{- end -}}
 
     {{ if fileExists $path }}
-        <img src="{{ $genPath | safeURL }}" loading="lazy" height="100%" alt="{{ .Text }}" title="{{ $title }}"/>
     {{ else }}
       {{- errorf "Image '%s' not found from Page '%s'" $src .Page.File }}
     {{ end }}
 {{- end -}}
 
-    </div>
+{{ $slug := (printf "figure-%s" (anchorize $title)) }}
+
+
+
+<figure class="diagrams-container" id="{{$slug}}">
     <figcaption title="{{ $title }}" class="diagrams-caption">
-        Figure: {{ $title }}
-        <a class="diagrams-link" title="Open diagram in new tab" href="{{ $genPath }}" target="_blank" rel="noopener">Open in tab</a>
+        <a href="#{{ $slug }}" title="{{ $title }}" class="permalink">Figure: {{ $title }} </a>
+        <a class="diagrams-link" title="Open diagram in new tab" href="{{ $genPath }}" target="_blank" rel="noopener">
+            <svg class="icon">
+                <use xlink:href="/symbol-defs.svg#icon-external-link"></use>
+            </svg>
+        </a>
     </figcaption>
+    <div title="{{ .Title }}" class="diagrams zoomable">
+        <img src="{{ $genPath | safeURL }}" loading="lazy" height="100%" alt="{{ $title }}" title="{{ $title }}"/>
+    </div>
+
 </figure>
