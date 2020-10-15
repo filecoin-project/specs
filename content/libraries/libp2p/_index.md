@@ -5,9 +5,7 @@ bookCollapseSection: true
 dashboardWeight: 1
 dashboardState: stable
 dashboardTests: 0
-dashboardAudit: done
-dashboardAuditDate: '2019-10-10'
-dashboardAuditURL: https://github.com/protocol/libp2p-vulnerabilities/blob/master/DRAFT_NCC_Group_ProtocolLabs_1903ProtocolLabsLibp2p_Report_2019-10-10_v1.1.pdf 
+dashboardAudit: wip
 ---
 
 # Libp2p
