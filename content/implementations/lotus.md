@@ -19,9 +19,9 @@ implRepos:
     auditState: done
     audits:
     - auditDate: '2020-07-28'
-      auditURL: /#appendix__audit_reports__rust-fil-proofs__filecoin-proving-subsystem
+      auditURL: /#appendix__audit_reports__rust-fil-proofs__28072020---filecoin-proving-subsystem
     - auditDate: '2020-07-28'
-      auditURL: /#appendix__audit_reports__rust-fil-proofs__zk-snark-proofs
+      auditURL: /#appendix__audit_reports__rust-fil-proofs__28072020---zk-snark-proofs
 ---
 
 # Lotus
