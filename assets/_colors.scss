@@ -23,25 +23,25 @@
 }
 
 .bg-na {
-    background-color: var(--cl-gray);
+    background-color: var(--cl-gray) !important;
 }
 .bg-missing {
-    background-color: var(--cl-red);
+    background-color: var(--cl-red) !important;
 }
 .bg-incorrect {
-    background-color: var(--cl-orange);
+    background-color: var(--cl-orange) !important;
 }
 .bg-wip {
-    background-color: var(--cl-yellow);
+    background-color: var(--cl-yellow) !important;
 }
 .bg-done {
-    background-color: var(--cl-green);
+    background-color: var(--cl-green) !important;
 }
 .bg-reliable {
-    background-color: var(--cl-green);
+    background-color: var(--cl-green) !important;
 }
 .bg-stable {
-    background-color: var(--cl-blue);
+    background-color: var(--cl-blue) !important;
     a {
         color: black;
     }

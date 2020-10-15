@@ -19,9 +19,9 @@ implRepos:
     auditState: done
     audits:
     - auditDate: '2020-07-28'
-      auditURL: https://github.com/filecoin-project/rust-fil-proofs/blob/master/audits/protocolai-audit-20200728.pdf
+      auditURL: /#section-appendix.audit_reports.rust-fil-proofs.2020-07-28-filecoin-proving-subsystem
     - auditDate: '2020-07-28'
-      auditURL: https://github.com/filecoin-project/rust-fil-proofs/blob/4a07a868d077f5926b23c3f913f99d8b46b8cebc/audits/Sigma-Prime-Protocol-Labs-Filecoin-Proofs-Security-Review-v2.1.pdf
+      auditURL: /#section-appendix.audit_reports.rust-fil-proofs.2020-07-28-zk-snark-proofs
 ---
 
 # Lotus

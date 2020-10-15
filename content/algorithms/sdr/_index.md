@@ -3,7 +3,7 @@ title: "Stacked DRG PoRep"
 description: "Stacked DRG Proof of Replication Specification"
 
 bookCollapseSection: true
-weight: 1
+weight: 3
 math-mode: true
 
 dashboardWeight: 2
