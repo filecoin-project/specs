@@ -6,7 +6,7 @@ dashboardState: stable
 dashboardTests: 0
 dashboardAudit: done
 dashboardAuditURL: /#section-appendix.audit_reports.2020-08-09-drand
-dashboardAuditDate: 'Done'
+dashboardAuditDate: '2020-08-09'
 ---
 
 # DRAND
