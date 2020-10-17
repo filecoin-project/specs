@@ -18,7 +18,7 @@ Report: [GossipSub v1.1 Protocol Design + Implementation](https://gateway.ipfs.i
 
 Audit conducted by: Least Authority
 
-This audit focused specifically on GossipSub as a pubsub protocol built on libp2p, looking at v1.1 which includes a peer scoring layer to mitigate certain types of attacks that could compromise a network. The audit covered the [spec](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub), [go-libp2p-pubsub](https://github.com/libp2p/go-libp2p-pubsub) and [gossipsub-hardening](https://github.com/libp2p/gossipsub-hardening/). The report found 4 issues, primarily in the Peer Scoring that was introduced in v1.1, and includes additional suggestions. All the issues raised in the report have been resolved, and additional details are available in the report linked above.
+This audit focused specifically on GossipSub, a pubsub protocol built on libp2p, version 1.1, which includes a peer scoring layer to mitigate certain types of attacks that could compromise a network. The audit covered the [spec](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub), [go-libp2p-pubsub](https://github.com/libp2p/go-libp2p-pubsub) and [gossipsub-hardening](https://github.com/libp2p/gossipsub-hardening/). The report found 4 issues, primarily in the Peer Scoring that was introduced in v1.1, and includes additional suggestions. All the issues raised in the report have been resolved, and additional details are available in the report linked above.
 
 ### 2020-04-18: GossipSub Evaluation
 
