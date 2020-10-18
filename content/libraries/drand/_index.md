@@ -5,7 +5,7 @@ dashboardWeight: 2
 dashboardState: stable
 dashboardTests: 0
 dashboardAudit: done
-dashboardAuditURL: https://drive.google.com/file/d/1fCy1ynO78gJLCNbqBruzHx7bh72Tu-q2/view
+dashboardAuditURL: /#section-appendix.audit_reports.2020-08-09-drand
 dashboardAuditDate: '2020-08-09'
 ---
 
