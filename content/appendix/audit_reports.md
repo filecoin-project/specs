@@ -42,7 +42,7 @@ This report covers the end-to-end audit carried out on drand, including the impl
 
 ### 2020-10-19: Actors Audit
 
-Report: [Filecoin Actors Audit](https://drive.google.com/file/d/16mlD-JMMpZ5trUyacOVbJhPMwgDz_jOu/view)
+Report: [Filecoin Actors Audit](https://diligence.consensys.net/audits/2020/09/filecoin-actors/)
 
 Audit conducted by: Consensys Diligence
 
