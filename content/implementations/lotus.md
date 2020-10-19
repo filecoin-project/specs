@@ -13,7 +13,10 @@ implRepos:
     auditState: wip
   - repo: https://github.com/filecoin-project/specs-actors
     lang: go
-    auditState: wip
+    auditState: done
+    audits:
+      - auditDate: '2020-10-19'
+        auditURL: '/#section-appendix.audit_reports.2020-10-19-actors-audit'
   - repo: https://github.com/filecoin-project/rust-fil-proofs
     lang: rust
     auditState: done
