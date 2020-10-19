@@ -9,6 +9,9 @@
 .text-wip {
     color: var(--cl-yellow);
 }
+.text-coming {
+    color: var(--cl-yellow);
+}
 .text-reliable {
     color: var(--cl-green);
 }
@@ -32,6 +35,9 @@
     background-color: var(--cl-orange) !important;
 }
 .bg-wip {
+    background-color: var(--cl-yellow) !important;
+}
+.bg-coming {
     background-color: var(--cl-yellow) !important;
 }
 .bg-done {
