@@ -20,19 +20,22 @@
 {{ end }}
 
 {{ define "stateToNumber" }}
-    {{- $num := 6 -}}
+    {{- $num := 7 -}}
     {{- if eq . "done" -}}{{$num = 1}}{{end}}
     {{- if eq . "stable" -}}{{$num = 1}}{{end}}
     {{- if eq . "reliable" -}}{{$num = 2}}{{end}}
     {{- if eq . "wip" -}}{{$num = 3}}{{end}}
     {{- if eq . "incorrect" -}}{{$num = 4}}{{end}}
     {{- if eq . "missing" -}}{{$num = 5}}{{end}}
+    {{- if eq . "coming" -}}{{$num = 6}}{{end}}
     {{- $num -}}
 {{end}}
 
 {{ define "humanizeState" }}
     {{- if eq . "wip" -}}
     Draft/WIP
+    {{- else if eq . "coming" -}}
+    Report Coming Soon
     {{- else if eq . "n/a" -}}
     {{ else }}
         {{ humanize . }}
@@ -46,16 +49,16 @@
     <td class="Dashboard-section">
         {{.number}} <a href="#{{.id}}">{{.text}}</a>
     </td>
-    
+
     <!-- State -->
     <td data-sort="{{template "stateToNumber" .dashboardState}}" class="text-black bg-na bg-{{.dashboardState}}">
         {{ template "humanizeState" .dashboardState }}
     </td>
-    
+
     <!-- Audit -->
     <td data-sort="{{template "stateToNumber" .dashboardAudit}}" class="text-black bg-{{.dashboardAudit}}">
         {{- if eq .dashboardAuditURL "" -}}
-        {{ template "humanizeState" .dashboardAudit }} 
+        {{ template "humanizeState" .dashboardAudit }}
         {{ else }}
             <a href="{{ .dashboardAuditURL }}" title="Read the audit report" target="_blank" rel="noopener noreferrer" class="text-black">{{.dashboardAuditDate}}<i class="gg-external gg-s-half"></i></a>
         {{ end }}
