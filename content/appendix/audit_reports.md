@@ -38,6 +38,16 @@ Audit conducted by: Sigma Prime
 
 This report covers the end-to-end audit carried out on drand, including the implementations found in [drand/drand](https://github.com/drand/drand), [drand/bls12-381](https://github.com/drand/bls12-381) and [drand/kyber](https://github.com/drand/kyber). The audit assessed drand's ability to securely provide a distributed, continuous source of entropy / randomness for Filecoin, and included using fuzzing to find potential leaks, errors, or other panics. A handful of issues were found, 14 of which were marked as issues ranging from low to high risk, all of which have been resolved (the details of all issues raised and their resolutions are available in the report).
 
+## specs-actors
+
+### 2020-10-19: Actors Audit
+
+Report: [Filecoin Actors Audit](https://drive.google.com/file/d/16mlD-JMMpZ5trUyacOVbJhPMwgDz_jOu/view)
+
+Audit conducted by: Consensys Diligence
+
+This audit covers the implementation of Filecoin's builtin Actors, focusing on the role of Actors as a core component in the business logic of the Filecoin storage network. The audit process involved a manual review of the Actors code and conducting ongoing reviews of changes to the code during the course of the engagement. Issues uncovered through this process are all tracked in the GitHub repository. All Priority 1 issues have been resolved. Most Priority 2 issues have been resolved - ones that are still open have been determined to not be a risk for the Filecoin network or miner experience. Further details on these and all other issues raised available in the report. 
+
 ## rust-fil-proofs
 
 ### 2020-07-28: Filecoin Proving Subsystem
