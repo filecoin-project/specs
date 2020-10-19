@@ -5,7 +5,7 @@ dashboardWeight: 1
 dashboardState: reliable
 dashboardAudit: n/a
 implRepos: 
-  - { lang: go, repo: https://github.com/filecoin-project/go-filecoin }
+  - { lang: go, repo: https://github.com/filecoin-project/venus }
 ---
 
 # Venus

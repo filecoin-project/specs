@@ -58,10 +58,16 @@
     <!-- Audit -->
     <td data-sort="{{template "stateToNumber" .dashboardAudit}}" class="text-black bg-{{.dashboardAudit}}">
         {{- if eq .dashboardAuditURL "" -}}
-        {{ template "humanizeState" .dashboardAudit }}
-        {{ else }}
-            <a href="{{ .dashboardAuditURL }}" title="Read the audit report" target="_blank" rel="noopener noreferrer" class="text-black">{{.dashboardAuditDate}}<i class="gg-external gg-s-half"></i></a>
-        {{ end }}
+            {{ template "humanizeState" .dashboardAudit }}
+        {{- else -}}
+            {{- if hasPrefix .dashboardAuditURL "http" -}}
+                <a href="{{ .dashboardAuditURL }}" title="Read the audit report" target="_blank" rel="noopener noreferrer" class="text-black">{{.dashboardAuditDate}}<svg class="icon">
+                    <use xlink:href="/symbol-defs.svg#icon-external-link"></use>
+                </svg></a>
+            {{- else -}}
+                <a href="{{ .dashboardAuditURL }}" title="Read the audit report" class="text-black">{{.dashboardAuditDate}}</a>
+            {{- end -}}
+        {{- end -}}
     </td>
 </tr>
 {{ range .children }}
