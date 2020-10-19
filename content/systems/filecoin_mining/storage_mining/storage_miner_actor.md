@@ -3,7 +3,9 @@ title: Storage Miner Actor
 weight: 5
 dashboardWeight: 2
 dashboardState: wip
-dashboardAudit: coming
+dashboardAudit: done
+dashboardAuditURL: /#section-appendix.audit_reports.specs-actors
+dashboardAuditDate: '2020-10-19'
 dashboardTests: 0
 ---
 
