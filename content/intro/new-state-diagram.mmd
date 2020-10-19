@@ -1,4 +1,5 @@
 stateDiagram
+
     Null --> Precommitted: PreCommitSectors
     Precommitted --> Committed: CommitSectors
     Precommitted --> Deleted: CronPreCommitExpiry (PCD)
