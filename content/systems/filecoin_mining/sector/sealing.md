@@ -3,7 +3,7 @@ title: Sector Sealing
 weight: 4
 dashboardWeight: 2
 dashboardState: stable
-dashboardAudit: coming
+dashboardAudit: wip
 dashboardTests: 0
 ---
 
