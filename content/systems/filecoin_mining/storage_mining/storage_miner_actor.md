@@ -3,7 +3,7 @@ title: Storage Miner Actor
 weight: 5
 dashboardWeight: 2
 dashboardState: wip
-dashboardAudit: done
+dashboardAudit: coming
 dashboardTests: 0
 ---
 
