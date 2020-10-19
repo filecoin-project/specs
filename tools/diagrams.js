@@ -10,9 +10,9 @@ const runMmd = (p) => {
     const outFile = path.basename(p).replace('.mmd', '.svg')
 
     fs.mkdirSync(outDir, { recursive: true })
-
+    const config = process.env.CI ? ['-p', 'tools/pptr.config'] :[]
     return execa('mmdc', [
-        '-p', 'tools/pptr.config',
+        ...config,
         '-i', p,
         '-o', path.join(outDir, outFile)
     ], { preferLocal: true });

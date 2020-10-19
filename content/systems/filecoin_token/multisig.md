@@ -5,6 +5,8 @@ bookCollapseSection: true
 dashboardWeight: 1
 dashboardState: reliable
 dashboardAudit: done
+dashboardAuditURL: /#section-appendix.audit_reports.specs-actors
+dashboardAuditDate: '2020-10-19'
 dashboardTests: 0
 ---
 
