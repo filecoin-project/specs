@@ -10,4 +10,4 @@ dashboardAudit: n/a
 
 Actor State Diagram
 
-![Actor State Diagram](new-state-diagram.mmd)
+![Actor State Diagram](intro/new-state-diagram.mmd)
