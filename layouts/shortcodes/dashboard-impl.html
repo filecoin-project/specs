@@ -34,7 +34,7 @@
             {{ if gt $data.cov 70 }}
                 {{ $color = "bg-reliable"}}
             {{ end }}
-            
+
             <tr>
                 <td style="text-align:left"><a title="{{ $data.repo }}" href="{{ $repoUrl }}">{{ $data.repo }}</a></td>
                 <td>{{ $repoLang }}  </td>
@@ -53,11 +53,20 @@
                     {{ else }}
                         {{ humanize $repoItem.auditState | default "Missing" }}
                     {{ end }}
-                    {{ if isset $repoItem "audits" }} 
+                    {{ if isset $repoItem "audits" }}
                         {{ range $auditIndex, $audit := $repoItem.audits }}
-                            <a href="{{ $audit.auditURL }}" title="Read the audit report - {{ $audit.auditDate }}" target="_blank" rel="noopener noreferrer" class="text-black">
-                                [{{ add $auditIndex 1 }}]
-                            </a>
+                            {{ if hasPrefix $audit.auditURL "http" }}
+                                <a href="{{ $audit.auditURL }}" title="Read the audit report - {{ $audit.auditDate }}" target="_blank" rel="noopener noreferrer" class="text-black">
+                                    [{{ add $auditIndex 1 }}<svg class="icon">
+                                        <use xlink:href="/symbol-defs.svg#icon-external-link"></use>
+                                    </svg>]
+                                </a>
+                            {{ else }}
+                                <a href="{{ $audit.auditURL }}" title="Read the audit report - {{ $audit.auditDate }}" class="text-black">
+                                    [{{ add $auditIndex 1 }}]
+                                </a>
+                            {{ end }}
+
                         {{ end }}
                     {{ end }}
                 </td>
