@@ -15,7 +15,7 @@ Filecoin is targeting [multiple implementations](https://filecoin.io/blog/announ
 - [Lotus](https://lotu.sh): the Go-based implementation, supported by [Protocol Labs](https://protocol.ai),
 - [Forest](https://github.com/ChainSafe/forest): the Rust-based implementation, supported by [ChainSafe](https://chainsafe.io),
 - [Fuhon](https://github.com/filecoin-project/cpp-filecoin): the C++-based implementation, supported by [Soramitsu](https://soramitsu.co.jp),
-- [go-filecoin](https://github.com/filecoin-project/go-filecoin): a second Go-based implementation of Filecoin, which is a community-driven effort.
+- [Venus](https://github.com/filecoin-project/go-filecoin): a second Go-based implementation of Filecoin, previously called `go-filecoin`, which is maintained by the [IPFS-Force Community](https://github.com/ipfs-force-community).
 
 
 {{<dashboard-impl>}}
