@@ -7,10 +7,16 @@ dashboardAudit: n/a
 implRepos: 
   - repo: https://github.com/filecoin-project/lotus
     lang: go
-    auditState: wip
+    auditState: done
+    audits:
+      - auditDate: '2020-10-20'
+        auditURL: '/#section-appendix.audit_reports.2020-10-20-lotus-mainnet-ready-security-audit'        
   - repo: https://github.com/filecoin-project/go-fil-markets
     lang: go
-    auditState: wip
+    auditState: done
+    audits:
+      - auditDate: '2020-10-20'
+        auditURL: '/#section-appendix.audit_reports.2020-10-20-lotus-mainnet-ready-security-audit'    
   - repo: https://github.com/filecoin-project/specs-actors
     lang: go
     auditState: done
