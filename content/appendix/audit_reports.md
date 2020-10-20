@@ -23,7 +23,7 @@ The scope of this audit covered:
 
 ## Actors
 
-### `2020-10-19c` Actors Mainnet Ready Security Audit
+### `2020-10-19` Actors Mainnet Ready Security Audit
 
 - Report: [**Filecoin Actors Audit**](https://diligence.consensys.net/audits/2020/09/filecoin-actors/)
 - Audit conducted by: **Consensys Diligence**
