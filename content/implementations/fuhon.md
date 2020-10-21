@@ -4,7 +4,7 @@ weight: 4
 dashboardWeight: 1
 dashboardState: reliable
 dashboardAudit: n/a
-implRepos: 
+implRepos:
   - { lang: c++, repo: https://github.com/filecoin-project/cpp-filecoin }
 ---
 

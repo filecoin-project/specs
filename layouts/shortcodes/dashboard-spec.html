@@ -61,11 +61,13 @@
             {{ template "humanizeState" .dashboardAudit }}
         {{- else -}}
             {{- if hasPrefix .dashboardAuditURL "http" -}}
-                <a href="{{ .dashboardAuditURL }}" title="Read the audit report" target="_blank" rel="noopener noreferrer" class="text-black">{{.dashboardAuditDate}}<svg class="icon">
+                <a href="{{ .dashboardAuditURL }}" title="Read the audit report" target="_blank" rel="noopener noreferrer">{{.dashboardAuditDate}}<svg class="icon">
                     <use xlink:href="/symbol-defs.svg#icon-external-link"></use>
                 </svg></a>
             {{- else -}}
-                <a href="{{ .dashboardAuditURL }}" title="Read the audit report" class="text-black">{{.dashboardAuditDate}}</a>
+                <a href="{{ .dashboardAuditURL }}" title="Read the audit reports"><svg class="icon">
+                    <use xlink:href="/symbol-defs.svg#icon-shield"></use>
+                </svg>Reports</a>
             {{- end -}}
         {{- end -}}
     </td>

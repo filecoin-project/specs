@@ -5,7 +5,7 @@ dashboardWeight: 2.0
 dashboardState: stable
 dashboardTests: 0
 dashboardAudit: done
-dashboardAuditURL: /#section-appendix.audit_reports.2020-06-03-gossipsub-design-and-implementation
+dashboardAuditURL: /#section-appendix.audit_reports.gossipsub
 dashboardAuditDate: '2020-06-03'
 ---
 

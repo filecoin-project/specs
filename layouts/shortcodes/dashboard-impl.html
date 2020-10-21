@@ -49,25 +49,22 @@
                 <td class="text-black bg-{{ $repoItem.auditState | default "missing" }}">
                     {{ if eq $repoItem.auditState "wip" }}
                         WIP
-                    {{ else if and (eq $repoItem.auditState "done") (isset $repoItem "audits") }}
-                    {{ else }}
-                        {{ humanize $repoItem.auditState | default "Missing" }}
-                    {{ end }}
-                    {{ if isset $repoItem "audits" }}
-                        {{ range $auditIndex, $audit := $repoItem.audits }}
-                            {{ if hasPrefix $audit.auditURL "http" }}
-                                <a href="{{ $audit.auditURL }}" title="Read the audit report - {{ $audit.auditDate }}" target="_blank" rel="noopener noreferrer" class="text-black">
-                                    [{{ add $auditIndex 1 }}<svg class="icon">
+                    {{ else if isset $repoItem "auditURL" }}
+                            {{ if hasPrefix $repoItem.auditURL "http" }}
+                                <a href="{{ $repoItem.auditURL }}" title="Read the audit reports" target="_blank" rel="noopener noreferrer">
+                                    Reports<svg class="icon">
                                         <use xlink:href="/symbol-defs.svg#icon-external-link"></use>
-                                    </svg>]
+                                    </svg>
                                 </a>
                             {{ else }}
-                                <a href="{{ $audit.auditURL }}" title="Read the audit report - {{ $audit.auditDate }}" class="text-black">
-                                    [{{ add $auditIndex 1 }}]
+                                <a href="{{ $repoItem.auditURL }}" title="Read the audit reports">
+                                    <svg class="icon">
+                                        <use xlink:href="/symbol-defs.svg#icon-shield"></use>
+                                    </svg>Reports
                                 </a>
                             {{ end }}
-
-                        {{ end }}
+                    {{ else }}
+                        {{ humanize $repoItem.auditState | default "Missing" }}
                     {{ end }}
                 </td>
             </tr>
