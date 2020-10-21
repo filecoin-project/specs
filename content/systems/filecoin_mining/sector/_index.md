@@ -12,7 +12,7 @@ dashboardTests: 0
 
 Sectors are the basic units of storage on Filecoin. They have standard sizes, as well as well-defined time-increments for commitments. The size of a sector balances security concerns against usability. A sectorʼs lifetime is determined in the storage market, and sets the promised duration of the sector.
 
-In the first iteration of the protocol, 32GiB and 64GiB sectors are supported. Maximum sector lifetime is determined by the proof algorithm. Maximum sector lifetime is initially 18 months. A sector naturally expires when it reaches the end of its lifetime.  Additionally, the miner can extend the lifetime of their sectors. Rewards are earned and collaterals recovered when the miner fulfils their commitment.
+In the first iteration of the protocol, 32GiB and 64GiB sectors are supported. Maximum sector lifetime is determined by the proof algorithm. Maximum sector lifetime is initially 18 months. A sector naturally expires when it reaches the end of its lifetime. Additionally, the miner can extend the lifetime of their sectors. Rewards are earned and collaterals recovered when the miner fulfils their commitment.
 
 Individual deals are formed when a storage miner and client are matched on Filecoinʼs storage market. The protocol does not distinguish miners matching with real clients from miners generating self-deals. However, **committed capacity** is a construction that is introduced to make self-dealing unnecessary and economically irrational. In earlier designs of the network, only sectors filled with deals increased the minerʼs likelihood of winning the block reward. This led to the expectation that miners would attack and exploit the network by playing the role of both storage provider and client, creating a malicious self-deal.
 
@@ -28,11 +28,8 @@ This diagram shows the composition of an unsealed sector and a sealed sector.
 
 ![Unsealed Sectors and Sealed Sectors](sectors.png)
 
-
 **Sector Storage & Window PoSt**
 
 The Lotus implementation of the Window PoSt scheduler can be found [here](https://github.com/filecoin-project/lotus/blob/master/storage/wdpost_sched.go) and the actual execution of Window PoSt on a sector can be found [here](https://github.com/filecoin-project/lotus/blob/master/storage/wdpost_run.go).
 
 The Lotus block store implementation for sectors can be found [here](https://github.com/filecoin-project/lotus/blob/master/storage/sectorblocks/blocks.go).
-
-

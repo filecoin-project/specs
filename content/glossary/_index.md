@@ -1,12 +1,12 @@
 ---
-title: "Glossary"
+title: 'Glossary'
 weight: 6
 dashboardWeight: 0.2
 dashboardState: reliable
 dashboardAudit: n/a
 ---
 
-# Glossary 
+# Glossary
 
 ## Account Actor
 
@@ -138,7 +138,6 @@ The term _Filecoin_ is used generically to refer to the Filecoin project, protoc
 
 The term `fr32` is derived from the name of a struct that Filecoin uses to represent the elements of the arithmetic field of a pairing-friendly curve, specifically Bls12-381—which justifies use of 32 bytes. `F` stands for "Field", while `r` is simply a mathematic letter-as-variable substitution used to denote the modulus of this particular field.
 
-
 ## Gas, Gas Fees
 
 _Gas_ is a property of a [message](glossary#message), corresponding to the resources involved in including that message in a given [block](glossary#block). For each message included in a block, the block's creator (i.e., miner) charges a fee to the message's sender.
@@ -182,7 +181,7 @@ A miner is an actor in the Filecoin system performing a service in the network f
 There are three types of miners in Filecoin:
 
 - [Storage miners](glossary#storage-miner-actor), who store files on behalf of clients.
-- [Retrieval miners](glossary#retrieval-miner), who deliver stored files to clients. 
+- [Retrieval miners](glossary#retrieval-miner), who deliver stored files to clients.
 - Repair miners, who replicate files to keep them available in the network, when a storage miner presents a fault.
 
 ## Multisig Actor
@@ -203,7 +202,7 @@ A [_payment channel_](filecoin_token#payment_channels) is set up between actors 
 
 ## Piece
 
-The [Piece](piece) is the main unit of account and negotiation for the data that a user wants to store on Filecoin. In the Lotus implementation, a piece is a [CAR file](https://github.com/ipld/specs/blob/master/block-layer/content-addressable-archives.md#summary) produced by an IPLD DAG with its own *payload CID* and *piece CID*. However, a piece can be produced in different ways as long as the outcome matches the _piece CID_. A piece is not a unit of storage and therefore, it can be of any size up to the size of a [sector](glossary#sector). If a piece is larger than a sector (currently set to 32GB or 64GB and chosen by the miner), then it has to be split in two (or more) pieces. For more details on the exact sizing of a Filecoin Piece as well as how it can be produced, see the [Piece section](piece).
+The [Piece](piece) is the main unit of account and negotiation for the data that a user wants to store on Filecoin. In the Lotus implementation, a piece is a [CAR file](https://github.com/ipld/specs/blob/master/block-layer/content-addressable-archives.md#summary) produced by an IPLD DAG with its own _payload CID_ and _piece CID_. However, a piece can be produced in different ways as long as the outcome matches the _piece CID_. A piece is not a unit of storage and therefore, it can be of any size up to the size of a [sector](glossary#sector). If a piece is larger than a sector (currently set to 32GB or 64GB and chosen by the miner), then it has to be split in two (or more) pieces. For more details on the exact sizing of a Filecoin Piece as well as how it can be produced, see the [Piece section](piece).
 
 ## Pledged Storage
 
@@ -215,7 +214,7 @@ See [Power Fraction](glossary#power-fraction).
 
 ## Power Fraction
 
-A storage miner's `Power Fraction` or `Power` is the ratio of their committed storage, as of their last PoSt submission, over Filecoin's total committed storage as of the current block. It is used in [Leader Election](glossary#leader-election). It is the proportion of power that a storage miner has in the system as a fraction of the overall power of all miners. 
+A storage miner's `Power Fraction` or `Power` is the ratio of their committed storage, as of their last PoSt submission, over Filecoin's total committed storage as of the current block. It is used in [Leader Election](glossary#leader-election). It is the proportion of power that a storage miner has in the system as a fraction of the overall power of all miners.
 
 ## Power Table
 
@@ -259,7 +258,7 @@ This measurement is the size of a sector in bytes.
 
 ## Retrieval miner
 
-A [_retrieval miner_](retrieval_market#retrieval_provider) is a Filecoin participant that enters in retrieval [deals](glossary#deal) with clients, agreeing to supply a client with a particular file in exchange for [FIL](glossary#fil).  Note that unlike [storage miners](glossary#storage-miner-actor), retrieval miners are not additionally rewarded with the ability to add blocks to (i.e., extend) the Filecoin blockchain; their only reward is the fee they extract from the client.
+A [_retrieval miner_](retrieval_market#retrieval_provider) is a Filecoin participant that enters in retrieval [deals](glossary#deal) with clients, agreeing to supply a client with a particular file in exchange for [FIL](glossary#fil). Note that unlike [storage miners](glossary#storage-miner-actor), retrieval miners are not additionally rewarded with the ability to add blocks to (i.e., extend) the Filecoin blockchain; their only reward is the fee they extract from the client.
 
 ## Repair
 
@@ -319,12 +318,12 @@ The [_Storage Power Actor_](sysactors) is responsible for keeping track of the s
 
 ## Storage Fault Slashing
 
-Storage Fault Slashing is a term that is used to encompass a broader set of penalties, including (but not limited to) Fault Fees, Sector Penalties, and Termination Fees. These penalties are to be paid by miners if they fail to provide sector reliability or decide to voluntarily exit the network. 
+Storage Fault Slashing is a term that is used to encompass a broader set of penalties, including (but not limited to) Fault Fees, Sector Penalties, and Termination Fees. These penalties are to be paid by miners if they fail to provide sector reliability or decide to voluntarily exit the network.
 
-* **Fault Fee (FF):** A penalty that a miner incurs for each day a miner's sector is offline.
-* **Sector Penalty (SP):**  A penalty that a miner incurs for a faulted sector that was not declared faulted before a WindowPoSt check occurs. 
-    * The sector will pay FF after incurring an SP when the fault is detected.
-* **Termination Penalty (TP):** A penalty that a miner incurs when a sector is voluntarily or involuntarily terminated and is removed from the network.
+- **Fault Fee (FF):** A penalty that a miner incurs for each day a miner's sector is offline.
+- **Sector Penalty (SP):** A penalty that a miner incurs for a faulted sector that was not declared faulted before a WindowPoSt check occurs.
+  - The sector will pay FF after incurring an SP when the fault is detected.
+- **Termination Penalty (TP):** A penalty that a miner incurs when a sector is voluntarily or involuntarily terminated and is removed from the network.
 
 ## Ticket or VRF Chain
 

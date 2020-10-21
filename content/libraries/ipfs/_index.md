@@ -14,10 +14,9 @@ Filecoin is built on the same underlying stack as IPFS - including connecting no
 
 ## Bitswap
 
-[Bitswap](https://github.com/ipfs/go-bitswap) is a simple peer-to-peer data exchange protocol, used primarily in IPFS, which can also be used independently of the rest of the pieces that make up IPFS. In Filecoin, `Bitswap` is used to request and receive blocks when a node is synchonized ("caught up") but `GossipSub` has failed to deliver some blocks to a node. 
+[Bitswap](https://github.com/ipfs/go-bitswap) is a simple peer-to-peer data exchange protocol, used primarily in IPFS, which can also be used independently of the rest of the pieces that make up IPFS. In Filecoin, `Bitswap` is used to request and receive blocks when a node is synchonized ("caught up") but `GossipSub` has failed to deliver some blocks to a node.
 
 Please refer to the [Bitswap specification](https://github.com/ipfs/specs/blob/master/BITSWAP.md) for more information.
-
 
 ## UnixFS
 

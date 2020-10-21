@@ -8,31 +8,31 @@ This is the [Filecoin Specification](https://github.com/filecoin-project/specs),
 
 ## Table of Contents
 
--   [Install](#install)
--   [Writing the spec](#writing-the-spec)
--   [Check your markdown](#check-your-markdown)
--   [Page Template](#page-template)
--   [Code](#code)
--   [Images](#images)
--   [Links](#links)
--   [Shortcodes](#shortcodes)
-    -   [`embed`](#embed)
-    -   [`listing`](#listing)
-    -   [`mermaid`](#mermaid)
-    -   [`hint`](#hint)
-    -   [`katex`](#katex)
--   [Math mode](#math-mode)
-    -   [Wrap `def`, `gdef`, etc.](#wrap-def-gdef-etc)
-    -   [Wrap inline math text with code blocks](#wrap-inline-math-text-with-code-blocks)
-    -   [Wrap math blocks with code fences](#wrap-math-blocks-with-code-fences)
--   [Front-matter](#front-matter)
--   [References](#references)
+- [Install](#install)
+- [Writing the spec](#writing-the-spec)
+- [Check your markdown](#check-your-markdown)
+- [Page Template](#page-template)
+- [Code](#code)
+- [Images](#images)
+- [Links](#links)
+- [Shortcodes](#shortcodes)
+  - [`embed`](#embed)
+  - [`listing`](#listing)
+  - [`mermaid`](#mermaid)
+  - [`hint`](#hint)
+  - [`katex`](#katex)
+- [Math mode](#math-mode)
+  - [Wrap `def`, `gdef`, etc.](#wrap-def-gdef-etc)
+  - [Wrap inline math text with code blocks](#wrap-inline-math-text-with-code-blocks)
+  - [Wrap math blocks with code fences](#wrap-math-blocks-with-code-fences)
+- [Front-matter](#front-matter)
+- [References](#references)
 
 ## Install
 
 To build the spec website you need
 
--   [`node` & `npm`](https://nodejs.org/en/download)
+- [`node` & `npm`](https://nodejs.org/en/download)
 
 On macOS you can get node from Homebrew
 
@@ -57,9 +57,9 @@ Then open <http://localhost:1313> in the browser
 
 ## Writing the spec
 
-The spec is written in markdown. Each section is markdown document in the `content` directory. The first level of the directory structure denotes the top level sections of the spec; (Introduction, Systems, etc.) The `_index.md` file in each folder is used as the starting point for each section. For example the **Introduction** starts in `content/intro/_index.md`. 
+The spec is written in markdown. Each section is markdown document in the `content` directory. The first level of the directory structure denotes the top level sections of the spec; (Introduction, Systems, etc.) The `_index.md` file in each folder is used as the starting point for each section. For example the **Introduction** starts in `content/intro/_index.md`.
 
-Sections can be split out into multiple markdown documents. The build process combines them into a single html page. The sections are ordered by the `weight` front-matter property. The introduction appears at the start of the html page because `content/intro/_index.md` has `weight: 1`, while `content/systems/_index.html` has `weight: 2` so it appears as the second section. 
+Sections can be split out into multiple markdown documents. The build process combines them into a single html page. The sections are ordered by the `weight` front-matter property. The introduction appears at the start of the html page because `content/intro/_index.md` has `weight: 1`, while `content/systems/_index.html` has `weight: 2` so it appears as the second section.
 
 You can split out sub-sections by adding additional pages to a section directory. The `content/intro/concepts.md` defines the Key Concepts sub-section of the the Introduction. The order of sub-sections within a section is again controlled by setting the `weight` property. This pattern repeats for sub sub folders which represent sub sub sections.
 
@@ -121,19 +121,21 @@ For `dot` and `mermaid` diagrams you link to the source file and the pipelines w
 
 ```md
 # relative to the markdown file
+
 ![Alt text](picture.jpg)
 
 # relative to the content folder
+
 ![Alt text](/content/intro/diagram1.mmd)
 
-![Alt text](graph.dot "Graph title")
+![Alt text](graph.dot 'Graph title')
 ```
 
 > The alt text is used as the title if not provided.
 
 ## Links
 
-Use markdown syntax `[text](markdown-document-name)`. 
+Use markdown syntax `[text](markdown-document-name)`.
 
 These links use "portable links" just like `relref`. Just give it the name of the file and it will fetch the correct relative path and title automatically. You can override the title by passing a second `string` in the link definition.
 
@@ -143,20 +145,20 @@ These links use "portable links" just like `relref`. Just give it the name of th
 [](storage_power_consensus)
 
 # Renders to
+
 <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Storage Power Consensus">Storage Power Consensus</a>
 
-
-[Storage Power](storage_power_consensus "Title to override the page original title")
+[Storage Power](storage_power_consensus 'Title to override the page original title')
 
 # Renders to
+
 <a href="/systems/filecoin_blockchain/storage_power_consensus" title="Title to override the page original title">Storage Power</a>
 
-
-[Tickets](storage_power_consensus#the-ticket-chain-and-drawing-randomness "The Ticket chain and drawing randomness")
+[Tickets](storage_power_consensus#the-ticket-chain-and-drawing-randomness 'The Ticket chain and drawing randomness')
 
 # Renders to
-<a href="/systems/filecoin_blockchain/storage_power_consensus#the-ticket-chain-and-drawing-randomness" title="The Ticket chain and drawing randomness">Tickets</a>
 
+<a href="/systems/filecoin_blockchain/storage_power_consensus#the-ticket-chain-and-drawing-randomness" title="The Ticket chain and drawing randomness">Tickets</a>
 ```
 
 ## Shortcodes
@@ -167,19 +169,25 @@ hugo shortcodes you can add to your markdown.
 
 ```md
 # src relative to the page
+
 {{<embed src="piece_store.go" lang="go">}}
 
 # src relative to content folder
+
 {{<embed src="/systems/piece_store.go" lang="go">}}
 
 # can just embed a markdown file
+
 {{<embed src="section.md" markdown="true">}}
 
 # can embed symbols from Go files
+
 # extracts comments and symbol body
+
 {{<embed src="types.go"  lang="go" symbol="Channel">}}
 
 # can embed from external sources like github
+
 {{<embed src="https://github.com/filecoin-project/lotus/blob/master/build/bootstrap.go" lang="go">}}
 ```
 
@@ -191,12 +199,15 @@ The listing shortcode creates tables from externals sources, supports Go `struct
 
 ```md
 # src relative to the page
+
 {{<listing src="piece_store.go" symbol="Channel">}}
 
 # src relative to content folder
+
 {{<listing src="/systems/piece_store.go" symbol="Channel">}}
 
 # src can also be from the externals repos
+
 {{<listing src="/externals/go-data-transfer/types.go"  symbol="Channel">}}
 ```
 
@@ -212,7 +223,7 @@ graph TD
   C -->|One| D[Laptop]
   C -->|Two| E[iPhone]
   C -->|Three| F[fa:fa-car Car]
-		
+
 {{</ mermaid >}}
 ```
 
@@ -220,6 +231,7 @@ graph TD
 
 ```md
 <!-- info|warning|danger -->
+
 {{< hint info >}}
 **Markdown content**  
 Lorem markdownum insigne. Olympo signis Delphis! Retexi Nereius nova develat
@@ -233,11 +245,13 @@ We should **only** use `inline` mode for now! Display mode has a bug and is not 
 
 ```md
 <!-- Use $ math $ for inline mode-->
+
 {{<katex>}}
 $SectorInitialConsensusPledge = \\[0.2cm] 30\% \times FILCirculatingSupply \times \frac{SectorQAP}{max(NetworkBaseline, NetworkQAP)}$
 {{</katex >}}
 
 <!-- Use $$ math $$ for display mode-->
+
 {{<katex>}}
 $$SectorInitialConsensusPledge = \\[0.2cm] 30\% \times FILCirculatingSupply \times \frac{SectorQAP}{max(NetworkBaseline, NetworkQAP)}$$
 {{</katex >}}
@@ -268,6 +282,7 @@ Math text needs to be wrapped to avoid Hugo's Markdown parser. When wrapping def
 
 ```md
 {{<plain hidden>}}
+
 $$
 \gdef\createporepbatch{\textsf{create_porep_batch}}
 \gdef\GrothProof{\textsf{Groth16Proof}}
@@ -275,6 +290,7 @@ $$
 \gdef\GrothEvaluationKey{\textsf{Groth16EvaluationKey}}
 \gdef\GrothVerificationKey{\textsf{Groth16VerificationKey}}
 {{</plain>}}
+$$
 ```
 
 ### Wrap inline math text with code blocks
@@ -311,7 +327,7 @@ Description for all the available frontmatter properties
 
 ```yaml
 # Page Title to be used in the navigation
-title: Libraries 
+title: Libraries
 # Small description for html metadata, if not present the first couple of paragraphs will be used instead
 description: Libraries used from Filecoin
 # This will be used to order the ToC, navigation and any other listings of pages
@@ -329,17 +345,17 @@ dashboardAudit: wip
 # When dashboardAudit is stable we should have a report url
 dashboardAuditURL: https://url.to.the.report
 # The date that the report at dashboardAuditURL was completed
-dashboardAuditDate: "2020-08-01"
+dashboardAuditDate: '2020-08-01'
 # This is used in the dashboard to describe if the page content has compliance tests, options are 0 or numbers of tests
 dashboardTests: 0
 ```
 
 ## References
 
--   [hugo theme book](https://themes.gohugo.io//theme/hugo-book/docs/shortcodes/columns/)
--   [Katex](https://katex.org/)
--   [Mermaid](https://mermaid-js.github.io/mermaid/#/)
-    -   [config](https://github.com/mermaid-js/mermaid/blob/master/docs/mermaidAPI.md#mermaidapi-configuration-defaults)
-    -   [editor](https://mermaid-js.github.io/mermaid-live-editor)
--   [Pan/Zoom for SVG](https://github.com/anvaka/panzoom)
--   [Icons](https://css.gg/)
+- [hugo theme book](https://themes.gohugo.io//theme/hugo-book/docs/shortcodes/columns/)
+- [Katex](https://katex.org/)
+- [Mermaid](https://mermaid-js.github.io/mermaid/#/)
+  - [config](https://github.com/mermaid-js/mermaid/blob/master/docs/mermaidAPI.md#mermaidapi-configuration-defaults)
+  - [editor](https://mermaid-js.github.io/mermaid-live-editor)
+- [Pan/Zoom for SVG](https://github.com/anvaka/panzoom)
+- [Icons](https://css.gg/)

@@ -1,5 +1,5 @@
 ---
-title: "Address"
+title: 'Address'
 weight: 2
 dashboardWeight: 0.2
 dashboardState: reliable
@@ -35,8 +35,9 @@ There are 2 ways a filecoin address can be represented. An address appearing on 
 
 When represented as bytes a filecoin address contains the following:
 
-* A **protocol indicator** byte that identifies the type and version of this address.
-* The **payload** used to uniquely identify the actor according to the protocol.
+- A **protocol indicator** byte that identifies the type and version of this address.
+- The **payload** used to uniquely identify the actor according to the protocol.
+
 ```text
 |----------|---------|
 | protocol | payload |
@@ -48,10 +49,10 @@ When represented as bytes a filecoin address contains the following:
 
 When encoded to a string a filecoin address contains the following:
 
-* A **network prefix** character that identifies the network the address belongs to.
-* A **protocol indicator** byte that identifies the type and version of this address.
-* A **payload** used to uniquely identify the actor according to the protocol.
-* A **checksum** used to validate the address.
+- A **network prefix** character that identifies the network the address belongs to.
+- A **protocol indicator** byte that identifies the type and version of this address.
+- A **payload** used to uniquely identify the actor according to the protocol.
+- A **checksum** used to validate the address.
 
 ```text
 |------------|----------|---------|----------|
@@ -59,8 +60,6 @@ When encoded to a string a filecoin address contains the following:
 |------------|----------|---------|----------|
 | 'f' or 't' |  1 byte  | n bytes | 4 bytes  |
 ```
-
-
 
 ### Network Prefix
 
@@ -189,7 +188,6 @@ The payload represents the data specified by the protocol. All payloads except t
 
 Filecoin checksums are calculated over the address protocol and payload using blake2b-4. Checksums are base32 encoded and only added to an address when encoding to a string. Addresses following the ID Protocol do not have a checksum.
 
-
 ### Expected Methods
 
 All implementations in Filecoin must have methods for creating, encoding, and decoding addresses in addition to checksum creation and validation. The follwing is a golang version of the Address Interface:
@@ -204,6 +202,7 @@ type Address interface {
 	ValidateChecksum(a Address) bool
 }
 ```
+
 #### New()
 
 `New()` returns an Address for the specified protocol encapsulating corresponding payload. New fails for unknown protocols.
@@ -251,9 +250,10 @@ func Encode(network string, a Address) string {
 #### Decode()
 
 Software decoding a Filecoin address must:
-* verify the network is a known network.
-* verify the protocol is a number of a known protocol.
-* verify the checksum is valid
+
+- verify the network is a known network.
+- verify the protocol is a number of a known protocol.
+- verify the checksum is valid
 
 Decode an Address from a string by removing the network prefix, validating the address is of a known protocol, decoding the payload and checksum, and validating the checksum.
 
@@ -351,7 +351,6 @@ f01729
 f018446744073709551615
 00ffffffffffffffffff01
 ```
-
 
 ### Secp256k1 Type Addresses
 

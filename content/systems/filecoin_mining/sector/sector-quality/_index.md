@@ -15,7 +15,7 @@ Given different sector contents, not all sectors have the same usefulness to the
 - **Sector Spacetime:** This measurement is the sector size multiplied by its promised duration in byte-epochs.
 - **Deal Weight:** This weight converts spacetime occupied by deals into consensus power. Deal weight of verified client deals in a sector is called Verified Deal Weight and will be greater than the regular deal weight.
 - **Deal Quality Multiplier:** This factor is assigned to different deal types (committed
-capacity, regular deals, and verified client deals) to reward different content.
+  capacity, regular deals, and verified client deals) to reward different content.
 - **Sector Quality Multiplier:** Sector quality is assigned on Activation (the epoch when the miner starts proving theyʼre storing the file). The sector quality multiplier is computed as an average of deal quality multipliers (committed capacity, regular deals, and verified client deals), weighted by the amount of spacetime each type of deal occupies in the sector.
 
 {{<katex>}}
@@ -31,23 +31,21 @@ The high quality multiplier and easy verification process for verified client de
 
 ![Sector Quality](sector-quality.jpg)
 
-
 **Sector Quality Adjusted Power** is a weighted average of the quality of its space and it is based on the size, duration and quality of its deals.
 
-| Name                         | Description                                           |
-|------------------------------|-------------------------------------------------------|
-| QualityBaseMultiplier (QBM)  | Multiplier for power for storage without deals.       |
-| DealWeightMultiplier  (DWM)  | Multiplier for power for storage with deals.          |
+| Name                                | Description                                           |
+| ----------------------------------- | ----------------------------------------------------- |
+| QualityBaseMultiplier (QBM)         | Multiplier for power for storage without deals.       |
+| DealWeightMultiplier (DWM)          | Multiplier for power for storage with deals.          |
 | VerifiedDealWeightMultiplier (VDWM) | Multiplier for power for storage with verified deals. |
 
-
 The formula for calculating Sector Quality Adjusted Power (or QAp, often referred to as power) makes use of the following factors:
+
 - `dealSpaceTime`: sum of the `duration*size` of each deal
 - `verifiedSpaceTime`: sum of the `duration*size` of each verified deal
 - `baseSpaceTime` (spacetime without deals): `sectorSize*sectorDuration - dealSpaceTime - verifiedSpaceTime`
 
 Based on these the average quality of a sector is:
-
 
 {{<katex>}}
 $avgQuality = \frac{baseSpaceTime*QBM + dealSpaceTime*DWM + verifiedSpaceTime*VDWM}{sectorSize*sectorDuration*QBM}$

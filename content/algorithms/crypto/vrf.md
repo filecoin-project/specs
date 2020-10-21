@@ -1,5 +1,5 @@
 ---
-title: "Verifiable Random Function"
+title: 'Verifiable Random Function'
 weight: 2
 dashboardWeight: 2
 dashboardState: incorrect

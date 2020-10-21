@@ -11,10 +11,10 @@ dashboardTests: 0
 
 Before a Sector can be used, the Miner must _seal_ the Sector: encode the data in the Sector to prepare it for the proving process.
 
-* **Unsealed Sector**: A Sector of raw data.
-    * **UnsealedCID (CommD)**: The root hash of the Unsealed Sector's merkle tree. Also called CommD, or "data commitment."
-* **Sealed Sector**: A Sector that has been encoded to prepare it for the proving process.
-    * **SealedCID (CommR)**: The root hash of the Sealed Sector's merkle tree. Also called CommR, or "replica commitment."
+- **Unsealed Sector**: A Sector of raw data.
+  - **UnsealedCID (CommD)**: The root hash of the Unsealed Sector's merkle tree. Also called CommD, or "data commitment."
+- **Sealed Sector**: A Sector that has been encoded to prepare it for the proving process.
+  - **SealedCID (CommR)**: The root hash of the Sealed Sector's merkle tree. Also called CommR, or "replica commitment."
 
 Sealing a sector through Proof-of-Replication (PoRep) is a computation-intensive process that results in a unique encoding of the sector. Once data is sealed, storage miners: generate a proof; run a SNARK on the proof to compress it; and finally, submit the result of the compression to the blockchain as a certification of the storage commitment. Depending on the PoRep algorithm and protocol security parameters, cost profiles and performance characteristics vary and tradeoffs have to be made among sealing cost, security, onchain footprint, retrieval latency and so on. However, sectors can be sealed with commercial hardware and sealing cost is expected to decrease over time. The Filecoin Protocol will launch with Stacked Depth Robust (SDR) PoRep with a planned upgrade to Narrow Stacked Expander (NSE) PoRep with improvement in both cost and retrieval latency.
 
@@ -23,17 +23,18 @@ The Lotus-specific set of functions applied to the sealing of a sector can be fo
 ## Randomness
 
 Randomness is an important attribute that helps the network verify the integrity of Miners' stored data. Filecoin's block creation process includes two types of randomness:
-* [DRAND](drand): Values pulled from a distributed random beacon
-* VRF: The output of a _Verifiable Random Function_ (VRF), which takes the previous block's VRF value and produces the current block's VRF value.
+
+- [DRAND](drand): Values pulled from a distributed random beacon
+- VRF: The output of a _Verifiable Random Function_ (VRF), which takes the previous block's VRF value and produces the current block's VRF value.
 
 Each block produced in Filecoin includes values pulled from these two sources of randomness.
 
 When Miners submit proofs about their stored data, the proofs incorporate references to randomness added at specific epochs. Assuming these values were not able to be predicted ahead of time, this helps ensure that Miners generated proofs at a specific point in time.
 
 There are two proof types. Each uses one of the two sources of randomness:
-* Windowed PoSt: Uses Drand values
-* Proof of Replication (PoRep): Uses VRF values
 
+- Windowed PoSt: Uses Drand values
+- Proof of Replication (PoRep): Uses VRF values
 
 ## Drawing randomness for sector commitments
 
@@ -49,8 +50,8 @@ We present precisely how ticket selection and verification should work. In the b
 - `X`-- round in which SEALing starts
 - `Z`-- round in which the SEAL appears (in a block)
 - `Y`-- round announced in the SEAL `commitSector` (should be X, but a miner could use any Y <= X), denoted by the ticket selection
- - `T`-- estimated time for SEAL, dependent on sector size
- - `G = T + variance`-- necessary flexibility to account for network delay and SEAL-time variance.
+- `T`-- estimated time for SEAL, dependent on sector size
+- `G = T + variance`-- necessary flexibility to account for network delay and SEAL-time variance.
 
 We expect Filecoin will be able to produce estimates for sector commitment time based on sector sizes, e.g.:
 `(estimate, variance) <--- SEALTime(sectors)`
@@ -59,7 +60,6 @@ G and T will be selected using these.
 **Picking a Ticket to Seal:** When starting to prepare a SEAL in round X, the miner should draw a ticket from X-F with which to compute the SEAL.
 
 **Verifying a Seal's ticket:** When verifying a SEAL in round Z, a verifier should ensure that the ticket used to generate the SEAL is found in the range of rounds `[Z-T-F-G, Z-T-F+G]`.
-
 
 ```text
                                Prover

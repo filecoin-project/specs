@@ -11,7 +11,7 @@ dashboardTests: 0
 
 ## Mining Blocks
 
-A miner registered with the storage power actor may begin generating and checking election tickets if it has proven storage that meets the [Minimum Miner Size](storage_power_consensus#minimum-miner-size) threshold requirement. 
+A miner registered with the storage power actor may begin generating and checking election tickets if it has proven storage that meets the [Minimum Miner Size](storage_power_consensus#minimum-miner-size) threshold requirement.
 
 In order to do so, the miner must be running chain validation, and be keeping track of the most recent blocks received. A miner's new block will be based on parents from the previous epoch.
 
@@ -19,7 +19,7 @@ In order to do so, the miner must be running chain validation, and be keeping tr
 
 Producing a block for epoch `H` requires waiting for the beacon entry for that epoch and using it to run `GenerateElectionProof`. If `WinCount` ≥ 1 (i.e., when the miner is elected), the same beacon entry is used to run `WinningPoSt`. Armed by the `ElectionProof` ticket (output of `GenerateElectionProof`) and the `WinningPoSt` proof, the miner can produce an new block.
 
-See [VM Interpreter](interpreter) for details of parent tipset evaluation, and [Block](block) for constraints on valid block header values. 
+See [VM Interpreter](interpreter) for details of parent tipset evaluation, and [Block](block) for constraints on valid block header values.
 
 To create a block, the eligible miner must compute a few fields:
 
@@ -48,12 +48,12 @@ messages which will succeed in execution and pay the most gas.
 
 The block reward is not evaluated when producing a block. It is paid when the block is included in a tipset in the following epoch.
 
-The block's signature ensures integrity of the block after propagation, since unlike many PoW blockchains, 
+The block's signature ensures integrity of the block after propagation, since unlike many PoW blockchains,
 a winning ticket is found independently of block generation.
 
 ### Block Broadcast
 
-An eligible miner propagates the completed block to the network using the [GossipSub](gossip_sub) `/fil/blocks` topic and, assuming everything was done correctly, 
+An eligible miner propagates the completed block to the network using the [GossipSub](gossip_sub) `/fil/blocks` topic and, assuming everything was done correctly,
 the network will accept it and other miners will mine on top of it, earning the miner a block reward.
 
 Miners should output their valid block as soon as it is produced, otherwise they risk other miners receiving the block after the EPOCH_CUTOFF and not including them in the current epoch.

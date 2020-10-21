@@ -1,5 +1,5 @@
 ---
-title: Formats and Serialization 
+title: Formats and Serialization
 weight: 4
 dashboardWeight: 1
 dashboardState: reliable
@@ -10,7 +10,7 @@ dashboardTests: 0
 # Data Formats and Serialization
 
 Filecoin seeks to make use of as few data formats as needed, with well-specced serialization rules to
-better protocol security through simplicity and enable interoperability amongst implementations of the 
+better protocol security through simplicity and enable interoperability amongst implementations of the
 Filecoin protocol.
 
 Read more on design considerations [here for CBOR-usage](https://github.com/filecoin-project/specs/issues/621) and [here for int types in Filecoin](https://github.com/filecoin-project/specs/issues/615).

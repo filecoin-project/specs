@@ -23,28 +23,26 @@ Economic analyses and models were developed to design, validate, and parameteriz
 
 The following table summarizes initial parameter recommendations for Filecoin. Monitoring, testing, validation and recommendations will continue to evolve and adapt. When changes to these parameters are due they will be announced and applied through FIPs.
 
-
-| **Parameter**  | **Value**   |
-| :------------- | :---------- |
-| Baseline Storage Amount Initial Value | 2.88888888 EB | 
-| Baseline Storage Amount Function  | 100% |
-| Percent simple minting vs baseline minting | 30% / 70% |
-| Reward delay and linear vesting period | 0 days |
-| Linear vesting period | 180 days |
-| Sector quality multipliers | Committed Capacity: 1x <br> Regular Deals: 1x <br> Verified Client Deals: 10x |
-| Initial pledge function | 20 days worth of block reward + <br> share of 30% qa power-normalized circulating supply | 
-| Initial Pledge Cap | 1FIL/32GiB QA Power |
-| Minimum sector lifetime | 180 days |
-| Maximum sector lifetime | 540 days |
-| Minimum deal duration | 180 days |
-| Maximum deal duration | 540 days |
-| Sector Fault Fee | 2.14 days worth of block reward|
-| Sector Fault Detection Fee | 1.5 days worth of estimated block reward |
-| Sector Termination Fee | Estimated number of days of block reward that a sector has earned; capped at 90 days |
-| Minimum Client Deal Collateral | 0 |
-| Minimum Provider Deal Collateral | share of 1% raw byte-normalised circulating supply |
-| Network Transaction Fee | Dynamic fee structure based on network congestion |
-
+| **Parameter**                              | **Value**                                                                                |
+| :----------------------------------------- | :--------------------------------------------------------------------------------------- |
+| Baseline Storage Amount Initial Value      | 2.88888888 EB                                                                            |
+| Baseline Storage Amount Function           | 100%                                                                                     |
+| Percent simple minting vs baseline minting | 30% / 70%                                                                                |
+| Reward delay and linear vesting period     | 0 days                                                                                   |
+| Linear vesting period                      | 180 days                                                                                 |
+| Sector quality multipliers                 | Committed Capacity: 1x <br> Regular Deals: 1x <br> Verified Client Deals: 10x            |
+| Initial pledge function                    | 20 days worth of block reward + <br> share of 30% qa power-normalized circulating supply |
+| Initial Pledge Cap                         | 1FIL/32GiB QA Power                                                                      |
+| Minimum sector lifetime                    | 180 days                                                                                 |
+| Maximum sector lifetime                    | 540 days                                                                                 |
+| Minimum deal duration                      | 180 days                                                                                 |
+| Maximum deal duration                      | 540 days                                                                                 |
+| Sector Fault Fee                           | 2.14 days worth of block reward                                                          |
+| Sector Fault Detection Fee                 | 1.5 days worth of estimated block reward                                                 |
+| Sector Termination Fee                     | Estimated number of days of block reward that a sector has earned; capped at 90 days     |
+| Minimum Client Deal Collateral             | 0                                                                                        |
+| Minimum Provider Deal Collateral           | share of 1% raw byte-normalised circulating supply                                       |
+| Network Transaction Fee                    | Dynamic fee structure based on network congestion                                        |
 
 ## Design Principles Justification
 

@@ -14,7 +14,7 @@ Payment channels are generally used as a mechanism to increase the scalability o
 
 The goal of the Payment Channel Actor specified here is to enable a series of off-chain microtransactions for applications built on top of Filecoin to be reconciled on-chain at a later time with fewer messages that involve the blockchain. Payment channels are already used in the Retrieval Market of the Filecoin Network, but their applicability is not constrained within this use-case only. Hence, here, we provide a detailed description of Payment Channels in the Filecoin network and then describe how Payment Channels are used in the specific case of the Filecoin Retrieval Market.
 
-The payment channel actor can be used to open long-lived, flexible payment channels between users. Filecoin payment channels are _uni-directional_ and can be funded by adding to their balance. Given the context of _uni-directional_ payment channels, we define the **payment channel sender** as the party that receives some service, creates the channel, deposits funds and _sends_ payments (hence the term _payment channel sender_). The *payment channel recipient*, on the other hand is defined as the party that provides services and *receives payment* for the services delivered (hence the term *payment channel recipient*). The fact that payment channels are uni-directional means that only the payment channel sender can add funds and the recipient can receive funds. Payment channels are identified by a unique address, as is the case with all Filecoin actors.
+The payment channel actor can be used to open long-lived, flexible payment channels between users. Filecoin payment channels are _uni-directional_ and can be funded by adding to their balance. Given the context of _uni-directional_ payment channels, we define the **payment channel sender** as the party that receives some service, creates the channel, deposits funds and _sends_ payments (hence the term _payment channel sender_). The _payment channel recipient_, on the other hand is defined as the party that provides services and _receives payment_ for the services delivered (hence the term _payment channel recipient_). The fact that payment channels are uni-directional means that only the payment channel sender can add funds and the recipient can receive funds. Payment channels are identified by a unique address, as is the case with all Filecoin actors.
 
 The payment channel state structure looks like this:
 
@@ -48,7 +48,6 @@ Before continuing with the details of the Payment Channel and its components and
 - `UpdateChannelState`: this is the process by which a voucher is redeemed, i.e., a voucher is submitted (but not cashed-out) on-chain.
 - `Settle`: this process starts closing the channel. It can be called by either the channel creator (sender) or the channel recipient.
 - `Collect`: with this process funds are eventually transferred from the payment channel sender to the payment channel recipient. This process incurs transaction/gas costs.
-
 
 ## Vouchers
 
@@ -101,14 +100,13 @@ Vouchers are signed by the party that creates them and are authenticated using a
 
 Once their transactions have completed, either party can choose to `Settle` (i.e., close) the channel. There is a 12hr period after `Settle` during which either party can submit any outstanding vouchers. Once the vouchers are submitted, either party can then call `Collect`. This will send the payment channel recipient the `ToPay` amount from the channel, and the channel sender (`From` address) will be refunded the remaining balance in the channel (if any).
 
-
 ## Lanes
 
 In addition, payment channels in Filecoin can be split into `lane`s created as part of updating the channel state with a payment `voucher`. Each lane has an associated `nonce` and amount of tokens it can be `redeemed` for. Lanes can be thought of as transactions for several different services provided by the channel recipient to the channel sender. The `nonce` plays the role of a sequence number of vouchers within a given lane, where a voucher with a higher nonce replaces a voucher with a lower nonce.
 
 Payment channel lanes allow for a lot of accounting between parties to be done off-chain and reconciled via single updates to the payment channel. The multiple lanes enable two parties to use a single payment channel to adjudicate multiple independent sets of payments.
 
-One example of such accounting is *merging of lanes*. When a pair of channel sender-recipient nodes have a payment channel established between them with many lanes, the channel recipient will have to pay gas cost for each one of the lanes in order to `Collect` funds. Merging of lanes allow the channel recipient to send a "merge" request to the channel sender to request merging of (some of the) lanes and consolidate the funds. This way, the recipient can reduce the overall gas cost. As an incentive for the channel sender to accept the merge lane request, the channel recipient can ask for a lower total value to balance out the gas cost. For instance, if the recipient has collected vouchers worth of 10 FIL from two lanes, say 5 from each, and the gas cost of submitting the vouchers for these funds is 2, then it can ask for 9 from the creator if the latter accepts to merge the two lanes. This way, the channel sender pays less overall for the services it received and the channel recipient pays less gas cost to submit the voucher for the services they provided.
+One example of such accounting is _merging of lanes_. When a pair of channel sender-recipient nodes have a payment channel established between them with many lanes, the channel recipient will have to pay gas cost for each one of the lanes in order to `Collect` funds. Merging of lanes allow the channel recipient to send a "merge" request to the channel sender to request merging of (some of the) lanes and consolidate the funds. This way, the recipient can reduce the overall gas cost. As an incentive for the channel sender to accept the merge lane request, the channel recipient can ask for a lower total value to balance out the gas cost. For instance, if the recipient has collected vouchers worth of 10 FIL from two lanes, say 5 from each, and the gas cost of submitting the vouchers for these funds is 2, then it can ask for 9 from the creator if the latter accepts to merge the two lanes. This way, the channel sender pays less overall for the services it received and the channel recipient pays less gas cost to submit the voucher for the services they provided.
 
 ## Lifecycle of a Payment Channel
 
@@ -126,17 +124,14 @@ Summarising, we have the following sequence:
 9. Either the channel sender or the channel recipient calls `Collect`.
 10. Funds are transferred to the channel recipient's account and any unclaimed balance goes back to channel sender.
 
-
 ## Payment Channels as part of the Filecoin Retrieval
- 
+
 Payment Channels are used in the Filecoin [Retrieval Market](retrieval_market) to enable efficient off-chain payments and accounting between parties for what is expected to be a series of microtransactions, as these occur during data retrieval.
 
 In particular, given that there is no proving method provided for the act of sending data from a provider (miner) to a client, there is no trust anchor between the two. Therefore, in order to avoid mis-behaviour, Filecoin is making use of payment channels in order to realise a step-wise "data transfer <-> payment" relationship between the data provider and the client (data receiver). Clients issue requests for data that miners are responding to. The miner is entitled to ask for interim payments, the volume-oriented interval for which is agreed in the Deal phase. In order to facilitate this process, the Filecoin client is creating a payment channel once the provider has agreed on the proposed deal. The client should also lock monetary value in the payment channel equal to the one needed for retrieval of the entire block of data requested. Every time a provider is completing transfer of the pre-specified amount of data, they can request a payment. The client is responding to this payment with a voucher which the provider can redeem (immediately or later), as per the process described earlier.
-
 
 {{<embed src="https://github.com/filecoin-project/lotus/blob/master/paychmgr/paych.go" lang="go" title="Payment Channel Implementation">}}
 
 {{<embed src="https://github.com/filecoin-project/specs-actors/blob/v0.9.12/actors/builtin/paych/paych_actor.go" lang="go" symbol="SignedVoucher">}}
 
 {{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/paych/paych_actor.go" lang="go" title="Payment Channel Actor">}}
-

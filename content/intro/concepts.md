@@ -1,5 +1,5 @@
 ---
-title: "Key Concepts"
+title: 'Key Concepts'
 audit: 2
 dashboardWeight: 0.2
 dashboardState: reliable

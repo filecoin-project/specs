@@ -1,5 +1,5 @@
 ---
-title: "GossipSub"
+title: 'GossipSub'
 weight: 6
 dashboardWeight: 2.0
 dashboardState: stable

@@ -21,10 +21,9 @@ IPLD is fundamentally comprised of three layers:
 
 Further details about IPLD can be found in its [specification](https://github.com/ipld/specs).
 
-
 ## The Data Model
 
-At its core, IPLD defines a [Data Model](https://github.com/ipld/specs/blob/master/data-model-layer/data-model.md) for representing data. The Data Model is designed for practical implementation across a wide variety of programming languages, while maintaining usability for content-addressed data and a broad range of generalized tools that interact with that data. 
+At its core, IPLD defines a [Data Model](https://github.com/ipld/specs/blob/master/data-model-layer/data-model.md) for representing data. The Data Model is designed for practical implementation across a wide variety of programming languages, while maintaining usability for content-addressed data and a broad range of generalized tools that interact with that data.
 
 The Data Model includes a range of standard primitive types (or "kinds"), such as booleans, integers, strings, nulls and byte arrays, as well as two recursive types: lists and maps. Because IPLD is designed for content-addressed data, it also includes a "link" primitive in its Data Model. In practice, links use the [CID](https://github.com/multiformats/cid) specification. IPLD data is organized into "blocks", where a block is represented by the raw, encoded data and its content-address, or CID. Every content-addressable chunk of data can be represented as a block, and together, blocks can form a coherent graph, or [Merkle DAG](https://docs.ipfs.io/guides/concepts/merkle-dag/).
 
@@ -33,6 +32,7 @@ Applications interact with IPLD via the Data Model, and IPLD handles marshalling
 ## IPLD in Filecoin
 
 IPLD is used in two ways in the Filecoin network:
+
 - All system datastructures are stored using DAG-CBOR (an IPLD codec). DAG-CBOR is a more strict subset of CBOR with a predefined tagging scheme, designed for storage, retrieval and traversal of hash-linked data DAGs. As compared to CBOR, DAG-CBOR can guarantee determinism.
 - Files and data stored on the Filecoin network are also stored using various IPLD codecs (not necessarily DAG-CBOR).
 

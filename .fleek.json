@@ -1,7 +1,7 @@
 {
-    "build": {
-        "image": "hugomrdias/puppeteer",
-        "command": "npm install && npm run build",
-        "publicDir": "public"
-    }
+  "build": {
+    "image": "hugomrdias/puppeteer",
+    "command": "npm install && npm run build",
+    "publicDir": "public"
+  }
 }

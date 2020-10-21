@@ -31,7 +31,7 @@ This circuit proves that given a Merkle root `CommD`, `CommRLast`, and `commRSta
 
 ### Public Parameters
 
-*Parameters that are embeded in the circuits or used to generate the circuit*
+_Parameters that are embeded in the circuits or used to generate the circuit_
 
 - `LAYERS : UInt`: Number of DRG layers.
 - `LAYER_CHALLENGES : [LAYERS]UInt`: Number of challenges per layer.
@@ -42,23 +42,23 @@ This circuit proves that given a Merkle root `CommD`, `CommRLast`, and `commRSta
 
 ### Public Inputs
 
-*Inputs that the prover uses to generate a SNARK proof and that the verifier uses to verify it*
+_Inputs that the prover uses to generate a SNARK proof and that the verifier uses to verify it_
 
 - `ReplicaId : Fr`: A unique identifier for the replica.
 - `CommD : Fr`: the Merkle tree root hash of the original data (input to the first layer).
 - `CommR : Fr`: The Merkle tree root hash of the final replica (output of the last layer).
 - `InclusionPath : [LAYERS][]Fr`: Inclusion path for the challenged data and replica leaf.
-- `ParentInclusionPath : [LAYERS][][PARENT_COUNT]Fr`:  Inclusion path for the parents of the corresponding `InclusionPath[l][c]`.
+- `ParentInclusionPath : [LAYERS][][PARENT_COUNT]Fr`: Inclusion path for the parents of the corresponding `InclusionPath[l][c]`.
 
 Design notes:
 
 - `CommRLast` is a private input used during during Proof-of-Spacetime.
-   To enable this, the prover must store `CommC` and use it to prove that `CommRLast` is included in `CommR` (TODO: define 'included' language.)
+  To enable this, the prover must store `CommC` and use it to prove that `CommRLast` is included in `CommR` (TODO: define 'included' language.)
 - `InclusionPath` and `ParentInclusionPath`: Each layer `l` has `LAYER_CHALLENGES[l]` inclusion paths.
 
 ### Private Inputs
 
-*Inputs that the prover uses to generate a SNARK proof, these are not needed by the verifier to verify the proof*
+_Inputs that the prover uses to generate a SNARK proof, these are not needed by the verifier to verify the proof_
 
 - `CommR : [LAYERS-1]Fr`: Commitment of the encoded data at each layer.
 
@@ -152,7 +152,6 @@ for l in range LAYERS {
   // TODO check if we need to do packing/unpacking
 }
 ```
-
 
 ## Verification of Offline PoRep Proof
 

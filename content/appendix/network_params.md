@@ -16,11 +16,10 @@ Most are generated/finalized using the [orient framework](https://github.com/fil
 ⚠️ **WARNING:** Filecoin is not yet launched, and we are finishing protocol spec and implementations. Parameters are set here as placeholders and highly likely to change to fit product and security requirements.
 {{</hint>}}
 
-
 ## Orient parameters
 
 | LAMBDA | SPACEGAP | BLOCK-SIZE-KIB | SECTOR-SIZE-GIB |
-|--------|----------|----------------|-----------------|
+| ------ | -------- | -------------- | --------------- |
 | 10     | 0.03     | 2.6084006      | 1024            |
 | 10     | 0.03     | 2.9687543      | 1024            |
 | 10     | 0.03     | 4.60544        | 256             |

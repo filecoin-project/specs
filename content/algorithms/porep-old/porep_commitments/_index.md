@@ -1,5 +1,5 @@
 ---
-title: "PoRep Commitments"
+title: 'PoRep Commitments'
 weight: 2
 ---
 

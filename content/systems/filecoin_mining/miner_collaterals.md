@@ -54,6 +54,6 @@ However, the protocol should provide liquidity for miners to support their minin
 
 In general, fault fees are slashed first from the soonest-to-vest unvested block rewards followed by the minerʼs account balance. When a minerʼs balance is insufficient to cover their minimum requirements, their ability to participate in consensus, win block rewards, and grow storage power will be restricted until their balance is restored. Overall, this reduces the initial pledge requirement and creates a sufficient economic deterrent for faults without slashing the miner's balance for every penalty.
 
-## Storage Deal Collateral 
+## Storage Deal Collateral
 
 The third form of collateral is provided by the storage provider to collateralize deals. See the [Storage Market Actor](storage_market_actor) for further details on the Storage Deal Collateral.

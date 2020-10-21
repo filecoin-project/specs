@@ -1,6 +1,6 @@
 ---
-title: "Stacked DRG PoRep"
-description: "Stacked DRG Proof of Replication Specification"
+title: 'Stacked DRG PoRep'
+description: 'Stacked DRG Proof of Replication Specification'
 
 bookCollapseSection: true
 weight: 3
@@ -15,6 +15,7 @@ dashboardTests: 0
 <!--lint disable -->
 
 {{< plain hidden >}}
+
 $$
 \gdef\createporepbatch{\textsf{create\_porep\_batch}}
 \gdef\GrothProof{\textsf{Groth16Proof}}
@@ -373,6 +374,7 @@ $$
 \gdef\ColumnDigest{\textsf{ColumnDigest}}
 \gdef\encode{\textsf{encode}}
 $$
+
 {{< /plain >}}
 
 <!--lint enable -->
@@ -382,8 +384,9 @@ $$
 ## Merkle Proofs
 
 **Implementation:**
-* [`storage_proofs::merkle::MerkleTreeWrapper::gen_proof()`](https://github.com/filecoin-project/rust-fil-proofs/blob/e4e3375158ed5d3be4635c47a826812bc9e1a459/storage-proofs/core/src/merkle/tree.rs#L92)
-* [`merkle_light::merkle::MerkleTree::gen_proof()`](https://github.com/filecoin-project/merkle_light/blob/64a468807c594d306d12d943dd90cc5f88d0d6b0/src/merkle.rs#L918)
+
+- [`storage_proofs::merkle::MerkleTreeWrapper::gen_proof()`](https://github.com/filecoin-project/rust-fil-proofs/blob/e4e3375158ed5d3be4635c47a826812bc9e1a459/storage-proofs/core/src/merkle/tree.rs#L92)
+- [`merkle_light::merkle::MerkleTree::gen_proof()`](https://github.com/filecoin-project/merkle_light/blob/64a468807c594d306d12d943dd90cc5f88d0d6b0/src/merkle.rs#L918)
 
 **Additional Notation:**
 
@@ -413,7 +416,8 @@ $\line{9}{\bi}{\return \BinTreeProof_c \thin \{\ \leaf, \thin \root, \thin \path
 ```
 
 **Code Comments:**
-* **Line 5:** Calculates the node index in layer `$l$` of the node that the verifier calculated using the previous lath element (or the `$\BinTreeProof_c\dot\leaf$` if `$l = 0$`). Note that `$c \gg l \equiv \lfloor c / 2^l \rfloor \thin$`.
+
+- **Line 5:** Calculates the node index in layer `$l$` of the node that the verifier calculated using the previous lath element (or the `$\BinTreeProof_c\dot\leaf$` if `$l = 0$`). Note that `$c \gg l \equiv \lfloor c / 2^l \rfloor \thin$`.
 
 ### OctTreeProofs
 
@@ -448,9 +452,10 @@ $\line{11}{}{\return \OctTreeProof_c \thin \{\ \leaf, \thin \root, \thin \path\ 
 ```
 
 **Code Comments:**
-* **Line 5:** Calculates the node index in layer `$l$` of the node that the verifier calculated themselves using the previous path element (or `$\OctTreeProof_c\dot\leaf$` if `$l = 0$`). Note that `$c \gg (3 * l) \equiv \lfloor c / 8^l \rfloor \thin$`.
-* **Line 7-8:** Calculates the indexes in tree layer `$l$` of the first and last (both inclusive) Merkle hash inputs for layer `$l$`'s path element.
-* **Line 9:** Copies the 7 Merkle hash inputs that will be in layer `$l$`'s path element `$\OctTreeProof\dot\path[l]\dot\siblings \thin$`.
+
+- **Line 5:** Calculates the node index in layer `$l$` of the node that the verifier calculated themselves using the previous path element (or `$\OctTreeProof_c\dot\leaf$` if `$l = 0$`). Note that `$c \gg (3 * l) \equiv \lfloor c / 8^l \rfloor \thin$`.
+- **Line 7-8:** Calculates the indexes in tree layer `$l$` of the first and last (both inclusive) Merkle hash inputs for layer `$l$`'s path element.
+- **Line 9:** Copies the 7 Merkle hash inputs that will be in layer `$l$`'s path element `$\OctTreeProof\dot\path[l]\dot\siblings \thin$`.
 
 ### Proof Root Validation
 
@@ -459,8 +464,9 @@ The functions `$\bintreeproofisvalid$` and `$\octtreeproofisvalid$` are used to 
 Note that these functions do not verify that a `$\BinTreeProof\dot\path$` or an `$\OctTreeProof\dot\path$` correspond to the expected Merkle challenge `$c$`. To verify that a proof path is consistent with `$c$`, see the psuedocode functions `$\calculatebintreechallenge$` and `$\calculateocttreechallenge$`.
 
 **Implementation:**
-* [`storage_proofs::core::merkle::proof::SingleProof::verify()`](https://github.com/filecoin-project/rust-fil-proofs/blob/f75804c503d9b97a2b02ef3ea2e5d44e8e2c6470/storage-proofs/core/src/merkle/proof.rs#L540)
-* [`storage_proofs::core::merkle::proof::InclusionPath::root()`](https://github.com/filecoin-project/rust-fil-proofs/blob/f75804c503d9b97a2b02ef3ea2e5d44e8e2c6470/storage-proofs/core/src/merkle/proof.rs#L189)
+
+- [`storage_proofs::core::merkle::proof::SingleProof::verify()`](https://github.com/filecoin-project/rust-fil-proofs/blob/f75804c503d9b97a2b02ef3ea2e5d44e8e2c6470/storage-proofs/core/src/merkle/proof.rs#L540)
+- [`storage_proofs::core::merkle::proof::InclusionPath::root()`](https://github.com/filecoin-project/rust-fil-proofs/blob/f75804c503d9b97a2b02ef3ea2e5d44e8e2c6470/storage-proofs/core/src/merkle/proof.rs#L189)
 
 ```text
 $\overline{\underline{\Function \bintreeproofisvalid(\proof: \BinTreeProof) \rightarrow \Bool}\thin}$
@@ -507,7 +513,6 @@ $\line{5}{\bi}{\mathrlap{\llcorner c \lrcorner_{8, \Le}: [8]^{[\hspace{1pt} \log
 $\line{6}{\bi}{\mathrlap{\llcorner c \lrcorner_{2, \Le}: \Bit^{[\hspace{1pt} \log_2(N_\nodes) \hspace{1pt}]}}\hphantom{\llcorner c \lrcorner_{2, \Le}: \Bit^{[\hspace{1pt} \log_2(N_\nodes) \hspace{1pt}]}} = \big\|_{\pathelem \hspace{1pt} \in \hspace{1pt} \OctTreeProof_c\dot\path} \thin \llcorner \pathelem\dot\missing \lrcorner_{2, \Le}}$
 ```
 
-
 **Implementation:** [`storage_proofs::merkle::MerkleProofTrait::path_index()`](https://github.com/filecoin-project/rust-fil-proofs/blob/f75804c503d9b97a2b02ef3ea2e5d44e8e2c6470/storage-proofs/core/src/merkle/proof.rs#L89)
 
 **Additional Notation:**
@@ -535,7 +540,7 @@ $\line{1}{\bi}{\return \sum_{l \in [\OctTreeDepth]}{\path[l]\dot\missing * 8^l}}
 
 ## Stacked Depth Robust Graphs
 
-Filecoin utilizes the topological properties of depth robust graphs (DRG's) to build a sequential and regeneration resistant encoding scheme. We stack `$N_\layers$` of DRG's, each containing `$N_\nodes$` nodes, on top of one another and connect each adjacent pair of DRG layers via the edges of bipartite expander. The source layer of each expander is the DRG at layer `$l$` and the sink layer is the DRG at layer `$l + 1$`. The resulting graph is termed a Stacked-DRG. 
+Filecoin utilizes the topological properties of depth robust graphs (DRG's) to build a sequential and regeneration resistant encoding scheme. We stack `$N_\layers$` of DRG's, each containing `$N_\nodes$` nodes, on top of one another and connect each adjacent pair of DRG layers via the edges of bipartite expander. The source layer of each expander is the DRG at layer `$l$` and the sink layer is the DRG at layer `$l + 1$`. The resulting graph is termed a Stacked-DRG.
 
 For every node `$v \in [N_\nodes]$` in the DRG at layer `$l \in [N_\layers]$`, we generate `$d_\drg$` number of DRG parent for `$v$` in layer `$l$`. DRG parents are generated using the [Bucket Sampling algorithm](https://eprint.iacr.org/2017/443.pdf). For every node `$v$` in layers `$l > 0$` we generate `$d_\exp$` number of expander parents for `$v$` where the parents are in layer `$l - 1$`. Expander parents are generated using a psuedorandom permutation (PRP) `$\pi: [N_\nodes] \rightarrow [N_\nodes]$` which maps a node in the DRG layer `$l$` to a node in the the DRG layer `$l - 1$`. The psudeorandom permutation is generated using a `$N_\feistelrounds$`-round Feistel network whose round function is the keyed hash function `$\Blake$`, where round keys are specified by the constant `$\FeistelKeys$`.
 
@@ -680,9 +685,10 @@ $\line{15}{}{\quad \input: \u{64}_{(34)} = \output}$
 ```
 
 **Code Comments:**
-* **Line 1:** Loops forever until the `$\textsf{return}$` statement is reached (loops until `$\output$` is a valid `$\ExpEdgeIndex$`).
-* **Lines 13-14:** Checks if `$\output$` is a valid `$\ExpEdgeIndex$` (true iff. the most-significant bit, the 34th bit, is 0), otherwise the Feistel network is rerun.
-* **Line 15:** Signifies that the next Feistel network's input has it's most-significant, its 34th bit, set to 1 (as opposed to the argument `$\input: \ExpEdgeIndex \equiv \u{64}_{(33)}$`, which does not have its 34th bit set).
+
+- **Line 1:** Loops forever until the `$\textsf{return}$` statement is reached (loops until `$\output$` is a valid `$\ExpEdgeIndex$`).
+- **Lines 13-14:** Checks if `$\output$` is a valid `$\ExpEdgeIndex$` (true iff. the most-significant bit, the 34th bit, is 0), otherwise the Feistel network is rerun.
+- **Line 15:** Signifies that the next Feistel network's input has it's most-significant, its 34th bit, set to 1 (as opposed to the argument `$\input: \ExpEdgeIndex \equiv \u{64}_{(33)}$`, which does not have its 34th bit set).
 
 ### All Parents
 
@@ -769,8 +775,9 @@ $\line{7}{\bi}{\return \Labels}$
 ```
 
 **Code Comments:**
-* **Lines 2-3:** Label the first Stacked-DRG layer.
-* **Lines 4-6:** Label the remaining Stacked-DRG layers.
+
+- **Lines 2-3:** Label the first Stacked-DRG layer.
+- **Lines 4-6:** Label the remaining Stacked-DRG layers.
 
 The function `$\labelwithdrgparents$` is used to label a node `$v$` in the first Stacked-DRG layer `$l_0 = 0 \thin$`.
 
@@ -838,7 +845,7 @@ $\line{6}{\bi}{\return \OctTree\cc\new(\leaves)}$
 
 ## Encoding
 
-Encoding is the process by which a sector `$D: \Safe^{[N_\nodes]}$` is transformed into its encoding `$R: \Fqsafe^{[N_\nodes]}$`. The encoding function is *node-wise* prime field addition `$\oplus$`, where "node-wise" means that every distinct `$\Safe$` slice `$D_i \in D$` is discretely encoded.
+Encoding is the process by which a sector `$D: \Safe^{[N_\nodes]}$` is transformed into its encoding `$R: \Fqsafe^{[N_\nodes]}$`. The encoding function is _node-wise_ prime field addition `$\oplus$`, where "node-wise" means that every distinct `$\Safe$` slice `$D_i \in D$` is discretely encoded.
 
 `$D$` is viewed as an array of `$N_\nodes$` distinct byte arrays `$D_i: \Safe$`. Sector preprocessing ensures that each `$D_i$` is a valid `$\Safe$` (represents a valid 254-bit or less field element `$\Fqsafe)$`.
 
@@ -854,7 +861,7 @@ $\bi K: \Label^{[N_\nodes]} = \Labels[N_\layers - 1][:]$
 $\bi K_i: \Label_{i, l_\last} = \Labels[N_\layers - 1][i]$
 ```
 
-`$D$` is encoded into `$R$` via *node-wise* field addition. Each `$D_i \in D$` is interpreted as a field element and encoded into `$R_i$` by adding `$K_i$` to `$D_i$`. The resulting array of field elements produced via field addition is the encoding `$R$` of `$D$`.
+`$D$` is encoded into `$R$` via _node-wise_ field addition. Each `$D_i \in D$` is interpreted as a field element and encoded into `$R_i$` by adding `$K_i$` to `$D_i$`. The resulting array of field elements produced via field addition is the encoding `$R$` of `$D$`.
 
 ```text
 $\bi R: \Fq^{[N_\nodes]} = [R_0, \ldots, R_{N_\nodes - 1}]$
@@ -980,11 +987,11 @@ A PoRep prover generates a `$\PorepPartitionProof_k$` for each partition `$k$` i
 
 A single partition proof generated by a PoRep prover shows that:
 
-* The prover knows a valid Merkle path for `$c$` in `$\TreeD$` that is consistent with the public `$\CommD$`.
-* The prover knows valid Merkle paths for `$c$` in trees `$\TreeC$` and `$\TreeR$` which are consistent with the committed to `$\CommCR$`.
-* The prover knows `$c$`'s labeling in each Stacked-DRG layer `$\Column_c = \ColumnProof_c\dot\column \thin$` by hashing `$\Column_c$` into a leaf in `$\TreeC$` that is consistent with `$\CommCR$`.
-* For each layer `$l$` in the Stacked-DRG, the prover knows `$c$`'s labeling preimage `$\ParentLabels$` (taken from the columns in `$\ParentColumnProofs$`), such that the parent labels are consistent with `$\CommCR$`.
-* The prover knows the key `$K_c$` used to encode `$D_c$` into `$R_c$` (where `$D_c$`, `$K_c$`, and `$R_c$` were already shown to be consistent with the commitments `$\CommD$` and `$\CommCR$`).
+- The prover knows a valid Merkle path for `$c$` in `$\TreeD$` that is consistent with the public `$\CommD$`.
+- The prover knows valid Merkle paths for `$c$` in trees `$\TreeC$` and `$\TreeR$` which are consistent with the committed to `$\CommCR$`.
+- The prover knows `$c$`'s labeling in each Stacked-DRG layer `$\Column_c = \ColumnProof_c\dot\column \thin$` by hashing `$\Column_c$` into a leaf in `$\TreeC$` that is consistent with `$\CommCR$`.
+- For each layer `$l$` in the Stacked-DRG, the prover knows `$c$`'s labeling preimage `$\ParentLabels$` (taken from the columns in `$\ParentColumnProofs$`), such that the parent labels are consistent with `$\CommCR$`.
+- The prover knows the key `$K_c$` used to encode `$D_c$` into `$R_c$` (where `$D_c$`, `$K_c$`, and `$R_c$` were already shown to be consistent with the commitments `$\CommD$` and `$\CommCR$`).
 
 ```text
 $\overline{\mathbf{Function:}\ \createvanillaporepproof(\ }$
@@ -1031,8 +1038,9 @@ $\line{14}{}{\return \PorepPartitionProof_{R, k}}$
 ### Verification
 
 **Implementation:**
-* [`storage_proofs::porep::stacked::vanilla::proof_scheme::StackedDrg::verify_all_partitions()`](https://github.com/filecoin-project/rust-fil-proofs/blob/c58918b9b2f749a5db40a7952d29a6501c765e13/storage-proofs/porep/src/stacked/vanilla/proof_scheme.rs#L82)
-* [`storage_proofs::porep::stacked::vanilla::params::Proof::verify()`](https://github.com/filecoin-project/rust-fil-proofs/blob/447a8ba76da224b8b5f9b7b8dd624ba9a6a107a6/storage-proofs/porep/src/stacked/vanilla/params.rs#L191)
+
+- [`storage_proofs::porep::stacked::vanilla::proof_scheme::StackedDrg::verify_all_partitions()`](https://github.com/filecoin-project/rust-fil-proofs/blob/c58918b9b2f749a5db40a7952d29a6501c765e13/storage-proofs/porep/src/stacked/vanilla/proof_scheme.rs#L82)
+- [`storage_proofs::porep::stacked::vanilla::params::Proof::verify()`](https://github.com/filecoin-project/rust-fil-proofs/blob/447a8ba76da224b8b5f9b7b8dd624ba9a6a107a6/storage-proofs/porep/src/stacked/vanilla/params.rs#L191)
 
 ```text
 $\overline{\Function\ \verifyvanillaporepproof(}$
@@ -1115,7 +1123,6 @@ The node index of a DRG or expander graph parent for `$c$`.
 `$\parentlabels': \Label^{[N_\parentlabels]}$`\
 The set of parent labels repeated until its length is `$N_\parentlabels$`.
 
-
 ```text
 $\overline{\Function: \createlabel_\V( \qquad\ }$
 $\quad \ReplicaID,$
@@ -1148,8 +1155,9 @@ $\line{11}{}{\return \Sha{254}(\preimage) \as \Fq}$
 ## PoRep Circuit
 
 **Implementation:**
-* [`storage_proofs::porep::stacked::circuit::proof::StackedCircuit::synthesize()`](https://github.com/filecoin-project/rust-fil-proofs/blob/master/storage-proofs/porep/src/stacked/circuit/proof.rs#L77)
-* [`storage_proofs::porep::stacked::circuit::params::Proof::synthesize()`](https://github.com/filecoin-project/rust-fil-proofs/blob/master/storage-proofs/porep/src/stacked/circuit/params.rs#L77)
+
+- [`storage_proofs::porep::stacked::circuit::proof::StackedCircuit::synthesize()`](https://github.com/filecoin-project/rust-fil-proofs/blob/master/storage-proofs/porep/src/stacked/circuit/proof.rs#L77)
+- [`storage_proofs::porep::stacked::circuit::params::Proof::synthesize()`](https://github.com/filecoin-project/rust-fil-proofs/blob/master/storage-proofs/porep/src/stacked/circuit/params.rs#L77)
 
 **Additional Notation:**
 
@@ -1280,14 +1288,15 @@ $\line{52}{}{\return \cs}$
 ```
 
 **Code Comments:**
-* **Lines 9-10:** Computes `$\CommCR^\dagger$` within the circuit from the witnessed commitments and assert that `$\CommCR^\dagger$` is equal to the public input `$\CommCR$`.
-* **Lines 15-16:** Adds the packed challenge `$c$` as a public input, used when calculating each challenge `$c$`'s column within the circuit.
-* **Lines 17-19:** Verifies `$c$`'s `$\TreeDProof_c$` by computing `$\CommD_c^\dagger$` within the circuit and asserting that it is equal to the public input `$\CommD$`.
-* **Lines 20-26:** Allocates each of `$c$`'s parent's `$u \in \mathbf{u}_\total$` label and checks that `$u$`'s `$\ColumnProof_u$` is consistent with the previously verified `$\CommC^\dagger \mapsto \CommC \thin$`.
-* **Lines 27-44:** Calculates challenge `$c$`'s label in each Stacked-DRG layer `$l$` within the circuit using each parent's allocated column.
-* **Lines 45-46:** Verifies that `$c$`'s `$\TreeRProof_c$` is consistent with the previously verified `$\CommR^\dagger \mapsto \CommR$`.
-* **Lines 47-48:** Checks that the calculated encoding key `$K_c^\dagger$` for `$c$` encodes the previously verified sector and replica tree leaves `$D_c^\dagger \mapsto D_c$` into `$R_c^\dagger \mapsto R_c$`.
-* **Lines 49-51:** Verifies `$c$`'s `$\ColumnProof_c$` against the previously verified `$\CommC$`.
+
+- **Lines 9-10:** Computes `$\CommCR^\dagger$` within the circuit from the witnessed commitments and assert that `$\CommCR^\dagger$` is equal to the public input `$\CommCR$`.
+- **Lines 15-16:** Adds the packed challenge `$c$` as a public input, used when calculating each challenge `$c$`'s column within the circuit.
+- **Lines 17-19:** Verifies `$c$`'s `$\TreeDProof_c$` by computing `$\CommD_c^\dagger$` within the circuit and asserting that it is equal to the public input `$\CommD$`.
+- **Lines 20-26:** Allocates each of `$c$`'s parent's `$u \in \mathbf{u}_\total$` label and checks that `$u$`'s `$\ColumnProof_u$` is consistent with the previously verified `$\CommC^\dagger \mapsto \CommC \thin$`.
+- **Lines 27-44:** Calculates challenge `$c$`'s label in each Stacked-DRG layer `$l$` within the circuit using each parent's allocated column.
+- **Lines 45-46:** Verifies that `$c$`'s `$\TreeRProof_c$` is consistent with the previously verified `$\CommR^\dagger \mapsto \CommR$`.
+- **Lines 47-48:** Checks that the calculated encoding key `$K_c^\dagger$` for `$c$` encodes the previously verified sector and replica tree leaves `$D_c^\dagger \mapsto D_c$` into `$R_c^\dagger \mapsto R_c$`.
+- **Lines 49-51:** Verifies `$c$`'s `$\ColumnProof_c$` against the previously verified `$\CommC$`.
 
 ## PoSt Challenges
 
@@ -1323,14 +1332,16 @@ $\line{4}{\bi}{\return \digestint \MOD N_\nodes}$
 ```
 
 **Code Comments:**
-* **Line 4:** modding by `$N_\nodes$` takes the 64-bit `$\digestint$` to a 32-bit node index `$\NodeIndex$`.
+
+- **Line 4:** modding by `$N_\nodes$` takes the 64-bit `$\digestint$` to a 32-bit node index `$\NodeIndex$`.
 
 ## Vanilla PoSt
 
 ### Proving
 
 **Implementation:**
-* [`storage_proofs::post::fallback::vanilla::FallbackPoSt::prove()`](https://github.com/filecoin-project/rust-fil-proofs/blob/8e8306c942c22571bc784f7536f1704058c45119/storage-proofs/post/src/fallback/vanilla.rs#L249)
+
+- [`storage_proofs::post::fallback::vanilla::FallbackPoSt::prove()`](https://github.com/filecoin-project/rust-fil-proofs/blob/8e8306c942c22571bc784f7536f1704058c45119/storage-proofs/post/src/fallback/vanilla.rs#L249)
 
 **Additional Notation:**
 
@@ -1382,7 +1393,8 @@ $\line{16}{}{\return \PartitionProof_{k \thin \aww}}$
 ```
 
 **Code Comments:**
-* **Lines 13-15:** If the prover does not have enough replicas to fill an entire PoSt partition proof, pad the partition proof with copies of the last distinct replica's `$\PostReplicaProof_R \thin$`.
+
+- **Lines 13-15:** If the prover does not have enough replicas to fill an entire PoSt partition proof, pad the partition proof with copies of the last distinct replica's `$\PostReplicaProof_R \thin$`.
 
 ### Verification
 
@@ -1437,7 +1449,8 @@ $\line{15}{}{\quad\quad \assert(\octtreeproofisvalid(\TreeRProof^\dagger))}$
 ```
 
 **Code Comments:**
-* **Line 13:** The dagger is removed from `$\CommR^\dagger$` (producing `$\CommR$`) because `$\CommR^\dagger$` was verified to be consistent with the committed to `$\CommCR$` (Line 8).
+
+- **Line 13:** The dagger is removed from `$\CommR^\dagger$` (producing `$\CommR$`) because `$\CommR^\dagger$` was verified to be consistent with the committed to `$\CommCR$` (Line 8).
 
 ## PoSt Circuit
 
@@ -1527,8 +1540,9 @@ $\line{10}{}{\return \curr_\auxb}$
 ```
 
 **Code Comments:**
-* **Line 9:** A public input is added to `$\cs$` for the Merkle challenge `$c$` corresponding to the Merkle path which was used to calculate the returned root.
-* **Line 10:** The final value for `$\curr_\auxb$` is the Merkle root calculated from `$\leaf_\auxb$` and `$\path$`.
+
+- **Line 9:** A public input is added to `$\cs$` for the Merkle challenge `$c$` corresponding to the Merkle path which was used to calculate the returned root.
+- **Line 10:** The final value for `$\curr_\auxb$` is the Merkle root calculated from `$\leaf_\auxb$` and `$\path$`.
 
 ### OctTree Root Gadget
 
@@ -1571,13 +1585,14 @@ $\line{17}{}{\return \curr_\auxb}$
 ```
 
 **Code Comments:**
-* **Line 1:** Not a reallocation of `$\leaf_\auxb$` within `$\cs$`, but is an in-memory copy.
-* **Lines 4-8:** Witnesses the 3-bit missing index for each path element. The first iteration `$i = 0$` corresponds to the least significant bit in `$\missing$`.
-* **Lines 9-12:** Witnesses each path element's 7 Merkle hash inputs (the exlucded 8-th Merkle hash input is the calculated hash input `$\curr_\auxb$` for this tree depth).
-* **Line 13:** Creates the Merkle hash inputs array by inserting `$\curr$` into `$\siblings$` at index `$\missing$`.
-* **Line 14:** Hashes the 8 Merkle hash inputs.
-* **Line 16:** Adds the challenge `$c$` as a public input.
-* **Line 17:** Returns the calculated root.
+
+- **Line 1:** Not a reallocation of `$\leaf_\auxb$` within `$\cs$`, but is an in-memory copy.
+- **Lines 4-8:** Witnesses the 3-bit missing index for each path element. The first iteration `$i = 0$` corresponds to the least significant bit in `$\missing$`.
+- **Lines 9-12:** Witnesses each path element's 7 Merkle hash inputs (the exlucded 8-th Merkle hash input is the calculated hash input `$\curr_\auxb$` for this tree depth).
+- **Line 13:** Creates the Merkle hash inputs array by inserting `$\curr$` into `$\siblings$` at index `$\missing$`.
+- **Line 14:** Hashes the 8 Merkle hash inputs.
+- **Line 16:** Adds the challenge `$c$` as a public input.
+- **Line 17:** Returns the calculated root.
 
 ### Encoding Gadget
 
@@ -1653,11 +1668,12 @@ $\line{11}{}{\return \label_\auxb}$
 ```
 
 **Code Comments:**
-* **Line 3:** The constant `$9984 = (2 + N_\parentlabels) * \ell_\block^\bit = (2 + 37) * 256 \thin$`. The constant `$160 = \ell_\block^\bit - \len(\layerindex) - \len(\nodeindex) = 256 - 32 - 64 \thin$`.
-* **Lines 4-5:** The constant `$256 = \ell_\block^\bit \thin$`.
-* **Lines 5-6:** These are not reallocations.
-* **Lines 6-7:** The labeling function is `$\Sha{254}$` not `$\Sha{256}$`.
-* **Lines 6,9:** The constant `$254 = \ell_{\Fq, \safe}^\bit \thin$`.
+
+- **Line 3:** The constant `$9984 = (2 + N_\parentlabels) * \ell_\block^\bit = (2 + 37) * 256 \thin$`. The constant `$160 = \ell_\block^\bit - \len(\layerindex) - \len(\nodeindex) = 256 - 32 - 64 \thin$`.
+- **Lines 4-5:** The constant `$256 = \ell_\block^\bit \thin$`.
+- **Lines 5-6:** These are not reallocations.
+- **Lines 6-7:** The labeling function is `$\Sha{254}$` not `$\Sha{256}$`.
+- **Lines 6,9:** The constant `$254 = \ell_{\Fq, \safe}^\bit \thin$`.
 
 ### Little-Endian Bits Gadget
 
@@ -1688,7 +1704,8 @@ $\line{9}{\bi}{\return \bits_{[\auxb, \Le]}}$
 ```
 
 **Code Comments:**
-* **Line 2:** This will pad `$n - \lceil \log_2(\value\dot\int) \rceil$` zero bits onto the most significant end of `$\llcorner \int \lrcorner_{2, \Le} \thin$`.
+
+- **Line 2:** This will pad `$n - \lceil \log_2(\value\dot\int) \rceil$` zero bits onto the most significant end of `$\llcorner \int \lrcorner_{2, \Le} \thin$`.
 
 ### Pack Bits as Input Gadget
 
@@ -1720,9 +1737,9 @@ $\bi (\y - \x) * (\bit) = (\y - \pick)$
 This table shows that for `$\bit \in \Bit$` and `$\x, \y \in \Fq$` that the constraint is satisfied for the outputted values of `$\pick$`.
 
 | `$\bit$` | `$\pick$` | `$(\y - \x) * (\bit) = (\y - \pick)$` |
-|--------|---------|------------------------------------|
-| `$1$`    | `$\x$`     | `$(\y-\x) * (1) = (\y-\x)$` |
-| `$0$`    | `$\y$`     | `$(\y-\x) * (0) = (\y-\y)$` |
+| -------- | --------- | ------------------------------------- |
+| `$1$`    | `$\x$`    | `$(\y-\x) * (1) = (\y-\x)$`           |
+| `$0$`    | `$\y$`    | `$(\y-\x) * (0) = (\y-\y)$`           |
 
 ```text
 $\overline{\Function \pickgadget( \qquad\quad\bi}$
@@ -1786,6 +1803,7 @@ $\pick_{\auxb, i(b_0)}$
 $\pick_{\auxb, i(b_0, b_1)}$
 $\pick_{\auxb, i(b_0, b_1, b_2)}$
 ```
+
 The pick for the `$i^{th}$` element of the inserted array based upon the value of the first bit (least-significant), first and second bits, and the first, second and third bits respectively.
 
 ```text
@@ -1796,6 +1814,7 @@ $\and_{(b_0, b_1)} \equiv \and_{\auxb \thin (b_0, b_1)}$
 $\arr[i] \equiv \arr_{[\aap]}[i]$
 $\arr'[i] \equiv \arr'_{[\auxb]}[i]$
 ```
+
 For ease of notation the subscripts `$_\auxb$` and `$_\aap$` are left off everywhere except in the function signature and when allocating of a value within the circuit.
 
 ```text
@@ -1863,12 +1882,12 @@ $\bi (\x) * (\y) = (\and)$
 
 This table shows the satisfiablilty of the constraint for all values of `$\x, \y \in \Bit$` and corresponding outputted values of `$\and \in \Bit$`.
 
-| `$\x$`   | `$\y$`    | `$\and$` | `$(\x) * (\y) = (\and)$` |
-|--------|---------|--------|-----------------------|
-| `$0$`    | `$0$`     | `$0$`      | `$(0) * (0) = (0)$` |
-| `$1$`    | `$0$`     | `$0$`      | `$(1) * (0) = (0)$` |
-| `$0$`    | `$1$`     | `$0$`      | `$(0) * (1) = (0)$` |
-| `$1$`    | `$1$`     | `$1$`      | `$(1) * (1) = (1)$` |
+| `$\x$` | `$\y$` | `$\and$` | `$(\x) * (\y) = (\and)$` |
+| ------ | ------ | -------- | ------------------------ |
+| `$0$`  | `$0$`  | `$0$`    | `$(0) * (0) = (0)$`      |
+| `$1$`  | `$0$`  | `$0$`    | `$(1) * (0) = (0)$`      |
+| `$0$`  | `$1$`  | `$0$`    | `$(0) * (1) = (0)$`      |
+| `$1$`  | `$1$`  | `$1$`    | `$(1) * (1) = (1)$`      |
 
 ```text
 $\overline{\Function \andgadget(\qquad}$
@@ -1896,12 +1915,12 @@ $\bi (1 - \x) * (1 - \y) = (\nor)$
 
 The following table shows the satisfiablilty of the constraint for all values of `$\x, \y \in \Bit$` and corresponding outputted values for `$\nor \in \Bit$`.
 
-| `$\x$`   | `$\y$`    | `$\nor$` | `$(1 - \x) * (1 - \y) = (\nor)$` |
-|--------|---------|--------|-----------------------|
-| `$0$`    | `$0$`     | `$1$`      | `$(1) * (1) = (1)$` |
-| `$1$`    | `$0$`     | `$0$`      | `$(0) * (1) = (0)$` |
-| `$0$`    | `$1$`     | `$0$`      | `$(1) * (0) = (0)$` |
-| `$1$`    | `$1$`     | `$0$`      | `$(0) * (0) = (0)$` |
+| `$\x$` | `$\y$` | `$\nor$` | `$(1 - \x) * (1 - \y) = (\nor)$` |
+| ------ | ------ | -------- | -------------------------------- |
+| `$0$`  | `$0$`  | `$1$`    | `$(1) * (1) = (1)$`              |
+| `$1$`  | `$0$`  | `$0$`    | `$(0) * (1) = (0)$`              |
+| `$0$`  | `$1$`  | `$0$`    | `$(1) * (0) = (0)$`              |
+| `$1$`  | `$1$`  | `$0$`    | `$(0) * (0) = (0)$`              |
 
 ```text
 $\overline{\Function \norgadget(\qquad}$

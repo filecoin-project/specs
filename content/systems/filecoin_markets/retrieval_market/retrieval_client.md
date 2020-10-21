@@ -1,5 +1,5 @@
 ---
-title: "Retrieval Client"
+title: 'Retrieval Client'
 weight: 3
 dashboardWeight: 2
 dashboardState: stable

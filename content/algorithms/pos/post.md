@@ -9,7 +9,7 @@ dashboardTests: 0
 
 # Proof-of-Spacetime (PoSt)
 
-From this point onwards, miners have to prove that they continuously store the data they pledged to store. Proof-of-Spacetime (PoSt) is a procedure during which miners are given cryptographic challenges that can only be correctly answered if the miner is actually storing a copy of the sealed data. 
+From this point onwards, miners have to prove that they continuously store the data they pledged to store. Proof-of-Spacetime (PoSt) is a procedure during which miners are given cryptographic challenges that can only be correctly answered if the miner is actually storing a copy of the sealed data.
 
 There are two types of challenges (and their corresponding mechanisms) that are realised as part of the PoSt process, namely, _WinningPoSt_ and _WindowPoSt_, each of which serve a different purpose.
 
@@ -64,27 +64,24 @@ There are currently three types of Faults, the _Declared Fault_, the _Detected F
 
 Summarising:
 
-- A miner maintains its sectors *active* by generating Proofs-of-Spacetime (PoSt) and submit `miner.SubmitWindowedPoSt` for their sectors in a timely manner.
+- A miner maintains its sectors _active_ by generating Proofs-of-Spacetime (PoSt) and submit `miner.SubmitWindowedPoSt` for their sectors in a timely manner.
 - A WindowPoSt proves that sectors are persistently stored through time.
-- Each miner proves all of its sectors once per *proving period*; each sector must be proven by a particular time called _deadline_.
-- A *proving period* is a period of `WPoStProvingPeriod` epochs in which a `Miner` actor is scheduled to prove its storage.
-- A *proving period* is evenly divided in `WPoStPeriodDeadlines` *deadlines*.
+- Each miner proves all of its sectors once per _proving period_; each sector must be proven by a particular time called _deadline_.
+- A _proving period_ is a period of `WPoStProvingPeriod` epochs in which a `Miner` actor is scheduled to prove its storage.
+- A _proving period_ is evenly divided in `WPoStPeriodDeadlines` _deadlines_.
 - Each miner has a different start of proving period `ProvingPeriodStart` that is assigned at `Power.CreateMiner`.
-- A *deadline* is a period of `WPoStChallengeWindow` epochs that divides a proving period.
+- A _deadline_ is a period of `WPoStChallengeWindow` epochs that divides a proving period.
 - Sectors are assigned to a deadline on `miner.ProveCommitSector` and will remain assigned to it throughout their lifetime.
 - In order to prove that they continuously store a sector, a miner must submit a `miner.SubmitWindowedPoSt` for each deadline.
 - Sectors are assigned to partitions. A partition is a set of sectors that is not larger than the Seal Proof allowed number of sectors `sp.WindowPoStPartitionSectors`.
 - Sectors are assigned to a partition at `miner.ProveCommitSector` and they can be re-arranged via `CompactPartitions`.
 - Partitions are a by-product of our current proof mechanism. There is a limit in the number of sectors (`sp.WindowPoStPartitionSectors`) that can be proven in a single SNARK proof. If more than this amount is required to be proven, more than one SNARK proof is required, given that each SNARK proof represents a partition.
 
-
 There are four relevant epochs associated to a deadline, shown in the table below:
 
 | Name          | Distance from `Open`      | Description                                                                                                                   |
-|---------------|---------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| ------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | `Open`        | `0`                       | Epoch from which a PoSt Proof for this deadline can be submitted.                                                             |
 | `Close`       | `WPoStChallengeWindow`    | Epoch after which a PoSt Proof for this deadline will be rejected.                                                            |
 | `FaultCutoff` | `-FaultDeclarationCutoff` | Epoch after which a `miner.DeclareFault` and `miner.DeclareFaultRecovered` for sectors in the upcoming deadline are rejected. |
 | `Challenge`   | `-WPoStChallengeLookback` | Epoch at which the randomness for the challenges is available.                                                                |
-
-

@@ -1,5 +1,5 @@
 ---
-title: "Architecture Diagrams"
+title: 'Architecture Diagrams'
 audit: 1
 dashboardWeight: 0.2
 dashboardState: reliable

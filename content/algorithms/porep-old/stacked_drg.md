@@ -5,42 +5,41 @@ weight: 1
 
 # Stacked DRG PoRep
 
-
-This section describes *Stacked DRG PoRep* (SDR), the specific Proof-of-Replication (PoRep) used in Filecoin. In this construction, the prover encodes the original data into a replica and commits to it. An offline PoRep proves that the commitment to the replica is a valid commitment of the encoded original data.
+This section describes _Stacked DRG PoRep_ (SDR), the specific Proof-of-Replication (PoRep) used in Filecoin. In this construction, the prover encodes the original data into a replica and commits to it. An offline PoRep proves that the commitment to the replica is a valid commitment of the encoded original data.
 
 SDR has been presented by [Ben Fisch at EUROCRYPT19](https://eprint.iacr.org/2018/702.pdf).
 
 # Introduction
 
 ## Background on Proof-of-Replication
-*Proof-of-Replication* enables a prover *P* to convince a verifier *V* that *P* is storing a replica *R*, a physically independent copy of some data *D*, unique to *P*. The scheme is defined by a tuple of polynomial time algorithms (_Setup_, Replication, _Prove_, _Verify_). The assumption is that generation of a replica after _Replicate_  must be difficult (if not impossible) to generate.
 
-- *Setup*: On setup, the public parameters of the proving systems are set.
-- *Replicate*: On replication, either a party or both (depending on the scheme, in our case the prover only!) generate a unique permutation of the original data _D_, which we call replica _R_.
+_Proof-of-Replication_ enables a prover _P_ to convince a verifier _V_ that _P_ is storing a replica _R_, a physically independent copy of some data _D_, unique to _P_. The scheme is defined by a tuple of polynomial time algorithms (_Setup_, Replication, _Prove_, _Verify_). The assumption is that generation of a replica after _Replicate_ must be difficult (if not impossible) to generate.
+
+- _Setup_: On setup, the public parameters of the proving systems are set.
+- _Replicate_: On replication, either a party or both (depending on the scheme, in our case the prover only!) generate a unique permutation of the original data _D_, which we call replica _R_.
 - _Prove_: On receiving a challenge, the prover must generate a proof that it is in possession of the replica and that it was derived from data _D_. The prover must only be able to respond to the challenge successfully if it is in possession of the replica, since would be difficult (if not impossible) to generate a replica that can be used to generate the proof at this stage
 - _Verify_: On receiving the proof, the verifier checks the validity of the proof and accepts or rejects the proof.
 
 {{% mermaid %}}
 sequenceDiagram
-    Note right of Prover: CommD
-    Prover-->>Prover: R, CommR ← Replicate(D)
-    Prover->>Verifier: CommR
-    Verifier-->>Verifier: Generate random challenge
-    Verifier->>Prover: challenge
-    Prover-->>Prover: proof ← Prove(D, R, challenge)
-    Prover->>Verifier: proof
+Note right of Prover: CommD
+Prover-->>Prover: R, CommR ← Replicate(D)
+Prover->>Verifier: CommR
+Verifier-->>Verifier: Generate random challenge
+Verifier->>Prover: challenge
+Prover-->>Prover: proof ← Prove(D, R, challenge)
+Prover->>Verifier: proof
 {{% /mermaid %}}
 
 ## Time-bounded Proof-of-Replication
 
-**Timing assumption**. *Time-bounded Proof-of-Replication* are constructions of PoRep with timing assumptions. The assumption is that generation of the replica (hence the _Replication_) takes some time _t_ that is substantially larger than the time it takes to produce a proof (hence _time(Prove)_) and the round-trip time (_RTT_) for sending a challenge and receiving a proof.
+**Timing assumption**. _Time-bounded Proof-of-Replication_ are constructions of PoRep with timing assumptions. The assumption is that generation of the replica (hence the _Replication_) takes some time _t_ that is substantially larger than the time it takes to produce a proof (hence _time(Prove)_) and the round-trip time (_RTT_) for sending a challenge and receiving a proof.
 
 **Distinguishing Malicious provers**. A malicious prover that does not have _R_, must obtain it (or generate it), before the _Prove_ step. A verifier can distinguish an honest prover from a malicious prover, since the malicious one will take too long to answer the challenge. A verifier will reject if receiving the proof from the prover takes longer than a timeout (bounded between proving time and replication time).
 
 ## Background on Stacked DRG PoRep
 
-*Stacked DRG PoRep* (SDR) is a specific Proof-of-Replication construction that we use in Filecoin. SDR has been designed by [Ben Fisch at EUROCRYPT19](https://eprint.iacr.org/2018/702.pdf).  At a high level, SDR ensures that the *Replicate* step is a slow non-parallelizable sequential process by using a special type of graph called Depth Robust Graphs (DRG).
-
+_Stacked DRG PoRep_ (SDR) is a specific Proof-of-Replication construction that we use in Filecoin. SDR has been designed by [Ben Fisch at EUROCRYPT19](https://eprint.iacr.org/2018/702.pdf). At a high level, SDR ensures that the _Replicate_ step is a slow non-parallelizable sequential process by using a special type of graph called Depth Robust Graphs (DRG).
 
 **Encoding using DRGs**. A key is generated by sequentially labeling nodes in the graph such that each label depends on the labels of its parents. The depth robustness property of these graphs ensure that the sequential labeling steps are not parallelizable. The final labels are used as a key to encode the original data.
 
@@ -56,7 +55,6 @@ TODO: This probably needs a more thorough rewrite.
 - `CommRLast` is the Merkle tree root hash of the replica.
 - `CommR` is the on-chain commitment to the replica, dervied as the hash of the concatenation of `CommC` and `CommRLast`.
 
-
 An SDR proof proves that some data whose committment is `CommD` has been used to run a `Replicate` algorithm and generated some data. `CommR` is the on-chain commitment to both the replicated data and to intermediate stages required to prove `Replicate` was performed correctly.
 
 An SDR proof consists of a set of challenged DRG nodes for each layer, a set of parent nodes for each challenged node and a Merkle tree inclusion proof for each node provided. The verifier can then verify the correct labeling of each node and that the nodes given were consistent with the prover's commitments.
@@ -67,16 +65,16 @@ The SNARK circuit proves that given Merkle roots `CommD`, and `CommR`, the prove
 
 ## PoRep in Filecoin
 
-Proof-of-Replication proves that a Storage Miner is dedicating unique storage for each ***sector***. Filecoin Storage Miners collect new clients' data in a sector, run a slow encoding process (called `Seal`) and generate a proof (`SealProof`) that the encoding was generated correctly.
+Proof-of-Replication proves that a Storage Miner is dedicating unique storage for each **_sector_**. Filecoin Storage Miners collect new clients' data in a sector, run a slow encoding process (called `Seal`) and generate a proof (`SealProof`) that the encoding was generated correctly.
 
-In Filecoin, PoRep provides two guarantees: (1) *space-hardness*: Storage Miners cannot lie about the amount of space they are dedicating to Filecoin in order to gain more power in the consensus; (2) *replication*: Storage Miners are dedicating unique storage for each copy of their clients data.
+In Filecoin, PoRep provides two guarantees: (1) _space-hardness_: Storage Miners cannot lie about the amount of space they are dedicating to Filecoin in order to gain more power in the consensus; (2) _replication_: Storage Miners are dedicating unique storage for each copy of their clients data.
 
 Glossary:
 
-- __*sector:*__ a fixed-size block of data of `SECTOR_SIZE` bytes which generally contains clients' data.
-- __*unsealed sector:*__ a concrete representation (on disk or in memory) of a sector's that follows the "Storage Format" described in Client Data Processing (currently `paddedfr32v1` is the required default).
-- __*sealed sector:*__  a concrete representation (on disk or in memory) of the unique replica generated by `Seal` from an __*unsealed sector*__. A sector contains one or more ***pieces***.
-- __*piece:*__ a block of data of at most `SECTOR_SIZE` bytes which is generally a client's file or part of.
+- **_sector:_** a fixed-size block of data of `SECTOR_SIZE` bytes which generally contains clients' data.
+- **_unsealed sector:_** a concrete representation (on disk or in memory) of a sector's that follows the "Storage Format" described in Client Data Processing (currently `paddedfr32v1` is the required default).
+- **_sealed sector:_** a concrete representation (on disk or in memory) of the unique replica generated by `Seal` from an **_unsealed sector_**. A sector contains one or more **_pieces_**.
+- **_piece:_** a block of data of at most `SECTOR_SIZE` bytes which is generally a client's file or part of.
 
 # Stacked DRG Construction
 
@@ -86,51 +84,45 @@ The following public parameters are used in the Stacked DRG Replication and Proo
 
 {{< hint warning >}}
 TODO:  
-The Appendix should explain why we picked those values  
+The Appendix should explain why we picked those values
 
 Just interpolate a table of the Orient parameters and reconcile naming.
 {{< /hint >}}
 
-
-
-
-| name | type | description | value |
-| --- | --- | --- | ---: |
-| `SECTOR_SIZE` | `uint` | Number of nodes in the DRG in bytes | `68,719,476,736` |
-| `LAYERS` | `uint` | Number of Depth Robust Graph stacked layers. | `10` |
-| `BASE_DEGREE` | `uint` | In-Degree of each Depth Robust Graph. | `6` |
-| `EXPANSION_DEGREE` | `uint` | Degree of each Bipartite Expander Graph to extend dependencies between layers. | `8` |
-| `GRAPH_SEED` |  `uint` | Seed used for random number generation in `baseParents`. | `TODO` |
-| `NODE_SIZE` | `uint` | Size of each node in bytes.| `32B` |
-
+| name               | type   | description                                                                    |            value |
+| ------------------ | ------ | ------------------------------------------------------------------------------ | ---------------: |
+| `SECTOR_SIZE`      | `uint` | Number of nodes in the DRG in bytes                                            | `68,719,476,736` |
+| `LAYERS`           | `uint` | Number of Depth Robust Graph stacked layers.                                   |             `10` |
+| `BASE_DEGREE`      | `uint` | In-Degree of each Depth Robust Graph.                                          |              `6` |
+| `EXPANSION_DEGREE` | `uint` | Degree of each Bipartite Expander Graph to extend dependencies between layers. |              `8` |
+| `GRAPH_SEED`       | `uint` | Seed used for random number generation in `baseParents`.                       |           `TODO` |
+| `NODE_SIZE`        | `uint` | Size of each node in bytes.                                                    |            `32B` |
 
 The following constants are computed from the public parameters:
 
-
-| name | type | description | computation | value |
-| --- | --- | --- | ---: | ---- |
-| `PARENTS_COUNT` | `uint` | Total number of parent nodes |`EXPANSION_DEGREE + BASE_DEGREE` | `13` |
-| `GRAPH_SIZE` | `uint` | Number of nodes in the graph  | `SECTOR_SIZE / NODE_SIZE` | `2,147,483,648` |
-| `TREE_DEPTH` | `uint` | Height of the Merkle Tree of a sector | `LOG_2(GRAPH_SIZE)` | `31` |
-
+| name            | type   | description                           |                      computation | value           |
+| --------------- | ------ | ------------------------------------- | -------------------------------: | --------------- |
+| `PARENTS_COUNT` | `uint` | Total number of parent nodes          | `EXPANSION_DEGREE + BASE_DEGREE` | `13`            |
+| `GRAPH_SIZE`    | `uint` | Number of nodes in the graph          |        `SECTOR_SIZE / NODE_SIZE` | `2,147,483,648` |
+| `TREE_DEPTH`    | `uint` | Height of the Merkle Tree of a sector |              `LOG_2(GRAPH_SIZE)` | `31`            |
 
 The following additional public parameters are required:
 
 - `TAPER` : `Float`: Fraction of each layer's challenges by which to reduce next-lowest layer's challenge count.
 - `TAPER_LAYERS`: `uint`: Number of layers which should be tapered. FIXME: update for current tapering.
-  `Data` is a byte array initialized to the content of __*unsealed sector*__ and will be mutated in-place by the replication process.
+  `Data` is a byte array initialized to the content of **_unsealed sector_** and will be mutated in-place by the replication process.
 
 ## Hash Functions
 
 We have describe three hash functions:
 
-| name          | description                                                                                                                                                                | size of input              | size of output | construction          |
-| ------------- | ------------------------------------------------------------                                                                                                               | -------------              | -------------- | --------------------- |
-| `KDFHash`     | Hash function used as a KDF to derive the key used to label a single node.                                                                                                 | TODO                       | `32B`          | `SHA256`         |
-| `ColumnHash`  | Hash function used to hash the labeled leaves of each layer (see SDR Column Commitments).                                                                                  | TODO                       | `32B`          | `JubjubPedersen`      |
-| `RepCompress` | Collision Resistant Hash function used for the Merkle tree.                                                                                                                | 2 x `32B` + integer height | `32B`          | `JubjubPedersen`      |
-| `RepHash`     | Balanced binary Merkle tree based used to generate commitments to sealed sectors, unsealed sectors, piece commitments, and intermediate parts of the Proof-of-Replication. | TODO                       | `32B`          | Uses `RepCompress`    |
-|               |                                                                                                                                                                            |                            |                |                       |
+| name          | description                                                                                                                                                                | size of input              | size of output | construction       |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- | ------------------ |
+| `KDFHash`     | Hash function used as a KDF to derive the key used to label a single node.                                                                                                 | TODO                       | `32B`          | `SHA256`           |
+| `ColumnHash`  | Hash function used to hash the labeled leaves of each layer (see SDR Column Commitments).                                                                                  | TODO                       | `32B`          | `JubjubPedersen`   |
+| `RepCompress` | Collision Resistant Hash function used for the Merkle tree.                                                                                                                | 2 x `32B` + integer height | `32B`          | `JubjubPedersen`   |
+| `RepHash`     | Balanced binary Merkle tree based used to generate commitments to sealed sectors, unsealed sectors, piece commitments, and intermediate parts of the Proof-of-Replication. | TODO                       | `32B`          | Uses `RepCompress` |
+|               |                                                                                                                                                                            |                            |                |                    |
 
 ### RepHash
 
@@ -150,7 +142,7 @@ TODO:
 this isn't quite right.
 {{< /hint >}}
 
-We provide an algorithm (`SDR`) which computes the parents of a node. In high level, the parents of a node are computed by combining two algorithms: some parents (`BASE_DEGREE` of them) are computed via the `BucketSample` algorithm extended with a direct ordering of nodes, others (`EXPANSION_DEGREE` of them) are computed via the `Chung` algorithm. 
+We provide an algorithm (`SDR`) which computes the parents of a node. In high level, the parents of a node are computed by combining two algorithms: some parents (`BASE_DEGREE` of them) are computed via the `BucketSample` algorithm extended with a direct ordering of nodes, others (`EXPANSION_DEGREE` of them) are computed via the `Chung` algorithm.
 
 ### `SDRGraph`: SDR Graph algorithm
 
@@ -165,13 +157,14 @@ Overview: Compute the DRG and Bipartite Expander parents using respectively `Buc
 
 #### Outputs
 
-| name      | description                                 | Type                  |
-| --------- | ------------------------------------------- | --------------------- |
+| name      | description                                         | Type                  |
+| --------- | --------------------------------------------------- | --------------------- |
 | `parents` | The ordered parents of node `node` on layer `layer` | `[PARENTS_COUNT]uint` |
 
 #### Algorithm
 
 - If `layer = 1`:
+
   - Compute `drgParents = BucketSample(node)`
   - Set `parents` to be `drgParents`.
 
@@ -183,7 +176,7 @@ Overview: Compute the DRG and Bipartite Expander parents using respectively `Buc
 We provide below a more succinct representation of the algorithm:
 
 {{< hint warning >}}
-TODO: Reference to code in filproofs/algorithms.go  — or restructure all this.
+TODO: Reference to code in filproofs/algorithms.go — or restructure all this.
 {{< /hint >}}
 
 #### Time-space tradeoff
@@ -198,7 +191,7 @@ The properties of DRG graphs guarantee that a sector has been encoded with a slo
 
 `BucketSample` DRG graphs are random graphs that can be deterministically generated from a seed; different seeds lead with high probability to different graphs. In SDR, we use the same seed `GRAPH_SEED` for each layer of the SDR graph such that they are all based on the same underlying DRG graph.
 
-The parents of any node can be locally computed without computing the entire graph. We call the parents of a node calculated in this way *base parents*.
+The parents of any node can be locally computed without computing the entire graph. We call the parents of a node calculated in this way _base parents_.
 
 `BucketSample` extends `BucketSampleInner` to include the node's 'immediate predecessor'. Each node except the first in a
 DRG generated by `BucketSample` has the node whose index is one less than its own as a parent. This ensures that
@@ -210,9 +203,8 @@ visiting nodes whose indexes are sequential will result in a graph traversal in 
 TODO: explain why we link nodes in the current layer
 {{< /hint >}}
 
-
 Each node in layers other than the first has `EXPANSION_DEGREE` parents generated via the `ChungExpander`
-algorithm. Note that the indexes returned refer to labels from the *previous* layer. TODO: Make this all clearer with explicit notation.
+algorithm. Note that the indexes returned refer to labels from the _previous_ layer. TODO: Make this all clearer with explicit notation.
 
 {{< hint warning >}}
 TODO: link to relevant filproofs/algorithms.go
@@ -232,7 +224,7 @@ TODO: link to filproofs/feistel
 
 # Replication
 
-> The Replication phase turns an *unsealed sector* into a *sealed sector* by first *generating a key*, then using the key to *encode the orignal data*.
+> The Replication phase turns an _unsealed sector_ into a _sealed sector_ by first _generating a key_, then using the key to _encode the orignal data_.
 
 Before running the `Replicate` algorithm, the prover must ensure that the sector is correctly formatted with a valid "Storage Format" (currently `paddedfr32v1` is the required default).
 
@@ -240,7 +232,7 @@ Before running the `Replicate` algorithm, the prover must ensure that the sector
 TODO: inputs are missing
 {{< /hint >}}
 
-The Replication Algorithm  proceeds as follows:
+The Replication Algorithm proceeds as follows:
 
 - Calculate `ReplicaID` using `Hash` (SHA256):
 
@@ -256,10 +248,10 @@ ReplicaID := Hash(ProverID || SectorNumber || RandomSeed || CommD)
 ```
 
 - Perform `RepHash` on `Data` to yield `CommD` and `TreeD`:
+
 ```text
 CommD, TreeD = RepHash(data)
 ```
-
 
 ## Layer Labeling
 
@@ -270,7 +262,6 @@ TODO: Define `Graph`. We need to decide if this is an object we'll explicitly de
 {{< hint warning >}}
 TODO: link to filproofs/algorithms
 {{< /hint >}}
-
 
 # Proof Generation
 
@@ -285,6 +276,7 @@ TODO: write a single algorithm which includes the spec below
 {{< /hint >}}
 
 ## Challenge Generation
+
 {{< hint warning >}}
 TODO: Link to filproofs/algorithms
 {{< /hint >}}
@@ -294,11 +286,13 @@ Calculate `LAYER_CHALLENGES : [LAYERS]uint`: Number of challenges per layer. (Th
 Derive challenges for each layer (call `DeriveChallenges()`).
 
 ## Witness Generation
+
 {{< hint warning >}}
 TODO: Link to filproofs/algorithms
 {{< /hint >}}
 
 ## Layer Challenge Counts
+
 {{< hint warning >}}
 TODO: we should just list current parameters and show this as a calculation for correctness, this should not mandatory to implement.
 {{< /hint >}}

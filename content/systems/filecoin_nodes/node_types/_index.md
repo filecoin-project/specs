@@ -11,6 +11,7 @@ dashboardTests: 0
 # Node Types
 
 Nodes in the Filecoin network are primarily identified in terms of the services they provide. The type of node, therefore, depends on which services a node provides. A basic set of services in the Filecoin network include:
+
 - chain verification
 - storage market client
 - storage market provider
@@ -42,6 +43,7 @@ type ChainVerifierNode interface {
   systems.Blockchain
 }
 ```
+
 The Lotus implementation of the Chain Verifier Node can be found [here](https://github.com/filecoin-project/lotus/blob/master/node/impl/full.go).
 
 ## Client Node
@@ -56,6 +58,7 @@ type ClientNode struct {
   markets.DataTransfers
 }
 ```
+
 The Lotus implementation of the Client Node can be found [here](https://github.com/filecoin-project/lotus/blob/master/node/impl/client/client.go).
 
 ## Storage Miner Node
@@ -70,6 +73,7 @@ type StorageMinerNode interface {
   markets.DataTransfers
 }
 ```
+
 The Lotus implementation of the Storage Miner Node can be found [here](https://github.com/filecoin-project/lotus/blob/master/node/impl/storminer.go).
 
 ## Retrieval Miner Node

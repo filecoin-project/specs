@@ -6,9 +6,8 @@ dashboardWeight: 1
 dashboardState: reliable
 dashboardAudit: n/a
 dashboardTests: 0
-
 ---
 
 # File
- 
+
 {{< embed src="file.id" lang="go" >}}

@@ -1,99 +1,99 @@
 .toc {
+  height: 100%;
+  > ol {
+    height: 90%;
+    overflow: auto;
+    position: relative;
+    > li {
+      font-weight: 500;
+    }
+  }
+  > ol li {
+    list-style: none;
+  }
+  > ol > li > ol {
+    padding-bottom: 1rem;
+    font-weight: 400;
+  }
+  ol {
+    margin: 0;
+    padding-left: 10px;
+  }
+  a {
+    color: currentColor;
     height: 100%;
-    > ol {
-        height: 90%;
-        overflow: auto;
-        position: relative;
-        > li {
-            font-weight: 500;
-        }
+  }
+  li::before {
+    content: ' ';
+    display: inline-block;
+    height: inherit;
+    left: 0;
+    margin-top: -1px;
+    position: absolute;
+  }
+  li:not(.active-parent) > .maybe-hide > li:not(.active) {
+    height: 0;
+  }
+  li.active,
+  li.active-parent,
+  .maybe-hide li.active-parent,
+  li.active-parent > .maybe-hide > li {
+    height: auto;
+  }
+  ol li {
+    padding: 0 0;
+    line-height: 2;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    a.toc-link {
+      height: 100%;
     }
-    > ol li {
-        list-style: none;
-    }
-    > ol > li > ol {
-        padding-bottom: 1rem;
-        font-weight: 400;
-    }
-    ol {
-        margin: 0;
-        padding-left: 10px;
-    }
-    a {
-        color: currentColor;
-        height: 100%;
-    }
-    li::before {
-        content: " ";
-        display: inline-block;
-        height: inherit;
-        left: 0;
-        margin-top: -1px;
-        position: absolute;
-    }
-    li:not(.active-parent) > .maybe-hide > li:not(.active) {
-        height: 0;
-    }
-    li.active,
-    li.active-parent,
-    .maybe-hide li.active-parent,
-    li.active-parent > .maybe-hide > li {
-        height: auto;
-    }
-    ol li {
-        padding: 0 0;
-        line-height: 2;
-        font-size: 14px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        a.toc-link {
-            height: 100%;
-        }
-    }
-    .label {
-        font-size: 10px;
-        font-weight: 700;
-        display: block;
-        color: var(--gray-600);
-    }
-    input[type="range"] {
-        -webkit-appearance: none;
-        margin: 18px 0;
-        width: 100%;
-    }
-    input[type="range"]:focus {
-        outline: none;
-    }
-    input[type="range"]::-webkit-slider-runnable-track {
-        width: 100%;
-        height: 2px;
-        cursor: pointer;
-        background: var(--cl-gray);
-        border-radius: 1.3px;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-        height: 16px;
-        width: 16px;
-        border-radius: 50%;
-        background: var(--cl-blue);
-        cursor: pointer;
-        -webkit-appearance: none;
-        margin-top: -7px;
-    }
-    input[type="range"]::-moz-range-track {
-        width: 100%;
-        height: 2px;
-        cursor: pointer;
-        background: #444;
-        border-radius: 1.3px;
-    }
-    input[type="range"]::-moz-range-thumb {
-        height: 16px;
-        width: 16px;
-        border-radius: 50%;
-        background: var(--cl-blue);
-        cursor: pointer;
-        border: 0;
-    }
+  }
+  .label {
+    font-size: 10px;
+    font-weight: 700;
+    display: block;
+    color: var(--gray-600);
+  }
+  input[type='range'] {
+    -webkit-appearance: none;
+    margin: 18px 0;
+    width: 100%;
+  }
+  input[type='range']:focus {
+    outline: none;
+  }
+  input[type='range']::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 2px;
+    cursor: pointer;
+    background: var(--cl-gray);
+    border-radius: 1.3px;
+  }
+  input[type='range']::-webkit-slider-thumb {
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: var(--cl-blue);
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -7px;
+  }
+  input[type='range']::-moz-range-track {
+    width: 100%;
+    height: 2px;
+    cursor: pointer;
+    background: #444;
+    border-radius: 1.3px;
+  }
+  input[type='range']::-moz-range-thumb {
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: var(--cl-blue);
+    cursor: pointer;
+    border: 0;
+  }
 }

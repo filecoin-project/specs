@@ -1,8 +1,8 @@
 ---
-title: "Notation, Constants, and Types"
+title: 'Notation, Constants, and Types'
 weight: 1
 math-mode: true
-description: "Notation, Constants, and Types for Stacked DRG PoRep"
+description: 'Notation, Constants, and Types for Stacked DRG PoRep'
 
 dashboardWeight: 2
 dashboardState: stable
@@ -13,6 +13,7 @@ dashboardTests: 0
 <!--lint disable -->
 
 {{< plain hidden >}}
+
 $$
 \gdef\createporepbatch{\textsf{create\_porep\_batch}}
 \gdef\GrothProof{\textsf{Groth16Proof}}
@@ -369,6 +370,7 @@ $$
 \gdef\encode{\textsf{encode}}
 \gdef\sector{\textsf{sector}}
 $$
+
 {{< /plain >}}
 
 <!--lint enable -->
@@ -408,6 +410,7 @@ A 64-bit unsigned integer where only the least significant 17 bits are utilized 
 
 `$\Fq \equiv [q]$`\
 An element of the scalar field that arises from BLS12-381's subgroup of prime order `$q$`. Where `$q$`, given in hex and decimal, is:
+
 ```text
 $\quad q = \text{73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001}_{16}$
 $\quad q = 52435875175126190479447740508185965837690552500527637822603658699938581184513_{10}$
@@ -484,7 +487,7 @@ Iterates over each element of `$\textsf{Iterator}$` and ignores each element's v
 `$\big[ \tern{x = 0}{a}{b \big}]$`\
 A ternary expression. Returns `$a$` if `$x = 0$`, otherwise returns `$b$`.
 
-`$\mathbb{T}^{[m]}\dot\extend(\mathbb{T}^{[n]})  \rightarrow \mathbb{T}^{[m + n]}$`\
+`$\mathbb{T}^{[m]}\dot\extend(\mathbb{T}^{[n]}) \rightarrow \mathbb{T}^{[m + n]}$`\
 Appends each value of `$\mathbb{T}^{[n]}$` onto the end of the array `$\mathbb{T}^{[m]}$`. Equivalent to writing:
 
 ```text
@@ -501,7 +504,6 @@ $\line{1}{\bi}{x: \mathbb{T}^{[m]} = [x_1, \thin\ldots\thin, x_m]}$
 $\line{2}{\bi}{\for i \in [n - m]:}$
 $\line{3}{\bi}{\quad x\dot\push(x[i \MOD m])}$
 ```
-
 
 ## Protocol Constants
 
@@ -537,7 +539,7 @@ The degree of each expander. The number of expander parents generated for each n
 `$d_\total = d_\drg + d_\exp = 14$`\
 The total number of parents generated for all nodes not in the first Stacked-DRG layer.
 
-`$N_\expedges = d_\exp * N_\nodes  = 2^{33} \Edges$`\
+`$N_\expedges = d_\exp * N_\nodes = 2^{33} \Edges$`\
 The number of edges per expander graph.
 
 `$\ell_\expedge^\bit = \log_2(N_\expedges) = 33 \Bits$`\
@@ -587,8 +589,8 @@ The number of Merkle challenges per challenged replica `$R$` in a PoSt partition
 `$\GrothVerificationKey_{\langle \textsf{circ} \rangle} = \text{<set during}\ \textsf{circ} \text{'s trusted setup>}$`\
 The Groth16 keypair used to generate and verify SNARKs for a circuit definition `$\textsf{circ}$` (PoRep, Winning PoSt, Window PoSt each for a given protocol sector size).
 
-`$\DrgStringID: {\Byte_\utf}^{[*]} = ``\text{Filecoin\_DRSample}"$`\
-`$\FeistelStringID: {\Byte_\utf}^{[*]} = ``\text{Filecoin\_Feistel}"$`\
+` $\DrgStringID: {\Byte_\utf}^{[*]} = ``\text{Filecoin\_DRSample}"$ `\
+` $\FeistelStringID: {\Byte_\utf}^{[*]} = ``\text{Filecoin\_Feistel}"$ `\
 The ID strings associated with the DRG and Feistel network.
 
 `$\DrgSeedPrefix_\PorepID: \Byte^{[28]} = \Sha{256}(\DrgStringID \concat \PorepID)[\ldotdot 28]$`\
@@ -612,6 +614,7 @@ $\quad \ledecode(\FeistelKeysBytes_\PorepID[8 \ldotdot 16]) \thin,$
 $\quad \ledecode(\FeistelKeysBytes_\PorepID[16 \ldotdot 24]) \thin,$
 $]$
 ```
+
 The Feistel round keys used by every PoRep having version `$\PorepID$`.\
 **Implementation:** [`storage_proofs::porep::stacked::vanilla::graph::StackedGraph::new()`](https://github.com/filecoin-project/rust-fil-proofs/blob/b6bf96faff1bf7611982ca1318c20d256fd464d4/storage-proofs/porep/src/stacked/vanilla/graph.rs#L189-#L194)
 
@@ -625,7 +628,6 @@ An array of 32 bytes that utilizes only the first `$\ell_\Fqsafe^\bit = 254$` bi
 
 `$\Fqsafe = \Fq \AND 1^{[254]}$`\
 A field element that utilizes only its first `$\ell_\Fqsafe^\bit = 254$` bits. `$\Fqsafe$`'s are created from casting a `$\Safe$` into an `$\Fq$` (the casting produces an `$\Fqsafe \thin$`).
-
 
 `$\leencode(\Fq) \rightarrow \Byte^{[32]}$`\
 `$\leencode(\Fqsafe) \rightarrow \Safe$`\
@@ -679,9 +681,10 @@ Filecoin utilizes two Merkle tree types, a binary tree type `$\BinTree$` and oct
 `$\BinTree{\bf \sf s}$` use the `$\Sha{254}_2$` hash function (two inputs per hash function call, tree nodes have type `$\Safe$`). `$\OctTree{\bf \sf s}$` use the hash function `$\Poseidon_8$` (eight inputs per hash function call, tree nodes have type `$\Fq$`).
 
 **Implementation:**
-* [`merkle_light::merkle::MerkleTree`](https://github.com/filecoin-project/merkle_light/blob/64a468807c594d306d12d943dd90cc5f88d0d6b0/src/merkle.rs#L138)
-* [`storage_proofs::core::merkle::MerkleTreeWrapper`](https://github.com/filecoin-project/rust-fil-proofs/blob/f75804c503d9b97a2b02ef3ea2e5d44e8e2c6470/storage-proofs/core/src/merkle/tree.rs#L53)
-* [`storage_proofs::core::merkle::MerkleTreeTrait`](https://github.com/filecoin-project/rust-fil-proofs/blob/f75804c503d9b97a2b02ef3ea2e5d44e8e2c6470/storage-proofs/core/src/merkle/tree.rs#L19)
+
+- [`merkle_light::merkle::MerkleTree`](https://github.com/filecoin-project/merkle_light/blob/64a468807c594d306d12d943dd90cc5f88d0d6b0/src/merkle.rs#L138)
+- [`storage_proofs::core::merkle::MerkleTreeWrapper`](https://github.com/filecoin-project/rust-fil-proofs/blob/f75804c503d9b97a2b02ef3ea2e5d44e8e2c6470/storage-proofs/core/src/merkle/tree.rs#L53)
+- [`storage_proofs::core::merkle::MerkleTreeTrait`](https://github.com/filecoin-project/rust-fil-proofs/blob/f75804c503d9b97a2b02ef3ea2e5d44e8e2c6470/storage-proofs/core/src/merkle/tree.rs#L19)
 
 ```text
 $\struct \BinTree\ \{$
@@ -693,6 +696,7 @@ $\quad \layer_{\BinTreeDepth - 1}: \Safe^{[2]},$
 $\quad \root \sim \layer_\BinTreeDepth: \Safe,$
 $\}$
 ```
+
 A binary Merkle tree with hash function arity-2 (each Merkle hash operates on two input values). The hash function for `$\BinTree$`'s is `$\Sha{254}_2$` (`$\Sha{256}$` that operates on two 32-byte inputs where the last two bits of the last byte of their `$\Sha{256}$` digest have been zeroed to produce a `$\Safe$` digest). The fields `$\layer_0, \ldots, \layer_\BinTreeDepth$` are arrays containing each tree layer's node labels. The fields `$\leaves$` and `$\root$` are aliases for the fields `$\layer_0$` and `$\layer_\BinTreeDepth$` respectively.
 
 ```text
@@ -705,13 +709,15 @@ $\quad \layer_{\OctTreeDepth - 1}: \Fq^{[8]},$
 $\quad \root \sim \layer_\OctTreeDepth: \Fq,$
 $\}$
 ```
+
 An octal Merkle tree with hash function arity-8 (each Merkle hash operates on 8 input values). The hash function for `$\OctTree$`'s is `$\Poseidon_8$`. The fields `$\layer_0, \ldots, \layer_{10}$` are arrays containing each tree layer's node labels. The fields `$\leaves$` and `$\root$` are aliases for the fields `$\layer_0$` and `$\layer_{10}$` respectively.
 
 ### Merkle Proofs
 
 **Implementation:**
-* `$\BinTreeProof$`, `$\OctTreeProof$`: [`storage_proofs::merkle::SingleProof`](https://github.com/filecoin-project/rust-fil-proofs/blob/f75804c503d9b97a2b02ef3ea2e5d44e8e2c6470/storage-proofs/core/src/merkle/proof.rs#L344)
-* `$\BinPathElement$`, `$\OctPathElement$`: [`storage_proofs::merkle::PathElement`](https://github.com/filecoin-project/rust-fil-proofs/blob/f75804c503d9b97a2b02ef3ea2e5d44e8e2c6470/storage-proofs/core/src/merkle/proof.rs#L223)
+
+- `$\BinTreeProof$`, `$\OctTreeProof$`: [`storage_proofs::merkle::SingleProof`](https://github.com/filecoin-project/rust-fil-proofs/blob/f75804c503d9b97a2b02ef3ea2e5d44e8e2c6470/storage-proofs/core/src/merkle/proof.rs#L344)
+- `$\BinPathElement$`, `$\OctPathElement$`: [`storage_proofs::merkle::PathElement`](https://github.com/filecoin-project/rust-fil-proofs/blob/f75804c503d9b97a2b02ef3ea2e5d44e8e2c6470/storage-proofs/core/src/merkle/proof.rs#L223)
 
 ```text
 $\struct \BinTreeProof\ \{$
@@ -720,6 +726,7 @@ $\quad \root: \Safe \thin,$
 $\quad \path: \BinPathElement^{[\BinTreeDepth]} \thin,$
 $\}$
 ```
+
 A `$\BinTree$` Merkle proof generated for a challenge. The notation `$\BinTreeProof_c$` denotes a proof generated for a challenge `$c$`. The field `$\path$` contains one element for tree layers `$0, \ldots, \BinTreeDepth - 1$` (there is no `$\path$` element for the root layer). The path element `$\BinTreeProof\dot\path[l]$` for tree layers `$l \in 0, \ldots, \BinTreeDepth - 1$` contains one node label in layer `$l$` that the Merkle proof verifier will use to calculate the label for a node in layer `$l + 1 \thin$`. Each path element is for a distinct tree layer.
 
 ```text
@@ -728,7 +735,8 @@ $\quad \sibling: \Safe \thin,$
 $\quad \missing: \Bit \thin,$
 $\}$
 ```
-A single element in `$\BinTreeProof\dot\path$` associated with a single `$\BinTree$` tree layer `$l$`.  Contains the information necessary for a Merkle proof verifier to calculate the label for a node in tree layer `$l + 1$`. The field `$\sibling$` contains the label that the Merkle proof verifier did not calculate for layer `$l$`. The Merkle verifier applies the hash function `$\Sha{254}_2$` to an array of two elements in layer `$l$` to produce the label for a node in layer `$l + 1$`. The order of the elements in each Merkle hash function's 2-element array is given by the field `$\missing$`. If `$\missing = 0$`, then `$\sibling$` is at index `$1$` in the Merkle hash inputs array. Conversely, if `$\missing = 1$` the field `$\sibling$` is at index `$0$` in the 2-element Merkle hash inputs array.
+
+A single element in `$\BinTreeProof\dot\path$` associated with a single `$\BinTree$` tree layer `$l$`. Contains the information necessary for a Merkle proof verifier to calculate the label for a node in tree layer `$l + 1$`. The field `$\sibling$` contains the label that the Merkle proof verifier did not calculate for layer `$l$`. The Merkle verifier applies the hash function `$\Sha{254}_2$` to an array of two elements in layer `$l$` to produce the label for a node in layer `$l + 1$`. The order of the elements in each Merkle hash function's 2-element array is given by the field `$\missing$`. If `$\missing = 0$`, then `$\sibling$` is at index `$1$` in the Merkle hash inputs array. Conversely, if `$\missing = 1$` the field `$\sibling$` is at index `$0$` in the 2-element Merkle hash inputs array.
 
 ```text
 $\struct \OctTreeProof\ \{$
@@ -737,6 +745,7 @@ $\quad \root: \Fq \thin,$
 $\quad \path: \OctPathElement^{[\OctTreeDepth]} \thin,$
 $\}$
 ```
+
 A `$\OctTree$` Merkle proof generated for a challenge. The notation `$\OctTreeProof_c$` denotes a proof generated for a challenge `$c$`. The field `$\path$` contains one element for tree layers `$0, \ldots, \OctTreeDepth - 1$` (there is no `$\path$` element for the root layer). The path element `$\OctTreeProof\dot\path[l]$` for tree layers `$l \in 0, \ldots, \OctTreeDepth - 1$` contains one node label in layer `$l$` that the Merkle proof verifier will use to calculate the label for a node in layer `$l + 1 \thin$`. Each path element is for a distinct tree layer. If `$l = 0$` the verifier inserts `$\BinTreeProof\dot\leaf$` into the first path element's Merkle hash inputs array at index `$\BinTreeProof\dot\path[0]\dot\missing \thin$`.
 
 ```text
@@ -745,7 +754,8 @@ $\quad \siblings: \Fq^{[7]} \thin,$
 $\quad \missing: [8] \thin,$
 $\}$
 ```
-A single element in `$\OctTreeProof\dot\path$` associated with a single `$\OctTree$` tree layer `$l$`.  Contains the information necessary for a Merkle proof verifier to calculate the label for a node in tree layer `$l + 1$`. The field `$\sibling$` contains the label that the Merkle proof verifier did not calculate for layer `$l$`. The Merkle verifier applies the hash function `$\Poseidon_8$` to an array of eight elements in layer `$l$` to produce the label for a node in layer `$l + 1$`. The order of the elements in each Merkle hash function's 8-element array is given by the field `$\missing$`. `$\missing$` is an index in an array of 8 elements telling the verifier at which index in the Merkle hash inputs array that the node label calculated by the verifier for this path element's layer is to be inserted into `$\siblings$`. Given an `$\OctPathElement = \OctTreeProof\dot\path[l]$` in tree layer `$l$`, the node label to be inserted into the hash inputs array at index `$\missing$` was calculated using the path element `$\OctTreeProof\dot\path[l]$` (or `$\OctTreeProof\dot\leaf$` if `$l = 0$`).
+
+A single element in `$\OctTreeProof\dot\path$` associated with a single `$\OctTree$` tree layer `$l$`. Contains the information necessary for a Merkle proof verifier to calculate the label for a node in tree layer `$l + 1$`. The field `$\sibling$` contains the label that the Merkle proof verifier did not calculate for layer `$l$`. The Merkle verifier applies the hash function `$\Poseidon_8$` to an array of eight elements in layer `$l$` to produce the label for a node in layer `$l + 1$`. The order of the elements in each Merkle hash function's 8-element array is given by the field `$\missing$`. `$\missing$` is an index in an array of 8 elements telling the verifier at which index in the Merkle hash inputs array that the node label calculated by the verifier for this path element's layer is to be inserted into `$\siblings$`. Given an `$\OctPathElement = \OctTreeProof\dot\path[l]$` in tree layer `$l$`, the node label to be inserted into the hash inputs array at index `$\missing$` was calculated using the path element `$\OctTreeProof\dot\path[l]$` (or `$\OctTreeProof\dot\leaf$` if `$l = 0$`).
 
 ### Graphs
 
@@ -760,6 +770,7 @@ $\quad \leencode(\PorepVersion) \as \Byte^{[8]}$
 $\quad \|\ \leencode(\Nonce_\PorepVersion) \as \Byte^{[8]}$
 $\quad \|\ 0^{[16]}$
 ```
+
 A unique 32-byte ID assigned to each PoRep version. Each PoRep version is defined by a distinct triple of parameters: (PoRep proof system, sector-size, version number). All PoRep's having the same PoRep version triple have the same `$\PorepID$`. The notation `$0^{[16]}$` denotes 16 zero bytes (not bits).\
 **Implementation:** [`filecoin_proofs_api::registry::RegisteredSealProof::porep_id()`](https://github.com/filecoin-project/rust-filecoin-proofs-api/blob/2a01ecc2ff2b9a70fa483d7e36ab79d4f035cf60/src/registry.rs#L110)
 
@@ -804,6 +815,7 @@ $\quad \path: \OctPathElement^{[\OctTreeDepth]},$
 $\quad \column: \Column,$
 $\}$
 ```
+
 A `$\ColumnProof_c$` is an `$\OctTreeProof_c$` adjoined with an additional field `$\column_c$`, the Merkle challenge `$c$`'s label in each Stacked-DRG layer. A valid `$\ColumnProof$` has `$\ColumnProof\dot\leaf: \ColumnDigest = \Poseidon_{11}(\ColumnProof\dot\column) \thin$`.
 
 `$\ParentLabels_{\mathbf{u}_\drg}: \Label^{[d_\drg]} = [\Label_{u_\drg, l_0} \mid \forall u_\drg \in \mathbf{u}_\drg]$`\
@@ -828,6 +840,7 @@ $\quad \TreeRProof_c,$
 $\quad \ParentColumnProofs_{\mathbf{u}_\total}: {\ColumnProof_u}^{[d_\total]},$
 $\}$
 ```
+
 The proof generated for each Merkle challenge `$c$` in a PoRep partition proof. The field `$\ParentColumnProofs_{\mathbf{u}_\total}$` stores the `$\ColumnProof_u$` for each parent `$u \in \mathbf{u}_\total$` of the challenge `$c$`.
 
 `$\PorepPartitionProof_{R, k}: \PorepChallengeProof^{[N_{\porepchallenges / k}]}$`\
@@ -846,6 +859,7 @@ $\quad \CommCR,$
 $\quad \SectorID,$
 $\}$
 ```
+
 A replica `$R$` that a PoSt prover has access to. All fields are associated with `$R$` at the time of PoSt proof batch generation.
 
 `$\PostReplicas_{\P, \batch \thin \aww}: {\PostReplica}^{[*]}$`\
@@ -856,6 +870,7 @@ $\PostReplicas_{\P, k \thin \aww}: {\PostReplica_{\P, \batch}}^{[0 < \ell \leq N
 $\PostReplicas_{\P, k \thin \aww} =$
 $\quad \PostReplicas_{\P, \batch \thin \aww}[k * N_{\postreplicas / k \thin \aww} \ldotdot (k + 1) * N_{\postreplicas / k \thin \aww}]$
 ```
+
 The `$k^{th}$` distinct slice of a PoSt prover `$\P$`'s total replica set `$\PostReplicas_{\P, \batch}$` used to generate prover's partition-`$k$` Winning or Window PoSt proof in a batch. This set contains all replicas that are challenged in PoSt partition `$k$`. `$\PostReplicas_{\P, k}$` does not contain padded replica proofs. The length of a PoSt prover's total replica set may not be divisible by the number of challenged replica's `$N_{\postreplicas / k \thin \aww}$`, thus the length of `$\PostReplicas_{\P, k}$` is in the range `$[1, N_{\postreplicas / k \thin \aww}] \thin$`.
 
 `$\PostPartitionProof_{k \thin \aww}: {\PostReplicaProof_{R \thin \aww}}^{[N_{\postreplicas/k \thin \aww}]}$`\
@@ -867,6 +882,7 @@ $\quad \TreeRProofs: \TreeRProof^{[N_{\challenges/R \thin \aww}]} \thin,$
 $\quad \CommC,$
 $\}$
 ```
+
 The proof for single replica `$R$` challenged in a PoSt partition proof. All fields are associated with `$R$`.
 
 ```text
@@ -875,6 +891,7 @@ $\quad \SectorID,$
 $\quad \CommCR,$
 $\}$
 ```
+
 The public information known to a PoSt verifier `$\V$` for each challenged replica `$R$` (distinct up to the PoSt batch) of the PoSt prover. `$\SectorID$` and `$\CommCR$` are associated with the replica `$R$`.
 
 `$\PostReplicas_{\V, k \thin \aww}: {\PostReplica_\V}^{[0 < \ell \leq N_{\postreplicas / k \thin \aww}]}$`\
@@ -934,6 +951,7 @@ $\RCS\dot\publicinput(\Fq)$
 $\RCS\dot\privateinput(\Fq)$
 $\RCS\dot\assert(\LinearCombination * \LinearCombination = \LinearCombination)$
 ```
+
 The `$\RCS$` types has three methods, one for adding primary assignments, one for adding auxiliary assignments, and one for adding constraints.
 
 ```text
@@ -942,6 +960,7 @@ $\quad \index_{\langle \text{primary|auxiliary} \rangle}: \mathbb{N},$
 $\quad \int: \Fq,$
 $\}$
 ```
+
 An instance of `$\CircuitVal$` is a reference to a single field element, of value `$\int$`, allocated within a constraint system. The field `$\int$` is a copy of the allocated value, arithmetic on `$\int$` is not circuit arithmetic. The field `$\index$` refers to the index of an allocated integer (a copy of `$\int$`) in either the primary or auxiliary assignments vectors of an `$\RCS$` instance. Every unique wire in a circuit has a unique (up to the instance of `$\RCS$`) `$\CircuitVal\dot\index$` in either the primary or auxiliary assignments vectors.
 
 ```text
@@ -950,6 +969,7 @@ $\quad \index_{\langle \text{primary|auxiliary} \rangle}: \mathbb{N},$
 $\quad \int: \Fq \in \Bit,$
 $\}$
 ```
+
 A reference to an allocated bit, a boolean constrained value, within an `$\RCS$` instance.
 
 `$\CircuitBitOrConst \equiv \{ \CircuitBit,\thin \Bit \}$`\
@@ -998,9 +1018,9 @@ When linear combinations are instantiated they are not evaluated to a single int
 
 Values are chosen for Protocol constants such that the following are true:
 
-* The sector size `$\ell_\sector^\byte$` is divisible by the node size `$\ell_\node^\byte$`.
-* The number of nodes always fits an unsigned 32-bit integer `$N_\nodes \leq 2^{32}$`, and thus node indexes are representable using 32-bit unsigned integers.
-* Every distinct contiguous 32-byte slice of a sector `$D_i \in D$` represents a valid prime field element `$\Fq$` (every `$D_i$` is a valid `$\Safe$`, this is accomplished via sector preprocessing).
+- The sector size `$\ell_\sector^\byte$` is divisible by the node size `$\ell_\node^\byte$`.
+- The number of nodes always fits an unsigned 32-bit integer `$N_\nodes \leq 2^{32}$`, and thus node indexes are representable using 32-bit unsigned integers.
+- Every distinct contiguous 32-byte slice of a sector `$D_i \in D$` represents a valid prime field element `$\Fq$` (every `$D_i$` is a valid `$\Safe$`, this is accomplished via sector preprocessing).
 
 ## Hash Functions
 
@@ -1045,7 +1065,7 @@ A bit array whose least significant bit is at index `$0$` and where each subsequ
 $\bi \bits_\Le: \Bit^{[n]} = \lebinrep{x}$
 ```
 
-An unsigned integer `$\int$`'s little-endian `$n$`-bit  binary representation `$\lebinrep{\int}$`, where `$n = \lceil \log_2(\int) \rceil$`, is defined as:
+An unsigned integer `$\int$`'s little-endian `$n$`-bit binary representation `$\lebinrep{\int}$`, where `$n = \lceil \log_2(\int) \rceil$`, is defined as:
 
 ```text
 $\bi \lebinrep{\int}: \Bit^{[n]} = [(\int \gg i) \AND 1 \mid \forall i \in [n]]$
@@ -1057,7 +1077,7 @@ An unsigned integer `$\int$`'s little-endian binary representation can be padded
 $\bi \lebinrep{\int}: \Bit^{[n']} = \lebinrep{\int} \concat 0^{[n' - n]}$
 ```
 
-An unsigned integer `$\int$`'s little-endian  bit string is the reverse of its big-endian bit string:
+An unsigned integer `$\int$`'s little-endian bit string is the reverse of its big-endian bit string:
 
 ```text
 $\bi \lebinrep{\int} = \reverse(\bebinrep{\int})$

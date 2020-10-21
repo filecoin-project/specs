@@ -1,5 +1,5 @@
 ---
-title: "BlockSync"
+title: 'BlockSync'
 weight: 5
 dashboardWeight: 1
 dashboardState: stable
@@ -84,13 +84,18 @@ type Status enum {
 For the set of arrays in the following TipSetBundle, the corresponding messages per block are as shown below:
 
 **TipSetBundle**
+
 ```js
 Blocks: [b0, b1]
 secpMsgs: [mA, mB, mC, mD]
-secpMsgIncludes: [[0, 1, 3], [1, 2, 0]]
+secpMsgIncludes: [
+  [0, 1, 3],
+  [1, 2, 0],
+]
 ```
 
 **Messages corresponding to each Block**
+
 ```js
 Block 'b0': [mA, mB, mD]
 Block 'b1': [mB, mC, mA]

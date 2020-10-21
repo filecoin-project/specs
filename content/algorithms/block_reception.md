@@ -1,8 +1,7 @@
 ---
-title: "Block Reception"
+title: 'Block Reception'
 draft: true
 ---
-
 
 ```go
 func (g *BlockValidationGraph_I) ConsiderBlock(block Block) {
