@@ -374,7 +374,7 @@ $$
 
 **Implementation:**
 
-- [`storage_proofs::merkle::MerkleTreeWrapper::gen_proof()`]()
+- [`storage_proofs::merkle::MerkleTreeWrapper::gen_proof()`](https://ddd)
 - [`merkle_light::merkle::MerkleTree::gen_proof()`](https://github.com/filecoin-project/merkle_light/blob/64a468807c594d306d12d943dd90cc5f88d0d6b0/src/merkle.rs#L918)
 
 **Additional Notation:**

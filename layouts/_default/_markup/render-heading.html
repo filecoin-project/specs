@@ -25,7 +25,11 @@
   ...while the subsequent headings have the .Anchor appended which is a hugo provided id derived from the heading text.
   e.g  in intro/_index.md <h2>Spec Status</h2> gets the id #intro__spec-status
 */}}
-{{- $anchor = printf "section-%s.%s" (delimit $pathParts ".") .Anchor -}}
+{{- if eq .Level 1 -}}
+{{- $anchor = printf "section-%s" (delimit $pathParts ".") -}}
+{{- else -}}
+  {{- $anchor = printf "section-%s.%s" (delimit $pathParts ".") .Anchor -}}
+{{- end -}}
 
 {{/*
   - headings get numbered by css; changing the nesting requires updating numbered.scss.
