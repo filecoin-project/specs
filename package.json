@@ -4,7 +4,7 @@
   "description": "The Filecoin protocol specification",
   "main": "index.js",
   "scripts": {
-    "test": "remark content --frail --quiet",
+    "test": "remark content --frail --quiet && prettier --check .",
     "start": "concurrently npm:watch-*",
     "serve": "npm start",
     "watch-hugo": "npm run build-diagrams && hugo server --bind=0.0.0.0 --disableFastRender --renderToDisk",
@@ -34,7 +34,9 @@
     "globby": "^11.0.1",
     "graphviz-cli": "^1.0.0",
     "hugo-extended": "^0.76.5",
+    "husky": ">=4",
     "jsdom": "^16.4.0",
+    "lint-staged": ">=10",
     "np": "^6.5.0",
     "premove": "^3.0.1",
     "prettier": "2.1.2",
@@ -54,5 +56,13 @@
     "tabWidth": 2,
     "semi": false,
     "singleQuote": true
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   }
 }
