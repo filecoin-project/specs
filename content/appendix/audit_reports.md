@@ -33,7 +33,7 @@ This audit covers the implementation of Filecoin's builtin Actors, focusing on t
 
 ## Proofs
 
-### `2020-10-20` Filecoin Bellman / BLS Signatures
+### `2020-10-20` Filecoin Bellman and BLS Signatures
 
 - Report: [**Filecoin Bellman/BLS Signatures Cryptography Review**](https://research.nccgroup.com/wp-content/uploads/2020/10/NCC_Group_ProtocolLabs_PRLB007_Report_2020-10-20_v1.0.pdf)
 - Audit conducted by: **NCC Group**
