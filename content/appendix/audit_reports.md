@@ -33,12 +33,19 @@ This audit covers the implementation of Filecoin's builtin Actors, focusing on t
 
 ## Proofs
 
+### `2020-10-20` Filecoin Bellman / BLS Signatures
+
+- Report: [**Filecoin Bellman/BLS Signatures Cryptography Review**](https://research.nccgroup.com/wp-content/uploads/2020/10/NCC_Group_ProtocolLabs_PRLB007_Report_2020-10-20_v1.0.pdf)
+- Audit conducted by: **NCC Group**
+
+This audit covers the core cryptographic primitives used by the Filecoin Proving subsystem, including BLS signatures, cryptographic arithmetic, pairings, and zk-SNARK operations. The scope of the audit included several repositories (most code is written in rust) - [bls-signatures](https://github.com/filecoin-project/bls-signatures/), Filecoin's [bellman](https://github.com/filecoin-project/bellman/), [ff](https://github.com/filecoin-project/ff), [group](https://github.com/filecoin-project/group), [paired](https://github.com/filecoin-project/paired), and [rush-sha2ni](https://github.com/filecoin-project/rust-sha2ni).The audit uncovered 1 medium severity issue which has been fixed, and a few other low severity/informational issues (the details of all issues raised and their status at time of publishing are available in the report). 
+
 ### `2020-07-28` Filecoin Proving Subsystem
 
 - Report: [**Security Assessment - Filecoin Proving Subsystem**](https://github.com/filecoin-project/rust-fil-proofs/blob/master/audits/Sigma-Prime-Protocol-Labs-Filecoin-Proofs-Security-Review-v2.1.pdf)
 - Audit conducted by: **Sigma Prime**
 
-This audit covers the full Proving Subsystem, including [rust-fil-proofs](https://github.com/filecoin-project/rust-fil-proofs) and [filecoin-ffi](https://github.com/filecoin-project/filecoin-ffi), through which Proof of Space-Time (PoSt), Proof of Retrievability (PoR), and Proof of Replication (PoRep) are implemented. The audit process included using fuzzing to identify potential vulnerabilities in the subsystem, each of which was resolved (the details of all issues raised and their resolutions are available in the report).
+This audit covers the full Proving subsystem, including [rust-fil-proofs](https://github.com/filecoin-project/rust-fil-proofs) and [filecoin-ffi](https://github.com/filecoin-project/filecoin-ffi), through which Proof of Space-Time (PoSt), Proof of Retrievability (PoR), and Proof of Replication (PoRep) are implemented. The audit process included using fuzzing to identify potential vulnerabilities in the subsystem, each of which was resolved (the details of all issues raised and their resolutions are available in the report).
 
 ### `2020-07-28` zk-SNARK proofs
 
