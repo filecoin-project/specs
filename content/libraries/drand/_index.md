@@ -5,7 +5,7 @@ dashboardWeight: 2
 dashboardState: stable
 dashboardTests: 0
 dashboardAudit: done
-dashboardAuditURL: /#section-appendix.audit_reports.2020-08-09-drand
+dashboardAuditURL: /#section-appendix.audit_reports.drand
 dashboardAuditDate: '2020-08-09'
 ---
 
