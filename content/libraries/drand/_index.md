@@ -36,9 +36,9 @@ By polling the appropriate endpoint (see below for specifics on the drand networ
 
 Specifically, we have:
 
-- `Signature`           -- the threshold BLS signature on the previous signature value `Previous` and the current round number `round`.
-- `PreviousSignature`   -- the threshold BLS signature from the previous drand round.
-- `Round`               -- the index of Randomness in the sequence of all random values produced by this drand network.
+- `Signature` -- the threshold BLS signature on the previous signature value `Previous` and the current round number `round`.
+- `PreviousSignature` -- the threshold BLS signature from the previous drand round.
+- `Round` -- the index of Randomness in the sequence of all random values produced by this drand network.
 
 Specifically, the message signed is the concatenation of the round number treated as a uint64 and the previous signature. At the moment, drand uses BLS signatures on the BLS12-381 curve with the latest v7 RFC of hash-to-curve and the signature is made over G1 (for more see the [drand spec](https://github.com/drand/drand/blob/master/docs/SPECS.md#cryptographic-specification)).
 
@@ -48,7 +48,7 @@ Filecoin nodes fetch the drand entry from the distribution network of the
 selected drand network.
 
 drand distributes randomness via multiple distribution channels (HTTP servers,
-S3 buckets, gossiping...).  Simply put, the drand nodes themselves will not be
+S3 buckets, gossiping...). Simply put, the drand nodes themselves will not be
 directly accessible by consumers, rather, highly-available relays will be set up
 to serve drand values over these distribution channels. See below section for
 more on the drand network configuration.
@@ -56,10 +56,11 @@ more on the drand network configuration.
 On initialization, Filecoin initializes a [drand
 client](https://github.com/drand/drand/tree/master/client) with chain `info`
 that contains the following information:
-- `Period`                           -- the period of time between each drand randomness generation
-- `GenesisTime`                      -- at which the first round in the drand randomness chain is created
-- `PublicKey`                        -- the public key to verify randomness
-- `GenesisSeed`                      -- the seed that has been used for creating the first randomness
+
+- `Period` -- the period of time between each drand randomness generation
+- `GenesisTime` -- at which the first round in the drand randomness chain is created
+- `PublicKey` -- the public key to verify randomness
+- `GenesisSeed` -- the seed that has been used for creating the first randomness
 
 Note that it is possible to simply store the hash of this chain info and to
 retrieve the contents from the drand distribution network as well on the `/info`
@@ -97,11 +98,11 @@ There is a deterministic mapping between a needed drand round number and a Filec
 
 After initializing access to a drand beacon, a Filecoin node should have access to the following values:
 
-- `filEpochDuration`    -- the Filecoin network's epoch duration (between any two leader elections)
-- `filGenesisTime`      -- the Filecoin genesis timestamp
-- `filEpoch`            -- the current Filecoin epoch
-- `drandGenesisTime`    -- drand's genesis timestamp
-- `drandPeriod`         -- drand's epoch duration (between any two randomness creations)
+- `filEpochDuration` -- the Filecoin network's epoch duration (between any two leader elections)
+- `filGenesisTime` -- the Filecoin genesis timestamp
+- `filEpoch` -- the current Filecoin epoch
+- `drandGenesisTime` -- drand's genesis timestamp
+- `drandPeriod` -- drand's epoch duration (between any two randomness creations)
 
 Using the above, a Filecoin node can determine the appropriate drand round value to be used for use in [secret leader election](expected_consensus#secret-leader-election) in an epoch using both networks' reliance on real time as follows:
 

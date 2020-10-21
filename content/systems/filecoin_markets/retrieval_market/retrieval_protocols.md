@@ -1,5 +1,5 @@
 ---
-title: "Retrieval Protocols"
+title: 'Retrieval Protocols'
 weight: 2
 dashboardWeight: 2
 dashboardState: stable
@@ -18,4 +18,3 @@ The `retrieval market` is implemented using the following `libp2p` service.
 
 Request: CBOR Encoded RetrievalQuery Data Structure
 Response: CBOR Encoded RetrievalQueryResponse Data Structure
-

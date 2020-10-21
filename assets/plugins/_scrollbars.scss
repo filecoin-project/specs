@@ -1,5 +1,5 @@
-@import "defaults";
-@import "variables";
+@import 'defaults';
+@import 'variables';
 
 ::-webkit-scrollbar {
   width: 6.5px;
@@ -20,7 +20,9 @@
 ::-webkit-scrollbar-button,
 ::-webkit-scrollbar-track-piece,
 ::-webkit-scrollbar-corner,
-::-webkit-resizer { display: none; }
+::-webkit-resizer {
+  display: none;
+}
 
 // code blocks
 .markdown pre::-webkit-scrollbar {
@@ -28,7 +30,7 @@
 }
 
 .markdown pre {
-  scrollbar-color: transparent transparent ;
+  scrollbar-color: transparent transparent;
 }
 .markdown pre:hover {
   scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
@@ -36,7 +38,6 @@
 .markdown pre:active {
   scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
 }
-
 
 .markdown pre::-webkit-scrollbar-thumb {
   background-color: transparent;

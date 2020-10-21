@@ -11,13 +11,13 @@ $endLevel: 6;
       counter-reset: h#{$currentLevel + 1} 0;
       counter-increment: h#{$currentLevel};
     }
-    $content: "";
+    $content: '';
     @for $n from $startLevel through $currentLevel {
       $content: $content + 'counter(h#{$n})"."';
     }
 
     h#{$currentLevel}::before {
-      content: unquote($content) " ";
+      content: unquote($content) ' ';
     }
   }
 }
@@ -31,14 +31,14 @@ $endLevel: 6;
     }
 
     a:before {
-      content: counters(item, ".") " ";
+      content: counters(item, '.') ' ';
       float: left;
       margin-inline-end: $padding-4;
       color: var(--gray-600);
     }
     &.active {
       &::before {
-        content: "⨎";
+        content: '⨎';
         color: var(--cl-blue);
       }
       > a::before {

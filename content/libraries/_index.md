@@ -1,6 +1,6 @@
 ---
 title: Libraries
-weight: 3 
+weight: 3
 dashboardWeight: 1.5
 dashboardState: reliable
 dashboardAudit: n/a

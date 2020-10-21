@@ -18,6 +18,7 @@ Security is a critical component in ensuring Filecoin can fulfill its mission to
 - Audit conducted by: **Sigma Prime**
 
 The scope of this audit covered:
+
 - The Lotus Daemon: Core component responsible for handling the Blockchain node logic by handling peer- to-peer networking, chain syncing, block validation, data retrieval and transfer, etc.
 - The Lotus Storage Miner: Mining component used to manage a single storage miner by contributing to the network through Sector commitments and Proofs-of-Spacetime data proving it is storing the sectors it has committed to. This component communicates with the Lotus daemon via JSON-RPC API calls.
 
@@ -28,7 +29,7 @@ The scope of this audit covered:
 - Report: [**Filecoin Actors Audit**](https://diligence.consensys.net/audits/2020/09/filecoin-actors/)
 - Audit conducted by: **Consensys Diligence**
 
-This audit covers the implementation of Filecoin's builtin Actors, focusing on the role of Actors as a core component in the business logic of the Filecoin storage network. The audit process involved a manual review of the Actors code and conducting ongoing reviews of changes to the code during the course of the engagement. Issues uncovered through this process are all tracked in the GitHub repository. All Priority 1 issues have been resolved. Most Priority 2 issues have been resolved - ones that are still open have been determined to not be a risk for the Filecoin network or miner experience. Further details on these and all other issues raised available in the report. 
+This audit covers the implementation of Filecoin's builtin Actors, focusing on the role of Actors as a core component in the business logic of the Filecoin storage network. The audit process involved a manual review of the Actors code and conducting ongoing reviews of changes to the code during the course of the engagement. Issues uncovered through this process are all tracked in the GitHub repository. All Priority 1 issues have been resolved. Most Priority 2 issues have been resolved - ones that are still open have been determined to not be a risk for the Filecoin network or miner experience. Further details on these and all other issues raised available in the report.
 
 ## Proofs
 

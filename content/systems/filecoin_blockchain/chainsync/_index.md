@@ -14,7 +14,7 @@ It handles retrieval and propagation of blocks and transactions (messages), and
 thus is in charge of distributed state replication.
 As such, this process is security critical -- problems with state replication can have severe consequences to the operation of a blockchain.
 
-When a node first joins the network it discovers peers (through the peer discovery discussed above) and joins the `/fil/blocks` and `/fil/msgs` GossipSub topics. It listens to new blocks being propagated by other nodes. It picks one block as the `BestTargetHead` and starts syncing the blockchain up to this height from the  `TrustedCheckpoint`, which by default is the `GenesisBlock` or `GenesisCheckpoint`. In order to pick the `BestTargetHead` the peer is comparing a combination of height and weight - the higher these values the higher the chances of the block being on the main chain. If there are two blocks on the same height, the peer should choose the one with the higher weight. Once the peer chooses the `BestTargetHead` it uses the BlockSync protocol to fetch the blocks and get to the current height. From that point on it is in `CHAIN_FOLLOW` mode, where it uses GossipSub to receive new blocks, or Bitswap if it hears about a block that it has not received through GossipSub.
+When a node first joins the network it discovers peers (through the peer discovery discussed above) and joins the `/fil/blocks` and `/fil/msgs` GossipSub topics. It listens to new blocks being propagated by other nodes. It picks one block as the `BestTargetHead` and starts syncing the blockchain up to this height from the `TrustedCheckpoint`, which by default is the `GenesisBlock` or `GenesisCheckpoint`. In order to pick the `BestTargetHead` the peer is comparing a combination of height and weight - the higher these values the higher the chances of the block being on the main chain. If there are two blocks on the same height, the peer should choose the one with the higher weight. Once the peer chooses the `BestTargetHead` it uses the BlockSync protocol to fetch the blocks and get to the current height. From that point on it is in `CHAIN_FOLLOW` mode, where it uses GossipSub to receive new blocks, or Bitswap if it hears about a block that it has not received through GossipSub.
 
 ## ChainSync Overview
 
@@ -24,18 +24,20 @@ but is general enough that it can serve other blockchains. `ChainSync` is a
 group of smaller protocols, which handle different parts of the sync process.
 
 Chain synchronisation is generally needed in the following cases:
+
 1. when a node first joins the network and needs to get to the current state before validating or extending the chain.
 2. when a node has fell out of sync, e.g., due to a brief disconnection.
 3. during normal operation in order to keep up with the latest messages and blocks.
 
 There are three main protocols used to achieve synchronisation for these three cases.
+
 - `GossipSub` is the libp2p pubsub protocol used to propagate messages and blocks. It is mainly used in the third process above when a node needs to stay in sync with new blocks being produced and propagated.
 - `BlockSync` is used to synchronise specific parts of the chain, that is from and to a specific height.
 - `hello` protocol, which is used when two peers first "meet" (i.e., first time they connect to each other). According to the protocol, they exchange their chain heads.
 
 In addition, `Bitswap` is used to request and receive blocks, when a node is synchonized ("caught up"), but GossipSub has failed to deliver some blocks to a node. Finally, `GraphSync` can be used to fetch parts of the blockchain as a more efficient version of `Bitswap`.
 
-Filecoin nodes are libp2p nodes, and therefore may run a variety of other protocols. As with anything else in Filecoin, nodes MAY opt to use additional protocols to achieve the results. That said, nodes MUST implement the version of `ChainSync` as described in this spec in order to be considered implementations of Filecoin. 
+Filecoin nodes are libp2p nodes, and therefore may run a variety of other protocols. As with anything else in Filecoin, nodes MAY opt to use additional protocols to achieve the results. That said, nodes MUST implement the version of `ChainSync` as described in this spec in order to be considered implementations of Filecoin.
 
 ## Terms and Concepts
 
@@ -62,7 +64,7 @@ At a high level, `ChainSync` does the following:
   - Step 1. Start with a `TrustedCheckpoint` (defaults to `GenesisCheckpoint`). The `TrustedCheckpoint` SHOULD NOT be verified in software, it SHOULD be verified by operators.
   - Step 2. Get the block it points to, and that block's parents
   - Step 3. Fetch the `StateTree`
-- **Part 4: Catch up to the chain  (`CHAIN_CATCHUP`)**
+- **Part 4: Catch up to the chain (`CHAIN_CATCHUP`)**
   - Step 1. Maintain a set of `TargetHeads` (`BlockCIDs`), and select the `BestTargetHead` from it
   - Step 2. Synchronize to the latest heads observed, validating blocks towards them (requesting intermediate points)
   - Step 3. As validation progresses, `TargetHeads` and `BestTargetHead` will likely change, as new blocks at the production fringe will arrive,
@@ -73,14 +75,12 @@ At a high level, `ChainSync` does the following:
   - Step 2. Receive, validate, and propagate received `Blocks`
   - Step 3. Now with greater certainty of having the best chain, finalize Tipsets, and advance chain state.
 
-
 `ChainSync` uses the following _conceptual_ state machine. Since this is a _conceptual_ state machine,
 implementations MAY deviate from implementing precisely these states, or dividing them strictly.
 Implementations MAY blur the lines between the states. If so, implementations MUST ensure security
 of the altered protocol.
 
 ![ChainSync State Machine](chainsync_fsm.dot)
-
 
 ## Peer Discovery
 
@@ -117,4 +117,3 @@ With explicit peering agreements, the operators must specify a list of peers whi
   - **BV6 - Chain ancestry and finality**: Verify block links back to trusted chain, not prior to finality.
   - **BV7 - Message Signatures**:
   - **BV8 - State tree**: Parent tipset message execution produces the claimed state tree root and receipts.
-

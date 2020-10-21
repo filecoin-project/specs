@@ -24,10 +24,10 @@ The [Storage Power Consensus](storage_power_consensus) subsystem uses access to 
 - Access to a weighting function enabling [Chain Selection](expected_consensus#chain-selection) by the chain manager.
 - Access to the most recently [finalized tipset](expected_consensus#finality-in-ec) available to all protocol participants.
 
-
 ## Tickets in EC
 
 There are two kinds of tickets:
+
 1. ElectionProof ticket: which is the VRF that runs based on DRAND input. In particular, the miner gets the DRAND randomness beacon and gives it as input to the VRF together with the miner's worker's key.
 2. the ticket is generated using the VRF as above, but the input includes the concatenation of the previous ticket. This means that the new ticket is generated running the VRF on the old ticket concatenated with the new DRAND value (and the key as before).
 
@@ -70,7 +70,7 @@ A miner will use the ElectionProof ticket to uniformly draw a value from 0 to 1 
 
 **Step 1:** Check for leader election
 
-A miner checks if they are elected for the current epoch by running `GenerateElectionProof`. 
+A miner checks if they are elected for the current epoch by running `GenerateElectionProof`.
 
 Recall that a miner is elected proportionally to their quality adjusted power at `ElectionPowerTableLookback`.
 
@@ -89,7 +89,7 @@ An elected miner gets the randomness value through the DRAND randomness generato
 
 WinningPoSt uses the randomness to select a sector for which the miner must generate a proof. If the miner is not able to generate this proof within some predefined amount of time, then they will not be able to create a block. The sector is chosen from the power table `WinningPoStSectorSetLookback` epochs in the past.
 
-Similarly to `ElectionPowerTableLookback`, a requirement for setting `WinningPoStSectorSetLookback` is that it must be larger than finality. This is to enforce that a miner cannot play with the power table and change which sector is challenged for  WinningPoSt (i.e., set the challenged sector to one of their preference).
+Similarly to `ElectionPowerTableLookback`, a requirement for setting `WinningPoStSectorSetLookback` is that it must be larger than finality. This is to enforce that a miner cannot play with the power table and change which sector is challenged for WinningPoSt (i.e., set the challenged sector to one of their preference).
 
 If `WinningPoStSectorSetLookback` is not longer than finality, a miner could try to create forks to change their sectors allocation to get a more favourable sector to be challenged for example. A simple attack could unfold as follows:
 
@@ -107,6 +107,7 @@ Note that there are variants of this attack in which the miner introduces a new 
 An expired sector will not be challenged during WindowPoSt (hence not penalized after its expiration). However, an edge case around the fact that `WinningPoStSectorSetLookback` is longer than finality is that due to the lookback, a miner can be challenged for an expired sector between `expirationEpoch` and `expirationEpoch + WinningPoStSectorSetLookback - 1`. Therefore, it is important that miners keep an expired sector for `WinningPoStSectorSetLookback` more epochs after expiration, or they will not be able to generate a WinningPoSt (and get the corresponding reward).
 
 Example:
+
 - At epoch `X`:
   - Sector expires and miner deletes the sector.
 - At epoch `X+WinningPoStSectorSetLookback-1`:
@@ -137,7 +138,7 @@ The "WinCount" is an integer that is used for weight and block reward calculatio
   - The probability of winning one block is `1-P[X=0]`, where `X` is a Poisson random variable following Poisson distribution with parameter `lambda = MinerPowerShare*ExpectedLeadersPerEpoch`. Thus, if `h_n` is less than `1-P[X=0]`, the miner wins at least one block.
   - Similarly if `h_n` is less than `1-P[X=0]-P[X=1]` we have at least two blocks and so on.
   - While it is not permitted for a single miner to publish two distinct blocks, in this case, the miner produces a single block which earns two block rewards
-  
+
 #### Explanations - Poisson Sortition
 
 Filecoin is building on the principle that a miner possessing _X%_ of network power should win as many times as X miners with 1% of network power in the election algorithm.
@@ -148,20 +149,18 @@ Despite this finding, we wanted to assess the difference between the two distrib
 
 Using `lambda = MinerPower*ExepectedLeader` as the parameter for the Poisson distribution, and assuming `TotalPower =10000`, `minerPower = 3300` and `ExpectedLeaderPerEpoch = 5`, we find (see table) that the probability mass function for the Binomial and the Poisson distributions do not differ much anyway.
 
-
-k | Binomial | Poisson
-|---|---|---|
-0 | 0.19197 | 0.19205
-1 | 0.31691 | 0.31688
-2 | 0.26150 | 0.26143
-3 | 0.14381 | 0.14379
-4 | 0.05930 | 0.05931
-5 | 0.01955 | 0.01957
-6 | 0.00537 | 0.00538
-7 | 0.00126 | 0.00127
-8 | 0.00026 | 0.00026
-9 | 0.00005 | 0.00005
-
+| k   | Binomial | Poisson |
+| --- | -------- | ------- |
+| 0   | 0.19197  | 0.19205 |
+| 1   | 0.31691  | 0.31688 |
+| 2   | 0.26150  | 0.26143 |
+| 3   | 0.14381  | 0.14379 |
+| 4   | 0.05930  | 0.05931 |
+| 5   | 0.01955  | 0.01957 |
+| 6   | 0.00537  | 0.00538 |
+| 7   | 0.00126  | 0.00127 |
+| 8   | 0.00026  | 0.00026 |
+| 9   | 0.00005  | 0.00005 |
 
 **Justification for the need of _WinCount_**
 
@@ -182,11 +181,11 @@ Bernouli, Binomial and Poisson distributions have been considered for the _WinCo
 - Option 4: WinCount(p,N) ~ Binomial(p/M, ME/N)
 - Option 5: WinCount(p,N) ~ Poisson(pE/N)
 
-Note that in Options 2-5 the expectation of the win-count grows linearly with the miner's power `p`. That is,  `𝔼[WinCount(p,N)] = pE/N`. For Option 1 this property does not hold when p/N > 1/E.
+Note that in Options 2-5 the expectation of the win-count grows linearly with the miner's power `p`. That is, `𝔼[WinCount(p,N)] = pE/N`. For Option 1 this property does not hold when p/N > 1/E.
 
-Furthermore, in Options 1, 3 and 5 the _WinCount distribution is invariant to the number of Sybils in the system. In particular WinCount(p,N)=2WinCount(p/2,N), which is a desirable property.
+Furthermore, in Options 1, 3 and 5 the \_WinCount distribution is invariant to the number of Sybils in the system. In particular WinCount(p,N)=2WinCount(p/2,N), which is a desirable property.
 
-In Option 5 (the one used in Filecoin Leader Election), the ticket targets for each _WinCount k that range from 1 to mE (with m=2 or 3) shall approximate the upside-down CDF of a Poisson distribution with rate λ=pE/N, or explicitly, 2²⁵⁶(1-exp(-pE/N)∑ᵏ⁻¹ᵢ₌₀(pE/N)ⁱ/(i!)).
+In Option 5 (the one used in Filecoin Leader Election), the ticket targets for each \_WinCount k that range from 1 to mE (with m=2 or 3) shall approximate the upside-down CDF of a Poisson distribution with rate λ=pE/N, or explicitly, 2²⁵⁶(1-exp(-pE/N)∑ᵏ⁻¹ᵢ₌₀(pE/N)ⁱ/(i!)).
 
 **Rationale for the Poisson Sortition choice**
 
@@ -319,13 +318,13 @@ w[r+1] = w[r] + (wPowerFactor[r+1] + wBlocksFactor[r+1]) * 2^8
 
 For a given tipset `ts` in round `r+1`, we define:
 
-- `wPowerFactor[r+1]  = wFunction(totalPowerAtTipset(ts))`
-- `wBlocksFactor[r+1] =  wPowerFactor[r+1] * wRatio * t / e`
+- `wPowerFactor[r+1] = wFunction(totalPowerAtTipset(ts))`
+- `wBlocksFactor[r+1] = wPowerFactor[r+1] * wRatio * t / e`
   - with `t = |ticketsInTipset(ts)|`
   - `e = expected number of tickets per round in the protocol`
   - and `wRatio in ]0, 1[`
-Thus, for stability of weight across implementations, we take:
-- `wBlocksFactor[r+1] =  (wPowerFactor[r+1] * b * wRatio_num) / (e * wRatio_den)`
+    Thus, for stability of weight across implementations, we take:
+- `wBlocksFactor[r+1] = (wPowerFactor[r+1] * b * wRatio_num) / (e * wRatio_den)`
 
 We get:
 
@@ -337,8 +336,8 @@ Using the 2^8 here to prevent precision loss ahead of the division in the wBlock
 
 The exact value for these parameters remain to be determined, but for testing purposes, you may use:
 
- - `e = 5`
- - `wRatio = .5, or wRatio_num = 1, wRatio_den = 2`
+- `e = 5`
+- `wRatio = .5, or wRatio_num = 1, wRatio_den = 2`
 - `wFunction = log2b` with
   - `log2b(X) = floor(log2(x)) = (binary length of X) - 1` and `log2b(0) = 0`. Note that that special case should never be used (given it would mean an empty power table).
 
@@ -381,21 +380,23 @@ This is detectable when a given miner submits two blocks that satisfy any of the
 ### Types of faults
 
 1. **Double-Fork Mining Fault**: two blocks mined at the same epoch (even if they have the same tipset).
-   - `B4.Epoch == B5.Epoch` 
-![Double-Fork Mining Fault](diagrams/double_fork.dot)
 
+   - `B4.Epoch == B5.Epoch`
+     ![Double-Fork Mining Fault](diagrams/double_fork.dot)
 
 2. **Time-Offset Mining Fault**: two blocks mined off of the same Tipset at different epochs.
+
    - `B3.Parents == B4.Parents && B3.Epoch != B4.Epoch`
-![Time-Offset Mining Fault](diagrams/time_offset.dot)
+     ![Time-Offset Mining Fault](diagrams/time_offset.dot)
 
 3. **Parent-Grinding Fault**: one block's parent is a Tipset that provably should have included a given block but does not. While it cannot be proven that a missing block was willfully omitted in general (i.e. network latency could simply mean the miner did not receive a particular block), it can when a miner has successfully mined a block two epochs in a row and omitted one. That is, this condition should be evoked when a miner omits their own prior block.
-Specifically, this can be proven with a "witness" block, that is by submitting blocks B2, B3, B4 where B2 is B4's parent and B3's sibling but B3 is not B4's parent.
-    - `!B4.Parents.Include(B3) && B4.Parents.Include(B2) && B3.Parents == B2.Parents && B3.Epoch == B2.Epoch`
-![Parent-Grinding fault](diagrams/parent_grinding.dot)
+   Specifically, this can be proven with a "witness" block, that is by submitting blocks B2, B3, B4 where B2 is B4's parent and B3's sibling but B3 is not B4's parent. - `!B4.Parents.Include(B3) && B4.Parents.Include(B2) && B3.Parents == B2.Parents && B3.Epoch == B2.Epoch`
+   ![Parent-Grinding fault](diagrams/parent_grinding.dot)
 
 ### Penalization for faults
+
 A single consensus fault results into:
+
 - miner termination and removal of power from the power table,
 - loss of all pledge collateral (which includes the initial pledge and blocks rewards yet to be vested)
 

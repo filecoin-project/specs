@@ -1,5 +1,5 @@
 ---
-title: "Faults"
+title: 'Faults'
 weight: 4
 dashboardWeight: 2
 dashboardState: reliable

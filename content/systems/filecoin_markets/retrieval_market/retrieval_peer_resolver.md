@@ -1,5 +1,5 @@
 ---
-title: "Retrieval Peer Resolver"
+title: 'Retrieval Peer Resolver'
 weight: 1
 dashboardWeight: 2
 dashboardState: stable

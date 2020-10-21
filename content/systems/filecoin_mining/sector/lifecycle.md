@@ -26,7 +26,7 @@ Miners can extend the lifetime of a sector at any time, though the sector will b
 A sector can be in one of the following states.
 
 | State          | Description                                                                                                                                           |
-|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Precommitted` | Miner seals sector and submits `miner.PreCommitSector`                                                                                                |
 | `Committed`    | Miner generates a Seal proof and submits `miner.ProveCommitSector`                                                                                    |
 | `Active`       | Miner generate valid PoSt proofs and timely submits `miner.SubmitWindowedPoSt`                                                                        |

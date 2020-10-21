@@ -11,6 +11,6 @@ plugins:
   remark-lint-no-hr-after-heading:
   # disable some of the sensible defaults given where we are today.
   remark-lint-list-item-indent: false
-  remark-lint-final-newline: false
-  remark-lint-no-literal-urls: false
-  remark-lint-list-item-bullet-indent: false
+#   remark-lint-final-newline: false
+#   remark-lint-no-literal-urls: false
+#   remark-lint-list-item-bullet-indent: false

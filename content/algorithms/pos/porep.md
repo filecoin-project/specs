@@ -7,7 +7,6 @@ dashboardAudit: wip
 dashboardTests: 0
 ---
 
-
 # Proof-of-Replication (PoRep)
 
 In order to register a sector with the Filecoin network, the sector has to be sealed. Sealing is a computation-heavy process that produces a unique representation of the data in the form of a proof, called **_Proof-of-Replication_** or PoRep.

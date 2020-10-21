@@ -5,7 +5,9 @@ math-mode: true
 ---
 
 <!--lint disable -->
+
 {{<plain hidden>}}
+
 $$
 \gdef\createporepbatch{\textsf{create_porep_batch}}
 \gdef\GrothProof{\textsf{Groth16Proof}}
@@ -359,7 +361,9 @@ $$
 \gdef\ColumnDigest{\textsf{ColumnDigest}}
 \gdef\encode{\textsf{encode}}
 $$
+
 {{</plain>}}
+
 <!--lint enable -->
 
 # Math mode
@@ -369,8 +373,9 @@ $$
 ### Merkle Proofs
 
 **Implementation:**
-* [`storage_proofs::merkle::MerkleTreeWrapper::gen_proof()`]()
-* [`merkle_light::merkle::MerkleTree::gen_proof()`](https://github.com/filecoin-project/merkle_light/blob/64a468807c594d306d12d943dd90cc5f88d0d6b0/src/merkle.rs#L918)
+
+- [`storage_proofs::merkle::MerkleTreeWrapper::gen_proof()`]()
+- [`merkle_light::merkle::MerkleTree::gen_proof()`](https://github.com/filecoin-project/merkle_light/blob/64a468807c594d306d12d943dd90cc5f88d0d6b0/src/merkle.rs#L918)
 
 **Additional Notation:**
 `$\index_l: [\lfloor N_\nodes / 2^l \rfloor] \equiv [\len(\BinTree\dot\layer_l)]$`
@@ -398,9 +403,9 @@ $\line{8}{\bi}{\quad \path\dot\push(\BinPathElement \thin \{\ \sibling, \thin \m
 $\line{9}{\bi}{\return \BinTreeProof_c \thin \{\ \leaf, \thin \root, \thin \path\ \}}$
 ```
 
-
 **Code Comments:**
-* **Line 5:** Calculates the node index in layer `$l$` of the node that the verifier calculated using the previous lath element (or the `$\BinTreeProof_c\dot\leaf$ if $l = 0$`). Note that `$c \gg l \equiv \lfloor c / 2^l \rfloor \thin$`.
+
+- **Line 5:** Calculates the node index in layer `$l$` of the node that the verifier calculated using the previous lath element (or the `$\BinTreeProof_c\dot\leaf$ if $l = 0$`). Note that `$c \gg l \equiv \lfloor c / 2^l \rfloor \thin$`.
 
 ### OctTreeProofs
 

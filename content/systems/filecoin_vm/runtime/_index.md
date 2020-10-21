@@ -12,7 +12,7 @@ dashboardTests: 0
 
 ## Receipts
 
-A `MessageReceipt` contains the result of a top-level message execution. Every syntactically valid and correctly signed message can be included in a block and will produce a receipt from execution. 
+A `MessageReceipt` contains the result of a top-level message execution. Every syntactically valid and correctly signed message can be included in a block and will produce a receipt from execution.
 
 A syntactically valid receipt has:
 

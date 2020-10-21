@@ -5,7 +5,6 @@ bookhidden: true
 
 # VM Interpreter
 
-
 ## Sending Funds
 
 As all messages carry a method ID, the method ID '0' is reserved for simple
@@ -64,7 +63,6 @@ The current state of a given actor can be accessed first by calling `Head` to re
 
 To store data, `Put` is used. Any number of objects may be `Put`, but only the object whose CID is committed, or objects that are linked to in some way by the committed object will be kept. All other objects are dropped after the method invocation returns. Objects stored via `Put` are first marshaled to CBOR-IPLD, and then stored, the returned CID is a 32 byte sha2-256 CBOR-IPLD content identifier.
 
-
 ## Pledge Collateral
 
 Filecoin includes a concept of "Pledge Collateral", which is FIL collateral that storage miners must lock up when participating as miners.
@@ -74,7 +72,6 @@ Pledge collateral serves several functions in Filecoin. It:
 - makes it possible to slash misbehaving or slow miners
 - ensures that miners have skin in the game (for the Filecoin network as a whole)
 - increases the cost of launching a 51% attack
-
 
 ### Computing Pledge Collateral
 
@@ -107,6 +104,7 @@ minerPerCapitaCollateral := totalPerCapitaCollateral / numMiners
 ```
 
 Putting all these variables together, we have each miner's individual collateral requirement:
+
 ```go
 minerPlegeCollateral := availableFil * ( POWER_COLLATERAL_PROPORTION * minerPower / totalNetworkPower PER_CAPITA_COLLATERAL_PROPORTION / numMiners)
 ```

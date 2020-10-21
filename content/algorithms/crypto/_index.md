@@ -1,5 +1,5 @@
 ---
-title: "Cryptographic Primitives"
+title: 'Cryptographic Primitives'
 bookCollapseSection: true
 weight: 7
 dashboardWeight: 2
@@ -14,6 +14,5 @@ dashboardTests: 0
 - Vector commitment scheme
 - zkSNARK
 - Reliable broadcast channel (libp2p)
-
 
 - TODO: Add more detail and include references to relevant papers.

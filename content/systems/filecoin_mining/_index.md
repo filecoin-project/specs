@@ -23,6 +23,6 @@ primarily describes in detail what MUST and SHOULD happen here, and leaves ample
 various optimizations for implementers, miners, and users to make. In some parts, we describe
 algorithms that could be replaced by other, more optimized versions, but in those cases it is
 important that the **protocol constraints** are satisfied. The **protocol constraints** are
-spelled out in clear detail.  It is up
+spelled out in clear detail. It is up
 to implementers who deviate from the algorithms presented here to ensure their modifications
 satisfy those constraints, especially those relating to protocol security.

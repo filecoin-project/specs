@@ -31,7 +31,7 @@ but their code belongs in the Markets system.
 - **Responder**: The party that receives the data transfer request - normally the storage provider.
 - **Data Transfer Voucher or Token**: A wrapper around storage- or retrieval-related data that can identify and validate the transfer request to the other party.
 - **Request Validator**: The data transfer module only initiates a transfer when the responder can validate that the request is tied directly to either an existing storage or retrieval deal. Validation is not performed by the data transfer module itself. Instead, a request validator inspects the data transfer voucher to determine whether to respond to the request or disregard the request.
-- **Transporter**:  Once a request is negotiated and validated, the actual transfer is managed by a transporter on both sides. The transporter is part of the data transfer module but is isolated from the negotiation process. It has access to an underlying verifiable transport protocol and uses it to send data and track progress.
+- **Transporter**: Once a request is negotiated and validated, the actual transfer is managed by a transporter on both sides. The transporter is part of the data transfer module but is isolated from the negotiation process. It has access to an underlying verifiable transport protocol and uses it to send data and track progress.
 - **Subscriber**: An external component that monitors progress of a data transfer by subscribing to data transfer events, such as progress or completion.
 - **GraphSync**: The default underlying transport protocol used by the Transporter. The full graphsync specification can be found [here](https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md)
 
@@ -43,7 +43,7 @@ There are two basic phases to any data transfer:
 2. Transfer: once the negotiation phase is complete, the data is actually transferred. The default protocol used to do the transfer is Graphsync.
 
 Note that the Negotiation and Transfer stages can occur in separate round trips,
-or potentially the same round trip, where the requesting party implicitly agrees by sending the request, and the responding party can agree and immediately send or receive data. Whether the process is taking place in a single or multiple round-trips depends in part on whether the request is a push request (storage deal) or a pull request (retrieval deal), and on whether the data transfer negotiation process is able to piggy back on the underlying transport mechanism. 
+or potentially the same round trip, where the requesting party implicitly agrees by sending the request, and the responding party can agree and immediately send or receive data. Whether the process is taking place in a single or multiple round-trips depends in part on whether the request is a push request (storage deal) or a pull request (retrieval deal), and on whether the data transfer negotiation process is able to piggy back on the underlying transport mechanism.
 In the case of GraphSync as transport mechanism, data transfer requests can piggy back as an extension to the GraphSync protocol using [GraphSync's built-in extensibility](https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md#extensions). So, only a single round trip is required for Pull Requests. However, because Graphsync is a request/response protocol with no direct support for `push` type requests, in the Push case, negotiation happens in a seperate request over data transfer's own libp2p protocol `/fil/datatransfer/1.0.0`. Other future transport mechinisms might handle both Push and Pull, either, or neither as a single round trip.
 Upon receiving a data transfer request, the data transfer module does the decoding the voucher and delivers it to the request validators. In storage deals, the request validator checks if the deal included is one that the recipient has agreed to before. For retrieval deals the request includes the proposal for the retrieval deal itself. As long as request validator accepts the deal proposal, everything is done at once as a single round-trip.
 
@@ -66,7 +66,6 @@ It is worth noting that in the case of retrieval the provider can accept the dea
 The push flow is ideal for storage deals, where the client initiates the data transfer straightaway
 once the provider indicates their intent to accept and publish the client's deal proposal.
 
-
 ## Pull Flow - Single Round Trip
 
 ![Data Transfer - Single Round Trip Pull Flow](alternate-pull-flow.mmd)
@@ -88,11 +87,8 @@ transport mechanism (including offline mechanisms) is acceptable.
 
 ## Data Structures
 
-
 {{<embed src="https://github.com/filecoin-project/go-data-transfer/blob/master/types.go"  lang="go" title="Data Transfer Types">}}
 
-
 {{<embed src="https://github.com/filecoin-project/go-data-transfer/blob/master/statuses.go"  lang="go" title="Data Transfer Statuses">}}
-
 
 {{<embed src="https://github.com/filecoin-project/go-data-transfer/blob/master/manager.go"  lang="go" symbol="Manager" title="Data Transfer Manager">}}

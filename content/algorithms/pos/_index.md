@@ -22,6 +22,6 @@ be the bottleneck in systems such as Filecoin, where storage providers are requi
 the blockchain network.
 
 To address this question, we introduce a new proof, called _Proof-of-Spacetime_, where a verifier can check if a prover
-has indeed stored the outsourced data they committed to over (storage) Space and over a period of Time (hence, the name Spacetime). 
+has indeed stored the outsourced data they committed to over (storage) Space and over a period of Time (hence, the name Spacetime).
 
 Recall that in the Filecoin network, miners are storing data in fixed-size [sectors](filecoin_mining#sector). Sectors are filled with client data agreed through regular deals in the [Storage Market](filecoin_markets#storage_market), through [verified deals](algorithms#verified_clients), or with random client data in case of [Committed Capacity sectors](filecoin_mining#sector).

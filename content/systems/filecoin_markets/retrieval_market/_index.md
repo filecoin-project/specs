@@ -23,10 +23,9 @@ The main components are as follows:
 - A client module to query retrieval miners and initiate deals for retrieval
 - A provider module to respond to queries and deal proposals
 
-The retrieval market operate by piggybacking on the Data Transfer system and Graphsync to handle transfer and verification, to support arbitrary selectors, and to reduce round trips. The retrieval market can support sending arbitrary payload CIDs & selectors within a piece. 
+The retrieval market operate by piggybacking on the Data Transfer system and Graphsync to handle transfer and verification, to support arbitrary selectors, and to reduce round trips. The retrieval market can support sending arbitrary payload CIDs & selectors within a piece.
 
 The Data Transfer System is augmented accordingly to support pausing/resuming and sending intermediate vouchers to facilitate this.
-
 
 ## Deal Flow in the Retrieval Market
 
@@ -56,7 +55,7 @@ Some extra notes worth making with regard to the above process are as follows:
 - The payment channel is created when the provider accepts the deal, unless an open payment channel already exists between the given client and provider.
 - The vouchers are also created by the client and (a reference/identifier to these vouchers is) sent to the provider.
 - The payment indicated in the voucher is not taken out of the payment channel funds upon creation and exchange of vouchers between the client and the provider.
-- In order for money to be transferred to the provider's payment channel side, the provider has to *redeem* the voucher
+- In order for money to be transferred to the provider's payment channel side, the provider has to _redeem_ the voucher
 - In order for money to be taken out of the payment channel, the provider has to submit the voucher on-chain and `Collect` the funds.
 - Both redeeming and collecting vouchers/funds can be done at any time during the data transfer, but redeeming vouchers and collecting funds involves the blockchain, which further means that it incurs gas cost.
 - Once the data transfer is complete, the client or provider may Settle the channel. There is then a 12hr period within which the provider has to submit the redeemed vouchers on-chain in order to collect the funds. Once the 12hr period is complete, the client may collect any unclaimed funds from the channel, and the provider loses the funds for vouchers they did not submit.
@@ -64,21 +63,22 @@ Some extra notes worth making with regard to the above process are as follows:
 
 ## Bootstrapping Trust
 
-Neither the client nor the provider have any specific reason to trust each other. Therefore, trust is established indirectly by payments for a retrieval deal done *incrementally*. This is achieved by sending vouchers as the data transfer progresses.
+Neither the client nor the provider have any specific reason to trust each other. Therefore, trust is established indirectly by payments for a retrieval deal done _incrementally_. This is achieved by sending vouchers as the data transfer progresses.
 
 Trust establishment proceeds as follows:
+
 - When the deal is created, client & provider agree to a "payment interval" in bytes, which is the _minimum_ amount of data the provider will send before each required increment.
 - They also agree to a "payment interval increment". This means that the interval will increase by this value after each successful transfer and payment, as trust develops between client and provider.
 - Example:
-   - If my "payment interval" is 1000, and my "payment interval increase" is 300, then:
-   - The provider must send at least 1000 bytes before they require any payment (they may end up sending slightly more because block boundaries are uneven).
-   - The client must pay (i.e., issue a voucher) for all bytes sent when the provider requests payment, provided that the provider has sent at least 1000 bytes.
-   - The provider now must send at least 1300 bytes before they request payment again.
-   - The client must pay (i.e., issue subsequent vouchers) for all bytes it has not yet paid for when the provider requests payment, assuming it has received at least 1300 bytes since last payment.
-   - The process continues until the end of the retrieval, when the last payment will simply be for the remainder of bytes.
+  - If my "payment interval" is 1000, and my "payment interval increase" is 300, then:
+  - The provider must send at least 1000 bytes before they require any payment (they may end up sending slightly more because block boundaries are uneven).
+  - The client must pay (i.e., issue a voucher) for all bytes sent when the provider requests payment, provided that the provider has sent at least 1000 bytes.
+  - The provider now must send at least 1300 bytes before they request payment again.
+  - The client must pay (i.e., issue subsequent vouchers) for all bytes it has not yet paid for when the provider requests payment, assuming it has received at least 1300 bytes since last payment.
+  - The process continues until the end of the retrieval, when the last payment will simply be for the remainder of bytes.
 
 ## Data Representation in the Retrieval Market
 
-The retrieval market works based on the Payload CID. The PayloadCID is the hash that represents the root of the IPLD DAG of the UnixFS version of the file. At this stage the file is a raw system file with IPFS-style representation. In order for a client to request  for some data under the retrieval market, they have to know the PayloadCID. It is important to highlight that PayloadCIDs are not stored or registered on-chain.
+The retrieval market works based on the Payload CID. The PayloadCID is the hash that represents the root of the IPLD DAG of the UnixFS version of the file. At this stage the file is a raw system file with IPFS-style representation. In order for a client to request for some data under the retrieval market, they have to know the PayloadCID. It is important to highlight that PayloadCIDs are not stored or registered on-chain.
 
 {{<embed src="https://github.com/filecoin-project/go-fil-markets/blob/master/retrievalmarket/types.go"  lang="go" title="Retrieval Market - Common Data Types">}}

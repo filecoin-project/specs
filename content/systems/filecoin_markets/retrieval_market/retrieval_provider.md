@@ -1,5 +1,5 @@
 ---
-title: "Retrieval Provider (Miner)"
+title: 'Retrieval Provider (Miner)'
 weight: 4
 dashboardWeight: 2
 dashboardState: stable

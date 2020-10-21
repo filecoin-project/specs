@@ -32,7 +32,6 @@ This decoupling is useful for:
 - **Scalability:** systems, and various use cases, may drive different performance requirements for different opertators.
   System decoupling makes it easier for operators to scale their deployments along system boundaries.
 
-
 ## Filecoin Nodes don't need all the systems
 
 Filecoin Nodes vary significantly, and do not need all the systems.

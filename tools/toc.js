@@ -13,14 +13,14 @@ if (require.main === module) {
   run(src, dest)
 }
 
-async function run (src, dest) {
+async function run(src, dest) {
   console.log('Building toc.json')
   console.time('Built toc.json')
   await buildToc(src, dest)
   console.timeEnd('Built toc.json')
 }
 
-async function buildToc (src, dest) {
+async function buildToc(src, dest) {
   if (!fs.existsSync(path.dirname(dest))) {
     fs.mkdirSync(path.dirname(dest))
   }
