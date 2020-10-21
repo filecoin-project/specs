@@ -11,9 +11,9 @@
 {{- $title := .Title -}}
 {{- $isRemote := or (in .Destination ":") (strings.HasPrefix .Destination "//") }}
 {{- if not $isRemote }}
-    {{/* 
-      it's a local link so normalise the path and it to look up the hugo .Page data 
-      .Destination is the markdown link target as written by the author, and is likely to be shortened... 
+    {{/*
+      it's a local link so normalise the path and it to look up the hugo .Page data
+      .Destination is the markdown link target as written by the author, and is likely to be shortened...
       ...to simplify linking the author can write (see over here)[signatures] when they want to link file to algorithms/crypto/signatures.md
       So .Destination is the raw target, which should be just unique enough for .GetPage to figure out what is wanted.
 
@@ -32,9 +32,9 @@
         {{- $pathParts := split $path "/" -}}
         {{- $anchor := "" -}}
         {{- if $url.Fragment -}}
-            {{- $anchor = printf "#%s__%s" (delimit $pathParts "__") $url.Fragment -}}
+            {{- $anchor = printf "#section-%s.%s" (delimit $pathParts ".") $url.Fragment -}}
         {{- else -}}
-            {{- $anchor = printf "#%s" (delimit $pathParts "__") -}}
+            {{- $anchor = printf "#section-%s" (delimit $pathParts ".") -}}
         {{- end -}}
         {{- $destination = $anchor }}
       {{- if .Title -}}
