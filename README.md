@@ -8,28 +8,25 @@ This is the [Filecoin Specification](https://github.com/filecoin-project/specs),
 
 ## Table of Contents
 
-- [Filecoin Specification](#filecoin-specification)
-  - [Table of Contents](#table-of-contents)
-  - [Install](#install)
-  - [Writing the spec](#writing-the-spec)
-  - [Check your markdown](#check-your-markdown)
-  - [Page Template](#page-template)
-  - [Code](#code)
-  - [Images](#images)
-  - [Links](#links)
-  - [Shortcodes](#shortcodes)
-    - [`embed`](#embed)
-    - [`listing`](#listing)
-    - [`mermaid`](#mermaid)
-    - [`hint`](#hint)
-    - [`katex`](#katex)
-  - [Math mode](#math-mode)
-    - [Wrap `def`, `gdef`, etc.](#wrap-def-gdef-etc)
-    - [Wrap inline math text with code blocks](#wrap-inline-math-text-with-code-blocks)
-    - [Wrap math blocks with code fences](#wrap-math-blocks-with-code-fences)
-  - [Front-matter](#front-matter)
-  - [External modules](#external-modules)
-  - [References](#references)
+-   [Install](#install)
+-   [Writing the spec](#writing-the-spec)
+-   [Check your markdown](#check-your-markdown)
+-   [Page Template](#page-template)
+-   [Code](#code)
+-   [Images](#images)
+-   [Links](#links)
+-   [Shortcodes](#shortcodes)
+    -   [`embed`](#embed)
+    -   [`listing`](#listing)
+    -   [`mermaid`](#mermaid)
+    -   [`hint`](#hint)
+    -   [`katex`](#katex)
+-   [Math mode](#math-mode)
+    -   [Wrap `def`, `gdef`, etc.](#wrap-def-gdef-etc)
+    -   [Wrap inline math text with code blocks](#wrap-inline-math-text-with-code-blocks)
+    -   [Wrap math blocks with code fences](#wrap-math-blocks-with-code-fences)
+-   [Front-matter](#front-matter)
+-   [References](#references)
 
 ## Install
 
@@ -132,7 +129,7 @@ For `dot` and `mermaid` diagrams you link to the source file and the pipelines w
 ![Alt text](graph.dot "Graph title")
 ```
 
-> the alt text as title is used as the title where it is not provided.
+> The alt text is used as the title if not provided.
 
 ## Links
 
@@ -185,8 +182,8 @@ hugo shortcodes you can add to your markdown.
 # can embed from external sources like github
 {{<embed src="https://github.com/filecoin-project/lotus/blob/master/build/bootstrap.go" lang="go">}}
 ```
-This shortcode also supports the property `title` to add a permalink below the embed.
 
+This shortcode also supports the property `title` to add a permalink below the embed.
 
 ### `listing`
 
@@ -231,7 +228,8 @@ stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa
 ```
 
 ### `katex`
-We should **only** use `inline` mode for now! Display mode has a bug and is not responsive the formulas don't break in small screen. Track: https://github.com/KaTeX/KaTeX/issues/2271
+
+We should **only** use `inline` mode for now! Display mode has a bug and is not responsive the formulas don't break in small screen. Track: <https://github.com/KaTeX/KaTeX/issues/2271>
 
 ```md
 <!-- Use $ math $ for inline mode-->
@@ -334,48 +332,6 @@ dashboardAuditURL: https://url.to.the.report
 dashboardAuditDate: "2020-08-01"
 # This is used in the dashboard to describe if the page content has compliance tests, options are 0 or numbers of tests
 dashboardTests: 0
-```
-
-## External modules
-
-External modules should be added as [Hugo Modules](https://gohugo.io/hugo-modules/)
-You can find examples in the `config.toml`
-
-```toml
-[module]
-  [[module.imports]]
-    path = "github.com/filecoin-project/specs-actors"
-    [[module.imports.mounts]]
-    source = "."
-    target = "content/externals/specs-actors"
-```
-
-> `target` should **ALWAYS** use the folder `content/externals`
-
-This makes files from external repos available for Hugo rendering and allows for linking to up-to-date files that are directly pulled from other repositories.
-
-The configuration above gives the following information:
-
--   `path`: Repository's URL without protocol.
--   `source`: Folder from the repository referenced in the `path` to be mounted into the local Hugo filesystem.
--   `target`: Folder where `source` will be mounted locally, this should follow this structure `content/modules/<target value>`.
-
-Example: if you want to link/embed to the file `xyz.go` that lives in `https://github.com/filecoin-project/specs-actors/actors/xyz-folder/xyz.go`, from within a markdown file then with the above configuration the `src` for shortcodes or markdown image syntax would be:
-
-    {{<embed src="/externals/specs-actors/actors/xyz-folder/xyz.go"  lang="go">}}
-
-> The first foward slash is important it means the path is relative to the content folder.
-
-These modules can be updated with 
-
-```sh
-hugo mod get -u
-```
-
-or to a specific version with
-
-```sh
-hugo mod get github.com/filecoin-project/specs-actors@v0.7.2
 ```
 
 ## References
