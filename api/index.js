@@ -95,7 +95,6 @@ async function get(event, options) {
     options
   )
 
-  console.log('BUST', cacheBust)
   const cache = caches.default
   const cacheKey = url + cacheBust
   const cacheTTL = 86400 * 2 // 2 days
