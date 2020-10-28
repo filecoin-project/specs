@@ -3,7 +3,7 @@
   <ol class="depth-{{ .depth }}{{ if ge .depth 2 }} maybe-hide{{ end }}">
     {{ range .children }}
       <li>
-        <a href="#{{ .id }}">{{.text}}</a>
+        <a href="#{{ .id }}">{{.number}} {{.text}}</a>
         {{ if gt (len .children) 0 }}
           {{ template "toc-list" (dict "children" .children "depth" (add 1 $depth) ) }}
         {{ end }}
