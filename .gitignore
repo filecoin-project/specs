@@ -8,3 +8,5 @@ node_modules
 resources
 static/_gen
 data/toc.json
+api/dist
+api/worker
