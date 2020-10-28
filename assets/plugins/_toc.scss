@@ -1,3 +1,13 @@
+.book-menu nav ol {
+  li {
+    &.active {
+      &::before {
+        content: '⨎';
+        color: var(--cl-blue);
+      }
+    }
+  }
+}
 .toc {
   height: 100%;
   > ol {
