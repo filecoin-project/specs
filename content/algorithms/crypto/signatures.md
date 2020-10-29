@@ -114,7 +114,7 @@ candidates in recent blockchain systems:
   terms of grinding, which is a real concern in recent proof of stake systems.
 - BLS signatures are aggregatable: one can aggregate signatures from different
   signers into one single signature. This feature enables drastically saving
-  space on the blockchain, especially when aggregating user transactions.
+  space on the blockchain, especially when aggregating user messages.
 
 **Aggregation Functionality**: The aggregation functionality is commutative and
 associative, enabling _partial_ aggregation. For example, given
@@ -130,14 +130,12 @@ of measures, as explained [here](https://crypto.stanford.edu/~dabo/pubs/papers/B
 - Prove knowledge of the secret key
 - Use a modified scheme (such as [BLS Multi Sig](https://crypto.stanford.edu/~dabo/pubs/papers/BLSmultisig.html))
 
-Fortunately, Filecoin can enforce the second condition to safely use the
+Fortunately, Filecoin can enforce the first condition to safely use the
 aggregation property:
-Filecoin uses aggregation only for aggregating the transaction's signature of a
-block. Since Filecoin uses the account model to represent the state of the
-chain, each message for a given signer is used in combination with a nonce to
-avoid replay attacks. As a direct consequence, every transaction's message is
-unique thereby the aggregation is done on distinct messages. Obviously, the
+Filecoin uses aggregation only for aggregating message signatures within a
+single block. Since Filecoin uses the account model to represent the state of
+the chain, each message for a given signer is used in combination with a nonce
+to avoid replay attacks. As a direct consequence, every message is unique
+thereby the aggregation is done on distinct messages. Obviously, the
 **assumption** here is that the block producer **enforces that distinction** and
-the other miners will **check all transactions** to make sure they are valid.
-The validity of a transaction in Filecoin's context implies that the signature
-is correctly formed over the message with the correct nonce.
+the other miners will **check all messages** to make sure they are valid.
