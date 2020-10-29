@@ -21,7 +21,7 @@ action like a storage deal.
 Filecoin uses signatures to verify the authenticity of the following objects (non
 exhaustive list):
 
-- Messages: Users authenticate their transactions to the blockchain.
+- Messages: Users authenticate their messages to the blockchain.
 - Tickets: Miner authenticates its ticket (see [Storage Miner](filecoin_mining)).
 - Blocks: Block leader signs over all data in the block.
 
@@ -37,7 +37,7 @@ Read more about this in [Randomness](randomness).
 Filecoin currently uses two types of signatures:
 
 - ECDSA signatures over the Secp256k1 elliptic curve to authenticate user
-  transactions, mainly for compatibility with external blockchain systems.
+  messages, mainly for compatibility with external blockchain systems.
 - BLS signatures over the BLS12-381 group of curves
 
 Both signature types fulfill the `Signature` interface
@@ -48,8 +48,8 @@ and each type have additional functionality as explained below.
 ### ECDSA Signatures
 
 Filecoin uses the ECDSA signature algorithm over the secp256k1 curve to
-authenticate the blockchain transactions. The main reason is to be able to
-validate transactions from other blockchain systems that uses secp256k1 (such as
+authenticate the blockchain messages. The main reason is to be able to
+validate messages from other blockchain systems that uses secp256k1 (such as
 Bitcoin or exchanges in general). ECDSA signatures offer an additional
 useful functionality as well: to recover the public key from a given signature.
 This feature can allow space to be saved on the blockchain by extracting the public

@@ -44,10 +44,10 @@ type State struct {
 Before continuing with the details of the Payment Channel and its components and features, it is worth defining a few terms.
 
 - Voucher: a signed message created by either of the two channel parties that updates the channel balance. To differentiate to the **payment channel sender/recipient**, we refer to the voucher parties as **voucher sender/recipient**, who might or might not be the same as the payment channel ones (i.e., the voucher sender might be either the payment channel recipient or the payment channel sender).
-- Redeeming a voucher: the voucher MUST be submitted on-chain by the opposite party from the one that created it. Redeeming a voucher does not trigger movement of funds from the channel to the recipient's account, but it does incur transaction/gas costs. Vouchers can be redeemed at any time up to `Collect` (see below), as long as it has got a higher `Nonce` than a previously submitted one.
+- Redeeming a voucher: the voucher MUST be submitted on-chain by the opposite party from the one that created it. Redeeming a voucher does not trigger movement of funds from the channel to the recipient's account, but it does incur message/gas costs. Vouchers can be redeemed at any time up to `Collect` (see below), as long as it has got a higher `Nonce` than a previously submitted one.
 - `UpdateChannelState`: this is the process by which a voucher is redeemed, i.e., a voucher is submitted (but not cashed-out) on-chain.
 - `Settle`: this process starts closing the channel. It can be called by either the channel creator (sender) or the channel recipient.
-- `Collect`: with this process funds are eventually transferred from the payment channel sender to the payment channel recipient. This process incurs transaction/gas costs.
+- `Collect`: with this process funds are eventually transferred from the payment channel sender to the payment channel recipient. This process incurs message/gas costs.
 
 ## Vouchers
 

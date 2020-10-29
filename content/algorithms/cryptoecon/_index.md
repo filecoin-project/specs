@@ -42,7 +42,7 @@ The following table summarizes initial parameter recommendations for Filecoin. M
 | Sector Termination Fee                     | Estimated number of days of block reward that a sector has earned; capped at 90 days     |
 | Minimum Client Deal Collateral             | 0                                                                                        |
 | Minimum Provider Deal Collateral           | share of 1% raw byte-normalised circulating supply                                       |
-| Network Transaction Fee                    | Dynamic fee structure based on network congestion                                        |
+| Network Gas Fee                            | Dynamic fee structure based on network congestion                                        |
 
 ## Design Principles Justification
 
@@ -52,7 +52,7 @@ The following table summarizes initial parameter recommendations for Filecoin. M
 
 **Block Reward Vesting:** In order to reduce the initial pledge requirement of a sector, the network considers all vesting block rewards as collateral. However, tracking block rewards on a per-sector level is not scalable. Instead, the protocol tracks rewards at a per-miner level and linearly vests block rewards over a fixed duration.
 
-**Minimum Sector Lifetime:** The justification for a minimum sector lifetime is as follows. Committing a sector to the Filecoin Network currently requires a moderately computationally-expensive "sealing" operation up-front, whose amortized cost is lower if the sector's lifetime is longer. In addition, a sector commitment will involve on-chain transactions, for which gas fees will be paid. The net effect of these transaction costs will be subsidized by the block reward, but only for sectors that will contribute to the network and earn rewards for a sufficiently long duration. Under current constraints, short-lived sectors would reduce the overall capacity of the network to deliver useful storage over time.
+**Minimum Sector Lifetime:** The justification for a minimum sector lifetime is as follows. Committing a sector to the Filecoin Network currently requires a moderately computationally-expensive "sealing" operation up-front, whose amortized cost is lower if the sector's lifetime is longer. In addition, a sector commitment will involve on-chain messages, for which gas fees will be paid. The net effect of these messages costs will be subsidized by the block reward, but only for sectors that will contribute to the network and earn rewards for a sufficiently long duration. Under current constraints, short-lived sectors would reduce the overall capacity of the network to deliver useful storage over time.
 
 **Sector Fault Fee:** If stored sectors are withdrawn from the network only temporarily, a substantial fraction of those sectors' value may be recovered in case the data storage is quickly restored to normal operation — this means that the network need not levy a termination fee immediately. However, even temporary interruptions can be disruptive, and also damage confidence about whether the sector is recoverable or permanently lost. In order to account for this situation, the network charges a much smaller fee per day that a sector is not being proven as promised (until enough days have passed that the network writes off that sector as terminated).
 

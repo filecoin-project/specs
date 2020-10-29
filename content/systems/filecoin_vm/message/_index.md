@@ -77,7 +77,7 @@ type Message struct {
 
 There should be several functions able to extract information from the `Message struct`, such as the sender and recipient addresses, the value to be transferred, the required funds to execute the message and the CID of the message.
 
-Given that Transaction Messages should eventually be included in a Block and added to the blockchain, the validity of the message should be checked with regard to the sender and the receiver of the message, the value (which should be non-negative and always smaller than the circulating supply), the gas price (which again should be non-negative) and the `BlockGasLimit` which should not be greater than the block's gas limit.
+Given that Messages should eventually be included in a Block and added to the blockchain, the validity of the message should be checked with regard to the sender and the receiver of the message, the value (which should be non-negative and always smaller than the circulating supply), the gas price (which again should be non-negative) and the `BlockGasLimit` which should not be greater than the block's gas limit.
 
 ## Message semantic validation
 
