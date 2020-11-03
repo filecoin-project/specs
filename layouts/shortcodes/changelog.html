@@ -1,0 +1,21 @@
+{{ $url := printf "%s/releases" $.Site.Params.API }}
+{{- range $cls := getJSON $url -}}
+{{- printf "## %s" $cls.name | $.Page.RenderString -}}
+<img style="border-radius: 50%; vertical-align: sub;" src="{{$cls.author.avatar_url}}" width="20" height="20" alt="@hugomrdias"> {{ $cls.author.login }} released this in {{ $cls.published_at }} · <a href="{{ $cls.preview}}"> Go to this release <svg class="icon">
+  <use xlink:href="/symbol-defs.svg#icon-external-link"></use>
+</svg></a>
+
+<div class="book-expand">
+  <label>
+    <div class="book-expand-head flex justify-between">
+      <span>Changelog</span>
+      <span>⇵</span>
+    </div>
+    <input type="checkbox" class="hidden">
+    <div class="book-expand-content markdown-inner">
+      {{- $cls.body | markdownify -}}
+    </div>
+  </label>
+</div>
+
+{{- end -}}
