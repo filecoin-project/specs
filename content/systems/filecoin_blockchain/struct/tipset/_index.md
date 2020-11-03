@@ -25,7 +25,7 @@ The blocks in a tipset are canonically ordered by the lexicographic ordering of 
 
 Due to network propagation delay, it is possible for a miner in epoch N+1 to omit valid blocks mined at epoch N from their parent tipset. This does not make the newly generated block invalid, it does however reduce its weight and chances of being part of the canonical chain in the protocol as defined by EC's [Chain Selection](expected_consensus#chain-selection) function.
 
-Block producers are expected to coordinate how they select messages for inclusion in blocks in order to avoid duplicates and thus maximize their expected earnings from transaction fees (see [Message Pool](message_pool)).
+Block producers are expected to coordinate how they select messages for inclusion in blocks in order to avoid duplicates and thus maximize their expected earnings from message fees (see [Message Pool](message_pool)).
 
 The main Tipset structure in the Lotus implementation includes the following:
 

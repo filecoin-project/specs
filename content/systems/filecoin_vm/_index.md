@@ -11,7 +11,7 @@ dashboardTests: 0
 
 # Virtual Machine
 
-An Actor in the Filecoin Blockchain is the equivalent of the smart contract in the Ethereum Virtual Machine. Actors carry the logic needed in order to submit transactions, proofs and blocks, among other things, to the Filecoin blockchain. Every actor is identified by a unique address.
+An Actor in the Filecoin Blockchain is the equivalent of the smart contract in the Ethereum Virtual Machine.
 
 The Filecoin Virtual Machine (VM) is the system component that is in charge of execution of all actors code. Execution of actors on the Filecoin VM (i.e., on-chain executions) incur a gas cost.
 

@@ -132,7 +132,7 @@ The term _Filecoin_ is used generically to refer to the Filecoin project, protoc
 
 ## Finality
 
-[Finality](expected_consensus#finality-in-ec) is a well known concept in blockchain environments and refers to the amount of time needed until having a reasonable guarantee that a transaction cannot be reversed or cancelled. It is measured in terms of delay, normally in epochs or rounds from the point when a transaction has been included in a block published onchain.
+[Finality](expected_consensus#finality-in-ec) is a well known concept in blockchain environments and refers to the amount of time needed until having a reasonable guarantee that a message cannot be reversed or cancelled. It is measured in terms of delay, normally in epochs or rounds from the point when a message has been included in a block published on-chain.
 
 ## `fr32`
 
@@ -310,7 +310,7 @@ The [_Storage Market Actor_](sysactors) is responsible for managing storage and 
 
 ## Storage Miner Actor
 
-The [_Storage Miner Actor_](sysactors) commits storage to the network, stores data on behalf of the network and is rewarded in [FIL](glossary#fil) for the storage service. The storage miner actor is responsible for collecting proofs and reaching consensus on the latest state of the storage network. When they create a block, storage miners are rewarded with newly minted FIL, as well as the transaction fees they can levy on other participants seeking to include messages in the block.
+The [_Storage Miner Actor_](sysactors) commits storage to the network, stores data on behalf of the network and is rewarded in [FIL](glossary#fil) for the storage service. The storage miner actor is responsible for collecting proofs and reaching consensus on the latest state of the storage network. When they create a block, storage miners are rewarded with newly minted FIL, as well as the message fees they can levy on other participants seeking to include messages in the block.
 
 ## Storage Power Actor
 
