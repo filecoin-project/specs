@@ -88,7 +88,6 @@ async function releases(event) {
   const rsp = await get(event, {
     url: `https://api.github.com/repos/filecoin-project/specs/releases?per_page=100&page=1`,
     headers,
-    force: true,
     transform: async (releases) => {
       return (
         await map(
