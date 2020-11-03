@@ -2,52 +2,52 @@
   counter-reset: h1 h2 h3 h4 h5 h6;
 }
 
-.book-page .markdown h1 {
+.book-page .markdown section > h1 {
   counter-reset: h2 0;
   counter-increment: h1;
 }
-.book-page .markdown h1::before {
+.book-page .markdown section > h1::before {
   content: counter(h1) '. ';
   margin-right: 4px;
 }
-.book-page .markdown h2 {
+.book-page .markdown section > h2 {
   counter-reset: h3 0;
   counter-increment: h2;
 }
-.book-page .markdown h2::before {
+.book-page .markdown section > h2::before {
   content: counter(h1) '.' counter(h2) '.';
   margin-right: 4px;
 }
-.book-page .markdown h3 {
+.book-page .markdown section > h3 {
   counter-reset: h4 0;
   counter-increment: h3;
 }
-.book-page .markdown h3::before {
+.book-page .markdown section > h3::before {
   content: counter(h1) '.' counter(h2) '.' counter(h3) '.' ' ';
   margin-right: 4px;
 }
-.book-page .markdown h4 {
+.book-page .markdown section > h4 {
   counter-reset: h5 0;
   counter-increment: h4;
 }
-.book-page .markdown h4::before {
+.book-page .markdown section > h4::before {
   content: counter(h1) '.' counter(h2) '.' counter(h3) '.' counter(h4) '.' ' ';
   margin-right: 4px;
 }
-.book-page .markdown h5 {
+.book-page .markdown section > h5 {
   counter-reset: h6 0;
   counter-increment: h5;
 }
-.book-page .markdown h5::before {
+.book-page .markdown section > h5::before {
   content: counter(h1) '.' counter(h2) '.' counter(h3) '.' counter(h4) '.'
     counter(h5) '.' ' ';
   margin-right: 4px;
 }
-.book-page .markdown h6 {
+.book-page .markdown section > h6 {
   counter-reset: h7 0;
   counter-increment: h6;
 }
-.book-page .markdown h6::before {
+.book-page .markdown section > h6::before {
   content: counter(h1) '.' counter(h2) '.' counter(h3) '.' counter(h4) '.'
     counter(h5) '.' counter(h6) '.' ' ';
   margin-right: 4px;

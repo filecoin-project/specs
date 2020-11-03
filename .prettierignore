@@ -10,3 +10,5 @@ static/_gen
 data/toc.json
 themes
 layouts
+api/dist
+api/worker
