@@ -1,21 +1,17 @@
-const Router = require('./router')
+const Router = require('./src/router')
 const dlv = require('dlv')
-const merge = require('merge-options')
-const nanoid = require('nanoid/non-secure')
+const get = require('./src/get')
+const map = require('p-map')
 
-const cacheBust = nanoid.nanoid()
-/**
- * Example of how router can be used in an application
- *  */
 addEventListener('fetch', (event) => {
   event.respondWith(handleRequest(event))
 })
 
 async function handleRequest(event) {
   const r = new Router()
-  // Replace with the appropriate paths and handlers
   r.get('.*/cov', () => cov(event))
   r.get('.*/github', () => github(event))
+  r.get('.*/releases', () => releases(event))
   r.get('/', () => new Response('Hello worker!')) // return a default message for the root route
 
   try {
@@ -61,7 +57,7 @@ async function github(event) {
   const ref = file[6]
   const headers = {
     'User-Agent': 'hugomrdias',
-    // Authorization: `token ${GITHUB_TOKEN}`
+    Authorization: `token ${GITHUB_TOKEN}`,
   }
 
   const treeUrlRsp = await get(event, {
@@ -84,79 +80,47 @@ async function github(event) {
   return data
 }
 
-async function get(event, options) {
-  const { url, transform, force, headers } = merge(
-    {
-      url: '',
-      transform: (d) => d,
-      force: false,
-      headers: {},
-    },
-    options
-  )
-
-  const cache = caches.default
-  const cacheKey = url + cacheBust
-  const cacheTTL = 86400 * 2 // 2 days
-  const cacheRevalidateTTL = 3600 * 2 // 2 hours
-  const cachedResponse = await cache.match(cacheKey)
-
-  if (force || !cachedResponse) {
-    console.log('Cache miss for ', cacheKey)
-    // if not in cache get from the origin
-    const response = await fetch(url, {
-      headers: {
-        ...headers,
-        'If-None-Match': cachedResponse
-          ? cachedResponse.headers.get('ETag')
-          : null,
-      },
-    })
-
-    if (response.ok) {
-      const { headers } = response
-      const contentType = headers.get('content-type') || ''
-
-      if (contentType.includes('application/json')) {
-        // transform the data
-        const data = transform(await response.json())
-
-        // build new response with the transformed body
-        const transformedResponse = new Response(JSON.stringify(data), {
-          headers: {
-            'Content-Type': 'application/json;charset=UTF-8',
-            'Cache-Control': `max-age=${cacheTTL}`,
-            'X-RateLimit-Limit': headers.get('X-RateLimit-Limit'),
-            'X-RateLimit-Remaining': headers.get('X-RateLimit-Remaining'),
-            'X-RateLimit-Reset': headers.get('X-RateLimit-Reset'),
-            ETag: headers.get('ETag'),
-          },
-        })
-
-        // save response to cache
-        event.waitUntil(cache.put(cacheKey, transformedResponse.clone()))
-
-        return transformedResponse
-      } else {
-        throw new Error(
-          `Request error content type not supported. ${contentType}`
-        )
-      }
-    } else if (response.status === 304) {
-      // renew cache response
-      event.waitUntil(cache.put(cacheKey, cachedResponse.clone()))
-      return cachedResponse.clone()
-    } else {
-      return response
-    }
-  } else {
-    console.log('Cache hit for ', cacheKey, cachedResponse.headers.get('age'))
-    const cacheAge = cachedResponse.headers.get('age')
-
-    if (cacheAge > cacheRevalidateTTL) {
-      console.log('Cache is too old, revalidating...')
-      event.waitUntil(get(event, { url, transform, force: true }))
-    }
-    return cachedResponse
+async function releases(event) {
+  const headers = {
+    'User-Agent': 'hugomrdias',
+    Authorization: `token ${GITHUB_TOKEN}`,
   }
+  const rsp = await get(event, {
+    url: `https://api.github.com/repos/filecoin-project/specs/releases?per_page=100&page=1`,
+    headers,
+    force: true,
+    transform: async (releases) => {
+      return (
+        await map(
+          releases,
+          async (r) => {
+            const status = await get(event, {
+              url: `https://api.github.com/repos/filecoin-project/specs/commits/${r.tag_name}/status`,
+              headers,
+            })
+            const statusData = await status.json()
+            const preview = dlv(statusData, 'statuses').find(
+              (d) => d.description === 'Preview ready'
+            )
+
+            if (preview) {
+              return {
+                state: dlv(statusData, 'state'),
+                preview: preview.target_url,
+                tag_name: r.tag_name,
+                name: r.name,
+                author: r.author,
+                created_at: r.created_at,
+                published_at: r.published_at,
+                body: r.body,
+              }
+            }
+          },
+          { concurrency: 3 }
+        )
+      ).filter(Boolean)
+    },
+  })
+
+  return rsp
 }
