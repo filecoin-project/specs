@@ -1,0 +1,80 @@
+{{ if isset .Site.Data "toc" }}
+  {{ template "dashboard-spec" (dict "children" .Site.Data.toc "number" 0 )}}
+{{ end }}
+
+{{ define "dashboard-spec" }}
+<table id="dashboard" class="sort Dashboard tablesort">
+    <thead>
+        <tr>
+            <th>Section</th>
+            <th>State</th>
+            <th>Theory Audit</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{ range .children }}
+            {{- template "dashboard-spec-tr" . -}}
+        {{ end }}
+    </tbody>
+</table>
+{{ end }}
+
+{{ define "stateToNumber" }}
+    {{- $num := 7 -}}
+    {{- if eq . "done" -}}{{$num = 1}}{{end}}
+    {{- if eq . "stable" -}}{{$num = 1}}{{end}}
+    {{- if eq . "reliable" -}}{{$num = 2}}{{end}}
+    {{- if eq . "wip" -}}{{$num = 3}}{{end}}
+    {{- if eq . "incorrect" -}}{{$num = 4}}{{end}}
+    {{- if eq . "missing" -}}{{$num = 5}}{{end}}
+    {{- if eq . "coming" -}}{{$num = 6}}{{end}}
+    {{- $num -}}
+{{end}}
+
+{{ define "humanizeState" }}
+    {{- if eq . "wip" -}}
+    Draft/WIP
+    {{- else if eq . "coming" -}}
+    Report Coming Soon
+    {{- else if eq . "n/a" -}}
+    {{ else }}
+        {{ humanize . }}
+    {{ end }}
+{{ end }}
+
+<!-- Children TR template -->
+{{- define "dashboard-spec-tr" -}}
+<tr>
+    <!-- Section -->
+    <td class="Dashboard-section">
+        {{.number}} <a href="#{{.id}}">{{.text}}</a>
+    </td>
+
+    <!-- State -->
+    <td data-sort="{{template "stateToNumber" .dashboardState}}" class="text-black bg-na bg-{{.dashboardState}}">
+        {{ template "humanizeState" .dashboardState }}
+    </td>
+
+    <!-- Audit -->
+    <td data-sort="{{template "stateToNumber" .dashboardAudit}}" class="text-black bg-{{.dashboardAudit}}">
+        {{- if eq .dashboardAuditURL "" -}}
+            {{ template "humanizeState" .dashboardAudit }}
+        {{- else -}}
+            {{- if hasPrefix .dashboardAuditURL "http" -}}
+                <a href="{{ .dashboardAuditURL }}" title="Read the audit report" target="_blank" rel="noopener noreferrer">{{.dashboardAuditDate}}<svg class="icon">
+                    <use xlink:href="/symbol-defs.svg#icon-external-link"></use>
+                </svg></a>
+            {{- else -}}
+                <a href="{{ .dashboardAuditURL }}" title="Read the audit reports"><svg class="icon">
+                    <use xlink:href="/symbol-defs.svg#icon-shield"></use>
+                </svg>Reports</a>
+            {{- end -}}
+        {{- end -}}
+    </td>
+</tr>
+{{ range .children }}
+    {{ if .page }}
+        {{- template "dashboard-spec-tr" . -}}
+    {{ end }}
+{{ end }}
+{{- end -}}

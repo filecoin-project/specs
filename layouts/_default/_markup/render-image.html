@@ -1,0 +1,52 @@
+{{- $isRemote := or (in .Destination ":") (strings.HasPrefix .Destination "//") }}
+{{ $src := .Destination }}
+{{ $path := "" }}
+{{ $genPath := "" }}
+{{ $title := default .Text .Title }}
+{{ $ext := path.Ext .Destination }}
+{{ $supported := in ".mmd,.dot" $ext }}
+
+
+
+{{- if $isRemote -}}
+    {{ $genPath = .Destination }}
+{{- else if eq $supported false -}}
+    {{ $src := .Page.Resources.GetMatch .Destination }}
+    {{ with $src }}
+        {{ $genPath = .RelPermalink }}
+    {{- else -}}
+        {{- errorf "Image '%s' not found from Page '%s'" .Destination .Page.File }}
+    {{ end }}
+{{- else -}}
+    {{ if eq ( $src | printf "%.1s") "/" }}
+        {{ $path = $src}}
+        {{ $genPath = (printf "/_gen/diagrams%s?%d" (replace $path $ext ".svg") now.Unix)}}
+    {{ else }}
+        {{ $path = printf "%s%s" .Page.File.Dir $src }}
+        {{ $genPath = (printf "/_gen/diagrams/%s?%d" (replace $path $ext ".svg") now.Unix)}}
+    {{- end -}}
+
+    {{ if fileExists $path }}
+    {{ else }}
+      {{- errorf "Image '%s' not found from Page '%s'" $src .Page.File }}
+    {{ end }}
+{{- end -}}
+
+{{ $slug := (printf "figure-%s" (anchorize $title)) }}
+
+
+
+<figure class="diagrams-container" id="{{$slug}}">
+    <figcaption title="{{ $title }}" class="diagrams-caption">
+        <a href="#{{ $slug }}" title="{{ $title }}" class="permalink">Figure: {{ $title }} </a>
+        <a class="diagrams-link" title="Open diagram in new tab" href="{{ $genPath }}" target="_blank" rel="noopener">
+            <svg class="icon">
+                <use xlink:href="/symbol-defs.svg#icon-external-link"></use>
+            </svg>
+        </a>
+    </figcaption>
+    <div title="{{ .Title }}" class="diagrams zoomable">
+        <img src="{{ $genPath | safeURL }}" loading="lazy" height="100%" alt="{{ $title }}" title="{{ $title }}"/>
+    </div>
+
+</figure>

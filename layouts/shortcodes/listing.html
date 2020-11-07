@@ -1,0 +1,85 @@
+{{/* Get the filepath */}}
+{{/* Relative to content folder */}}
+{{ if eq (.Get "src" | printf "%.1s") "/" }}
+    {{ $.Scratch.Set "filepath" ( strings.TrimLeft "/" ( .Get "src" ))}}
+{{ else }}
+{{/* Relative to page */}}
+    {{ $.Scratch.Set "filepath" $.Page.File.Dir }}
+    {{ $.Scratch.Add "filepath" ( .Get "src" ) }}
+{{ end }}
+{{ $path := ($.Scratch.Get "filepath")}}
+{{ $lang := .Get "lang" }}
+{{ $symbolName := .Get "symbol" }}
+
+{{ if fileExists $path }}
+        {{ $content := readFile $path }}
+        {{ $body := "" }}
+        {{ $comment := "" }}
+
+        <!-- search for func -->
+        <!-- func https://regex101.com/r/hEcbY2/6 -->
+        {{ $pattern2 := printf "(?m)(^\\n^((//.*\\n)*)(func(\\s\\([^\\)]+\\))?\\s%s\\([\\s\\S]+?\\n}))" $symbolName}}
+        {{ $block :=  index (findRE $pattern2 $content ) 0}}
+        {{ $comment = replaceRE $pattern2 "$2" $block }}
+        {{ $body = replaceRE $pattern2 "$4" $block }}
+
+        <!-- search for type struct -->
+        <!-- https://regex101.com/r/GxAnFP/1 -->
+        {{- if eq $body "" -}}
+            {{ $patternStruct := printf "(?m)(^\\n^((//.*\\n)*)(type %s struct \\{[\\s\\S]+?\\n}))" $symbolName}}
+            {{ $block :=  index (findRE $patternStruct $content ) 0}}
+            {{ $comment = replaceRE $patternStruct "$2" $block }}
+            {{ $body = replaceRE $patternStruct "$4" $block }}
+        {{- end -}}
+
+        <!-- search for type interface -->
+        {{- if eq $body "" -}}
+            {{ $patternStruct := printf "(?m)(^\\n^((//.*\\n)*)(type %s interface \\{[\\s\\S]+?\\n}))" $symbolName}}
+            {{ $block :=  index (findRE $patternStruct $content ) 0}}
+            {{ $comment = replaceRE $patternStruct "$2" $block }}
+            {{ $body = replaceRE $patternStruct "$4" $block }}
+        {{- end -}}
+
+        {{- if $body }}
+            <p id="symbol-comment-{{- $symbolName -}}">
+                {{ (replace $comment "//" "") | .Page.RenderString }}
+            </p>
+            <div id="symbol-body-{{- $symbolName -}}">
+                {{ $parts := split $body "\n" }}
+                {{ $partsFirst := first (sub (len $parts) 1) $parts }}
+                {{ $partsLast := last (sub (len $partsFirst) 1) $partsFirst }}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{- range $partsLast -}}
+                            {{- $pattern := printf "(?m)(^\\t([\\S]*)\\s*([\\S]*)(\\s//\\s(.*))?)" -}}
+                            {{- $name := replaceRE $pattern "$2" . -}}
+                            {{- $type := replaceRE $pattern "$3" . -}}
+                            {{- $desc := replaceRE $pattern "$5" . -}}
+                            <tr>
+                                <td><code>{{ $name }}</code></td>
+                                <td><code>{{ $type }}</code></td>
+                                <td>{{ $desc }}</td>
+                            </tr>
+                        {{- end -}}
+                    </tbody>
+                </table>
+            </div>
+        {{- else -}}
+            <blockquote class="book-hint danger">
+                {{- printf "Symbol '%s' not found in file '%s' from Page '%s'" $symbolName $path .Page.File }}
+            </blockquote>
+            {{- errorf "Symbol '%s' not found in file '%s' from Page '%s'" $symbolName $path .Page.File }}
+        {{- end -}}
+{{ else }}
+    <blockquote class="book-hint danger">
+      {{- printf "File '%s' not found from Page '%s'" $path .Page.File }}
+    </blockquote>
+    {{- errorf "File '%s' not found from Page '%s'" $path .Page.File }}
+{{ end }}

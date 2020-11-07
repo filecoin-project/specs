@@ -1,0 +1,73 @@
+<table id="dashboard-impls" class="sort Dashboard">
+    <thead>
+        <tr>
+            <th style="width:20%">Repo</th>
+            <th>Language</th>
+            <th>CI</th>
+            <th>Test Coverage</th>
+            <th>Security Audit</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{- template "dashboard-impls-children" (dict "Section" ($.Site.GetPage "implementations") "Host" $.Site.Params.API ) -}}
+    </tbody>
+</table>
+
+<!-- Children Template -->
+{{ define "dashboard-impls-children" }}
+    {{- $pages := where .Section.Pages "Params.bookhidden" "ne" true -}}
+    {{- range $impl := (sort $pages "Weight" "asc") -}}
+        {{- range $repoUrlIndex, $repoItem := .Params.implRepos -}}
+            {{ $repoUrl := $repoItem.repo }}
+            {{ $repoLang := $repoItem.lang }}
+            {{ $url := printf "%s/cov?repo=%s" $.Host $repoUrl }}
+            {{ $data := getJSON $url }}
+            {{ $path := delimit (slice $data.org $data.repo) "/" }}
+
+            {{ $color := "bg-na"}}
+            {{ if gt $data.cov 0 }}
+                {{ $color = "bg-incorrect"}}
+            {{ end }}
+            {{ if gt $data.cov 20 }}
+                {{ $color = "bg-wip"}}
+            {{ end }}
+            {{ if gt $data.cov 70 }}
+                {{ $color = "bg-reliable"}}
+            {{ end }}
+
+            <tr>
+                <td style="text-align:left"><a title="{{ $data.repo }}" href="{{ $repoUrl }}">{{ $data.repo }}</a></td>
+                <td>{{ $repoLang }}  </td>
+                <td class="text-black {{ if eq $data.ci  true }}bg-reliable{{ else if eq $data.ci false }}bg-incorrect {{ else }}bg-na{{end}}">
+                    {{ if eq $data.ci  true }}Passed{{ else if eq $data.ci false }}Failed{{ else }}Unknown{{ end }}
+                </td>
+                <td class="text-black {{ $color }}">
+                    <a class="text-black" href="https://codecov.io/gh/{{ $path }}" title="Open on codecov.io">
+                        {{ if $data.cov }}{{ math.Round $data.cov }}%{{ else }}Unknown{{end}}
+                    </a>
+                </td>
+                <td class="text-black bg-{{ $repoItem.auditState | default "missing" }}">
+                    {{ if eq $repoItem.auditState "wip" }}
+                        WIP
+                    {{ else if isset $repoItem "auditURL" }}
+                            {{ if hasPrefix $repoItem.auditURL "http" }}
+                                <a href="{{ $repoItem.auditURL }}" title="Read the audit reports" target="_blank" rel="noopener noreferrer">
+                                    Reports<svg class="icon">
+                                        <use xlink:href="/symbol-defs.svg#icon-external-link"></use>
+                                    </svg>
+                                </a>
+                            {{ else }}
+                                <a href="{{ $repoItem.auditURL }}" title="Read the audit reports">
+                                    <svg class="icon">
+                                        <use xlink:href="/symbol-defs.svg#icon-shield"></use>
+                                    </svg>Reports
+                                </a>
+                            {{ end }}
+                    {{ else }}
+                        {{ humanize $repoItem.auditState | default "Missing" }}
+                    {{ end }}
+                </td>
+            </tr>
+        {{ end }}
+    {{ end }}
+{{ end }}

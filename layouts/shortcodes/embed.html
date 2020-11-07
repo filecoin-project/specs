@@ -1,0 +1,103 @@
+{{ $src := .Get "src" }}
+
+{{/* Get the filepath */}}
+{{/* Relative to content folder */}}
+{{ if eq ($src | printf "%.1s") "/" }}
+    {{ $.Scratch.Set "filepath" ( strings.TrimLeft "/" ( $src ))}}
+{{ else }}
+{{/* Relative to page */}}
+    {{ $.Scratch.Set "filepath" $.Page.File.Dir }}
+    {{ $.Scratch.Add "filepath" ( $src ) }}
+{{ end }}
+
+
+{{ $path := ($.Scratch.Get "filepath")}}
+{{ $lang := .Get "lang" }}
+{{ $markdown := .Get "markdown" }}
+{{ $symbolName := .Get "symbol" }}
+{{ $remote := .Get "remote"}}
+{{ $external := false }}
+{{ $content := "" }}
+{{ $url := "" }}
+{{ $title := default $symbolName (.Get "title")}}
+
+{{ if hasPrefix $src "https://github.com" }}
+    {{ $external = "github" }}
+{{ end }}
+
+{{ if $external }}
+    {{- $HOST := $.Site.Params.API -}}
+    {{- $ref := default "master" (.Get "ref" ) -}}
+    {{- $resp := getJSON (printf "%s/github?file=%s" $HOST $src )  -}}
+    {{- $content = ($resp.content | base64Decode ) -}}
+    {{- $url = $resp.url -}}
+{{ else if fileExists $path }}
+    {{ $content = readFile $path }}
+{{ else }}
+    {{- errorf "File '%s' not found from Page '%s'" $path .Page.File }}
+{{ end }}
+
+{{ if $content }}
+<div class="diagrams-container" id="{{anchorize (printf "example-%s" $title) }}">
+    <div title="{{ $title }}" class="diagrams-caption">
+        <a href="#{{anchorize (printf "example-%s" $title) }}" title="{{ $title }}" class="permalink">Example: {{ $title }} </a>
+        {{- if $external -}}
+        <a class="diagrams-link" title="Open example in Github" href="{{$url}}" target="_blank" rel="noopener">
+            <svg class="icon">
+                <use xlink:href="/symbol-defs.svg#icon-github"></use>
+            </svg>
+        </a>
+        {{- end -}}
+    </div>
+    {{ if eq $markdown "true" }}
+        {{ $content | markdownify }}
+    {{ else if $symbolName }}
+        <!-- Symbols -->
+        {{ $body := "" }}
+        {{ $comment := "" }}
+
+        <!-- search for func -->
+        <!-- func https://regex101.com/r/hEcbY2/6 -->
+        {{ $pattern2 := printf "(?m)(^\\n^((//.*\\n)*)(func(\\s\\([^\\)]+\\))?\\s%s\\([\\s\\S]+?\\n}))" $symbolName}}
+        {{ $block :=  index (findRE $pattern2 $content ) 0}}
+        {{ $comment = replaceRE $pattern2 "$2" $block }}
+        {{ $body = replaceRE $pattern2 "$4" $block }}
+
+        <!-- search for type struct -->
+        <!-- https://regex101.com/r/GxAnFP/1 -->
+        {{- if eq $body "" -}}
+            {{ $patternStruct := printf "(?m)(^\\n^((//.*\\n)*)(type %s struct \\{[\\s\\S]+?\\n}))" $symbolName}}
+            {{ $block :=  index (findRE $patternStruct $content ) 0}}
+            {{ $comment = replaceRE $patternStruct "$2" $block }}
+            {{ $body = replaceRE $patternStruct "$4" $block }}
+        {{- end -}}
+
+        <!-- search for type interface -->
+        {{- if eq $body "" -}}
+            {{ $patternStruct := printf "(?m)(^\\n^((//.*\\n)*)(type %s interface \\{[\\s\\S]+?\\n}))" $symbolName}}
+            {{ $block :=  index (findRE $patternStruct $content ) 0}}
+            {{ $comment = replaceRE $patternStruct "$2" $block }}
+            {{ $body = replaceRE $patternStruct "$4" $block }}
+        {{- end -}}
+
+        {{- if $body }}
+            {{- if $comment }}
+            <div class="embed-comment" id="symbol-comment-{{- $symbolName -}}">
+                {{- (replace $comment "//" "") | .Page.RenderString -}}
+            </div>
+            {{- end -}}
+            <div id="symbol-body-{{- $symbolName -}}">
+                {{ highlight ($body | safeHTML) $lang "" }}
+            </div>
+        {{- else -}}
+            {{- errorf "Symbol '%s' not found in file '%s' from Page '%s'" $symbolName $path .Page.File }}
+        {{- end -}}
+    {{ else if $lang }}
+        <div>
+            {{ highlight ($content | safeHTML ) (.Get "lang") "" }}
+        </div>
+    {{ else }}
+        {{ $content | safeHTML }}
+    {{ end }}
+</div>
+{{ end }}

@@ -1,0 +1,78 @@
+{{/*
+  render-heading.html is a hugo hook called for each heading in each markdown doc,
+  allowing us to control the HTML generated and fix the id generation to work for
+  a single page site, and add anchors and state badges.
+*/}}
+
+{{/* get rid of unwanted filename noise */}}
+{{- $path := strings.TrimSuffix "/_index.md" .Page.File.Path }}
+{{- $path = strings.TrimSuffix ".md" $path }}
+{{- $pathParts := split $path "/" -}}
+{{- $pathSize := len $pathParts -}}
+
+{{/*
+  .Level is the heading number from the original markdown, e.g 1 for an h1.
+  $level is the corrected heading number given the depth of the file in the tree.
+*/}}
+{{- $level := add $pathSize (sub .Level 1) -}}
+{{- $originalLevel := default 1 .Level -}}
+{{- $anchor := "" -}}
+
+{{/*
+  each markdown doc must have exactly 1 h1 element.
+  e.g. in intro/_index.md, the h1 gets the id #intro...
+
+  ...while the subsequent headings have the .Anchor appended which is a hugo provided id derived from the heading text.
+  e.g  in intro/_index.md <h2>Spec Status</h2> gets the id #intro__spec-status
+*/}}
+{{- if eq .Level 1 -}}
+{{- $anchor = printf "section-%s" (delimit $pathParts ".") -}}
+{{- else -}}
+  {{- $anchor = printf "section-%s.%s" (delimit $pathParts ".") .Anchor -}}
+{{- end -}}
+
+{{/*
+  - headings get numbered by css; changing the nesting requires updating numbered.scss.
+  - heading text is grabbed by toc.js as the ToC link text
+*/}}
+<h{{ $level }} id="{{ $anchor | safeURL }}" class="level-{{ $level }}" data-page="{{if eq $originalLevel 1 }}true{{end}}" data-dashboard-weight="{{.Page.Params.dashboardWeight}}" data-dashboard-state="{{.Page.Params.dashboardState}}" data-dashboard-audit="{{.Page.Params.dashboardAudit}}" data-dashboard-audit-url="{{.Page.Params.dashboardAuditURL}}" data-dashboard-audit-date="{{.Page.Params.dashboardAuditDate}}">
+  <a href="#{{ $anchor | safeURL }}" title="link to this section">{{ .Text | safeHTML }}</a>
+
+
+  <div class="section-badges">
+      <label for="menu-{{$anchor}}" class="toggle">
+      <svg class="icon">
+          <use xlink:href="/symbol-defs.svg#icon-more-vertical"></use>
+      </svg>
+      </label>
+      <input type="checkbox" class="hidden toggle" id="menu-{{$anchor}}">
+      <ul class="dropdown">
+          <li>
+              <svg class="icon">
+                  <use xlink:href="/symbol-defs.svg#icon-award"></use>
+              </svg>
+              State <code class="bg-{{ .Page.Params.dashboardState }}">{{ .Page.Params.dashboardState }}</code>
+          </li>
+          <li>
+              <svg class="icon">
+                  <use xlink:href="/symbol-defs.svg#icon-shield"></use>
+              </svg>
+              Theory Audit <code class="bg-{{ .Page.Params.dashboardAudit }}">{{ .Page.Params.dashboardAudit }}</code>{{- if .Page.Params.dashboardAuditURL -}}<a href="{{- .Page.Params.dashboardAuditURL -}}" title="Audit report from {{.Page.Params.dashboardAuditDate}}"><svg class="icon">
+                  <use xlink:href="/symbol-defs.svg#icon-external-link"></use>
+              </svg></a>{{- end -}}
+          </li>
+          <li>
+              <svg class="icon">
+                  <use xlink:href="/symbol-defs.svg#icon-github"></use>
+              </svg>
+              <a href="{{ .Page.Site.Params.BookRepo }}/{{ .Page.Site.Params.BookEditPath }}/{{ .Page.Site.Params.contentDir }}/{{ replace .Page.File.Path "\\" "/" }}" target="_blank" rel="noopener" title="Edit this section on Github">Edit this section</a>
+          </li>
+          <li>
+              <svg class="icon">
+                  <use xlink:href="/symbol-defs.svg#icon-bookmark"></use>
+              </svg><code class="label u-VaMiddle" title="Label for this section">{{$anchor}}</code>
+          </li>
+        </ul>
+
+  </div>
+</h{{ $level }}>

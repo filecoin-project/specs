@@ -1,0 +1,52 @@
+{{- if .Page.Site.Params.BookPortableLinks -}}
+  {{- template "portable-link" . -}}
+{{- else -}}
+  <a href="{{ .Destination | safeURL }}"{{ with .Title}} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
+{{- end -}}
+
+{{- define "portable-link" -}}
+{{- $pagePath := "" -}}
+{{- $path := "" -}}
+{{- $destination := .Destination }}
+{{- $title := .Title -}}
+{{- $isRemote := or (in .Destination ":") (strings.HasPrefix .Destination "//") }}
+{{- if not $isRemote }}
+    {{/*
+      it's a local link so normalise the path and it to look up the hugo .Page data
+      .Destination is the markdown link target as written by the author, and is likely to be shortened...
+      ...to simplify linking the author can write (see over here)[signatures] when they want to link file to algorithms/crypto/signatures.md
+      So .Destination is the raw target, which should be just unique enough for .GetPage to figure out what is wanted.
+
+      $pagePath is the normalised verison of that shortened path. e.g. `signatures`
+      $path is the path to the file, which we normalise to match the heading id format defined in render-heading.html - e.g. `algorithms/crypto/signatures`
+      $anchor is the converted link target which is now an internal page id anchor - e.g. `#algorithms__crypto__signatures`
+    */}}
+    {{- $url := urls.Parse .Destination }}
+    {{- $pagePath = strings.TrimSuffix "/_index.md" $url.Path }}
+    {{- $pagePath = strings.TrimSuffix "/_index" $pagePath }}
+    {{- $pagePath = strings.TrimSuffix ".md" $pagePath }}
+    {{- $page := .Page.Site.GetPage $pagePath }}
+    {{- if $page }}
+        {{- $path = strings.TrimSuffix "/_index.md" $page.File.Path }}
+        {{- $path = strings.TrimSuffix ".md" $path }}
+        {{- $pathParts := split $path "/" -}}
+        {{- $anchor := "" -}}
+        {{- if $url.Fragment -}}
+            {{- $anchor = printf "#section-%s.%s" (delimit $pathParts ".") $url.Fragment -}}
+        {{- else -}}
+            {{- $anchor = printf "#section-%s" (delimit $pathParts ".") -}}
+        {{- end -}}
+        {{- $destination = $anchor }}
+      {{- if .Title -}}
+        {{- $title = .Title -}}
+      {{- else -}}
+        {{- $title = $page.Title -}}
+      {{- end -}}
+    {{- else if fileExists (print .Page.File.Dir .Destination) }}
+      <!-- Nothing -->
+    {{- else -}}
+      {{- errorf "Page '%s' not found in '%s' for lang '%s'" .Destination .Page.File .Page.File.Lang }}
+    {{- end }}
+  {{- end }}
+  <a href="{{ $destination | safeURL }}"{{ with $title}} title="{{ . }}"{{ end }} {{ if $isRemote }} target="_blank" rel="noopener"{{ end }}>{{ (default $title .Text) | safeHTML }}</a>
+{{- end -}}

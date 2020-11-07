@@ -1,0 +1,44 @@
+{{- with .Site.GetPage "/" -}}
+    {{- $level := 0 -}}
+    {{- template "dashboard-progress" (dict "Site" $.Site "level" $level) -}}
+{{- end -}}
+
+<!-- Children Template -->
+{{ define "dashboard-progress" }}
+    {{- $count := .level -}}
+    {{- $stable := 0 -}}
+    {{- $reliable := 0 -}}
+    {{- $wip := 0 -}}
+    {{- $pages := where .Site.AllPages "Params.bookhidden" "ne" true -}}
+    {{- $pages2 := where $pages "Params.dashboardhidden" "ne" true -}}
+    {{- $pages3 := where $pages2 "Kind" "in" (slice "section" "page") -}}
+    {{- $pages4 := where $pages3 "Language.Lang" "eq" "en" -}}
+    {{- range sort $pages4 "Weight" "asc" -}}
+        {{- if .Params.dashboardState -}}
+            {{- $count = add $count 1 -}}
+            {{- if eq .Params.dashboardState "stable" -}}
+                {{- $stable = add $stable 1 -}}
+            {{- end -}}
+            {{- if eq .Params.dashboardState "reliable" -}}
+                {{- $reliable = add $reliable 1 -}}
+            {{- end -}}
+            {{- if eq .Params.dashboardState "wip" -}}
+                {{- $wip = add $wip 1 -}}
+            {{- end -}}
+        {{- end -}}
+    {{- end -}}
+    {{- $total := (add $stable (add $reliable $wip)) }}
+    {{- $usable := add $stable $reliable }}
+    {{- $stablePercent := lang.NumFmt 0 (div (float (mul $stable 100))  (float $count)) -}}
+    {{- $reliablePercent := lang.NumFmt 0 (div (float (mul $reliable 100))  (float $count)) -}}
+    {{- $wipPercent := lang.NumFmt 0 (div (float (mul $wip 100))  (float $count)) -}}
+    {{- $totalPercent := lang.NumFmt 0 (div (float (mul $total 100))  (float $count)) -}}
+    {{- $usablePercent := lang.NumFmt 0 (div (float (mul $usable 100))  (float $count)) -}}
+    <div class="meter">
+        <span class="bar bg-wip" style="width: {{ $wipPercent }}%">WIP <strong>{{$wipPercent}}%</strong>
+        </span><span class="bar bg-reliable" style="width: {{ $reliablePercent }}%">Reliable <strong>{{$reliablePercent}}%</strong>
+        </span><span class="bar bg-stable" style="width: {{ $stablePercent }}%">Stable <strong>{{$stablePercent}}%</strong>
+        </span>
+        {{/*  <span> total {{$totalPercent}}%</span>  */}}
+    </div>
+{{ end }}

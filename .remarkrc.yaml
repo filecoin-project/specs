@@ -1,0 +1,13 @@
+plugins:
+  # make remark aware of fontmatter.
+  remark-frontmatter:
+  remark-math:
+  # sensible linter defaults see: https://github.com/remarkjs/remark-lint/tree/main/packages/remark-preset-lint-recommended#rules
+  remark-preset-lint-recommended:
+  # add extra rules
+  remark-lint-heading-increment:
+  remark-lint-fenced-code-flag:
+  remark-lint-first-heading-level:
+  remark-lint-no-hr-after-heading:
+  # disable some of the sensible defaults given where we are today.
+  remark-lint-list-item-indent: false

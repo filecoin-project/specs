@@ -1,0 +1,60 @@
+// Colors
+
+.text-missing {
+  color: var(--cl-red);
+}
+.text-incorrect {
+  color: var(--cl-orange);
+}
+.text-wip {
+  color: var(--cl-yellow);
+}
+.text-coming {
+  color: var(--cl-yellow);
+}
+.text-reliable {
+  color: var(--cl-green);
+}
+.text-stable {
+  color: var(--cl-blue);
+}
+.text-transparent {
+  color: transparent;
+}
+.text-black {
+  color: black !important;
+}
+
+.bg-na {
+  background-color: var(--cl-gray) !important;
+}
+.bg-missing {
+  background-color: var(--cl-red) !important;
+}
+.bg-incorrect {
+  background-color: var(--cl-orange) !important;
+}
+.bg-wip {
+  background-color: var(--cl-yellow) !important;
+}
+.bg-coming {
+  background-color: var(--cl-yellow) !important;
+}
+.bg-done {
+  background-color: var(--cl-green) !important;
+}
+.bg-reliable {
+  background-color: var(--cl-green) !important;
+}
+.bg-stable {
+  background-color: var(--cl-blue) !important;
+  a {
+    color: black;
+  }
+}
+.bg-transparent {
+  background-color: transparent;
+}
+.bg-black {
+  background-color: black;
+}

@@ -1,0 +1,45 @@
+// SVG Diagrams
+.diagrams-container {
+  margin: 20px 0px;
+  border: 1px solid var(--gray-200);
+  border-radius: $border-radius;
+}
+.diagrams {
+  height: 400px;
+  overflow: hidden;
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.diagrams img {
+  max-height: 100%;
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.diagrams:active {
+  cursor: grabbing;
+}
+.diagrams-caption {
+  border-bottom: 1px solid #e9ecef;
+  padding: 0.5rem;
+  font-size: 12px;
+  font-weight: 500;
+  .diagrams-link {
+    text-decoration: none !important;
+    float: right;
+    font-weight: 400;
+  }
+}
+.diagrams-container .highlight pre {
+  margin: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  // margin: 0 -1px;
+}
+.diagrams-container .embed-comment {
+  margin: 0.5rem 1rem;
+}

@@ -1,166 +1,361 @@
 # Filecoin Specification
 
-[![CircleCI](https://circleci.com/gh/filecoin-project/specs/tree/master.svg?style=svg)](https://circleci.com/gh/filecoin-project/specs/tree/master)
+![CI](https://github.com/filecoin-project/specs/workflows/CI/badge.svg)
 
 This is the [Filecoin Specification](https://github.com/filecoin-project/specs), a repository that contains documents, code, models, and diagrams that constitute the specification of the [Filecoin Protocol](https://filecoin.io). This repository is the singular source of truth for the Filecoin Protocol. All implementations of the Filecoin Protocol should match and comply with the descriptions, interfaces, code, and models defined in this specification.
 
-Note that the `master` branch of the specs moves quickly. We work to merge PRs as fast as possible into master, which means changes or reversals are possible here. Accordingly, we periodically compile swaths of spec along with a high-level difflog into the `release` branch. As the spec stabilizes, this practice will change.
+<https://spec.filecoin.io> is the user-friendly website rendering, which we recommend for reading this repository. The website is updated automatically with every merge to `master`.
 
-## View Website
+## Table of Contents
 
-https://filecoin-project.github.io/specs is the user-friendly website rendering, which we recommend for reading this repository. The website is updated automatically with every merge to `master`.
+- [Install](#install)
+- [Writing the spec](#writing-the-spec)
+- [Check your markdown](#check-your-markdown)
+- [Page Template](#page-template)
+- [Code](#code)
+- [Images](#images)
+- [Links](#links)
+- [Shortcodes](#shortcodes)
+  - [`embed`](#embed)
+  - [`listing`](#listing)
+  - [`mermaid`](#mermaid)
+  - [`hint`](#hint)
+  - [`katex`](#katex)
+- [Math mode](#math-mode)
+  - [Wrap `def`, `gdef`, etc.](#wrap-def-gdef-etc)
+  - [Wrap inline math text with code blocks](#wrap-inline-math-text-with-code-blocks)
+  - [Wrap math blocks with code fences](#wrap-math-blocks-with-code-fences)
+- [Front-matter](#front-matter)
+- [References](#references)
 
-## Contributing
+## Install
 
-Please [read the spec process](https://filecoin-project.github.io/specs/#intro__process). Please file PRs on github with fixes.
+To build the spec website you need
 
-## Develop
+- [`node` & `npm`](https://nodejs.org/en/download)
 
-### Install
+On macOS you can get node from Homebrew
 
-- Make sure you have installed `go` on your machine.
-
-```
-git clone https://github.com/filecoin-project/specs filecoin-specs
-cd filecoin-specs
-make deps-basic
-```
-
-### Build
-
-```
-make build
-```
-
-### Serve
-
-```
-make serve
-```
-
-This will write out an HTTP address to check out with your browser. Most likely: http://localhost:1313
-
-### Update actors
-
-The actor code lives in https://github.com/filecoin-project/specs-actors. It is imported:
-
-- into the compilation as a Go module, configured in src/build_go.mod
-- into the webside as a Git submodule at src/actors
-
-To change the code, edit in the home repository and then update _both_ the build_go.mod and submodule to point to the new ref.
-You should probably make a release of the specs-actors repo for ease of referring to it as a Go module.
-
-### Website
-
-```
-make website
+```bash
+brew install node
 ```
 
-### Diagrams
+Clone the repo, and use `npm install` to fetch the dependencies
 
-Install dependencies for diagram making
-
-```
-make deps-diag
-```
-
-Render diagrams
-
-```
-make diagrams
+```sh
+git clone https://github.com/filecoin-project/specs.git
+npm install
 ```
 
-Make sure to check in your rendered output (`*.dot.svg` and `*.mmd.svg`) so that others dont need to install diagram building deps.
+To run the development server with live-reload locally, run:
 
-### Orient and Org mode
-
-Install dependencies for org mode and orient
-
-```
-make deps-orient
+```sh
+npm start
 ```
 
-Without these, you won't be able to compile `.org` files, and they may be missing from the document output.
+Then open <http://localhost:1313> in the browser
 
-## Overviews
+## Writing the spec
 
-### Build System Overview
+The spec is written in markdown. Each section is markdown document in the `content` directory. The first level of the directory structure denotes the top level sections of the spec; (Introduction, Systems, etc.) The `_index.md` file in each folder is used as the starting point for each section. For example the **Introduction** starts in `content/intro/_index.md`.
 
-Given the complexity of the protocol, a build system is introduced to leverage the power of modern programs and improve understanding, efficiency, consistency, and velocity of Filecoin spec development. The Filecoin spec is organized into subcomponents as defined in `src/` with high-level and introductory sections in `Introduction` and `Algorithmns`, detailed spec on different Filecoin systems in `Systems`, followed by `Listings`, `Glossary`, and `Appendix`.
+Sections can be split out into multiple markdown documents. The build process combines them into a single html page. The sections are ordered by the `weight` front-matter property. The introduction appears at the start of the html page because `content/intro/_index.md` has `weight: 1`, while `content/systems/_index.html` has `weight: 2` so it appears as the second section.
 
-For every subsystem in the Filecoin spec, it must always have a markdown file that specifies the component. Wherever possible and necessary, an `.id` file should be included to automatically generate compiled `.go` files that can be tested to ensure build consistency and served from `hugo`. Similarly, contributors should include an `.orient` file that describes mathematical constraints in a component of the system. `Orient`, a language created to write constraints and models about the system, is used to perform ubercalc and generate artifacts about the system. To facilitate in line code display, an `.org` file can also be included to interweave output from ubercalc and markdown.
+You can split out sub-sections by adding additional pages to a section directory. The `content/intro/concepts.md` defines the Key Concepts sub-section of the the Introduction. The order of sub-sections within a section is again controlled by setting the `weight` property. This pattern repeats for sub sub folders which represent sub sub sections.
 
- <!--
- An architectural diagram of the build system can be found below.
-  This is outdated. fix it and bring back.
-<img src="src/diagrams/buildsys/buildsys.dot.svg" width="50%">
--->
+The markdown documents should all be well formed, with a single h1, and headings should increment by a single level.
 
-#### Adding new sections
+> Note: Regular markdown files like `content/intro/concepts.md` can't reference resources such as images, or other files. Such resources can be referenced only from `_index.md` files. Given that a folder will have an `_index.md` file already, there is the following work around to reference resources from any file: create a new sub-folder in the same folder where the initial .md file was, e.g., `content/intro/concepts/_index.md`, include the content from `concepts.md` in the `_index.md` file, add the resource files (for example, images) in the new folder and reference the resource file from the new `_index.md` file inside the `concepts` folder. The referencing syntax and everything else works the same way.
 
-The specification is broken down into 5 levels (`#.#.#.#.#`). The L1 and L2 numbers in this sequence are determined by the first two directories extending from `/src/`; for example, `/src/systems/filecoin_mining/` resolves to `2.6.`.
+## Check your markdown
 
-The L3 number is generated by creating an additional directory within a L2 directory, containing its own appropriately formatted `index.md`. This new directory name must then be added to the `entries` field of the L2 `index.md` file, sequentially ordered as they are to be within the specification.
+Use `npm test` to run a markdown linter set up to check for common errors. It runs in CI and you can run it locally with:
 
-Further L4 and L5 subsections are added using the `##` and `###` headers respectively within a the content of a L3 section's `index.md` file.
+```bash
+npm test
+content/algorithms/crypto/randomness.md
+  15:39-15:46  warning  Found reference to undefined definition  no-undefined-references  remark-lint
+  54:24-54:31  warning  Found reference to undefined definition  no-undefined-references  remark-lint
 
-### System Overview
-
-<img src="src/diagrams/overview1/overview.svg" />
-
-## Detailed Build Usage
-
-```makefile
-> make help
-SYNOPSIS
-  make -- filecoin spec build toolchain commands
-
-USAGE
-  make deps-basic  run this once, to install & build basic dependencies
-  make build       run this every time you want to re-build artifacts
-
-MAIN TARGETS
-  make help        description of the targets (this message)
-  make build       build all final artifacts (website only for now)
-  make test        run all test cases (test-code only for now)
-  make drafts      publish artifacts to ipfs and show an address
-  make publish     publish final artifacts to spec website (github pages)
-  make clean       removes all build artifacts. you shouldn't need this
-  make serve       start hugo in serving mode -- must run 'make build' on changes manually
-
-INSTALL DEPENDENCIES
-  make deps        install ALL dependencies of this tool chain
-  make deps-basic  install minimal dependencies of this tool chain
-  make deps-diag   install dependencies for rendering diagrams
-  make deps-orient install dependencies for running orient
-  make deps-ouser  install dependencies for orient user-environment tooling
-  make bins        compile some build tools whose source is in this repo
-
-INTERMEDIATE TARGETS
-  make website     build the website artifact
-  make diagrams    build diagram artifacts ({dot, mmd} -> svg)
-  make org2md      run org mode to markdown compilation
-
-HUGO TARGETS
-  make hugo-src    copy sources into hugo dir
-  make build-hugo  run the hugo part of the pipeline
-  make watch-hugo  watch and rebuild hugo
-
-CODE TARGETS
-  make gen-code    generate code artifacts (eg id -> go)
-  make test-code   run test cases in code artifacts
-  make build-code  build all src go code (test it)
-  make clean-code  remove build code artifacts
-  make watch-code  watch and rebuild code
-
-CLEAN TARGETS
-  make clean       remove all build artifacts
-  make clean-deps  remove (some of) the dependencies installed in this repo
-  make clean-hugo  remove intermediate hugo artifacts
-  make clean-code  remove build code artifacts
-
-WATCH TARGETS
-  make serve-and-watch -j2  serve, watch, and rebuild all - works for live edit
-  make watch-code           watch and rebuild code
-  make watch-hugo           watch and rebuild hugo
+⚠ 2 warnings
 ```
+
+## Page Template
+
+A spec document should start with a YAML front-matter section and contain at least a single h1, as below.
+
+```md
+---
+title: Important thing
+weight: 1
+dashboardState: wip
+dashboardAudit: missing
+---
+
+# Important thing
+```
+
+## Code
+
+Wrap code blocks in _code fences_. Code fences should **always** have a lang. It is used to provide syntax highlighting. Use `text` as the language flag for pseudocode for no highlighting.
+
+````text
+```text
+Your algorithm here
+```
+````
+
+You can embed source code from local files or external other repos using the `embed` [shortcode](#embed).
+
+```text
+{{<embed src="/path/to/local/file/types.go"  lang="go" symbol="Channel">}}
+
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/build/bootstrap.go" lang="go">}}
+```
+
+## Images
+
+Use normal markdown syntax to include images.
+
+For `dot` and `mermaid` diagrams you link to the source file and the pipelines will handle converting that to `svg`.
+
+```md
+# relative to the markdown file
+
+![Alt text](picture.jpg)
+
+# relative to the content folder
+
+![Alt text](/content/intro/diagram1.mmd)
+
+![Alt text](graph.dot 'Graph title')
+```
+
+> The alt text is used as the title if not provided.
+
+## Links
+
+Use markdown syntax `[text](markdown-document-name)`.
+
+These links use "portable links" just like `relref`. Just give it the name of the file and it will fetch the correct relative path and title automatically. You can override the title by passing a second `string` in the link definition.
+
+> **Note**: When using anchors the title can't be fetched automatically.
+
+```md
+[](storage_power_consensus)
+
+# Renders to
+
+<a href="/systems/filecoin_blockchain/storage_power_consensus" title="Storage Power Consensus">Storage Power Consensus</a>
+
+[Storage Power](storage_power_consensus 'Title to override the page original title')
+
+# Renders to
+
+<a href="/systems/filecoin_blockchain/storage_power_consensus" title="Title to override the page original title">Storage Power</a>
+
+[Tickets](storage_power_consensus#the-ticket-chain-and-drawing-randomness 'The Ticket chain and drawing randomness')
+
+# Renders to
+
+<a href="/systems/filecoin_blockchain/storage_power_consensus#the-ticket-chain-and-drawing-randomness" title="The Ticket chain and drawing randomness">Tickets</a>
+```
+
+## Shortcodes
+
+hugo shortcodes you can add to your markdown.
+
+### `embed`
+
+```md
+# src relative to the page
+
+{{<embed src="piece_store.go" lang="go">}}
+
+# src relative to content folder
+
+{{<embed src="/systems/piece_store.go" lang="go">}}
+
+# can just embed a markdown file
+
+{{<embed src="section.md" markdown="true">}}
+
+# can embed symbols from Go files
+
+# extracts comments and symbol body
+
+{{<embed src="types.go"  lang="go" symbol="Channel">}}
+
+# can embed from external sources like github
+
+{{<embed src="https://github.com/filecoin-project/lotus/blob/master/build/bootstrap.go" lang="go">}}
+```
+
+This shortcode also supports the property `title` to add a permalink below the embed.
+
+### `listing`
+
+The listing shortcode creates tables from externals sources, supports Go `struct`.
+
+```md
+# src relative to the page
+
+{{<listing src="piece_store.go" symbol="Channel">}}
+
+# src relative to content folder
+
+{{<listing src="/systems/piece_store.go" symbol="Channel">}}
+
+# src can also be from the externals repos
+
+{{<listing src="/externals/go-data-transfer/types.go"  symbol="Channel">}}
+```
+
+### `mermaid`
+
+Inline mermaid syntax rendering
+
+```html
+{{< mermaid >}}
+graph TD
+  A[Christmas] -->|Get money| B(Go shopping)
+  B --> C{Let me think}
+  C -->|One| D[Laptop]
+  C -->|Two| E[iPhone]
+  C -->|Three| F[fa:fa-car Car]
+
+{{</ mermaid >}}
+```
+
+### `hint`
+
+```md
+<!-- info|warning|danger -->
+
+{{< hint info >}}
+**Markdown content**  
+Lorem markdownum insigne. Olympo signis Delphis! Retexi Nereius nova develat
+stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa
+{{< /hint >}}
+```
+
+### `katex`
+
+We should **only** use `inline` mode for now! Display mode has a bug and is not responsive the formulas don't break in small screen. Track: <https://github.com/KaTeX/KaTeX/issues/2271>
+
+```md
+<!-- Use $ math $ for inline mode-->
+
+{{<katex>}}
+$SectorInitialConsensusPledge = \\[0.2cm] 30\% \times FILCirculatingSupply \times \frac{SectorQAP}{max(NetworkBaseline, NetworkQAP)}$
+{{</katex >}}
+
+<!-- Use $$ math $$ for display mode-->
+
+{{<katex>}}
+$$SectorInitialConsensusPledge = \\[0.2cm] 30\% \times FILCirculatingSupply \times \frac{SectorQAP}{max(NetworkBaseline, NetworkQAP)}$$
+{{</katex >}}
+```
+
+## Math mode
+
+For short snippets of math text (e.g., inline reference to parameters, or single formulas) it is easier to use the `{{<katex>}}`/`{{/katex}}` shortcode (as described just [above](specs#katex)). Check how KaTeX parses math typesetting [here](https://katex.org/docs/api.html).
+
+For extensive blocks of math content it is more convenient to use `math-mode` to avoid having to repeat the katex shortcode for every math formula.
+
+Check this example [example](https://spec.filecoin.io/math-mode/)
+
+> Some syntax like `\_` can't go through HUGO markdown parser and for that reason we need to wrap math text with code blocks, code fendes or the shortcode `{{<plain>}}`. See examples below.
+>
+> ### Add `math-mode` prop to the Frontmatter
+>
+> ```md
+> ---
+> title: Math Mode
+> math-mode: true
+> ---
+> ```
+
+### Wrap `def`, `gdef`, etc.
+
+Math text needs to be wrapped to avoid Hugo's Markdown parser. When wrapping defs or any math block that doesn't need to be rendered the recommended option is to use the shortcode `{{<plain hidden}}` with the hidden argument.
+
+```md
+{{<plain hidden>}}
+
+$$
+\gdef\createporepbatch{\textsf{create_porep_batch}}
+\gdef\GrothProof{\textsf{Groth16Proof}}
+\gdef\Groth{\textsf{Groth16}}
+\gdef\GrothEvaluationKey{\textsf{Groth16EvaluationKey}}
+\gdef\GrothVerificationKey{\textsf{Groth16VerificationKey}}
+{{</plain>}}
+$$
+```
+
+### Wrap inline math text with code blocks
+
+```md
+The index of a node in a `$\BinTree$` layer `$l$`. The leftmost node in a tree has `$\index_l = 0$`.
+```
+
+### Wrap math blocks with code fences
+
+````md
+```text
+$\overline{\underline{\Function \BinTree\dot\createproof(c: \NodeIndex) \rightarrow \BinTreeProof_c}}$
+$\line{1}{\bi}{\leaf: \Safe = \BinTree\dot\leaves[c]}$
+$\line{2}{\bi}{\root: \Safe = \BinTree\dot\root}$
+
+$\line{3}{\bi}{\path: \BinPathElement^{[\BinTreeDepth]}= [\ ]}$
+$\line{4}{\bi}{\for l \in [\BinTreeDepth]:}$
+$\line{5}{\bi}{\quad \index_l: [\len(\BinTree\dot\layer_l)] = c \gg l}$
+$\line{6}{\bi}{\quad \missing: \Bit = \index_l \AND 1}$
+$\line{7}{\bi}{\quad \sibling: \Safe = \if \missing = 0:}$
+$\quad\quad\quad \BinTree\dot\layer_l[\index_l + 1]$
+$\quad\quad\thin \else:$
+$\quad\quad\quad \BinTree\dot\layer_l[\index_l - 1]$
+$\line{8}{\bi}{\quad \path\dot\push(\BinPathElement \thin \{\ \sibling, \thin \missing\ \} \thin )}$
+
+$\line{9}{\bi}{\return \BinTreeProof_c \thin \{\ \leaf, \thin \root, \thin \path\ \}}$
+```
+````
+
+## Front-matter
+
+Description for all the available frontmatter properties
+
+```yaml
+# Page Title to be used in the navigation
+title: Libraries
+# Small description for html metadata, if not present the first couple of paragraphs will be used instead
+description: Libraries used from Filecoin
+# This will be used to order the ToC, navigation and any other listings of pages
+weight: 3
+# This will make a page section collapse in the navigation
+bookCollapseSection: true
+# This will hidden the page from the navigation
+bookhidden: true
+# This is used in the dashboard to describe the importance of the page content
+dashboardWeight: 2
+# This is used in the dashboard to describe the state of the page content options are "missing", "incorrect", "wip", "reliable", "stable" or "n/a"
+dashboardState: stable
+# This is used in the dashboard to describe if the theory of the page has been audited, options are "missing", "wip", "done" or "n/a"
+dashboardAudit: wip
+# When dashboardAudit is stable we should have a report url
+dashboardAuditURL: https://url.to.the.report
+# The date that the report at dashboardAuditURL was completed
+dashboardAuditDate: '2020-08-01'
+# This is used in the dashboard to describe if the page content has compliance tests, options are 0 or numbers of tests
+dashboardTests: 0
+```
+
+## References
+
+- [hugo theme book](https://themes.gohugo.io//theme/hugo-book/docs/shortcodes/columns/)
+- [Katex](https://katex.org/)
+- [Mermaid](https://mermaid-js.github.io/mermaid/#/)
+  - [config](https://github.com/mermaid-js/mermaid/blob/master/docs/mermaidAPI.md#mermaidapi-configuration-defaults)
+  - [editor](https://mermaid-js.github.io/mermaid-live-editor)
+- [Pan/Zoom for SVG](https://github.com/anvaka/panzoom)
+- [Icons](https://css.gg/)

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.Language.Lang }}" dir={{ .Site.Language.LanguageDirection }}>
+
+<head>
+  {{ partial "html-head" . }}
+</head>
+
+<body dir={{ .Site.Language.LanguageDirection }}>
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+
+  <header class="book-header">
+    {{ template "header" . }} <!-- Mobile layout header -->
+  </header>
+
+  <aside class="book-menu">
+    {{ template "menu" . }} <!-- Left menu Content -->
+  </aside>
+
+  <main class="container flex">
+
+    <div class="book-page">
+      {{ template "main" . }} <!-- Page Content -->
+
+      {{/*  <footer class="book-footer">
+        {{ template "footer" . }} <!-- Footer under page content -->
+      </footer>  */}}
+
+    </div>
+  </main>
+
+  <label for="menu-control" class="hidden book-menu-overlay"></label>
+  {{ partial "body" . }}
+</body>
+
+</html>
+
+{{ define "menu" }}
+  {{ partial "single/menu" . }}
+{{ end }}
+
+{{ define "header" }}
+  {{ partial "single/header" . }}
+{{ end }}
+
+{{ define "footer" }}
+  {{ partial "docs/footer" . }}
+{{ end }}
+
+{{ define "main" }}
+  <div class="markdown">
+    {{- $pages := where .Pages "Params.bookhidden" "ne" true -}}
+    {{- $pages2 := where $pages "Type" "ne" "externals" -}}
+    {{ range sort $pages2 "Weight" "asc" }}
+      {{- $pathParts := split .Page.File.Path "/" -}}
+      <section class="section-{{ index $pathParts 0}}">
+        {{ if default false (index .Params "math-mode") }}
+          <div class="math-mode">
+          {{ .Content }}
+          </div>
+        {{ else }}
+          {{ .Content }}
+        {{ end }}
+        {{- template "mainChildren" (dict "Section" . ) -}}
+      </section>
+    {{ end }}
+  </div>
+{{ end }}
+
+{{ define "mainChildren" }}
+    {{- $pages := where .Section.Pages "Params.bookhidden" "ne" true -}}
+    {{ range sort $pages "Weight" "asc" }}
+      {{ if default false (index .Params "math-mode") }}
+        <div class="math-mode">
+        {{ .Content }}
+        </div>
+      {{ else }}
+        {{ .Content }}
+      {{ end }}
+        {{- template "mainChildren" (dict "Section" . ) -}}
+    {{ end }}
+{{ end }}
