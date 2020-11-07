@@ -17,7 +17,7 @@ In this section, we provide the mathematical specification for Simple Minting, B
 
 
 
-- `$M_\infty$` is the total asymptotic number of tokens to be emitted as storage-mining block rewards. Per the [Token Allocation spec]{https://spec.filecoin.io/#systems__filecoin_token__token_allocation}, `$M_\infty := 55\% \cdot \texttt{FIL\_BASE} = 0.55 \cdot 2\times 10^9 FIL = 1.1 \times 10^9 FIL$`. The dimension of the `$M_\infty$` quantity is tokens.
+- `$M_\infty$` is the total asymptotic number of tokens to be emitted as storage-mining block rewards. Per the [Token Allocation spec](#systems__filecoin_token__token_allocation), `$M_\infty := 55\% \cdot \texttt{FIL\_BASE} = 0.55 \cdot 2\times 10^9 FIL = 1.1 \times 10^9 FIL$`. The dimension of the `$M_\infty$` quantity is tokens.
 
 - `$\lambda$` is the "simple exponential decay" minting rate corresponding to a 6-year half-life. The meaning of "simple exponential decay" is that the total minted supply at time `$t$` is `$M_\infty \cdot (1 - e^{-\lambda t})$`, so the specification of `$\lambda$` in symbols becomes the equation `$1 - e^{-\lambda \cdot 6yr} = \frac{1}{2}$`. Note that a "year" is poorly defined. The simplified definition of `$1yr := 365d$` was agreed upon for Filecoin. Of course, `$1d = 86400s$`, so `$1yr = 31536000s$`. We can solve this equation as
 
@@ -27,7 +27,7 @@ In this section, we provide the mathematical specification for Simple Minting, B
 
 The dimension of the `$\lambda$` quantity is `time$^{-1}$`.
 
-- `$\gamma$` is the mixture between baseline and simple minting. A `$\gamma$` value of 1.0 corresponds to pure baseline minting, while a `$\gamma$` value of 0.0 corresponds to pure simple minting. Per the [Parameter Recommendation spec]{https://spec.filecoin.io/#algorithms__cryptoecon__initial-parameter-recommendation}, we currently use `$\gamma := 0.7$`. The `$\gamma$` quantity is dimensionless.
+- `$\gamma$` is the mixture between baseline and simple minting. A `$\gamma$` value of 1.0 corresponds to pure baseline minting, while a `$\gamma$` value of 0.0 corresponds to pure simple minting. We currently use `$\gamma := 0.7$`. The `$\gamma$` quantity is dimensionless.
 
 - `$b(t)$` is the baseline function, which was designed as an exponential 
 
@@ -38,8 +38,8 @@ $$b(t) = b_0 \cdot e^{g t}$$
 where 
 
 
-  - `$b_0$` is the "initial baseline". The dimension of the `$b_0$` quantity is information.
-  - `$g$` is related to the baseline's "annual growth rate" (`$g_a$`) by the equation `$\exp(g \cdot 1yr) = 1 + g_a$`, which has the solution
+- `$b_0$` is the "initial baseline". The dimension of the `$b_0$` quantity is information.
+- `$g$` is related to the baseline's "annual growth rate" (`$g_a$`) by the equation `$\exp(g \cdot 1yr) = 1 + g_a$`, which has the solution
 
 {{<katex>}}
   $$g = \frac{\ln\left(1 + g_a\right)}{31536000s}.$$
