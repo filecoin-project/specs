@@ -69,7 +69,7 @@ The markdown documents should all be well formed, with a single h1, and headings
 
 ## Check your markdown
 
-Use `npm test` to run a markdown linter set up to check for common errors. It runs in CI and you can run it locally with:
+Use `npm test` to run a markdown linter and prettier to check for common errors. It runs in CI and you can run it locally with:
 
 ```bash
 npm test
@@ -78,6 +78,14 @@ content/algorithms/crypto/randomness.md
   54:24-54:31  warning  Found reference to undefined definition  no-undefined-references  remark-lint
 
 ⚠ 2 warnings
+```
+
+Format errors can be fixed by running `npm run format`.
+
+```bash
+Checking formatting...
+[warn] content/systems/filecoin_token/block_reward_minting.md
+[warn] Code style issues found in the above file(s). Forgot to run Prettier?
 ```
 
 ## Page Template

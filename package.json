@@ -14,7 +14,8 @@
     "build-toc": "tools/toc.js",
     "clean": "premove public resources static/_gen",
     "release": "np --no-publish && conventional-github-releaser -p angular",
-    "readme": "tools/readme.js"
+    "readme": "tools/readme.js",
+    "format": "prettier --write ."
   },
   "author": "",
   "license": "MIT",
