@@ -37,7 +37,7 @@ Finally, `GasPremium` is the priority fee included by senders to incentivize min
 
 - The `GasFeeCap` should always be higher than the network's `BaseFee`. If a message’s `GasFeeCap` is lower than the `BaseFee`, then the remainder comes from the miner (as a penalty). This penalty is applied to the miner because they have selected a message that pays less than the network `BaseFee` (i.e., does not cover the network costs). However, a miner might want to choose a message whose `GasFeeCap` is smaller than the `BaseFee` if the same sender has another message in the message pool whose `GasFeeCap` is much bigger than the `BaseFee`. Recall, that a miner should pick all the messages of a sender from the message pool, if more than one exists. The justification is that the increased fee of the second message will pay off the loss from the first.
 
-- If `BaseFee + GasPremium` < `GasFeeCap`, then the miner might not earn the entire `GasLimit * GasPremium` as their reward.
+- If `BaseFee + GasPremium` > `GasFeeCap`, then the miner might not earn the entire `GasLimit * GasPremium` as their reward.
 
 - A message is hard-constrained to spending no more than `GasFeeCap * GasLimit`. From this amount, the network `BaseFee` is paid (burnt) first. After that, up to `GasLimit * GasPremium` will be given to the miner as a reward.
 
