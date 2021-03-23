@@ -17,8 +17,10 @@ There are eleven (11) builtin System Actors in total, but not all of them intera
 There are two system actors required for VM processing:
 
 - the [InitActor](sysactors#initactor), which initializes new actors and records the network name, and
-- the [CronActor](sysactors#cronactor), a scheduler actor that runs critical functions at every epoch.
-  There are another two actors that interact with the VM:
+- the [CronActor](sysactors#cronactor), a scheduler actor that runs critical functions at every epoch.   
+
+There are another two actors that interact with the VM:  
+ 
 - the [AccountActor](sysactors#accountactor) responsible for user accounts (non-singleton), and
 - the [RewardActor](sysactors#rewardactor) for block reward and token vesting (singleton).
 
