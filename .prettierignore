@@ -12,3 +12,4 @@ themes
 layouts
 api/dist
 api/worker
+content/algorithms/crypto/poseidon.md
