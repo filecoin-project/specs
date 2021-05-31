@@ -33,6 +33,14 @@ This audit covers the implementation of Filecoin's builtin Actors, focusing on t
 
 ## Proofs
 
+### `2021-05-31` SnarkPack audit
+
+Two externals audits have been contracted on the cryptographic part of [SnarkPack](https://eprint.iacr.org/2021/529.pdf), that is used in the [FIP0009](https://github.com/filecoin-project/FIPs/blob/master/FIPS/fip-0009.md):
+- [Report](https://drive.google.com/file/d/1avwxOO6CK_nkX7AVV4P9l6XawNco3-m_/view) from [NCC group](https://www.nccgroup.com/us/)
+- [Report](https://hackmd.io/@LIRa8YONSwKxiRz3cficng/B105no8w_) from Matteo Campanelli, a well known cryptography [researcher](https://www.binarywhales.com/)
+
+One major issue was found in the report by Campanelli where the challenges of each prove commits were not tied to the aggregated proof; this could have led up to malicious miner forge valid aggregated proofs without the individual prove commits. The rest of the issues were of medium to informal severity.
+
 ### `2020-10-20` Filecoin Bellman and BLS Signatures
 
 - Report: [**Filecoin Bellman/BLS Signatures Cryptography Review**](https://research.nccgroup.com/wp-content/uploads/2020/10/NCC_Group_ProtocolLabs_PRLB007_Report_2020-10-20_v1.0.pdf)
