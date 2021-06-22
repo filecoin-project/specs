@@ -50,7 +50,7 @@ The Filecoin network expects constant availability of stored files. Failing to s
 
 ## Design
 
-Each miner actor is allocated a 24-hr proving period at random upon creation. This proving period is divided into 48 non-overlapping half-hour deadlines. Each sector is assigned to one of these deadlines when proven to the chain, i.e., when `ProveCommit` completes and never changes deadline. The sets of sectors due at each deadline is recorded in a collection of 48 bitfields.
+Each miner actor is allocated a 24-hr proving period at random upon creation. This proving period is divided into 48 non-overlapping half-hour deadlines. Each sector is assigned to one of these deadlines when proven to the chain, i.e., when ProveCommit completes and never changes deadline. The sets of sectors due at each deadline is recorded in a collection of 48 bitfields.
 
 Generally, sectors are first allocated to fill any deadline up to the next whole-partition multiple of (2349) sectors; next a new partition is started on the deadline with the fewest partitions. If all deadlines have the same number of sectors, a new partition is opened at deadline 0.
 
@@ -71,10 +71,10 @@ Summarising:
 - A _proving period_ is evenly divided in `WPoStPeriodDeadlines` _deadlines_.
 - Each miner has a different start of proving period `ProvingPeriodStart` that is assigned at `Power.CreateMiner`.
 - A _deadline_ is a period of `WPoStChallengeWindow` epochs that divides a proving period.
-- Sectors are assigned to a deadline on `miner.ProveCommitSector` and will remain assigned to it throughout their lifetime.
+- Sectors are assigned to a deadline on Prove commit, either a call to `miner.ProveCommitSector` or `miner.ProveCommitAggregate`, and will remain assigned to it throughout their lifetime.
 - In order to prove that they continuously store a sector, a miner must submit a `miner.SubmitWindowedPoSt` for each deadline.
 - Sectors are assigned to partitions. A partition is a set of sectors that is not larger than the Seal Proof allowed number of sectors `sp.WindowPoStPartitionSectors`.
-- Sectors are assigned to a partition at `miner.ProveCommitSector` and they can be re-arranged via `CompactPartitions`.
+- Sectors are assigned to a partition at ProveCommit, through a call to `miner.ProveCommitSector` or `miner.ProveCommitAggregate`, and they can be re-arranged via `CompactPartitions`.
 - Partitions are a by-product of our current proof mechanism. There is a limit in the number of sectors (`sp.WindowPoStPartitionSectors`) that can be proven in a single SNARK proof. If more than this amount is required to be proven, more than one SNARK proof is required, given that each SNARK proof represents a partition.
 
 There are four relevant epochs associated to a deadline, shown in the table below:

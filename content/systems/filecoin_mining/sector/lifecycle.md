@@ -27,8 +27,8 @@ A sector can be in one of the following states.
 
 | State          | Description                                                                                                                                           |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Precommitted` | Miner seals sector and submits `miner.PreCommitSector`                                                                                                |
-| `Committed`    | Miner generates a Seal proof and submits `miner.ProveCommitSector`                                                                                    |
+| `Precommitted` | Miner seals sector and submits `miner.PreCommitSector` or `miner.PreCommitSectorBatch`                                                                |
+| `Committed`    | Miner generates a Seal proof and submits `miner.ProveCommitSector` or `miner.ProveCommitAggregate`                                                    |
 | `Active`       | Miner generate valid PoSt proofs and timely submits `miner.SubmitWindowedPoSt`                                                                        |
 | `Faulty`       | Miner fails to generate a proof (see Fault section)                                                                                                   |
 | `Recovering`   | Miner declared a faulty sector via `miner.DeclareFaultRecovered`                                                                                      |
