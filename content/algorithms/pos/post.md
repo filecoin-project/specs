@@ -71,7 +71,7 @@ Summarising:
 - A _proving period_ is evenly divided in `WPoStPeriodDeadlines` _deadlines_.
 - Each miner has a different start of proving period `ProvingPeriodStart` that is assigned at `Power.CreateMiner`.
 - A _deadline_ is a period of `WPoStChallengeWindow` epochs that divides a proving period.
-- Sectors are assigned to a deadline on Prove commit, either a call to `miner.ProveCommitSector` or `miner.ProveCommitAggregate`, and will remain assigned to it throughout their lifetime.
+- Sectors are assigned to a deadline at ProveCommit, either a call to `miner.ProveCommitSector` or `miner.ProveCommitAggregate`, and will remain assigned to it throughout their lifetime.
 - In order to prove that they continuously store a sector, a miner must submit a `miner.SubmitWindowedPoSt` for each deadline.
 - Sectors are assigned to partitions. A partition is a set of sectors that is not larger than the Seal Proof allowed number of sectors `sp.WindowPoStPartitionSectors`.
 - Sectors are assigned to a partition at ProveCommit, through a call to `miner.ProveCommitSector` or `miner.ProveCommitAggregate`, and they can be re-arranged via `CompactPartitions`.

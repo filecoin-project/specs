@@ -11,8 +11,8 @@ dashboardTests: 0
 
 A Miner adds more storage in the form of Sectors. Adding more storage is a two-step process:
 
-1. **PreCommitting a Sector**: A Miner publishes a Sector's SealedCID and makes a deposit. The Sector is now registered to the Miner, and the Miner must ProveCommit the Sector or lose their deposit.
-2. **ProveCommitting a Sector**: The Miner provides a Proof of Replication (PoRep) for the Sector. This proof must be submitted AFTER a delay (the InteractiveEpoch), and BEFORE PreCommit expiration.
+1. **PreCommitting a Sector**: A Miner publishes a Sector's SealedCID, through miner.PreCommitSector of miner.PreCommitSectorBatch, and makes a deposit. The Sector is now registered to the Miner, and the Miner must ProveCommit the Sector or lose their deposit.
+2. **ProveCommitting a Sector**: The Miner provides a Proof of Replication (PoRep) for the Sector through miner.ProveCommitSector or miner.ProveCommitAggregate. This proof must be submitted AFTER a delay (the InteractiveEpoch), and BEFORE PreCommit expiration.
 
 This two-step process provides assurance that the Miner's PoRep _actually proves_ that the Miner has replicated the Sector data and is generating proofs from it:
 
