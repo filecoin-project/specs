@@ -82,7 +82,7 @@ Note that the "skipped fault" allows for sector-wise fault penalties, as compare
 **Deadlines**
 
 A _deadline_ is a period of `WPoStChallengeWindow` epochs that divides a proving period.
-Sectors are assigned to a deadline on ProveCommit, calling either `miner.ProveCommitSector`, or `miner.ProveCommitAggregate`, and will remain assigned to it throughout their lifetime. Recall that Sectors are also assigned to a partition.
+Sectors are assigned to a deadline on ProveCommit, by calling either `miner.ProveCommitSector`, or `miner.ProveCommitAggregate`, and will remain assigned to it throughout their lifetime. Recall that Sectors are also assigned to a partition.
 
 A miner must submit a `miner.SubmitWindowedPoSt` for each deadline.
 
