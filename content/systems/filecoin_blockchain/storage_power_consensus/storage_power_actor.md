@@ -32,7 +32,7 @@ The Miner lifecycle in the power table should be roughly as follows:
 
 - `MinerRegistration`: A new miner with an associated worker public key and address is registered on the power table by the storage mining subsystem, along with their associated sector size (there is only one per worker).
 - `UpdatePower`: These power increments and decrements are called by various storage actors (and must thus be verified by every full node on the network). Specifically:
-  - Power is incremented at `SectorProveCommit`
+  - Power is incremented at ProveCommit, as a subcall of `miner.ProveCommitSector` or `miner.ProveCommitAggregate`
   - Power of a partition is decremented immediately after a missed WindowPoSt (`DetectedFault`).
   - A particular sector's power is decremented when it enters into a faulty state either through Declared Faults or Skipped Faults.
   - A particular sector's power is added back after recovery is declared and proven by PoSt.

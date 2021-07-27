@@ -25,7 +25,7 @@ dashboardTests: 0
 
 ## Sealing sectors
 
-4. Once a miner finishes packing a `Sector`, it generates a `SectorPreCommitInfo` and calls `PreCommitSector` with a `PreCommitDeposit`. It must call `ProveCommitSector` with `SectorProveCommitInfo` within some bound to recover the deposit. Initial pledge will then be required at `ProveCommit`. Initial Pledge is usually higher than `PreCommitDeposit`. Recovered `PreCommitDeposit` will count towards Initial Pledge and miners only need to top up additional funds at `ProveCommit`. Excess `PreCommitDeposit`, when it is greater than Initial Pledge, will be returned to the miner. An expired `PreCommit` message will result in `PreCommitDeposit` being burned. All Sectors have an explicit expiration epoch declared during `PreCommit`. For sectors with deals, all deals must expire before sector expiration. The Miner gains power for this particular sector upon successful `ProveCommit`. For more details on the Sectors and the different types of deals that can be included in a Sector refer to the [Sector section](filecoin_mining#sector).
+4. Once a miner finishes packing a `Sector`, it generates a `SectorPreCommitInfo` and calls `PreCommitSector` or `PreCommitSectorBatch` with a `PreCommitDeposit`. It must call `ProveCommitSector` or `ProveCommitAggregate with `SectorProveCommitInfo`within some bound to recover the deposit. Initial pledge will then be required at time of`ProveCommit`. Initial Pledge is usually higher than `PreCommitDeposit`. Recovered `PreCommitDeposit`will count towards Initial Pledge and miners only need to top up additional funds at`ProveCommit`. Excess `PreCommitDeposit`, when it is greater than Initial Pledge, will be returned to the miner. An expired `PreCommit`message will result in`PreCommitDeposit`being burned. All Sectors have an explicit expiration epoch declared during`PreCommit`. For sectors with deals, all deals must expire before sector expiration. The Miner gains power for this particular sector upon successful `ProveCommit`. For more details on the Sectors and the different types of deals that can be included in a Sector refer to the [Sector section](filecoin_mining#sector).
 
 ## Prove Storage
 
@@ -51,7 +51,7 @@ dashboardTests: 0
 
 ## Sector Termination
 
-12. Termination of a sector can be triggered in two ways. One when sector remains faulty for 14 consecutive days and the other when a miner initiates a termination by calling `TerminateSectors`. In both cases, a `TerminationFee` is penalized, which is in principle equivalent to how much the sector has earned so far. Miners are also penalized for the `DealCollateral` that the sector contains and remaining `DealPayement` will be returned to clients.
+12. Termination of a sector can be triggered in two ways. One when sector remains faulty for 14 consecutive days and the other when a miner initiates a termination by calling `TerminateSectors`. In both cases, a `TerminationFee` is penalized, which is in principle equivalent to how much the sector has earned so far. Miners are also penalized for the `DealCollateral` that the sector contains and remaining `DealPayment` will be returned to clients.
 
 ## Deal Payment and slashing
 
