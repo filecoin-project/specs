@@ -32,10 +32,10 @@ There are two kinds of tickets:
 2. the ticket is generated using the VRF as above, but the input includes the concatenation of the previous ticket. This means that the new ticket is generated running the VRF on the old ticket concatenated with the new DRAND value (and the key as before).
 
 ```text
-## Get Randomness value from  DRAND beacon, by giving the current epoch as input.
+## Get Randomness value from DRAND beacon, by giving the current epoch as input.
 Drand_value = GetRandmness(current epoch)
 
-## Create ElectionProof ticket by calling VRF and  giving the secret key of the miner's worker and the DRAND value obtained in the previous step
+## Create ElectionProof ticket by calling VRF and giving the secret key of the miner's worker and the DRAND value obtained in the previous step
 Election_Proof = VRF(sk, drand_value)
 
 ## Extend the VRF ticket chain by concatenating the previous proof/ticket with the current one by following the same process as above (i.e., call VRF function with the secret key of the miner's worker and the DRAND value of the current epoch).
