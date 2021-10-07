@@ -698,14 +698,10 @@ $\overline{\underline{\Function \textsf{sparse\_factorize}(m \typecolon \Zp^{[t 
     0 & m_{t - 1, 1} & \dots & m_{t - 1, t - 1}
 \end{bmatrix} \\~
 \\
-\line{3} \wb \typecolon \Zp^{[t - 1 {\times} 1]} = \hat{m}_{\ast, 0} = \begin{bmatrix}
-    \hat{m}_{0, 0} \\
+\line{3} \wb \typecolon \Zp^{[t - 1 {\times} 1]} = m_{1 \dotdot, 0} = \begin{bmatrix}
+    m_{1, 0} \\
     \vdots \\
-    \hat{m}_{t - 2, 0}
-\end{bmatrix} = m_{1 \dotdot, 1} = \begin{bmatrix}
-    m_{1, 1} \\
-    \vdots \\
-    m_{t - 1, 1}
+    m_{t - 1, 0}
 \end{bmatrix} \\~
 \\
 \line{4} \hat\wb \typecolon \Zp^{[t - 1 {\times} 1]} = \hat{m}^{\neg 1} {\times} \hso \wb = \begin{bmatrix}
