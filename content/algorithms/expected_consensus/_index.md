@@ -361,7 +361,7 @@ The above case may happen in situations under certain block propagation conditio
 
 Miner 1 outputs their block B and shuts down. Miners 2 and 3 both receive B but not each others' blocks. We have miner 2 mining a Tipset made of B and C and miner 3 mining a Tipset made of B and D. If both succesfully mine blocks now, other miners in the network will receive new blocks built off of Tipsets with equal weight and the same smallest VRF output (that of block B). They should select the block mined atop `[B, C]` since minVRF(C) < minVRF(D).
 
-The probability that two Tipsets with different blocks would have all the same VRF output can be considered negligible: this would amount to finding a collision between two 256-bit (or more) collision-resistant hashes.
+The probability that two Tipsets with different blocks would have all the same VRF output can be considered negligible: this would amount to finding a collision between two 256-bit (or more) collision-resistant hashes. Behaviour is explicitly left unspecified in this case.
 
 ## Finality in EC
 
