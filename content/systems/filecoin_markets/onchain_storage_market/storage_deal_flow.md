@@ -51,7 +51,7 @@ dashboardTests: 0
 
 ## Sector Termination
 
-12. Termination of a sector can be triggered in two ways. One when sector remains faulty for 14 consecutive days and the other when a miner initiates a termination by calling `TerminateSectors`. In both cases, a `TerminationFee` is penalized, which is in principle equivalent to how much the sector has earned so far. Miners are also penalized for the `DealCollateral` that the sector contains and remaining `DealPayment` will be returned to clients.
+12. Termination of a sector can be triggered in two ways. One when sector remains faulty for 42 consecutive days and the other when a miner initiates a termination by calling `TerminateSectors`. In both cases, a `TerminationFee` is penalized, which is in principle equivalent to how much the sector has earned so far. Miners are also penalized for the `DealCollateral` that the sector contains and remaining `DealPayment` will be returned to clients.
 
 ## Deal Payment and slashing
 
