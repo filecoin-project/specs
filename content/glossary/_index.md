@@ -78,8 +78,22 @@ The algorithm(s) and logic needed so that the state of the blockchain is agreed 
 
 ## Consensus Fault Slashing
 
-Consensus Fault Slashing is the penalty that a miner incurs for committing consensus faults. This penalty is applied to miners that have acted maliciously against the network's consensus functionality.
+Consensus Fault Slashing is the penalty that a miner incurs for committing consensus faults. This penalty is applied to miners that have acted maliciously against the network's consensus functionality. the detailed error checking process is as follows
 
+1. whether byte data in params is legal block data
+2. whether block epoch between UpgradeOrangeHeight - policy.ChainFinality and  UpgradeOrangeHeight + policy.ChainFinality
+3. two blocks cannot be the same
+4. both blocks must be produced by the same miner
+5. epoch of sencond block must bigger or equal than the first one
+6. whether two blocks and extra blocks belongs to one of [three consensus faults](expected_consensus#types-of-faults
+),
+7. heck if the signature of both block is correct
+   - block epoch must be whthin lastest ChainFinality epoch after network version7
+   - get the state when the block height is generated and than get the actor of message receiver,no gas fee is required
+   - to get the miner info of messager receiver in the previous step, requires a gas fee
+   - get worker address of miner,requires a gas fee.
+   - use the worker address obtained in the previous step to verify that the signature
+ 
 ## Cron Actor
 
 The [_Cron Actor_](sysactors) is a scheduler actor that runs critical functions at every epoch.
