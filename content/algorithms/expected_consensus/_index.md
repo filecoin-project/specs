@@ -397,11 +397,14 @@ This is detectable when a given miner submits two blocks that satisfy any of the
 
 A single consensus fault results into:
 
-- miner termination and removal of power from the power table,
-- loss of all pledge collateral (which includes the initial pledge and blocks rewards yet to be vested)
+- a higger penalty is applied, the amount is approximately the reward of the report height
+- unable to become leader within ChainFinality epoch
+- unable to submit PreCommitMessage, PreCommitBatchMessage and eclareFaultsRecovered message within ChainFinality epoch
 
 ### Detection and Reporting
 
 A node that detects and reports a consensus fault is called "slasher". Any user in Filecoin can be a slasher. They can report consensus faults by calling the `ReportConsensusFault` on the `StorageMinerActor` of the faulty miner. The slasher is rewarded with a portion of the penalty paid by the offending miner's `ConsensusFaultPenalty` for notifying the network of the consensus fault. Note that some slashers might not get the full reward because of the low balance of the offending miners. However rational honest miners are still incentivised to notify the network about consensus faults.
 
 The reward given to the slasher is a function of some initial share (`SLASHER_INITIAL_SHARE`) and growth rate (`SLASHER_SHARE_GROWTH_RATE`) and it has a maximum `maxReporterShare`. Slasher's share increases exponentially as epoch elapses since the block when the fault is committed (see `RewardForConsensusSlashReport`). Only the first slasher gets their share of the pledge collateral and the remaining pledge collateral is burned. The longer a slasher waits, the higher the likelihood that the slashed collateral will be claimed by another slasher.
+
+
