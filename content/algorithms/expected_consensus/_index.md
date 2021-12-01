@@ -399,7 +399,7 @@ A single consensus fault results into:
 
 - a higger penalty is applied, the amount is approximately the reward of the report height
 - unable to become leader within ChainFinality epoch
-- unable to submit PreCommitMessage, PreCommitBatchMessage and eclareFaultsRecovered message within ChainFinality epoch
+- unable to submit PreCommitMessage, PreCommitBatchMessage and DeclareFaultsRecovered message within ChainFinality epoch
 
 ### Detection and Reporting
 
