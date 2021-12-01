@@ -397,8 +397,9 @@ This is detectable when a given miner submits two blocks that satisfy any of the
 
 A single consensus fault results into:
 
-- miner termination and removal of power from the power table,
-- loss of all pledge collateral (which includes the initial pledge and blocks rewards yet to be vested)
+- a higger penalty is applied, the amount is approximately the reward of the report height
+- unable to become leader within ChainFinality epoch
+- unable to submit PreCommitMessage, PreCommitBatchMessage and DeclareFaultsRecovered message within ChainFinality epoch
 
 ### Detection and Reporting
 
