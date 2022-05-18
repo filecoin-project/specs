@@ -173,9 +173,9 @@ WinCount guarantees that a lucky single block will earn the same reward as the r
 
 **Alternative Options for the Distribution/Sortition**
 
-Bernouli, Binomial and Poisson distributions have been considered for the _WinCount_ of a miner with power `p` out of a total network power of `N`. There are the following options:
+Bernoulli, Binomial and Poisson distributions have been considered for the _WinCount_ of a miner with power `p` out of a total network power of `N`. There are the following options:
 
-- Option 1: WinCount(p,N) ~ Bernouli(pE/N)
+- Option 1: WinCount(p,N) ~ Bernoulli(pE/N)
 - Option 2: WinCount(p,N) ~ Binomial(E, p/N)
 - Option 3: WinCount(p,N) ~ Binomial(p, E/N)
 - Option 4: WinCount(p,N) ~ Binomial(p/M, ME/N)
@@ -189,7 +189,7 @@ In Option 5 (the one used in Filecoin Leader Election), the ticket targets for e
 
 **Rationale for the Poisson Sortition choice**
 
-- Option 1 - Bernouli(pE/N): this option is easy to implement, but comes with a drawback: if the miner's power exceeds 1/E, the miner's WinCount is always 1, but never higher than 1.
+- Option 1 - Bernoulli(pE/N): this option is easy to implement, but comes with a drawback: if the miner's power exceeds 1/E, the miner's WinCount is always 1, but never higher than 1.
 - Option 2 - Binomial(E, p/N): the expectation of WinCount stays the same irrespectively of whether the miner splits their power into more than one Sybil nodes, but the variance increases if they choose to Sybil. Risk-seeking miners will prefer to Sybil, while risk-averse miners will prefer to pool, none of which is a behaviour the protocol should encourage. This option is not computationally-expensive as it would involve calculation of factorials and fixed-point multiplications (or small integer exponents) only.
 - Option 3 - Binomial(p, E/N): this option is computationally inefficient. It involves very large integer exponents.
 - Option 4 - Binomial(p/M, ME/N): the complexity of this option depends on the value of M. A small M results in high computational cost, similarly to Option 3. A large M, on the other hand, leads to a situation similar to that of Option 2, where a risk-seeking miner is incentivized to Sybil. Clearly none of these are desirable properties.
