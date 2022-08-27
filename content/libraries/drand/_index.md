@@ -69,7 +69,7 @@ endpoint.
 Thereafter, the Filecoin client can call drand's endpoints:
 
 - `/public/latest` to get the latest randomness value produced by the beacon
-- `/public/<round>` to get the randoomness value produced by the beacon at a given round
+- `/public/<round>` to get the randommness value produced by the beacon at a given round
 
 ## Using drand in Filecoin
 
