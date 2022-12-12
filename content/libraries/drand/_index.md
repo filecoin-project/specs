@@ -18,7 +18,7 @@ Any node that has gathered t of the signatures can reconstruct the full BLS sign
 
 drand assumes that at least t of the n nodes are honest (and online -- for liveness). If this threshold is broken, the adversary can permanently halt randomness production but cannot otherwise bias the randomness.
 
-You can learn more about how drand works, by visiting its [repository](https://github.com/drand/drand), or reading its [spec](https://github.com/drand/drand/blob/master/docs/SPECS.md).
+You can learn more about how drand works, by visiting its [repository](https://github.com/drand/drand), or reading its [spec](https://drand.love/docs/specification).
 
 In the following sections we look in turn at how the Filecoin protocol makes use of drand randomness, and at some of the characteristics of the specific drand network Filecoin uses.
 
