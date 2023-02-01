@@ -90,7 +90,7 @@ Upon receiving a new drand randomness value from a beacon, a Filecoin node shoul
 - that the `Signature` field is verified by the beacon's `PublicKey` as the beacon's signature of `SHA256(PreviousSignature || Round)`.
 - that the `Randomness` field is `SHA256(Signature)`.
 
-See [drand](https://github.com/drand/drand/blob/master/beacon/beacon.go#L63) for an example.
+See [drand](https://github.com/drand/drand/blob/master/crypto/schemes.go#L68) for an example.
 
 ### Fetching the appropriate drand value while mining
 
