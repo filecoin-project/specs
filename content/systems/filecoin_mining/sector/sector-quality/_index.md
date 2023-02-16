@@ -57,4 +57,4 @@ The _Sector Quality Adjusted Power_ is:
 $sectorQuality = avgQuality*size$
 {{</katex>}}
 
-During `miner.PreCommitSector`, the sector quality is calculated and stored in the sector information.
+During `miner.PreCommitSector` and `miner.PreCommitSectorBatch`, the sector quality is calculated and stored in the sector information.
