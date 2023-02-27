@@ -397,7 +397,7 @@ This is detectable when a given miner submits two blocks that satisfy any of the
 
 A single consensus fault results into:
 
-- miner termination and removal of power from the power table,
+- miner suspension
 - loss of all pledge collateral (which includes the initial pledge and blocks rewards yet to be vested)
 
 ### Detection and Reporting
