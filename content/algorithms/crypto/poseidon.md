@@ -356,7 +356,15 @@ while providing security against known attacks (statistical, interpolation, and 
 
 <br/>
 
-{{<plain>}}$\constb R_F, R_P = \texttt{calc\_round\_numbers}(p, M, t, \alpha)${{</plain>}}\
+{{<plain>}}$\constb R_F, R_P = \texttt{calc\_round\_numbers}(p, M, t, c_{\alpha}})${{</plain>}}\
+where the S-box case, {{<plain>}}$c_{\alpha}${{</plain>}}, is given by
+{{<plain>}}
+$c_{\alpha} = \begin{cases}
+    0 & \if \alpha = 3 \cr
+    1 & \if \alpha = 5 \cr
+    2 & \if \alpha = \neg 1
+\end{cases}
+{{</plain>}}\
 The number of full and partial rounds, both are positive integers $R_F, R_P \typecolon \mathbb{Z}_{>0}$ and $R_F$ is even.
 
 $R_F$ and $R_P$ are calculated using either the Python script [`calc_round_numbers.py`](https://extgit.iaik.tugraz.at/krypto/hadeshash/-/blob/9d80ec0473ad7cde5a12f3aac46439ad0da68c0a/code/scripts/calc_round_numbers.py) or the [`neptune`](https://github.com/filecoin-project/neptune) Rust library, denoted {{<plain>}}$\texttt{calc\_round\_numbers}${{</plain>}}. Both methods calculate the round numbers via brute-force; by iterating over all reasonable values for $R_F$ and $R_P$ and choosing the pair that satisfies the security inequalities (provided below) while minimizing the number of S-boxes.
