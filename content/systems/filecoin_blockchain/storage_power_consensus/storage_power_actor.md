@@ -16,7 +16,7 @@ dashboardTests: 0
 
 {{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/power/power_actor.go" lang="go" symbol="Exports">}}
 
-{{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/power/power_actor.go" lang="go" symbol="MinerConstructorParams">}}
+<!-- {{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/power/power_actor.go" lang="go" symbol="MinerConstructorParams">}} -->
 
 ## The Power Table
 
