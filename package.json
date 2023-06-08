@@ -33,7 +33,7 @@
     "conventional-github-releaser": "^3.1.5",
     "execa": "^4.0.3",
     "globby": "^11.0.1",
-    "graphviz-cli": "^1.0.0",
+    "graphviz-cli": "^2.0.0",
     "hugo-extended": "^0.76.5",
     "husky": ">=4",
     "jsdom": "^16.4.0",

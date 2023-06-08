@@ -4,6 +4,7 @@ const globby = require('globby')
 const execa = require('execa')
 const path = require('path')
 const fs = require('fs')
+const graphviz = require('graphviz-cli')
 
 const runMmd = (p) => {
   const outDir = path.dirname(p).replace('content/', 'static/_gen/diagrams/')
@@ -21,13 +22,12 @@ const runMmdAll = async () => {
   await Promise.all(paths.map(runMmd))
 }
 
-const runDot = (p) => {
+const runDot = async (p) => {
   const outDir = path.dirname(p).replace('content/', 'static/_gen/diagrams/')
   const outFile = path.basename(p).replace('.dot', '.svg')
   fs.mkdirSync(outDir, { recursive: true })
-  return execa('graphviz', ['-Tsvg', `-o${path.join(outDir, outFile)}`, p], {
-    preferLocal: true,
-  })
+
+  return await graphviz.renderGraphFromSource({ name: p }, { format: 'svg', name: path.join(outDir, outFile) })
 }
 
 const runDotAll = async () => {
