@@ -2,6 +2,7 @@
   "name": "specs",
   "version": "2.1.1",
   "description": "The Filecoin protocol specification",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "remark content --frail --quiet && prettier --check .",
@@ -27,7 +28,7 @@
     "tablesort": "^5.2.1"
   },
   "devDependencies": {
-    "@mermaid-js/mermaid-cli": "^8.8.1",
+    "@mermaid-js/mermaid-cli": "^10.2.2",
     "chokidar": "^3.4.3",
     "concurrently": "^5.3.0",
     "conventional-github-releaser": "^3.1.5",

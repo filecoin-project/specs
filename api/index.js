@@ -37,7 +37,7 @@ async function cov(event) {
     Accept: 'application/json',
     Authorization: `Bearer ${CODECOV_TOKEN}`,
   }
-  const repo_resp= await get(event, {
+  const repo_resp = await get(event, {
     url: `https://api.codecov.io/api/v2/github/${owner}/repos/${repo}/`,
     transform: (data) => {
       const out = {
