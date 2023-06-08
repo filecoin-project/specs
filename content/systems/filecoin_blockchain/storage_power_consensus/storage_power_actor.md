@@ -16,8 +16,6 @@ dashboardTests: 0
 
 {{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/power/power_actor.go" lang="go" symbol="Exports">}}
 
-<!-- {{<embed src="https://github.com/filecoin-project/specs-actors/blob/master/actors/builtin/power/power_actor.go" lang="go" symbol="MinerConstructorParams">}} -->
-
 ## The Power Table
 
 The portion of blocks a given miner generates through leader election in EC (and so the block rewards they earn) is proportional to their `Quality-Adjusted Power Fraction` over time. That is, a miner whose quality adjusted power represents 1% of total quality adjusted power on the network should mine 1% of blocks on expectation.
