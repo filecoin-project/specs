@@ -9,7 +9,7 @@
     "serve": "npm start",
     "watch-hugo": "npm run build-diagrams && hugo server --bind=0.0.0.0 --disableFastRender --renderToDisk",
     "watch-assets": "tools/watch.js --watch",
-    "build": "npm run build-diagrams && hugo && npm run build-toc && hugo --gc --minify",
+    "build": "npm run build-diagrams && hugo && npm run build-toc && hugo --gc",
     "build-diagrams": "tools/diagrams.js",
     "build-toc": "tools/toc.js",
     "clean": "premove public resources static/_gen",

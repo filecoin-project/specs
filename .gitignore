@@ -11,3 +11,4 @@ data/toc.json
 api/dist
 api/worker
 .hugo_build.lock
+assets/jsconfig.json
