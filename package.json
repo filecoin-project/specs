@@ -2,7 +2,6 @@
   "name": "specs",
   "version": "2.1.1",
   "description": "The Filecoin protocol specification",
-  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "remark content --frail --quiet && prettier --check .",

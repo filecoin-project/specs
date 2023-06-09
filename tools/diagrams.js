@@ -1,17 +1,16 @@
 #!/usr/bin/env node
-import { run as mmdc } from '@mermaid-js/mermaid-cli'
-import globby from 'globby'
-import path from 'path'
-import fs from 'fs'
-import { renderGraphFromSource } from 'graphviz-cli'
-import * as url from 'node:url';
+const globby = require('globby')
+const path = require('path')
+const fs = require('fs')
+const graphviz = require('graphviz-cli')
 
 const runMmd = async (p) => {
+  const mmdc = await import('@mermaid-js/mermaid-cli')
   const outDir = path.dirname(p).replace('content/', 'static/_gen/diagrams/')
   const outFile = path.basename(p).replace('.mmd', '.svg')
   fs.mkdirSync(outDir, { recursive: true })
   const config = process.env.CI ? { puppeteerConfig: 'tools/pptr.config' } : {}
-  return await mmdc(p, path.join(outDir, outFile), {
+  return await mmdc.run(p, path.join(outDir, outFile), {
     puppeteerConfig: 'tool/ppt.config',
   })
 }
@@ -26,7 +25,7 @@ const runDot = async (p) => {
   const outFile = path.basename(p).replace('.dot', '.svg')
   fs.mkdirSync(outDir, { recursive: true })
 
-  return await renderGraphFromSource(
+  return await graphviz.renderGraphFromSource(
     { name: p },
     { format: 'svg', name: path.join(outDir, outFile) }
   )
@@ -45,7 +44,7 @@ const run = async () => {
   console.timeEnd('Processed *.{mmd,dot}')
 }
 
-export const configureWatcher = (watcher) => {
+exports.configureWatcher = (watcher) => {
   watcher.on('all', async (_, p) => {
     const ext = path.extname(p)
     switch (ext) {
@@ -65,9 +64,6 @@ export const configureWatcher = (watcher) => {
 }
 
 // run as script, so do the thing
-if (import.meta.url.startsWith('file:')) { // (A)
-  const modulePath = url.fileURLToPath(import.meta.url);
-  if (process.argv[1] === modulePath) { // (B)
-    run()
-  }
+if (require.main === module) {
+  run()
 }

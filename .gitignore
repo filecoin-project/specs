@@ -10,3 +10,4 @@ static/_gen
 data/toc.json
 api/dist
 api/worker
+.hugo_build.lock
