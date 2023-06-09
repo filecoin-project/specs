@@ -9,10 +9,7 @@ const runMmd = async (p) => {
   const outDir = path.dirname(p).replace('content/', 'static/_gen/diagrams/')
   const outFile = path.basename(p).replace('.mmd', '.svg')
   fs.mkdirSync(outDir, { recursive: true })
-  const config = process.env.CI ? { puppeteerConfig: 'tools/pptr.config' } : {}
-  return await mmdc.run(p, path.join(outDir, outFile), {
-    puppeteerConfig: 'tool/ppt.config',
-  })
+  return await mmdc.run(p, path.join(outDir, outFile))
 }
 
 const runMmdAll = async () => {
