@@ -1,6 +1,6 @@
 {
   "build": {
-    "image": "node:20.2",
+    "image": "node:20-slim",
     "command": "npm install && npm run build",
     "publicDir": "public"
   }
