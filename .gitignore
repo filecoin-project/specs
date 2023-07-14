@@ -6,7 +6,8 @@ yarn.lock
 package-lock.json
 node_modules
 resources
-static/_gen
 data/toc.json
 api/dist
 api/worker
+.hugo_build.lock
+assets/jsconfig.json
