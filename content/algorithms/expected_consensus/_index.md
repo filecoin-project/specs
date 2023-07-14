@@ -341,10 +341,6 @@ The exact value for these parameters remain to be determined, but for testing pu
 - `wFunction = log2b` with
   - `log2b(X) = floor(log2(x)) = (binary length of X) - 1` and `log2b(0) = 0`. Note that that special case should never be used (given it would mean an empty power table).
 
-{{< hint warning >}}
-**Note that if your implementation does not allow for rounding to the fourth decimal**, miners should apply the [tie-breaker below](selecting-between-tipsets-with-equal-weight). Weight changes will be on the order of single digit numbers on expectation, so this should not have an outsized impact on chain consensus across implementations.
-{{< /hint >}}
-
 `ParentWeight` is the aggregate chain weight of a given block's parent set. It is calculated as
 the `ParentWeight` of any of its parent blocks (all blocks in a given Tipset should have
 the same `ParentWeight` value) plus the delta weight of each parent. To make the
