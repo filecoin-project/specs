@@ -18,7 +18,7 @@ Any node that has gathered t of the signatures can reconstruct the full BLS sign
 
 drand assumes that at least t of the n nodes are honest (and online -- for liveness). If this threshold is broken, the adversary can permanently halt randomness production but cannot otherwise bias the randomness.
 
-You can learn more about how drand works, by visiting its [repository](https://github.com/drand/drand), or reading its [spec](https://github.com/drand/drand/blob/master/docs/SPECS.md).
+You can learn more about how drand works, by visiting its [repository](https://github.com/drand/drand), or reading its [specification](https://drand.love/docs/specification/).
 
 In the following sections we look in turn at how the Filecoin protocol makes use of drand randomness, and at some of the characteristics of the specific drand network Filecoin uses.
 
@@ -40,7 +40,7 @@ Specifically, we have:
 - `PreviousSignature` -- the threshold BLS signature from the previous drand round.
 - `Round` -- the index of Randomness in the sequence of all random values produced by this drand network.
 
-Specifically, the message signed is the concatenation of the round number treated as a uint64 and the previous signature. At the moment, drand uses BLS signatures on the BLS12-381 curve with the latest v7 RFC of hash-to-curve and the signature is made over G1 (for more see the [drand spec](https://github.com/drand/drand/blob/master/docs/SPECS.md#cryptographic-specification)).
+Specifically, the message signed is the concatenation of the round number treated as a uint64 and the previous signature. At the moment, drand uses BLS signatures on the BLS12-381 curve with the latest v7 RFC of hash-to-curve and the signature is made over G1 (for more see the [drand specification](https://drand.love/docs/specification/#cryptographic-specification).
 
 ## Polling the drand network
 
@@ -90,7 +90,7 @@ Upon receiving a new drand randomness value from a beacon, a Filecoin node shoul
 - that the `Signature` field is verified by the beacon's `PublicKey` as the beacon's signature of `SHA256(PreviousSignature || Round)`.
 - that the `Randomness` field is `SHA256(Signature)`.
 
-See [drand](https://github.com/drand/drand/blob/master/beacon/beacon.go#L63) for an example.
+See [drand](https://github.com/drand/drand/blob/0df91a710b4366d41e88ad487814a16cf88494f9/crypto/schemes.go#L68) for an example.
 
 ### Fetching the appropriate drand value while mining
 
