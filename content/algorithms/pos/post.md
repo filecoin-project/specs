@@ -30,7 +30,7 @@ Before continuing into more details of the _WinnningPoSt_ and _WindowPoSt_ algor
 
 ## WinningPoSt
 
-At the beginning of each epoch, a small number of storage miners (up to five, currently) are elected to mine new blocks, by Filecoin's [Expected Consensus](algorithms#expected_consensus) algorithm. Recall that the Filecoin blockchain operates on the basis of _tipsets_, which are groups of up to five blocks. This means that multiple blocks (up to five) can be mined at the same height.
+At the beginning of each epoch, a small number of storage miners are elected to mine new blocks, by Filecoin's [Expected Consensus](algorithms#expected_consensus) algorithm. Recall that the Filecoin blockchain operates on the basis of _tipsets_, therefore multiple blocks can be mined at the same height.
 
 Each of the miners that are elected to mine a block have to submit a proof that they keep a sealed copy of the data which they have included in their proposed block, before the end of the current epoch. Successful submission of this proof is the _WinningPoSt_, which in turn grants the miner the Filecoin Block Reward, as well as the opportunity to charge other nodes fees in order to include their messages in the block. If a miner misses the epoch-end deadline, then the miner misses the opportunity to mine a block and get a Block Reward. No penalty is incurred in this case.
 

@@ -30,6 +30,6 @@ This diagram shows the composition of an unsealed sector and a sealed sector.
 
 **Sector Storage & Window PoSt**
 
-The Lotus implementation of the Window PoSt scheduler can be found [here](https://github.com/filecoin-project/lotus/blob/master/storage/wdpost_sched.go) and the actual execution of Window PoSt on a sector can be found [here](https://github.com/filecoin-project/lotus/blob/master/storage/wdpost_run.go).
+The Lotus implementation of the Window PoSt scheduler can be found [here](https://github.com/filecoin-project/lotus/blob/master/storage/wdpost/wdpost_sched.go) and the actual execution of Window PoSt on a sector can be found [here](https://github.com/filecoin-project/lotus/blob/master/storage/wdpost/wdpost_run.go).
 
 The Lotus block store implementation for sectors can be found [here](https://github.com/filecoin-project/lotus/blob/master/storage/sectorblocks/blocks.go).
