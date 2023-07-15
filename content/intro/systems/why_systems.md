@@ -68,7 +68,7 @@ Sometimes this is harder, and it requires detangling, adding, or removing abstra
 example, the `StoragePowerActor` and the `StorageMarketActor` were a single `Actor` previously. This caused
 a large coupling of functionality across `StorageDeal` making, the `StorageMarket`, markets in general, with
 Storage Mining, Sector Sealing, PoSt Generation, and more. Detangling these two sets of related functionality
-requried breaking apart the one actor into two.
+required breaking apart the one actor into two.
 
 ## Decomposing within a System
 
