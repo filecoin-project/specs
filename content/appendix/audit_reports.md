@@ -14,12 +14,12 @@ Security is a critical component in ensuring Filecoin can fulfill its mission to
 
 ### `2023-03-09` Filecoin EVM (FEVM)
 
-- Report: [Filecoin EVM Audit](https://github.com/oak-security/audit-reports/blob/master/Filecoin%20Foundation/2023-03-09%20Audit%20Report%20-%20Filecoin%20EVM%20(FEVM)%20v1.1.pdf)
+- Report: [Filecoin EVM Audit](<https://github.com/oak-security/audit-reports/blob/master/Filecoin%20Foundation/2023-03-09%20Audit%20Report%20-%20Filecoin%20EVM%20(FEVM)%20v1.1.pdf>)
 - Audit conducted by **Oak Security**
 
 The audit covers the implementation of:
 
--  FEVM's [builtin actors](https://github.com/filecoin-project/builtin-actors/tree/1b11df4b399550753a4105f45f58bc07015af2a3/actors/evm) out of which only [actors/evm](https://github.com/filecoin-project/builtin-actors/tree/1b11df4b399550753a4105f45f58bc07015af2a3/actors/evm) and [actors/eam](https://github.com/filecoin-project/builtin-actors/tree/1b11df4b399550753a4105f45f58bc07015af2a3/actors/eam) were included in scope along with code base of [ref-fvm](https://github.com/filecoin-project/ref-fvm). The report included auditing EVM runtime action and implementation, correctness of EVM opcodes, including Ethereum Address Manager(EAM). The report also included issues and enhancements methods for gas model and F4 addresses. The audit team also reviewed the message execution flow and kernel setup, WASM integration and FVM logs. All the valid issues raised by the audit were resolved and acknowledged including a few informational issues. More details on these issues are available in the report.
+- FEVM's [builtin actors](https://github.com/filecoin-project/builtin-actors/tree/1b11df4b399550753a4105f45f58bc07015af2a3/actors/evm) out of which only [actors/evm](https://github.com/filecoin-project/builtin-actors/tree/1b11df4b399550753a4105f45f58bc07015af2a3/actors/evm) and [actors/eam](https://github.com/filecoin-project/builtin-actors/tree/1b11df4b399550753a4105f45f58bc07015af2a3/actors/eam) were included in scope along with code base of [ref-fvm](https://github.com/filecoin-project/ref-fvm). The report included auditing EVM runtime action and implementation, correctness of EVM opcodes, including Ethereum Address Manager(EAM). The report also included issues and enhancements methods for gas model and F4 addresses. The audit team also reviewed the message execution flow and kernel setup, WASM integration and FVM logs. All the valid issues raised by the audit were resolved and acknowledged including a few informational issues. More details on these issues are available in the report.
 
 ## Lotus
 
