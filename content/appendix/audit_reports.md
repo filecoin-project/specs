@@ -22,6 +22,17 @@ The scope of this audit covered:
 - The Lotus Daemon: Core component responsible for handling the Blockchain node logic by handling peer- to-peer networking, chain syncing, block validation, data retrieval and transfer, etc.
 - The Lotus Storage Miner: Mining component used to manage a single storage miner by contributing to the network through Sector commitments and Proofs-of-Spacetime data proving it is storing the sectors it has committed to. This component communicates with the Lotus daemon via JSON-RPC API calls.
 
+## Venus
+
+### `2021-06-29` Venus Security Audit
+
+- Report: [Venus Security Assessment](https://leastauthority.com/static/publications/LeastAuthority_Filecoin_Foundation_Venus_Final_Audit_Report.pdf)
+- Audit conducted by: **Least Authority**
+
+The scope of this audit covered:
+
+- The Venus Daemon: Core component responsible for handling the Filecoin node logic by handling peer-to-peer networking, chain syncing, block validation, etc.
+
 ## Actors
 
 ### `2020-10-19` Actors Mainnet Ready Security Audit
