@@ -1,5 +1,5 @@
 ---
-title: Fuhon
+title: Fuhon (deprecated)
 weight: 4
 dashboardWeight: 1
 dashboardState: reliable
@@ -15,3 +15,5 @@ Fuhon is the C++ implementation of Filecoin. The implementation uses Rust librar
 You can find the Fuhon codebase [here](https://github.com/filecoin-project/cpp-filecoin).
 
 The Fuhon implementation of Filecoin is supported by [Soramitsu](https://soramitsu.co.jp/).
+
+Since May 2022, this implementation has been deprecated and out of support. The existing code repositories will remain public.
