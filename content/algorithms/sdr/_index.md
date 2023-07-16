@@ -1156,8 +1156,8 @@ $\line{11}{}{\return \Sha{254}(\preimage) \as \Fq}$
 
 **Implementation:**
 
-- [`storage_proofs::porep::stacked::circuit::proof::StackedCircuit::synthesize()`](https://github.com/filecoin-project/rust-fil-proofs/blob/master/storage-proofs/porep/src/stacked/circuit/proof.rs#L77)
-- [`storage_proofs::porep::stacked::circuit::params::Proof::synthesize()`](https://github.com/filecoin-project/rust-fil-proofs/blob/master/storage-proofs/porep/src/stacked/circuit/params.rs#L77)
+- [`storage_proofs::porep::stacked::circuit::proof::StackedCircuit::synthesize()`](https://github.com/filecoin-project/rust-fil-proofs/blob/108517271f8166cabc23e1966d8e8f397ec75ae0/storage-proofs-porep/src/stacked/circuit/proof.rs#L64)
+- [`storage_proofs::porep::stacked::circuit::params::Proof::synthesize()`](https://github.com/filecoin-project/rust-fil-proofs/blob/108517271f8166cabc23e1966d8e8f397ec75ae0/storage-proofs-porep/src/stacked/circuit/proof.rs#L92)
 
 **Additional Notation:**
 
