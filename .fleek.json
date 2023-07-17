@@ -1,6 +1,6 @@
 {
   "build": {
-    "image": "hugomrdias/puppeteer",
+    "image": "node:20.2",
     "command": "npm install && npm run build",
     "publicDir": "public"
   }
