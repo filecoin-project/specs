@@ -10,6 +10,17 @@ dashboardAudit: n/a
 
 Security is a critical component in ensuring Filecoin can fulfill its mission to be the storage network for humanity. In addition to robust secure development processes, trainings, theory audits, and investing in external security research, the Filecoin project has engaged reputable third party auditing specialists to ensure that the theory behind the protocol and its implementation delivers the intended value, enabling Filecoin to be a safe and secure network. This section covers a selection of audit reports that have been published on Filecoin's theory and implementation.
 
+## Filecoin Virtual Machine
+
+### `2023-03-09` Filecoin EVM (FEVM)
+
+- Report: [Filecoin EVM Audit](<https://github.com/oak-security/audit-reports/blob/master/Filecoin%20Foundation/2023-03-09%20Audit%20Report%20-%20Filecoin%20EVM%20(FEVM)%20v1.1.pdf>)
+- Audit conducted by **Oak Security**
+
+The audit covers the implementation of:
+
+- FEVM's [builtin actors](https://github.com/filecoin-project/builtin-actors/tree/1b11df4b399550753a4105f45f58bc07015af2a3/actors/evm) out of which only [actors/evm](https://github.com/filecoin-project/builtin-actors/tree/1b11df4b399550753a4105f45f58bc07015af2a3/actors/evm) and [actors/eam](https://github.com/filecoin-project/builtin-actors/tree/1b11df4b399550753a4105f45f58bc07015af2a3/actors/eam) were included in scope along with code base of [ref-fvm](https://github.com/filecoin-project/ref-fvm). The report included auditing EVM runtime action and implementation, correctness of EVM opcodes, including Ethereum Address Manager(EAM). The report also included issues and enhancements methods for gas model and F4 addresses. The audit team also reviewed the message execution flow and kernel setup, WASM integration and FVM logs. All the valid issues raised by the audit were resolved and acknowledged including a few informational issues. More details on these issues are available in the report.
+
 ## Lotus
 
 ### `2020-10-20` Lotus Mainnet Ready Security Audit
@@ -21,6 +32,17 @@ The scope of this audit covered:
 
 - The Lotus Daemon: Core component responsible for handling the Blockchain node logic by handling peer- to-peer networking, chain syncing, block validation, data retrieval and transfer, etc.
 - The Lotus Storage Miner: Mining component used to manage a single storage miner by contributing to the network through Sector commitments and Proofs-of-Spacetime data proving it is storing the sectors it has committed to. This component communicates with the Lotus daemon via JSON-RPC API calls.
+
+## Venus
+
+### `2021-06-29` Venus Security Audit
+
+- Report: [Venus Security Assessment](https://leastauthority.com/static/publications/LeastAuthority_Filecoin_Foundation_Venus_Final_Audit_Report.pdf)
+- Audit conducted by: **Least Authority**
+
+The scope of this audit covered:
+
+- The Venus Daemon: Core component responsible for handling the Filecoin node logic by handling peer-to-peer networking, chain syncing, block validation, etc.
 
 ## Actors
 

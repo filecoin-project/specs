@@ -5,6 +5,10 @@ canonifyurls = false
 theme = "book"
 # relativeURLs = true
 
+# allow building even if getting remote JSON fails
+# needed because rust-fil-proofs has no coverage
+ignoreErrors = ["error-remote-getjson"]
+
 # Book configuration
 disablePathToLower = true
 enableGitInfo = true
@@ -41,7 +45,7 @@ enableGitInfo = true
 #   weight = 10
 
 [params]
-  API = 'https://specs-api.protocol-labs.workers.dev'
+  API = 'https://specs-api.filecoin-foundation.workers.dev'
   # (Optional, default true) Controls table of contents visibility on right side of pages.
   # Start and end levels can be controlled with markup.tableOfContents setting.
   # You can also specify this parameter per page in front matter.

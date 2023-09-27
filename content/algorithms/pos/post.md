@@ -30,7 +30,7 @@ Before continuing into more details of the _WinnningPoSt_ and _WindowPoSt_ algor
 
 ## WinningPoSt
 
-At the beginning of each epoch, a small number of storage miners (up to five, currently) are elected to mine new blocks, by Filecoin's [Expected Consensus](algorithms#expected_consensus) algorithm. Recall that the Filecoin blockchain operates on the basis of _tipsets_, which are groups of up to five blocks. This means that multiple blocks (up to five) can be mined at the same height.
+At the beginning of each epoch, a small number of storage miners are elected to mine new blocks, by Filecoin's [Expected Consensus](algorithms#expected_consensus) algorithm. Recall that the Filecoin blockchain operates on the basis of _tipsets_, therefore multiple blocks can be mined at the same height.
 
 Each of the miners that are elected to mine a block have to submit a proof that they keep a sealed copy of the data which they have included in their proposed block, before the end of the current epoch. Successful submission of this proof is the _WinningPoSt_, which in turn grants the miner the Filecoin Block Reward, as well as the opportunity to charge other nodes fees in order to include their messages in the block. If a miner misses the epoch-end deadline, then the miner misses the opportunity to mine a block and get a Block Reward. No penalty is incurred in this case.
 
@@ -50,7 +50,7 @@ The Filecoin network expects constant availability of stored files. Failing to s
 
 ## Design
 
-Each miner actor is allocated a 24-hr proving period at random upon creation. This proving period is divided into 48 non-overlapping half-hour deadlines. Each sector is assigned to one of these deadlines when proven to the chain, i.e., when `ProveCommit` completes and never changes deadline. The sets of sectors due at each deadline is recorded in a collection of 48 bitfields.
+Each miner actor is allocated a 24-hr proving period at random upon creation. This proving period is divided into 48 non-overlapping half-hour deadlines. Each sector is assigned to one of these deadlines when proven to the chain, i.e., when ProveCommit completes and never changes deadline. The sets of sectors due at each deadline is recorded in a collection of 48 bitfields.
 
 Generally, sectors are first allocated to fill any deadline up to the next whole-partition multiple of (2349) sectors; next a new partition is started on the deadline with the fewest partitions. If all deadlines have the same number of sectors, a new partition is opened at deadline 0.
 
@@ -71,10 +71,10 @@ Summarising:
 - A _proving period_ is evenly divided in `WPoStPeriodDeadlines` _deadlines_.
 - Each miner has a different start of proving period `ProvingPeriodStart` that is assigned at `Power.CreateMiner`.
 - A _deadline_ is a period of `WPoStChallengeWindow` epochs that divides a proving period.
-- Sectors are assigned to a deadline on `miner.ProveCommitSector` and will remain assigned to it throughout their lifetime.
+- Sectors are assigned to a deadline at ProveCommit, either a call to `miner.ProveCommitSector` or `miner.ProveCommitAggregate`, and will remain assigned to it throughout their lifetime.
 - In order to prove that they continuously store a sector, a miner must submit a `miner.SubmitWindowedPoSt` for each deadline.
 - Sectors are assigned to partitions. A partition is a set of sectors that is not larger than the Seal Proof allowed number of sectors `sp.WindowPoStPartitionSectors`.
-- Sectors are assigned to a partition at `miner.ProveCommitSector` and they can be re-arranged via `CompactPartitions`.
+- Sectors are assigned to a partition at ProveCommit, through a call to `miner.ProveCommitSector` or `miner.ProveCommitAggregate`, and they can be re-arranged via `CompactPartitions`.
 - Partitions are a by-product of our current proof mechanism. There is a limit in the number of sectors (`sp.WindowPoStPartitionSectors`) that can be proven in a single SNARK proof. If more than this amount is required to be proven, more than one SNARK proof is required, given that each SNARK proof represents a partition.
 
 There are four relevant epochs associated to a deadline, shown in the table below:
