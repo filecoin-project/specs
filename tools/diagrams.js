@@ -1,19 +1,15 @@
 #!/usr/bin/env node
-
 const globby = require('globby')
-const execa = require('execa')
 const path = require('path')
 const fs = require('fs')
+const graphviz = require('graphviz-cli')
 
-const runMmd = (p) => {
+const runMmd = async (p) => {
+  const mmdc = await import('@mermaid-js/mermaid-cli')
   const outDir = path.dirname(p).replace('content/', 'static/_gen/diagrams/')
   const outFile = path.basename(p).replace('.mmd', '.svg')
-
   fs.mkdirSync(outDir, { recursive: true })
-  const config = process.env.CI ? ['-p', 'tools/pptr.config'] : []
-  return execa('mmdc', [...config, '-i', p, '-o', path.join(outDir, outFile)], {
-    preferLocal: true,
-  })
+  return await mmdc.run(p, path.join(outDir, outFile))
 }
 
 const runMmdAll = async () => {
@@ -21,13 +17,15 @@ const runMmdAll = async () => {
   await Promise.all(paths.map(runMmd))
 }
 
-const runDot = (p) => {
+const runDot = async (p) => {
   const outDir = path.dirname(p).replace('content/', 'static/_gen/diagrams/')
   const outFile = path.basename(p).replace('.dot', '.svg')
   fs.mkdirSync(outDir, { recursive: true })
-  return execa('graphviz', ['-Tsvg', `-o${path.join(outDir, outFile)}`, p], {
-    preferLocal: true,
-  })
+
+  return await graphviz.renderGraphFromSource(
+    { name: p },
+    { format: 'svg', name: path.join(outDir, outFile) }
+  )
 }
 
 const runDotAll = async () => {
@@ -43,7 +41,7 @@ const run = async () => {
   console.timeEnd('Processed *.{mmd,dot}')
 }
 
-module.exports.configureWatcher = (watcher) => {
+exports.configureWatcher = (watcher) => {
   watcher.on('all', async (_, p) => {
     const ext = path.extname(p)
     switch (ext) {
