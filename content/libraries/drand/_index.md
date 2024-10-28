@@ -44,7 +44,6 @@ Specifically, we have:
 
 Specifically, the message signed is the concatenation of the round number treated as a uint64 and the previous signature. At the moment, drand uses BLS signatures on the BLS12-381 curve with the latest v7 RFC of hash-to-curve and the signature is made over G1 (for more see the [drand specification](https://drand.love/docs/specification/#cryptographic-specification).
 
-
 ## Polling the drand network
 
 Filecoin nodes fetch the drand entry from the distribution network of the
