@@ -36,7 +36,7 @@ The Miner lifecycle in the power table should be roughly as follows:
   - Power of a partition is decremented immediately after a missed WindowPoSt (`DetectedFault`).
   - A particular sector's power is decremented when it enters into a faulty state either through Declared Faults or Skipped Faults.
   - A particular sector's power is added back after recovery is declared and proven by PoSt.
-  - A particular sector's power is removed when the sector is expired or terminated through miner invovation.
+  - A particular sector's power is removed when the sector is expired or terminated through miner invocation.
 
 To summarize, only sectors in the Active state will command power. A Sector becomes Active when it is added upon `ProveCommit`. Power is immediately decremented when it enters into the faulty state. Power will be restored when its declared recovery is proven. A sector's power is removed when it is expired or terminated through miner invocation.
 
