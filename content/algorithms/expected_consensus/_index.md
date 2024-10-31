@@ -11,7 +11,7 @@ dashboardTests: 0
 
 ## Algorithm
 
-Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high level, it operates by running a leader election every epoch in which, on expectation, a set number of participants may be eligible to submit a block. EC guarantees that these winners will be anonymous until they reveal themselves by submitting a proof that they have been elected, the `ElectionProof`. Each winning miner can submit one such proof per round and will be rewarded proportionally to its power. From this point on, each wining miner also creates a proof of storage (aka Winning PoSt). Each proof can be derived from a [properly formatted beacon entry](randomness), as described below.
+Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high level, it operates by running a leader election every epoch in which, on expectation, a set number of participants may be eligible to submit a block. EC guarantees that these winners will be anonymous until they reveal themselves by submitting a proof that they have been elected, the `ElectionProof`. Each winning miner can submit one such proof per round and will be rewarded proportionally to its power. From this point on, each winning miner also creates a proof of storage (aka Winning PoSt). Each proof can be derived from a [properly formatted beacon entry](randomness), as described below.
 
 All valid blocks submitted in a given round form a `Tipset`. Every block in a Tipset adds weight to its chain. The 'best' chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on how to select the heaviest chain, see [Chain Selection](expected_consensus#chain-selection). While on expectation at least one block will be generated at every round, in cases where no one finds a block in a given round, a miner can simply run leader election again for the next epoch with the appropriate random seed, thereby ensuring liveness in the protocol.
 
@@ -173,9 +173,9 @@ WinCount guarantees that a lucky single block will earn the same reward as the r
 
 **Alternative Options for the Distribution/Sortition**
 
-Bernouli, Binomial and Poisson distributions have been considered for the _WinCount_ of a miner with power `p` out of a total network power of `N`. There are the following options:
+Bernoulli, Binomial and Poisson distributions have been considered for the _WinCount_ of a miner with power `p` out of a total network power of `N`. There are the following options:
 
-- Option 1: WinCount(p,N) ~ Bernouli(pE/N)
+- Option 1: WinCount(p,N) ~ Bernoulli(pE/N)
 - Option 2: WinCount(p,N) ~ Binomial(E, p/N)
 - Option 3: WinCount(p,N) ~ Binomial(p, E/N)
 - Option 4: WinCount(p,N) ~ Binomial(p/M, ME/N)
@@ -189,7 +189,7 @@ In Option 5 (the one used in Filecoin Leader Election), the ticket targets for e
 
 **Rationale for the Poisson Sortition choice**
 
-- Option 1 - Bernouli(pE/N): this option is easy to implement, but comes with a drawback: if the miner's power exceeds 1/E, the miner's WinCount is always 1, but never higher than 1.
+- Option 1 - Bernoulli(pE/N): this option is easy to implement, but comes with a drawback: if the miner's power exceeds 1/E, the miner's WinCount is always 1, but never higher than 1.
 - Option 2 - Binomial(E, p/N): the expectation of WinCount stays the same irrespectively of whether the miner splits their power into more than one Sybil nodes, but the variance increases if they choose to Sybil. Risk-seeking miners will prefer to Sybil, while risk-averse miners will prefer to pool, none of which is a behaviour the protocol should encourage. This option is not computationally-expensive as it would involve calculation of factorials and fixed-point multiplications (or small integer exponents) only.
 - Option 3 - Binomial(p, E/N): this option is computationally inefficient. It involves very large integer exponents.
 - Option 4 - Binomial(p/M, ME/N): the complexity of this option depends on the value of M. A small M results in high computational cost, similarly to Option 3. A large M, on the other hand, leads to a situation similar to that of Option 2, where a risk-seeking miner is incentivized to Sybil. Clearly none of these are desirable properties.
@@ -342,7 +342,7 @@ The exact value for these parameters remain to be determined, but for testing pu
   - `log2b(X) = floor(log2(x)) = (binary length of X) - 1` and `log2b(0) = 0`. Note that that special case should never be used (given it would mean an empty power table).
 
 {{< hint warning >}}
-**Note that if your implementation does not allow for rounding to the fourth decimal**, miners should apply the [tie-breaker below](selecting-between-tipsets-with-equal-weight). Weight changes will be on the order of single digit numbers on expectation, so this should not have an outsized impact on chain consensus across implementations.
+**Note that if your implementation does not allow for rounding to the fourth decimal**, miners should apply the [tie-breaker below](#section-algorithms.expected_consensus.selecting-between-tipsets-with-equal-weight). Weight changes will be on the order of single digit numbers on expectation, so this should not have an outsized impact on chain consensus across implementations.
 {{< /hint >}}
 
 `ParentWeight` is the aggregate chain weight of a given block's parent set. It is calculated as
@@ -397,7 +397,7 @@ This is detectable when a given miner submits two blocks that satisfy any of the
 
 A single consensus fault results into:
 
-- miner termination and removal of power from the power table,
+- miner suspension
 - loss of all pledge collateral (which includes the initial pledge and blocks rewards yet to be vested)
 
 ### Detection and Reporting
