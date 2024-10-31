@@ -11,3 +11,4 @@ api/dist
 api/worker
 .hugo_build.lock
 assets/jsconfig.json
+static/_gen
