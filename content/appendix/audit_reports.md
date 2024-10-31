@@ -58,6 +58,7 @@ This audit covers the implementation of Filecoin's builtin Actors, focusing on t
 ### `2021-05-31` SnarkPack audit
 
 An audit was conducted on the cryptographic part of [SnarkPack](https://eprint.iacr.org/2021/529.pdf), that is used in the [FIP0009](https://github.com/filecoin-project/FIPs/blob/master/FIPS/fip-0009.md):
+
 - [Report](https://hackmd.io/@LIRa8YONSwKxiRz3cficng/B105no8w_) from Matteo Campanelli, a well known cryptography [researcher](https://www.binarywhales.com/)
 
 One major issue was found in the report by Campanelli where the challenges of each prove commits were not tied to the aggregated proof; this could have led up to malicious miner forge valid aggregated proofs without the individual prove commits. The rest of the issues were of medium to informal severity.
