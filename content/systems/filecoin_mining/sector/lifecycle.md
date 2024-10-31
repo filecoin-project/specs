@@ -17,9 +17,7 @@ It is reasonable to assume that miners enter the network by adding Committed Cap
 
 All sectors are expected to remain live until the end of their sector lifetime and early dropping of sectors will result in slashing. This is done to provide clients a certain level of guarantee on the reliability of their hosted data. Sector termination can comes with a corresponding _termination fee_.
 
-As with every system it is expected that sectors will present faults. Although this might degrade the quality offered by the network, the reaction of the miner to the fault drives system decisions on whether or not the miner should be penalized. If a fault is reported immediately after it is detected by the miner, then the penalty fee is much lower than if the system detects the defect through wrong (or non-existent) PoSt submission.
-
-An adjacent concept to the sector _fault_ is sector _recovery_, that is, how quickly and if the miner attempts to recover the sector and bring it back to normal operation. Therefore, in case of a faulty sector, a small penalty fee approximately equal to the block reward that the sector would win per day is applied. The fee is calculated per day of the sector being unavailable to the network.
+As with every system it is expected that sectors will present faults. Although this might degrade the quality offered by the network, the reaction of the miner to the fault drives system decisions on whether or not the miner should be penalized. A miner can recover the faulty sector, let the system terminate the sector automatically after 42 days of faults, or proactively terminate the sector immediately in the case of unrecoverable data loss. In case of a faulty sector, a small penalty fee approximately equal to the block reward that the sector would win per day is applied. The fee is calculated per day of the sector being unavailable to the network, i.e. until the sector is recovered or terminated.
 
 Miners can extend the lifetime of a sector at any time, though the sector will be expected to remain live until it has reached the end of the new sector lifetime. This can be done by submitting a `ExtendedSectorExpiration` message to the chain.
 
@@ -27,9 +25,9 @@ A sector can be in one of the following states.
 
 | State          | Description                                                                                                                                           |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Precommitted` | Miner seals sector and submits `miner.PreCommitSector`                                                                                                |
-| `Committed`    | Miner generates a Seal proof and submits `miner.ProveCommitSector`                                                                                    |
+| `Precommitted` | Miner seals sector and submits `miner.PreCommitSector` or `miner.PreCommitSectorBatch`                                                                |
+| `Committed`    | Miner generates a Seal proof and submits `miner.ProveCommitSector` or `miner.ProveCommitAggregate`                                                    |
 | `Active`       | Miner generate valid PoSt proofs and timely submits `miner.SubmitWindowedPoSt`                                                                        |
 | `Faulty`       | Miner fails to generate a proof (see Fault section)                                                                                                   |
 | `Recovering`   | Miner declared a faulty sector via `miner.DeclareFaultRecovered`                                                                                      |
-| `Terminated`   | Either sector is expired, or early terminated by a miner via `miner.TerminateSectors`, or was failed to be proven for 14 consecutive proving periods. |
+| `Terminated`   | Either sector is expired, or early terminated by a miner via `miner.TerminateSectors`, or was failed to be proven for 42 consecutive proving periods. |

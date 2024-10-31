@@ -55,7 +55,7 @@ Once a Miner successfully adds and ProveCommits a Sector, the Sector is assigned
 
 A Miner's financial gain or loss is affected by the following three actions:
 
-1. Miners deposit tokens to act as collateral for their `PreCommitted` and `ProveCommitted` Sectors
+1. Miners deposit tokens to act as collateral for their PreCommitted and ProveCommitted Sectors
 2. Miners earn tokens from block rewards, when they are elected to mine a new block and extend the blockchain.
 3. Miners lose tokens if they fail to prove storage of a sector and are given penalties as a result.
 
@@ -82,7 +82,7 @@ Note that the "skipped fault" allows for sector-wise fault penalties, as compare
 **Deadlines**
 
 A _deadline_ is a period of `WPoStChallengeWindow` epochs that divides a proving period.
-Sectors are assigned to a deadline on `miner.ProveCommitSector` and will remain assigned to it throughout their lifetime. Recall that Sectors are also assigned to a partition.
+Sectors are assigned to a deadline on ProveCommit, by calling either `miner.ProveCommitSector`, or `miner.ProveCommitAggregate`, and will remain assigned to it throughout their lifetime. Recall that Sectors are also assigned to a partition.
 
 A miner must submit a `miner.SubmitWindowedPoSt` for each deadline.
 
@@ -103,7 +103,7 @@ Regardless of how a fault first becomes known (declared, skipped, detected), the
 
 A Miner may accrue penalties for many reasons:
 
-- **PreCommit Expiry Penalty**: Occurs if a Miner fails to `ProveCommit` a PreCommitted Sector in time. This happens the first time that a miner declares that it proves a sector and falls into the PoRep consensus.
+- **PreCommit Expiry Penalty**: Occurs if a Miner fails to ProveCommit a PreCommitted Sector in time. This happens the first time that a miner declares that it proves a sector and falls into the PoRep consensus.
 - **Undeclared Fault Penalty**: Occurs if a Miner fails to submit a PoSt for a Sector on time. Depending on whether the "Skipped Fault" option is implemented, this penalty applies to either a sector or a whole partition.
 - **Declared Fault Penalty**: Occurs if a Miner fails to submit a PoSt for a Sector on time, but they declare the Sector faulty before the system finds out (in which case the fault falls in the "Undeclared Fault Penalty" above). **This penalty fee should be lower than the undeclared fault penalty**, in order to incentivize Miners to declare faults early.
 - **Ongoing Fault Penalty**: Occurs every Proving Period a Miner fails to submit a PoSt for a Sector.

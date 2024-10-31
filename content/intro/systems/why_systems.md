@@ -29,12 +29,12 @@ This decoupling is useful for:
 - **Security Isolation:** some systems require higher operational security than others. System decoupling allows
   implementations to meet their security and functionality needs. A good example of this is separating Blockchain
   processing from Data Transfer.
-- **Scalability:** systems, and various use cases, may drive different performance requirements for different opertators.
+- **Scalability:** systems, and various use cases, may drive different performance requirements for different operators.
   System decoupling makes it easier for operators to scale their deployments along system boundaries.
 
 ## Filecoin Nodes don't need all the systems
 
-Filecoin Nodes vary significantly, and do not need all the systems.
+Filecoin Nodes vary significantly and do not need all the systems.
 Most systems are only needed for a subset of use cases.
 
 For example, the Blockchain System is required for synchronizing the chain, participating in secure consensus,
@@ -68,7 +68,7 @@ Sometimes this is harder, and it requires detangling, adding, or removing abstra
 example, the `StoragePowerActor` and the `StorageMarketActor` were a single `Actor` previously. This caused
 a large coupling of functionality across `StorageDeal` making, the `StorageMarket`, markets in general, with
 Storage Mining, Sector Sealing, PoSt Generation, and more. Detangling these two sets of related functionality
-requried breaking apart the one actor into two.
+required breaking apart the one actor into two.
 
 ## Decomposing within a System
 

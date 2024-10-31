@@ -31,21 +31,41 @@ async function handleRequest(event) {
 async function cov(event) {
   const url = new URL(event.request.url)
   // https://github.com/filecoin-project/lotus
-  const repo = url.searchParams.get('repo').split('/').slice(3).join('/')
-  const data = await get(event, {
-    url: `https://codecov.io/api/gh/${repo}`,
+  const [owner, repo] = url.searchParams.get('repo').split('/').slice(3)
+  const headers = {
+    'User-Agent': 'ianconsolata',
+    Accept: 'application/json',
+    Authorization: `Bearer ${CODECOV_TOKEN}`,
+  }
+  const repo_resp = await get(event, {
+    url: `https://api.codecov.io/api/v2/github/${owner}/repos/${repo}/`,
     transform: (data) => {
       const out = {
-        cov: dlv(data, 'commit.totals.c', 0),
-        ci: dlv(data, 'commit.ci_passed', false),
-        repo: dlv(data, 'repo.name', 'N/A'),
-        org: dlv(data, 'owner.username', 'N/A'),
-        lang: dlv(data, 'repo.language', 'N/A'),
+        branch: dlv(data, 'branch', 'master'),
+        lang: dlv(data, 'language', 'N/A'),
       }
       return out
     },
+    headers,
   })
-  return data
+  const repo_data = await repo_resp.json()
+
+  const cov_data = await get(event, {
+    url: `https://api.codecov.io/api/v2/github/${owner}/repos/${repo}/branches/${repo_data.branch}/`,
+    transform: (data) => {
+      const out = {
+        cov: dlv(data, 'head_commit.totals.coverage', 0),
+        ci: dlv(data, 'head_commit.ci_passed', false),
+        repo: repo,
+        org: owner,
+        lang: repo_data.lang,
+        branch: repo_data.branch,
+      }
+      return out
+    },
+    headers,
+  })
+  return cov_data
 }
 
 async function github(event) {
@@ -56,7 +76,7 @@ async function github(event) {
   const path = file.slice(7).join('/')
   const ref = file[6]
   const headers = {
-    'User-Agent': 'hugomrdias',
+    'User-Agent': 'ianconsolata',
     Authorization: `token ${GITHUB_TOKEN}`,
   }
 
@@ -82,7 +102,7 @@ async function github(event) {
 
 async function releases(event) {
   const headers = {
-    'User-Agent': 'hugomrdias',
+    'User-Agent': 'ianconsolata',
     Authorization: `token ${GITHUB_TOKEN}`,
   }
   const rsp = await get(event, {
