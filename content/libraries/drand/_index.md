@@ -29,6 +29,7 @@ By polling the appropriate endpoint (see below for specifics on the drand networ
 ```json
 {
   "round": 367,
+  "randomness": "3439d92d58e47d342131d446a3abe264396dd264717897af30525c98408c834f",
   "signature": "b62dd642e939191af1f9e15bef0f0b0e9562a5f570a12a231864afe468377e2a6424a92ccfc34ef1471cbd58c37c6b020cf75ce9446d2aa1252a090250b2b1441f8a2a0d22208dcc09332eaa0143c4a508be13de63978dbed273e3b9813130d5",
   "previous_signature": "afc545efb57f591dbdf833c339b3369f569566a93e49578db46b6586299422483b7a2d595814046e2847494b401650a0050981e716e531b6f4b620909c2bf1476fd82cf788a110becbc77e55746a7cccd47fb171e8ae2eea2a22fcc6a512486d"
 }
@@ -36,6 +37,7 @@ By polling the appropriate endpoint (see below for specifics on the drand networ
 
 Specifically, we have:
 
+- `Randomness` -- SHA256 hash of the signature
 - `Signature` -- the threshold BLS signature on the previous signature value `Previous` and the current round number `round`.
 - `PreviousSignature` -- the threshold BLS signature from the previous drand round.
 - `Round` -- the index of Randomness in the sequence of all random values produced by this drand network.
@@ -69,7 +71,7 @@ endpoint.
 Thereafter, the Filecoin client can call drand's endpoints:
 
 - `/public/latest` to get the latest randomness value produced by the beacon
-- `/public/<round>` to get the randoomness value produced by the beacon at a given round
+- `/public/<round>` to get the randomness value produced by the beacon at a given round
 
 ## Using drand in Filecoin
 
