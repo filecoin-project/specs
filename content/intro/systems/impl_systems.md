@@ -41,7 +41,7 @@ For this purpose, we use the `FilecoinNode` data structure, which is passed into
 Further, Systems MUST abide by the following limitations:
 
 - **Random crashes.** A Filecoin Node may crash at any moment. Systems must be secure and consistent through crashes.
-  This is primarily achived by limiting the use of persistent state, persisting such state through Ipld data structures,
+  This is primarily achieved by limiting the use of persistent state, persisting such state through Ipld data structures,
   and through the use of initialization routines that check state, and perhaps correct errors.
 - **Isolation.** Systems must communicate over well-defined, isolated interfaces. They must not build their critical
   functionality over a shared memory space. (Note: for performance, shared memory abstractions can be used to power

@@ -32,7 +32,7 @@ To facilitate this, there are _two types_ of Sectors that may be sealed and Prov
 - **Regular Sector**: A Sector that contains Client data
 - **Committed Capacity (CC) Sector**: A Sector with no data (all zeroes)
 
-Miners are free to coose which types of Sectors to store. CC sectors, in particular, allow Miners to immediately make use of existing disk space: earning storage power and a higher chance at producing a block. Miners can decide if they should upgrade their CC sectors to take client deals or continue proving CC sectors. Currently, CC sectors store randomness by default in client implementation, but this does not preclude miners from storing any type of useful data that increase their private utility in CC sectors (as long as it is legal). The protocol expects that new use-cases and diversity will emerge out of such behaviour.
+Miners are free to choose which types of Sectors to store. CC sectors, in particular, allow Miners to immediately make use of existing disk space: earning storage power and a higher chance at producing a block. Miners can decide if they should upgrade their CC sectors to take client deals or continue proving CC sectors. Currently, CC sectors store randomness by default in client implementation, but this does not preclude miners from storing any type of useful data that increase their private utility in CC sectors (as long as it is legal). The protocol expects that new use-cases and diversity will emerge out of such behaviour.
 
 To incentivize Miners to hoard storage space and dedicate it to Filecoin, CC Sectors have a unique capability: **they can be "upgraded" to Regular Sectors** (also called "replacing a CC Sector").
 
