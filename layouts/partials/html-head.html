@@ -9,6 +9,10 @@
 <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#0090ff">
 <meta name="msapplication-TileColor" content="#2b5797">
 <meta name="theme-color" content="#0090ff">
+<script defer data-domain="spec.filecoin.io" src="https://plausible.io/js/script.file-downloads.hash.outbound-links.js"></script>
+<script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+
+
 
 {{- template "_internal/opengraph.html" . -}}
 
@@ -22,7 +26,7 @@
 {{- $styles := resources.Get "book.scss" | resources.ExecuteAsTemplate "book.scss" . | resources.ToCSS | resources.Minify | resources.Fingerprint }}
 <link rel="stylesheet" href="{{ $styles.RelPermalink }}" integrity="{{ $styles.Data.Integrity }}">
 
-{{- template "_internal/google_analytics_async.html" . -}}
+
 
 <!-- RSS -->
 {{- with .OutputFormats.Get "rss" -}}
