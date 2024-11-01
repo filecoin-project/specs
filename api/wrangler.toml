@@ -1,7 +1,5 @@
 name = "specs-api"
-type = "webpack"
-account_id = "fffa4b4363a7e5250af8357087263b3a"
+account_id = "e85b6fdda17f8c464c343dc84d1373e8"
 workers_dev = true
-route = ""
-zone_id = ""
-webpack_config = "webpack.config.js"
+main = "index.js"
+compatibility_date = "2023-04-27"

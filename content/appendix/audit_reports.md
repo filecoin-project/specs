@@ -10,6 +10,17 @@ dashboardAudit: n/a
 
 Security is a critical component in ensuring Filecoin can fulfill its mission to be the storage network for humanity. In addition to robust secure development processes, trainings, theory audits, and investing in external security research, the Filecoin project has engaged reputable third party auditing specialists to ensure that the theory behind the protocol and its implementation delivers the intended value, enabling Filecoin to be a safe and secure network. This section covers a selection of audit reports that have been published on Filecoin's theory and implementation.
 
+## Filecoin Virtual Machine
+
+### `2023-03-09` Filecoin EVM (FEVM)
+
+- Report: [Filecoin EVM Audit](<https://github.com/oak-security/audit-reports/blob/master/Filecoin%20Foundation/2023-03-09%20Audit%20Report%20-%20Filecoin%20EVM%20(FEVM)%20v1.1.pdf>)
+- Audit conducted by **Oak Security**
+
+The audit covers the implementation of:
+
+- FEVM's [builtin actors](https://github.com/filecoin-project/builtin-actors/tree/1b11df4b399550753a4105f45f58bc07015af2a3/actors/evm) out of which only [actors/evm](https://github.com/filecoin-project/builtin-actors/tree/1b11df4b399550753a4105f45f58bc07015af2a3/actors/evm) and [actors/eam](https://github.com/filecoin-project/builtin-actors/tree/1b11df4b399550753a4105f45f58bc07015af2a3/actors/eam) were included in scope along with code base of [ref-fvm](https://github.com/filecoin-project/ref-fvm). The report included auditing EVM runtime action and implementation, correctness of EVM opcodes, including Ethereum Address Manager(EAM). The report also included issues and enhancements methods for gas model and F4 addresses. The audit team also reviewed the message execution flow and kernel setup, WASM integration and FVM logs. All the valid issues raised by the audit were resolved and acknowledged including a few informational issues. More details on these issues are available in the report.
+
 ## Lotus
 
 ### `2020-10-20` Lotus Mainnet Ready Security Audit
@@ -22,6 +33,17 @@ The scope of this audit covered:
 - The Lotus Daemon: Core component responsible for handling the Blockchain node logic by handling peer- to-peer networking, chain syncing, block validation, data retrieval and transfer, etc.
 - The Lotus Storage Miner: Mining component used to manage a single storage miner by contributing to the network through Sector commitments and Proofs-of-Spacetime data proving it is storing the sectors it has committed to. This component communicates with the Lotus daemon via JSON-RPC API calls.
 
+## Venus
+
+### `2021-06-29` Venus Security Audit
+
+- Report: [Venus Security Assessment](https://leastauthority.com/static/publications/LeastAuthority_Filecoin_Foundation_Venus_Final_Audit_Report.pdf)
+- Audit conducted by: **Least Authority**
+
+The scope of this audit covered:
+
+- The Venus Daemon: Core component responsible for handling the Filecoin node logic by handling peer-to-peer networking, chain syncing, block validation, etc.
+
 ## Actors
 
 ### `2020-10-19` Actors Mainnet Ready Security Audit
@@ -32,6 +54,14 @@ The scope of this audit covered:
 This audit covers the implementation of Filecoin's builtin Actors, focusing on the role of Actors as a core component in the business logic of the Filecoin storage network. The audit process involved a manual review of the Actors code and conducting ongoing reviews of changes to the code during the course of the engagement. Issues uncovered through this process are all tracked in the GitHub repository. All Priority 1 issues have been resolved. Most Priority 2 issues have been resolved - ones that are still open have been determined to not be a risk for the Filecoin network or miner experience. Further details on these and all other issues raised available in the report.
 
 ## Proofs
+
+### `2021-05-31` SnarkPack audit
+
+An audit was conducted on the cryptographic part of [SnarkPack](https://eprint.iacr.org/2021/529.pdf), that is used in the [FIP0009](https://github.com/filecoin-project/FIPs/blob/master/FIPS/fip-0009.md):
+
+- [Report](https://hackmd.io/@LIRa8YONSwKxiRz3cficng/B105no8w_) from Matteo Campanelli, a well known cryptography [researcher](https://www.binarywhales.com/)
+
+One major issue was found in the report by Campanelli where the challenges of each prove commits were not tied to the aggregated proof; this could have led up to malicious miner forge valid aggregated proofs without the individual prove commits. The rest of the issues were of medium to informal severity.
 
 ### `2020-10-20` Filecoin Bellman and BLS Signatures
 

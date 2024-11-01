@@ -18,7 +18,7 @@ Any node that has gathered t of the signatures can reconstruct the full BLS sign
 
 drand assumes that at least t of the n nodes are honest (and online -- for liveness). If this threshold is broken, the adversary can permanently halt randomness production but cannot otherwise bias the randomness.
 
-You can learn more about how drand works, by visiting its [repository](https://github.com/drand/drand), or reading its [spec](https://github.com/drand/drand/blob/master/docs/SPECS.md).
+You can learn more about how drand works, by visiting its [repository](https://github.com/drand/drand), or reading its [specification](https://drand.love/docs/specification/).
 
 In the following sections we look in turn at how the Filecoin protocol makes use of drand randomness, and at some of the characteristics of the specific drand network Filecoin uses.
 
@@ -29,6 +29,7 @@ By polling the appropriate endpoint (see below for specifics on the drand networ
 ```json
 {
   "round": 367,
+  "randomness": "3439d92d58e47d342131d446a3abe264396dd264717897af30525c98408c834f",
   "signature": "b62dd642e939191af1f9e15bef0f0b0e9562a5f570a12a231864afe468377e2a6424a92ccfc34ef1471cbd58c37c6b020cf75ce9446d2aa1252a090250b2b1441f8a2a0d22208dcc09332eaa0143c4a508be13de63978dbed273e3b9813130d5",
   "previous_signature": "afc545efb57f591dbdf833c339b3369f569566a93e49578db46b6586299422483b7a2d595814046e2847494b401650a0050981e716e531b6f4b620909c2bf1476fd82cf788a110becbc77e55746a7cccd47fb171e8ae2eea2a22fcc6a512486d"
 }
@@ -36,11 +37,12 @@ By polling the appropriate endpoint (see below for specifics on the drand networ
 
 Specifically, we have:
 
+- `Randomness` -- SHA256 hash of the signature
 - `Signature` -- the threshold BLS signature on the previous signature value `Previous` and the current round number `round`.
 - `PreviousSignature` -- the threshold BLS signature from the previous drand round.
 - `Round` -- the index of Randomness in the sequence of all random values produced by this drand network.
 
-Specifically, the message signed is the concatenation of the round number treated as a uint64 and the previous signature. At the moment, drand uses BLS signatures on the BLS12-381 curve with the latest v7 RFC of hash-to-curve and the signature is made over G1 (for more see the [drand spec](https://github.com/drand/drand/blob/master/docs/SPECS.md#cryptographic-specification)).
+Specifically, the message signed is the concatenation of the round number treated as a uint64 and the previous signature. At the moment, drand uses BLS signatures on the BLS12-381 curve with the latest v7 RFC of hash-to-curve and the signature is made over G1 (for more see the [drand specification](https://drand.love/docs/specification/#cryptographic-specification).
 
 ## Polling the drand network
 
@@ -69,7 +71,7 @@ endpoint.
 Thereafter, the Filecoin client can call drand's endpoints:
 
 - `/public/latest` to get the latest randomness value produced by the beacon
-- `/public/<round>` to get the randoomness value produced by the beacon at a given round
+- `/public/<round>` to get the randomness value produced by the beacon at a given round
 
 ## Using drand in Filecoin
 
@@ -90,7 +92,7 @@ Upon receiving a new drand randomness value from a beacon, a Filecoin node shoul
 - that the `Signature` field is verified by the beacon's `PublicKey` as the beacon's signature of `SHA256(PreviousSignature || Round)`.
 - that the `Randomness` field is `SHA256(Signature)`.
 
-See [drand](https://github.com/drand/drand/blob/master/beacon/beacon.go#L63) for an example.
+See [drand](https://github.com/drand/drand/blob/0df91a710b4366d41e88ad487814a16cf88494f9/crypto/schemes.go#L68) for an example.
 
 ### Fetching the appropriate drand value while mining
 
