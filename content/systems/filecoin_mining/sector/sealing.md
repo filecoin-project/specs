@@ -18,7 +18,7 @@ Before a Sector can be used, the Miner must _seal_ the Sector: encode the data i
 
 Sealing a sector through Proof-of-Replication (PoRep) is a computation-intensive process that results in a unique encoding of the sector. Once data is sealed, storage miners: generate a proof; run a SNARK on the proof to compress it; and finally, submit the result of the compression to the blockchain as a certification of the storage commitment. Depending on the PoRep algorithm and protocol security parameters, cost profiles and performance characteristics vary and tradeoffs have to be made among sealing cost, security, onchain footprint, retrieval latency and so on. However, sectors can be sealed with commercial hardware and sealing cost is expected to decrease over time. The Filecoin Protocol will launch with Stacked Depth Robust (SDR) PoRep with a planned upgrade to Narrow Stacked Expander (NSE) PoRep with improvement in both cost and retrieval latency.
 
-The Lotus-specific set of functions applied to the sealing of a sector can be found [here](https://github.com/filecoin-project/lotus/blob/master/storage/pipeline/sealing.go).
+The Lotus-specific set of functions applied to the sealing of a sector can be found [here](https://github.com/filecoin-project/lotus/blob/master/cmd/lotus-miner/sealing.go).
 
 ## Randomness
 
