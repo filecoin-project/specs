@@ -35,7 +35,7 @@
     "globby": "^11.0.1",
     "graphviz-cli": "^2.0.0",
     "hugo-extended": "^0.113.0",
-    "husky": ">=4",
+    "husky": "^4.3.8",
     "jsdom": "^22.1.0",
     "lint-staged": ">=10",
     "np": "^6.5.0",
