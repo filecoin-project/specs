@@ -377,7 +377,7 @@ Every mined block has a computed `weight`, also called its `WinCount`. Together,
 
 [_Window Proof-of-Spacetime_ (WindowPoSt)](post#windowpost) is the mechanism by which the commitments made by [storage miners](glossary#storage-miner-actor) are audited. It sees each 24-hour period broken down into a series of windows. Correspondingly, each storage miner's set of pledged [sectors](glossary#sector) is partitioned into subsets, one subset for each window. Within a given window, each storage miner must submit a [Proof-of-Spacetime](glossary#proof-of-spacetime-post) for each sector in their respective subset. This requires ready access to each of the challenged sectors, and will result in a [zk-SNARK-compressed](glossary#zksnark) proof published to the Filecoin [blockchain](glossary#blockchain) as a [message](glossary#message) in a [block](glossary#block). In this way, every sector of [pledged storage](glossary#pledged-storage) is audited at least once in any 24-hour period, and a permanent, verifiable, and public record attesting to each storage miner's continued commitment is kept.
 
-The Filecoin network expects constant availability of stored data. Failing to submit WindowPoSt for a sector will result in a [fault](glossary#fault), and the storage miner supplying the sector will be [slashed](glossary#slash).
+The Filecoin network expects constant availability of stored data. Failing to submit WindowPoSt for a sector will result in a [fault](glossary#fault), and the storage miner supplying the sector will be [slashed](glossary#slashing).
 
 ## Winning Proof-of-Spacetime (WinningPoSt)
 
