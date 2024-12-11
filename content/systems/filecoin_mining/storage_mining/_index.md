@@ -29,7 +29,7 @@ The above involves a number of steps to putting on and maintaining online storag
 
 A [Proof of Replication (PoRep)](sdr) is a proof that a Miner has correctly generated a unique _replica_ of some underlying data.
 
-In practice, the underlying data is the _raw data_ contained in an Unsealed Sector, and a PoRep is a SNARK proof that the _sealing process_ was performed correctly to produce a Sealed Sector (See [Sealing a Sector](#Sealing-a-Sector)).
+In practice, the underlying data is the _raw data_ contained in an Unsealed Sector, and a PoRep is a SNARK proof that the _sealing process_ was performed correctly to produce a Sealed Sector (See [Sealing a Sector](sector#sealing)).
 
 It is important to note that the replica should not only be unique to the miner, but also to the time when a miner has actually created the replica, i.e., sealed the sector. This means that if the same miner produces a sealed sector out of the same raw data twice, then this would count as a different replica.
 

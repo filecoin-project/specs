@@ -45,6 +45,6 @@ To summarize, only sectors in the Active state will command power. A Sector beco
 Pledge Collateral is slashed for any fault affecting storage-power consensus, these include:
 
 - faults to expected consensus in particular (see [Consensus Faults](expected_consensus#consensus-faults)), which will be reported by a slasher to the `StoragePowerActor` in exchange for a reward.
-- faults affecting consensus power more generally, specifically uncommitted power faults (i.e. [Storage Faults](faults#storage-faults)), which will be reported by the `CronActor` automatically or when a miner terminates a sector earlier than its promised duration.
+- faults affecting consensus power more generally, specifically uncommitted power faults (i.e. [Storage Faults](faults)), which will be reported by the `CronActor` automatically or when a miner terminates a sector earlier than its promised duration.
 
 For a more detailed discussion on Pledge Collateral, please see the [Miner Collaterals section](filecoin_mining#miner_collaterals).
