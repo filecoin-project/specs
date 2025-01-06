@@ -118,7 +118,7 @@ You can read more about sectors [here](sector) and how sector relates to power [
 
 ### Step 2: Producing Blocks
 
-Once the miner has power on the network, they are randomly chosen by the ["Secret Leader Election"](expected_consensus#secret_leader_election) algorithm to mine and submit blocks proportionally to the power they hold, i.e., if a miner holds 3% of the overall network power they will be chosen in 3% of the cases. The winning miner is chosen by the system and the miner can prove that they were chosen by submitting an Election Proof.
+Once the miner has power on the network, they are randomly chosen by the ["Secret Leader Election"](expected_consensus#secret-leader-election) algorithm to mine and submit blocks proportionally to the power they hold, i.e., if a miner holds 3% of the overall network power they will be chosen in 3% of the cases. The winning miner is chosen by the system and the miner can prove that they were chosen by submitting an Election Proof.
 
 When a miner is chosen to produce a block, they must submit a `WinningPoSt` proof. This process is as follows: an elected miner gets the randomness value through the DRAND randomness generator based on the current epoch and uses it to generate WinningPoSt.
 
@@ -126,7 +126,7 @@ WinningPoSt uses the randomness to select a sector for which the miner must gene
 
 ### Faults
 
-If a miner detects [Storage Faults](faults#storage-faults) among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults as discussed earlier.
+If a miner detects [Storage Faults](faults) among their sectors (any sort of storage failure that would prevent them from crafting a PoSt), they should declare these faults as discussed earlier.
 
 The miner will be unable to craft valid PoSt proofs over faulty sectors, thereby reducing their chances of being able to create a valid block (i.e., adding a Winning PoSt). By declaring a fault, the miner will no longer be challenged on that sector, and will lose power accordingly.
 
