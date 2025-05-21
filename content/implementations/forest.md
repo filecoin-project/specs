@@ -18,7 +18,7 @@ Forest does not support all features of the reference implementation but is a go
 - running a bootstrap node,
 - running an RPC node.
 
-Forest does not support mining.
+Forest does not provide storage provider functionality.
 
 Links:
 
