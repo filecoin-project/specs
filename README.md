@@ -1,6 +1,6 @@
 # Filecoin Specification
 
-![CI](https://github.com/filecoin-project/specs/workflows/CI/badge.svg)
+[![CI](https://github.com/filecoin-project/specs/workflows/CI/badge.svg)](https://github.com/filecoin-project/specs/actions/workflows/main.yml)
 
 This is the [Filecoin Specification](https://github.com/filecoin-project/specs), a repository that contains documents, code, models, and diagrams that constitute the specification of the [Filecoin Protocol](https://filecoin.io). This repository is the singular source of truth for the Filecoin Protocol. All implementations of the Filecoin Protocol should match and comply with the descriptions, interfaces, code, and models defined in this specification.
 
