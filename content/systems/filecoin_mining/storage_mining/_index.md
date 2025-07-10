@@ -97,16 +97,16 @@ There are four relevant epochs associated to a deadline:
 
 **Fault Recovery**
 
-Regardless of how a fault first becomes known (declared, skipped, detected), the sector stays faulty and is excluded from future proofs until the miner explicitly declares it recovered. The declaration of recovery restores the sector to the proving set at the start of the subsequent proving period. When a PoSt for a just-recovered sector is received, power for that sector is restored.
+Regardless of how a fault first becomes known (declared, skipped, detected), the sector stays faulty and is excluded from future proofs until the miner explicitly declares it recovered. The declaration of recovery restores the sector to the proving set at the start of the subsequent proving period. When a PoSt for a just-recovered sector is received, power for that sector is restored. Following FIP-0002, successful recovery no longer incurs a recovery fee.
 
 **Penalties**
 
 A Miner may accrue penalties for many reasons:
 
 - **PreCommit Expiry Penalty**: Occurs if a Miner fails to ProveCommit a PreCommitted Sector in time. This happens the first time that a miner declares that it proves a sector and falls into the PoRep consensus.
-- **Undeclared Fault Penalty**: Occurs if a Miner fails to submit a PoSt for a Sector on time. Depending on whether the "Skipped Fault" option is implemented, this penalty applies to either a sector or a whole partition.
-- **Declared Fault Penalty**: Occurs if a Miner fails to submit a PoSt for a Sector on time, but they declare the Sector faulty before the system finds out (in which case the fault falls in the "Undeclared Fault Penalty" above). **This penalty fee should be lower than the undeclared fault penalty**, in order to incentivize Miners to declare faults early.
-- **Ongoing Fault Penalty**: Occurs every Proving Period a Miner fails to submit a PoSt for a Sector.
+- **Fault Detection (Post FIP-0002)**: When a partition misses a WindowPoSt submission deadline, sectors are marked as faulty. For 100% healthy partitions (no previously faulty or recovering sectors), no immediate fee is charged. For partitions with faulty or recovering sectors, those sectors are charged the Sector Fault Fee.
+- **Skipped Fault (Post FIP-0002)**: When a miner submits a WindowPoSt but skips proofs for specific sectors, those sectors are marked as faulty. No immediate penalty is charged, but the Sector Fault Fee applies starting from the next proving period.
+- **Ongoing Fault Penalty**: Occurs every Proving Period a Miner fails to submit a PoSt for a Sector. The fee is 3.51 days worth of expected block reward per sector per proving period.
 - **Termination Penalty**: Occurs if a Sector is terminated before its expiration.
 - **Consensus Fault Penalty**: Occurs if a Miner commits a consensus fault and is reported.
 

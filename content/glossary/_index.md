@@ -318,11 +318,12 @@ The [_Storage Power Actor_](sysactors) is responsible for keeping track of the s
 
 ## Storage Fault Slashing
 
-Storage Fault Slashing is a term that is used to encompass a broader set of penalties, including (but not limited to) Fault Fees, Sector Penalties, and Termination Fees. These penalties are to be paid by miners if they fail to provide sector reliability or decide to voluntarily exit the network.
+Storage Fault Slashing is a term that is used to encompass a broader set of penalties, including (but not limited to) Fault Fees and Termination Fees. These penalties are to be paid by miners if they fail to provide sector reliability or decide to voluntarily exit the network.
 
-- **Fault Fee (FF):** A penalty that a miner incurs for each day a miner's sector is offline.
-- **Sector Penalty (SP):** A penalty that a miner incurs for a faulted sector that was not declared faulted before a WindowPoSt check occurs.
-  - The sector will pay FF after incurring an SP when the fault is detected.
+- **Fault Fee (FF) (Post FIP-0002):** A penalty that a miner incurs for each proving period a sector is faulty, set at 3.51 days worth of expected block reward. For newly faulted sectors in 100% healthy partitions, this fee is waived for the first proving period after fault detection.
+- **Fault Detection (Post FIP-0002):** When a partition misses a WindowPoSt submission deadline:
+  - For 100% healthy partitions (no previously faulty or recovering sectors), sectors are marked as faulty with no immediate fee
+  - For partitions with faulty or recovering sectors, those sectors are charged the Fault Fee
 - **Termination Penalty (TP):** A penalty that a miner incurs when a sector is voluntarily or involuntarily terminated and is removed from the network.
 
 ## Ticket or VRF Chain

@@ -33,17 +33,17 @@ dashboardTests: 0
 
 ## Declare and Recover Faults
 
-6. Miners can call `DeclareFaults` to mark certain Sectors as faulty to avoid paying Sector Fault Detection Fee. Power associated with the sector will be removed at fault declaration.
-7. Miners can call `DeclareFaultsRecovered` to mark previously faulty sector as recovered. Power will be restored when recovered sectors pass WindowPoSt checks successfully.
-8. A sector pays a Sector Fault Fee for every proving period during which it is marked as faulty.
+6. Miners can call `DeclareFaults` to mark certain Sectors as faulty before their proving deadline. Power associated with the sector will be removed at fault declaration.
+7. Miners can call `DeclareFaultsRecovered` to mark previously faulty sector as recovered. Power will be restored when recovered sectors pass WindowPoSt checks successfully. Following FIP-0002, no recovery fee is charged.
+8. A sector pays a Sector Fault Fee (3.51 days worth of expected block reward) for every proving period during which it is marked as faulty, starting from the second proving period after initial fault detection.
 
 ## Skipped Faults
 
-9. After a WindowPoSt deadline opens, a miner can mark one of their sectors as faulty and exempted by WindowPoSt checks, hence Skipped Faults. This could avoid paying a Sector Fault Detection Fee on the whole partition.
+9. After a WindowPoSt deadline opens, a miner can mark one of their sectors as faulty and exempted by WindowPoSt checks, hence Skipped Faults. Following FIP-0002, skipped faults incur no immediate penalty, but will be charged the Sector Fault Fee starting from the next proving period.
 
 ## Detected Faults
 
-10. If a partition misses a WindowPoSt submission deadline, all previously non-faulty sectors in the partition are detected as faulty and a Fault Detection Fee is charged.
+10. If a partition misses a WindowPoSt submission deadline, all previously non-faulty sectors in the partition are detected as faulty. Following FIP-0002, if the partition was 100% healthy (no faulty or recovering sectors), no immediate fee is charged. However, sectors that were already faulty or recovering are charged the Sector Fault Fee.
 
 ## Sector Expiration
 
