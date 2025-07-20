@@ -61,7 +61,7 @@ The spec is written in markdown. Each section is markdown document in the `conte
 
 Sections can be split out into multiple markdown documents. The build process combines them into a single html page. The sections are ordered by the `weight` front-matter property. The introduction appears at the start of the html page because `content/intro/_index.md` has `weight: 1`, while `content/systems/_index.html` has `weight: 2` so it appears as the second section.
 
-You can split out sub-sections by adding additional pages to a section directory. The `content/intro/concepts.md` defines the Key Concepts sub-section of the the Introduction. The order of sub-sections within a section is again controlled by setting the `weight` property. This pattern repeats for sub sub folders which represent sub sub sections.
+You can split out sub-sections by adding additional pages to a section directory. The `content/intro/concepts.md` defines the Key Concepts sub-section of the Introduction. The order of sub-sections within a section is again controlled by setting the `weight` property. This pattern repeats for sub folders which represent sub sub sections.
 
 The markdown documents should all be well formed, with a single h1, and headings should increment by a single level.
 
